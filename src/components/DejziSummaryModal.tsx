@@ -182,8 +182,8 @@ export function DejziSummaryModal({
           ? `Saving the rest adds +${formatAmount(perDayBonus, language)} ${currency}/day to all remaining days.`
           : `Sparar du resten fördelas +${formatAmount(perDayBonus, language)} ${currency}/dag ut på alla kommande dagar.`;
         actionTip = isEn
-          ? `Every unspent krona strengthens your daily budget ahead!`
-          : `Varje osparad krona idag stärker din dagsbudget framöver!`;
+          ? `Every saved coin strengthens your daily budget ahead!`
+          : `Varje sparad slant idag stärker din dagsbudget framöver!`;
       }
     }
 
@@ -219,7 +219,7 @@ export function DejziSummaryModal({
               <div className="flex items-center gap-3">
                 <DejziAvatar size="lg" />
                 <div>
-                  <h3 className="text-base sm:text-[17px] font-semibold font-unbounded tracking-tight text-[var(--text-primary)]">
+                  <h3 className="text-base sm:text-section-title font-display tracking-tight text-[var(--text-primary)]">
                     {userName ? `${isEn ? 'Hi' : 'Hej'} ${userName}!` : 'Dejzi'}
                   </h3>
                   <p className="text-xs font-semibold text-[var(--warning-color)] dark:text-[var(--warning-color)] mt-0.5">
@@ -240,7 +240,7 @@ export function DejziSummaryModal({
 
             {/* Status & Key Takeaway */}
             {dejziInfo && (
-              <div className="p-4 rounded-[8px] bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-[var(--warning-color)] space-y-1.5">
+              <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-[var(--warning-color)] space-y-1.5">
                 <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">
                   {dejziInfo.message}
                 </p>
@@ -255,7 +255,7 @@ export function DejziSummaryModal({
             {/* Status Grid Cards (4 Metrics) */}
             <div className="grid grid-cols-2 gap-2.5">
               {/* Dagsbudget kvar */}
-              <div className="p-3.5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <Coins size={13} className="text-[var(--warning-color)]" />
                   <span>{isEn ? "Today's balance" : 'Dagens saldo'}</span>
@@ -266,7 +266,7 @@ export function DejziSummaryModal({
               </div>
 
               {/* Dagar kvar till lön */}
-              <div className="p-3.5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <Calendar size={13} className="text-[var(--text-primary)]" />
                   <span>{isEn ? 'Days to payday' : 'Dagar till lön'}</span>
@@ -277,7 +277,7 @@ export function DejziSummaryModal({
               </div>
 
               {/* Totalt kvar i perioden */}
-              <div className="p-3.5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <Wallet size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Total left' : 'Totalt kvar'}</span>
@@ -288,7 +288,7 @@ export function DejziSummaryModal({
               </div>
 
               {/* Grundbudget per dag */}
-              <div className="p-3.5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <TrendingUp size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Daily budget' : 'Budget / dag'}</span>
@@ -301,7 +301,7 @@ export function DejziSummaryModal({
 
             {/* Dejzi Proactive Tip */}
             {dejziInfo?.actionTip && (
-              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-[8px] bg-[var(--surface-color)] text-[var(--text-primary)] text-xs font-medium border-none shadow-none">
+              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] text-[var(--text-primary)] text-xs font-medium border-none shadow-none">
                 <Zap size={14} className="shrink-0 text-[var(--warning-color)] mt-0.5" />
                 <span>{dejziInfo.actionTip}</span>
               </div>

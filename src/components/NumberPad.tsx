@@ -114,7 +114,7 @@ export function NumberPad({
           <span className="opacity-90">Beräknat belopp:</span>
           <span className="text-sm font-extrabold flex items-center gap-1">
             = {livePreview} {currency}
-            <span className="text-[10px] font-normal bg-white/20 px-1.5 py-0.5 rounded-full ml-1.5">Verkställ</span>
+            <span className="text-micro-label font-normal bg-white/20 px-1.5 py-0.5 rounded-full ml-1.5">Verkställ</span>
           </span>
         </button>
       )}
@@ -126,7 +126,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleQuickDivide(2)}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-label sm:text-xs font-semibold text-[var(--text-primary)] border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
           title="Dela på 2"
         >
           <span>÷2</span>
@@ -135,7 +135,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleQuickDivide(3)}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-label sm:text-xs font-semibold text-[var(--text-primary)] border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
           title="Dela på 3"
         >
           <span>÷3</span>
@@ -144,7 +144,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleQuickDivide(4)}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-label sm:text-xs font-semibold text-[var(--text-primary)] border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
           title="Dela på 4"
         >
           <span>÷4</span>

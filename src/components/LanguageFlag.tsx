@@ -30,7 +30,7 @@ export const LanguageFlag: React.FC<LanguageFlagProps> = ({
       <img
         src={info.flagUrl}
         alt={info.label}
-        className={`${sizeClasses} object-cover rounded-[3px] shadow-2xs shrink-0 border border-subtle`}
+        className={`${sizeClasses} object-cover rounded-xs shadow-2xs shrink-0 border border-subtle`}
         onError={(e) => {
           // Fallback if image blocked
           const target = e.currentTarget;

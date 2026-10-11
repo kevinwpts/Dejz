@@ -41,7 +41,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const defaultLeftIcon = isSearch && !icon ? <Icon name="magnifying-glass" size={16} /> : icon;
 
     const baseInputStyles =
-      'w-full h-[var(--height-input,48px)] bg-[var(--input-bg,rgba(0,0,0,0.05))] rounded-[var(--radius-input,14px)] border transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-inactive)] disabled:opacity-50 disabled:cursor-not-allowed';
+      'w-full h-[var(--height-input,46px)] bg-[var(--input-bg,rgba(0,0,0,0.05))] rounded-[var(--radius-input,12px)] border transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-inactive)] disabled:opacity-50 disabled:cursor-not-allowed';
 
     const borderAndFocusStyles = error
       ? 'border-[var(--danger-color)] focus:border-[var(--danger-color)] focus:ring-2 focus:ring-[var(--danger-color)]/20'

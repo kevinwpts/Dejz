@@ -206,7 +206,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       <div className="w-full max-w-[400px] mx-auto my-auto relative z-10 space-y-6">
         {isEmailSent ? (
           <div className="text-center py-6 space-y-6">
-            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[8px] flex items-center justify-center mx-auto shadow-xs">
+            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[var(--radius-card-nested,12px)] flex items-center justify-center mx-auto shadow-xs">
               <Mail size={28} strokeWidth={2} />
             </div>
 
@@ -235,7 +235,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           </div>
         ) : isResetSent ? (
           <div className="text-center py-6 space-y-6">
-            <div className="w-16 h-16 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] rounded-[8px] flex items-center justify-center mx-auto shadow-xs">
+            <div className="w-16 h-16 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] rounded-[var(--radius-card-nested,12px)] flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 size={30} strokeWidth={2} />
             </div>
 
@@ -283,7 +283,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError(null);
+                }}
                 placeholder={t('email')}
                 icon={<Mail size={16} />}
                 error={error}
@@ -339,7 +342,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError(null);
+                  }}
                   placeholder={t('email')}
                   icon={<Mail size={16} />}
                 />
@@ -349,7 +355,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                     type="password"
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError(null);
+                    }}
                     placeholder={t('passwordPlaceholder' as any)}
                     icon={<Lock size={16} />}
                     error={error}

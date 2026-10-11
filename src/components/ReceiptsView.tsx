@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag, FileText } from 'lucide-react';
+import { Receipt, Paperclip, ChevronRight, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { EmptyState } from './EmptyState';
-import { formatAmount } from '../utils/format';
+import { formatAmount, capitalize } from '../utils/format';
 import { Card, Input } from './ui';
+import { CategoryIcon } from './CategoryIcon';
+import { getCategoryIconName } from '../utils/icons';
 
 interface ReceiptsViewProps {
   onBack: () => void;
@@ -20,13 +22,18 @@ export function ReceiptsView({
   onViewTransaction
 }: ReceiptsViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const isEn = config.language === 'en';
+  const curr = config.currency || 'kr';
 
   // Filter transactions that have a receiptUrl
-  const receiptTransactions = transactions.filter(t => t.receiptUrl && t.receiptUrl.trim() !== '');
+  const receiptTransactions = (transactions || []).filter(
+    (t) => t.receiptUrl && typeof t.receiptUrl === 'string' && t.receiptUrl.trim() !== ''
+  );
 
   // Filter by search query
-  const filteredTransactions = receiptTransactions.filter(item => {
-    const query = searchQuery.toLowerCase();
+  const filteredTransactions = receiptTransactions.filter((item) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
     const merchantMatch = item.merchant?.toLowerCase().includes(query) || false;
     const categoryMatch = item.category?.toLowerCase().includes(query) || false;
     const noteMatch = item.note?.toLowerCase().includes(query) || false;
@@ -34,164 +41,207 @@ export function ReceiptsView({
     return merchantMatch || categoryMatch || noteMatch || amountMatch;
   });
 
-  const formatDisplayAmount = (amount: number) => {
-    return `${formatAmount(amount, config.language)} ${config.currency || 'kr'}`;
+  const totalAmount = filteredTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const getLocale = () => {
+    const lang = config?.language || 'sv';
+    const mapping: Record<string, string> = {
+      sv: 'sv-SE',
+      en: 'en-US',
+      no: 'no-NO',
+      da: 'da-DK',
+      fi: 'fi-FI'
+    };
+    return mapping[lang] || 'sv-SE';
   };
 
   const formatDate = (timestamp: number) => {
-    return new Intl.DateTimeFormat('sv-SE', {
-      dateStyle: 'medium',
-    }).format(new Date(timestamp));
+    return new Date(timestamp).toLocaleDateString(getLocale(), {
+      day: 'numeric',
+      month: 'short',
+      year: new Date(timestamp).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+    });
   };
-
-  const totalAmount = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0 overflow-x-hidden"
+      exit={{ opacity: 0, y: -8 }}
+      className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0"
     >
-      {/* Stats Summary Panel */}
+      {/* 1. Metric Summary Cards matching global Dejz standard */}
       {receiptTransactions.length > 0 && (
-        <Card variant="default" padding="lg" className="space-y-2 min-w-0 w-full overflow-hidden">
-          <div className="flex items-center justify-between gap-2 min-w-0 w-full">
-            <span className="text-micro-label font-bold tracking-wider text-[var(--text-tertiary)] uppercase truncate min-w-0">
-              {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
-            </span>
-            <span className="text-micro-label font-bold text-[var(--success-color)] bg-[var(--success-container)] px-2.5 py-0.5 rounded-full shrink-0">
-              {filteredTransactions.length} {config.language === 'sv' ? 'kvitton' : 'receipts'}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2 pt-1 min-w-0 w-full">
-            <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums truncate min-w-0">
-              {formatDisplayAmount(totalAmount)}
-            </span>
-            <span className="text-xs font-medium text-[var(--text-tertiary)] shrink-0">
-              {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
-            </span>
-          </div>
-        </Card>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {/* Card 1: Totalt belopp */}
+          <Card variant="default" padding="md" className="space-y-1 min-w-0">
+            <div className="flex items-center gap-1.5 text-metric-label font-medium text-[var(--text-metric-label)]">
+              <Receipt size={14} className="text-[var(--accent-color)] shrink-0" strokeWidth={2} />
+              <span className="truncate">{isEn ? 'Total amount' : 'Totalt belopp'}</span>
+            </div>
+            <div className="pt-0.5">
+              <span className="text-large-amount font-amount font-semibold text-[var(--text-primary)] tabular-nums block truncate">
+                {formatAmount(totalAmount, config.language)} {curr}
+              </span>
+            </div>
+          </Card>
+
+          {/* Card 2: Antal sparade kvitton */}
+          <Card variant="default" padding="md" className="space-y-1 min-w-0">
+            <div className="flex items-center gap-1.5 text-metric-label font-medium text-[var(--text-metric-label)]">
+              <Paperclip size={13} className="text-[var(--text-secondary)] shrink-0" strokeWidth={2} />
+              <span className="truncate">{isEn ? 'Saved receipts' : 'Sparade kvitton'}</span>
+            </div>
+            <div className="pt-0.5">
+              <span className="text-large-amount font-amount font-semibold text-[var(--text-primary)] tabular-nums block truncate">
+                {filteredTransactions.length} {isEn ? 'receipts' : 'st'}
+              </span>
+            </div>
+          </Card>
+        </div>
       )}
 
-      {/* Search Input matching History search bar style */}
+      {/* 2. Search Input adhering to standard Input search variant */}
       {receiptTransactions.length > 0 && (
         <Input
           variant="search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
+          placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
-          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none min-w-0 w-full"
+          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none"
         />
       )}
 
-      {/* Receipt Grid/List */}
+      {/* 3. Receipts List matching Dejz Card and TransactionItem hierarchy */}
       <div className="space-y-[var(--card-gap)] min-w-0 w-full">
         {filteredTransactions.length > 0 ? (
-          <div className="flex flex-col gap-3 min-w-0 w-full">
+          <div className="space-y-[var(--card-gap)] min-w-0 w-full">
             <AnimatePresence mode="popLayout">
-              {filteredTransactions.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layoutId={`receipt-card-${item.id}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  id={`receipt_item_${item.id}`}
-                  className="min-w-0 w-full overflow-hidden"
-                >
-                  <Card
-                    variant="default"
-                    padding="md"
-                    isInteractive
-                    onClick={() => onViewTransaction(item)}
-                    className="group flex items-center justify-between gap-2 sm:gap-3 min-w-0 w-full max-w-full overflow-hidden"
+              {filteredTransactions.map((item) => {
+                const searchCat = (item.category || '').trim().toLowerCase();
+                const matchedCategory = (config?.categories || []).concat(config?.incomeCategories || []).find(
+                  (c) => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === item.category || (c?.id || '').toLowerCase() === searchCat
+                );
+                const iconKey = matchedCategory?.icon || getCategoryIconName(item.category || '');
+                const isPdf = item.receiptUrl ? item.receiptUrl.toLowerCase().includes('.pdf') : false;
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    layoutId={`receipt-card-${item.id}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    id={`receipt_item_${item.id}`}
+                    className="min-w-0 w-full"
                   >
-                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
-                      {/* Receipt thumbnail / Icon wrapper */}
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[var(--radius-card-nested,10px)] border-none overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-white/5 flex items-center justify-center">
-                        {item.receiptUrl ? (
-                          <>
+                    <Card
+                      variant="default"
+                      padding="sm"
+                      isInteractive
+                      onClick={() => onViewTransaction(item)}
+                      className="group flex items-center justify-between gap-3 min-w-0 w-full transition-all active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                        {/* Receipt Thumbnail Container */}
+                        <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] overflow-hidden relative shrink-0 bg-[var(--surface-muted)] border border-subtle flex items-center justify-center">
+                          {item.receiptUrl && !isPdf ? (
                             <img
                               src={item.receiptUrl}
-                              alt="Receipt thumbnail"
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              alt={item.merchant || 'Kvitto'}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               referrerPolicy="no-referrer"
+                              loading="lazy"
                             />
-                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                              <Receipt size={14} className="text-white drop-shadow-subtle" />
-                            </div>
-                          </>
-                        ) : (
-                          <Receipt size={18} className="text-[var(--text-secondary)]" strokeWidth={2} />
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1 overflow-hidden">
-                        <div className="flex items-center gap-1.5 min-w-0 w-full">
-                          <span className="text-body-medium font-bold text-[var(--text-primary)] truncate min-w-0 flex-1 block">
-                            {item.merchant || item.category}
-                          </span>
-                          {item.type === 'income' ? (
-                            <span className="p-0.5 rounded-full bg-[var(--success-container)] text-[var(--success-color)] shrink-0">
-                              <ArrowDownRight size={10} strokeWidth={2.5} />
-                            </span>
                           ) : (
-                            <span className="p-0.5 rounded-full bg-[var(--danger-container)] text-[var(--danger-color)] shrink-0">
-                              <ArrowUpRight size={10} strokeWidth={2.5} />
-                            </span>
+                            <Receipt size={20} className="text-[var(--text-secondary)]" strokeWidth={1.8} />
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-micro-label font-medium text-[var(--text-secondary)] opacity-70 min-w-0 w-full mt-0.5">
-                          <span className="inline-flex items-center gap-1 shrink-0">
-                            <Calendar size={11} strokeWidth={2} className="shrink-0" />
-                            {formatDate(item.timestamp)}
-                          </span>
-                          <span className="shrink-0">•</span>
-                          <span className="inline-flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
-                            <Tag size={10} strokeWidth={2} className="shrink-0" />
-                            <span className="truncate min-w-0 flex-1">{item.category}</span>
-                          </span>
-                        </div>
-                        {item.note && (
-                          <p className="text-micro-label text-[var(--text-secondary)] opacity-70 mt-0.5 truncate min-w-0 w-full">
-                            {item.note}
-                          </p>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 text-right ml-auto">
-                      <div>
-                        <span className="text-body-medium font-bold text-[var(--text-primary)] tabular-nums whitespace-nowrap shrink-0 block">
-                          {formatDisplayAmount(item.amount)}
+                        {/* Middle: Payee + Category + Date */}
+                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                          <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate">
+                            {item.merchant || item.category || (isEn ? 'Receipt' : 'Kvitto')}
+                          </p>
+
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-secondary text-[var(--text-secondary)] flex-wrap">
+                            {/* Category with Icon */}
+                            <div className="flex items-center gap-1 shrink-0">
+                              {iconKey && (
+                                <CategoryIcon
+                                  icon={iconKey}
+                                  categoryName={item.category}
+                                  variant="minimal"
+                                  size="2xs"
+                                />
+                              )}
+                              <span className="truncate max-w-[120px] sm:max-w-[160px]">
+                                {capitalize(item.category || '')}
+                              </span>
+                            </div>
+
+                            <span className="text-[var(--text-tertiary)] opacity-60">•</span>
+
+                            {/* Date */}
+                            <span className="text-[var(--text-tertiary)] tabular-nums shrink-0">
+                              {formatDate(item.timestamp)}
+                            </span>
+                          </div>
+
+                          {/* Optional note */}
+                          {item.note && (
+                            <p className="text-secondary text-[var(--text-tertiary)] opacity-80 mt-0.5 truncate">
+                              {item.note}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Amount + Chevron */}
+                      <div className="flex items-center gap-2 shrink-0 text-right pl-2">
+                        <span
+                          className={`text-list-amount font-amount tabular-nums font-semibold whitespace-nowrap ${
+                            item.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
+                          }`}
+                        >
+                          <span className="opacity-80 mr-0.5">{item.type === 'income' ? '+' : '−'}</span>
+                          {formatAmount(item.amount, config.language)} {curr}
                         </span>
+
+                        <ChevronRight
+                          size={16}
+                          className="text-[var(--text-tertiary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0"
+                        />
                       </div>
-                      <div className="w-7 h-7 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] group-hover:bg-accent/10 group-hover:text-accent flex items-center justify-center transition-all shrink-0">
-                        <Eye size={13} strokeWidth={2} />
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         ) : (
           <EmptyState
             icon={FileText}
-            title={receiptTransactions.length === 0 
-              ? (config.language === 'sv' ? 'Inga kvitton sparade än' : 'No receipts saved yet')
-              : (config.language === 'sv' ? 'Inga träffar' : 'No matches found')}
-            description={receiptTransactions.length === 0
-              ? (config.language === 'sv' 
-                  ? 'Fotografera eller ladda upp kvitton när du registrerar ett köp så samlas de här.' 
-                  : 'Take a photo or upload receipts when logging a purchase to collect them here.')
-              : (config.language === 'sv' 
-                  ? 'Din sökning matchade inga kvitton. Testa att söka på något annat.' 
-                  : 'Your search did not match any receipts. Try searching for something else.')}
+            title={
+              receiptTransactions.length === 0
+                ? isEn
+                  ? 'No receipts saved yet'
+                  : 'Inga kvitton sparade än'
+                : isEn
+                ? 'No matches found'
+                : 'Inga träffar'
+            }
+            description={
+              receiptTransactions.length === 0
+                ? isEn
+                  ? 'Take a photo or upload receipts when logging a purchase to collect them here.'
+                  : 'Fotografera eller ladda upp kvitton när du registrerar ett köp så samlas de här.'
+                : isEn
+                ? 'Your search did not match any receipts. Try searching for something else.'
+                : 'Din sökning matchade inga kvitton. Testa att söka på något annat.'
+            }
           />
         )}
       </div>

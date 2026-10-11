@@ -94,7 +94,7 @@ export function CalculatorModal({ isOpen, onClose }: CalculatorModalProps) {
       showCloseButton={true}
       bodyClassName="p-5 space-y-4"
     >
-      <div className="bg-black/[0.04] dark:bg-white/[0.06] p-4 rounded-[8px] border border-subtle text-right space-y-1">
+      <div className="bg-black/[0.04] dark:bg-white/[0.06] p-4 rounded-[var(--radius-card-nested,12px)] border border-subtle text-right space-y-1">
         <div className="text-label font-medium text-[var(--text-tertiary)] h-4 overflow-hidden tabular-nums">
           {equation}
         </div>
@@ -110,7 +110,7 @@ export function CalculatorModal({ isOpen, onClose }: CalculatorModalProps) {
             type="button"
             onClick={btn.action}
             className={`
-              h-12 flex items-center justify-center rounded-[8px] font-semibold text-card-title transition-all active:scale-[0.95] cursor-pointer
+              h-12 flex items-center justify-center rounded-[var(--radius-icon-button,10px)] font-semibold text-card-title transition-all active:scale-[0.95] cursor-pointer
               ${btn.wide ? 'col-span-2' : ''}
               ${btn.type === 'number' ? 'bg-white dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 border border-subtle shadow-xs' : ''}
               ${btn.type === 'operator' ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/20 border border-[var(--accent-color)]/20' : ''}

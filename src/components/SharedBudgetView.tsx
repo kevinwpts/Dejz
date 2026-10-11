@@ -92,7 +92,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
                 </div>
               </div>
 
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-[var(--success-container)] text-[var(--success-color)] px-2.5 py-0.5 rounded-full">
+              <span className="text-micro-label font-bold uppercase tracking-wider bg-[var(--success-container)] text-[var(--success-color)] px-2.5 py-0.5 rounded-full">
                 {isEn ? 'Active' : 'Aktiv'}
               </span>
             </div>

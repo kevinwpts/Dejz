@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
   LayoutGrid, 
   Calendar as CalendarIcon, 
   ChevronLeft, 
@@ -16,12 +14,11 @@ import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { Input, BottomSheet, SegmentedControl, Button, FilterButtonGroup } from './ui';
+import { Input, BottomSheet, Button, FilterButtonGroup } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { formatFullDate } from '../utils/date';
-import { formatAmount } from '../utils/format';
 import { getCategoryIconName } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 
@@ -562,12 +559,12 @@ export function LogView({
               setModalPeriod(initial);
               setIsPeriodPickerOpen(true);
             }}
-            className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+            className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
           >
             <CalendarIcon size={15} className="text-[var(--text-secondary)] shrink-0" />
             <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
             {selectedPeriod?.isCurrent && (
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+              <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
                 {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
               </span>
             )}
@@ -618,7 +615,7 @@ export function LogView({
         >
           <SlidersHorizontal size={15} strokeWidth={2} />
           {activeFiltersCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-[11px] font-bold inline-flex items-center justify-center shrink-0 ml-0.5">
+            <span className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-label font-bold inline-flex items-center justify-center shrink-0 ml-0.5">
               {activeFiltersCount}
             </span>
           )}
@@ -629,7 +626,7 @@ export function LogView({
       {(hasActiveSearch || hasActiveFilters) && (
         <div className="flex items-center justify-between px-1 py-0.5 text-xs text-[var(--text-secondary)]">
           <div className="flex items-center gap-1.5 overflow-hidden">
-            <span className="text-[11px] truncate">
+            <span className="text-label truncate">
               {filteredExpenses.length === 0 ? (
                 hasActiveSearch ? (
                   <>
@@ -673,7 +670,7 @@ export function LogView({
           <button
             type="button"
             onClick={handleClearResultRow}
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--accent-color)] hover:underline cursor-pointer shrink-0 ml-2"
+            className="inline-flex items-center gap-1 text-label font-medium text-[var(--accent-color)] hover:underline cursor-pointer shrink-0 ml-2"
           >
             <RotateCcw size={11} />
             <span>
@@ -698,30 +695,11 @@ export function LogView({
               transition={{ delay: index * 0.03 }}
               className="space-y-1.5"
             >
-              {/* Day Header with Date and Day Total Net */}
-              <div className="px-1 flex items-center justify-between pb-0.5">
+              {/* Day Header with Date */}
+              <div className="px-1 pb-0.5">
                 <span className="text-label font-medium text-[var(--text-secondary)]">
                   {formatFullDate(date, currentLang)}
                 </span>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
-                    {dayData.items.length} {getL10n(
-                      dayData.items.length === 1 ? 'transaktion' : 'transaktioner',
-                      dayData.items.length === 1 ? 'tx' : 'txs',
-                      dayData.items.length === 1 ? 'transaksjon' : 'transaksjoner',
-                      dayData.items.length === 1 ? 'transaktion' : 'transaktioner',
-                      dayData.items.length === 1 ? 'tapahtuma' : 'tapahtumaa'
-                    )}
-                  </span>
-                  <span className="text-[var(--text-tertiary)]/40 text-[10px]">·</span>
-                  <span className={`text-micro-label font-semibold tabular-nums font-amount ${
-                    dayData.dayNet > 0 
-                      ? 'text-[var(--success-color)]' 
-                      : 'text-[var(--text-primary)]'
-                  }`}>
-                    {dayData.dayNet > 0 ? `+${formatAmount(dayData.dayNet, getLocale())}` : formatAmount(dayData.dayNet, getLocale())} {config.currency || 'kr'}
-                  </span>
-                </div>
               </div>
 
               {/* Transactions for this Day */}
@@ -888,13 +866,13 @@ export function LogView({
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] border-none">
+                    <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] border-none">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
                 </div>
                 {modalPeriod?.name?.includes('(') && (
-                  <span className="text-[10.5px] text-[var(--text-tertiary)] font-normal truncate mt-0.5">
+                  <span className="text-secondary text-[var(--text-tertiary)] font-normal truncate mt-0.5">
                     {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
                   </span>
                 )}
@@ -943,7 +921,7 @@ export function LogView({
               {/* Weekday headers */}
               <div className="grid grid-cols-7 gap-1 mb-1 text-center">
                 {weekdayNames.map((d, i) => (
-                  <div key={i} className="text-center text-[10px] font-semibold text-[var(--text-tertiary)] tracking-wider py-0.5">
+                  <div key={i} className="text-center text-micro-label font-semibold text-[var(--text-tertiary)] tracking-wider py-0.5">
                     {d}
                   </div>
                 ))}
@@ -981,7 +959,7 @@ export function LogView({
                           : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] font-medium'
                       }`}
                     >
-                      <span className={`text-xs sm:text-[13px] leading-none tabular-nums ${
+                      <span className={`text-xs sm:text-body leading-none tabular-nums ${
                         isSelected ? 'text-[var(--on-accent)]' : 'text-[var(--text-primary)]'
                       }`}>
                         {dayNum}
@@ -1109,7 +1087,7 @@ export function LogView({
                   />
                   <span>{cat.name}</span>
                   {cat.count !== undefined && cat.count > 0 && (
-                    <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full ${
+                    <span className={`text-micro-label font-semibold px-1.5 py-0.2 rounded-full ${
                       isSelected ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-tertiary)]'
                     }`}>
                       {cat.count}

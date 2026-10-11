@@ -140,7 +140,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           </div>
           <div>
             <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums block truncate">
-              -{formatAmount(totalIOwe, config.language)} {curr}
+              −{formatAmount(totalIOwe, config.language)} {curr}
             </span>
           </div>
         </Card>
@@ -240,7 +240,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                               : 'text-[var(--danger-color)]'
                           }`}
                         >
-                          {isOweMe ? '+' : '-'}{formatAmount(item.amount, config.language)} {curr}
+                          {isOweMe ? '+' : '−'}{formatAmount(item.amount, config.language)} {curr}
                         </span>
                       </div>
 

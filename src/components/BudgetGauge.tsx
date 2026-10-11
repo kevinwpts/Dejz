@@ -75,7 +75,7 @@ export function BudgetGauge({
           {/* Left Column: Totalt kvar + Stora siffran + /dag */}
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-[12.5px] sm:text-[13px] font-medium text-[var(--on-accent)] opacity-90">
+              <span className="text-card-title sm:text-body font-medium text-[var(--on-accent)] opacity-90">
                 {label || (isEn ? 'Total remaining' : 'Totalt kvar')}
               </span>
               {onOpenInfo && (
@@ -114,14 +114,14 @@ export function BudgetGauge({
             {/* Per dag beloppet placerat direkt under det stora beloppet */}
             <div className="flex items-center gap-2 pt-0.5 text-xs text-[var(--on-accent)] opacity-90">
               <span className="font-semibold text-[var(--on-accent)] font-amount tabular-nums">
-                {formatAmount(Math.round(remainingCents / Math.max(1, remainingDays ?? 1)), language)} {currency}/dag
+                {formatAmount(Math.round(remainingCents / Math.max(1, remainingDays ?? 1)), language)} {currency || 'kr'}{isEn ? '/day' : '/dag'}
               </span>
             </div>
           </div>
 
           {/* Right Column: Thick Circular Progress Ring */}
           <div className="flex-shrink-0 flex items-center justify-center pl-1">
-            <div className="relative w-[68px] h-[68px] sm:w-[74px] sm:h-[74px] flex items-center justify-center">
+            <div className="relative w-[84px] h-[84px] sm:w-[92px] sm:h-[92px] flex items-center justify-center">
               <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 80 80">
                 {/* Background Track Circle */}
                 <circle
@@ -147,10 +147,10 @@ export function BudgetGauge({
               </svg>
               {/* Center Content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-[14px] sm:text-[15px] font-bold font-amount tabular-nums text-[var(--on-accent)] leading-none">
+                <span className="text-[16px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--on-accent)] leading-none">
                   {percentage}%
                 </span>
-                <span className="text-[8.5px] font-bold text-[var(--on-accent)] opacity-85 uppercase tracking-wider mt-0.5">
+                <span className="text-micro-label font-bold text-[var(--on-accent)] opacity-85 uppercase tracking-wider mt-0.5">
                   {isEn ? 'left' : 'kvar'}
                 </span>
               </div>
@@ -165,11 +165,11 @@ export function BudgetGauge({
           >
             {/* Left: Aktuell period */}
             <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium leading-tight text-[var(--on-accent)] opacity-80">
+              <div className="flex items-center gap-1.5 text-label font-medium leading-tight text-[var(--on-accent)] opacity-80">
                 <Icon name="calendar" size={12} className="shrink-0 opacity-80" />
                 <span>{isEn ? 'Current period' : 'Aktuell period'}</span>
               </div>
-              <span className="text-xs sm:text-[13px] font-semibold text-[var(--on-accent)] truncate mt-0.5">
+              <span className="text-secondary sm:text-body font-semibold text-[var(--on-accent)] truncate mt-0.5">
                 {periodIntervalText}
               </span>
             </div>
@@ -179,11 +179,11 @@ export function BudgetGauge({
 
             {/* Right: Nästa lön */}
             <div className="flex flex-col items-end shrink-0 text-right">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium leading-tight justify-end text-[var(--on-accent)] opacity-80">
+              <div className="flex items-center gap-1.5 text-label font-medium leading-tight justify-end text-[var(--on-accent)] opacity-80">
                 <Icon name="coins" size={12} className="shrink-0 opacity-80" />
                 <span>{isEn ? 'Next payday' : 'Nästa lön'}</span>
               </div>
-              <span className="text-xs sm:text-[13px] font-semibold font-amount tabular-nums text-[var(--on-accent)] truncate mt-0.5">
+              <span className="text-secondary sm:text-body font-semibold font-amount tabular-nums text-[var(--on-accent)] truncate mt-0.5">
                 {paydayText}
               </span>
             </div>
@@ -195,7 +195,7 @@ export function BudgetGauge({
               <span>{timeText}</span>
             </div>
             {remainingDays !== undefined && totalDays !== undefined && (
-              <span className="font-amount tabular-nums text-[10px] text-[var(--on-accent)] opacity-80">
+              <span className="font-amount tabular-nums text-micro-label text-[var(--on-accent)] opacity-80">
                 {isEn
                   ? `Day ${totalDays - remainingDays + 1} of ${totalDays}`
                   : `Dag ${totalDays - remainingDays + 1} av ${totalDays}`}

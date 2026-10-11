@@ -36,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
             <h1 className="text-2xl font-semibold mb-2">{this.getTranslation('errorTitle')}</h1>
             <p className="mb-4 text-sm opacity-80">{this.getTranslation('errorMessage')}</p>
             {this.state.error && (
-              <pre className="text-left text-[10px] bg-danger/10 p-3 rounded-[var(--radius-card-nested,10px)] overflow-auto max-h-48 font-mono border border-danger/20">
+              <pre className="text-left text-micro-label bg-danger/10 p-3 rounded-[var(--radius-card-nested,10px)] overflow-auto max-h-48 font-mono border border-danger/20">
                 {this.state.error.toString()}
               </pre>
             )}

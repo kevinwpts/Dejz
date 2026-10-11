@@ -95,7 +95,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
         >
           <span className="font-extrabold text-sm">=</span>
           <span className="text-sm">{livePreview} {currency}</span>
-          <span className="text-[10px] opacity-80 font-normal ml-1 bg-white/20 px-1.5 py-0.5 rounded-full">Verkställ</span>
+          <span className="text-micro-label opacity-80 font-normal ml-1 bg-white/20 px-1.5 py-0.5 rounded-full">Verkställ</span>
         </motion.button>
       )}
 

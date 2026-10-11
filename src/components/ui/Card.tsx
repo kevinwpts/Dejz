@@ -39,7 +39,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       none: 'p-0',
       sm: 'card-p-sm',
       md: 'card-p',
-      lg: 'p-5 sm:p-6',
+      lg: 'card-p-lg',
     }[padding];
 
     const interactiveStyles = interactive

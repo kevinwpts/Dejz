@@ -39,16 +39,47 @@ Använd alltid de semantiska hörnradie-token som styrs centralt. Hårdkoda **al
 Dejz stöder **Light Mode**, **Dark Mode** och **Black Theme**. Färgerna hämtas dynamiskt via CSS-variabler, vilket gör att användargränssnittet anpassar sig sömlöst:
 
 *   **Bakgrund/Ytor:**
-    *   `var(--bg-color)` – Canvas (huvudbakgrunden för appen).
-    *   `var(--surface-color)` – Standardkort och ytor.
+    *   `var(--bg-color)` – Canvas (huvudbakgrunden för appen: `#ECEFF3` i Light, `#141414` i Dark, `#0A0A0A` i Black).
+    *   `var(--surface-color)` – Standardkort och moduler (`#FFFFFF` i Light, `#1C1C1C` i Dark, `#121212` i Black för distinkt OLED-separation).
     *   `var(--surface-high)` / `var(--surface-muted)` – Förhöjda eller dämpade ytor.
+*   **Dividers & Linjer:**
+    *   `var(--border-divider)` – Subtila 16px indragna skiljelinjer via `.divide-subtle` (`rgba(0,0,0,0.05)` i Light, `rgba(255,255,255,0.05)` i Dark, `rgba(255,255,255,0.06)` i Black).
 *   **Textfärger:**
     *   `var(--text-primary)` – Primär rubrik- och brödtext.
-    *   `var(--text-secondary)` – Sekundär text, etiketter.
+    *   `var(--text-secondary)` – Sekundär text, etiketter (11.5px).
     *   `var(--text-tertiary)` / `var(--text-muted)` – Dämpad metadata, inaktiva val.
-*   **Accentfärg (Användarvald):**
+*   **Accentfärg (Användarvald & Färgmixad):**
     *   `var(--accent-color)` – Dynamisk färg för aktiva knappar, highlights och selektioner.
-    *   `var(--on-accent)` – Textfärg ovanpå accentfärgen (alltid kontrasterande vit/ljus).
+    *   `var(--accent-soft)` & `var(--accent-container)` – Automatiskt harmoniserade containers beräknade via CSS `color-mix`, som sömlöst matchar oavsett vald accentfärg.
+    *   `var(--on-accent)` – Textfärg ovanpå accentfärgen (alltid kontrasterande vit).
+
+### 2.3 Komponenthöjder & Interaktioner (Touch & Heights)
+*   `--height-input` & `--height-button`: Båda harmoniserade till **46px** för perfekt visuell linjering sida-vid-sida.
+*   `touch-press` & `touch-press-subtle`: Centrala utilities för naturlig haptisk/fysisk tryckrespons (`active:scale-[0.98]` / `active:scale-[0.99]`).
+
+### 2.4 Layout, Spacing & Ikonstandard (100% Enhetlighet)
+*   **Kort- & Behållarpadding:**
+    *   `.card-p`: Standard (16px mobil / 20px desktop).
+    *   `.card-p-sm`: Kompakt (12px mobil / 14px desktop).
+    *   `.card-p-lg`: Utökad (20px mobil / 24px desktop).
+    *   `.row-p`: Standard listrad-padding (14px 16px).
+    *   `.modal-p`: Modal- och sheet-padding (20px mobil / 24px desktop).
+*   **Ikonstorlekar i Cirkulära Ikonbehållare:**
+    *   Liten / Kompakt listrad: **32px** (`w-8 h-8 rounded-[var(--radius-icon-button,10px)]`).
+    *   Standard listrad & kort: **40px** (`w-10 h-10 rounded-[var(--radius-icon-button,10px)]`).
+    *   Stor / Hero: **48px** (`w-12 h-12 rounded-[var(--radius-icon-button,10px)]`).
+*   **Radie-Harmoni:**
+    *   Kort och huvudcontainrar: `var(--radius-card, 20px)`.
+    *   Inre kort och grupperade val (`SelectionRow`): `var(--radius-card-nested, 12px)`.
+    *   Knappar och inmatningsfält: `var(--radius-button, 12px)` och `var(--radius-input, 12px)`.
+    *   Modaler och BottomSheets: `var(--radius-modal, 24px)`.
+*   **Listrad Touch-mått (Min-heights):**
+    *   Standard ListRow: Minst `56–60px`.
+    *   Kompakt ListRow & SelectionRow: Minst `50–54px`.
+*   **Sektions- och Elementavstånd:**
+    *   Mellan element i en grupp: `.gap-element` / `.space-y-element` (12px).
+    *   Mellan huvudsektioner på en sida: `.gap-section` / `.space-y-section` (24px).
+    *   Sidomarginal till skärmkant (mobil): `.page-px` (16px).
 
 ---
 
@@ -62,13 +93,13 @@ Dejz använder **DM Sans** genomgående som enda UI-typsnitt för alla rubriker,
 | **List Amount** | `.text-list-amount` | 15px | 600 | 1.25 | -0.02em | Belopp i transaktionslistor och rader |
 | **Page Title** | `.text-page-title` | 18px | 600 | 1.25 | -0.025em | Sidrubriker, huvudvyer |
 | **Section Title** | `.text-section-title` | 15.5px | 600 | 1.3 | -0.015em | Sektionsrubriker, modaltitlar |
-| **Card Title** | `.text-card-title` | 11.5px | 600 | 1.35 | 0em | Korttitlar, listrubriker, dialog-delrubriker |
+| **Card Title** | `.text-card-title` | 12.5px | 600 | 1.35 | 0em | Korttitlar, listrubriker, dialog-delrubriker |
 | **Metric Label** | `.text-metric-label` | 12.5px | 500 | 1.35 | 0em | Nyckeltalsetiketter ovanför ekonomiska belopp (Hem, Analys, Ekonomi) |
-| **Body** | `.text-body` | 11px | 400 | 1.5 | 0em | Standard brödtext, inmatningsfält |
+| **Body** | `.text-body` | 13px | 400 | 1.5 | 0em | Standard brödtext, inmatningsfält |
 | **Body Medium** | `.text-body-medium` | 13px | 500 | 1.45 | -0.01em | Transaktionsrader, knappar, viktad brödtext |
-| **Secondary** | `.text-secondary` | 10.5px | 400 | 1.45 | 0em | Sekundärtext, förklarande text |
-| **Label** | `.text-label` | 9.5px | 500 | 1.35 | 0.01em | Fältetiketter, filterknappar, statusindikatorer |
-| **Micro Label** | `.text-micro-label` | 9px | 400 | 1.3 | 0.01em | Badges, pills, små diagrametiketter, datumstämplar |
+| **Secondary** | `.text-secondary` | 11.5px | 400 | 1.45 | 0em | Sekundärtext, förklarande text, transaktionsrader |
+| **Label** | `.text-label` | 11px | 500 | 1.35 | 0.01em | Fältetiketter, filterknappar, statusindikatorer |
+| **Micro Label** | `.text-micro-label` | 10px | 400 | 1.35 | 0.01em | Badges, pills, små diagrametiketter, datumstämplar, bottenmenyflikar |
 
 Dessa klasser är definierade som centrala `@utility` i `src/index.css` och tillgängliga via `DS.typography` i `src/constants/designSystem.ts`. Hårdkoda **aldrig** godtyckliga textstorlekar som `text-[13px]` eller `text-[17px]` i nya komponenter.
 

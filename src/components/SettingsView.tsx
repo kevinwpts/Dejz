@@ -214,7 +214,7 @@ export function SettingsView({
     return (
       <div className="space-y-6 w-full py-2">
         <div className="space-y-3">
-          <label className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
+          <label className="text-sm font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
             {isEn ? 'Appearance mode' : 'Utseendeläge'}
           </label>
           <div className="grid grid-cols-3 gap-2.5">
@@ -247,7 +247,7 @@ export function SettingsView({
 
         {/* Temafärg */}
         <div className="space-y-3 pt-2">
-          <label className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
+          <label className="text-sm font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
             {isEn ? 'Theme color' : 'Temafärg'}
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
@@ -274,7 +274,7 @@ export function SettingsView({
                   >
                     {isSelected && <Icon name="check" size={15} weight="bold" />}
                   </div>
-                  <span className={`text-[11px] font-medium tracking-tight truncate w-full text-center ${
+                  <span className={`text-label font-medium tracking-tight truncate w-full text-center ${
                     isSelected ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)]'
                   }`}>
                     {theme.name}

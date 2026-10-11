@@ -25,6 +25,7 @@ interface TransactionItemProps {
   hideCategoryBadge?: boolean;
   hideFixedBadge?: boolean;
   showDate?: boolean;
+  isVariable?: boolean;
 }
 
 export function TransactionItem({ 
@@ -41,7 +42,8 @@ export function TransactionItem({
   variant,
   hideCategoryBadge,
   hideFixedBadge,
-  showDate
+  showDate,
+  isVariable,
 }: TransactionItemProps) {
   const transaction = originalTransaction as any;
   const isFixedItem = Boolean(
@@ -51,6 +53,11 @@ export function TransactionItem({
     transaction?.isFixedExpense || 
     transaction?.fixed_expense_id || 
     (typeof transaction?.id === 'string' && transaction.id.startsWith('fixed-'))
+  );
+  const isVariableItem = Boolean(
+    isVariable ??
+    transaction?.isVariable ??
+    transaction?.is_variable
   );
   const canEdit = Boolean(onView);
   const isClickable = Boolean(onClick || onView);
@@ -211,9 +218,23 @@ export function TransactionItem({
           className={`${paddingClasses} relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {/* Real Logo in original color */}
-            <div className="flex-shrink-0">
+            {/* Real Logo in original color with floating Variable 'R' badge */}
+            <div className="flex-shrink-0 relative">
               <TransactionLogo transaction={transaction} config={config} />
+              {isVariableItem && (
+                <span
+                  title={getL10n(
+                    'Varierande belopp',
+                    'Variable amount',
+                    'Varierende beløp',
+                    'Varierende beløb',
+                    'Vaihteleva summa'
+                  )}
+                  className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-micro-label font-bold flex items-center justify-center leading-none border-[1.5px] border-[var(--surface-color)] shadow-xs pointer-events-none z-20 select-none font-sans"
+                >
+                  R
+                </span>
+              )}
             </div>
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
@@ -271,7 +292,7 @@ export function TransactionItem({
               <span className="text-secondary opacity-80 font-normal ml-1">
                 {config?.currency || 'kr'}
                 {transaction.frequency ? (
-                  <span className="text-[10px] opacity-70 ml-0.5">
+                  <span className="text-micro-label opacity-70 ml-0.5">
                     {transaction.originalAmount ? (config?.language === 'en' ? '/mo' : '/mån') :
                     transaction.frequency === 'Månadsvis' || transaction.frequency === 'MONTHLY' ? (config?.language === 'en' ? '/mo' : '/mån') :
                     transaction.frequency === 'Kvartalsvis' || transaction.frequency === 'QUARTERLY' ? (config?.language === 'en' ? '/quarter' : '/kvartal') :

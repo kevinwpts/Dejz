@@ -48,7 +48,7 @@ export function CustomBottomNavigation({
           onClick={() => {
             if (onPlusClick) onPlusClick();
           }}
-          className="w-[56px] h-[56px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer active:scale-95 transition-transform border-none outline-none shadow-none"
+          className="w-[56px] h-[56px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press border-none outline-none shadow-none"
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
@@ -120,7 +120,7 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`w-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none ${
+      className={`w-full flex flex-col items-center justify-center transition-colors touch-press-subtle cursor-pointer select-none ${
         isActive
           ? 'text-[var(--accent-color)] font-semibold'
           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'

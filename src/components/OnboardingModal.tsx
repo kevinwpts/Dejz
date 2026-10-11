@@ -4,7 +4,7 @@ import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, PiggyBank, Arro
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
-import { formatAmount } from '../utils/format';
+import { formatAmount, formatCurrency } from '../utils/format';
 import { getPeriodBoundaries } from '../utils/date';
 import { FixedExpenseModal, IncomeModal } from './BudgetModals';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -662,7 +662,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </button>
                   )}
                   <div className="flex flex-col">
-                    <span className="text-[10.5px] font-bold text-[var(--accent-color)] tracking-wide">
+                    <span className="text-label font-bold text-[var(--accent-color)] tracking-wide">
                       {s.stepOf(stepNumber, totalSteps)}
                     </span>
                     <h2 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)]">
@@ -705,7 +705,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="name" />
                         <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.nameQuestion}
                           </h3>
                         </div>
@@ -750,7 +750,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="payday" payday={payday} />
                         <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.paydayQuestion}
                           </h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -825,7 +825,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                               <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">
                                 {s.paydayBeforeWeekendTitle}
                               </span>
-                              <span className="text-[11px] sm:text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
+                              <span className="text-label sm:text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
                                 {s.paydayBeforeWeekendDesc}
                               </span>
                             </div>
@@ -862,7 +862,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="income" />
                         <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.incomeQuestion}
                           </h3>
                         </div>
@@ -908,7 +908,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                             setEditingIncomeIndex(null);
                             setIsAddingIncome(true);
                           }}
-                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[8px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[var(--radius-xs,8px)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={14} />
                           <span>{s.addIncome}</span>
@@ -940,7 +940,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="expenses" />
                         <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.expensesQuestion}
                           </h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -1002,8 +1002,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                       <p className="text-xs font-bold leading-tight break-words text-[var(--text-primary)]">
                                         {preset.name}
                                       </p>
-                                      <p className="text-[10.5px] font-amount font-semibold mt-0.5 text-[var(--text-secondary)]">
-                                        {formatAmount(preset.defaultAmount, lang)} kr
+                                      <p className="text-secondary font-amount font-semibold mt-0.5 text-[var(--text-secondary)]">
+                                        {formatCurrency(preset.defaultAmount, config.currency || 'kr', lang)}
                                       </p>
                                     </div>
                                   </div>
@@ -1048,7 +1048,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                             setEditingExpenseIndex(null);
                             setIsAddingExpense(true);
                           }}
-                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[8px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[var(--radius-xs,8px)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={14} />
                           <span>{s.customExpense}</span>
@@ -1089,7 +1089,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="goals" />
                         <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.savingsQuestion}
                           </h3>
                         </div>
@@ -1125,7 +1125,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                     : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40'
                                 }`}
                               >
-                                {amount === 0 ? '0 kr' : formatAmount(amount, lang)}
+                                {amount === 0 ? formatCurrency(0, config.currency || 'kr', lang) : formatAmount(amount, lang)}
                               </button>
                             );
                           })}
@@ -1214,7 +1214,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="summary" />
                         <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.summaryQuestion}
                           </h3>
                           <p className="text-xs font-medium text-[var(--text-secondary)]">

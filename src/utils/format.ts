@@ -21,7 +21,7 @@ export const formatAmount = (val: string | number, language: string = 'sv-SE'): 
     return val.toLocaleString(locale, {
       minimumFractionDigits: hasDecimals ? 2 : 0,
       maximumFractionDigits: 2
-    }).replace(/\s/g, ' ').replace(/\u00a0/g, ' ');
+    }).replace(/\s/g, ' ').replace(/\u00a0/g, ' ').replace(/^-/, '−');
   }
 
   // If the input contains math operators, preserve them nicely
@@ -51,16 +51,71 @@ export const formatAmount = (val: string | number, language: string = 'sv-SE'): 
   const decimalPart = parts.length > 1 ? (cleanValue.includes(',') ? ',' : '.') + parts[1] : '';
 
   if (integerPart === '' && decimalPart !== '') return decimalPart;
-  if (integerPart === '-' && decimalPart !== '') return '-' + decimalPart;
+  if (integerPart === '-' && decimalPart !== '') return '−' + decimalPart;
   
   // Use a manual regex for grouping to ensure spaces are always used consistently
   const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
   // If the user is typing "0", allow it
   if (integerPart === '0' && parts.length === 1) return '0';
-  if (integerPart === '-0' && parts.length === 1) return '-0';
+  if (integerPart === '-0' && parts.length === 1) return '−0';
 
-  return formattedInteger + decimalPart;
+  return (formattedInteger + decimalPart).replace(/^-/, '−');
+};
+
+export interface FormatCurrencyOptions {
+  showPlus?: boolean;
+  suffix?: string;
+  hideCurrency?: boolean;
+}
+
+/**
+ * Central funktion för valutaformatering i hela Dejz.
+ * Säkerställer konsekvent hantering av:
+ * - Valfri valutasymbol (kr, €, $, £ etc.)
+ * - Tusentalsavgränsare (konsekvent mellanslag)
+ * - Decimaler (enligt valt språk)
+ * - Typografiskt minustecken (U+2212 '−')
+ * - Mellanrum före valutasymbol
+ *
+ * Exempel:
+ * formatCurrency(19100, '€') => "19 100 €"
+ * formatCurrency(0, '€') => "0 €"
+ * formatCurrency(-120, '€') => "−120 €"
+ * formatCurrency(500, '€', 'sv', { showPlus: true }) => "+500 €"
+ */
+export const formatCurrency = (
+  val: string | number | null | undefined,
+  currency: string = 'kr',
+  language: string = 'sv-SE',
+  options?: FormatCurrencyOptions
+): string => {
+  const curr = currency || 'kr';
+  if (val === null || val === undefined || val === '') {
+    return options?.hideCurrency ? '0' : `0 ${curr}${options?.suffix || ''}`;
+  }
+
+  const numVal = typeof val === 'number' ? val : parseAmount(val);
+  const isNegative = typeof val === 'number'
+    ? val < 0
+    : String(val).trim().startsWith('-') || String(val).trim().startsWith('−');
+  const isZero = numVal === 0;
+
+  const absNum = Math.abs(numVal);
+  const formattedAbs = formatAmount(absNum, language) || '0';
+
+  let prefix = '';
+  if (isNegative && !isZero) {
+    prefix = '−';
+  } else if (options?.showPlus && !isZero) {
+    prefix = '+';
+  }
+
+  if (options?.hideCurrency) {
+    return `${prefix}${formattedAbs}${options?.suffix || ''}`;
+  }
+
+  return `${prefix}${formattedAbs} ${curr}${options?.suffix || ''}`;
 };
 
 /**
@@ -98,6 +153,15 @@ export const formatPaydaySummary = (day: number, lang: string = 'sv'): string =>
 export const parseAmount = (val: string): number => {
   if (!val) return 0;
   
+  // Replace typographical minus with standard minus
+  const clean = val.trim().replace(/^−/, '-');
+
+  // If simple signed number with optional spaces and comma/dot
+  if (/^[-+]?\d+([.,]\d+)?$/.test(clean.replace(/\s/g, ''))) {
+    const normalized = clean.replace(/\s/g, '').replace(/,/g, '.');
+    return parseFloat(normalized) || 0;
+  }
+
   // Try evaluating as math expression first if operators are present
   const mathVal = parseMathAmount(val);
   if (mathVal !== null) {
@@ -105,7 +169,7 @@ export const parseAmount = (val: string): number => {
   }
 
   // Replace comma with dot for parseFloat and remove spaces
-  const normalized = val.replace(/\s/g, '').replace(/,/g, '.');
+  const normalized = clean.replace(/\s/g, '').replace(/,/g, '.');
   return parseFloat(normalized) || 0;
 };
 

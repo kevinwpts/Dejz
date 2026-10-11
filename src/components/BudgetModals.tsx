@@ -179,10 +179,10 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--success-color)]">
               <span className="opacity-80 mr-1">+</span>
               <span>{formatAmount(displayAmount, config.language)}</span>
-              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+              <span className="text-sm font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
             </p>
             {hasAdjustment && (
-              <p className="text-[12px] font-normal text-[var(--text-secondary)] mt-1 tabular-nums">
+              <p className="text-secondary font-normal text-[var(--text-secondary)] mt-1 tabular-nums">
                 {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
               </p>
             )}
@@ -192,7 +192,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           <div className="divide-y divide-subtle text-left">
             {/* Category */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
@@ -207,7 +207,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   return (
                     <>
                       {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="xs" />}
-                      <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
+                      <span className="text-sm font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
                 })()}
@@ -216,20 +216,20 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
             {/* Type */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {income.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
 
             {/* Arrival Day */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('arrivalDay')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(income.deductionDay, config.language, true)}
               </span>
             </div>
@@ -237,10 +237,10 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             {/* Note */}
             {income.note && (
               <div className="py-3 flex items-start justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
                   {t('ownNote')}
                 </span>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {income.note}
                 </span>
               </div>
@@ -254,7 +254,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             type="button"
             variant="secondary"
             size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            className="flex-1 rounded-full text-body font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(income);
@@ -445,7 +445,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
               {income 
                 ? (config?.language === 'en' ? 'Edit Income' : 'Redigera inkomst') 
                 : (config?.language === 'en' ? 'New Income' : 'Ny inkomst')}
@@ -466,7 +466,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[8px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[var(--radius-xs,8px)] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -477,7 +477,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 />
               </button>
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Name / Payer' : 'Namn / Betalare'}
                 </label>
                 <input 
@@ -486,14 +486,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('incomePayerPlaceholder')} 
-                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
             <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Amount' : 'Belopp'}
                 </label>
                 <div 
@@ -515,7 +515,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     placeholder="0"
                     className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
                   />
-                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                  <span className="text-secondary font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[var(--radius-xs,8px)] select-none shrink-0 font-sans">
                     {currency}
                   </span>
                 </div>
@@ -533,7 +533,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               }}
               className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[58px]"
             >
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -549,7 +549,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     />
                   );
                 })()}
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || t('income')}
                 </span>
                 <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
@@ -558,14 +558,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Row 2: Arrival / Payout Day */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('arrivalDay')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -586,14 +586,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Row 3: Frequency */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -615,14 +615,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             {/* Row 4 (if non-monthly): Start Month (directly below frequency) */}
             {frequency !== Frequency.MONTHLY && (
               <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -649,11 +649,11 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Row 5: Type (Fixed / Variable) */}
             <div className="p-4 flex items-center justify-between min-h-[58px]">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <Switch
@@ -667,7 +667,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Row 6: Own Note */}
             <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('ownNote')}
               </span>
               <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
@@ -676,7 +676,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                  className="text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                 />
                 {note && (
                   <button 
@@ -699,12 +699,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
                 <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-subtle shrink-0">
-                  <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
+                  <h3 className="text-section-title text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
                   <button
                     type="button"
                     onClick={() => setIsCategorySelectorOpen(false)}
@@ -713,36 +713,45 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
-                <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
-                  <div className="grid grid-cols-2 gap-3">
-                    {(categories || []).map(cat => {
-                      const isSelected = category === cat.name;
-                      return (
-                        <button
-                          key={cat.name}
-                          type="button"
-                          onClick={() => {
-                            setCategory(cat.name);
-                            setIsCategorySelectorOpen(false);
-                          }}
-                          style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-subtle relative overflow-hidden text-left ${
-                            isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
-                          }`}
-                        >
-                          <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
-                          <span className="text-[13.5px] sm:text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
+                <div className="p-3.5 overflow-y-auto flex-1 min-h-0 custom-scrollbar space-y-1">
+                  {(categories || []).map(cat => {
+                    const isSelected = category === cat.name;
+                    const catColor = cat.color || getCategoryColor(cat.name, categories);
+                    return (
+                      <button
+                        key={cat.name}
+                        type="button"
+                        onClick={() => {
+                          if (typeof feedback?.light === 'function') feedback.light();
+                          setCategory(cat.name);
+                          setIsCategorySelectorOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[var(--radius-card-sm,12px)] transition-colors cursor-pointer text-left active:scale-[0.99] ${
+                          isSelected
+                            ? 'bg-black/[0.04] dark:bg-white/[0.06]'
+                            : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <CategoryIcon 
+                            icon={cat.icon} 
+                            color={catColor} 
+                            size="sm" 
+                            variant="primary" 
+                            categoryName={cat.name} 
+                          />
+                          <span className={`text-sm truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                             {cat.name}
                           </span>
-                          {isSelected && (
-                            <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
-                              <Check size={14} strokeWidth={2.5} />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </div>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white shrink-0">
+                            <Check size={12} strokeWidth={2.5} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </div>,
@@ -1371,7 +1380,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
               {expense 
                 ? (config?.language === 'en' ? 'Edit Fixed Expense' : 'Redigera fast utgift') 
                 : (config?.language === 'en' ? 'New Fixed Expense' : 'Ny fast utgift')}
@@ -1392,7 +1401,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[8px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[var(--radius-xs,8px)] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -1403,7 +1412,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 />
               </button>
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Name / Expense' : 'Namn / Utgift'}
                 </label>
                 <input 
@@ -1412,14 +1421,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('fixedExpensePlaceholder')} 
-                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
             <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Amount' : 'Belopp'}
                 </label>
                 <div 
@@ -1441,7 +1450,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     placeholder="0"
                     className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
                   />
-                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                  <span className="text-secondary font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[var(--radius-button-sm,8px)] select-none shrink-0 font-sans">
                     {currency}
                   </span>
                 </div>
@@ -1450,7 +1459,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
@@ -1459,7 +1468,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               }}
               className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[58px]"
             >
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -1475,7 +1484,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     />
                   );
                 })()}
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
                 <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
@@ -1484,16 +1493,16 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {/* Row 2: Deduction / Payment Day */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
                   ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1514,14 +1523,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {/* Row 3: Frequency */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1543,14 +1552,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             {/* Row 4 (if non-monthly): Start Month (directly below Frequency) */}
             {frequency !== Frequency.MONTHLY && (
               <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1577,14 +1586,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {/* Row 5: Payment Method */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('paymentMethod')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   {pmIcon}
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1608,11 +1617,11 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {/* Row 6: Type (Fixed / Variable) */}
             <div className="p-4 flex items-center justify-between min-h-[58px]">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <Switch
@@ -1626,11 +1635,11 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {/* Row 7: Cancellation Status */}
             <div className="p-4 flex items-center justify-between min-h-[58px]">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {config?.language === 'en' ? 'Sagt upp abonnemang' : 'Sagt upp abonnemang'}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {isCancelled ? (config?.language === 'en' ? 'Yes, cancelled' : 'Ja, sagt upp') : (config?.language === 'en' ? 'No, active' : 'Nej, aktivt')}
                 </span>
                 <Switch
@@ -1645,21 +1654,21 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             {/* Row 8 (if cancelled): Cancellation Date */}
             {isCancelled && (
               <div className="p-4 flex items-center justify-between min-h-[58px] gap-3 bg-black/[0.02] dark:bg-white/[0.03]">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {config?.language === 'en' ? 'Expiration date' : 'Sista dag (uppsägningsdatum)'}
                 </span>
                 <input
                   type="date"
                   value={cancellationDate}
                   onChange={(e) => setCancellationDate(e.target.value)}
-                  className="text-[13px] font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-subtle rounded-[var(--radius-input,14px)] px-2 py-1"
+                  className="text-body font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-subtle rounded-[var(--radius-input,14px)] px-2 py-1"
                 />
               </div>
             )}
 
             {/* Row 7: Own Note */}
             <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('ownNote')}
               </span>
               <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
@@ -1668,7 +1677,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                  className="text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                 />
                 {note && (
                   <button 
@@ -1691,12 +1700,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
                 <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-subtle shrink-0">
-                  <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
+                  <h3 className="text-section-title text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
                   <button
                     type="button"
                     onClick={() => setIsCategorySelectorOpen(false)}
@@ -1705,39 +1714,48 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
-                <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
-                  <div className="grid grid-cols-2 gap-3">
-                    {(categories || []).map(cat => {
-                      const isSelected = category === cat.name;
-                      return (
-                        <button
-                          key={cat.name}
-                          type="button"
-                          onClick={() => {
-                            setCategory(cat.name);
-                            if (!manualSelectionThisSession && (!expense?.logo || !findKnownBrandDomain(name, cat.name))) {
-                              setLogo(undefined);
-                            }
-                            setIsCategorySelectorOpen(false);
-                          }}
-                          style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-subtle relative overflow-hidden text-left ${
-                            isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
-                          }`}
-                        >
-                          <CategoryIcon icon={cat.icon} categoryName={cat.name} size="lg" noBackground whiteIcon />
-                          <span className="text-[13.5px] sm:text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
+                <div className="p-3.5 overflow-y-auto flex-1 min-h-0 custom-scrollbar space-y-1">
+                  {(categories || []).map(cat => {
+                    const isSelected = category === cat.name;
+                    const catColor = cat.color || getCategoryColor(cat.name, categories);
+                    return (
+                      <button
+                        key={cat.name}
+                        type="button"
+                        onClick={() => {
+                          if (typeof feedback?.light === 'function') feedback.light();
+                          setCategory(cat.name);
+                          if (!manualSelectionThisSession && (!expense?.logo || !findKnownBrandDomain(name, cat.name))) {
+                            setLogo(undefined);
+                          }
+                          setIsCategorySelectorOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[var(--radius-card-sm,12px)] transition-colors cursor-pointer text-left active:scale-[0.99] ${
+                          isSelected
+                            ? 'bg-black/[0.04] dark:bg-white/[0.06]'
+                            : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                          <CategoryIcon 
+                            icon={cat.icon} 
+                            color={catColor} 
+                            size="sm" 
+                            variant="primary" 
+                            categoryName={cat.name} 
+                          />
+                          <span className={`text-sm truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                             {cat.name}
                           </span>
-                          {isSelected && (
-                            <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
-                              <Check size={14} strokeWidth={2.5} />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </div>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white shrink-0">
+                            <Check size={12} strokeWidth={2.5} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
             </div>,
@@ -1749,13 +1767,13 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-card-nested bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-subtle flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-card-nested bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-subtle flex items-center justify-between group transition-all cursor-pointer touch-press text-left"
               >
                 <div>
-                  <p className="text-[13px] font-medium text-[var(--text-primary)]">
+                  <p className="text-body font-medium text-[var(--text-primary)]">
                     {config?.language === 'en' ? 'Cancel subscription' : 'Säg upp abonnemang'}
                   </p>
-                  <p className="text-[11.5px] font-normal text-[var(--text-secondary)] mt-0.5">
+                  <p className="text-secondary font-normal text-[var(--text-secondary)] mt-0.5">
                     {config?.language === 'en' ? 'Instructions and direct link' : 'Instruktioner och direktlänk'}
                   </p>
                 </div>
@@ -1878,7 +1896,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           isOpen={isCancelModalOpen}
           onClose={() => setIsCancelModalOpen(false)}
           expense={expense}
-          config={config || { language: 'sv', currency: 'kr' } as any}
+          config={config || { language: 'sv', currency: currency || 'kr' } as any}
           onDeleteExpense={() => {
             onDelete?.();
             onClose();
@@ -2013,7 +2031,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--text-primary)]">
               <span className="opacity-80 mr-1">→</span>
               <span>{formatAmount(saving.amount, config.language)}</span>
-              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+              <span className="text-sm font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
             </p>
           </div>
 
@@ -2021,12 +2039,12 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           <div className="divide-y divide-subtle text-left">
             {/* Type */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
               <div className="flex items-center justify-end gap-2">
                 <CategoryIcon icon={saving.icon || 'piggy-bank'} variant="minimal" size="xs" />
-                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {t('monthlySavings')}
                 </span>
               </div>
@@ -2034,20 +2052,20 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
 
             {/* Frequency */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {freqText}
               </span>
             </div>
 
             {/* Deduction Day */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {config.language === 'en' ? 'Deduction day' : 'Dragningsdag'}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(saving.deductionDay, config.language, true)}
               </span>
             </div>
@@ -2055,12 +2073,12 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             {/* Payment Method */}
             {saving.paymentMethod && (
               <div className="py-3 flex items-center justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('paymentMethod')}
                 </span>
                 <div className="flex items-center justify-end gap-2">
                   {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
-                  <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
                     {methodStr}
                   </span>
                 </div>
@@ -2075,7 +2093,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             type="button"
             variant="secondary"
             size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            className="flex-1 rounded-full text-body font-medium"
             onClick={() => {
               if (typeof feedback?.tap === 'function') feedback.tap();
               onEdit(saving);
@@ -2269,7 +2287,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
               {saving ? `${t('edit')} ${saving.name}` : `${t('new')} ${t('monthlySavings').toLowerCase()}`}
             </h2>
             <button 
@@ -2306,7 +2324,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 </div>
               </button>
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Name / Goal' : 'Namn / Sparmål'}
                 </label>
                 <input 
@@ -2315,14 +2333,14 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('savingsGoalPlaceholder')} 
-                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
             <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Amount' : 'Belopp'}
                 </label>
                 <div 
@@ -2344,7 +2362,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                     placeholder="0"
                     className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
                   />
-                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                  <span className="text-secondary font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[var(--radius-button-sm,8px)] select-none shrink-0 font-sans">
                     {currency}
                   </span>
                 </div>
@@ -2353,17 +2371,17 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Deduction Day */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('deductionDay') || 'Dragningsdag'}
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2384,14 +2402,14 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Row 2: Frequency */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2413,14 +2431,14 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             {/* Row 3 (if non-monthly): Start Month (directly below frequency) */}
             {frequency !== Frequency.MONTHLY && (
               <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2448,14 +2466,14 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             {/* Row 4: Payment Method (if available) */}
             {paymentMethods && paymentMethods.length > 0 && (
               <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {pmIcon}
                   </div>
-                  <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                     {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2476,11 +2494,11 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Row 5: Type (Fixed / Variable) */}
             <div className="p-4 flex items-center justify-between min-h-[58px]">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <Switch
@@ -2665,7 +2683,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
               noBackground 
             />
           </button>
-          <span className="text-[11px] font-medium text-[var(--text-tertiary)] mt-2">
+          <span className="text-label font-medium text-[var(--text-tertiary)] mt-2">
             Tryck för att byta ikon (valfritt)
           </span>
         </div>

@@ -77,6 +77,7 @@
   --radius-lg: 14px;
   --radius-md: 10px;
   --radius-sm: 6px;
+  --radius-xs: 8px;
 
   /* Central Semantic Radii */
   --radius-card: var(--radius-card);
@@ -298,22 +299,25 @@ h6 {
 }
 
 @utility card-p {
-  padding: 14px 18px;
+  padding: 1rem;
   @media (min-width: 640px) {
-    padding: 16px 20px;
+    padding: 1.25rem;
   }
 }
 
 @utility card-p-sm {
-  padding: var(--space-card-p-sm, 0.875rem);
+  padding: 0.75rem 0.875rem;
 }
 
 @utility card-p-lg {
-  padding: var(--space-card-p-lg, 1.5rem);
+  padding: 1.25rem;
+  @media (min-width: 640px) {
+    padding: 1.5rem;
+  }
 }
 
 @utility row-p {
-  padding: var(--space-row-p, 0.875rem);
+  padding: 0.875rem 1rem;
 }
 
 @utility gap-element {
@@ -324,8 +328,23 @@ h6 {
   gap: var(--space-section-gap, 1.5rem);
 }
 
+@utility space-y-element {
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-top: var(--space-element-gap, 0.75rem);
+  }
+}
+
+@utility space-y-section {
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-top: var(--space-section-gap, 1.5rem);
+  }
+}
+
 @utility modal-p {
-  padding: var(--space-card-p, 1rem);
+  padding: 1.25rem;
+  @media (min-width: 640px) {
+    padding: 1.5rem;
+  }
 }
 
 /* Central Semantic Typography Utilities */
@@ -377,7 +396,7 @@ h6 {
 }
 
 @utility text-card-title {
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1.35;
   letter-spacing: 0em;
@@ -386,7 +405,7 @@ h6 {
 }
 
 @utility text-body {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: 0em;
@@ -404,7 +423,7 @@ h6 {
 }
 
 @utility text-secondary {
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 400;
   line-height: 1.45;
   letter-spacing: 0em;
@@ -413,7 +432,7 @@ h6 {
 }
 
 @utility text-label {
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: 0.01em;
@@ -431,9 +450,9 @@ h6 {
 }
 
 @utility text-micro-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 400;
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: 0.01em;
   font-family: var(--font-sans);
   color: var(--text-secondary);
@@ -586,6 +605,23 @@ h6 {
   --tw-ring-color: var(--accent-color);
 }
 
+/* Global Tactile Touch & Motion Utilities */
+@utility touch-press {
+  transition: transform var(--duration-fast, 100ms) var(--ease-spring, cubic-bezier(0.32, 0.72, 0, 1)), opacity var(--duration-fast, 100ms) ease;
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.92;
+  }
+}
+
+@utility touch-press-subtle {
+  transition: transform var(--duration-fast, 100ms) var(--ease-spring, cubic-bezier(0.32, 0.72, 0, 1)), opacity var(--duration-fast, 100ms) ease;
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.95;
+  }
+}
+
 :root {
   /* Global Font System: DM Sans + Outfit */
   --font-display: 'Outfit', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -649,8 +685,8 @@ h6 {
   --border-color: transparent;
   --border-control: transparent;
   --border-strong: transparent;
-  --border-divider: transparent;
-  --border-menu-divider: transparent;
+  --border-divider: rgba(0, 0, 0, 0.05);
+  --border-menu-divider: rgba(0, 0, 0, 0.05);
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #F0F0F0;
@@ -673,13 +709,13 @@ h6 {
   --accent-gradient: var(--accent-color);
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(59, 130, 246, 0.08);
-  --accent-container: #EFF6FF;
-  --on-accent-container: #3B82F6;
+  --accent-soft: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  --accent-container: color-mix(in srgb, var(--accent-color) 12%, var(--surface-color));
+  --on-accent-container: var(--accent-color);
   --accent-on-solid: #FFFFFF;
-  --dejz-accent: #3B82F6;
+  --dejz-accent: var(--accent-color);
   --accent-glow: none;
-  --accent-secondary-color: #EFF6FF;
+  --accent-secondary-color: var(--accent-container);
 
   /* Primary button states (Light mode) */
   --btn-primary-bg: #3B82F6;
@@ -750,11 +786,11 @@ h6 {
   --radius-container: 20px;
 
   /* Component Dimensions / Heights */
-  --height-input: 44px;
-  --height-button: 44px;
+  --height-input: 46px;
+  --height-button: 46px;
   --height-button-sm: 32px;
   --height-button-lg: 48px;
-  --height-search: 44px;
+  --height-search: 46px;
   --height-header: 64px;
   --height-bottom-nav: 64px;
   --size-icon-button-xs: 24px;
@@ -766,16 +802,16 @@ h6 {
   --space-page-px: 1rem;
   --space-page-max: 42rem;
   --space-card-p: 1rem;
-  --space-card-p-sm: 0.875rem;
-  --space-card-p-lg: 1.5rem;
-  --space-row-p: 0.875rem;
+  --space-card-p-sm: 0.75rem 0.875rem;
+  --space-card-p-lg: 1.25rem;
+  --space-row-p: 0.875rem 1rem;
   --space-element-gap: 0.75rem;
-  --space-section-gap: 1.25rem;
+  --space-section-gap: 1.5rem;
+  --space-modal-p: 1.25rem;
 
   /* Borders & Dividers */
   --border-width-default: 1px;
   --border-width-thick: 2px;
-  --border-divider: var(--border-subtle);
 
   /* Form & Input Field Defaults */
   --input-bg: rgba(0, 0, 0, 0.05);
@@ -806,31 +842,35 @@ h6 {
   --bg-color: #0A0A0A;
   --bg-secondary: #0A0A0A;
   --bg-gradient: #0A0A0A;
-  --surface-color: #0A0A0A;
-  --surface-gradient: #0A0A0A;
-  --surface-solid: #0A0A0A;
-  --surface-raised: #121212;
-  --surface-elevated: #121212;
-  --surface-elevated-gradient: #121212;
+  --surface-color: #121212;
+  --surface-gradient: #121212;
+  --surface-solid: #121212;
+  --surface-raised: #181818;
+  --surface-elevated: #181818;
+  --surface-elevated-gradient: #181818;
   --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
   --shadow-subtle: none;
-  --surface-high: #1A1A1A;
+  --surface-high: #202020;
   --surface-muted: #1A1A1A;
   --bg-hover: #222222;
-  --transaction-bg: #0A0A0A;
-  --card-nested-bg: #121212;
+  --transaction-bg: #121212;
+  --card-nested-bg: #181818;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
-  --chip-bg: #121212;
+  --chip-bg: #181818;
   --text-metric-label: #D6D6D6;
-  --border-subtle: transparent;
-  --border-color: transparent;
-  --border-control: transparent;
-  --border-strong: transparent;
-  --border-divider: transparent;
-  --border-menu-divider: transparent;
-  --input-bg: #121212;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-control: #2A2A2A;
+  --border-strong: #333333;
+  --border-divider: rgba(255, 255, 255, 0.06);
+  --border-menu-divider: rgba(255, 255, 255, 0.06);
+  --input-bg: #181818;
+  --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
+  --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
+  --on-accent-container: #FFFFFF;
+  --accent-secondary-color: var(--accent-container);
 }
 
 .dark {
@@ -871,10 +911,14 @@ h6 {
   --border-color: transparent;
   --border-control: transparent;
   --border-strong: transparent;
-  --border-divider: transparent;
-  --border-menu-divider: transparent;
+  --border-divider: rgba(255, 255, 255, 0.05);
+  --border-menu-divider: rgba(255, 255, 255, 0.05);
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.05);
+  --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
+  --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
+  --on-accent-container: #FFFFFF;
+  --accent-secondary-color: var(--accent-container);
 
   --chip-bg: rgba(255, 255, 255, 0.05);
   --chip-text: #B8B8B8;

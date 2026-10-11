@@ -32,7 +32,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const sizeStyles = {
       sm: 'h-[var(--height-button-sm,32px)] px-3.5 rounded-[var(--radius-button-sm,10px)] text-label gap-1.5 active:scale-95',
-      md: 'h-[var(--height-button,44px)] px-5 rounded-[var(--radius-button,12px)] text-body-medium gap-2 active:scale-[0.98]',
+      md: 'h-[var(--height-button,46px)] px-5 rounded-[var(--radius-button,12px)] text-body-medium gap-2 active:scale-[0.98]',
       lg: 'h-[var(--height-button-lg,48px)] px-6 rounded-[var(--radius-button-lg,12px)] text-body-medium font-semibold gap-2.5 active:scale-[0.98]',
     }[size];
 

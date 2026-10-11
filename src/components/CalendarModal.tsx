@@ -42,7 +42,7 @@ export function CalendarModal({
       title={language === 'en' ? 'Select period' : 'Välj period'}
       subtitle={periodName || (language === 'en' ? 'Choose period for analysis' : 'Välj period för analys')}
       headerLeading={
-        <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+        <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
           <CalendarIcon size={16} strokeWidth={2} />
         </div>
       }
@@ -55,9 +55,9 @@ export function CalendarModal({
               onSelectDate(today);
               if (onPeriodChange) onPeriodChange(today);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-label font-semibold text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 transition-colors active:scale-95 cursor-pointer border-none shadow-none"
+            className="flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer border-none shadow-none"
           >
-            <RotateCcw size={12} strokeWidth={2.5} />
+            <RotateCcw size={12} strokeWidth={2.2} />
             <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
           </button>
         ) : undefined

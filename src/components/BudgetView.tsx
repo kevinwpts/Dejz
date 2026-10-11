@@ -351,7 +351,7 @@ export function BudgetView({
           />
           <span className="text-secondary font-normal opacity-80 select-none">
             {config?.currency || 'kr'}
-            <span className="text-[10px] opacity-70 ml-0.5">
+            <span className="text-micro-label opacity-70 ml-0.5">
               {config?.language === 'en' ? '/mo' : '/mån'}
             </span>
           </span>
@@ -412,7 +412,7 @@ export function BudgetView({
                         key={income.id}
                         item={income} 
                         onClick={() => onViewIncome(income)} 
-                        currency={config.currency} 
+                        currency={config?.currency || 'kr'} 
                         type="income"
                         language={config.language as Language}
                         t={t}
@@ -480,7 +480,7 @@ export function BudgetView({
                         key={expense.id}
                         item={expense} 
                         onClick={() => onViewFixedExpense(expense)} 
-                        currency={config.currency} 
+                        currency={config?.currency || 'kr'} 
                         type="expense"
                         language={config.language as Language}
                         t={t}
@@ -550,7 +550,7 @@ export function BudgetView({
                         key={saving.id}
                         item={saving} 
                         onClick={() => onViewMonthlySaving(saving)} 
-                        currency={config.currency} 
+                        currency={config?.currency || 'kr'} 
                         type="expense"
                         language={config.language as Language}
                         t={t}

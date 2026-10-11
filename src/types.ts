@@ -235,6 +235,7 @@ export interface Transaction {
   paymentMethod?: PaymentMethod;
   receiptUrl?: string;
   splits?: TransactionSplit[];
+  isVariable?: boolean;
 }
 
 export interface AppNotification {

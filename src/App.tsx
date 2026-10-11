@@ -1496,6 +1496,20 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  const prevSessionRef = useRef<Session | null>(null);
+
+  // Clear lingering error toasts and ALWAYS land on Hem (today) when user logs in after being logged out
+  useEffect(() => {
+    if (session) {
+      setToasts([]);
+      if (!prevSessionRef.current) {
+        setActiveTab("today");
+        window.scrollTo({ top: 0, behavior: "instant" as any });
+      }
+    }
+    prevSessionRef.current = session;
+  }, [session]);
+
   const showConfirm = (
     title: string,
     message: string,
@@ -1754,6 +1768,7 @@ export default function App() {
     clearDemoData();
     setIsDemoMode(false);
     setSession(null);
+    setActiveTab("today");
     setShowLanding(true);
     setShowWelcome(false);
     
@@ -4452,7 +4467,7 @@ export default function App() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
               </span>
               <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
-              <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-[11px]">— Du utforskar appen med exempeldata</span>
+              <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-label">— Du utforskar appen med exempeldata</span>
             </div>
             <button
               type="button"
@@ -4890,7 +4905,7 @@ export default function App() {
                 }}
                 onDismiss={handleDismissNotification}
                 onBack={() => handleGoBack()}
-                currency={config.currency}
+                currency={config?.currency || "kr"}
                 config={config}
                 t={t}
               />
@@ -5436,7 +5451,7 @@ export default function App() {
                 : undefined
             }
             t={t}
-            currency={config.currency}
+            currency={config?.currency || "kr"}
             userId={session?.user.id}
             isPro={isPro(subscriptionStatus)}
             categories={config.incomeCategories}
@@ -5448,7 +5463,13 @@ export default function App() {
           <FixedExpenseViewModal
             expense={viewingFixedExpense}
             currentPeriodId={currentPeriodId}
-            onClose={() => setViewingFixedExpense(null)}
+            onClose={() => {
+              setViewingFixedExpense(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
+            }}
             onEdit={(expense) => {
               setViewingFixedExpense(null);
               setEditingFixedExpense(expense);
@@ -5467,7 +5488,13 @@ export default function App() {
           <IncomeViewModal
             income={viewingIncome}
             currentPeriodId={currentPeriodId}
-            onClose={() => setViewingIncome(null)}
+            onClose={() => {
+              setViewingIncome(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
+            }}
             onEdit={(income) => {
               setViewingIncome(null);
               setEditingIncome(income);
@@ -5597,6 +5624,8 @@ export default function App() {
             isOpen={isSearchModalOpen}
             onClose={() => setIsSearchModalOpen(false)}
             transactions={transactions}
+            fixedExpenses={fixedExpenses}
+            incomes={incomes}
             config={config}
             onNavigate={handleNavigate}
             searchQuery={searchQuery}
@@ -5605,6 +5634,16 @@ export default function App() {
               setSearchModalOpenBeforeViewing(true);
               setIsSearchModalOpen(false);
               setViewingTransaction(trans);
+            }}
+            onViewFixedExpense={(expense) => {
+              setSearchModalOpenBeforeViewing(true);
+              setIsSearchModalOpen(false);
+              setViewingFixedExpense(expense);
+            }}
+            onViewIncome={(income) => {
+              setSearchModalOpenBeforeViewing(true);
+              setIsSearchModalOpen(false);
+              setViewingIncome(income);
             }}
           />
         )}
@@ -5683,7 +5722,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--bg-color)] dark:bg-[#191919] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-subtle font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
+              className="bg-[var(--surface-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-subtle font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
@@ -5825,6 +5864,7 @@ export default function App() {
         isProcessing={isScanningReceipt}
         language={config?.language}
       />
+      <ToastContainer toasts={toasts} onDismiss={removeToast} />
     </div>
   );
 }

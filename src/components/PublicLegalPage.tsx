@@ -203,14 +203,14 @@ function SwedishPrivacyPolicy() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white border-none mb-1">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
           <Lock size={12} />
           GDPR & Google OAuth
         </div>
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Integritetspolicy för Dejz
         </h1>
-        <p className="text-[11px] text-[var(--text-secondary)]">
+        <p className="text-label text-[var(--text-secondary)]">
           Senast uppdaterad: 23 september 2026
         </p>
       </header>
@@ -277,14 +277,14 @@ function EnglishPrivacyPolicy() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white border-none mb-1">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
           <Lock size={12} />
           GDPR & Google OAuth
         </div>
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Privacy Policy for Dejz
         </h1>
-        <p className="text-[11px] text-[var(--text-secondary)]">
+        <p className="text-label text-[var(--text-secondary)]">
           Last updated: September 23, 2026
         </p>
       </header>
@@ -313,7 +313,7 @@ function SwedishTermsOfService() {
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Användarvillkor för Dejz
         </h1>
-        <p className="text-[11px] text-[var(--text-secondary)]">
+        <p className="text-label text-[var(--text-secondary)]">
           Gäller från 23 september 2026
         </p>
       </header>
@@ -343,7 +343,7 @@ function EnglishTermsOfService() {
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Terms of Service for Dejz
         </h1>
-        <p className="text-[11px] text-[var(--text-secondary)]">
+        <p className="text-label text-[var(--text-secondary)]">
           Effective from September 23, 2026
         </p>
       </header>
@@ -367,7 +367,7 @@ function SwedishCookiePolicy() {
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Cookiepolicy för Dejz
         </h1>
-        <p className="text-[11px] text-[var(--text-secondary)]">
+        <p className="text-label text-[var(--text-secondary)]">
           Senast uppdaterad: 23 september 2026
         </p>
       </header>
@@ -391,7 +391,7 @@ function EnglishCookiePolicy() {
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Cookie Policy for Dejz
         </h1>
-        <p className="text-[11px] text-[var(--text-secondary)]">
+        <p className="text-label text-[var(--text-secondary)]">
           Last updated: September 23, 2026
         </p>
       </header>

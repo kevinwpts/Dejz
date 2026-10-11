@@ -627,7 +627,7 @@ export function TransactionModal({
 
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
               {transaction 
                 ? (currentLang === 'en' ? 'Edit Transaction' : 'Redigera transaktion') 
                 : (type === 'income' 
@@ -695,7 +695,7 @@ export function TransactionModal({
                 />
               </button>
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {currentLang === 'en' ? 'Name / Merchant' : 'Namn / Mottagare'}
                 </label>
                 <input 
@@ -711,14 +711,14 @@ export function TransactionModal({
                     }
                   }}
                   placeholder={currentLang === 'en' ? 'Name' : 'Namn'}
-                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
             <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {currentLang === 'en' ? 'Amount' : 'Belopp'}
                 </label>
                 <div 
@@ -740,7 +740,7 @@ export function TransactionModal({
                     className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)] text-[30px] sm:text-[36px] w-full leading-none shrink min-w-[60px]"
                     placeholder="0"
                   />
-                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                  <span className="text-secondary font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[var(--radius-xs,8px)] select-none shrink-0 font-sans">
                     {currency}
                   </span>
                 </div>
@@ -776,7 +776,7 @@ export function TransactionModal({
               <div className="p-4 space-y-3 bg-black/[0.015] dark:bg-white/[0.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold text-[var(--text-primary)]">
+                    <span className="text-body font-bold text-[var(--text-primary)]">
                       {currentLang === 'en' ? 'Category Split' : 'Uppdelade kategorier'}
                     </span>
                     {/* Balance Status Indicator (shows only if there is a remaining difference) */}
@@ -786,7 +786,7 @@ export function TransactionModal({
                       const diff = totalVal - currentSum;
                       if (Math.abs(diff) < 0.5) return null;
                       return (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-amount tabular-nums">
+                        <span className="text-micro-label font-bold px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-amount tabular-nums">
                           {formatAmount(Math.max(0, diff).toString())} {currency} {currentLang === 'en' ? 'left' : 'kvar'}
                         </span>
                       );
@@ -827,7 +827,7 @@ export function TransactionModal({
                             color={split.category ? (catData?.color || getCategoryColor(split.category, categories)) : '#716e68'} 
                             size="xs" 
                           />
-                          <span className="text-[13px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate">
+                          <span className="text-body font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate">
                             {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                           </span>
                         </button>
@@ -871,10 +871,10 @@ export function TransactionModal({
                                 setSplits(newSplits);
                               }
                             }}
-                            className="w-20 bg-black/5 dark:bg-white/5 rounded-[var(--radius-input,14px)] px-2 py-1 text-[13.5px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                            className="w-20 bg-black/5 dark:bg-white/5 rounded-[var(--radius-input,14px)] px-2 py-1 text-body font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
                             placeholder="0"
                           />
-                          <span className="text-[11px] font-bold text-[var(--text-tertiary)] select-none font-amount">
+                          <span className="text-label font-bold text-[var(--text-tertiary)] select-none font-amount">
                             {currency}
                           </span>
 
@@ -948,7 +948,7 @@ export function TransactionModal({
                         return { ...s, amount: perSplit + add };
                       }));
                     }}
-                    className="text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                    className="text-label font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
                   >
                     {currentLang === 'en' ? 'Equalize' : 'Fördela jämnt'}
                   </button>
@@ -957,7 +957,7 @@ export function TransactionModal({
             ) : (
               /* Single Category Row with Inline Split Button */
               <div className="p-4 flex items-center justify-between min-h-[60px] gap-2">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('category')}
                 </span>
                 <div className="flex items-center gap-2 min-w-0">
@@ -975,7 +975,7 @@ export function TransactionModal({
                       size="xs" 
                       categoryName={category}
                     />
-                    <span className="text-[13.5px] font-bold text-[var(--text-primary)] truncate max-w-[120px] sm:max-w-[160px]">
+                    <span className="text-body font-bold text-[var(--text-primary)] truncate max-w-[120px] sm:max-w-[160px]">
                       {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                     </span>
                     <ChevronRight size={15} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 shrink-0" />
@@ -995,7 +995,7 @@ export function TransactionModal({
                           { id: Math.random().toString(), amount: totalVal - half, category: cat2, tags: [] }
                         ]);
                       }}
-                      className="h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 active:scale-95"
+                      className="h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 active:scale-95"
                       title="Dela upp i flera kategorier"
                     >
                       <Plus size={13} strokeWidth={2.5} />
@@ -1008,7 +1008,7 @@ export function TransactionModal({
 
             {/* Row 2: Date */}
             <div className="p-4 flex items-center justify-between min-h-[60px]">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -1018,7 +1018,7 @@ export function TransactionModal({
                     setSelectedDate(new Date());
                     setShowFullCalendar(false);
                   }}
-                  className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
+                  className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-label font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -1034,7 +1034,7 @@ export function TransactionModal({
                     setSelectedDate(yesterday);
                     setShowFullCalendar(false);
                   }}
-                  className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
+                  className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-label font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -1054,7 +1054,7 @@ export function TransactionModal({
                 >
                   <Calendar size={13} strokeWidth={2} />
                   {new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                    <span className="text-[11px] font-bold tabular-nums">
+                    <span className="text-label font-bold tabular-nums">
                       {formatFullDate(selectedDate, currentLang)}
                     </span>
                   )}
@@ -1064,7 +1064,7 @@ export function TransactionModal({
 
             {/* Row 3: Note */}
             <div className="p-4 flex items-center justify-between min-h-[60px] gap-3">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('ownNote')}
               </span>
               <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
@@ -1080,7 +1080,7 @@ export function TransactionModal({
                     }
                   }}
                   placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
-                  className={`text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
+                  className={`text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
                     validationError === 'note' ? 'text-[var(--danger-color)]' : ''
                   }`}
                 />
@@ -1098,14 +1098,14 @@ export function TransactionModal({
 
             {/* Row 4: Receipt / Attachment */}
             <div className="p-4 flex items-center justify-between min-h-[60px]">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Kvitto / Bilaga'}
               </span>
 
               {isScanningReceipt ? (
                 <div className="flex items-center gap-2 py-0.5">
                   <Loader2 size={13} className="animate-spin text-[var(--accent-color)]" />
-                  <span className="text-[11px] text-[var(--accent-color)] font-medium">
+                  <span className="text-label text-[var(--accent-color)] font-medium">
                     {currentLang === 'en' ? 'Uploading…' : 'Laddar upp…'}
                   </span>
                 </div>
@@ -1122,7 +1122,7 @@ export function TransactionModal({
                     href={receiptUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11.5px] font-semibold text-[var(--text-primary)] hover:underline truncate max-w-[120px]"
+                    className="text-secondary font-semibold text-[var(--text-primary)] hover:underline truncate max-w-[120px]"
                   >
                     {currentLang === 'en' ? 'View file' : 'Visa fil'}
                   </a>
@@ -1145,7 +1145,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => receiptInputRef.current?.click()}
                     disabled={isUploadingReceipt}
-                    className="h-[28px] px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-[var(--radius-button-sm,10px)] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
+                    className="h-[28px] px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-label font-semibold rounded-[var(--radius-button-sm,10px)] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
                   >
                     <Paperclip size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'File' : 'Fil'}</span>
@@ -1154,7 +1154,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => setIsCameraModalOpen(true)}
                     disabled={isUploadingReceipt}
-                    className="h-[28px] px-2.5 bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 text-[11px] font-semibold rounded-[var(--radius-button-sm,10px)] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="h-[28px] px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-label font-semibold rounded-[var(--radius-button-sm,10px)] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
                   >
                     <Camera size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
@@ -1303,10 +1303,10 @@ export function TransactionModal({
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-subtle shrink-0">
                   <div>
-                    <h3 className="text-[16px] font-semibold text-[var(--text-primary)] tracking-tight">
+                    <h3 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
                       {t('category')}
                     </h3>
-                    <p className="text-[11px] font-normal text-[var(--text-secondary)] mt-0.5">
+                    <p className="text-label font-normal text-[var(--text-secondary)] mt-0.5">
                       {currentLang === 'en' ? 'Choose category for transaction' : 'Välj kategori för transaktionen'}
                     </p>
                   </div>
@@ -1320,8 +1320,8 @@ export function TransactionModal({
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar min-h-0">
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="flex-1 overflow-y-auto p-3.5 space-y-1 custom-scrollbar min-h-0">
+                  <div className="space-y-1">
                     {categories.map(cat => {
                       const isSelected = (category || '').toLowerCase() === cat.name.toLowerCase();
                       return (
@@ -1329,6 +1329,7 @@ export function TransactionModal({
                           key={cat.name}
                           type="button"
                           onClick={() => {
+                            if (typeof feedback?.light === 'function') feedback.light();
                             if (activeSplitIndex !== null) {
                               const newSplits = [...splits];
                               newSplits[activeSplitIndex].category = cat.name;
@@ -1340,17 +1341,27 @@ export function TransactionModal({
                             }
                             setIsCategoryPickerOpen(false);
                           }}
-                          className={`h-24 sm:h-28 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-subtle hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-none relative overflow-hidden text-center ${
-                            isSelected ? 'ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-white dark:ring-offset-[#1C1C1C]' : ''
+                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[var(--radius-card-sm,12px)] transition-colors cursor-pointer text-left active:scale-[0.99] ${
+                            isSelected
+                              ? 'bg-black/[0.04] dark:bg-white/[0.06]'
+                              : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
                           }`}
                         >
-                          <CategoryIcon icon={cat.icon} color={cat.color} size="lg" categoryName={cat.name} />
-                          <span className="text-[13px] font-semibold text-[var(--text-primary)] text-center truncate w-full px-1">
-                            {cat.name}
-                          </span>
+                          <div className="flex items-center gap-3 min-w-0 pr-2">
+                            <CategoryIcon 
+                              icon={cat.icon} 
+                              color={cat.color} 
+                              size="sm" 
+                              variant="primary" 
+                              categoryName={cat.name} 
+                            />
+                            <span className={`text-sm truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
+                              {cat.name}
+                            </span>
+                          </div>
                           {isSelected && (
-                            <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white">
-                              <Check size={11} strokeWidth={2.5} />
+                            <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white shrink-0">
+                              <Check size={12} strokeWidth={2.5} />
                             </div>
                           )}
                         </button>
@@ -1365,7 +1376,7 @@ export function TransactionModal({
                         setIsCategoryPickerOpen(false);
                         setIsAddingCategory(true);
                       }}
-                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-subtle text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-subtle dark:hover:border-subtle transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-subtle text-body font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-subtle dark:hover:border-subtle transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={15} strokeWidth={2.5} />
                       <span>{t('newCategory')}</span>

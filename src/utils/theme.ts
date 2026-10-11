@@ -54,6 +54,7 @@ export function applyThemeColor(themeColorHex: string = '#3B82F6', isDark: boole
     target.style.setProperty('--on-accent', '#FFFFFF');
     target.style.setProperty('--text-on-accent', '#FFFFFF');
     target.style.setProperty('--accent-container', isDark ? `rgba(${r}, ${g}, ${b}, 0.22)` : `rgba(${r}, ${g}, ${b}, 0.12)`);
+    target.style.setProperty('--accent-secondary-color', isDark ? `rgba(${r}, ${g}, ${b}, 0.22)` : `rgba(${r}, ${g}, ${b}, 0.12)`);
     target.style.setProperty('--on-accent-container', isDark ? '#FFFFFF' : hex);
     target.style.setProperty('--accent-on-solid', '#FFFFFF');
     target.style.setProperty('--dejz-accent', hex);

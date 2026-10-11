@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X } from 'lucide-react';
-import { Transaction, Config } from '../types';
+import { Transaction, Config, FixedExpense, Income } from '../types';
 import { TransactionItem } from './TransactionItem';
+import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -10,9 +11,13 @@ interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   transactions: Transaction[];
+  fixedExpenses?: FixedExpense[];
+  incomes?: Income[];
   config: Config;
   onNavigate: (tab: string, section?: string) => void;
   onViewTransaction: (transaction: Transaction) => void;
+  onViewFixedExpense?: (expense: FixedExpense) => void;
+  onViewIncome?: (income: Income) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
 }
@@ -21,8 +26,12 @@ export function SearchModal({
   isOpen, 
   onClose, 
   transactions, 
+  fixedExpenses = [],
+  incomes = [],
   config, 
   onViewTransaction,
+  onViewFixedExpense,
+  onViewIncome,
   searchQuery = '',
   setSearchQuery
 }: SearchModalProps) {
@@ -71,6 +80,49 @@ export function SearchModal({
 
   const trimmedQuery = query.trim().toLowerCase();
 
+  const matchingFixedExpenses = useMemo(() => {
+    if (!trimmedQuery) {
+      return [];
+    }
+    return (fixedExpenses || [])
+      .filter((fe) => {
+        if (fe.isCancelled) return false;
+        const name = (fe.name || '').toLowerCase();
+        const category = (fe.category || '').toLowerCase();
+        const note = (fe.note || '').toLowerCase();
+        const amountStr = String(Math.abs(fe.amount));
+        const deductionDayStr = fe.deductionDay ? String(fe.deductionDay) : '';
+
+        return (
+          name.includes(trimmedQuery) ||
+          category.includes(trimmedQuery) ||
+          note.includes(trimmedQuery) ||
+          amountStr.includes(trimmedQuery) ||
+          (deductionDayStr && (deductionDayStr === trimmedQuery || `${deductionDayStr}:e`.includes(trimmedQuery)))
+        );
+      });
+  }, [fixedExpenses, trimmedQuery]);
+
+  const matchingIncomes = useMemo(() => {
+    if (!trimmedQuery) {
+      return [];
+    }
+    return (incomes || [])
+      .filter((inc) => {
+        const source = ((inc as any).source || (inc as any).name || '').toLowerCase();
+        const category = (inc.category || '').toLowerCase();
+        const note = (inc.note || '').toLowerCase();
+        const amountStr = String(Math.abs(inc.amount));
+
+        return (
+          source.includes(trimmedQuery) ||
+          category.includes(trimmedQuery) ||
+          note.includes(trimmedQuery) ||
+          amountStr.includes(trimmedQuery)
+        );
+      });
+  }, [incomes, trimmedQuery]);
+
   const matchingTransactions = useMemo(() => {
     if (!trimmedQuery) {
       return [];
@@ -91,6 +143,8 @@ export function SearchModal({
       })
       .sort((a, b) => b.timestamp - a.timestamp);
   }, [transactions, trimmedQuery]);
+
+  const totalMatches = matchingFixedExpenses.length + matchingIncomes.length + matchingTransactions.length;
 
   return (
     <AnimatePresence>
@@ -123,11 +177,11 @@ export function SearchModal({
                   onChange={(e) => setQuery(e.target.value)}
                   autoComplete="off"
                   placeholder={getL10n(
-                    "Sök transaktion, butik, kategori...",
-                    "Search transaction, merchant, category...",
-                    "Søk transaksjon, butikk, kategori...",
-                    "Søg transaktion, butik, kategori...",
-                    "Etsi tilitapahtumaa, kauppaa, kategoriaa..."
+                    "Sök transaktion, fast utgift, butik...",
+                    "Search transactions, fixed expenses, stores...",
+                    "Søk transaksjon, fast utgift, butikk...",
+                    "Søg transaktion, fast udgift, butik...",
+                    "Etsi tapahtumaa, kiinteää kulua, kauppaa..."
                   )}
                   className="w-full h-full bg-transparent text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none"
                 />
@@ -156,7 +210,7 @@ export function SearchModal({
             </div>
 
             {/* Results Scroll Container */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-[var(--card-gap)] custom-scrollbar touch-pan-y overscroll-contain bg-canvas">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-4 custom-scrollbar touch-pan-y overscroll-contain bg-canvas">
               {!trimmedQuery ? (
                 <div className="py-8 px-2">
                   <EmptyState
@@ -169,55 +223,117 @@ export function SearchModal({
                       'Hae taloudestasi'
                     )}
                     description={getL10n(
-                      'Skriv in butik, anteckning, kategori eller belopp för att söka.',
-                      'Type a store, note, category or amount to search.',
-                      'Skriv inn butikk, notat, kategori eller beløp for å søke.',
-                      'Indtast butik, note, kategori eller beløb for at søge.',
-                      'Kirjoita kauppa, muistiinpano, kategoria tai summa hakeaksesi.'
+                      'Skriv in fast utgift, butik, anteckning, kategori eller belopp för att söka.',
+                      'Type a fixed expense, store, note, category or amount to search.',
+                      'Skriv inn fast utgift, butikk, notat, kategori eller beløp for å søke.',
+                      'Indtast fast udgift, butik, note, kategori eller beløb for at søge.',
+                      'Kirjoita kiinteä kulu, kauppa, muistiinpano, kategoria tai summa hakeaksesi.'
                     )}
                   />
                 </div>
+              ) : totalMatches === 0 ? (
+                <EmptyState
+                  icon="search"
+                  title={getL10n(
+                    'Inga sökresultat',
+                    'No search results',
+                    'Ingen søkeresultater',
+                    'Ingen søgeresultater',
+                    'Ei hakutuloksia'
+                  )}
+                  description={getL10n(
+                    'Prova ett annat sökord.',
+                    'Try another search term.',
+                    'Prøv et annet søkeord.',
+                    'Prøv et andet søgeord.',
+                    'Kokeile toista hakusanaa.'
+                  )}
+                />
               ) : (
-                <div className="space-y-[var(--card-gap)]">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70">
-                      {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
-                    </span>
-                  </div>
-
-                  {matchingTransactions.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Fixed Expenses Section */}
+                  {matchingFixedExpenses.length > 0 && (
                     <div className="space-y-[var(--card-gap)]">
-                      {matchingTransactions.map(t => (
-                        <TransactionItem 
-                          key={t.id} 
-                          transaction={t} 
-                          config={config} 
-                          showDate={true}
-                          onView={(trans) => {
-                            onViewTransaction(trans);
-                            onClose();
-                          }}
-                        />
-                      ))}
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70 uppercase">
+                          {getL10n("Fasta utgifter", "Fixed expenses", "Faste utgifter", "Faste udgifter", "Kiinteät kulut")} ({matchingFixedExpenses.length})
+                        </span>
+                      </div>
+                      <div className="space-y-[var(--card-gap)]">
+                        {matchingFixedExpenses.map((fe) => (
+                          <BudgetItem
+                            key={fe.id}
+                            item={fe}
+                            currency={config.currency}
+                            type="expense"
+                            language={config.language as any}
+                            t={(k: any) => k}
+                            config={config}
+                            onClick={() => {
+                              if (onViewFixedExpense) {
+                                onViewFixedExpense(fe);
+                              }
+                              onClose();
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  ) : (
-                    <EmptyState
-                      icon="search"
-                      title={getL10n(
-                        'Inga sökresultat',
-                        'No search results',
-                        'Ingen søkeresultater',
-                        'Ingen søgeresultater',
-                        'Ei hakutuloksia'
-                      )}
-                      description={getL10n(
-                        'Prova ett annat sökord.',
-                        'Try another search term.',
-                        'Prøv et annet søkeord.',
-                        'Prøv et andet søgeord.',
-                        'Kokeile toista hakusanaa.'
-                      )}
-                    />
+                  )}
+
+                  {/* Fixed Incomes Section */}
+                  {matchingIncomes.length > 0 && (
+                    <div className="space-y-[var(--card-gap)]">
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70 uppercase">
+                          {getL10n("Inkomster", "Incomes", "Inntekter", "Indkomster", "Tulot")} ({matchingIncomes.length})
+                        </span>
+                      </div>
+                      <div className="space-y-[var(--card-gap)]">
+                        {matchingIncomes.map((inc) => (
+                          <BudgetItem
+                            key={inc.id}
+                            item={inc}
+                            currency={config.currency}
+                            type="income"
+                            language={config.language as any}
+                            t={(k: any) => k}
+                            config={config}
+                            onClick={() => {
+                              if (onViewIncome) {
+                                onViewIncome(inc);
+                              }
+                              onClose();
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Transactions Section */}
+                  {matchingTransactions.length > 0 && (
+                    <div className="space-y-[var(--card-gap)]">
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70 uppercase">
+                          {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
+                        </span>
+                      </div>
+                      <div className="space-y-[var(--card-gap)]">
+                        {matchingTransactions.map((t) => (
+                          <TransactionItem 
+                            key={t.id} 
+                            transaction={t} 
+                            config={config} 
+                            showDate={true}
+                            onView={(trans) => {
+                              onViewTransaction(trans);
+                              onClose();
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

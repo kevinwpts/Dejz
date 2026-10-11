@@ -107,9 +107,9 @@ export function PeriodSelectorModal({
                 onSelectDate(null);
                 onClose();
               }}
-              className={`w-full p-3.5 rounded-[var(--radius-card-sm,12px)] border transition-all text-left flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] ${
+              className={`w-full p-3.5 rounded-[var(--radius-card-sm,12px)] border transition-all text-left flex items-center justify-between gap-3 cursor-pointer touch-press ${
                 !selectedPeriod && !selectedDate
-                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-[var(--text-primary)] shadow-sm'
+                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-[var(--text-primary)] shadow-subtle'
                   : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
               }`}
             >
@@ -120,10 +120,10 @@ export function PeriodSelectorModal({
                   <CalendarIcon size={15} strokeWidth={2} />
                 </div>
                 <div>
-                  <div className="text-[14px] font-semibold tracking-tight">
+                  <div className="text-body font-semibold tracking-tight">
                     {currentLang === 'en' ? 'All periods' : 'Alla perioder'}
                   </div>
-                  <div className={`text-[12px] ${!selectedPeriod && !selectedDate ? 'text-white/80' : 'text-[var(--text-tertiary)]'}`}>
+                  <div className={`text-secondary ${!selectedPeriod && !selectedDate ? 'text-white/80' : 'text-[var(--text-tertiary)]'}`}>
                     {currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner sammanlagt'}
                   </div>
                 </div>
@@ -132,10 +132,25 @@ export function PeriodSelectorModal({
           )}
 
           {chronologicalPeriods.map((p, idx) => {
-            const [title, sub] = p.name?.includes('(')
-              ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
-              : [p.name, ''];
-            const isSelected = selectedPeriod?.name === p.name && !selectedDate;
+            const monthName = p.end ? (new Date(p.end)).toLocaleString(currentLang === 'en' ? 'en-US' : 'sv-SE', { month: 'long' }) : '';
+            const capitalizedMonth = monthName ? monthName.charAt(0).toUpperCase() + monthName.slice(1) : '';
+
+            let title = capitalizedMonth;
+            let sub = '';
+
+            if (p.name?.includes('(')) {
+              const parts = p.name.split('(');
+              title = parts[0].trim() || capitalizedMonth;
+              sub = parts[1]?.replace(')', '').trim() || '';
+            } else if (p.start && p.end) {
+              const startStr = new Date(p.start).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+              const endStr = new Date(p.end).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+              sub = `${startStr} – ${endStr}`;
+            } else {
+              title = p.name;
+            }
+
+            const isSelected = (selectedPeriod?.periodId ? selectedPeriod.periodId === p.periodId : selectedPeriod?.name === p.name) && !selectedDate;
 
             return (
               <button
@@ -147,7 +162,7 @@ export function PeriodSelectorModal({
                   onSelectDate(null);
                   onClose();
                 }}
-                className={`w-full p-3.5 rounded-[var(--radius-card-sm,12px)] border transition-all text-left flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] ${
+                className={`w-full p-3.5 rounded-[var(--radius-card-sm,12px)] border transition-all text-left flex items-center justify-between gap-3 cursor-pointer touch-press ${
                   isSelected
                     ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-[var(--text-primary)] shadow-xs'
                     : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
@@ -161,9 +176,9 @@ export function PeriodSelectorModal({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-semibold tracking-tight truncate">{title}</span>
+                      <span className="text-body font-semibold tracking-tight truncate">{title}</span>
                       {p.isCurrent && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider ${
+                        <span className={`text-micro-label font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider ${
                           isSelected ? 'bg-white/25 text-white' : 'bg-[var(--accent-color)]/15 text-[var(--accent-color)]'
                         }`}>
                           {currentLang === 'en' ? 'Current' : 'Nu'}
@@ -171,7 +186,7 @@ export function PeriodSelectorModal({
                       )}
                     </div>
                     {sub && (
-                      <div className={`text-[12px] truncate ${isSelected ? 'text-white/80' : 'text-[var(--text-tertiary)]'}`}>
+                      <div className={`text-secondary truncate ${isSelected ? 'text-white/80' : 'text-[var(--text-tertiary)]'}`}>
                         {sub}
                       </div>
                     )}
@@ -180,7 +195,7 @@ export function PeriodSelectorModal({
 
                 {isSelected && (
                   <div className="w-5 h-5 rounded-full bg-white text-[var(--text-primary)] flex items-center justify-center shrink-0">
-                    <span className="text-[11px] font-bold">✓</span>
+                    <span className="text-micro-label font-bold">✓</span>
                   </div>
                 )}
               </button>

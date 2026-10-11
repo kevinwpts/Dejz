@@ -109,7 +109,7 @@ export function IconPickerModal({
       </div>
 
       {/* Subheader info */}
-      <div className="px-5 py-1.5 flex items-center justify-between text-[11px] text-[var(--text-secondary)] font-medium shrink-0">
+      <div className="px-5 py-1.5 flex items-center justify-between text-label text-[var(--text-secondary)] font-medium shrink-0">
         <span>
           {activeCategory === 'all' 
             ? (searchQuery ? `Sökresultat för "${searchQuery}"` : 'Alla ikoner (Icons8 Color)') 
@@ -155,7 +155,7 @@ export function IconPickerModal({
                       loading="lazy" 
                     />
                   </div>
-                  <span className="text-[10px] text-center truncate w-full px-0.5 opacity-90 group-hover:opacity-100 font-medium leading-tight text-[var(--text-primary)]">
+                  <span className="text-micro-label text-center truncate w-full px-0.5 opacity-90 group-hover:opacity-100 font-medium leading-tight text-[var(--text-primary)]">
                     {item.name.split('/')[0].trim()}
                   </span>
                   {isSelected && (

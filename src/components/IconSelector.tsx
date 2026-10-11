@@ -228,7 +228,7 @@ export function IconSelector({
             ) : customUserLogo && !isAutomaticMerchantLogo(customUserLogo, name) ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center">
                 <img src={customUserLogo} alt="Custom" className="w-8 h-8 object-contain rounded-full" />
-                <span className="text-[10px] font-semibold mt-0.5">{t('customLogo')}</span>
+                <span className="text-micro-label font-semibold mt-0.5">{t('customLogo')}</span>
                 {isCustomLogoSelected && (
                   <div className="absolute top-1.5 right-2 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-90 shadow-xs">
                     <Check size={10} strokeWidth={2.5} />

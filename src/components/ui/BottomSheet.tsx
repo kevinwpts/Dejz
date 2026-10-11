@@ -114,7 +114,7 @@ export function BottomSheet({
                   )}
                   <div className="flex flex-col min-w-0 flex-1">
                     {title && (
-                      <h2 className="text-card-title truncate">
+                      <h2 className="text-section-title truncate">
                         {title}
                       </h2>
                     )}

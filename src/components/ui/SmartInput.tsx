@@ -26,7 +26,7 @@ export const SmartInputLabel: React.FC<SmartInputLabelProps> = ({
   return (
     <div className={`flex items-center gap-1.5 px-0.5 select-none ${className}`}>
       <motion.span
-        className="inline-flex items-center text-[#05B862] shrink-0"
+        className="inline-flex items-center text-[var(--accent-color)] shrink-0"
         animate={
           isProcessing
             ? {
@@ -41,9 +41,9 @@ export const SmartInputLabel: React.FC<SmartInputLabelProps> = ({
             : { duration: 0.2 }
         }
       >
-        <Icon name="sparkles" size={13} className="text-[#05B862]" />
+        <Icon name="sparkles" size={13} className="text-[var(--accent-color)]" />
       </motion.span>
-      <span className="text-label font-medium text-[var(--text-secondary)] dark:text-[#A8A8A8]">
+      <span className="text-label font-medium text-[var(--text-secondary)]">
         {label}
       </span>
     </div>
@@ -74,12 +74,12 @@ export const SmartInputFeedback: React.FC<SmartInputFeedbackProps> = ({
         transition={{ duration: 0.15 }}
         className={`flex items-center gap-1.5 text-micro-label font-medium px-1 py-0.5 select-none ${
           feedback.type === 'success'
-            ? 'text-[var(--text-secondary)] dark:text-[#A8A8A8]'
+            ? 'text-[var(--text-secondary)]'
             : 'text-[var(--danger-color)]'
         } ${className}`}
       >
         {feedback.type === 'success' && (
-          <Icon name="check" size={12} className="text-[#05B862] shrink-0" />
+          <Icon name="check" size={12} className="text-[var(--success-color)] shrink-0" />
         )}
         <span>{feedback.message}</span>
       </motion.div>
@@ -191,7 +191,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] text-body text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
+            className={`w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-input,12px)] text-body text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/15 outline-none transition-all shadow-none ${
               leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')

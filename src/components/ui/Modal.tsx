@@ -90,17 +90,17 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0, y: center ? 20 : 30, scale: center ? 0.95 : 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] ${
-              center ? 'rounded-[var(--radius-modal,24px)] border' : 'rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-t sm:border'
-            } border-[var(--border-subtle)] shadow-modal max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
+              center ? 'rounded-[var(--radius-modal,24px)]' : 'rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)]'
+            } border-none shadow-modal max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
             {!center && (
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-3 shrink-0 sm:hidden" />
+              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-2 shrink-0 sm:hidden" />
             )}
 
             {/* Header */}
             {(title || showCloseButton || headerRight) && (
-              <div className={`flex items-center justify-between page-px pt-4 pb-2 shrink-0 ${headerClassName}`}>
+              <div className={`flex items-center justify-between page-px pt-4 pb-3 shrink-0 ${headerClassName}`}>
                 <div className="flex flex-col pr-4 min-w-0">
                   {title && (
                     <h2 className="text-section-title truncate">

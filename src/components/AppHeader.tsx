@@ -92,7 +92,7 @@ export function AppHeader({
             <>
               <button
                 onClick={onBack}
-                className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[#211F1C] dark:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer shrink-0"
+                className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] flex items-center justify-center touch-press cursor-pointer shrink-0"
                 aria-label="Tillbaka"
               >
                 <ChevronLeft size={18} strokeWidth={2} />
@@ -106,7 +106,7 @@ export function AppHeader({
           ) : (
             <button
               onClick={() => onNavigate("today")}
-              className="flex items-center gap-2 transition-transform active:scale-95 cursor-pointer py-1 select-none"
+              className="flex items-center gap-2 transition-transform touch-press-subtle cursor-pointer py-1 select-none"
               aria-label="dejz"
               title="dejz"
             >
@@ -121,7 +121,7 @@ export function AppHeader({
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
+              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
               aria-label="Notiser"
               title="Notiser"
             >
@@ -144,7 +144,7 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
+            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
@@ -154,7 +154,7 @@ export function AppHeader({
           {/* 3. Profile Avatar Button (Far Right) */}
           <button
             onClick={() => onNavigate("profile")}
-            className="flex items-center justify-center transition-transform active:scale-95 cursor-pointer p-0.5 select-none ml-1"
+            className="flex items-center justify-center transition-transform touch-press-subtle cursor-pointer p-0.5 select-none ml-1"
             aria-label="Profil"
             title="Profil"
           >
@@ -169,7 +169,7 @@ export function AppHeader({
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <User size={18} strokeWidth={2} className="text-[#6D6962] dark:text-[#A8A8A8]" />
+                <User size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
               )}
             </div>
           </button>

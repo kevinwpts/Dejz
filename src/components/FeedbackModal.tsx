@@ -41,7 +41,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
       subtitle={
         <span className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] animate-pulse"></span>
-          <span>Dejz Beta · Hjälp oss göra appen ännu bättre!</span>
+          <span>Hjälp oss göra appen ännu bättre!</span>
         </span>
       }
       showCloseButton={true}

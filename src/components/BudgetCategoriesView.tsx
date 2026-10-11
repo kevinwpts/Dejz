@@ -7,7 +7,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
 import { Button, Modal, Select, Card } from './ui';
-import { formatAmount } from '../utils/format';
+import { formatAmount, formatCurrency } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { getActiveFixedExpenses } from '../utils/cancellation';
@@ -346,7 +346,7 @@ export function BudgetCategoriesView({
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-micro-label font-semibold text-[var(--text-secondary)]">
+                  <span className="text-body-medium font-semibold text-[var(--text-secondary)]">
                     {isEn ? 'Left to allocate' : 'Kvar att fördela'}
                   </span>
                   <div
@@ -354,17 +354,15 @@ export function BudgetCategoriesView({
                       isOverAllocated
                         ? 'text-[var(--danger-color)]'
                         : remainingToAllocate === 0
-                        ? 'text-[var(--success-color)]'
+                        ? 'text-[var(--text-primary)]'
                         : 'text-[var(--text-primary)]'
                     }`}
                   >
-                    {remainingToAllocate === 0
-                      ? '0 kr'
-                      : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
+                    {formatCurrency(remainingToAllocate, curr, config.language)}
                   </div>
                 </div>
 
-                <div className="text-right text-micro-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                <div className="text-right text-body-medium font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
@@ -444,7 +442,7 @@ export function BudgetCategoriesView({
                         {isEditingThis ? (
                           <div
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center bg-white dark:bg-black/40 rounded-[6px] px-2.5 py-1 border border-[var(--accent-color)] shadow-xs"
+                            className="flex items-center bg-white dark:bg-black/40 rounded-[var(--radius-sm,6px)] px-2.5 py-1 border border-[var(--accent-color)] shadow-xs"
                           >
                             <input
                               type="text"
@@ -492,7 +490,7 @@ export function BudgetCategoriesView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                             }}
-                            className="px-3 py-1.5 rounded-[6px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-subtle cursor-pointer flex items-center gap-1 active:scale-95"
+                            className="px-3 py-1.5 rounded-[var(--radius-sm,6px)] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-subtle cursor-pointer flex items-center gap-1 active:scale-95"
                           >
                             <span className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)]">
                               {catBudget > 0 ? formatAmount(catBudget, config.language) : '0'}
@@ -607,7 +605,7 @@ export function BudgetCategoriesView({
           message={
             isEn
               ? 'Reset all category budgets to 0?'
-              : 'Vill du nollställa alla kategoribudgetar till 0 kr?'
+              : `Vill du nollställa alla kategoribudgetar till 0 ${curr}?`
           }
           confirmText={isEn ? 'Reset' : 'Nollställ'}
           cancelText={isEn ? 'Cancel' : 'Avbryt'}

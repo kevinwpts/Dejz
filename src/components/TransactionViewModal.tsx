@@ -246,7 +246,7 @@ export function TransactionViewModal({
             <p className={`text-large-amount font-amount tabular-nums mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-card-title text-[var(--text-secondary)] ml-1.5 self-end pb-1">{config.currency}</span>
+              <span className="text-card-title text-[var(--text-secondary)] ml-1.5 self-end pb-1">{config?.currency || 'kr'}</span>
             </p>
           </div>
 
@@ -321,10 +321,10 @@ export function TransactionViewModal({
             {/* Note if exists */}
             {transaction.note && (
               <div className="py-3 flex items-start justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
                   {t('ownNote')}
                 </span>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {transaction.note}
                 </span>
               </div>
@@ -335,11 +335,11 @@ export function TransactionViewModal({
               <div className="py-3 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0 pt-0.5">
                   <Tag size={13} strokeWidth={2} />
-                  <span className="text-[13px] font-normal">{t('tags')}</span>
+                  <span className="text-body font-normal">{t('tags')}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-[var(--surface-color)] text-[var(--text-primary)] px-2.5 py-1 rounded-full text-[11px] font-medium border-none shadow-none">
+                    <span key={index} className="bg-[var(--surface-color)] text-[var(--text-primary)] px-2.5 py-1 rounded-full text-label font-medium border-none shadow-none">
                       {tag}
                     </span>
                   ))}
@@ -354,14 +354,14 @@ export function TransactionViewModal({
                   <div className="flex items-center justify-between text-[var(--text-secondary)]">
                     <div className="flex items-center gap-1.5">
                       <Paperclip size={13} strokeWidth={2} />
-                      <span className="text-[13px] font-normal">
+                      <span className="text-body font-normal">
                         {config.language === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowReceiptLightbox(true)}
-                      className="text-[12px] font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
+                      className="text-secondary font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
                     >
                       {config.language === 'en' ? 'View full screen' : 'Visa i helskärm'}
                     </button>
@@ -373,7 +373,7 @@ export function TransactionViewModal({
                     {transaction.receiptUrl.includes('.pdf') ? (
                       <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
                         <FileText size={40} className="text-[var(--text-secondary)]" />
-                        <span className="text-[13px] font-medium text-[var(--text-primary)]">PDF-dokument (Klicka för att öppna)</span>
+                        <span className="text-body font-medium text-[var(--text-primary)]">PDF-dokument (Klicka för att öppna)</span>
                       </div>
                     ) : (
                       <img 
@@ -467,18 +467,18 @@ export function TransactionViewModal({
                     if (typeof feedback?.light === 'function') feedback.light();
                     setShowSimilar(prev => !prev);
                   }}
-                  className="w-full py-3 px-4 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-subtle shadow-2xs text-left active:scale-[0.99]"
+                  className="w-full py-3 px-4 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-subtle shadow-2xs text-left touch-press"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">
+                      <span className="text-body font-semibold text-[var(--text-primary)] tracking-tight">
                         {config.language === 'en' ? 'Similar transactions' : 'Liknande transaktioner'}
                       </span>
-                      <span className="text-[10.5px] font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+                      <span className="text-micro-label font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
                         {similarTransactions.length}
                       </span>
                     </div>
-                    <span className="text-[11px] text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
+                    <span className="text-label text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
                       {config.language === 'en' 
                         ? `${similarTransactions.length} other ${similarTransactions.length === 1 ? 'transaction' : 'transactions'} with similar name`
                         : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'andra transaktioner' : 'andra transaktioner'} med liknande namn`}
@@ -520,7 +520,7 @@ export function TransactionViewModal({
             type="button"
             variant="secondary"
             size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            className="flex-1 rounded-full text-body font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(transaction);

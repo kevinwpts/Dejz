@@ -221,7 +221,7 @@ export function CategoryBottomSheetModal({
                   {/* Right: Percentage pill (only when hasBudget) */}
                   {hasBudget && (
                     <span
-                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border tabular-nums shrink-0 whitespace-nowrap mt-0.5 ${
+                      className={`text-label font-semibold px-2.5 py-1 rounded-full border tabular-nums shrink-0 whitespace-nowrap mt-0.5 ${
                         remaining < 0
                           ? 'bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]'
                           : remaining === 0
@@ -267,10 +267,10 @@ export function CategoryBottomSheetModal({
                 {matchingFixedExpenses.length > 0 && (
                   <div className="space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between px-1">
-                      <span className="text-[12px] font-bold text-[var(--text-secondary)] tracking-tight">
+                      <span className="text-secondary font-bold text-[var(--text-secondary)] tracking-tight">
                         {isEn ? 'Fixed expenses' : 'Fasta utgifter'} ({matchingFixedExpenses.length})
                       </span>
-                      <span className="text-[11px] font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                      <span className="text-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
                         {formatAmount(totalFixedAmount, language)} {curr}
                       </span>
                     </div>
@@ -301,11 +301,11 @@ export function CategoryBottomSheetModal({
                 <div className="space-y-2 flex-1 flex flex-col min-h-0">
                   {matchingFixedExpenses.length > 0 && (
                     <div className="flex items-center justify-between px-1 pt-1">
-                      <span className="text-[12px] font-bold text-[var(--text-secondary)] tracking-tight">
+                      <span className="text-secondary font-bold text-[var(--text-secondary)] tracking-tight">
                         {isEn ? 'Variable transactions' : 'Rörliga utgifter'} ({displayTransactions.length})
                       </span>
                       {displayTransactions.length > 0 && (
-                        <span className="text-[11px] font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                        <span className="text-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
                           {formatAmount(
                             displayTransactions.reduce((s, tx) => s + (Number(tx.amount) || 0), 0),
                             language

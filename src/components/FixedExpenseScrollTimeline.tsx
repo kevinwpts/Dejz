@@ -138,7 +138,7 @@ export function FixedExpenseScrollTimeline({
           <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Payments' : 'Betalningar'}
           </h3>
-          <span className="text-[11px] font-medium text-[var(--text-secondary)]">
+          <span className="text-label font-medium text-[var(--text-secondary)]">
             {activeExpenses.length} {isEn ? 'scheduled' : 'st'}
           </span>
         </div>
@@ -283,7 +283,7 @@ export function FixedExpenseScrollTimeline({
                         {/* Discrete count badge when multiple expenses share the same day: non-overlapping and compact */}
                         {hasMultiple && (
                           <span
-                            className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full text-[9.5px] font-bold flex items-center justify-center border leading-none shadow-xs pointer-events-none z-30"
+                            className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full text-micro-label font-bold flex items-center justify-center border leading-none shadow-xs pointer-events-none z-30"
                             style={{
                               backgroundColor: 'var(--surface-color)',
                               color: 'var(--text-primary)',
@@ -327,12 +327,12 @@ export function FixedExpenseScrollTimeline({
                       />
                       {/* "Idag" for current day, or day number for other days */}
                       {isCurrent ? (
-                        <span className="text-[9.5px] font-bold text-[var(--accent-color)] tracking-tight whitespace-nowrap">
+                        <span className="text-micro-label font-bold text-[var(--accent-color)] tracking-tight whitespace-nowrap">
                           Idag
                         </span>
                       ) : (
                         <span
-                          className={`text-[9.5px] tabular-nums transition-colors ${
+                          className={`text-micro-label tabular-nums transition-colors ${
                             hasExpense
                               ? 'font-semibold text-[var(--text-primary)]'
                               : 'font-normal text-[var(--text-tertiary)]'

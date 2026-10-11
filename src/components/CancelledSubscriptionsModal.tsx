@@ -150,7 +150,7 @@ export function CancelledSubscriptionsModal({
                           <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
                             {formatAmount(item.amount, config.language)} {config.currency || 'kr'}
                           </span>
-                          <span className="block text-[10.5px] text-[var(--text-secondary)] font-medium">
+                          <span className="block text-secondary text-[var(--text-secondary)] font-medium">
                             /{isEn ? 'mo' : 'mån'}
                           </span>
                         </div>
@@ -160,12 +160,12 @@ export function CancelledSubscriptionsModal({
                       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)]">
                         <div className="flex items-center gap-1.5 text-xs font-medium">
                           {isExpired ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--success-container)] text-[var(--success-color)] font-semibold text-[11.5px]">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--success-container)] text-[var(--success-color)] font-semibold text-secondary">
                               <CheckCircle2 size={12} />
                               {isEn ? 'Ended (not counted in budget)' : 'Avslutat (räknas ej längre)'}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-semibold text-[11.5px]">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-semibold text-secondary">
                               <Clock size={12} />
                               {isEn
                                 ? `Active until ${item.cancellationDate || 'date'}`

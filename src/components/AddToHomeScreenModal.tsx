@@ -294,7 +294,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                         {activePlatform === 'ios' ? <Share size={13} className="text-[var(--accent-color)]" /> : <MoreVertical size={13} className="text-[var(--accent-color)]" />}
                         {activePlatform === 'ios' ? localized.iosStep1Title : localized.androidStep1Title}
                       </div>
-                      <div className="text-[11px] text-[var(--text-tertiary)] truncate">
+                      <div className="text-label text-[var(--text-tertiary)] truncate">
                         {activePlatform === 'ios' ? localized.iosStep1Desc : localized.androidStep1Desc}
                       </div>
                     </div>
@@ -310,7 +310,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                         <PlusSquare size={13} className="text-[var(--text-primary)]" />
                         {activePlatform === 'ios' ? localized.iosStep2Title : localized.androidStep2Title}
                       </div>
-                      <div className="text-[11px] text-[var(--text-tertiary)] truncate">
+                      <div className="text-label text-[var(--text-tertiary)] truncate">
                         {activePlatform === 'ios' ? localized.iosStep2Desc : localized.androidStep2Desc}
                       </div>
                     </div>

@@ -15,6 +15,7 @@ import { findCancellationDetails, CancellationInfo } from '../utils/cancellation
 import { feedback } from '../utils/feedback';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { BudgetItemLogo } from './BudgetItem';
+import { formatAmount } from '../utils/format';
 
 interface CancelSubscriptionModalProps {
   isOpen: boolean;
@@ -104,7 +105,7 @@ export function CancelSubscriptionModal({
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
             {/* Target Item Card */}
-            <div className="flex items-center justify-between p-3.5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none">
+            <div className="flex items-center justify-between p-3.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border-none shadow-none">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-[var(--bg-color)] flex items-center justify-center shrink-0 border-none overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
                   <BudgetItemLogo item={expense} type="expense" config={config} />
@@ -121,9 +122,9 @@ export function CancelSubscriptionModal({
 
               <div className="text-right shrink-0">
                 <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                  -{expense.amount} {config.currency || 'kr'}
+                  −{formatAmount(expense.amount, config.language)} {config.currency || 'kr'}
                 </span>
-                <span className="block text-[10.5px] text-[var(--text-secondary)] font-medium">
+                <span className="block text-secondary text-[var(--text-secondary)] font-medium">
                   /{isEn ? 'mo' : 'mån'}
                 </span>
               </div>
@@ -146,7 +147,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`tel:${details.phoneNumber.replace(/\s+/g, '')}`}
                     onClick={() => feedback.tap()}
-                    className="w-full h-12 px-4 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Phone size={17} strokeWidth={2} />
                     <span>{isEn ? `Call Kundservice: ${details.phoneNumber}` : `Ring kundservice: ${details.phoneNumber}`}</span>
@@ -155,7 +156,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`mailto:${details.supportEmail}?subject=${encodeURIComponent(`Uppsägning av abonnemang - ${expense.name}`)}`}
                     onClick={() => feedback.tap()}
-                    className="w-full h-12 px-4 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Mail size={17} strokeWidth={2} />
                     <span>{isEn ? `Email Cancellation: ${details.supportEmail}` : `Skicka uppsägning: ${details.supportEmail}`}</span>
@@ -164,7 +165,7 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={handleOpenLink}
-                    className="w-full h-12 px-4 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <ExternalLink size={17} strokeWidth={2} />
                     <span>{isEn ? 'Open cancellation portal' : 'Öppna uppsägningssidan'}</span>
@@ -173,7 +174,7 @@ export function CancelSubscriptionModal({
 
                 {/* Step-by-Step Instructions */}
                 {details.steps && details.steps.length > 0 && (
-                  <div className="p-4 rounded-[8px] bg-[var(--surface-color)] border border-subtle space-y-3">
+                  <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-subtle space-y-3">
                     <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] tracking-tight">
                       <HelpCircle size={14} className="text-[var(--text-secondary)]" />
                       <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
@@ -182,7 +183,7 @@ export function CancelSubscriptionModal({
                     <ol className="space-y-2.5">
                       {details.steps.map((step, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
-                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-subtle">
+                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-bold text-micro-label flex items-center justify-center shrink-0 mt-0.5 border border-subtle">
                             {idx + 1}
                           </span>
                           <span className="text-[var(--text-primary)]">{step}</span>

@@ -497,12 +497,12 @@ export function AnalysisView({
         <button
           type="button"
           onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
         >
           <Calendar size={15} className="text-[var(--text-secondary)] shrink-0" />
           <span className="truncate max-w-[120px] sm:max-w-none">{periodDisplayName}</span>
           {currentPeriod?.isCurrent && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+            <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
               {isEn ? 'Current' : 'Nu'}
             </span>
           )}
@@ -737,7 +737,7 @@ export function AnalysisView({
                     const hoveredTrend = getCategoryTrend(hoveredItem.name, hoveredItem.value);
                     return (
                       <div className="flex flex-col items-center max-w-[160px] sm:max-w-[185px]">
-                        <span className="text-[12px] font-medium text-[var(--text-secondary)] truncate max-w-full">
+                        <span className="text-secondary font-medium text-[var(--text-secondary)] truncate max-w-full">
                           {hoveredItem.name}
                         </span>
                         <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
@@ -745,12 +745,12 @@ export function AnalysisView({
                           <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                         </span>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[11px] font-semibold text-[var(--accent-color)] tabular-nums">
+                          <span className="text-label font-semibold text-[var(--accent-color)] tabular-nums">
                             {hoveredItem.pct}%
                           </span>
                           {hoveredTrend && hoveredTrend.type !== 'new' && (
                             <span
-                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-semibold tabular-nums inline-flex items-center gap-0.5 ${
+                              className={`px-1.5 py-0.2 rounded-full text-micro-label font-semibold tabular-nums inline-flex items-center gap-0.5 ${
                                 hoveredTrend.type === 'down'
                                   ? 'bg-[var(--success-container)] text-[var(--success-color)] border border-[var(--success-color)]/25'
                                   : hoveredTrend.type === 'up'
@@ -973,7 +973,7 @@ export function AnalysisView({
                             )}
 
                             {totalItemCount === 0 && (
-                              <div className="py-3 text-center text-[var(--text-tertiary)] text-[12px]">
+                              <div className="py-3 text-center text-[var(--text-tertiary)] text-secondary">
                                 {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
                               </div>
                             )}

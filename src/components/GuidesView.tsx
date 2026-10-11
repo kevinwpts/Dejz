@@ -192,10 +192,10 @@ export function GuidesView({ config }: GuidesViewProps) {
                 {step.imagePlaceholder && (
                   <div className="rounded-[var(--radius-card,16px)] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-subtle p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
                     <ImageIcon size={24} strokeWidth={1.5} className="opacity-50" />
-                    <span className="text-[11px] font-medium">
+                    <span className="text-label font-medium">
                       {step.imagePlaceholder}
                     </span>
-                    <span className="text-[10px] opacity-60">
+                    <span className="text-micro-label opacity-60">
                       {isEn ? '(Drop your screenshot here)' : '(Plats för skärmdump)'}
                     </span>
                   </div>
@@ -256,7 +256,7 @@ export function GuidesView({ config }: GuidesViewProps) {
                   </div>
 
                   <div className="flex items-center gap-1 text-xs font-semibold text-[var(--text-secondary)] shrink-0">
-                    <span className="text-[11px] opacity-75">{g.readTime}</span>
+                    <span className="text-label opacity-75">{g.readTime}</span>
                     <ChevronRight size={16} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </Card>

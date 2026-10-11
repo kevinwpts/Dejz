@@ -54,12 +54,12 @@ export const ListRow: React.FC<ListRowProps> = ({
 
   const containerStyles = {
     card: isCompact
-      ? 'bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-3 min-h-[58px] rounded-[var(--radius-card,20px)]'
-      : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] p-4 min-h-[62px] rounded-[var(--radius-card,20px)]',
+      ? 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[54px] rounded-[var(--radius-card,20px)] shadow-subtle'
+      : 'bg-[var(--surface-color)] border-none card-p min-h-[60px] rounded-[var(--radius-card,20px)] shadow-subtle',
     grouped: isCompact
-      ? 'bg-transparent px-4 py-3 min-h-[58px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
-      : 'bg-transparent px-4 py-3.5 min-h-[62px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
-    plain: isCompact ? 'bg-transparent px-3 py-2 min-h-[48px]' : 'bg-transparent p-2 sm:p-3',
+      ? 'bg-transparent px-4 py-2.5 min-h-[50px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+      : 'bg-transparent px-4 py-3 min-h-[56px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
+    plain: isCompact ? 'bg-transparent px-3 py-2 min-h-[46px]' : 'bg-transparent px-3.5 py-2.5 min-h-[50px]',
   }[variant];
 
   const clickableStyles = isClickable
@@ -74,8 +74,8 @@ export const ListRow: React.FC<ListRowProps> = ({
   };
 
   const iconContainerSize = isCompact
-    ? 'w-[38px] h-[38px] rounded-[var(--radius-button-sm,10px)]'
-    : 'w-10 h-10 rounded-[var(--radius-button-sm,10px)]';
+    ? 'w-8 h-8 rounded-[var(--radius-icon-button,10px)]'
+    : 'w-10 h-10 rounded-[var(--radius-icon-button,10px)]';
 
   const gapSize = 'gap-3.5';
 

@@ -588,6 +588,7 @@ export function TodayView({
           {displayedFixedTransactions.length > 0 && (
             <div className="space-y-[var(--card-gap)]">
               {displayedFixedTransactions.map((item) => {
+                const isItemVariable = Boolean(item.isVariable || item.originalItem?.isVariable || item.originalItem?.is_variable);
                 const tx: Transaction = {
                   id: item.id,
                   merchant: item.merchant,
@@ -595,6 +596,9 @@ export function TodayView({
                   amount: item.amount,
                   type: item.type as any,
                   date: selectedDate.toISOString(),
+                  isVariable: isItemVariable,
+                  icon: item.icon || item.originalItem?.icon,
+                  logo: item.logo || item.originalItem?.logo,
                 };
 
                 return (
@@ -602,6 +606,7 @@ export function TodayView({
                     <TransactionItem
                       transaction={tx}
                       isFixed={true}
+                      isVariable={isItemVariable}
                       config={config}
                       onClick={() => {
                         if (item.type === "income" && onViewIncome) {
@@ -636,7 +641,7 @@ export function TodayView({
         <div className="space-y-[var(--card-gap)] pt-1">
           {/* Period */}
           <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
               <Calendar size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
@@ -651,7 +656,7 @@ export function TodayView({
 
           {/* Payday / Next Salary */}
           <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
               <Clock size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">

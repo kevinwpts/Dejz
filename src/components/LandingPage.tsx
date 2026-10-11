@@ -239,7 +239,7 @@ export function LandingPage({
 
             {/* RIGHT COLUMN: Image */}
             <div className="lg:col-span-6 flex justify-center">
-              <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[#0f172a]">
+              <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)]">
                 <img 
                   src="/hero.png" 
                   alt="Dejz App" 
@@ -305,7 +305,7 @@ export function LandingPage({
             </div>
 
             {/* Hero Image */}
-            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[#0f172a] aspect-[16/11] sm:aspect-[16/10]">
+            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-slate-900 aspect-[16/11] sm:aspect-[16/10]">
               <img 
                 src="/hero.png" 
                 alt="Dejz App" 
@@ -713,7 +713,7 @@ export function LandingPage({
 
       {/* 10. SLUTLIG CTA */}
       <section className="py-12 px-6 sm:px-8 max-w-[1240px] mx-auto">
-        <div className="bg-[#0f172a] text-white rounded-[var(--radius-card,16px)] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-subtle border border-[var(--border-subtle)]">
+        <div className="bg-slate-900 text-white rounded-[var(--radius-card,16px)] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-subtle border border-[var(--border-subtle)]">
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-xl sm:text-3xl font-semibold font-display tracking-tight text-white leading-snug">
               Redo att få koll på ekonomin?

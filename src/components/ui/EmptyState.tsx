@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon, IconName } from './Icon';
+import { Button } from './Button';
 
 export interface EmptyStateProps {
   icon?: IconName | React.ComponentType<any> | React.ReactNode;
@@ -35,37 +36,38 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <div
-      className={`bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}
+      className={`bg-[var(--surface-color)] rounded-[var(--radius-card,16px)] p-6 sm:p-7 flex flex-col items-center justify-center text-center border border-subtle shadow-none ${className}`}
     >
       {icon && (
-        <div className="w-12 h-12 rounded-[var(--radius-card-nested,10px)] bg-[var(--surface-muted)] border-none flex items-center justify-center text-[var(--text-secondary)] mb-3 shrink-0">
+        <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] mb-3 shrink-0">
           {renderIcon()}
         </div>
       )}
-      <div className="space-y-1.5 max-w-sm flex flex-col items-center">
-        <h3 className="text-card-title text-center">
+      <div className="space-y-1 max-w-sm flex flex-col items-center">
+        <h3 className="text-section-title text-center">
           {title}
         </h3>
         {description && (
           typeof description === 'string' ? (
-            <p className="text-secondary text-center">
+            <p className="text-secondary text-center mt-0.5 leading-relaxed">
               {description}
             </p>
           ) : (
-            <div className="text-secondary text-center">
+            <div className="text-secondary text-center mt-0.5 leading-relaxed">
               {description}
             </div>
           )
         )}
       </div>
       {actionLabel && onAction && (
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={onAction}
-          className="mt-4 h-9 px-4 bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] rounded-[var(--radius-button-sm,10px)] text-label font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-none active:scale-[0.98] select-none"
+          className="mt-3.5 sm:mt-4"
         >
           {actionLabel}
-        </button>
+        </Button>
       )}
     </div>
   );

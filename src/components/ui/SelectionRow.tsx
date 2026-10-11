@@ -37,12 +37,12 @@ export function SelectionRow<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[var(--radius-card,14px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
+      className={`w-full flex items-center justify-between py-2.5 px-4 rounded-[var(--radius-card-nested,12px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[50px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
           <div
-            className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center shrink-0 bg-[var(--surface-muted)] text-[var(--text-primary)]"
+            className="w-8 h-8 rounded-[var(--radius-icon-button,10px)] flex items-center justify-center shrink-0 bg-[var(--surface-muted)] text-[var(--text-primary)]"
           >
             {icon}
           </div>
