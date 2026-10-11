@@ -161,6 +161,25 @@ export function TransactionItem({
     }
   };
 
+  const methodRaw = typeof transaction?.paymentMethod === 'object'
+    ? (transaction.paymentMethod as any)?.name
+    : (typeof transaction?.paymentMethod === 'string' ? transaction.paymentMethod : '');
+
+  const methodStr = methodRaw ? capitalize(methodRaw.trim()) : '';
+
+  const dayStr = transaction?.deductionDay 
+    ? `${transaction.deductionDay}${config?.language === 'en' ? 'th' : ':e'}`
+    : '';
+
+  let fixedBadgeLabel = '';
+  if (dayStr && methodStr) {
+    fixedBadgeLabel = `${dayStr} (${methodStr})`;
+  } else if (dayStr) {
+    fixedBadgeLabel = dayStr;
+  } else if (methodStr) {
+    fixedBadgeLabel = methodStr;
+  }
+
   return (
     <>
       <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[var(--radius-card,14px)]'} select-none`}>
@@ -309,22 +328,25 @@ export function TransactionItem({
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixedItem && (
-              <span className="text-secondary text-[var(--text-tertiary)] mt-0.5 whitespace-nowrap tabular-nums">
+              <div className="mt-1 flex items-center justify-end gap-1 flex-wrap">
                 {transaction.originalAmount ? (
-                  <span className="opacity-80 mr-1 font-normal">
+                  <span className="text-secondary text-[var(--text-tertiary)] font-normal mr-0.5 tabular-nums">
                     {formatAmount(transaction.originalAmount, config?.language || "sv")} {config?.currency || "kr"}
                     {transaction.frequency === "Kvartalsvis" || transaction.frequency === "QUARTERLY" ? (config?.language === "en" ? "/qtr" : "/kvartal") :
                      transaction.frequency === "Halvårsvis" || transaction.frequency === "SEMI_ANNUALLY" ? (config?.language === "en" ? "/half-yr" : "/halvår") :
                      (config?.language === "en" ? "/yr" : "/år")}
-                    {transaction.deductionDay ? " • " : ""}
                   </span>
                 ) : null}
-                {transaction.deductionDay 
-                  ? `${transaction.deductionDay}${config?.language === "en" ? "th" : ":e"}`
-                  : (transaction.timestamp || transaction.date) 
-                    ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
-                    : ''}
-              </span>
+                {fixedBadgeLabel ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-secondary)] border border-[var(--border-subtle)] select-none leading-none tracking-tight">
+                    {fixedBadgeLabel}
+                  </span>
+                ) : (transaction.timestamp || transaction.date) ? (
+                  <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
+                    {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
+                  </span>
+                ) : null}
+              </div>
             )}
           </div>
         </motion.div>

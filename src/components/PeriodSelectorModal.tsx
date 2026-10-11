@@ -132,21 +132,28 @@ export function PeriodSelectorModal({
           )}
 
           {chronologicalPeriods.map((p, idx) => {
-            const monthName = p.end ? (new Date(p.end)).toLocaleString(currentLang === 'en' ? 'en-US' : 'sv-SE', { month: 'long' }) : '';
-            const capitalizedMonth = monthName ? monthName.charAt(0).toUpperCase() + monthName.slice(1) : '';
+            const endDate = p.end ? new Date(p.end) : null;
+            const startDate = p.start ? new Date(p.start) : null;
+
+            const monthName = endDate && !isNaN(endDate.getTime()) 
+              ? endDate.toLocaleString(currentLang === 'en' ? 'en-US' : 'sv-SE', { month: 'long' }) 
+              : (startDate && !isNaN(startDate.getTime()) ? startDate.toLocaleString(currentLang === 'en' ? 'en-US' : 'sv-SE', { month: 'long' }) : '');
+            
+            const capitalizedMonth = monthName ? monthName.charAt(0).toUpperCase() + monthName.slice(1) : (p.name || '');
 
             let title = capitalizedMonth;
             let sub = '';
 
-            if (p.name?.includes('(')) {
+            if (p.name && p.name.includes('(')) {
               const parts = p.name.split('(');
-              title = parts[0].trim() || capitalizedMonth;
+              const extractedTitle = parts[0].trim();
+              if (extractedTitle) title = extractedTitle;
               sub = parts[1]?.replace(')', '').trim() || '';
-            } else if (p.start && p.end) {
-              const startStr = new Date(p.start).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
-              const endStr = new Date(p.end).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+            } else if (startDate && endDate && !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+              const startStr = startDate.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+              const endStr = endDate.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
               sub = `${startStr} – ${endStr}`;
-            } else {
+            } else if (p.name) {
               title = p.name;
             }
 

@@ -169,18 +169,11 @@ const normalizePaymentMethods = (methods: any[] | null | undefined): any[] => {
   });
 };
 
-let hasGloballyDismissedOnboarding = false;
-
 export const isGloballyDismissedOnboarding = (userId?: string) => {
-  if (hasGloballyDismissedOnboarding) return true;
+  if (!userId) return false;
   try {
-    if (sessionStorage.getItem('dejz_onboarding_dismissed') === 'true') return true;
-    if (localStorage.getItem('dejz_onboarding_skipped') === 'true') return true;
-    if (localStorage.getItem('dejz_onboarding_completed') === 'true') return true;
-    if (userId) {
-      if (localStorage.getItem(`dejz_onboarding_skipped_${userId}`) === 'true') return true;
-      if (localStorage.getItem(`dejz_onboarding_completed_${userId}`) === 'true') return true;
-    }
+    if (localStorage.getItem(`dejz_onboarding_skipped_${userId}`) === 'true') return true;
+    if (localStorage.getItem(`dejz_onboarding_completed_${userId}`) === 'true') return true;
   } catch (_e) {
     // Ignore storage availability errors
   }
@@ -188,15 +181,10 @@ export const isGloballyDismissedOnboarding = (userId?: string) => {
 };
 
 export const markGloballyDismissedOnboarding = (userId?: string) => {
-  hasGloballyDismissedOnboarding = true;
+  if (!userId) return;
   try {
-    sessionStorage.setItem('dejz_onboarding_dismissed', 'true');
-    localStorage.setItem('dejz_onboarding_skipped', 'true');
-    localStorage.setItem('dejz_onboarding_completed', 'true');
-    if (userId) {
-      localStorage.setItem(`dejz_onboarding_skipped_${userId}`, 'true');
-      localStorage.setItem(`dejz_onboarding_completed_${userId}`, 'true');
-    }
+    localStorage.setItem(`dejz_onboarding_skipped_${userId}`, 'true');
+    localStorage.setItem(`dejz_onboarding_completed_${userId}`, 'true');
   } catch (_e) {
     // Ignore storage write errors
   }
@@ -1765,6 +1753,7 @@ export default function App() {
   }, [session]);
 
   const handleLogout = async () => {
+    hasDismissedOnboardingSession.current = false;
     clearDemoData();
     setIsDemoMode(false);
     setSession(null);
@@ -2074,9 +2063,7 @@ export default function App() {
         const activeUserId = session.user.id;
         const isLocallyDone =
           localStorage.getItem(`dejz_onboarding_completed_${activeUserId}`) === 'true' ||
-          localStorage.getItem(`dejz_onboarding_skipped_${activeUserId}`) === 'true' ||
-          localStorage.getItem('dejz_onboarding_completed') === 'true' ||
-          localStorage.getItem('dejz_onboarding_skipped') === 'true';
+          localStorage.getItem(`dejz_onboarding_skipped_${activeUserId}`) === 'true';
 
         const isMetaDone =
           session.user.user_metadata?.onboarding_completed === true ||
@@ -2084,16 +2071,11 @@ export default function App() {
 
         const isDbDone = dbProfile.onboarding_completed === true;
 
-        const hasName =
-          Boolean((dbProfile.full_name || session.user.user_metadata?.full_name)?.trim());
-
         const shouldSkipOnboarding =
           isLocallyDone ||
           isMetaDone ||
           isDbDone ||
-          hasName ||
-          hasDismissedOnboardingSession.current ||
-          isGloballyDismissedOnboarding(activeUserId);
+          hasDismissedOnboardingSession.current;
 
         if (!shouldSkipOnboarding) {
           setIsOnboarding(true);
@@ -5742,7 +5724,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
@@ -5762,7 +5744,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
@@ -5777,7 +5759,7 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
                       <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
                     ) : (

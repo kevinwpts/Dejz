@@ -397,7 +397,7 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button 
-                      variant="primary"
+                      variant="secondary"
                       size="sm"
                       icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddIncome}
@@ -465,7 +465,7 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button
-                      variant="primary"
+                      variant="secondary"
                       size="sm"
                       icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddFixedExpense}
@@ -535,7 +535,7 @@ export function BudgetView({
                     </button>
 
                     <Button
-                      variant="primary"
+                      variant="secondary"
                       size="sm"
                       icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddMonthlySaving}

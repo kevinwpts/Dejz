@@ -921,13 +921,7 @@ export function AnalysisView({
 
                           {/* Sektion 3: Transaktioner */}
                           <div className="space-y-2">
-                            <div className="flex items-center justify-start pb-0.5">
-                              <span className="text-label font-medium tabular-nums text-[var(--text-secondary)]">
-                                {totalItemCount} {isEn 
-                                  ? (totalItemCount === 1 ? 'item' : 'items') 
-                                  : (totalItemCount === 1 ? 'st' : 'st')}
-                              </span>
-                            </div>
+
 
                             {displayTransactions.length > 0 && (
                               <div className="space-y-1.5">
