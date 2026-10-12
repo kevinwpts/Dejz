@@ -2280,12 +2280,22 @@ export default function App() {
         }
 
         const resolvedCountry = dbProfile.country || localSavedConfig?.country || defaultConfig.country;
-        const resolvedReg = getRegionDefaults(resolvedCountry || dbProfile.language || 'sv');
+        const resolvedReg = getRegionDefaults(resolvedCountry || effectiveLang || 'sv');
 
-        const resolvedLang = dbProfile.language || defaultConfig.language;
+        const resolvedLang = effectiveLang || dbProfile.language || 'sv';
         if (resolvedLang && resolvedLang !== landingLanguage) {
           setLandingLanguage(normalizeLanguage(resolvedLang));
           localStorage.setItem('app_language', resolvedLang);
+        }
+        if (resolvedLang && resolvedLang !== dbProfile.language) {
+          dataService.updateProfile(session.user.id, {
+            language: resolvedLang,
+            country: resolvedReg.countryCode,
+            currency: resolvedReg.currencySymbol,
+            currency_code: resolvedReg.defaultCurrencyCode,
+            locale: resolvedReg.locale,
+            timezone: resolvedReg.timezone,
+          }).catch(err => console.warn("Could not sync profile language:", err));
         }
 
         const mappedConfig = {
