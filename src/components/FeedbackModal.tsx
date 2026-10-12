@@ -28,8 +28,8 @@ const contentMap: Record<string, {
   closeBtn: string;
 }> = {
   sv: {
-    greeting: 'Hej! Jag skapade Dejz 👋',
-    bio: '”Jag bygger Dejz för att göra det enklare att få koll på din ekonomi. Har du en idé, hittat ett fel eller saknar något? Jag vill gärna höra vad du tycker!”',
+    greeting: 'Hej, jag är personen bakom Dejz 👋',
+    bio: 'Jag bygger Dejz för att göra det enklare att få koll på sin ekonomi. Har du hittat ett fel eller har en idé? Jag vill gärna höra vad du tycker!',
     bug: 'Rapportera fel',
     idea: 'Idé / Förslag',
     other: 'Övrigt',
@@ -41,8 +41,8 @@ const contentMap: Record<string, {
     closeBtn: 'Stäng',
   },
   da: {
-    greeting: 'Hej! Jeg skabte Dejz 👋',
-    bio: '”Jeg bygger Dejz for at gøre det nemmere at få styr på din økonomi. Har du en idé, fundet en fejl eller mangler du noget? Jeg vil meget gerne høre hvad du synes!”',
+    greeting: 'Hej, jeg er personen bag Dejz 👋',
+    bio: 'Jeg bygger Dejz for at gøre det nemmere at få styr på din økonomi. Har du fundet en fejl eller har en idé? Jeg vil meget gerne høre hvad du synes!',
     bug: 'Rapporter fejl',
     idea: 'Idé / Forslag',
     other: 'Andet',
@@ -54,8 +54,8 @@ const contentMap: Record<string, {
     closeBtn: 'Luk',
   },
   no: {
-    greeting: 'Hei! Jeg skapte Dejz 👋',
-    bio: '”Jeg bygger Dejz for å gjøre det enklere å få oversikt over økonomien din. Har du en idé, funnet en feil eller savner noe? Jeg vil gjerne høre hva du mener!”',
+    greeting: 'Hei, jeg er personen bak Dejz 👋',
+    bio: 'Jeg bygger Dejz for å gjøre det enklere å få oversikt over økonomien din. Har du funnet en feil eller har en idé? Jeg vil gjerne høre hva du mener!',
     bug: 'Rapporter feil',
     idea: 'Idé / Forslag',
     other: 'Annet',
@@ -67,8 +67,8 @@ const contentMap: Record<string, {
     closeBtn: 'Lukk',
   },
   fi: {
-    greeting: 'Hei! Minä loin Dejzin 👋',
-    bio: '”Rakennan Dejziä, jotta talouden hallinta olisi helpompaa. Onko sinulla idea, löysitkö virheen tai kaipaatko jotain? Kuulen mielelläni mielipiteesi!”',
+    greeting: 'Hei, minä olen Dejzin takana oleva henkilö 👋',
+    bio: 'Rakennan Dejziä, jotta talouden hallinta olisi helpompaa. Löysitkö virheen tai onko sinulla idea? Kuulen mielelläni mielipiteesi!',
     bug: 'Ilmoita virheestä',
     idea: 'Idea / Ehdotus',
     other: 'Muu',
@@ -112,7 +112,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
       size="md"
       title={t('sendFeedback')}
       showCloseButton={true}
-      bodyClassName="p-5 sm:p-6 space-y-5"
+      bodyClassName="p-4 sm:p-5 space-y-4"
     >
       {isSubmitted ? (
         <div className="py-8 text-center space-y-4">
@@ -140,35 +140,40 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
         </div>
       ) : (
         <>
-          {/* Creator greeting & portrait card */}
-          <div className="p-4 rounded-card-nested bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-start gap-3.5">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[var(--border-color)] bg-[var(--surface-color)] flex items-center justify-center shadow-2xs shrink-0">
-              {/* Neutral image placeholder: replace src with creator photo URL when available */}
+          {/* Creator greeting & portrait card - compact & balanced with creator portrait icon */}
+          <div className="p-3.5 rounded-card-nested bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-center gap-3">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-[var(--border-color)] bg-[var(--surface-color)] flex items-center justify-center shadow-2xs shrink-0">
               <img 
                 src="/creator-avatar.jpg"
                 onError={(e) => {
+                  // Fallback to stylish vector illustration if creator-avatar.jpg isn't placed yet
                   e.currentTarget.style.display = 'none';
                 }}
                 alt="Creator of Dejz"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[var(--accent-color)]/20 to-transparent text-[var(--text-primary)] font-black text-base select-none pointer-events-none">
-                K
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[var(--accent-color)]/20 to-transparent text-[var(--text-primary)] font-bold text-xs select-none pointer-events-none">
+                <svg viewBox="0 0 36 36" fill="none" className="w-7 h-7 text-[var(--accent-color)]">
+                  <circle cx="18" cy="14" r="6" fill="currentColor" fillOpacity="0.2" />
+                  <path d="M6 30C6 24.4772 10.4772 20 16 20H20C25.5228 20 30 24.4772 30 30V32H6V30Z" fill="currentColor" fillOpacity="0.2" />
+                  <circle cx="18" cy="13" r="5" fill="currentColor" />
+                  <path d="M8 29C8 24.0294 12.0294 20 17 20H19C23.9706 20 28 24.0294 28 29V31H8V29Z" fill="currentColor" />
+                </svg>
               </div>
             </div>
 
-            <div className="space-y-1.5 min-w-0 flex-1">
+            <div className="space-y-1 min-w-0 flex-1">
               <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
                 {c.greeting}
               </h4>
-              <p className="text-xs text-[var(--text-secondary)] font-normal leading-relaxed italic">
+              <p className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-normal leading-normal">
                 {c.bio}
               </p>
             </div>
           </div>
 
           {/* Category selector pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none">
+          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 select-none">
             <Pill
               active={feedbackType === 'bug'}
               onClick={() => setFeedbackType('bug')}
@@ -190,7 +195,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
               onClick={() => setFeedbackType('other')}
               icon={<HeartHandshake size={13} strokeWidth={2.2} />}
             >
-              {c.other}
+              {c.heart || <HeartHandshake size={13} strokeWidth={2.2} />}
             </Pill>
           </div>
 
@@ -208,7 +213,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
                   ? c.placeholderIdea
                   : c.placeholderOther
               } 
-              className="w-full h-32 bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,12px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
+              className="w-full h-28 bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,12px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
             />
           </div>
 
