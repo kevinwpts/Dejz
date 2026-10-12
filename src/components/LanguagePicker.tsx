@@ -47,20 +47,20 @@ export function LanguagePicker({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Välj språk / Choose language"
-        className={`inline-flex items-center gap-2 rounded-[var(--radius-button-sm,10px)] font-medium transition-all cursor-pointer select-none border border-[var(--border-subtle)] ${
+        className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] font-medium transition-all cursor-pointer select-none border border-[var(--border-subtle)] whitespace-nowrap shrink-0 ${
           variant === 'footer'
-            ? 'h-8 px-2.5 text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/30'
+            ? 'text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/30'
             : variant === 'compact'
-            ? 'h-8 px-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/5 dark:bg-white/5'
-            : 'h-9 px-3 text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/30'
+            ? 'text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/5 dark:bg-white/5'
+            : 'text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/30'
         }`}
       >
-        <span className="text-sm sm:text-base leading-none select-none" aria-hidden="true">{currentOption.flag}</span>
-        <span className="font-semibold text-[var(--text-primary)]">
-          {currentOption.nativeLabel}
+        <span className="text-sm select-none leading-none shrink-0" aria-hidden="true">{currentOption.flag}</span>
+        <span className="font-bold text-xs uppercase tracking-wide text-[var(--text-primary)] shrink-0">
+          {currentOption.shortCode || currentOption.code.toUpperCase()}
         </span>
         <ChevronDown
-          size={13}
+          size={12}
           className={`shrink-0 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
@@ -68,7 +68,9 @@ export function LanguagePicker({
       {isOpen && (
         <div
           role="listbox"
-          className="absolute z-50 mt-1.5 w-44 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-lg overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0"
+          className={`absolute z-50 w-48 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-lg overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0 ${
+            variant === 'footer' ? 'bottom-full mb-1.5' : 'mt-1.5'
+          }`}
         >
           <div className="py-0.5">
             {NORDIC_LANGUAGES.map((lang) => {

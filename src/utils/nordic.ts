@@ -74,11 +74,12 @@ export const NORDIC_REGIONS: Record<NordicCountry, NordicRegionConfig> = {
 
 export const SUPPORTED_LANGUAGES: Language[] = ['sv', 'da', 'no', 'fi', 'en'];
 
-export const NORDIC_LANGUAGES: { code: Language; label: string; nativeLabel: string; flag: string; flagUrl: string; countryCode: string }[] = [
-  { code: 'sv', label: 'Svenska', nativeLabel: 'Svenska', flag: '🇸🇪', flagUrl: 'https://flagcdn.com/w40/se.png', countryCode: 'SE' },
-  { code: 'da', label: 'Dansk', nativeLabel: 'Dansk', flag: '🇩🇰', flagUrl: 'https://flagcdn.com/w40/dk.png', countryCode: 'DK' },
-  { code: 'no', label: 'Norsk (bokmål)', nativeLabel: 'Norsk (bokmål)', flag: '🇳🇴', flagUrl: 'https://flagcdn.com/w40/no.png', countryCode: 'NO' },
-  { code: 'fi', label: 'Suomi', nativeLabel: 'Suomi', flag: '🇫🇮', flagUrl: 'https://flagcdn.com/w40/fi.png', countryCode: 'FI' },
+export const NORDIC_LANGUAGES: { code: Language; label: string; nativeLabel: string; flag: string; flagUrl: string; countryCode: string; shortCode: string }[] = [
+  { code: 'sv', label: 'Svenska', nativeLabel: 'Svenska', flag: '🇸🇪', flagUrl: 'https://flagcdn.com/w40/se.png', countryCode: 'SE', shortCode: 'SV' },
+  { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧', flagUrl: 'https://flagcdn.com/w40/gb.png', countryCode: 'GB', shortCode: 'EN' },
+  { code: 'no', label: 'Norsk (bokmål)', nativeLabel: 'Norsk (bokmål)', flag: '🇳🇴', flagUrl: 'https://flagcdn.com/w40/no.png', countryCode: 'NO', shortCode: 'NO' },
+  { code: 'da', label: 'Dansk', nativeLabel: 'Dansk', flag: '🇩🇰', flagUrl: 'https://flagcdn.com/w40/dk.png', countryCode: 'DK', shortCode: 'DA' },
+  { code: 'fi', label: 'Suomi', nativeLabel: 'Suomi', flag: '🇫🇮', flagUrl: 'https://flagcdn.com/w40/fi.png', countryCode: 'FI', shortCode: 'FI' },
 ];
 
 /**

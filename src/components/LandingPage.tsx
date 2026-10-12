@@ -38,7 +38,7 @@ const LANDING_TEXTS = {
     continueWithGoogle: 'Fortsätt med Google',
     heroTitleLine1: 'Hela din ekonomi.',
     heroTitleLine2: 'Svart på vitt.',
-    heroSubtitle: 'Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.',
+    heroSubtitle: 'Samla inkomster, fasta utgifter, sparande och budget på ett ställe. Se exakt vad du har kvar att spendera mellan två löner.',
     trust1Title: 'Ingen bankkoppling',
     trust1Desc: 'Full kontroll över din data.',
     trust2Title: 'Säker och privat',
@@ -108,7 +108,7 @@ const LANDING_TEXTS = {
     faq3Q: 'Kan jag testa Dejz innan jag skapar konto?',
     faq3A: 'Absolut! Du kan klicka på "Testa demo direkt" för att utforska appen med färdig demo-data direkt i webbläsaren.',
     faq4Q: 'Hur fungerar perioderna mellan två löner?',
-    faq4A: 'Du ställer in din egen lönedag (t.ex. den 25:e i månaden). Dejz räknar sedan automatiskt ut din budgetperiod och dagsbudget fram till nästa lön.',
+    faq4A: 'Du ställer in din egen lönedag (t.ex. den 25:e i månaden). Dejz räknar sedan automatiskt ut din budgetperiod och vad du har kvar att spendera fram till nästa lön.',
     finalCtaTitle: 'Redo att få koll på ekonomin?',
     finalCtaSub: 'Kom igång med Dejz på några minuter.',
     footerPrivacy: 'Integritetspolicy',
@@ -124,7 +124,7 @@ const LANDING_TEXTS = {
     continueWithGoogle: 'Fortsæt med Google',
     heroTitleLine1: 'Hele din økonomi.',
     heroTitleLine2: 'Sort på hvidt.',
-    heroSubtitle: 'Saml indtægter, faste udgifter, opsparing og budget ét sted. Se præcis hvad pengene går til, og få pengene til at række mellem to lønninger.',
+    heroSubtitle: 'Saml indtægter, faste udgifter, opsparing og budget ét sted. Se præcis hvad du har tilbage at bruge mellem to lønninger.',
     trust1Title: 'Ingen bankforbindelse',
     trust1Desc: 'Fuld kontrol over dine data.',
     trust2Title: 'Sikker og privat',
@@ -194,7 +194,7 @@ const LANDING_TEXTS = {
     faq3Q: 'Kan jeg prøve Dejz før jeg opretter en konto?',
     faq3A: 'Ja! Klik på "Prøv demo direkte" for at udforske hele appen med demodata direkte i browseren.',
     faq4Q: 'Hvordan fungerer perioden mellem to lønninger?',
-    faq4A: 'Du angiver din egen lønningsdag. Dejz beregner automatisk din budgetperiode og dagsbudget frem til næste løn.',
+    faq4A: 'Du angiver din egen lønningsdag. Dejz beregner automatisk din budgetperiode og hvad du har tilbage at bruge frem til næste løn.',
     finalCtaTitle: 'Klar til at få styr på økonomien?',
     finalCtaSub: 'Kom i gang med Dejz på få minutter.',
     footerPrivacy: 'Privatlivspolitik',
@@ -210,7 +210,7 @@ const LANDING_TEXTS = {
     continueWithGoogle: 'Fortsett med Google',
     heroTitleLine1: 'Hele din økonomi.',
     heroTitleLine2: 'Svart på hvitt.',
-    heroSubtitle: 'Samle inntekter, faste utgifter, sparing og dagsbudsjett på ett sted. Se nøyaktig hva pengene går til og få dem til å strekke til mellom to lønninger.',
+    heroSubtitle: 'Samle inntekter, faste utgifter, sparing og budsjett på ett sted. Se nøyaktig hva du har igjen å bruke mellom to lønninger.',
     trust1Title: 'Ingen banktilkobling',
     trust1Desc: 'Full kontroll over egne data.',
     trust2Title: 'Trygt og privat',
@@ -238,7 +238,7 @@ const LANDING_TEXTS = {
     step2Receipt: 'Legg ved kvittering',
     step3Num: '3',
     step3Title: 'Se hva du kan bruke',
-    step3Desc: 'Når du registrerer nye utgifter, oppdaterer Dejz automatisk dagsbudsjettet ditt.',
+    step3Desc: 'Når du registrerer nye utgifter, oppdaterer Dejz automatisk hva du har igjen å bruke.',
     step3LeftVal: '10 000 kr',
     step3Realtime: 'Oppdateres i sanntid',
     featuresHeading: 'Din økonomi, på dine premisser.',
@@ -280,7 +280,7 @@ const LANDING_TEXTS = {
     faq3Q: 'Kan jeg teste Dejz før jeg oppretter konto?',
     faq3A: 'Ja! Klikk på "Prøv demo direkte" for å utforske appen med ferdige demodata direkte i nettleseren.',
     faq4Q: 'Hvordan fungerer perioden mellom to lønninger?',
-    faq4A: 'Du stiller inn din egen lønningsdag. Dejz regner automatisk ut budsjettperioden din og dagsbudsjettet frem til neste lønning.',
+    faq4A: 'Du stiller inn din egen lønningsdag. Dejz regner automatisk ut budsjettperioden din og hva du har igjen å bruke frem til neste lønning.',
     finalCtaTitle: 'Klar for å få kontroll på økonomien?',
     finalCtaSub: 'Kom i gang med Dejz på få minutter.',
     footerPrivacy: 'Personvern',
@@ -296,7 +296,7 @@ const LANDING_TEXTS = {
     continueWithGoogle: 'Jatka Googlella',
     heroTitleLine1: 'Koko taloutesi.',
     heroTitleLine2: 'Mustaa valkoisella.',
-    heroSubtitle: 'Kokoa tulot, kiinteät kulut, säästöt ja päiväbudjetti yhteen paikkaan. Näe tarkalleen minne rahasi menevät ja saa ne riittämään palkkapäivästä toiseen.',
+    heroSubtitle: 'Kokoa tulot, kiinteät kulut, säästöt ja budjetti yhteen paikkaan. Näe tarkalleen, mitä sinulla on jäljellä käytettäväksi kahden palkan välillä.',
     trust1Title: 'Ei pankkiyhteyttä',
     trust1Desc: 'Täysi hallinta omiin tietoihisi.',
     trust2Title: 'Turvallinen ja yksityinen',
@@ -324,7 +324,7 @@ const LANDING_TEXTS = {
     step2Receipt: 'Liitä kuitti',
     step3Num: '3',
     step3Title: 'Näe mitä voit käyttää',
-    step3Desc: 'Kun kirjaat uusia kuluja, Dejz päivittää päiväbudjettisi automaattisesti.',
+    step3Desc: 'Kun kirjaat uusia kuluja, Dejz päivittää automaattisesti mitä sinulla on jäljellä käytettäväksi.',
     step3LeftVal: '1 000 €',
     step3Realtime: 'Päivittyy reaaliajassa',
     featuresHeading: 'Taloutesi, sinun ehdoillasi.',
@@ -366,7 +366,7 @@ const LANDING_TEXTS = {
     faq3Q: 'Voinko kokeilla sovellusta ennen tilin luomista?',
     faq3A: 'Kyllä! Napsauta "Kokeile demoa heti" testataksesi sovellusta valmiilla esimerkkidatalla suoraan selaimessa.',
     faq4Q: 'Miten palkkakaudet toimivat?',
-    faq4A: 'Asetat oman palkkapäiväsi. Dejz laskee automaattisesti budjettikautesi ja päiväbudjettisi seuraavaan palkkapäivään asti.',
+    faq4A: 'Asetat oman palkkapäiväsi. Dejz laskee automaattisesti budjettikautesi ja mitä sinulla on käytettävissä seuraavaan palkkapäivään asti.',
     finalCtaTitle: 'Valmis ottamaan taloutesi haltuun?',
     finalCtaSub: 'Aloita Dejzin käyttö parissa minuutissa.',
     footerPrivacy: 'Tietosuojaseloste',
@@ -382,7 +382,7 @@ const LANDING_TEXTS = {
     continueWithGoogle: 'Continue with Google',
     heroTitleLine1: 'Your whole budget.',
     heroTitleLine2: 'In black and white.',
-    heroSubtitle: 'Track income, fixed expenses, savings, and daily budget in one intuitive place. See where your money goes and make it last until next payday.',
+    heroSubtitle: 'Bring income, fixed expenses, savings, and budget together in one place. See exactly what you have left to spend between two paydays.',
     trust1Title: 'No bank connection',
     trust1Desc: 'Total control over your data.',
     trust2Title: 'Secure and private',
@@ -452,7 +452,7 @@ const LANDING_TEXTS = {
     faq3Q: 'Can I try Dejz before creating an account?',
     faq3A: 'Absolutely! Click "Try demo directly" to explore the application pre-populated with realistic demo data.',
     faq4Q: 'How do pay periods work?',
-    faq4A: 'Set your regular payday. Dejz calculates your period boundaries and daily allowance until the next salary arrives.',
+    faq4A: 'Set your regular payday. Dejz calculates your period boundaries and what you have left to spend until your next payday.',
     finalCtaTitle: 'Ready to take control of your finances?',
     finalCtaSub: 'Get started with Dejz in just a few minutes.',
     footerPrivacy: 'Privacy Policy',
@@ -550,29 +550,32 @@ export function LandingPage({
 
       {/* HEADER */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/95 border-b border-[var(--border-subtle)] transition-all pt-[env(safe-area-inset-top)]">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-8 lg:gap-10">
-            <div className="flex items-center select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <DejzLogo className="text-2xl font-black tracking-tight text-[var(--text-primary)]" />
+        <div className="max-w-[1240px] mx-auto px-3 sm:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-6 lg:gap-10 shrink-0">
+            <div
+              className="flex items-center select-none cursor-pointer shrink-0"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              <DejzLogo className="text-xl sm:text-2xl font-black tracking-tight text-[var(--text-primary)] shrink-0" />
             </div>
 
             <nav className="hidden md:flex items-center gap-6">
               <a 
                 href="#how-it-works" 
-                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap"
               >
                 {c.navHow}
               </a>
               <a 
                 href="#features" 
-                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap"
               >
                 {c.navFeatures}
               </a>
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0">
             <LanguagePicker
               currentLanguage={currentLanguage}
               onLanguageChange={onLanguageChange}
@@ -582,17 +585,18 @@ export function LandingPage({
             {onLogin && (
               <Button
                 variant="ghost"
-                size="md"
+                size="sm"
                 onClick={onLogin}
-                className="text-[var(--text-primary)] hidden sm:inline-flex"
+                className="text-[var(--text-primary)] whitespace-nowrap text-xs sm:text-sm font-semibold h-8 sm:h-9 px-2.5 sm:px-3.5 shrink-0"
               >
                 {c.login}
               </Button>
             )}
             <Button
               variant="primary"
-              size="md"
+              size="sm"
               onClick={onGetStarted}
+              className="hidden sm:inline-flex whitespace-nowrap text-xs sm:text-sm font-semibold h-8 sm:h-9 px-3.5 sm:px-4 shrink-0"
             >
               {c.getStarted}
             </Button>

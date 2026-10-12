@@ -32,10 +32,10 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           
           <div className="space-y-3 max-w-sm">
             <h2 className="text-page-title text-[var(--text-primary)]">
-              Se exakt vad du kan spendera idag.
+              Hela din ekonomi. Svart på vitt.
             </h2>
             <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
-              Låt oss räkna ut din personliga dagsbudget. Sluta gissa – vet exakt vad du har råd med, varje morgon.
+              Samla inkomster, fasta utgifter, sparande och budget på ett ställe och se vad du har kvar att spendera mellan två löner.
             </p>
           </div>
         </motion.div>
