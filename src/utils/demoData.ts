@@ -6,10 +6,11 @@ export function seedDemoData() {
   }
   const now = Date.now();
   const dayMs = 86400000;
+  const lang = (localStorage.getItem('app_language') as any) || 'sv';
 
   const demoConfig: Config = {
     currency: 'kr',
-    language: 'sv',
+    language: lang,
     payday: 25,
     paydayType: PaydayType.TWENTY_FIFTH,
     paydayBeforeWeekend: true,

@@ -1649,8 +1649,9 @@ export default function App() {
         return;
       }
     } else {
-      // In-app experience for logged in users: clean tab URLs
-      newPath = activeTab && activeTab !== 'today' ? `/${activeTab}` : '/';
+      // In-app and onboarding experience: preserve language subpath
+      const tabSub = activeTab && activeTab !== 'today' ? `/${activeTab}` : '/';
+      newPath = buildLanguageUrl(currentLang, tabSub);
     }
     
     if (window.location.pathname !== newPath) {
@@ -5108,6 +5109,7 @@ export default function App() {
             onClose={() => setIsFeedbackModalOpen(false)}
             onSubmit={handleFeedbackSubmit}
             t={t}
+            language={config?.language || landingLanguage || 'sv'}
           />
         )}
         {isDeleteAccountModalOpen && (
