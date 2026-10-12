@@ -96,6 +96,14 @@ import { clearDemoData, isDemoMode as checkDemoMode } from "./utils/demoUtils";
 
 import { dataService } from "./services/dataService";
 import { Language, translations, TranslationKey } from "./i18n";
+import {
+  parseLanguageFromPath,
+  detectBrowserLanguage,
+  buildLanguageUrl,
+  normalizeLanguage,
+  getRegionDefaults,
+} from "./utils/nordic";
+import { updateDocumentSeo } from "./utils/seo";
 import { hasPin } from "./utils/security";
 import {
   getPeriodBoundaries,
@@ -207,16 +215,19 @@ export default function App() {
 
   const [config, setConfig] = useState<Config | null>(null);
   const [landingLanguage, setLandingLanguage] = useState<Language>(() => {
-    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    if (pathSegments.length > 0) {
-      const firstSegment = pathSegments[0].toLowerCase();
-      if (['en', 'sv'].includes(firstSegment)) {
-        localStorage.setItem('app_language', firstSegment);
-        return firstSegment as Language;
-      }
+    // 1. Explicit language in URL (e.g. /da/, /no/, /fi/, /sv/)
+    const parsed = parseLanguageFromPath(window.location.pathname);
+    if (parsed.lang) {
+      localStorage.setItem('app_language', parsed.lang);
+      return parsed.lang;
     }
+    // 2. Previously manually chosen language
     const saved = localStorage.getItem('app_language');
-    return (saved as Language) || 'sv';
+    if (saved) {
+      return normalizeLanguage(saved);
+    }
+    // 3. Browser's preferred language, falling back to 'sv'
+    return detectBrowserLanguage();
   });
   const [currentPeriodDate, setCurrentPeriodDate] = useState(new Date());
 
@@ -895,21 +906,25 @@ export default function App() {
         }
 
         let languageToUse = dbSettings.language;
-        const pathSegments = window.location.pathname.split('/').filter(Boolean);
-        const urlLang = pathSegments.length > 0 && ['en', 'sv'].includes(pathSegments[0].toLowerCase()) ? pathSegments[0].toLowerCase() : null;
+        const parsedPath = parseLanguageFromPath(window.location.pathname);
+        const urlLang = parsedPath.lang;
 
-        if (urlLang && urlLang !== languageToUse) {
-          languageToUse = urlLang;
-          dataService.saveSettings(session.user.id, { ...dbSettings, language: urlLang });
-        } else if (!languageToUse && landingLanguage) {
-          languageToUse = landingLanguage;
-          dataService.saveSettings(session.user.id, { ...dbSettings, language: landingLanguage });
-        } else if (languageToUse && languageToUse !== landingLanguage) {
-          setLandingLanguage(languageToUse as Language);
+        if (!languageToUse) {
+          languageToUse = urlLang || landingLanguage || 'sv';
+          dataService.saveSettings(session.user.id, { ...dbSettings, language: languageToUse });
+        } else if (languageToUse !== landingLanguage) {
+          setLandingLanguage(normalizeLanguage(languageToUse));
+          localStorage.setItem('app_language', languageToUse);
         }
 
+        const regionDef = getRegionDefaults(dbSettings.country || languageToUse || 'sv');
+
         setConfig({
-          currency: dbSettings.currency === "SEK" ? "kr" : dbSettings.currency,
+          currency: dbSettings.currency === "SEK" ? "kr" : (dbSettings.currency || regionDef.currencySymbol),
+          currencyCode: dbSettings.currencyCode || regionDef.defaultCurrencyCode,
+          country: dbSettings.country || regionDef.countryCode,
+          locale: dbSettings.locale || regionDef.locale,
+          timezone: dbSettings.timezone || regionDef.timezone,
           language: languageToUse,
           payday: dbSettings.payday,
           paydayType: dbSettings.paydayType || PaydayType.TWENTY_FIFTH,
@@ -1591,25 +1606,13 @@ export default function App() {
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
     const handleUrlChange = () => {
-      const pathSegments = window.location.pathname.split('/').filter(Boolean);
-      let detectedLang: Language = 'sv';
-      let tabSegment = 'today';
-      
-      if (pathSegments.length > 0) {
-        const firstSegment = pathSegments[0].toLowerCase();
-        if (['en', 'sv'].includes(firstSegment)) {
-          detectedLang = firstSegment as Language;
-          tabSegment = pathSegments[1] || 'today';
-        } else {
-          tabSegment = pathSegments[0];
-        }
+      const parsed = parseLanguageFromPath(window.location.pathname);
+      if (parsed.lang && parsed.lang !== landingLanguage) {
+        setLandingLanguage(parsed.lang);
+        localStorage.setItem('app_language', parsed.lang);
       }
       
-      if (detectedLang !== landingLanguage) {
-        setLandingLanguage(detectedLang);
-        localStorage.setItem('app_language', detectedLang);
-      }
-      
+      const tabSegment = parsed.subpath.replace(/^\//, '').split('/')[0] || 'today';
       if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(tabSegment)) {
         if (tabSegment !== activeTab) {
           setActiveTab(tabSegment as Tab);
@@ -1624,20 +1627,22 @@ export default function App() {
   }, [landingLanguage, activeTab]);
 
   useEffect(() => {
-    const currentLang = config?.language || landingLanguage;
-    let newPath = '';
+    const currentLang = normalizeLanguage(config?.language || landingLanguage);
     
+    // Always keep SEO, canonical, and hreflang synchronized
+    updateDocumentSeo(currentLang, window.location.pathname);
+
+    let newPath = '';
     if (showLanding) {
-      newPath = currentLang === 'en' ? '/en' : '/';
-    } else {
-      if (currentLang === 'en') {
-        newPath = '/en';
-        if (activeTab && activeTab !== 'today') {
-          newPath += `/${activeTab}`;
-        }
-      } else {
-        newPath = activeTab && activeTab !== 'today' ? `/${activeTab}` : '/';
+      newPath = buildLanguageUrl(currentLang, '/');
+      // If visiting root '/' without prefix, replaceState seamlessly
+      if (window.location.pathname === '/' || window.location.pathname === '') {
+        window.history.replaceState(null, '', newPath);
+        return;
       }
+    } else {
+      // In-app experience for logged in users: clean tab URLs
+      newPath = activeTab && activeTab !== 'today' ? `/${activeTab}` : '/';
     }
     
     if (window.location.pathname !== newPath) {
@@ -2253,12 +2258,16 @@ export default function App() {
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
           surplusIncome: dbProfile.surplus_income || 0,
-          monthlySavings: dbProfile.monthly_savings || dbProfile.monthlySavings || config?.monthlySavings || 0,
-          monthlySavingsItems: (dbProfile.monthly_savings_items && dbProfile.monthly_savings_items.length > 0)
+          monthlySavings: (dbProfile.monthly_savings !== undefined && dbProfile.monthly_savings !== null)
+            ? dbProfile.monthly_savings
+            : ((dbProfile.monthlySavings !== undefined && dbProfile.monthlySavings !== null)
+              ? dbProfile.monthlySavings
+              : (config?.monthlySavings ?? 0)),
+          monthlySavingsItems: Array.isArray(dbProfile.monthly_savings_items)
             ? dbProfile.monthly_savings_items
-            : (dbProfile.monthlySavingsItems && dbProfile.monthlySavingsItems.length > 0)
+            : Array.isArray(dbProfile.monthlySavingsItems)
               ? dbProfile.monthlySavingsItems
-              : (config?.monthlySavingsItems && config.monthlySavingsItems.length > 0)
+              : Array.isArray(config?.monthlySavingsItems)
                 ? config.monthlySavingsItems
                 : (dbProfile.savings_goals || dbProfile.savingsGoals || config?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0).map((g: any) => ({
                     id: g.id || crypto.randomUUID(),
@@ -2317,14 +2326,12 @@ export default function App() {
         }
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
-        if (mappedConfig.monthlySavingsItems && mappedConfig.monthlySavingsItems.length > 0) {
+        if (Array.isArray(mappedConfig.monthlySavingsItems)) {
           const itemsSum = mappedConfig.monthlySavingsItems.reduce(
             (sum: number, item: any) => sum + (Number(item.amount) || 0),
             0,
           );
-          if (itemsSum > 0) {
-            mappedConfig.monthlySavings = itemsSum;
-          }
+          mappedConfig.monthlySavings = itemsSum;
         } else if (mappedConfig.monthlySavings > 0) {
           mappedConfig.monthlySavingsItems = [{
             id: crypto.randomUUID(),
@@ -2601,12 +2608,13 @@ export default function App() {
         );
         const checkFixedDue = (fe: any) => isFixedItemDueInPeriod(fe, periodStart, periodEnd);
 
-        const activeFixed = getActiveFixedExpenses(fixedExpenses);
+        const activeFixed = getActiveFixedExpenses(fixedExpenses, referenceDate, periodStart, periodEnd);
         const totalFixed = activeFixed.reduce((sum, e) => {
           const amount = getAmountForPeriod(e);
           const isDue = checkFixedDue(e);
           return isDue ? sum + amount : sum;
         }, 0);
+        const hasExplicitSavingsList = Array.isArray(config.monthlySavingsItems);
         const savingsFromItems = config.monthlySavingsItems?.reduce(
           (sum, item) => {
             const amount = getAmountForPeriod(item);
@@ -2621,7 +2629,7 @@ export default function App() {
           : (Number(config.monthlySavings) || 0);
 
         const fallbackSavingsGoals =
-          explicitMonthlySavings === 0 && config.savingsGoals?.length
+          !hasExplicitSavingsList && explicitMonthlySavings === 0 && config.savingsGoals?.length
             ? config.savingsGoals.reduce(
                 (sum, g) => sum + (Number(g.targetAmount) || 0),
                 0,
@@ -3541,11 +3549,24 @@ export default function App() {
     }
   };
 
+  const extractRawSavingId = (rawId: any): string => {
+    if (!rawId) return '';
+    let str = String(rawId);
+    if (str.startsWith('fixed-saving-')) {
+      str = str.replace(/^fixed-saving-/, '');
+      str = str.replace(/-\d{4}-\d{1,2}-\d{1,2}$/, '');
+    }
+    if (str.startsWith('saving-')) {
+      str = str.replace(/^saving-/, '');
+    }
+    return str;
+  };
+
   const handleSaveMonthlySaving = async (saving: any) => {
     if (!session || !config) return;
     try {
       const rawId = editingMonthlySaving?.id || crypto.randomUUID();
-      const targetId = rawId.startsWith('saving-') ? rawId.replace('saving-', '') : rawId;
+      const targetId = extractRawSavingId(rawId) || rawId;
       const newSaving = {
         ...saving,
         isVariable: Boolean(saving.isVariable),
@@ -3554,9 +3575,15 @@ export default function App() {
       };
 
       const existingItems = config.monthlySavingsItems || [];
-      const itemExists = existingItems.some((s: any) => s.id === targetId || s.id === rawId);
+      const itemExists = existingItems.some((s: any) => {
+        const sClean = extractRawSavingId(s.id);
+        return s.id === targetId || s.id === rawId || (!!sClean && sClean === targetId);
+      });
       const newItems = itemExists
-        ? existingItems.map((s: any) => (s.id === targetId || s.id === rawId ? newSaving : s))
+        ? existingItems.map((s: any) => {
+            const sClean = extractRawSavingId(s.id);
+            return (s.id === targetId || s.id === rawId || (!!sClean && sClean === targetId)) ? newSaving : s;
+          })
         : [...existingItems, newSaving];
 
       const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
@@ -3574,11 +3601,39 @@ export default function App() {
   const handleDeleteMonthlySaving = async (id: string) => {
     if (!session || !config) return;
     try {
-      const cleanId = id.startsWith('saving-') ? id.replace('saving-', '') : id;
-      const newItems =
-        config.monthlySavingsItems?.filter((s: any) => s.id !== id && s.id !== cleanId) || [];
+      const cleanTargetId = extractRawSavingId(id);
+      const targetItem = (config.monthlySavingsItems || []).find((s: any) => {
+        const itemCleanId = extractRawSavingId(s.id);
+        return s.id === id || s.id === cleanTargetId || itemCleanId === cleanTargetId;
+      });
+
+      const newItems = (config.monthlySavingsItems || []).filter((s: any) => {
+        const itemCleanId = extractRawSavingId(s.id);
+        return (
+          s.id !== id &&
+          s.id !== cleanTargetId &&
+          itemCleanId !== cleanTargetId
+        );
+      });
       const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
-      const newConfig = { ...config, monthlySavingsItems: newItems, monthlySavings: itemsSum };
+
+      // Also clean up matching savingsGoals if any exist
+      const newGoals = (config.savingsGoals || []).filter((g: any) => {
+        const goalCleanId = extractRawSavingId(g.id);
+        const isMatch =
+          g.id === id ||
+          g.id === cleanTargetId ||
+          goalCleanId === cleanTargetId ||
+          (targetItem && (g.title === targetItem.name || g.name === targetItem.name));
+        return !isMatch;
+      });
+
+      const newConfig = {
+        ...config,
+        monthlySavingsItems: newItems,
+        monthlySavings: itemsSum,
+        savingsGoals: newItems.length === 0 ? [] : newGoals,
+      };
       setConfig(newConfig);
       await dataService.saveSettings(session.user.id, newConfig);
       addToast(t("deleted"), "success");
@@ -4188,6 +4243,7 @@ export default function App() {
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
         case "receipts": return config?.language === 'en' ? 'Receipts' : 'Kvitton';
+        case "starred": return config?.language === 'en' ? 'Starred' : 'Hjärtmarkerade';
         case "debts": return config?.language === 'en' ? 'Debts & IOUs' : 'Skyldig';
         case "sharedBudget": return config?.language === 'en' ? 'Shared budget' : 'Delad budget';
         case "guides": return config?.language === 'en' ? 'Guides & Instructions' : 'Guider & Instruktioner';
@@ -5142,6 +5198,9 @@ export default function App() {
                 userAgeGroup: data.userAgeGroup || config?.userAgeGroup,
                 userGender: data.userGender || config?.userGender,
                 categories: (data.categories && data.categories.length > 0) ? data.categories : config.categories,
+                country: data.country || config?.country,
+                currency: data.currency || config?.currency,
+                currencyCode: data.currencyCode || config?.currencyCode,
               };
               await dataService.saveSettings(activeUserId, newConfig);
               setConfig(newConfig);

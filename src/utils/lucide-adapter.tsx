@@ -368,3 +368,6 @@ export const Instagram = wrapIcon(Phosphor.InstagramLogo);
 export const Square = wrapIcon(Phosphor.Square);
 export const CircleHalf = wrapIcon(Phosphor.CircleHalf);
 export const CalendarCheck = wrapIcon(Phosphor.CalendarCheck);
+export const GitFork = wrapIcon(Phosphor.GitFork);
+export const Split = wrapIcon(Phosphor.GitFork);
+

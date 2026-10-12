@@ -2,7 +2,8 @@ import React from 'react';
 
 export interface SwitchProps {
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
+  onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
   size?: 'sm' | 'md';
   'aria-label'?: string;
@@ -13,12 +14,18 @@ export interface SwitchProps {
 export const Switch: React.FC<SwitchProps> = ({
   checked,
   onChange,
+  onCheckedChange,
   disabled = false,
   size = 'md',
   'aria-label': ariaLabel,
   id,
   className = '',
 }) => {
+  const handleChange = (newChecked: boolean) => {
+    if (disabled) return;
+    onChange?.(newChecked);
+    onCheckedChange?.(newChecked);
+  };
   const isSm = size === 'sm';
 
   const trackWidth = isSm ? 'w-9 h-5' : 'w-11 h-6';
@@ -29,7 +36,7 @@ export const Switch: React.FC<SwitchProps> = ({
     if (disabled) return;
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
-      onChange(!checked);
+      handleChange(!checked);
     }
   };
 
@@ -41,7 +48,7 @@ export const Switch: React.FC<SwitchProps> = ({
       aria-checked={checked}
       aria-label={ariaLabel}
       disabled={disabled}
-      onClick={() => !disabled && onChange(!checked)}
+      onClick={() => handleChange(!checked)}
       onKeyDown={handleKeyDown}
       className={`relative inline-flex items-center shrink-0 cursor-pointer rounded-full transition-colors duration-[var(--duration-normal,150ms)] ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 disabled:opacity-40 disabled:cursor-not-allowed select-none ${trackWidth} ${
         checked ? 'bg-[var(--accent-color)]' : 'bg-[var(--surface-muted)] border border-[var(--border-subtle)]'

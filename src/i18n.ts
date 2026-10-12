@@ -3,7 +3,7 @@ export type Language = 'sv' | 'en' | 'no' | 'da' | 'fi';
 export const languageInfo: Record<Language, { label: string; flag: string; countryCode: string; flagUrl: string }> = {
   sv: { label: 'Svenska', flag: '🇸🇪', countryCode: 'SV', flagUrl: 'https://flagcdn.com/w40/se.png' },
   en: { label: 'English', flag: '🇬🇧', countryCode: 'EN', flagUrl: 'https://flagcdn.com/w40/gb.png' },
-  no: { label: 'Norsk', flag: '🇳🇴', countryCode: 'NO', flagUrl: 'https://flagcdn.com/w40/no.png' },
+  no: { label: 'Norsk (bokmål)', flag: '🇳🇴', countryCode: 'NO', flagUrl: 'https://flagcdn.com/w40/no.png' },
   da: { label: 'Dansk', flag: '🇩🇰', countryCode: 'DA', flagUrl: 'https://flagcdn.com/w40/dk.png' },
   fi: { label: 'Suomi', flag: '🇫🇮', countryCode: 'FI', flagUrl: 'https://flagcdn.com/w40/fi.png' },
 };

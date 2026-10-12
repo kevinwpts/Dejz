@@ -889,19 +889,19 @@ export function AnalysisView({
                       </div>
                     </div>
 
-                    {/* Höger: Spenderat belopp, Andel av utgifterna, Chevron */}
-                    <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 whitespace-nowrap pl-2">
-                      <div className="text-right flex flex-col items-end justify-center min-w-0">
-                        <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight">
+                    {/* Höger: Tydlig högerkolumn för belopp + procent + chevron */}
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 whitespace-nowrap pl-2">
+                      <div className="w-[110px] sm:w-[130px] text-right flex flex-col items-end justify-center shrink-0">
+                        <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight tabular-nums">
                           {formatAmount(spentRound, config.language)}
                           <span className="text-secondary font-normal opacity-80 ml-1 select-none">{config.currency || 'kr'}</span>
                         </p>
-                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-1 leading-tight font-normal">
+                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-0.5 leading-tight font-normal">
                           {categoryPct} %
                         </span>
                       </div>
-                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
-                        <ChevronDown size={18} strokeWidth={2} />
+                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)] opacity-60'}`}>
+                        <ChevronDown size={16} strokeWidth={2} />
                       </div>
                     </div>
                   </div>

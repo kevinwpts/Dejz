@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /sv/
+Allow: /da/
+Allow: /no/
+Allow: /fi/
+Disallow: /api/
+
+Sitemap: https://dejz.se/sitemap.xml

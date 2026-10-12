@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown,  } from 'lucide-react';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, Clock, ChevronDown } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
@@ -9,7 +9,7 @@ import { Button, Card, FilterButtonGroup } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
-import { getActiveFixedExpenses } from '../utils/cancellation';
+import { getActiveFixedExpenses, isExpenseCancelledAndExpired } from '../utils/cancellation';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -143,7 +143,15 @@ export function BudgetView({
     }
   }, [incomes, incomeSortBy]);
 
-  const activeFixedExpenses = React.useMemo(() => getActiveFixedExpenses(fixedExpenses), [fixedExpenses]);
+  const [showCancelledList, setShowCancelledList] = React.useState(false);
+
+  const activeFixedExpenses = React.useMemo(() => {
+    return getActiveFixedExpenses(fixedExpenses, new Date(), stats?.periodStart, stats?.periodEnd);
+  }, [fixedExpenses, stats?.periodStart, stats?.periodEnd]);
+
+  const expiredCancelledExpenses = React.useMemo(() => {
+    return (fixedExpenses || []).filter(e => isExpenseCancelledAndExpired(e, new Date()));
+  }, [fixedExpenses]);
 
   const sortedFixedExpenses = React.useMemo(() => {
     const list = [...(activeFixedExpenses || [])];
@@ -265,7 +273,7 @@ export function BudgetView({
 
   const totalSavingsSum = stats?.totalSavings !== undefined
     ? stats.totalSavings
-    : (config.monthlySavingsItems && config.monthlySavingsItems.length > 0
+    : (Array.isArray(config.monthlySavingsItems)
         ? (config.monthlySavingsItems.reduce((sum, item) => {
             const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
               ? item.periodOverrides[currentPeriodId]
@@ -489,6 +497,52 @@ export function BudgetView({
                       />
                     ))}
                   </div>
+
+                  {expiredCancelledExpenses.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-subtle space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowCancelledList(!showCancelledList)}
+                        className="w-full p-3 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] flex items-center justify-between transition-colors cursor-pointer text-left border-none shadow-none"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Clock size={15} className="text-amber-500 shrink-0" />
+                          <span className="text-xs font-bold text-[var(--text-primary)]">
+                            {config.language === 'en' ? 'Cancelled / Ended Subscriptions' : 'Uppsagda & avslutade abonnemang'}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-[11px]">
+                            {expiredCancelledExpenses.length}
+                          </span>
+                        </div>
+                        <ChevronDown size={16} className={`text-[var(--text-secondary)] transition-transform duration-200 ${showCancelledList ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {showCancelledList && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden space-y-[var(--card-gap)] pt-2"
+                          >
+                            {expiredCancelledExpenses.map((expense) => (
+                              <BudgetItem
+                                key={expense.id}
+                                item={expense}
+                                onClick={() => onViewFixedExpense(expense)}
+                                currency={config?.currency || 'kr'}
+                                type="expense"
+                                language={config.language as Language}
+                                t={t}
+                                config={config}
+                                currentPeriodId={currentPeriodId}
+                              />
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
                 </>
               ) : (
                 <EmptyState 

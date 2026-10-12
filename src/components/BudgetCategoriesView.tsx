@@ -85,7 +85,7 @@ export function BudgetCategoriesView({
   const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
 
   // --- Calculations ---
-  const activeExpenses = getActiveFixedExpenses(fixedExpenses);
+  const activeExpenses = getActiveFixedExpenses(fixedExpenses, new Date(), stats?.periodStart, stats?.periodEnd);
 
   const getFixedSpentForCategory = (catName: string) => {
     return (activeExpenses || [])
@@ -136,7 +136,7 @@ export function BudgetCategoriesView({
   const totalSavingsSum =
     stats?.totalSavings !== undefined
       ? stats.totalSavings
-      : config.monthlySavingsItems && config.monthlySavingsItems.length > 0
+      : Array.isArray(config.monthlySavingsItems)
       ? config.monthlySavingsItems.reduce((sum, item) => {
           const amount =
             item.isVariable && item.periodOverrides && currentPeriodId && item.periodOverrides[currentPeriodId] !== undefined

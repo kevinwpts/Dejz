@@ -6,15 +6,29 @@ import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
 import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
 
+import { Language } from '../i18n';
+import { getRegionDefaults } from '../utils/nordic';
+import { LanguagePicker } from './LanguagePicker';
+
 interface AuthProps {
   onShowToast: (message: string, type: 'success' | 'error') => void;
   onLegalClick: (type: 'privacy' | 'terms' | 'cookies' | 'contact') => void;
   t: (key: TranslationKey) => string;
   initialIsRegistering?: boolean;
   onBack?: () => void;
+  currentLanguage?: Language;
+  onLanguageChange?: (lang: Language) => void;
 }
 
-export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = false, onBack }: AuthProps) {
+export function Auth({ 
+  onShowToast, 
+  onLegalClick, 
+  t, 
+  initialIsRegistering = false, 
+  onBack,
+  currentLanguage = 'sv',
+  onLanguageChange,
+}: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(initialIsRegistering);
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -24,10 +38,52 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  const getLocalizedAuthMsg = (key: string, defaultMsg: string) => {
+    const isEn = currentLanguage === 'en';
+    const isDa = currentLanguage === 'da';
+    const isNo = currentLanguage === 'no';
+    const isFi = currentLanguage === 'fi';
+
+    switch (key) {
+      case 'enterEmail':
+        if (isEn) return 'Please enter your email address';
+        if (isDa) return 'Indtast venligst din e-mailadresse';
+        if (isNo) return 'Vennligst oppgi din e-postadresse';
+        if (isFi) return 'Syötä sähköpostiosoitteesi';
+        return 'Ange din e-postadress';
+      case 'resetSent':
+        if (isEn) return 'Password reset link sent!';
+        if (isDa) return 'Link til nulstilling er sendt!';
+        if (isNo) return 'Tilbakestillingslenke er sendt!';
+        if (isFi) return 'Palautuslinkki on lähetetty!';
+        return 'Återställningslänk har skickats!';
+      case 'tooManyRequests':
+        if (isEn) return 'Too many requests. Please wait a moment and try again.';
+        if (isDa) return 'For mange anmodninger. Vent et øjeblik og prøv igen.';
+        if (isNo) return 'For mange forespørsler. Vent litt og prøv igjen.';
+        if (isFi) return 'Liikaa pyyntöjä. Odota hetki ja yritä uudelleen.';
+        return 'För många förfrågningar. Vänta en stund och försök igen.';
+      case 'passwordMin6':
+        if (isEn) return 'Password must be at least 6 characters long.';
+        if (isDa) return 'Adgangskoden skal være mindst 6 tegn lang.';
+        if (isNo) return 'Passordet må være minst 6 tegn langt.';
+        if (isFi) return 'Salasanan on oltava vähintään 6 merkkiä pitkä.';
+        return 'Lösenordet måste vara minst 6 tecken långt.';
+      case 'accountExists':
+        if (isEn) return 'An account with this email already exists. Choose "Log in" instead.';
+        if (isDa) return 'En konto med denne e-mail findes allerede. Vælg "Log ind" i stedet.';
+        if (isNo) return 'En konto med denne e-posten finnes allerede. Velg "Logg inn" i stedet.';
+        if (isFi) return 'Tili tällä sähköpostiosoitteella on jo olemassa. Valitse "Kirjaudu sisään".';
+        return 'Ett konto med denna e-postadress finns redan. Välj "Logga in" istället.';
+      default:
+        return defaultMsg;
+    }
+  };
+
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
-      setError('Ange din e-postadress');
+      setError(getLocalizedAuthMsg('enterEmail', 'Ange din e-postadress'));
       return;
     }
 
@@ -35,19 +91,21 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     setError(null);
 
     try {
+      localStorage.setItem('app_language', currentLanguage);
+      localStorage.setItem('app_language_manual', 'true');
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}/${currentLanguage}/`,
       });
 
       if (error) throw error;
 
       setIsResetSent(true);
-      onShowToast('Återställningslänk har skickats!', 'success');
+      onShowToast(getLocalizedAuthMsg('resetSent', 'Återställningslänk har skickats!'), 'success');
     } catch (err: any) {
       console.error('Password reset error:', err);
       let message = err.message || 'Kunde inte skicka återställningslänk.';
       if (message.includes('rate limit')) {
-        message = 'För många förfrågningar. Vänta en stund och försök igen.';
+        message = getLocalizedAuthMsg('tooManyRequests', 'För många förfrågningar. Vänta en stund och försök igen.');
       }
       setError(message);
       onShowToast(message, 'error');
@@ -78,7 +136,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     }
 
     if (isRegistering && password.length < 6) {
-      const message = 'Lösenordet måste vara minst 6 tecken långt.';
+      const message = getLocalizedAuthMsg('passwordMin6', 'Lösenordet måste vara minst 6 tecken långt.');
       setError(message);
       onShowToast(message, 'error');
       setLoading(false);
@@ -86,12 +144,22 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     }
 
     try {
+      localStorage.setItem('app_language', currentLanguage);
+      localStorage.setItem('app_language_manual', 'true');
+      const regDefaults = getRegionDefaults(currentLanguage);
+
       if (isRegistering) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/${currentLanguage}/`,
             data: {
+              language: currentLanguage,
+              country: regDefaults.countryCode,
+              currency: regDefaults.defaultCurrencyCode,
+              locale: regDefaults.locale,
+              timezone: regDefaults.timezone,
               dark_mode: true,
             },
           },
@@ -120,9 +188,9 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       } else if (message === 'User not found') {
         message = t('userNotFound' as any) || 'Ingen användare hittades med denna e-post.';
       } else if (message === 'User already registered') {
-        message = 'Ett konto med denna e-postadress finns redan. Välj "Logga in" istället.';
+        message = getLocalizedAuthMsg('accountExists', 'Ett konto med denna e-postadress finns redan. Välj "Logga in" istället.');
       } else if (message?.includes('Password should be at least')) {
-        message = 'Lösenordet måste vara minst 6 tecken långt.';
+        message = getLocalizedAuthMsg('passwordMin6', 'Lösenordet måste vara minst 6 tecken långt.');
       } else if (!message) {
         message = t('authError' as any) || 'Ett fel uppstod vid inloggning.';
       }
@@ -143,10 +211,13 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
         inIframe = true;
       }
       
+      localStorage.setItem('app_language', currentLanguage);
+      localStorage.setItem('app_language_manual', 'true');
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/${currentLanguage}/`,
           skipBrowserRedirect: inIframe,
           queryParams: {
             prompt: 'select_account',
@@ -199,6 +270,17 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
             variant="muted"
             size="sm"
             aria-label="Tillbaka"
+          />
+        </div>
+      )}
+
+      {/* Top Right Language Picker */}
+      {onLanguageChange && (
+        <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 sm:right-8 z-30">
+          <LanguagePicker
+            currentLanguage={currentLanguage}
+            onLanguageChange={onLanguageChange}
+            variant="compact"
           />
         </div>
       )}

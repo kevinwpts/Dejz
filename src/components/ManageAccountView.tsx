@@ -7,7 +7,7 @@ import { PasswordChangeView } from './PasswordChangeView';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { Button, Input, IconButton, ListRow } from './ui';
+import { Button, Input, IconButton, ListRow, Card } from './ui';
 
 interface ManageAccountViewProps {
   onBack: () => void;
@@ -133,9 +133,9 @@ export function ManageAccountView({
       ) : (
         <>
           {/* Profile Avatar Upload */}
-          <div className="text-center py-2 flex flex-col items-center justify-center">
-            <label htmlFor="avatar-manage" className="relative w-20 h-20 mb-2 block cursor-pointer group">
-              <div className="w-20 h-20 rounded-[var(--radius-card-nested,10px)] overflow-hidden border-none bg-black/[0.04] dark:bg-white/5 relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
+          <div className="text-center py-1 flex flex-col items-center justify-center">
+            <label htmlFor="avatar-manage" className="relative w-16 h-16 mb-1 block cursor-pointer group">
+              <div className="w-16 h-16 rounded-[var(--radius-card-nested,12px)] overflow-hidden border-none bg-black/[0.04] dark:bg-white/5 relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -160,7 +160,6 @@ export function ManageAccountView({
                 onChange={handleFileChange}
               />
             </label>
-
           </div>
 
           <div className="space-y-4">
@@ -186,24 +185,24 @@ export function ManageAccountView({
             </div>
 
             {/* Password */}
-            <div className="border-t border-b border-[var(--border-subtle)] my-1">
+            <Card padding="none" className="overflow-hidden bg-[var(--surface-color)] border-none shadow-none rounded-[var(--radius-card,14px)]">
               <ListRow
                 variant="grouped"
                 showChevron
-                icon={<Lock size={16} strokeWidth={2} />}
+                icon={<Lock size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />}
                 iconBg="bg-black/[0.04] dark:bg-white/5"
                 title={t('changePassword' as any) || 'Ändra lösenord'}
                 onClick={() => setShowPasswordChange(true)}
               />
-            </div>
+            </Card>
 
-            {/* Connected Accounts */}
+            {/* Connected Accounts / Inloggningsmetoder */}
             {identities.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <span className="text-label font-semibold text-[var(--text-secondary)] px-1.5 block">
-                  {t('connectedAccounts' as any) || 'Kopplade konton'}
+              <div className="space-y-2">
+                <span className="text-label font-semibold text-[var(--text-secondary)] px-1 block">
+                  {t('connectedAccounts' as any) || 'Inloggningsmetoder'}
                 </span>
-                <div className="divide-y divide-[var(--border-subtle)] border-t border-b border-[var(--border-subtle)]">
+                <Card padding="none" className="overflow-hidden divide-y divide-subtle bg-[var(--surface-color)] border-none shadow-none rounded-[var(--radius-card,14px)]">
                   {identities.map((identity) => (
                     <ListRow
                       key={identity.id}
@@ -244,12 +243,12 @@ export function ManageAccountView({
                       }
                     />
                   ))}
-                </div>
+                </Card>
               </div>
             )}
 
             {/* Actions */}
-            <div className="pt-2 space-y-2.5">
+            <div className="pt-2 space-y-2">
               <Button 
                 onClick={handleSave}
                 loading={isUpdating}

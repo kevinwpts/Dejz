@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Receipt, ChevronRight, FileText } from 'lucide-react';
+import { Receipt, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { EmptyState } from './EmptyState';
 import { formatAmount, capitalize } from '../utils/format';
@@ -116,7 +116,7 @@ export function ReceiptsView({
           placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
-          className="w-full"
+          className="w-full h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none"
         />
       )}
 
@@ -166,13 +166,13 @@ export function ReceiptsView({
                           )}
                         </div>
 
-                        {/* Middle: Payee + Category + Date */}
+                        {/* Middle: Payee + Category */}
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
                           <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate">
                             {item.merchant || item.category || (isEn ? 'Receipt' : 'Kvitto')}
                           </p>
 
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-secondary text-[var(--text-secondary)] flex-wrap">
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
                             {/* Category with Icon */}
                             <div className="flex items-center gap-1 shrink-0">
                               {iconKey && (
@@ -183,17 +183,10 @@ export function ReceiptsView({
                                   size="2xs"
                                 />
                               )}
-                              <span className="truncate max-w-[120px] sm:max-w-[160px]">
+                              <span className="text-secondary text-[var(--text-secondary)] whitespace-nowrap truncate max-w-[140px] sm:max-w-[180px]">
                                 {capitalize(item.category || '')}
                               </span>
                             </div>
-
-                            <span className="text-[var(--text-tertiary)] opacity-60">•</span>
-
-                            {/* Date */}
-                            <span className="text-[var(--text-tertiary)] tabular-nums shrink-0">
-                              {formatDate(item.timestamp)}
-                            </span>
                           </div>
 
                           {/* Optional note */}
@@ -205,21 +198,20 @@ export function ReceiptsView({
                         </div>
                       </div>
 
-                      {/* Right: Amount + Chevron */}
-                      <div className="flex items-center gap-2 shrink-0 text-right pl-2">
-                        <span
+                      {/* Right: Amount + Date under amount */}
+                      <div className="flex flex-col items-end justify-center shrink-0 whitespace-nowrap pl-1 text-right">
+                        <p
                           className={`text-list-amount font-amount tabular-nums font-semibold whitespace-nowrap ${
                             item.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
                           }`}
                         >
                           <span className="opacity-80 mr-0.5">{item.type === 'income' ? '+' : '−'}</span>
                           {formatAmount(item.amount, config.language)} {curr}
-                        </span>
+                        </p>
 
-                        <ChevronRight
-                          size={16}
-                          className="text-[var(--text-tertiary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0"
-                        />
+                        <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                          {formatDate(item.timestamp)}
+                        </p>
                       </div>
                     </Card>
                   </motion.div>

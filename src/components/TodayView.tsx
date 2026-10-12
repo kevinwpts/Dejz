@@ -23,6 +23,7 @@ import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
 import { Button, Modal } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
+import { isExpenseCancelledAndExpired } from "../utils/cancellation";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
@@ -229,6 +230,8 @@ export function TodayView({
     });
 
     fixedExpenses.forEach((fe) => {
+      if (isExpenseCancelledAndExpired(fe, normalizedSelectedDate)) return;
+
       if (fe.deductionDay === day) {
         let isActiveThisMonth = true;
         const currentMonth = normalizedSelectedDate.getMonth();
@@ -261,7 +264,7 @@ export function TodayView({
       }
     });
 
-    const savingsList = config?.monthlySavingsItems && config.monthlySavingsItems.length > 0 
+    const savingsList = Array.isArray(config?.monthlySavingsItems)
       ? config.monthlySavingsItems 
       : (stats?.savingsGoals || []);
 

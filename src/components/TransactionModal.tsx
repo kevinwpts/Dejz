@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { X, ChevronRight, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText, Heart } from 'lucide-react';
+import { X, ChevronRight, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText, Heart, GitFork } from 'lucide-react';
 import { IconButton, Button, Switch } from './ui';
 import { Transaction, Category, TransactionSplit } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -167,8 +167,22 @@ export function TransactionModal({
 }: TransactionModalProps) {
   useScrollLock(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const parseSplits = (rawSplits: any): TransactionSplit[] => {
+    if (!rawSplits) return [];
+    if (Array.isArray(rawSplits)) return rawSplits;
+    if (typeof rawSplits === 'string') {
+      try {
+        const parsed = JSON.parse(rawSplits);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
   const [amount, setAmount] = useState(formatAmount(transaction?.amount?.toString() || prefill?.amount?.toString() || ''));
-  const [splits, setSplits] = useState<TransactionSplit[]>(transaction?.splits || []);
+  const [splits, setSplits] = useState<TransactionSplit[]>(() => parseSplits(transaction?.splits));
   const [category, setCategory] = useState(transaction?.category || prefill?.category || (categories && categories.length > 0 ? categories[0].name : ''));
   const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(!!prefill?.category);
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
@@ -352,7 +366,10 @@ export function TransactionModal({
   const categoryData = categories.find(c => c.name === category);
   const _categoryColor = categoryData?.color;
 
-  const isSplitsValid = splits.length === 0 || splits.every(s => s.category !== '');
+  const totalVal = parseAmount(amount);
+  const currentSplitSum = useMemo(() => splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0), [splits]);
+  const isSplitSumExact = splits.length === 0 || Math.abs(currentSplitSum - totalVal) < 0.01;
+  const isSplitsValid = (splits.length === 0 || splits.every(s => (s.category || '').trim() !== '')) && isSplitSumExact;
 
   useEffect(() => {
     if (validationError) setValidationError(null);
@@ -560,6 +577,24 @@ export function TransactionModal({
     }
   }, [merchant, note, manualSelectionThisSession]);
 
+  // Synchronize state when editing a transaction
+  useEffect(() => {
+    if (transaction) {
+      setAmount(formatAmount(transaction.amount?.toString() || ''));
+      setSplits(parseSplits(transaction.splits));
+      setCategory(transaction.category || (categories && categories.length > 0 ? categories[0].name : ''));
+      setMerchant(transaction.merchant || '');
+      setNote(transaction.note || '');
+      if (transaction.logo) setLogo(transaction.logo);
+      if (transaction.icon) setIcon(transaction.icon);
+      if (transaction.receiptUrl) setReceiptUrl(transaction.receiptUrl);
+      setIsStarred(Boolean(transaction.isStarred || (transaction.tags && Array.isArray(transaction.tags) && transaction.tags.includes('starred'))));
+      if (transaction.timestamp) {
+        setSelectedDate(new Date(transaction.timestamp));
+      }
+    }
+  }, [transaction]);
+
   // Only resolve initial prefill brand visual on mount if not editing existing transaction
   useEffect(() => {
     if (prefill?.name && !transaction && !logo) {
@@ -682,7 +717,7 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-2.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -719,14 +754,14 @@ export function TransactionModal({
               </div>
             </div>
 
-            <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
+            <div className="pt-2.5 border-t border-subtle flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {currentLang === 'en' ? 'Amount' : 'Belopp'}
                 </label>
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="flex items-center gap-2 font-amount cursor-text w-full"
+                  className="flex items-baseline gap-1.5 font-amount cursor-text w-full"
                 >
                   <input
                     ref={amountInputRef}
@@ -743,7 +778,7 @@ export function TransactionModal({
                     className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)] text-[30px] sm:text-[36px] w-full leading-none shrink min-w-[60px]"
                     placeholder="0"
                   />
-                  <span className="text-secondary font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[var(--radius-xs,8px)] select-none shrink-0 font-sans">
+                  <span className="text-secondary font-medium text-[var(--text-tertiary)] uppercase tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
                     {currency}
                   </span>
                 </div>
@@ -775,46 +810,56 @@ export function TransactionModal({
           <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Category or Split Categories */}
             {type === 'expense' && splits.length > 0 ? (
-              /* Inline Split Category View */
-              <div className="p-4 space-y-3 bg-black/[0.015] dark:bg-white/[0.02]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-body font-bold text-[var(--text-primary)]">
-                      {currentLang === 'en' ? 'Category Split' : 'Uppdelade kategorier'}
+              /* Expanded Split Category View */
+              <div>
+                {/* Header: "Kategorier" on left, "Ta bort uppdelning" on right */}
+                <div className="px-4 pt-3 pb-2 border-b border-subtle">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-body font-semibold text-[var(--text-primary)]">
+                      {currentLang === 'en' ? 'Categories' : 'Kategorier'}
                     </span>
-                    {/* Balance Status Indicator (shows only if there is a remaining difference) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        if (splits.length > 0 && splits[0].category) {
+                          setCategory(splits[0].category);
+                        }
+                        setSplits([]);
+                      }}
+                      className="text-xs font-medium text-[var(--danger-color)] hover:underline cursor-pointer shrink-0"
+                    >
+                      {currentLang === 'en' ? 'Remove split' : 'Ta bort uppdelning'}
+                    </button>
+                  </div>
+
+                  {/* Summary on its own discrete row directly under the header */}
+                  <div className="mt-0.5">
                     {(() => {
                       const totalVal = parseAmount(amount);
                       const currentSum = splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-                      const diff = totalVal - currentSum;
-                      if (Math.abs(diff) < 0.5) return null;
+                      const isExact = Math.abs(currentSum - totalVal) < 0.01;
                       return (
-                        <span className="text-micro-label font-bold px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-amount tabular-nums">
-                          {formatAmount(Math.max(0, diff).toString())} {currency} {currentLang === 'en' ? 'left' : 'kvar'}
+                        <span className={`text-[11px] font-medium flex items-center gap-1 font-amount ${
+                          isExact ? 'text-[var(--text-tertiary)]' : 'text-[var(--warning-color)] font-medium'
+                        }`}>
+                          {currentSum} av {totalVal} {currency} fördelat
+                          {isExact && totalVal > 0 && (
+                            <Check size={12} className="text-emerald-500 stroke-[2.5] shrink-0" />
+                          )}
                         </span>
                       );
                     })()}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setSplits([]);
-                    }}
-                    className="text-xs font-semibold text-[var(--danger-color)] hover:text-[var(--danger-color)] p-1 cursor-pointer"
-                  >
-                    {currentLang === 'en' ? 'Cancel split' : 'Ta bort uppdelning'}
-                  </button>
                 </div>
 
-                {/* Split Category Rows */}
-                <div className="space-y-2">
+                {/* Split Category Rows with Thin Dividers & Compact Vertical Spacing */}
+                <div className="divide-y divide-subtle">
                   {splits.map((split, index) => {
-                    const catData = categories.find(c => c.name === split.category);
+                    const catData = categories.find(c => c.name.toLowerCase() === (split.category || '').toLowerCase());
 
                     return (
-                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-card-nested bg-[var(--surface-color)] border border-subtle gap-2">
+                      <div key={split.id || index} className="px-4 py-2.5 flex items-center justify-between gap-2">
                         {/* Category Selector Button */}
                         <button
                           type="button"
@@ -823,74 +868,89 @@ export function TransactionModal({
                             setActiveSplitIndex(index);
                             setIsCategoryPickerOpen(true);
                           }}
-                          className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer group"
+                          className="flex items-center gap-2.5 flex-1 min-w-0 text-left cursor-pointer group"
                         >
                           <CategoryIcon 
                             icon={catData?.icon || 'tag'} 
                             color={split.category ? (catData?.color || getCategoryColor(split.category, categories)) : '#716e68'} 
                             size="xs" 
                           />
-                          <span className="text-body font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate">
+                          <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate max-w-[120px] sm:max-w-[180px]">
                             {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                           </span>
+                          <ChevronRight size={14} strokeWidth={2} className="text-[var(--text-tertiary)] opacity-60 group-hover:opacity-100 shrink-0" />
                         </button>
 
-                        {/* Amount Input with Auto-balancing on other splits */}
-                        <div className="flex items-center gap-1 shrink-0">
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={split.amount ?? ''}
-                            onChange={(e) => {
-                              const rawVal = parseAmount(e.target.value);
-                              const totalVal = parseAmount(amount);
+                        {/* Amount Input with Auto-balancing */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              value={split.amount ?? ''}
+                              onFocus={(e) => e.target.select()}
+                              onChange={(e) => {
+                                const rawVal = parseAmount(e.target.value);
+                                const totalVal = parseAmount(amount);
 
-                              if (splits.length <= 1) return;
+                                if (splits.length <= 1) return;
 
-                              if (splits.length === 2) {
-                                // 2 splits: editing index automatically adjusts the other split!
-                                const otherIndex = index === 0 ? 1 : 0;
-                                const clampedVal = Math.min(totalVal, Math.max(0, rawVal));
-                                const newSplits = [...splits];
-                                newSplits[index] = { ...newSplits[index], amount: clampedVal };
-                                newSplits[otherIndex] = { ...newSplits[otherIndex], amount: totalVal - clampedVal };
-                                setSplits(newSplits);
-                              } else {
-                                // 3 or more splits: editing index adjusts target, and adjusts either the last or second-to-last split
-                                const targetAdjustIndex = index === splits.length - 1 ? splits.length - 2 : splits.length - 1;
-                                
-                                const fixedSum = splits.reduce((sum, s, i) => {
-                                  if (i === index || i === targetAdjustIndex) return sum;
-                                  return sum + (Number(s.amount) || 0);
-                                }, 0);
+                                if (splits.length === 2) {
+                                  // 2 splits: editing index automatically adjusts the other split
+                                  const otherIndex = index === 0 ? 1 : 0;
+                                  const clampedVal = Math.min(totalVal, Math.max(0, rawVal));
+                                  const newSplits = [...splits];
+                                  newSplits[index] = { ...newSplits[index], amount: clampedVal };
+                                  newSplits[otherIndex] = { ...newSplits[otherIndex], amount: Math.max(0, totalVal - clampedVal) };
+                                  setSplits(newSplits);
+                                } else {
+                                  // 3 or more splits
+                                  const oldVal = Number(splits[index].amount) || 0;
+                                  const newSplits = [...splits];
+                                  const delta = rawVal - oldVal;
 
-                                const maxForEdit = Math.max(0, totalVal - fixedSum);
-                                const clampedVal = Math.min(maxForEdit, Math.max(0, rawVal));
-                                const remainder = Math.max(0, totalVal - fixedSum - clampedVal);
-
-                                const newSplits = [...splits];
-                                newSplits[index] = { ...newSplits[index], amount: clampedVal };
-                                newSplits[targetAdjustIndex] = { ...newSplits[targetAdjustIndex], amount: remainder };
-                                setSplits(newSplits);
-                              }
-                            }}
-                            className="w-20 bg-black/5 dark:bg-white/5 rounded-[var(--radius-input,14px)] px-2 py-1 text-body font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
-                            placeholder="0"
-                          />
-                          <span className="text-label font-bold text-[var(--text-tertiary)] select-none font-amount">
-                            {currency}
-                          </span>
+                                  if (delta > 0) {
+                                    let remainingToReduce = delta;
+                                    for (let i = 0; i < newSplits.length; i++) {
+                                      if (i === index) continue;
+                                      const curAmt = Number(newSplits[i].amount) || 0;
+                                      const reduceBy = Math.min(curAmt, remainingToReduce);
+                                      newSplits[i] = { ...newSplits[i], amount: curAmt - reduceBy };
+                                      remainingToReduce -= reduceBy;
+                                      if (remainingToReduce <= 0) break;
+                                    }
+                                    const finalVal = rawVal - remainingToReduce;
+                                    newSplits[index] = { ...newSplits[index], amount: finalVal };
+                                  } else if (delta < 0) {
+                                    const absDelta = Math.abs(delta);
+                                    newSplits[index] = { ...newSplits[index], amount: Math.max(0, rawVal) };
+                                    const targetIdx = index === newSplits.length - 1 ? newSplits.length - 2 : index + 1;
+                                    const curAmt = Number(newSplits[targetIdx].amount) || 0;
+                                    newSplits[targetIdx] = { ...newSplits[targetIdx], amount: curAmt + absDelta };
+                                  }
+                                  setSplits(newSplits);
+                                }
+                              }}
+                              className="w-20 sm:w-24 bg-black/5 dark:bg-white/5 rounded-[var(--radius-button-sm,10px)] px-2.5 py-1 text-sm font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                              placeholder="0"
+                            />
+                            <span className="text-xs font-semibold text-[var(--text-tertiary)] select-none font-amount">
+                              {currency}
+                            </span>
+                          </div>
 
                           <button 
                             type="button"
                             onClick={() => {
                               if (typeof feedback?.light === 'function') feedback.light();
-                              const totalVal = parseAmount(amount);
                               const newSplits = splits.filter((_, i) => i !== index);
                               if (newSplits.length <= 1) {
+                                if (newSplits.length === 1 && newSplits[0].category) {
+                                  setCategory(newSplits[0].category);
+                                }
                                 setSplits([]);
                               } else {
-                                // Redistribute to maintain total sum
+                                const totalVal = parseAmount(amount);
                                 const perSplit = Math.floor(totalVal / newSplits.length);
                                 let rem = totalVal - perSplit * newSplits.length;
                                 setSplits(newSplits.map(s => {
@@ -900,7 +960,8 @@ export function TransactionModal({
                                 }));
                               }
                             }}
-                            className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--danger-color)] rounded-full transition-all cursor-pointer"
+                            className="w-7 h-7 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--danger-color)] rounded-full transition-colors cursor-pointer"
+                            title={currentLang === 'en' ? 'Remove category' : 'Ta bort kategori'}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -910,32 +971,65 @@ export function TransactionModal({
                   })}
                 </div>
 
-                {/* Action buttons: + Kategori & Fördela jämnt */}
-                <div className="flex items-center justify-between pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      const totalVal = parseAmount(amount);
-                      const usedCats = splits.map(s => s.category);
-                      const unusedCat = categories.find(c => !usedCats.includes(c.name))?.name || '';
-                      const newCount = splits.length + 1;
-                      const perSplit = Math.floor(totalVal / newCount);
-                      let rem = totalVal - perSplit * newCount;
+                {/* Warning bar if split amounts do not equal total */}
+                {(() => {
+                  const totalVal = parseAmount(amount);
+                  const currentSum = splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+                  const isExact = Math.abs(currentSum - totalVal) < 0.01;
+                  if (isExact) return null;
+                  return (
+                    <div className="px-4 py-2 bg-[var(--warning-container)]/30 border-t border-[var(--warning-color)]/20 text-xs font-medium text-[var(--warning-color)] flex items-center justify-between">
+                      <span>
+                        {currentLang === 'en'
+                          ? `Sum (${currentSum} ${currency}) must equal total amount (${totalVal} ${currency}).`
+                          : `Kategoriernas summa (${currentSum} ${currency}) måste motsvara totalbeloppet (${totalVal} ${currency}).`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof feedback?.light === 'function') feedback.light();
+                          const perSplit = Math.floor(totalVal / splits.length);
+                          let remainder = totalVal - perSplit * splits.length;
+                          setSplits(splits.map(s => {
+                            const add = remainder > 0 ? 1 : 0;
+                            if (remainder > 0) remainder--;
+                            return { ...s, amount: perSplit + add };
+                          }));
+                        }}
+                        className="text-xs font-bold underline cursor-pointer shrink-0 ml-2"
+                      >
+                        {currentLang === 'en' ? 'Adjust automatically' : 'Justera automatiskt'}
+                      </button>
+                    </div>
+                  );
+                })()}
 
-                      const updatedSplits = splits.map(s => {
-                        const add = rem > 0 ? 1 : 0;
-                        if (rem > 0) rem--;
-                        return { ...s, amount: perSplit + add };
-                      });
-                      updatedSplits.push({ id: Math.random().toString(), amount: perSplit + (rem > 0 ? 1 : 0), category: unusedCat, tags: [] });
-                      setSplits(updatedSplits);
-                    }}
-                    className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)] hover:opacity-80 cursor-pointer py-1 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10"
-                  >
-                    <Plus size={14} strokeWidth={2.5} />
-                    <span>{currentLang === 'en' ? 'Add category' : 'Kategori'}</span>
-                  </button>
+                {/* Bottom Action bar: + Lägg till kategori & Fördela jämnt */}
+                <div className="px-4 py-2.5 border-t border-subtle flex items-center justify-between gap-2 bg-black/[0.01] dark:bg-white/[0.01]">
+                  {splits.length < categories.length ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        const usedCats = splits.map(s => (s.category || '').toLowerCase().trim());
+                        const unusedCat = categories.find(c => !usedCats.includes(c.name.toLowerCase().trim()))?.name;
+                        if (!unusedCat) return;
+
+                        setSplits([
+                          ...splits,
+                          { id: Math.random().toString(), amount: 0, category: unusedCat, tags: [] }
+                        ]);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer py-0.5"
+                    >
+                      <Plus size={14} strokeWidth={2.5} />
+                      <span>{currentLang === 'en' ? 'Add category' : 'Lägg till kategori'}</span>
+                    </button>
+                  ) : (
+                    <span className="text-xs text-[var(--text-tertiary)] italic">
+                      {currentLang === 'en' ? 'All categories added' : 'Alla kategorier tillagda'}
+                    </span>
+                  )}
 
                   <button
                     type="button"
@@ -951,62 +1045,61 @@ export function TransactionModal({
                         return { ...s, amount: perSplit + add };
                       }));
                     }}
-                    className="text-label font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                    className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-0.5"
                   >
                     {currentLang === 'en' ? 'Equalize' : 'Fördela jämnt'}
                   </button>
                 </div>
               </div>
             ) : (
-              /* Single Category Row with Inline Split Button */
-              <div className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group min-h-[58px]">
-                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
-                  {t('category')}
-                </span>
-                <div className="flex items-center gap-2 min-w-0">
-                  <div 
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setActiveSplitIndex(null);
-                      setIsCategoryPickerOpen(true);
-                    }}
-                    className="flex items-center gap-2 min-w-0 cursor-pointer group/cat hover:text-[var(--accent-color)]"
-                  >
+              /* Single Category Row with Discreet "Dela upp på flera kategorier" below */
+              <div>
+                <div 
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setActiveSplitIndex(null);
+                    setIsCategoryPickerOpen(true);
+                  }}
+                  className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer min-h-[58px]"
+                >
+                  <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
+                    {t('category')}
+                  </span>
+                  <div className="flex items-center gap-2 min-w-0">
                     <CategoryIcon 
                       icon={currentCatData?.icon || 'receipt'} 
                       color={currentCatData?.color || 'var(--accent-color)'}
                       size="xs" 
                       categoryName={category}
                     />
-                    <span className="text-sm font-medium text-[var(--text-primary)] group-hover/cat:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[180px]">
+                    <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[160px] sm:max-w-[220px]">
                       {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                     </span>
-                    <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover/cat:opacity-100 group-hover/cat:translate-x-0.5 transition-all shrink-0 ml-0.5" />
+                    <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 shrink-0 ml-0.5" />
                   </div>
+                </div>
 
-                  {type === 'expense' && (
-                    <Button
+                {type === 'expense' && (
+                  <div className="px-4 py-2.5 border-t border-subtle flex items-center justify-start bg-black/[0.01] dark:bg-white/[0.01]">
+                    <button
                       type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         if (typeof feedback?.light === 'function') feedback.light();
                         const totalVal = parseAmount(amount);
                         const cat1 = category || categories[0]?.name || '';
-                        const cat2 = categories.find(c => c.name !== cat1)?.name || categories[1]?.name || '';
-                        const half = Math.floor(totalVal / 2);
+                        const cat2 = categories.find(c => c.name.toLowerCase() !== cat1.toLowerCase())?.name || categories[1]?.name || '';
                         setSplits([
-                          { id: Math.random().toString(), amount: half, category: cat1, tags: [] },
-                          { id: Math.random().toString(), amount: totalVal - half, category: cat2, tags: [] }
+                          { id: Math.random().toString(), amount: totalVal, category: cat1, tags: [] },
+                          { id: Math.random().toString(), amount: 0, category: cat2, tags: [] }
                         ]);
                       }}
-                      icon={<Plus size={13} strokeWidth={2.5} />}
+                      className="flex items-center gap-1.5 text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer active:scale-98 transition-all"
                     >
-                      {currentLang === 'en' ? 'Split' : 'Dela upp'}
-                    </Button>
-                  )}
-                </div>
+                      <GitFork size={13} strokeWidth={2} />
+                      <span>{currentLang === 'en' ? 'Split into multiple categories' : 'Dela upp på flera kategorier'}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1024,7 +1117,7 @@ export function TransactionModal({
                   }}
                   className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-label font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                      ? 'bg-[var(--accent-color)] text-white shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -1040,7 +1133,7 @@ export function TransactionModal({
                   }}
                   className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-label font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                      ? 'bg-[var(--accent-color)] text-white shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -1051,14 +1144,14 @@ export function TransactionModal({
                   onClick={() => setShowFullCalendar(!showFullCalendar)}
                   className={`h-[28px] px-2 rounded-[var(--radius-button-sm,10px)] transition-all flex items-center justify-center cursor-pointer gap-1 ${
                     showFullCalendar || (new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString())
-                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
+                      ? 'bg-[var(--accent-color)] text-white shadow-xs' 
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                   title={t('chooseDate')}
                 >
                   <Calendar size={13} strokeWidth={2} />
                   {new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                    <span className="text-label font-bold tabular-nums">
+                    <span className="text-label font-bold tabular-nums text-white">
                       {formatFullDate(selectedDate, currentLang)}
                     </span>
                   )}
@@ -1101,7 +1194,13 @@ export function TransactionModal({
             </div>
 
             {/* Row 5: Heart / Starred */}
-            <div className="p-4 flex items-center justify-between min-h-[60px] border-t border-subtle">
+            <div 
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setIsStarred(!isStarred);
+              }}
+              className="p-4 flex items-center justify-between min-h-[60px] border-t border-subtle cursor-pointer select-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+            >
               <div className="flex items-center gap-2">
                 <Heart size={16} className={isStarred ? "fill-rose-500 text-rose-500 shrink-0" : "text-[var(--text-secondary)] shrink-0"} />
                 <span className="text-body font-normal text-[var(--text-primary)]">
@@ -1110,7 +1209,7 @@ export function TransactionModal({
               </div>
               <Switch
                 checked={isStarred}
-                onCheckedChange={(checked) => {
+                onChange={(checked) => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   setIsStarred(checked);
                 }}
@@ -1199,7 +1298,7 @@ export function TransactionModal({
                 onSave({
                   merchant,
                   note,
-                  category,
+                  category: splits.length > 0 ? (splits[0]?.category || category) : category,
                   amount: parseAmount(amount),
                   type: type as any,
                   logo: logo || 'none',
@@ -1345,12 +1444,19 @@ export function TransactionModal({
                 <div className="flex-1 overflow-y-auto p-3.5 space-y-1 custom-scrollbar min-h-0">
                   <div className="space-y-1">
                     {categories.map(cat => {
-                      const isSelected = (category || '').toLowerCase() === cat.name.toLowerCase();
+                      const isSelected = activeSplitIndex !== null
+                        ? (splits[activeSplitIndex]?.category || '').toLowerCase() === cat.name.toLowerCase()
+                        : (category || '').toLowerCase() === cat.name.toLowerCase();
+
+                      const isAlreadyUsedInOtherSplit = activeSplitIndex !== null && splits.some((s, idx) => idx !== activeSplitIndex && (s.category || '').toLowerCase() === cat.name.toLowerCase());
+
                       return (
                         <button
                           key={cat.name}
                           type="button"
+                          disabled={isAlreadyUsedInOtherSplit}
                           onClick={() => {
+                            if (isAlreadyUsedInOtherSplit) return;
                             if (typeof feedback?.light === 'function') feedback.light();
                             if (activeSplitIndex !== null) {
                               const newSplits = [...splits];
@@ -1363,10 +1469,12 @@ export function TransactionModal({
                             }
                             setIsCategoryPickerOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[var(--radius-card-sm,12px)] transition-colors cursor-pointer text-left active:scale-[0.99] ${
-                            isSelected
-                              ? 'bg-black/[0.04] dark:bg-white/[0.06]'
-                              : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[var(--radius-card-sm,12px)] transition-colors text-left ${
+                            isAlreadyUsedInOtherSplit
+                              ? 'opacity-40 cursor-not-allowed bg-black/[0.01] dark:bg-white/[0.01]'
+                              : isSelected
+                              ? 'bg-black/[0.04] dark:bg-white/[0.06] cursor-pointer active:scale-[0.99]'
+                              : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer active:scale-[0.99]'
                           }`}
                         >
                           <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -1385,6 +1493,11 @@ export function TransactionModal({
                             <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white shrink-0">
                               <Check size={12} strokeWidth={2.5} />
                             </div>
+                          )}
+                          {isAlreadyUsedInOtherSplit && (
+                            <span className="text-xs text-[var(--text-tertiary)] italic shrink-0">
+                              {currentLang === 'en' ? 'Already selected' : 'Redan vald'}
+                            </span>
                           )}
                         </button>
                       );

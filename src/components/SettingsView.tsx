@@ -168,9 +168,10 @@ export function SettingsView({
   const renderLanguageSettings = () => {
     const languages: { code: Language; label: string }[] = [
       { code: 'sv', label: 'Svenska' },
-      { code: 'en', label: 'English' },
+      { code: 'da', label: 'Dansk' },
       { code: 'no', label: 'Norsk' },
       { code: 'fi', label: 'Suomi' },
+      { code: 'en', label: 'English' },
     ];
 
     return (

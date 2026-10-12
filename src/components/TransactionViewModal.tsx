@@ -240,9 +240,9 @@ export function TransactionViewModal({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Centered Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-3">
+          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-1">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10 flex items-center gap-1.5">
               <IconButton
@@ -307,41 +307,47 @@ export function TransactionViewModal({
                 {t('category')}
               </span>
               <div className="text-right">
-                {transaction.splits && transaction.splits.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {transaction.splits.map((split, idx) => {
-                      const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
-                      const searchCat = splitCatName.trim().toLowerCase();
-                      const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                        c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
-                      );
-                      const iconKey = cat?.icon || getCategoryIconName(splitCatName);
-                      return (
-                        <div key={split.id || idx} className="flex items-center justify-end gap-2">
-                          {iconKey && <CategoryIcon icon={iconKey} categoryName={splitCatName} variant="minimal" size="sm" />}
-                          <span className="text-body-medium font-medium text-[var(--text-primary)]">{splitCatName}</span>
-                          <span className="text-label text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-end gap-2">
-                    {(() => {
-                      const catName = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
-                      const searchCat = catName.trim().toLowerCase();
-                      const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                        c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
-                      );
-                      const iconKey = cat?.icon || getCategoryIconName(catName);
-                      if (!iconKey) return null;
-                      return <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="sm" />;
-                    })()}
-                    <span className="text-body-medium font-medium text-[var(--text-primary)]">
-                      {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
-                    </span>
-                  </div>
-                )}
+                {(() => {
+                  const rawSplits = currentTx.splits || transaction.splits;
+                  const splitsArray = Array.isArray(rawSplits)
+                    ? rawSplits
+                    : (typeof rawSplits === 'string' ? (() => { try { const p = JSON.parse(rawSplits); return Array.isArray(p) ? p : []; } catch { return []; } })() : []);
+
+                  if (splitsArray.length > 0) {
+                    return (
+                      <div className="space-y-1.5">
+                        {splitsArray.map((split: any, idx: number) => {
+                          const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
+                          const searchCat = splitCatName.trim().toLowerCase();
+                          const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                            c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
+                          );
+                          const iconKey = cat?.icon || getCategoryIconName(splitCatName);
+                          return (
+                            <div key={split.id || idx} className="flex items-center justify-end gap-2">
+                              {iconKey && <CategoryIcon icon={iconKey} categoryName={splitCatName} variant="minimal" size="sm" />}
+                              <span className="text-body-medium font-medium text-[var(--text-primary)]">{splitCatName}</span>
+                              <span className="text-label text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+
+                  const catName = typeof currentTx.category === 'object' ? (currentTx.category as any)?.name : (currentTx.category || transaction.category || '');
+                  const searchCat = catName.trim().toLowerCase();
+                  const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                    c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
+                  );
+                  const iconKey = cat?.icon || getCategoryIconName(catName);
+                  return (
+                    <div className="flex items-center justify-end gap-2">
+                      {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="sm" />}
+                      <span className="text-body-medium font-medium text-[var(--text-primary)]">{catName}</span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
@@ -540,13 +546,12 @@ export function TransactionViewModal({
                 </button>
 
                 {showSimilar && (
-                  <div className="mt-2 space-y-1 bg-[var(--surface-muted)]/50 p-2 rounded-card-nested border border-subtle">
+                  <div className="mt-2 space-y-2">
                     {similarTransactions.map((similarTx) => (
                       <TransactionItem
                         key={similarTx.id}
                         transaction={similarTx}
                         config={config}
-                        variant="transparent"
                         showDate={true}
                         onClick={() => {
                           if (typeof feedback?.selection === 'function') feedback.selection();
@@ -572,7 +577,7 @@ export function TransactionViewModal({
             className="flex-1 text-body-medium font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
-              onEdit(transaction);
+              onEdit(currentTx);
             }} 
             icon={<Pencil size={14.5} strokeWidth={2} className="dark:text-white" />}
           >

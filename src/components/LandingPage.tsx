@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ChevronDown,
-  Shield,
-  Lock,
-  Sparkles,
-  Check,
-  Receipt,
-  Instagram,
-  Star
+  ChevronDown, 
+  Shield, 
+  Lock, 
+  Sparkles, 
+  Check, 
+  Receipt, 
+  Instagram, 
+  Star 
 } from 'lucide-react';
-import { TranslationKey, Language } from '../i18n';
+import { Language, TranslationKey } from '../i18n';
 import { PolicyModal } from './PolicyModal';
 import { DejzLogo } from './DejzLogo';
 import { Button, Card } from './ui';
+import { LanguagePicker } from './LanguagePicker';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -22,10 +23,443 @@ interface LandingPageProps {
   onGoogleLogin?: () => void;
   onFacebookLogin?: () => void;
   onLegalClick?: (type: 'privacy' | 'terms' | 'cookies') => void;
-  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
+  t?: (key: TranslationKey, params?: Record<string, string | number>) => string;
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
 }
+
+const LANDING_TEXTS = {
+  sv: {
+    navHow: 'Så fungerar det',
+    navFeatures: 'Funktioner',
+    login: 'Logga in',
+    getStarted: 'Kom igång gratis',
+    demoDirect: 'Testa demo direkt',
+    continueWithGoogle: 'Fortsätt med Google',
+    heroTitleLine1: 'Hela din ekonomi.',
+    heroTitleLine2: 'Svart på vitt.',
+    heroSubtitle: 'Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.',
+    trust1Title: 'Ingen bankkoppling',
+    trust1Desc: 'Full kontroll över din data.',
+    trust2Title: 'Säker och privat',
+    trust2Desc: 'Din information är din.',
+    trust3Title: 'Byggd för enkelhet',
+    trust3Desc: 'Fokus på det som hjälper.',
+    howTitle: 'Så fungerar Dejz',
+    howSubtitle: 'Tre enkla steg till bättre koll på pengarna.',
+    step1Num: '1',
+    step1Title: 'Periodkalkyl',
+    step1Desc: 'Fyll i din inkomst, fasta kostnader och sparande. Dejz räknar ut vad du faktiskt har kvar.',
+    step1IncomeLabel: 'Inkomst',
+    step1IncomeVal: '25 000 kr',
+    step1FixedLabel: 'Fasta kostnader',
+    step1FixedVal: '−12 000 kr',
+    step1SavingsLabel: 'Sparande',
+    step1SavingsVal: '−3 000 kr',
+    step1LeftLabel: 'Kvar att spendera',
+    step1LeftVal: '10 000 kr',
+    step2Num: '2',
+    step2Title: 'Registrera utgifter',
+    step2Desc: 'Lägg snabbt till dina köp och välj kategori.',
+    step2SampleName: 'Lunch',
+    step2SampleVal: '−120 kr',
+    step2Receipt: 'Bifoga kvitto',
+    step3Num: '3',
+    step3Title: 'Se vad du kan spendera',
+    step3Desc: 'När du registrerar nya utgifter uppdaterar Dejz automatiskt hur mycket du har kvar.',
+    step3LeftVal: '10 000 kr',
+    step3Realtime: 'Uppdateras i realtid',
+    featuresHeading: 'Din ekonomi, på dina villkor.',
+    featuresSubheading: 'Dejz hjälper dig att få full kontroll över vardagsekonomin. Ingen bankkoppling och inga onödigt komplicerade verktyg – bara en tydlig överblick över dina pengar.',
+    check1: 'Manuell inmatning – du bestämmer',
+    check2: 'Smarta analyser',
+    check3: 'Koll från lön till lön',
+    check4: 'Säker och privat',
+    check5: 'Kvitton och historik',
+    check6: 'Ingen data säljs',
+    allInOneHeadingLine1: 'Allt du behöver',
+    allInOneHeadingLine2: '– samlat på ett ställe.',
+    allInOneSub: 'Se dina utgifter, budget, historik och analyser på ett och samma ställe.',
+    screenHome: 'Hem',
+    screenHomeDesc: 'Se vad du kan spendera.',
+    screenHistory: 'Historik',
+    screenHistoryDesc: 'Alla dina transaktioner samlade.',
+    screenAnalysis: 'Analys',
+    screenAnalysisDesc: 'Förstå vart pengarna går.',
+    screenEconomy: 'Ekonomi',
+    screenEconomyDesc: 'Hantera inkomster och fasta utgifter.',
+    reviewsBadge: '4.9 av 5 i betyg bland 20+ tidiga användare',
+    reviewsHeading: 'Vad säger de som provat?',
+    reviewsSubheading: 'Dejz har testats noggrant för att säkerställa att upplevelsen sitter perfekt från dag ett.',
+    review1Text: '"Slutligen en app som inte kräver krångliga bankkopplingar. Har äntligen full koll på pengarna mellan lönerna!"',
+    review1Author: 'Marcus Lindström',
+    review1City: 'Betatestare (Stockholm)',
+    review2Text: '"Periodkalkylen är guld värd. Man ser direkt vad som faktiskt finns kvar att spendera efter alla fasta utgifter."',
+    review2Author: 'Sofia Karlsson',
+    review2City: 'Betatestare (Göteborg)',
+    review3Text: '"Superenkel, snabb och stilren design. Precis det ekonomiverktyg jag har letat efter i flera år."',
+    review3Author: 'Alexander Ek',
+    review3City: 'Betatestare (Malmö)',
+    faqTitle: 'Vanliga frågor',
+    faq1Q: 'Är Dejz gratis att använda?',
+    faq1A: 'Ja, du kan komma igång och använda grundläggande funktioner helt gratis.',
+    faq2Q: 'Hur fungerar Dejz utan bankkoppling?',
+    faq2A: 'Du lägger enkelt till dina transaktioner manuellt, via snabbval eller genom att fota kvitton. Det ger dig fullständig kontroll och ökad medvetenhet om varje köp utan att dela dina bankinloggningsuppgifter.',
+    faq3Q: 'Kan jag testa Dejz innan jag skapar konto?',
+    faq3A: 'Absolut! Du kan klicka på "Testa demo direkt" för att utforska appen med färdig demo-data direkt i webbläsaren.',
+    faq4Q: 'Hur fungerar perioderna mellan två löner?',
+    faq4A: 'Du ställer in din egen lönedag (t.ex. den 25:e i månaden). Dejz räknar sedan automatiskt ut din budgetperiod och dagsbudget fram till nästa lön.',
+    finalCtaTitle: 'Redo att få koll på ekonomin?',
+    finalCtaSub: 'Kom igång med Dejz på några minuter.',
+    footerPrivacy: 'Integritetspolicy',
+    footerTerms: 'Användarvillkor',
+    footerContact: 'Kontakt',
+  },
+  da: {
+    navHow: 'Sådan fungerer det',
+    navFeatures: 'Funktioner',
+    login: 'Log ind',
+    getStarted: 'Kom i gang gratis',
+    demoDirect: 'Prøv demo direkte',
+    continueWithGoogle: 'Fortsæt med Google',
+    heroTitleLine1: 'Hele din økonomi.',
+    heroTitleLine2: 'Sort på hvidt.',
+    heroSubtitle: 'Saml indtægter, faste udgifter, opsparing og budget ét sted. Se præcis hvad pengene går til, og få pengene til at række mellem to lønninger.',
+    trust1Title: 'Ingen bankforbindelse',
+    trust1Desc: 'Fuld kontrol over dine data.',
+    trust2Title: 'Sikker og privat',
+    trust2Desc: 'Dine oplysninger forbliver dine.',
+    trust3Title: 'Bygget til enkelhed',
+    trust3Desc: 'Fokus på det, der virker.',
+    howTitle: 'Sådan fungerer Dejz',
+    howSubtitle: 'Tre enkle trin til bedre styr på økonomien.',
+    step1Num: '1',
+    step1Title: 'Periodeberegning',
+    step1Desc: 'Indtast din indkomst, faste omkostninger og opsparing. Dejz regner ud, hvad du reelt har tilbage.',
+    step1IncomeLabel: 'Indkomst',
+    step1IncomeVal: '25.000 kr.',
+    step1FixedLabel: 'Faste udgifter',
+    step1FixedVal: '−12.000 kr.',
+    step1SavingsLabel: 'Opsparing',
+    step1SavingsVal: '−3.000 kr.',
+    step1LeftLabel: 'Tilbage at bruge',
+    step1LeftVal: '10.000 kr.',
+    step2Num: '2',
+    step2Title: 'Registrer udgifter',
+    step2Desc: 'Tilføj hurtigt dine køb og vælg en kategori.',
+    step2SampleName: 'Frokost',
+    step2SampleVal: '−120 kr.',
+    step2Receipt: 'Vedhæft kvittering',
+    step3Num: '3',
+    step3Title: 'Se hvad du kan bruge',
+    step3Desc: 'Når du registrerer nye udgifter, opdaterer Dejz automatisk dit rådighedsbeløb.',
+    step3LeftVal: '10.000 kr.',
+    step3Realtime: 'Opdateres i realtid',
+    featuresHeading: 'Din økonomi, på dine præmisser.',
+    featuresSubheading: 'Dejz hjælper dig med at få fuld kontrol over hverdagsøkonomien. Ingen bankforbindelse og ingen overkomplicerede grafer – bare et klart overblik.',
+    check1: 'Manuel indtastning – du bestemmer',
+    check2: 'Smarte analyser',
+    check3: 'Overblik fra løn til løn',
+    check4: 'Sikker og privat',
+    check5: 'Kvitteringer og historik',
+    check6: 'Ingen data sælges',
+    allInOneHeadingLine1: 'Alt du behøver',
+    allInOneHeadingLine2: '– samlet ét sted.',
+    allInOneSub: 'Se dine udgifter, budget, historik og analyser samlet på en enkel skærm.',
+    screenHome: 'Hjem',
+    screenHomeDesc: 'Se hvad du kan bruge i dag.',
+    screenHistory: 'Historik',
+    screenHistoryDesc: 'Alle dine transaktioner samlet.',
+    screenAnalysis: 'Analyse',
+    screenAnalysisDesc: 'Forstå hvor pengene forsvinder hen.',
+    screenEconomy: 'Økonomi',
+    screenEconomyDesc: 'Håndter faste indtægter og udgifter.',
+    reviewsBadge: '4.9 ud af 5 i bedømmelse blandt tidlige brugere',
+    reviewsHeading: 'Hvad siger brugerne?',
+    reviewsSubheading: 'Dejz er grundigt testet, så appen fungerer gnidningsfrit fra første dag.',
+    review1Text: '"Endelig en app, der ikke kræver besværlig bankintegration. Har endelig fuldt overblik over pengene mellem lønninger!"',
+    review1Author: 'Mads Lind',
+    review1City: 'Bruger (København)',
+    review2Text: '"Periodeberegningen er guld værd. Man ser straks, hvad der reelt er tilbage at bruge efter faste udgifter."',
+    review2Author: 'Sofie Holm',
+    review2City: 'Bruger (Aarhus)',
+    review3Text: '"Super enkelt, hurtigt og stilrent design. Præcis det budgetværktøj jeg har ledt efter."',
+    review3Author: 'Alexander M.',
+    review3City: 'Bruger (Odense)',
+    faqTitle: 'Ofte stillede spørgsmål',
+    faq1Q: 'Er Dejz gratis at bruge?',
+    faq1A: 'Ja, du kan oprette en profil og bruge de centrale budgetfunktioner helt gratis.',
+    faq2Q: 'Hvordan fungerer Dejz uden bankforbindelse?',
+    faq2A: 'Du indtaster blot dine køb manuelt eller fotograferer kvitteringer. Det giver dig fuld kontrol og større bevidsthed om dine penge uden at dele bankkoder.',
+    faq3Q: 'Kan jeg prøve Dejz før jeg opretter en konto?',
+    faq3A: 'Ja! Klik på "Prøv demo direkte" for at udforske hele appen med demodata direkte i browseren.',
+    faq4Q: 'Hvordan fungerer perioden mellem to lønninger?',
+    faq4A: 'Du angiver din egen lønningsdag. Dejz beregner automatisk din budgetperiode og dagsbudget frem til næste løn.',
+    finalCtaTitle: 'Klar til at få styr på økonomien?',
+    finalCtaSub: 'Kom i gang med Dejz på få minutter.',
+    footerPrivacy: 'Privatlivspolitik',
+    footerTerms: 'Betingelser',
+    footerContact: 'Kontakt',
+  },
+  no: {
+    navHow: 'Slik fungerer det',
+    navFeatures: 'Funksjoner',
+    login: 'Logg inn',
+    getStarted: 'Kom i gang gratis',
+    demoDirect: 'Prøv demo direkte',
+    continueWithGoogle: 'Fortsett med Google',
+    heroTitleLine1: 'Hele din økonomi.',
+    heroTitleLine2: 'Svart på hvitt.',
+    heroSubtitle: 'Samle inntekter, faste utgifter, sparing og dagsbudsjett på ett sted. Se nøyaktig hva pengene går til og få dem til å strekke til mellom to lønninger.',
+    trust1Title: 'Ingen banktilkobling',
+    trust1Desc: 'Full kontroll over egne data.',
+    trust2Title: 'Trygt og privat',
+    trust2Desc: 'Informasjonen din forblir din.',
+    trust3Title: 'Bygget for enkelhet',
+    trust3Desc: 'Fokus på det som hjelper deg.',
+    howTitle: 'Slik fungerer Dejz',
+    howSubtitle: 'Tre enkle steg til full kontroll på pengene.',
+    step1Num: '1',
+    step1Title: 'Periodeberegning',
+    step1Desc: 'Legg inn inntekt, faste utgifter og sparing. Dejz regner ut hva du faktisk har igjen.',
+    step1IncomeLabel: 'Inntekt',
+    step1IncomeVal: '25 000 kr',
+    step1FixedLabel: 'Faste utgifter',
+    step1FixedVal: '−12 000 kr',
+    step1SavingsLabel: 'Sparing',
+    step1SavingsVal: '−3 000 kr',
+    step1LeftLabel: 'Igjen å bruke',
+    step1LeftVal: '10 000 kr',
+    step2Num: '2',
+    step2Title: 'Registrer utgifter',
+    step2Desc: 'Legg raskt inn kjøpene dine og velg kategori.',
+    step2SampleName: 'Lunsj',
+    step2SampleVal: '−120 kr',
+    step2Receipt: 'Legg ved kvittering',
+    step3Num: '3',
+    step3Title: 'Se hva du kan bruke',
+    step3Desc: 'Når du registrerer nye utgifter, oppdaterer Dejz automatisk dagsbudsjettet ditt.',
+    step3LeftVal: '10 000 kr',
+    step3Realtime: 'Oppdateres i sanntid',
+    featuresHeading: 'Din økonomi, på dine premisser.',
+    featuresSubheading: 'Dejz hjelper deg med å få full kontroll over hverdagsøkonomien. Ingen bankkobling og ingen unødvendig kompliserte menyer – bare en krystallklar oversikt.',
+    check1: 'Manuell registrering – du bestemmer',
+    check2: 'Smarte analyser',
+    check3: 'Oversikt fra lønn til lønn',
+    check4: 'Trygt og privat',
+    check5: 'Kvitteringer og historikk',
+    check6: 'Ingen data selges',
+    allInOneHeadingLine1: 'Alt du trenger',
+    allInOneHeadingLine2: '– samlet på ett sted.',
+    allInOneSub: 'Se dine utgifter, budsjett, historikk og analyser på en oversiktlig skjerm.',
+    screenHome: 'Hjem',
+    screenHomeDesc: 'Se hva du kan bruke i dag.',
+    screenHistory: 'Historikk',
+    screenHistoryDesc: 'Alle transaksjonene dine samlet.',
+    screenAnalysis: 'Analyse',
+    screenAnalysisDesc: 'Forstå hvor pengene tar veien.',
+    screenEconomy: 'Økonomi',
+    screenEconomyDesc: 'Administrer inntekter og faste utgifter.',
+    reviewsBadge: '4.9 av 5 i vurdering blant tidlige brukere',
+    reviewsHeading: 'Hva sier brukerne?',
+    reviewsSubheading: 'Dejz er testet og finpusset for at opplevelsen skal sitte fra første dag.',
+    review1Text: '"Endelig en app som ikke krever bankinnlogging. Har endelig full oversikt over pengene mellom lønningene!"',
+    review1Author: 'Marius Lind',
+    review1City: 'Bruker (Oslo)',
+    review2Text: '"Periodeberegningen er genial. Man ser med en gang hva man faktisk har igjen å bruke etter faste regninger."',
+    review2Author: 'Silje Karlsen',
+    review2City: 'Bruker (Bergen)',
+    review3Text: '"Superenkel, rask og minimalistisk design. Akkurat det økonomiverktøyet jeg har lett etter."',
+    review3Author: 'Alexander E.',
+    review3City: 'Bruker (Trondheim)',
+    faqTitle: 'Vanlige spørsmål',
+    faq1Q: 'Er Dejz gratis å bruke?',
+    faq1A: 'Ja, du kan opprette bruker og bruke kjernefunksjonene helt gratis.',
+    faq2Q: 'Hvordan fungerer Dejz uten banktilkobling?',
+    faq2A: 'Du legger enkelt til kjøpene dine manuelt eller ved å ta bilde av kvitteringer. Det gir deg full kontroll og økt bevissthet rundt forbruket ditt.',
+    faq3Q: 'Kan jeg teste Dejz før jeg oppretter konto?',
+    faq3A: 'Ja! Klikk på "Prøv demo direkte" for å utforske appen med ferdige demodata direkte i nettleseren.',
+    faq4Q: 'Hvordan fungerer perioden mellom to lønninger?',
+    faq4A: 'Du stiller inn din egen lønningsdag. Dejz regner automatisk ut budsjettperioden din og dagsbudsjettet frem til neste lønning.',
+    finalCtaTitle: 'Klar for å få kontroll på økonomien?',
+    finalCtaSub: 'Kom i gang med Dejz på få minutter.',
+    footerPrivacy: 'Personvern',
+    footerTerms: 'Brukervilkår',
+    footerContact: 'Kontakt',
+  },
+  fi: {
+    navHow: 'Miten se toimii',
+    navFeatures: 'Ominaisuudet',
+    login: 'Kirjaudu sisään',
+    getStarted: 'Aloita ilmaiseksi',
+    demoDirect: 'Kokeile demoa heti',
+    continueWithGoogle: 'Jatka Googlella',
+    heroTitleLine1: 'Koko taloutesi.',
+    heroTitleLine2: 'Mustaa valkoisella.',
+    heroSubtitle: 'Kokoa tulot, kiinteät kulut, säästöt ja päiväbudjetti yhteen paikkaan. Näe tarkalleen minne rahasi menevät ja saa ne riittämään palkkapäivästä toiseen.',
+    trust1Title: 'Ei pankkiyhteyttä',
+    trust1Desc: 'Täysi hallinta omiin tietoihisi.',
+    trust2Title: 'Turvallinen ja yksityinen',
+    trust2Desc: 'Tietosi pysyvät vain sinulla.',
+    trust3Title: 'Rakennettu yksinkertaiseksi',
+    trust3Desc: 'Keskity siihen mikä oikeasti auttaa.',
+    howTitle: 'Miten Dejz toimii',
+    howSubtitle: 'Kolme helppoa askelta parempaan taloudenhallintaan.',
+    step1Num: '1',
+    step1Title: 'Kausilaskelma',
+    step1Desc: 'Syötä tulosi, kiinteät kulusi ja säästösi. Dejz laskee mitä sinulle todellisuudessa jää käteen.',
+    step1IncomeLabel: 'Tulot',
+    step1IncomeVal: '2 500 €',
+    step1FixedLabel: 'Kiinteät kulut',
+    step1FixedVal: '−1 200 €',
+    step1SavingsLabel: 'Säästöt',
+    step1SavingsVal: '−300 €',
+    step1LeftLabel: 'Käytettävissä',
+    step1LeftVal: '1 000 €',
+    step2Num: '2',
+    step2Title: 'Kirjaa kulut',
+    step2Desc: 'Lisää ostoksesi vaivattomasti ja valitse kategoria.',
+    step2SampleName: 'Lounas',
+    step2SampleVal: '−12 €',
+    step2Receipt: 'Liitä kuitti',
+    step3Num: '3',
+    step3Title: 'Näe mitä voit käyttää',
+    step3Desc: 'Kun kirjaat uusia kuluja, Dejz päivittää päiväbudjettisi automaattisesti.',
+    step3LeftVal: '1 000 €',
+    step3Realtime: 'Päivittyy reaaliajassa',
+    featuresHeading: 'Taloutesi, sinun ehdoillasi.',
+    featuresSubheading: 'Dejz auttaa sinua saamaan täyden hallinnan arjen taloudesta. Ei monimutkaisia pankkiliitoksia – vain selkeä ja rauhallinen yleisnäkymä rahoistasi.',
+    check1: 'Manuaalinen kirjaus – sinä päätät',
+    check2: 'Älykkäät analyysit',
+    check3: 'Hallinta palkasta palkkaan',
+    check4: 'Turvallinen ja yksityinen',
+    check5: 'Kuitit ja historia',
+    check6: 'Tietoja ei myydä koskaan',
+    allInOneHeadingLine1: 'Kaikki mitä tarvitset',
+    allInOneHeadingLine2: '– yhdessä paikassa.',
+    allInOneSub: 'Näe kulusi, budjettisi, historiasi ja analyysisi yhdellä selkeällä ruudulla.',
+    screenHome: 'Koti',
+    screenHomeDesc: 'Katso paljonko voit käyttää tänään.',
+    screenHistory: 'Historia',
+    screenHistoryDesc: 'Kaikki tapahtumasi koottuna.',
+    screenAnalysis: 'Analyysi',
+    screenAnalysisDesc: 'Ymmärrä minne rahasi kuluvat.',
+    screenEconomy: 'Talous',
+    screenEconomyDesc: 'Hallinnoi tuloja ja kiinteitä kuluja.',
+    reviewsBadge: '4.9 / 5 tähtiluokitus varhaisilta käyttäjiltä',
+    reviewsHeading: 'Mitä testaajat sanovat?',
+    reviewsSubheading: 'Dejz on testattu huolellisesti, jotta käyttökokemus tuntuu vaivattomalta ensimmäisestä päivästä alkaen.',
+    review1Text: '"Vihdoinkin sovellus, joka ei vaadi pankkitunnuksia. Nyt tiedän tarkalleen missä mennään palkkapäivien välillä!"',
+    review1Author: 'Markus L.',
+    review1City: 'Käyttäjä (Helsinki)',
+    review2Text: '"Kausilaskuri on uskomattoman hyödyllinen. Näkee heti mitä jää vapaasti käytettäväksi kiinteiden kulujen jälkeen."',
+    review2Author: 'Sofia K.',
+    review2City: 'Käyttäjä (Tampere)',
+    review3Text: '"Superhelppo, nopea ja kaunis ulkoasu. Juuri se budjettityökalu jota olen etsinyt vuosia."',
+    review3Author: 'Aleksi E.',
+    review3City: 'Käyttäjä (Turku)',
+    faqTitle: 'Usein kysytyt kysymykset',
+    faq1Q: 'Onko Dejz ilmainen?',
+    faq1A: 'Kyllä, voit luoda profiilin ja käyttää sovelluksen ydinominaisuuksia täysin ilmaiseksi.',
+    faq2Q: 'Miten Dejz toimii ilman pankkiyhteyttä?',
+    faq2A: 'Lisäät kulusi kätevästi käsin tai kuvaamalla kuitin. Tämä antaa sinulle täyden hallinnan ja vahvistaa tietoisuutta rahan käytöstä.',
+    faq3Q: 'Voinko kokeilla sovellusta ennen tilin luomista?',
+    faq3A: 'Kyllä! Napsauta "Kokeile demoa heti" testataksesi sovellusta valmiilla esimerkkidatalla suoraan selaimessa.',
+    faq4Q: 'Miten palkkakaudet toimivat?',
+    faq4A: 'Asetat oman palkkapäiväsi. Dejz laskee automaattisesti budjettikautesi ja päiväbudjettisi seuraavaan palkkapäivään asti.',
+    finalCtaTitle: 'Valmis ottamaan taloutesi haltuun?',
+    finalCtaSub: 'Aloita Dejzin käyttö parissa minuutissa.',
+    footerPrivacy: 'Tietosuojaseloste',
+    footerTerms: 'Käyttöehdot',
+    footerContact: 'Yhteystiedot',
+  },
+  en: {
+    navHow: 'How it works',
+    navFeatures: 'Features',
+    login: 'Log in',
+    getStarted: 'Get started free',
+    demoDirect: 'Try demo directly',
+    continueWithGoogle: 'Continue with Google',
+    heroTitleLine1: 'Your whole budget.',
+    heroTitleLine2: 'In black and white.',
+    heroSubtitle: 'Track income, fixed expenses, savings, and daily budget in one intuitive place. See where your money goes and make it last until next payday.',
+    trust1Title: 'No bank connection',
+    trust1Desc: 'Total control over your data.',
+    trust2Title: 'Secure and private',
+    trust2Desc: 'Your financial data stays yours.',
+    trust3Title: 'Built for simplicity',
+    trust3Desc: 'Focused on what actually helps.',
+    howTitle: 'How Dejz works',
+    howSubtitle: 'Three simple steps to better control of your money.',
+    step1Num: '1',
+    step1Title: 'Period calculation',
+    step1Desc: 'Enter your income, fixed costs, and savings. Dejz calculates what you genuinely have available.',
+    step1IncomeLabel: 'Income',
+    step1IncomeVal: '25 000 kr',
+    step1FixedLabel: 'Fixed expenses',
+    step1FixedVal: '−12 000 kr',
+    step1SavingsLabel: 'Savings',
+    step1SavingsVal: '−3 000 kr',
+    step1LeftLabel: 'Available to spend',
+    step1LeftVal: '10 000 kr',
+    step2Num: '2',
+    step2Title: 'Log expenses',
+    step2Desc: 'Quickly enter purchases and assign categories.',
+    step2SampleName: 'Lunch',
+    step2SampleVal: '−120 kr',
+    step2Receipt: 'Attach receipt',
+    step3Num: '3',
+    step3Title: 'See what you can spend',
+    step3Desc: 'When you record new expenses, Dejz automatically recalculates your remaining balance.',
+    step3LeftVal: '10 000 kr',
+    step3Realtime: 'Updates in real time',
+    featuresHeading: 'Your finances, on your terms.',
+    featuresSubheading: 'Dejz helps you gain complete clarity over daily spending. No forced bank linking, no complicated tables – just an honest overview.',
+    check1: 'Manual tracking – you are in charge',
+    check2: 'Smart spending insights',
+    check3: 'Payday to payday peace of mind',
+    check4: 'Safe and private',
+    check5: 'Receipts and history',
+    check6: 'We never sell your data',
+    allInOneHeadingLine1: 'Everything you need',
+    allInOneHeadingLine2: '– all in one place.',
+    allInOneSub: 'View expenses, budget, history, and analyses cleanly unified.',
+    screenHome: 'Home',
+    screenHomeDesc: 'See what you can spend today.',
+    screenHistory: 'Log',
+    screenHistoryDesc: 'All transactions gathered.',
+    screenAnalysis: 'Analysis',
+    screenAnalysisDesc: 'Understand where money flows.',
+    screenEconomy: 'Finances',
+    screenEconomyDesc: 'Manage income and fixed costs.',
+    reviewsBadge: '4.9 out of 5 rated by early users',
+    reviewsHeading: 'What do users say?',
+    reviewsSubheading: 'Dejz has been crafted and tested to make everyday budgeting genuinely effortless.',
+    review1Text: '"Finally an app that does not require linking bank accounts. I finally have full visibility into my budget!"',
+    review1Author: 'Marcus L.',
+    review1City: 'Beta tester (Stockholm)',
+    review2Text: '"The pay period calculator is incredible. You immediately see what remains after fixed bills are covered."',
+    review2Author: 'Sofia K.',
+    review2City: 'Beta tester (Gothenburg)',
+    review3Text: '"Super clean, responsive, and minimalist design. Exactly the finance tool I was wishing for."',
+    review3Author: 'Alexander E.',
+    review3City: 'Beta tester (Malmö)',
+    faqTitle: 'Frequently asked questions',
+    faq1Q: 'Is Dejz free to use?',
+    faq1A: 'Yes, you can register and use the core budget features completely free.',
+    faq2Q: 'How does Dejz work without linking a bank account?',
+    faq2A: 'You quickly log purchases manually or snap receipt photos. This fosters awareness and keeps your credentials entirely safe.',
+    faq3Q: 'Can I try Dejz before creating an account?',
+    faq3A: 'Absolutely! Click "Try demo directly" to explore the application pre-populated with realistic demo data.',
+    faq4Q: 'How do pay periods work?',
+    faq4A: 'Set your regular payday. Dejz calculates your period boundaries and daily allowance until the next salary arrives.',
+    finalCtaTitle: 'Ready to take control of your finances?',
+    finalCtaSub: 'Get started with Dejz in just a few minutes.',
+    footerPrivacy: 'Privacy Policy',
+    footerTerms: 'Terms of Service',
+    footerContact: 'Contact',
+  },
+};
 
 const PlaceholderBox = ({ 
   id, 
@@ -37,11 +471,9 @@ const PlaceholderBox = ({
   labelClass?: string;
 }) => {
   return (
-    <div 
-      data-mockup-id={id}
-      className={`relative w-full ${className} rounded-[var(--radius-card,16px)] bg-[var(--surface-color)] border border-dashed border-[var(--border-subtle)] flex flex-col items-center justify-center p-6 select-none transition-all hover:bg-[var(--surface-muted)]`}
-    >
-      <span className={`font-mono font-semibold tracking-wider text-[var(--text-tertiary)] uppercase text-center ${labelClass}`}>
+    <div className={`w-full relative rounded-[var(--radius-card-nested,12px)] overflow-hidden shadow-2xs border border-[var(--border-subtle)] bg-[var(--surface-color)] flex items-center justify-center ${className}`}>
+      <div className="absolute inset-0 bg-gradient-to-br from-black/[0.01] to-black/[0.04] dark:from-white/[0.01] dark:to-white/[0.03]" />
+      <span className={`relative font-semibold text-[var(--text-tertiary)] uppercase tracking-wider text-center px-4 ${labelClass}`}>
         {id}
       </span>
     </div>
@@ -49,21 +481,24 @@ const PlaceholderBox = ({
 };
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="border-b border-[var(--border-subtle)] transition-colors">
-      <button 
+    <div className="border-b border-[var(--border-subtle)]">
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 sm:py-6 flex items-center justify-between text-left group cursor-pointer focus:outline-none"
+        className="w-full py-5 text-left flex items-center justify-between gap-4 group cursor-pointer focus:outline-none"
+        aria-expanded={isOpen}
       >
-        <span className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)] transition-colors pr-6">
+        <span className="text-base sm:text-lg font-semibold text-[var(--text-primary)] group-hover:text-[var(--text-primary)] transition-colors">
           {question}
         </span>
-        <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all shrink-0 ${isOpen ? 'rotate-180 bg-[var(--surface-muted)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)] bg-[var(--surface-color)] group-hover:text-[var(--text-primary)]'}`}>
-          <ChevronDown size={16} />
-        </div>
+        <ChevronDown 
+          size={18} 
+          className={`text-[var(--text-secondary)] shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
+
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -89,13 +524,20 @@ export function LandingPage({
   onLogin, 
   onStartDemo, 
   onGoogleLogin, 
-  onLegalClick: _onLegalClick
+  onLegalClick: _onLegalClick,
+  currentLanguage,
+  onLanguageChange,
 }: LandingPageProps) {
   const [activePolicy, setActivePolicy] = React.useState<'privacy' | 'terms' | null>(null);
 
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const normalizedLang = (currentLanguage === 'da' || currentLanguage === 'no' || currentLanguage === 'fi' || currentLanguage === 'en')
+    ? currentLanguage
+    : 'sv';
+  const c = LANDING_TEXTS[normalizedLang] || LANDING_TEXTS.sv;
 
   return (
     <div className="min-h-dvh font-sans text-[var(--text-primary)] bg-[var(--bg-color)] relative selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
@@ -108,8 +550,8 @@ export function LandingPage({
 
       {/* HEADER */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/95 border-b border-[var(--border-subtle)] transition-all pt-[env(safe-area-inset-top)]">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-10">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-8 lg:gap-10">
             <div className="flex items-center select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <DejzLogo className="text-2xl font-black tracking-tight text-[var(--text-primary)]" />
             </div>
@@ -119,26 +561,32 @@ export function LandingPage({
                 href="#how-it-works" 
                 className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                Så fungerar det
+                {c.navHow}
               </a>
               <a 
                 href="#features" 
                 className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                Funktioner
+                {c.navFeatures}
               </a>
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LanguagePicker
+              currentLanguage={currentLanguage}
+              onLanguageChange={onLanguageChange}
+              variant="header"
+            />
+
             {onLogin && (
               <Button
                 variant="ghost"
                 size="md"
                 onClick={onLogin}
-                className="text-[var(--text-primary)]"
+                className="text-[var(--text-primary)] hidden sm:inline-flex"
               >
-                Logga in
+                {c.login}
               </Button>
             )}
             <Button
@@ -146,7 +594,7 @@ export function LandingPage({
               size="md"
               onClick={onGetStarted}
             >
-              Kom igång gratis
+              {c.getStarted}
             </Button>
           </div>
         </div>
@@ -162,11 +610,11 @@ export function LandingPage({
             <div className="lg:col-span-6 space-y-8">
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-[1.2]">
-                  Hela din ekonomi.<br />
-                  Svart på vitt.
+                  {c.heroTitleLine1}<br />
+                  {c.heroTitleLine2}
                 </h1>
                 <p className="text-lg text-[var(--text-secondary)] font-normal leading-relaxed max-w-xl">
-                  Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
+                  {c.heroSubtitle}
                 </p>
               </div>
 
@@ -179,7 +627,7 @@ export function LandingPage({
                     onClick={onGetStarted}
                     className="flex-1 shadow-subtle shadow-[var(--accent-color)]/20"
                   >
-                    Kom igång gratis
+                    {c.getStarted}
                   </Button>
                   {onStartDemo && (
                     <Button
@@ -187,7 +635,7 @@ export function LandingPage({
                       size="lg"
                       onClick={onStartDemo}
                     >
-                      Testa demo direkt
+                      {c.demoDirect}
                     </Button>
                   )}
                 </div>
@@ -206,7 +654,7 @@ export function LandingPage({
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    Fortsätt med Google
+                    {c.continueWithGoogle}
                   </Button>
                 )}
               </div>
@@ -217,22 +665,22 @@ export function LandingPage({
                   <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] mb-1">
                     <Shield size={14} strokeWidth={2} />
                   </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">Ingen bankkoppling</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">Full kontroll över din data.</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust1Title}</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust1Desc}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] mb-1">
                     <Lock size={14} strokeWidth={2} />
                   </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">Säker och privat</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">Din information är din.</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust2Title}</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust2Desc}</p>
                 </div>
                 <div className="space-y-1">
                   <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] mb-1">
                     <Sparkles size={14} strokeWidth={2} />
                   </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">Byggd för enkelhet</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">Fokus på det som hjälper.</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust3Title}</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust3Desc}</p>
                 </div>
               </div>
             </div>
@@ -253,11 +701,11 @@ export function LandingPage({
           <div className="block lg:hidden space-y-6">
             <div className="space-y-4">
               <h1 className="text-3xl sm:text-4xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-[1.25]">
-                Hela din ekonomi.<br />
-                Svart på vitt.
+                {c.heroTitleLine1}<br />
+                {c.heroTitleLine2}
               </h1>
               <p className="text-base text-[var(--text-secondary)] font-normal leading-relaxed">
-                Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
+                {c.heroSubtitle}
               </p>
             </div>
 
@@ -271,7 +719,7 @@ export function LandingPage({
                   fullWidth
                   className="shadow-subtle shadow-[var(--accent-color)]/20"
                 >
-                  Kom igång gratis
+                  {c.getStarted}
                 </Button>
                 {onStartDemo && (
                   <Button
@@ -280,7 +728,7 @@ export function LandingPage({
                     onClick={onStartDemo}
                     fullWidth
                   >
-                    Testa demo direkt
+                    {c.demoDirect}
                   </Button>
                 )}
               </div>
@@ -299,29 +747,29 @@ export function LandingPage({
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                   </svg>
-                  Fortsätt med Google
+                  {c.continueWithGoogle}
                 </Button>
               )}
             </div>
 
-            {/* Hero Image */}
-            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)] aspect-[16/11] sm:aspect-[16/10]">
+            {/* Mobile Image */}
+            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)] my-4">
               <img 
                 src="/hero.png" 
                 alt="Dejz App" 
-                className="w-full h-full object-cover object-right block"
+                className="w-full h-auto object-cover object-center block"
               />
             </div>
 
-            {/* Trust points */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            {/* Mobile Trust Points */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
               <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-[var(--surface-color)] sm:bg-transparent p-3 sm:p-0 rounded-[var(--radius-card-nested,10px)] border sm:border-0 border-[var(--border-subtle)]">
                 <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--bg-color)] sm:bg-[var(--surface-color)] border sm:border-0 border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
                   <Shield size={14} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">Ingen bankkoppling</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">Full kontroll över din data.</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust1Title}</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust1Desc}</p>
                 </div>
               </div>
 
@@ -330,8 +778,8 @@ export function LandingPage({
                   <Lock size={14} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">Säker och privat</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">Din information är din.</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust2Title}</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust2Desc}</p>
                 </div>
               </div>
 
@@ -340,8 +788,8 @@ export function LandingPage({
                   <Sparkles size={14} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">Byggd för enkelhet</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">Fokus på det som hjälper.</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust3Title}</h4>
+                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust3Desc}</p>
                 </div>
               </div>
             </div>
@@ -356,10 +804,10 @@ export function LandingPage({
         <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-14">
           <div className="max-w-2xl space-y-3">
             <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
-              Så fungerar Dejz
+              {c.howTitle}
             </h2>
             <p className="text-base sm:text-lg text-[var(--text-secondary)]">
-              Tre enkla steg till bättre koll på pengarna.
+              {c.howSubtitle}
             </p>
           </div>
 
@@ -368,30 +816,30 @@ export function LandingPage({
             <Card variant="default" padding="lg" className="space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-bold text-sm flex items-center justify-center">
-                  1
+                  {c.step1Num}
                 </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Periodkalkyl</h3>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{c.step1Title}</h3>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                  Fyll i din inkomst, fasta kostnader och sparande. Dejz räknar ut vad du faktiskt har kvar.
+                  {c.step1Desc}
                 </p>
               </div>
 
               <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,10px)] p-4 border border-[var(--border-subtle)] space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>Inkomst</span>
-                  <span className="font-semibold text-[var(--text-primary)]">25 000 kr</span>
+                  <span>{c.step1IncomeLabel}</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{c.step1IncomeVal}</span>
                 </div>
                 <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>Fasta kostnader</span>
-                  <span className="font-semibold text-[var(--text-primary)]">−12 000 kr</span>
+                  <span>{c.step1FixedLabel}</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{c.step1FixedVal}</span>
                 </div>
                 <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>Sparande</span>
-                  <span className="font-semibold text-[var(--text-primary)]">−3 000 kr</span>
+                  <span>{c.step1SavingsLabel}</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{c.step1SavingsVal}</span>
                 </div>
                 <div className="border-t border-[var(--border-subtle)] pt-2 flex justify-between font-bold text-[var(--text-primary)] text-sm">
-                  <span>Kvar att spendera</span>
-                  <span className="text-emerald-600">10 000 kr</span>
+                  <span>{c.step1LeftLabel}</span>
+                  <span className="text-emerald-600">{c.step1LeftVal}</span>
                 </div>
               </div>
             </Card>
@@ -400,22 +848,22 @@ export function LandingPage({
             <Card variant="default" padding="lg" className="space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-bold text-sm flex items-center justify-center">
-                  2
+                  {c.step2Num}
                 </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Registrera utgifter</h3>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{c.step2Title}</h3>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                  Lägg snabbt till dina köp och välj kategori.
+                  {c.step2Desc}
                 </p>
               </div>
 
               <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,10px)] p-4 border border-[var(--border-subtle)] space-y-3">
                 <div className="flex items-center justify-between bg-[var(--bg-color)] p-3 rounded-[var(--radius-card-nested,10px)] border border-[var(--border-subtle)] shadow-xs">
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Lunch</span>
-                  <span className="text-sm font-bold text-rose-600">−120 kr</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.step2SampleName}</span>
+                  <span className="text-sm font-bold text-rose-600">{c.step2SampleVal}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] px-1">
                   <Receipt size={14} className="text-[var(--text-tertiary)]" />
-                  <span>Bifoga kvitto</span>
+                  <span>{c.step2Receipt}</span>
                 </div>
               </div>
             </Card>
@@ -424,20 +872,20 @@ export function LandingPage({
             <Card variant="default" padding="lg" className="space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-bold text-sm flex items-center justify-center">
-                  3
+                  {c.step3Num}
                 </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Se vad du kan spendera</h3>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{c.step3Title}</h3>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                  När du registrerar nya utgifter uppdaterar Dejz automatiskt hur mycket du har kvar.
+                  {c.step3Desc}
                 </p>
               </div>
 
               <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,10px)] p-4 border border-[var(--border-subtle)] space-y-1.5 text-center">
-                <span className="text-xs text-[var(--text-tertiary)] font-medium uppercase tracking-wider">Kvar att spendera</span>
+                <span className="text-xs text-[var(--text-tertiary)] font-medium uppercase tracking-wider">{c.step1LeftLabel}</span>
                 <div className="text-2xl font-black text-emerald-600 tracking-tight">
-                  10 000 kr
+                  {c.step3LeftVal}
                 </div>
-                <div className="text-[11px] text-[var(--text-tertiary)]">Uppdateras i realtid</div>
+                <div className="text-[11px] text-[var(--text-tertiary)]">{c.step3Realtime}</div>
               </div>
             </Card>
           </div>
@@ -453,7 +901,7 @@ export function LandingPage({
               <div className="w-full max-w-[340px] sm:max-w-[380px] relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)]">
                 <img 
                   src="/IMG_3049.PNG" 
-                  alt="Din ekonomi, på dina villkor" 
+                  alt="Dejz App Screenshot" 
                   className="w-full h-auto object-cover object-center block"
                 />
               </div>
@@ -463,10 +911,10 @@ export function LandingPage({
             <div className="lg:col-span-7 space-y-8">
               <div className="space-y-4">
                 <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
-                  Din ekonomi, på dina villkor.
+                  {c.featuresHeading}
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
-                  Dejz hjälper dig att få full kontroll över vardagsekonomin. Ingen bankkoppling och inga onödigt komplicerade verktyg – bara en tydlig överblick över dina pengar.
+                  {c.featuresSubheading}
                 </p>
               </div>
 
@@ -475,42 +923,42 @@ export function LandingPage({
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Manuell inmatning – du bestämmer</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check1}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Smarta analyser</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check2}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Koll från lön till lön</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check3}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Säker och privat</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check4}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Kvitton och historik</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check5}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">Ingen data säljs</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check6}</span>
                 </div>
               </div>
             </div>
@@ -527,11 +975,11 @@ export function LandingPage({
               <div className="lg:col-span-5 space-y-6">
                 <div className="space-y-4">
                   <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-[1.25] max-w-sm">
-                    Allt du behöver<br />
-                    – samlat på ett ställe.
+                    {c.allInOneHeadingLine1}<br />
+                    {c.allInOneHeadingLine2}
                   </h2>
                   <p className="text-[var(--text-secondary)] text-base sm:text-lg leading-relaxed max-w-md">
-                    Se dina utgifter, budget, historik och analyser på ett och samma ställe.
+                    {c.allInOneSub}
                   </p>
                 </div>
 
@@ -541,7 +989,7 @@ export function LandingPage({
                     size="lg"
                     onClick={onGetStarted}
                   >
-                    Kom igång gratis
+                    {c.getStarted}
                   </Button>
                 </div>
               </div>
@@ -549,34 +997,34 @@ export function LandingPage({
               {/* Right Content */}
               <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="space-y-2.5">
-                  <PlaceholderBox id="HOME_SCREEN" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
+                  <PlaceholderBox id="HEM" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">Hem</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">Se vad du kan spendera.</p>
+                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenHome}</h4>
+                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenHomeDesc}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2.5">
-                  <PlaceholderBox id="HISTORY_SCREEN" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
+                  <PlaceholderBox id="HISTORIK" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">Historik</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">Alla dina transaktioner samlade.</p>
+                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenHistory}</h4>
+                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenHistoryDesc}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2.5">
-                  <PlaceholderBox id="ANALYSIS_SCREEN" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
+                  <PlaceholderBox id="ANALYS" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">Analys</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">Förstå vart pengarna går.</p>
+                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenAnalysis}</h4>
+                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenAnalysisDesc}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2.5">
-                  <PlaceholderBox id="ECONOMY_SCREEN" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
+                  <PlaceholderBox id="EKONOMI" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">Ekonomi</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">Hantera inkomster och fasta utgifter.</p>
+                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenEconomy}</h4>
+                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenEconomyDesc}</p>
                   </div>
                 </div>
               </div>
@@ -585,7 +1033,7 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 8. BETA TESTERS SOCIAL PROOF SECTION */}
+      {/* 8. SOCIAL PROOF / REVIEWS */}
       <section className="py-24 bg-[var(--bg-color)] border-b border-[var(--border-subtle)]">
         <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-4">
@@ -597,13 +1045,13 @@ export function LandingPage({
                 <Star size={14} fill="currentColor" />
                 <Star size={14} fill="currentColor" />
               </div>
-              <span>4.9 av 5 i betyg bland 20+ tidiga betatestare</span>
+              <span>{c.reviewsBadge}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-semibold font-display tracking-tight text-[var(--text-primary)]">
-              Vad säger de som provat?
+              {c.reviewsHeading}
             </h2>
             <p className="text-base sm:text-lg text-[var(--text-secondary)]">
-              Dejz har testats av över 20 tidiga användare för att säkerställa att upplevelsen sitter perfekt från dag ett.
+              {c.reviewsSubheading}
             </p>
           </div>
 
@@ -618,7 +1066,7 @@ export function LandingPage({
                   <Star size={16} fill="currentColor" />
                 </div>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
-                  &quot;Slutligen en app som inte kräver krångliga bankkopplingar. Har äntligen full koll på pengarna mellan lönerna!&quot;
+                  {c.review1Text}
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
@@ -626,8 +1074,8 @@ export function LandingPage({
                   ML
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Marcus Lindström</h4>
-                  <p className="text-xs text-[var(--text-tertiary)]">Betatestare (Stockholm)</p>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{c.review1Author}</h4>
+                  <p className="text-xs text-[var(--text-tertiary)]">{c.review1City}</p>
                 </div>
               </div>
             </Card>
@@ -642,7 +1090,7 @@ export function LandingPage({
                   <Star size={16} fill="currentColor" />
                 </div>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
-                  &quot;Periodkalkylen är guld värd. Man ser direkt vad som faktiskt finns kvar att spendera efter alla fasta utgifter.&quot;
+                  {c.review2Text}
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
@@ -650,8 +1098,8 @@ export function LandingPage({
                   SK
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Sofia Karlsson</h4>
-                  <p className="text-xs text-[var(--text-tertiary)]">Betatestare (Göteborg)</p>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{c.review2Author}</h4>
+                  <p className="text-xs text-[var(--text-tertiary)]">{c.review2City}</p>
                 </div>
               </div>
             </Card>
@@ -666,7 +1114,7 @@ export function LandingPage({
                   <Star size={16} fill="currentColor" />
                 </div>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
-                  &quot;Superenkel, snabb och stilren design. Precis det ekonomiverktyg jag har letat efter i flera år.&quot;
+                  {c.review3Text}
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
@@ -674,8 +1122,8 @@ export function LandingPage({
                   AE
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Alexander Ek</h4>
-                  <p className="text-xs text-[var(--text-tertiary)]">Betatestare (Malmö)</p>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{c.review3Author}</h4>
+                  <p className="text-xs text-[var(--text-tertiary)]">{c.review3City}</p>
                 </div>
               </div>
             </Card>
@@ -687,25 +1135,25 @@ export function LandingPage({
       <section className="py-24 bg-[var(--bg-color)]">
         <div className="max-w-[1000px] mx-auto px-6 sm:px-8 space-y-10">
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--text-primary)]">
-            Vanliga frågor
+            {c.faqTitle}
           </h2>
 
           <div className="space-y-0">
             <FAQItem 
-              question="Är Dejz gratis att använda?" 
-              answer="Ja, du kan komma igång och använda grundläggande funktioner helt gratis." 
+              question={c.faq1Q} 
+              answer={c.faq1A} 
             />
             <FAQItem 
-              question="Hur fungerar Dejz utan bankkoppling?" 
-              answer="Du lägger enkelt till dina transaktioner manuellt, via röstinmatning eller genom att fota kvitton. Det ger dig fullständig kontroll och ökad medvetenhet om varje köp utan att dela dina bankinloggningsuppgifter." 
+              question={c.faq2Q} 
+              answer={c.faq2A} 
             />
             <FAQItem 
-              question="Kan jag testa Dejz innan jag skapar konto?" 
-              answer="Absolut! Du kan klicka på 'Testa demo direkt' för att utforska appen med färdig demo-data direkt i webbläsaren." 
+              question={c.faq3Q} 
+              answer={c.faq3A} 
             />
             <FAQItem 
-              question="Hur fungerar perioderna mellan två löner?" 
-              answer="Du ställer in din egen lönedag (t.ex. den 25:e i månaden). Dejz räknar sedan automatiskt ut din budgetperiod och dagsbudget fram till nästa lön." 
+              question={c.faq4Q} 
+              answer={c.faq4A} 
             />
           </div>
         </div>
@@ -716,10 +1164,10 @@ export function LandingPage({
         <Card variant="default" padding="lg" className="p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 border border-[var(--border-subtle)]">
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
-              Redo att få koll på ekonomin?
+              {c.finalCtaTitle}
             </h2>
             <p className="text-[var(--text-secondary)] text-sm sm:text-lg font-medium leading-relaxed">
-              Kom igång med Dejz på några minuter.
+              {c.finalCtaSub}
             </p>
           </div>
 
@@ -737,7 +1185,7 @@ export function LandingPage({
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                Fortsätt med Google
+                {c.continueWithGoogle}
               </Button>
             )}
             <Button
@@ -746,7 +1194,7 @@ export function LandingPage({
               onClick={onGetStarted}
               className="w-full sm:w-auto font-bold"
             >
-              Kom igång gratis
+              {c.getStarted}
             </Button>
           </div>
         </Card>
@@ -760,13 +1208,18 @@ export function LandingPage({
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-6 font-semibold">
-            <a href="#features" className="hover:text-[var(--text-primary)] transition-colors">Funktioner</a>
-            <button onClick={() => setActivePolicy('privacy')} className="hover:text-[var(--text-primary)] transition-colors cursor-pointer">Integritetspolicy</button>
-            <button onClick={() => setActivePolicy('terms')} className="hover:text-[var(--text-primary)] transition-colors cursor-pointer">Användarvillkor</button>
-            <a href="#how-it-works" className="hover:text-[var(--text-primary)] transition-colors">Kontakt</a>
+            <a href="#features" className="hover:text-[var(--text-primary)] transition-colors">{c.navFeatures}</a>
+            <button onClick={() => setActivePolicy('privacy')} className="hover:text-[var(--text-primary)] transition-colors cursor-pointer">{c.footerPrivacy}</button>
+            <button onClick={() => setActivePolicy('terms')} className="hover:text-[var(--text-primary)] transition-colors cursor-pointer">{c.footerTerms}</button>
+            <a href="#how-it-works" className="hover:text-[var(--text-primary)] transition-colors">{c.footerContact}</a>
           </div>
 
           <div className="flex items-center gap-4">
+            <LanguagePicker
+              currentLanguage={currentLanguage}
+              onLanguageChange={onLanguageChange}
+              variant="footer"
+            />
             <a 
               href="https://instagram.com" 
               target="_blank" 

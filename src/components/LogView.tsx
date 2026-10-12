@@ -205,7 +205,7 @@ export function LogView({
       });
 
       // 3. Monthly Savings
-      const savingsList = config?.monthlySavingsItems && config.monthlySavingsItems.length > 0
+      const savingsList = Array.isArray(config?.monthlySavingsItems)
         ? config.monthlySavingsItems
         : (stats?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0);
 

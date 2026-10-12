@@ -1,4 +1,5 @@
 import { parseMathAmount, hasMathOperators } from './mathUtils';
+import { getLocaleFromLanguage, normalizeLanguage } from './nordic';
 
 /**
  * Capitalizes the first letter of a string.
@@ -16,7 +17,7 @@ export const formatAmount = (val: string | number, language: string = 'sv-SE'): 
   if (val === undefined || val === null || val === '') return '';
   
   if (typeof val === 'number') {
-    const locale = (language === 'en' || language === 'en-US') ? 'en-US' : 'sv-SE';
+    const locale = getLocaleFromLanguage(language);
     const hasDecimals = Math.abs(val % 1) > 1e-6;
     return val.toLocaleString(locale, {
       minimumFractionDigits: hasDecimals ? 2 : 0,
@@ -122,14 +123,17 @@ export const formatCurrency = (
  * Formats day of month into ordinal representation (e.g. 1st, 2nd, 25th in EN or 1:a, 2:a, 25:e in SV/others)
  */
 export const formatOrdinalDay = (day: number, lang: string = 'sv'): string => {
-  const isEn = lang === 'en' || lang === 'en-US';
-  if (isEn) {
+  const norm = normalizeLanguage(lang);
+  if (norm === 'en') {
     if (day >= 11 && day <= 13) return `${day}th`;
     const lastDigit = day % 10;
     if (lastDigit === 1) return `${day}st`;
     if (lastDigit === 2) return `${day}nd`;
     if (lastDigit === 3) return `${day}rd`;
     return `${day}th`;
+  }
+  if (norm === 'da' || norm === 'no' || norm === 'fi') {
+    return `${day}.`;
   }
   // Swedish / Nordic: 1:a, 2:a, 21:a, 22:a, 31:a, others :e
   if (day === 1 || day === 2 || day === 21 || day === 22 || day === 31) {
@@ -142,11 +146,12 @@ export const formatOrdinalDay = (day: number, lang: string = 'sv'): string => {
  * Formats payday summary sentence for settings and onboarding
  */
 export const formatPaydaySummary = (day: number, lang: string = 'sv'): string => {
-  const isEn = lang === 'en' || lang === 'en-US';
+  const norm = normalizeLanguage(lang);
   const ordinal = formatOrdinalDay(day, lang);
-  if (isEn) {
-    return `The ${ordinal} of each month`;
-  }
+  if (norm === 'en') return `The ${ordinal} of each month`;
+  if (norm === 'da') return `Den ${ordinal} hver måned`;
+  if (norm === 'no') return `Den ${ordinal} hver måned`;
+  if (norm === 'fi') return `Joka kuukauden ${ordinal}`;
   return `Den ${ordinal} varje månad`;
 };
 
@@ -178,15 +183,21 @@ export const parseAmount = (val: string): number => {
  */
 export const formatDeductionDayDisplay = (day?: number | null, language: string = 'sv', short: boolean = false): string => {
   if (!day) return '-';
-  const isEn = language === 'en' || language === 'en-US';
-
-  if (day === 1) {
-    return isEn ? '1st' : '1:a';
-  }
+  const norm = normalizeLanguage(language);
 
   if (day === 31 || day === 99 || day === 32) {
-    if (short) return isEn ? 'Last day' : 'Sista dagen';
-    return isEn ? 'Last day of month' : 'Sista dagen i månaden';
+    if (short) {
+      if (norm === 'en') return 'Last day';
+      if (norm === 'da') return 'Sidste dag';
+      if (norm === 'no') return 'Siste dag';
+      if (norm === 'fi') return 'Viimeinen päivä';
+      return 'Sista dagen';
+    }
+    if (norm === 'en') return 'Last day of month';
+    if (norm === 'da') return 'Sidste dag i måneden';
+    if (norm === 'no') return 'Siste dag i måneden';
+    if (norm === 'fi') return 'Kuukauden viimeinen päivä';
+    return 'Sista dagen i månaden';
   }
 
   return formatOrdinalDay(day, language);
@@ -196,9 +207,26 @@ export const formatDeductionDayDisplay = (day?: number | null, language: string 
  * Returns options list for deduction day selects.
  */
 export const getDeductionDayOptions = (language: string = 'sv') => {
-  const isEn = language === 'en' || language === 'en-US';
+  const norm = normalizeLanguage(language);
+  let firstDayLabel = 'Första dagen i månaden (1:a)';
+  let lastDayLabel = 'Sista dagen i månaden';
+
+  if (norm === 'en') {
+    firstDayLabel = '1st - First day of month';
+    lastDayLabel = 'Last day of month';
+  } else if (norm === 'da') {
+    firstDayLabel = 'Første dag i måneden (1.)';
+    lastDayLabel = 'Sidste dag i måneden';
+  } else if (norm === 'no') {
+    firstDayLabel = 'Første dag i måneden (1.)';
+    lastDayLabel = 'Siste dag i måneden';
+  } else if (norm === 'fi') {
+    firstDayLabel = 'Kuukauden ensimmäinen päivä (1.)';
+    lastDayLabel = 'Kuukauden viimeinen päivä';
+  }
+
   const options = [
-    { value: 1, label: isEn ? '1st - First day of month' : 'Första dagen i månaden (1:a)' },
+    { value: 1, label: firstDayLabel },
   ];
 
   for (let d = 2; d <= 30; d++) {
@@ -207,7 +235,7 @@ export const getDeductionDayOptions = (language: string = 'sv') => {
 
   options.push({
     value: 31,
-    label: isEn ? 'Last day of month' : 'Sista dagen i månaden',
+    label: lastDayLabel,
   });
 
   return options;

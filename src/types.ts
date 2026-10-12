@@ -87,6 +87,9 @@ export interface Config {
   currency: string;
   currencyCode?: string;
   language: string;
+  country?: string;
+  locale?: string;
+  timezone?: string;
   payday: number;
   paydayType: PaydayType;
   paydayBeforeWeekend: boolean;
@@ -201,8 +204,9 @@ export interface FixedExpense {
   periodOverrides?: Record<string, number>;
   note?: string;
   isCancelled?: boolean;
-  cancellationDate?: string;
-  cancelledAt?: number;
+  cancellationDate?: string; // Slutdatum (När abonnemanget upphör)
+  cancelledAt?: number;      // Uppsägningsdatum (När det sades upp)
+  lastPaymentDate?: string;  // Sista betalningsdag
 }
 
 export interface SavingsPotTransaction {

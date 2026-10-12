@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calendar, Repeat, CreditCard, Clock } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calendar, Repeat, CreditCard, Clock, RotateCcw } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { TranslationKey } from '../i18n';
@@ -22,7 +22,7 @@ import { getTransactionDominantColor, extractDominantColorFromImage } from '../u
 import { resolveEntityVisual } from '../utils/resolver';
 import { getCategoryColor } from '../utils/categoryColors';
 import { feedback } from '../utils/feedback';
-import { isExpenseCancelledAndExpired } from '../utils/cancellation';
+import { getLastPaymentDate, formatShortDate, getCancellationBadgeText } from '../utils/cancellation';
 
 function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
@@ -958,7 +958,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -971,9 +971,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Centered Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-3">
+          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-1">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10">
               <IconButton 
@@ -994,13 +994,13 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               <TransactionLogo transaction={expenseCompatible as any} config={config} size="lg" />
             </div>
 
-            {/* Title: Page title Outfit 19px 600 */}
-            <h2 className="text-page-title max-w-[90%] truncate px-2">
+            {/* Title */}
+            <h2 className="text-page-title text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
               {expense.name}
             </h2>
 
-            {/* Price: Large amount Outfit 25px 600 */}
-            <p className="text-large-amount font-amount tabular-nums tracking-tight mt-1 flex items-baseline justify-center text-[var(--text-primary)]">
+            {/* Price */}
+            <p className="text-large-amount font-amount tabular-nums mt-1 flex items-baseline justify-center text-[var(--text-primary)]">
               <span className="opacity-80 mr-1">−</span>
               <span>{formatAmount(displayAmount, config.language)}</span>
               <span className="text-secondary font-medium text-[var(--text-secondary)] ml-1.5 self-end pb-0.5">{currency}</span>
@@ -1012,13 +1012,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             )}
             {expense.isCancelled && (
               <div className="mt-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-semibold text-xs border border-[var(--warning-color)]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold text-xs border border-amber-500/30">
                   <Clock size={13} />
-                  <span>
-                    {isExpenseCancelledAndExpired(expense)
-                      ? (config.language === 'en' ? 'Cancelled & Expired (not in budget)' : 'Uppsagt & Avslutat (räknas ej mer)')
-                      : (config.language === 'en' ? `Cancelled (ends ${expense.cancellationDate || 'date'})` : `Uppsagt (slutar ${expense.cancellationDate || 'valt datum'})`)}
-                  </span>
+                  <span>{getCancellationBadgeText(expense, config.language)}</span>
                 </span>
               </div>
             )}
@@ -1100,6 +1096,42 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               </div>
             </div>
 
+            {/* Cancellation breakdown rows if cancelled */}
+            {expense.isCancelled && (
+              <>
+                {expense.cancelledAt && (
+                  <div className="py-3 flex items-center justify-between gap-4">
+                    <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+                      {config.language === 'en' ? 'Cancelled on' : 'Uppsägningsdatum'}
+                    </span>
+                    <span className="text-body-medium text-[var(--text-primary)] font-medium text-right tabular-nums">
+                      {new Date(expense.cancelledAt).toLocaleDateString(config.language === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                )}
+                {expense.cancellationDate && (
+                  <div className="py-3 flex items-center justify-between gap-4">
+                    <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+                      {config.language === 'en' ? 'End date' : 'Slutdatum'}
+                    </span>
+                    <span className="text-body-medium text-[var(--text-primary)] font-medium text-right tabular-nums">
+                      {formatShortDate(expense.cancellationDate, config.language)}
+                    </span>
+                  </div>
+                )}
+                {getLastPaymentDate(expense) && (
+                  <div className="py-3 flex items-center justify-between gap-4">
+                    <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+                      {config.language === 'en' ? 'Last payment' : 'Sista betalningsdag'}
+                    </span>
+                    <span className="text-body-medium text-[var(--text-primary)] font-medium text-right tabular-nums font-bold text-[var(--accent-color)]">
+                      {formatShortDate(getLastPaymentDate(expense)!, config.language)}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+
             {/* Note */}
             {expense.note && (
               <div className="py-3 flex items-start justify-between gap-4">
@@ -1113,22 +1145,47 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             )}
           </div>
 
-          {/* Neutral Secondary Action: Visa hur du säger upp */}
-          <button
-            type="button"
-            onClick={() => setIsCancelModalOpen(true)}
-            className="w-full mt-2 p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
-          >
-            <div>
-              <p className="text-body-medium font-medium text-[var(--text-primary)]">
-                {config.language === 'en' ? 'Cancel subscription' : 'Säg upp abonnemang'}
-              </p>
-              <p className="text-secondary text-[var(--text-secondary)] mt-0.5">
-                {config.language === 'en' ? 'Instructions and direct link' : 'Instruktioner och direktlänk'}
-              </p>
-            </div>
-            <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
-          </button>
+          {/* Cancellation Actions */}
+          <div className="space-y-2 mt-2">
+            <button
+              type="button"
+              onClick={() => setIsCancelModalOpen(true)}
+              className="w-full p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
+            >
+              <div>
+                <p className="text-body-medium font-medium text-[var(--text-primary)]">
+                  {expense.isCancelled
+                    ? (config.language === 'en' ? 'Edit cancellation dates' : 'Ändra uppsägningsdatum')
+                    : (config.language === 'en' ? 'Cancel subscription' : 'Säg upp abonnemang')}
+                </p>
+                <p className="text-secondary text-[var(--text-secondary)] mt-0.5">
+                  {config.language === 'en' ? 'Instructions, guide & direct link' : 'Instruktioner, villkor och direktlänk'}
+                </p>
+              </div>
+              <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
+            </button>
+
+            {expense.isCancelled && (
+              <button
+                type="button"
+                onClick={() => {
+                  feedback.success();
+                  onEdit({
+                    ...expense,
+                    isCancelled: false,
+                    cancellationDate: undefined,
+                    cancelledAt: undefined,
+                    lastPaymentDate: undefined,
+                  });
+                  onClose();
+                }}
+                className="w-full p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] flex items-center justify-between text-left cursor-pointer active:scale-[0.99] border-none text-[var(--accent-color)] font-semibold text-sm"
+              >
+                <span>{config.language === 'en' ? 'Reactivate subscription' : 'Återaktivera abonnemang'}</span>
+                <RotateCcw size={15} />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera-knapp */}
@@ -1398,7 +1455,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-2.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -1428,14 +1485,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </div>
             </div>
 
-            <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
+            <div className="pt-2.5 border-t border-subtle flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <label className="text-label font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Amount' : 'Belopp'}
                 </label>
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="flex items-center gap-2 font-amount cursor-text w-full"
+                  className="flex items-baseline gap-1.5 font-amount cursor-text w-full"
                 >
                   <input
                     ref={amountInputRef}
@@ -1452,7 +1509,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     placeholder="0"
                     className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
                   />
-                  <span className="text-secondary font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[var(--radius-button-sm,8px)] select-none shrink-0 font-sans">
+                  <span className="text-secondary font-medium text-[var(--text-tertiary)] uppercase tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
                     {currency}
                   </span>
                 </div>

@@ -89,6 +89,9 @@ export function BudgetItem({
     deductionDay: item.deductionDay,
     frequency: item.frequency,
     isCancelled: item.isCancelled,
+    cancellationDate: item.cancellationDate,
+    cancelledAt: item.cancelledAt,
+    lastPaymentDate: item.lastPaymentDate,
     originalAmount: rawAmount !== finalDisplayAmount ? rawAmount : undefined,
     isVariable: isItemVariable,
   } as any;

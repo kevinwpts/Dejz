@@ -5,7 +5,8 @@ import { TransactionLogo } from './TransactionLogo';
 import { formatAmount, capitalize } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
-import { Paperclip, Trash2, RotateCw, Heart } from 'lucide-react';
+import { Paperclip, Trash2, RotateCw, Heart, Clock } from 'lucide-react';
+import { getCancellationBadgeText } from '../utils/cancellation';
 import { feedback } from '../utils/feedback';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { ConfirmModal } from './ConfirmModal';
@@ -118,7 +119,7 @@ export function TransactionItem({
   }
 
   // Neutral discreet category display
-  const renderCategoryBadge = (categoryName: string, amount?: number) => {
+  const renderCategoryBadge = (categoryName: string, amount?: number, extraCount?: number) => {
     const searchCat = (categoryName || '').trim().toLowerCase();
     const matchedCategory = (config?.categories || []).concat(config?.incomeCategories || []).find(
       (c) => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === categoryName || (c?.id || '').toLowerCase() === searchCat
@@ -136,14 +137,18 @@ export function TransactionItem({
           />
         ) : null}
         <span className="text-secondary text-[var(--text-secondary)] whitespace-nowrap">
-          {capitalize(categoryName || '')}
+          {capitalize(categoryName || '')}{extraCount && extraCount > 0 ? ` +${extraCount}` : ''}
           {amount !== undefined && <span className="ml-0.5 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
       </div>
     );
   };
 
-  const isSplit = (transaction as any).splits && (transaction as any).splits.length > 0;
+  const rawSplits = (transaction as any).splits;
+  const splitsArray = Array.isArray(rawSplits)
+    ? rawSplits
+    : (typeof rawSplits === 'string' ? (() => { try { const p = JSON.parse(rawSplits); return Array.isArray(p) ? p : []; } catch { return []; } })() : []);
+  const isSplit = splitsArray.length > 1;
   const merchantName = isFixed 
     ? (transaction.name || transaction.merchant || transaction.category) 
     : (transaction.merchant || transaction.category || 'Transaktion');
@@ -288,6 +293,12 @@ export function TransactionItem({
               
               {/* Secondary Details: smaller category icon & text */}
               <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)] flex-wrap">
+                {(transaction as any).isCancelled && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded-full shrink-0 select-none">
+                    <Clock size={10} strokeWidth={2} />
+                    <span>{getCancellationBadgeText(transaction as any, config?.language)}</span>
+                  </span>
+                )}
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
                     <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
@@ -295,11 +306,13 @@ export function TransactionItem({
                     </span>
                   ) : null
                 ) : showAllCategories && isSplit ? (
-                  (transaction as any).splits.map((split: any, idx: number) => (
+                  splitsArray.map((split: any, idx: number) => (
                     <React.Fragment key={idx}>
                       {renderCategoryBadge(split.category, split.amount)}
                     </React.Fragment>
                   ))
+                ) : isSplit ? (
+                  renderCategoryBadge(splitsArray[0]?.category || transaction.category, undefined, splitsArray.length - 1)
                 ) : (
                   renderCategoryBadge(transaction.category)
                 )}

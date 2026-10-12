@@ -51,7 +51,11 @@ export const dataService = {
 
     return {
       currency: profileData.currency,
+      currencyCode: profileData.currency_code || localSavedConfig?.currencyCode || undefined,
       language: profileData.language,
+      country: profileData.country || localSavedConfig?.country || undefined,
+      locale: profileData.locale || localSavedConfig?.locale || undefined,
+      timezone: profileData.timezone || localSavedConfig?.timezone || undefined,
       payday: profileData.payday,
       paydayType: profileData.payday_type,
       paydayBeforeWeekend: profileData.payday_before_weekend,
@@ -69,11 +73,12 @@ export const dataService = {
         ? profileData.savings_goals
         : (localSavedConfig?.savingsGoals || []),
       totalSavedLifetime: profileData.total_saved_lifetime || 0,
-      surplusIncome: profileData.surplus_income || 0,
-      monthlySavings: profileData.monthly_savings || localSavedConfig?.monthlySavings || 0,
-      monthlySavingsItems: (profileData.monthly_savings_items && Array.isArray(profileData.monthly_savings_items) && profileData.monthly_savings_items.length > 0)
+      monthlySavings: (profileData.monthly_savings !== undefined && profileData.monthly_savings !== null)
+        ? profileData.monthly_savings
+        : (localSavedConfig?.monthlySavings !== undefined ? localSavedConfig.monthlySavings : 0),
+      monthlySavingsItems: Array.isArray(profileData.monthly_savings_items)
         ? profileData.monthly_savings_items
-        : (localSavedConfig?.monthlySavingsItems || []),
+        : (Array.isArray(localSavedConfig?.monthlySavingsItems) ? localSavedConfig.monthlySavingsItems : []),
       appIconTheme: profileData.app_icon_theme,
       includeFixedExpensesInAnalysis: profileData.include_fixed_expenses_in_analysis !== undefined 
         ? profileData.include_fixed_expenses_in_analysis 
@@ -205,7 +210,11 @@ export const dataService = {
     const payload: any = {
       id: userId,
       currency: config.currency,
+      currency_code: config.currencyCode || null,
       language: config.language,
+      country: config.country || null,
+      locale: config.locale || null,
+      timezone: config.timezone || null,
       payday: config.payday,
       payday_type: config.paydayType,
       payday_before_weekend: config.paydayBeforeWeekend,
@@ -311,7 +320,7 @@ export const dataService = {
       paymentMethod: t.payment_method,
       receiptUrl: t.receipt_url,
       tags: t.tags || [],
-      splits: t.splits || [],
+      splits: typeof t.splits === 'string' ? (() => { try { const p = JSON.parse(t.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(t.splits) ? t.splits : []),
       isStarred: Boolean(t.is_starred || (t.tags && Array.isArray(t.tags) && t.tags.includes('starred')))
     }));
   },
@@ -381,7 +390,7 @@ export const dataService = {
       paymentMethod: row.payment_method,
       receiptUrl: row.receipt_url,
       tags: row.tags || [],
-      splits: row.splits || [],
+      splits: typeof row.splits === 'string' ? (() => { try { const p = JSON.parse(row.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(row.splits) ? row.splits : []),
       isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
     };
   },
@@ -441,7 +450,7 @@ export const dataService = {
       paymentMethod: row.payment_method,
       receiptUrl: row.receipt_url,
       tags: row.tags || [],
-      splits: row.splits || [],
+      splits: typeof row.splits === 'string' ? (() => { try { const p = JSON.parse(row.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(row.splits) ? row.splits : []),
       isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
     };
   },
@@ -578,7 +587,8 @@ export const dataService = {
       note: e.note || undefined,
       isCancelled: e.is_cancelled || false,
       cancellationDate: e.cancellation_date || undefined,
-      cancelledAt: e.cancelled_at || undefined
+      cancelledAt: e.cancelled_at || undefined,
+      lastPaymentDate: e.last_payment_date || e.period_overrides?._last_payment_date || undefined
     }));
   },
 
@@ -600,7 +610,8 @@ export const dataService = {
 
     const periodOverrides = {
       ...(expense.periodOverrides || {}),
-      ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {})
+      ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {}),
+      ...(expense.lastPaymentDate ? { _last_payment_date: expense.lastPaymentDate } : {})
     };
 
     const payload: any = {
@@ -620,7 +631,8 @@ export const dataService = {
       note: expense.note && expense.note.trim() ? expense.note.trim() : null,
       is_cancelled: expense.isCancelled || false,
       cancellation_date: expense.cancellationDate || null,
-      cancelled_at: expense.cancelledAt || null
+      cancelled_at: expense.cancelledAt || null,
+      last_payment_date: expense.lastPaymentDate || null
     };
 
     const currentPayload = { ...payload };

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, CheckCircle2 } from 'lucide-react';
 import { Config, Debt } from '../types';
 import { formatAmount } from '../utils/format';
-import { Modal, Card, Button, IconButton, Input, SegmentedControl, EmptyState } from './ui';
+import { Modal, Card, Button, IconButton, Input, FilterButtonGroup, EmptyState } from './ui';
 
 interface DebtsViewProps {
   onBack: () => void;
@@ -148,19 +148,17 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
 
       {/* 2. Global Filter Pills & Add Button */}
       <div className="flex items-center justify-between gap-2.5 min-w-0 w-full">
-        <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
-          <SegmentedControl
+        <div className="flex-1 min-w-0">
+          <FilterButtonGroup
             options={[
-              { value: 'all', label: isEn ? 'All' : 'Alla' },
-              { value: 'owe_me', label: isEn ? 'Owes me' : 'Skyldig mig' },
-              { value: 'i_owe', label: isEn ? 'I owe' : 'Jag är skyldig' },
-              { value: 'settled', label: isEn ? 'Settled' : 'Kvitterade' },
+              { id: 'all', label: isEn ? 'All' : 'Alla' },
+              { id: 'owe_me', label: isEn ? 'Owes me' : 'Skyldig mig' },
+              { id: 'i_owe', label: isEn ? 'I owe' : 'Jag är skyldig' },
+              { id: 'settled', label: isEn ? 'Settled' : 'Kvitterade' },
             ]}
-            value={activeTab}
-            onChange={(val) => setActiveTab(val as any)}
-            size="sm"
-            fullWidth={false}
-            className="whitespace-nowrap shrink-0"
+            selectedId={activeTab}
+            onSelect={(id) => setActiveTab(id as any)}
+            ariaLabel={isEn ? 'Filter debts' : 'Filtrera skulder'}
           />
         </div>
 
@@ -169,7 +167,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           size="sm"
           onClick={() => setIsAddModalOpen(true)}
           icon={<Plus size={14} strokeWidth={2.5} />}
-          className="shrink-0 h-9 px-3.5 rounded-full text-xs font-bold"
+          className="shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full text-xs sm:text-[13px] font-bold"
         >
           {isEn ? 'Add' : 'Lägg till'}
         </Button>

@@ -1,4 +1,5 @@
 import { WeekendAdjustment, PaydayType, Frequency } from '../types';
+import { getLocaleFromLanguage } from './nordic';
 
 export const getActualPayday = (year: number, month: number, paydayType: PaydayType, targetDay: number, adjustment: WeekendAdjustment) => {
   let day: number;
@@ -55,9 +56,11 @@ export const getPeriodBoundaries = (date: Date, paydayType: PaydayType, paydaySe
   return { start: periodStart, end: periodEnd };
 };
 
+
 export const getPeriodName = (start: Date, end: Date, paydayType: PaydayType, language: string) => {
+  const locale = getLocaleFromLanguage(language);
   const getMonthName = (d: Date) => {
-    const monthName = d.toLocaleString(language === 'en' ? 'en-US' : 'sv-SE', { month: 'long' });
+    const monthName = d.toLocaleString(locale, { month: 'long' });
     return monthName.charAt(0).toUpperCase() + monthName.slice(1);
   };
 
@@ -68,7 +71,7 @@ export const getPeriodName = (start: Date, end: Date, paydayType: PaydayType, la
   }
   
   const formatDate = (d: Date) => {
-    return d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+    return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
   };
   
   return `${getMonthName(end)} (${formatDate(start)} - ${formatDate(end)})`;

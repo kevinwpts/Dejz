@@ -27,16 +27,20 @@ export const AGE_OPTIONS = [
   { id: '51+', labelSv: '51+ år', labelEn: '51+', isYoung: false },
 ];
 
-const texts = {
+import { 
+  normalizeLanguage, 
+  getRegionDefaults, 
+  NORDIC_COUNTRIES, 
+  NordicCountry, 
+} from '../utils/nordic';
+
+const texts: Record<string, any> = {
   sv: {
     stepOf: (step: number, total: number) => `Steg ${step} av ${total}`,
-    
-    // Step 1
     welcome: 'Välkommen till Dejz',
     nameQuestion: 'Vad heter du?',
     firstNamePlaceholder: 'Ditt förnamn',
-    
-    // Step 2
+    countryQuestion: 'Land och valuta',
     paydayTitle: 'Din lönedag',
     paydayQuestion: 'När får du lön?',
     paydayDesc: 'Det avgör när din period börjar och slutar.',
@@ -44,31 +48,21 @@ const texts = {
     everyMonth: ':e varje månad',
     paydayBeforeWeekendTitle: 'Lön tidigare vid helg',
     paydayBeforeWeekendDesc: 'Om din lönedag infaller på en helg räknar Dejz med att lönen kommer föregående vardag.',
-    
-    // Step 3
     incomeTitle: 'Månadsinkomst',
     incomeQuestion: 'Vilka inkomster har du varje månad?',
     incomeDesc: 'Lägg till dina återkommande inkomster.',
     aiPlaceholder: 'T.ex. 25 000 från Ur & Penn',
     addIncome: 'Lägg till inkomst manuellt',
-    
-    // Step 4
     expensesTitle: 'Fasta kostnader',
     expensesQuestion: 'Vilka fasta kostnader har du?',
     expensesDesc: 'Lägg till dina återkommande kostnader.',
     searchPresetsPlaceholder: 'Sök fast kostnad',
     customExpense: 'Skapa egen utgift',
     noPresetsFound: 'Ingen färdig mall hittades. Skapa en egen nedan.',
-    
-    // Step 5
     savingsTitle: 'Månadssparande',
     savingsQuestion: 'Hur mycket vill du spara varje månad?',
     savingsDesc: 'Vi räknar bort det innan vi visar vad du har kvar att spendera.',
-    
-    // Step 6
     midMonthTitle: 'Din start',
-    
-    // Step 7
     summaryTitle: 'Din plan',
     summaryQuestion: 'Din plan är klar',
     untilPayday: (date: string) => `Fram till nästa lön den ${date}`,
@@ -78,7 +72,6 @@ const texts = {
     spentSoFarLabel: 'Spenderat hittills',
     freeSpendLabel: 'Kvar att spendera',
     openDejz: 'Öppna Dejz',
-    
     next: 'Nästa',
     back: 'Tillbaka',
     exitOnboarding: 'Avsluta onboarding',
@@ -87,15 +80,147 @@ const texts = {
     skipAndEnter: 'Hoppa över & öppna Dejz',
     continueOnboarding: 'Fortsätt introduktionen',
   },
+  da: {
+    stepOf: (step: number, total: number) => `Trin ${step} af ${total}`,
+    welcome: 'Velkommen til Dejz',
+    nameQuestion: 'Hvad hedder du?',
+    firstNamePlaceholder: 'Dit fornavn',
+    countryQuestion: 'Land og valuta',
+    paydayTitle: 'Din lønningsdag',
+    paydayQuestion: 'Hvornår får du løn?',
+    paydayDesc: 'Det afgør, hvornår din budgetperiode starter og slutter.',
+    customDay: 'Anden dag',
+    everyMonth: '. hver måned',
+    paydayBeforeWeekendTitle: 'Løn tidligere ved weekend',
+    paydayBeforeWeekendDesc: 'Hvis din lønningsdag falder i en weekend, regner Dejz med, at lønnen kommer hverdagen før.',
+    incomeTitle: 'Månedlig indkomst',
+    incomeQuestion: 'Hvilke faste indtægter har du hver måned?',
+    incomeDesc: 'Tilføj dine faste indkomster.',
+    aiPlaceholder: 'F.eks. 25.000 fra arbejde',
+    addIncome: 'Tilføj indkomst manuelt',
+    expensesTitle: 'Faste udgifter',
+    expensesQuestion: 'Hvilke faste udgifter har du?',
+    expensesDesc: 'Tilføj dine faste omkostninger.',
+    searchPresetsPlaceholder: 'Søg fast udgift',
+    customExpense: 'Opret egen udgift',
+    noPresetsFound: 'Ingen skabelon fundet. Opret din egen nedenfor.',
+    savingsTitle: 'Månedlig opsparing',
+    savingsQuestion: 'Hvor meget vil du spare op hver måned?',
+    savingsDesc: 'Vi trækker det fra, før vi viser hvad du har tilbage at bruge.',
+    midMonthTitle: 'Din start',
+    summaryTitle: 'Din plan',
+    summaryQuestion: 'Din plan er klar',
+    untilPayday: (date: string) => `Frem til næste løn den ${date}`,
+    incomeLabel: 'Indkomst',
+    fixedCostsLabel: 'Faste udgifter',
+    savingsLabel: 'Opsparing',
+    spentSoFarLabel: 'Brugt indtil videre',
+    freeSpendLabel: 'Tilbage at bruge',
+    openDejz: 'Åbn Dejz',
+    next: 'Næste',
+    back: 'Tilbage',
+    exitOnboarding: 'Afslut introduktion',
+    skipOnboardingTitle: 'Spring introduktionen over?',
+    skipOnboardingDesc: 'Du kan altid indstille lønningsdag, indkomst og faste udgifter senere under Indstillinger.',
+    skipAndEnter: 'Spring over & åbn Dejz',
+    continueOnboarding: 'Fortsæt introduktionen',
+  },
+  no: {
+    stepOf: (step: number, total: number) => `Steg ${step} av ${total}`,
+    welcome: 'Velkommen til Dejz',
+    nameQuestion: 'Hva heter du?',
+    firstNamePlaceholder: 'Fornavnet ditt',
+    countryQuestion: 'Land og valuta',
+    paydayTitle: 'Din lønningsdag',
+    paydayQuestion: 'Når får du lønn?',
+    paydayDesc: 'Det avgjør når perioden din starter og slutter.',
+    customDay: 'Annen dag',
+    everyMonth: '. hver måned',
+    paydayBeforeWeekendTitle: 'Lønn tidligere ved helg',
+    paydayBeforeWeekendDesc: 'Hvis lønningsdagen din faller på en helg, regner Dejz med at lønnen kommer foregående hverdag.',
+    incomeTitle: 'Månedsinntekt',
+    incomeQuestion: 'Hvilke faste inntekter har du hver måned?',
+    incomeDesc: 'Legg til dine faste inntekter.',
+    aiPlaceholder: 'F.eks. 25 000 fra jobb',
+    addIncome: 'Legg til inntekt manuelt',
+    expensesTitle: 'Faste utgifter',
+    expensesQuestion: 'Hvilke faste utgifter har du?',
+    expensesDesc: 'Legg til dine faste kostnader.',
+    searchPresetsPlaceholder: 'Søk fast utgift',
+    customExpense: 'Opprett egen utgift',
+    noPresetsFound: 'Ingen mal funnet. Opprett din egen nedenfor.',
+    savingsTitle: 'Månedssparing',
+    savingsQuestion: 'Hvor mye vil du spare hver måned?',
+    savingsDesc: 'Vi trekker det fra før vi viser hva du har igjen å bruke.',
+    midMonthTitle: 'Din start',
+    summaryTitle: 'Planen din',
+    summaryQuestion: 'Planen din er klar',
+    untilPayday: (date: string) => `Frem til neste lønn den ${date}`,
+    incomeLabel: 'Inntekt',
+    fixedCostsLabel: 'Faste utgifter',
+    savingsLabel: 'Månedssparing',
+    spentSoFarLabel: 'Brukt så langt',
+    freeSpendLabel: 'Igjen å bruke',
+    openDejz: 'Åpne Dejz',
+    next: 'Neste',
+    back: 'Tilbake',
+    exitOnboarding: 'Avslutt introduksjon',
+    skipOnboardingTitle: 'Hopp over introduksjonen?',
+    skipOnboardingDesc: 'Du kan alltid stille inn lønningsdag, inntekter og faste utgifter senere under Innstillinger.',
+    skipAndEnter: 'Hopp over & åpne Dejz',
+    continueOnboarding: 'Fortsett introduksjonen',
+  },
+  fi: {
+    stepOf: (step: number, total: number) => `Vaihe ${step} / ${total}`,
+    welcome: 'Tervetuloa Dejziin',
+    nameQuestion: 'Mikä on nimesi?',
+    firstNamePlaceholder: 'Etunimesi',
+    countryQuestion: 'Maa ja valuutta',
+    paydayTitle: 'Palkkapäiväsi',
+    paydayQuestion: 'Milloin saat palkkaa?',
+    paydayDesc: 'Tämä määrittää budjettikautesi alun ja lopun.',
+    customDay: 'Muu päivä',
+    everyMonth: '. joka kuukausi',
+    paydayBeforeWeekendTitle: 'Palkka aiemmin viikonloppuna',
+    paydayBeforeWeekendDesc: 'Jos palkkapäiväsi osuu viikonlopulle, Dejz olettaa sen saapuvan edellisenä arkipäivänä.',
+    incomeTitle: 'Kuukausitulot',
+    incomeQuestion: 'Mitä toistuvia tuloja sinulla on kuukaudessa?',
+    incomeDesc: 'Lisää toistuvat tulosi.',
+    aiPlaceholder: 'Esim. 2 500 palkka',
+    addIncome: 'Lisää tulo manuaalisesti',
+    expensesTitle: 'Kiinteät kulut',
+    expensesQuestion: 'Mitä kiinteitä kuluja sinulla on?',
+    expensesDesc: 'Lisää toistuvat menosi.',
+    searchPresetsPlaceholder: 'Hae kiinteää kulua',
+    customExpense: 'Luo oma kulu',
+    noPresetsFound: 'Mallia ei löytynyt. Luo oma kulu alla.',
+    savingsTitle: 'Kuukausisäästö',
+    savingsQuestion: 'Kuinka paljon haluat säästää kuukaudessa?',
+    savingsDesc: 'Vähennämme tämän ennen kuin näytämme vapaasti käytettävissä olevan budjettisi.',
+    midMonthTitle: 'Kauden aloitus',
+    summaryTitle: 'Suunnitelmasi',
+    summaryQuestion: 'Suunnitelmasi on valmis',
+    untilPayday: (date: string) => `Seuraavaan palkkapäivään (${date}) asti`,
+    incomeLabel: 'Tulot',
+    fixedCostsLabel: 'Kiinteät kulut',
+    savingsLabel: 'Kuukausisäästö',
+    spentSoFarLabel: 'Käytetty tähän mennessä',
+    freeSpendLabel: 'Käytettävissä',
+    openDejz: 'Avaa Dejz',
+    next: 'Seuraava',
+    back: 'Takaisin',
+    exitOnboarding: 'Poistu esittelystä',
+    skipOnboardingTitle: 'Haluatko ohittaa esittelyn?',
+    skipOnboardingDesc: 'Voit aina määrittää palkkapäivän, tulot ja kiinteät kulut myöhemmin Asetuksista.',
+    skipAndEnter: 'Ohita ja avaa Dejz',
+    continueOnboarding: 'Jatka esittelyä',
+  },
   en: {
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
-    
-    // Step 1
     welcome: 'Welcome to Dejz',
     nameQuestion: 'What is your name?',
     firstNamePlaceholder: 'Your first name',
-    
-    // Step 2
+    countryQuestion: 'Country & currency',
     paydayTitle: 'Your Payday',
     paydayQuestion: 'When do you get paid?',
     paydayDesc: 'This determines your financial period.',
@@ -103,31 +228,21 @@ const texts = {
     everyMonth: 'th of every month',
     paydayBeforeWeekendTitle: 'Pay early if weekend',
     paydayBeforeWeekendDesc: 'If your payday falls on a weekend, Dejz counts it as arriving on the previous weekday.',
-    
-    // Step 3
     incomeTitle: 'Monthly Income',
     incomeQuestion: 'What recurring income do you have each month?',
     incomeDesc: 'Add your recurring income.',
     aiPlaceholder: 'E.g. 25 000 from Ur & Penn',
     addIncome: 'Add income manually',
-    
-    // Step 4
     expensesTitle: 'Fixed Expenses',
     expensesQuestion: 'What fixed expenses do you have?',
     expensesDesc: 'Add your recurring expenses.',
     searchPresetsPlaceholder: 'Search fixed cost',
     customExpense: 'Create custom expense',
     noPresetsFound: 'No template found. Create a custom one below.',
-    
-    // Step 5
     savingsTitle: 'Monthly Savings',
     savingsQuestion: 'How much do you want to save each month?',
     savingsDesc: 'We deduct it before showing what you have available to spend.',
-    
-    // Step 6
     midMonthTitle: 'Start of period',
-    
-    // Step 7
     summaryTitle: 'Your Plan',
     summaryQuestion: 'Your plan is ready',
     untilPayday: (date: string) => `Until next payday on ${date}`,
@@ -137,7 +252,6 @@ const texts = {
     spentSoFarLabel: 'Spent so far',
     freeSpendLabel: 'Available to spend',
     openDejz: 'Open Dejz',
-    
     next: 'Next',
     back: 'Back',
     exitOnboarding: 'Exit onboarding',
@@ -151,25 +265,53 @@ const texts = {
 const QUICK_PAYDAYS = [25, 27, 30, 1];
 const SAVINGS_PRESETS = [0, 1000, 2000, 3000, 5000];
 
-function getStep6DynamicContent(daysSince: number, isEn: boolean) {
+function getStep6DynamicContent(daysSince: number, lang: string) {
   const days = Math.max(1, daysSince);
   const isSingular = days === 1;
+  const norm = normalizeLanguage(lang);
 
-  const headline = isEn
-    ? (isSingular
+  if (norm === 'en') {
+    return {
+      headline: isSingular
         ? 'You are 1 day into your pay period. How much have you spent on other purchases since payday?'
-        : `You are ${days} days into your pay period. How much have you spent on other purchases since payday?`)
-    : (isSingular
-        ? 'Du är 1 dag in i din löneperiod. Hur mycket har du spenderat på övriga köp sedan du fick lön?'
-        : `Du är ${days} dagar in i din löneperiod. Hur mycket har du spenderat på övriga köp sedan du fick lön?`);
+        : `You are ${days} days into your pay period. How much have you spent on other purchases since payday?`,
+      helpText: 'Do not include fixed expenses you already entered. It does not need to be exact. You only do this once.',
+    };
+  }
 
-  const helpText = isEn
-    ? 'Do not include fixed expenses you already entered. It does not need to be exact. You only do this once.'
-    : 'Räkna inte med fasta kostnader du redan lagt in. Det behöver inte vara exakt. Det här gör du bara en gång.';
+  if (norm === 'da') {
+    return {
+      headline: isSingular
+        ? 'Du er 1 dag inde i din lønperiode. Hvor meget har du brugt på øvrige køb siden lønningsdag?'
+        : `Du er ${days} dage inde i din lønperiode. Hvor meget har du brugt på øvrige køb siden lønningsdag?`,
+      helpText: 'Medregn ikke faste udgifter, du allerede har indtastet. Det behøver ikke være præcist. Du gør kun dette én gang.',
+    };
+  }
 
+  if (norm === 'no') {
+    return {
+      headline: isSingular
+        ? 'Du er 1 dag inn i lønnsperioden din. Hvor mye har du brukt på andre kjøp siden du fikk lønn?'
+        : `Du er ${days} dager inn i lønnsperioden din. Hvor mye har du brukt på andre kjøp siden du fikk lønn?`,
+      helpText: 'Ikke regn med faste utgifter du allerede har lagt inn. Det trenger ikke være nøyaktig. Dette gjør du bare én gang.',
+    };
+  }
+
+  if (norm === 'fi') {
+    return {
+      headline: isSingular
+        ? 'Olet 1 päivän palkkakaudessasi. Kuinka paljon olet käyttänyt muihin ostoksiin palkkapäivän jälkeen?'
+        : `Olet ${days} päivää palkkakaudessasi. Kuinka paljon olet käyttänyt muihin ostoksiin palkkapäivän jälkeen?`,
+      helpText: 'Älä laske mukaan kiinteitä kuluja, jotka olet jo lisännyt. Sen ei tarvitse olla tarkkaa. Teet tämän vain kerran.',
+    };
+  }
+
+  // Swedish default
   return {
-    headline,
-    helpText,
+    headline: isSingular
+      ? 'Du är 1 dag in i din löneperiod. Hur mycket har du spenderat på övriga köp sedan du fick lön?'
+      : `Du är ${days} dagar in i din löneperiod. Hur mycket har du spenderat på övriga köp sedan du fick lön?`,
+    helpText: 'Räkna inte med fasta kostnader du redan lagt in. Det behöver inte vara exakt. Det här gör du bara en gång.',
   };
 }
 
@@ -191,6 +333,9 @@ interface OnboardingModalProps {
     userAgeGroup?: string;
     userGender?: string;
     categories?: Category[];
+    country?: NordicCountry;
+    currency?: string;
+    currencyCode?: string;
   }) => Promise<void> | void;
   t: (key: TranslationKey) => string;
   currentPeriodId: string;
@@ -199,9 +344,14 @@ interface OnboardingModalProps {
 
 export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onClose, t, currentPeriodId }: OnboardingModalProps) {
   useScrollLock(isOpen);
-  const isEn = config.language === 'en' || t('today') === 'Today';
-  const lang = isEn ? 'en' : 'sv';
-  const s = texts[lang];
+  const norm = normalizeLanguage(config.language);
+  const isEn = norm === 'en';
+  const s = texts[norm] || texts.sv;
+
+  const initialRegion = getRegionDefaults(config.country || config.language || 'sv');
+  const [selectedCountry, setSelectedCountry] = useState<NordicCountry>((config.country as NordicCountry) || initialRegion.countryCode);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(config.currency || initialRegion.currencySymbol);
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<string>(config.currencyCode || initialRegion.defaultCurrencyCode);
 
   const [step, setStep] = useState<Step>('name');
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -528,6 +678,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
         payday,
         paydayBeforeWeekend,
         categories: config.categories,
+        country: selectedCountry,
+        currency: selectedCurrency,
+        currencyCode: selectedCurrencyCode,
       });
     } catch (err: any) {
       console.error('Error during onboarding:', err);
@@ -723,6 +876,44 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           if (e.key === 'Enter' && fullName.trim()) handleNext();
                         }}
                       />
+
+                      {/* Nordic Country & Currency Selector */}
+                      <div className="space-y-2 text-left pt-1">
+                        <label className="text-xs font-semibold text-[var(--text-secondary)] tracking-tight px-1 block">
+                          {s.countryQuestion || 'Land och valuta'}
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {NORDIC_COUNTRIES.map((c) => {
+                            const isSelected = selectedCountry === c.code;
+                            return (
+                              <button
+                                key={c.code}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCountry(c.code);
+                                  setSelectedCurrency(c.currencySymbol);
+                                  setSelectedCurrencyCode(c.currencyCode);
+                                }}
+                                className={`p-2.5 rounded-btn border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/5 shadow-2xs'
+                                    : 'border-[var(--border-subtle)] bg-[var(--surface-color)] hover:border-[var(--border-color)]'
+                                }`}
+                              >
+                                <span className="text-xl select-none leading-none" aria-hidden="true">{c.flag}</span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                                    {c.name}
+                                  </div>
+                                  <div className="text-micro-label text-[var(--text-secondary)] font-medium">
+                                    {c.currencyCode} ({c.currencySymbol})
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
                       <div className="pt-1">
                         <button 

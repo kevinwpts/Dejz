@@ -127,8 +127,8 @@ export function ManageAccountModal({
         <div className="space-y-4 pt-1">
           {/* Profile Avatar Upload */}
           <div className="text-center py-1 flex flex-col items-center justify-center">
-            <label htmlFor="avatar-modal" className="relative w-16 h-16 mb-2 block cursor-pointer group">
-              <div className="w-16 h-16 rounded-[var(--radius-xs,8px)] overflow-hidden border-none bg-[var(--surface-color)] relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
+            <label htmlFor="avatar-modal" className="relative w-16 h-16 mb-1 block cursor-pointer group">
+              <div className="w-16 h-16 rounded-[var(--radius-card-nested,12px)] overflow-hidden border-none bg-black/[0.04] dark:bg-white/5 relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -179,11 +179,11 @@ export function ManageAccountModal({
           </div>
 
           {identities.length > 0 && (
-            <div className="space-y-2 pt-1">
+            <div className="space-y-2">
               <span className="text-label font-semibold text-[var(--text-secondary)] px-1 block">
-                {t('connectedAccounts' as any) || 'Kopplade konton'}
+                {t('connectedAccounts' as any) || 'Inloggningsmetoder'}
               </span>
-              <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/50">
+              <Card padding="none" className="overflow-hidden divide-y divide-subtle bg-[var(--surface-color)] border-none shadow-none rounded-[var(--radius-card,14px)]">
                 {identities.map((identity) => (
                   <ListRow
                     key={identity.id}
