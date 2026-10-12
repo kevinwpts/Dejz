@@ -11,6 +11,7 @@ import { getPaymentMethodIcon } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
 
 import { BudgetCategoriesView } from './BudgetCategoriesView';
+import { dataService } from '../services/dataService';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
@@ -189,8 +190,18 @@ export function SettingsView({
                 title={l.label}
                 titleClassName={isSelected ? 'font-medium text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}
                 showCheck={isSelected}
-                onClick={() => {
-                  setConfig({ ...config, language: l.code });
+                onClick={async () => {
+                  const newConfig = { ...config, language: l.code };
+                  setConfig(newConfig);
+                  localStorage.setItem('app_language', l.code);
+                  localStorage.setItem('app_language_manual', 'true');
+                  if (userId) {
+                    try {
+                      await dataService.saveSettings(userId, newConfig);
+                    } catch (err) {
+                      console.warn('Could not save language selection:', err);
+                    }
+                  }
                 }}
               />
             );
