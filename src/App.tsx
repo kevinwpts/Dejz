@@ -1784,6 +1784,8 @@ export default function App() {
     applyThemeColor('#3B82F6', false);
     
     window.scrollTo({ top: 0, behavior: 'instant' });
+    localStorage.removeItem('app_language');
+    localStorage.removeItem('app_language_manual');
     if (isSupabaseConfigured) {
       await supabase.auth.signOut().catch(() => {});
     }
@@ -2279,15 +2281,26 @@ export default function App() {
           // ignore
         }
 
-        const resolvedCountry = dbProfile.country || localSavedConfig?.country || defaultConfig.country;
-        const resolvedReg = getRegionDefaults(resolvedCountry || effectiveLang || 'sv');
+        const isManualOverride = localStorage.getItem('app_language_manual') === 'true';
+        const hasDbProfileLanguage = Boolean(dbProfile && dbProfile.language);
 
-        const resolvedLang = effectiveLang || dbProfile.language || 'sv';
+        let resolvedLang: Language = 'sv';
+        if (hasDbProfileLanguage && !urlLang && !isManualOverride) {
+          resolvedLang = normalizeLanguage(dbProfile.language);
+        } else {
+          resolvedLang = normalizeLanguage(
+            urlLang || (isManualOverride ? savedLang : null) || landingLanguage || metaLang || dbProfile?.language || savedLang || detectBrowserLanguage() || 'sv'
+          );
+        }
+
+        const resolvedCountry = dbProfile.country || localSavedConfig?.country || defaultConfig.country;
+        const resolvedReg = getRegionDefaults(resolvedCountry || resolvedLang || 'sv');
+
         if (resolvedLang && resolvedLang !== landingLanguage) {
           setLandingLanguage(normalizeLanguage(resolvedLang));
           localStorage.setItem('app_language', resolvedLang);
         }
-        if (resolvedLang && resolvedLang !== dbProfile.language) {
+        if (dbProfile && resolvedLang && resolvedLang !== dbProfile.language && (urlLang || isManualOverride)) {
           dataService.updateProfile(session.user.id, {
             language: resolvedLang,
             country: resolvedReg.countryCode,
