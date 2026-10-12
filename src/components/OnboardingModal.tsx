@@ -30,7 +30,6 @@ export const AGE_OPTIONS = [
 import { 
   normalizeLanguage, 
   getRegionDefaults, 
-  NORDIC_COUNTRIES, 
   NordicCountry, 
 } from '../utils/nordic';
 
@@ -350,9 +349,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
   const s = texts[norm] || texts.sv;
 
   const initialRegion = getRegionDefaults(config.country || config.language || 'sv');
-  const [selectedCountry, setSelectedCountry] = useState<NordicCountry>((config.country as NordicCountry) || initialRegion.countryCode);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(config.currency || initialRegion.currencySymbol);
-  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<string>(config.currencyCode || initialRegion.defaultCurrencyCode);
+  const selectedCountry = (config.country as NordicCountry) || initialRegion.countryCode;
+  const selectedCurrency = config.currency || initialRegion.currencySymbol;
+  const selectedCurrencyCode = config.currencyCode || initialRegion.defaultCurrencyCode;
 
   const [step, setStep] = useState<Step>('name');
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -878,43 +877,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         }}
                       />
 
-                      {/* Nordic Country & Currency Selector */}
-                      <div className="space-y-2 text-left pt-1">
-                        <label className="text-xs font-semibold text-[var(--text-secondary)] tracking-tight px-1 block">
-                          {s.countryQuestion || 'Land och valuta'}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {NORDIC_COUNTRIES.map((c) => {
-                            const isSelected = selectedCountry === c.code;
-                            return (
-                              <button
-                                key={c.code}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedCountry(c.code);
-                                  setSelectedCurrency(c.currencySymbol);
-                                  setSelectedCurrencyCode(c.currencyCode);
-                                }}
-                                className={`p-2.5 rounded-btn border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
-                                  isSelected
-                                    ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/5 shadow-2xs'
-                                    : 'border-[var(--border-subtle)] bg-[var(--surface-color)] hover:border-[var(--border-color)]'
-                                }`}
-                              >
-                                <span className="text-xl select-none leading-none" aria-hidden="true">{c.flag}</span>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                                    {c.name}
-                                  </div>
-                                  <div className="text-micro-label text-[var(--text-secondary)] font-medium">
-                                    {c.currencyCode} ({c.currencySymbol})
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
+
 
                       <div className="pt-1">
                         <button 
