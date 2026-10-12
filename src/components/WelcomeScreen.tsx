@@ -8,9 +8,34 @@ interface WelcomeScreenProps {
   onAction: (isRegistering: boolean) => void;
   onLegalClick: (type: 'privacy' | 'terms' | 'cookies' | 'contact') => void;
   t: (key: TranslationKey) => string;
+  currentLanguage?: string;
 }
 
-export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps) {
+export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv' }: WelcomeScreenProps) {
+  const norm = (currentLanguage || 'sv').toLowerCase();
+  
+  let headline = 'Hela din ekonomi. Svart på vitt.';
+  let subtitle = 'Samla inkomster, fasta utgifter, sparande och budget på ett ställe och se vad du har kvar att spendera mellan två löner.';
+  let ctaText = 'Kom igång gratis';
+
+  if (norm === 'da') {
+    headline = 'Hele din økonomi. Sort på hvidt.';
+    subtitle = 'Saml indtægter, faste udgifter, opsparing og budget ét sted og se præcis hvad du har tilbage at bruge mellem to lønninger.';
+    ctaText = 'Kom i gang gratis';
+  } else if (norm === 'no') {
+    headline = 'Hele din økonomi. Svart på hvitt.';
+    subtitle = 'Samle inntekter, faste utgifter, sparing og budsjett på ett sted og se nøyaktig hva du har igjen å bruke mellom to lønninger.';
+    ctaText = 'Kom i gang gratis';
+  } else if (norm === 'fi') {
+    headline = 'Koko taloutesi. Mustaa valkoisella.';
+    subtitle = 'Kokoa tulot, kiinteät kulut, säästöt ja budjetti yhteen paikkaan ja näe tarkalleen, mitä sinulla on jäljellä käytettäväksi kahden palkan välillä.';
+    ctaText = 'Aloita ilmaiseksi';
+  } else if (norm === 'en') {
+    headline = 'Your whole budget. In black and white.';
+    subtitle = 'Bring income, fixed expenses, savings, and budget together in one place and see exactly what you have left to spend between two paydays.';
+    ctaText = 'Get started free';
+  }
+
   return (
     <div className="min-h-dvh relative flex flex-col bg-[var(--bg-color)] z-50 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
       {/* Subtle Ambient Glow */}
@@ -32,10 +57,10 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           
           <div className="space-y-3 max-w-sm">
             <h2 className="text-page-title text-[var(--text-primary)]">
-              Hela din ekonomi. Svart på vitt.
+              {headline}
             </h2>
             <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
-              Samla inkomster, fasta utgifter, sparande och budget på ett ställe och se vad du har kvar att spendera mellan två löner.
+              {subtitle}
             </p>
           </div>
         </motion.div>
@@ -52,7 +77,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           onClick={() => onAction(false)}
           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-btn text-body-medium active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
         >
-          <span>Kom igång gratis</span>
+          <span>{ctaText}</span>
           <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
         </button>
 

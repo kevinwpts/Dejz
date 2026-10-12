@@ -346,6 +346,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
   useScrollLock(isOpen);
   const norm = normalizeLanguage(config.language);
   const isEn = norm === 'en';
+  const lang = norm;
   const s = texts[norm] || texts.sv;
 
   const initialRegion = getRegionDefaults(config.country || config.language || 'sv');

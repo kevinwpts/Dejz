@@ -762,14 +762,22 @@ export default function App() {
 
       // Ensure profile exists
       if (!dbProfile || Object.keys(dbProfile).length === 0) {
+        const preferredLang = session.user.user_metadata?.language || landingLanguage || 'sv';
+        const regDefaults = getRegionDefaults(session.user.user_metadata?.country || preferredLang);
         const { data, error } = await supabase
           .from("profiles")
           .insert({
             id: session.user.id,
             email: session.user.email,
+            full_name: session.user.user_metadata?.full_name || "",
             role:
               session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
-            language: landingLanguage,
+            language: preferredLang,
+            country: session.user.user_metadata?.country || regDefaults.countryCode,
+            currency: session.user.user_metadata?.currency || regDefaults.currencySymbol,
+            currency_code: session.user.user_metadata?.currencyCode || regDefaults.defaultCurrencyCode,
+            locale: session.user.user_metadata?.locale || regDefaults.locale,
+            timezone: session.user.user_metadata?.timezone || regDefaults.timezone,
             dark_mode: false,
           })
           .select()
@@ -1797,11 +1805,15 @@ export default function App() {
       } catch (_e) {
         inIframe = true;
       }
+
+      const activeLang = normalizeLanguage(landingLanguage || 'sv');
+      localStorage.setItem('app_language', activeLang);
+      localStorage.setItem('app_language_manual', 'true');
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/${activeLang}/`,
           skipBrowserRedirect: inIframe,
           queryParams: {
             prompt: 'select_account',
@@ -1836,11 +1848,15 @@ export default function App() {
       } catch (_e) {
         inIframe = true;
       }
+
+      const activeLang = normalizeLanguage(landingLanguage || 'sv');
+      localStorage.setItem('app_language', activeLang);
+      localStorage.setItem('app_language_manual', 'true');
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/${activeLang}/`,
           skipBrowserRedirect: inIframe,
         },
       });
@@ -1914,9 +1930,27 @@ export default function App() {
   const fetchData = useCallback(async () => {
     if (!session) return;
 
+    // Determine active language with precedence:
+    // 1. Explicit language in current URL path
+    // 2. Language stored in user session metadata (from signup / Google OAuth)
+    // 3. User's manually saved language in localStorage
+    // 4. In-state landingLanguage
+    // 5. Browser detected language, fallback to 'sv'
+    const urlLang = parseLanguageFromPath(window.location.pathname).lang;
+    const metaLang = session?.user?.user_metadata?.language;
+    const savedLang = localStorage.getItem('app_language');
+    const effectiveLang: Language = normalizeLanguage(
+      urlLang || metaLang || savedLang || landingLanguage || detectBrowserLanguage()
+    );
+    const regDefaults = getRegionDefaults(session?.user?.user_metadata?.country || effectiveLang);
+
     const defaultConfig: Config = {
-      currency: "kr",
-      language: "sv",
+      currency: session?.user?.user_metadata?.currency || regDefaults.currencySymbol,
+      currencyCode: session?.user?.user_metadata?.currencyCode || regDefaults.defaultCurrencyCode,
+      country: session?.user?.user_metadata?.country || regDefaults.countryCode,
+      locale: session?.user?.user_metadata?.locale || regDefaults.locale,
+      timezone: session?.user?.user_metadata?.timezone || regDefaults.timezone,
+      language: effectiveLang,
       payday: 25,
       paydayType: PaydayType.TWENTY_FIFTH,
       paydayBeforeWeekend: true,
@@ -2017,6 +2051,10 @@ export default function App() {
           role:
             session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
           currency: defaultConfig.currency,
+          currency_code: defaultConfig.currencyCode,
+          country: defaultConfig.country,
+          locale: defaultConfig.locale,
+          timezone: defaultConfig.timezone,
           language: defaultConfig.language,
           payday: defaultConfig.payday,
           payday_type: defaultConfig.paydayType,
@@ -2240,9 +2278,22 @@ export default function App() {
           // ignore
         }
 
+        const resolvedCountry = dbProfile.country || localSavedConfig?.country || defaultConfig.country;
+        const resolvedReg = getRegionDefaults(resolvedCountry || dbProfile.language || 'sv');
+
+        const resolvedLang = dbProfile.language || defaultConfig.language;
+        if (resolvedLang && resolvedLang !== landingLanguage) {
+          setLandingLanguage(normalizeLanguage(resolvedLang));
+          localStorage.setItem('app_language', resolvedLang);
+        }
+
         const mappedConfig = {
-          currency: dbProfile.currency === "SEK" ? "kr" : dbProfile.currency,
-          language: dbProfile.language,
+          currency: dbProfile.currency === "SEK" ? "kr" : (dbProfile.currency || resolvedReg.currencySymbol),
+          currencyCode: dbProfile.currency_code || localSavedConfig?.currencyCode || resolvedReg.defaultCurrencyCode,
+          country: resolvedCountry,
+          locale: dbProfile.locale || localSavedConfig?.locale || resolvedReg.locale,
+          timezone: dbProfile.timezone || localSavedConfig?.timezone || resolvedReg.timezone,
+          language: resolvedLang,
           payday: dbProfile.payday,
           paydayType: dbProfile.payday_type || PaydayType.TWENTY_FIFTH,
           paydayBeforeWeekend: dbProfile.payday_before_weekend,
@@ -4380,6 +4431,7 @@ export default function App() {
             }}
             onLegalClick={handleLegalClick}
             t={t}
+            currentLanguage={landingLanguage}
           />
         ) : (
           <Auth
@@ -4388,6 +4440,11 @@ export default function App() {
             t={t}
             initialIsRegistering={initialIsRegistering}
             onBack={() => setShowLanding(true)}
+            currentLanguage={landingLanguage}
+            onLanguageChange={(lang) => {
+              setLandingLanguage(lang);
+              localStorage.setItem('app_language', lang);
+            }}
           />
         )}
 
