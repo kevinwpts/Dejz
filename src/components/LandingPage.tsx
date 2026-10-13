@@ -1,20 +1,43 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronDown, 
-  Shield, 
-  Lock, 
-  Sparkles, 
+  ShieldCheck, 
   Check, 
-  Receipt, 
-  Instagram, 
-  Star 
+  Mic, 
+  Smartphone, 
+  ArrowRight, 
+  Sparkles,
+  CheckCircle2,
+  Lock,
+  Layers,
+  PieChart,
+  RotateCcw,
+  Menu,
+  X
 } from 'lucide-react';
 import { Language, TranslationKey } from '../i18n';
 import { PolicyModal } from './PolicyModal';
 import { DejzLogo } from './DejzLogo';
 import { Button, Card } from './ui';
 import { LanguagePicker } from './LanguagePicker';
+
+export interface LandingPageScreenshots {
+  heroHome?: string;      // Placeholder 1: "Screenshot: Hem – kvar att spendera och aktuell löneperiod"
+  economy?: string;       // Placeholder 2: "Screenshot: Ekonomi – inkomster och fasta utgifter"
+  voiceInput?: string;    // Placeholder 3: "Screenshot: Röstregistrering – registrera en transaktion"
+  analysis?: string;      // Placeholder 4: "Screenshot: Analys – kategorier och fördelning"
+}
+
+/**
+ * Centralized screenshot configuration for uploaded app images.
+ * Simply set the URL/path here when screenshots are uploaded in AI Studio.
+ */
+export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
+  heroHome: '/hero.PNG',
+  economy: undefined,
+  voiceInput: undefined,
+  analysis: undefined,
+};
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -26,468 +49,114 @@ interface LandingPageProps {
   t?: (key: TranslationKey, params?: Record<string, string | number>) => string;
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
+  screenshots?: LandingPageScreenshots;
 }
 
-const LANDING_TEXTS = {
-  sv: {
-    navHow: 'Så fungerar det',
-    navFeatures: 'Funktioner',
-    login: 'Logga in',
-    getStarted: 'Kom igång gratis',
-    demoDirect: 'Testa demo direkt',
-    continueWithGoogle: 'Fortsätt med Google',
-    heroTitleLine1: 'Hela din ekonomi.',
-    heroTitleLine2: 'Svart på vitt.',
-    heroSubtitle: 'Samla inkomster, fasta utgifter, sparande och budget på ett ställe. Se exakt vad du har kvar att spendera mellan två löner.',
-    trust1Title: 'Ingen bankkoppling',
-    trust1Desc: 'Full kontroll över din data.',
-    trust2Title: 'Säker och privat',
-    trust2Desc: 'Din information är din.',
-    trust3Title: 'Byggd för enkelhet',
-    trust3Desc: 'Fokus på det som hjälper.',
-    howTitle: 'Så fungerar Dejz',
-    howSubtitle: 'Tre enkla steg till bättre koll på pengarna.',
-    step1Num: '1',
-    step1Title: 'Periodkalkyl',
-    step1Desc: 'Fyll i din inkomst, fasta kostnader och sparande. Dejz räknar ut vad du faktiskt har kvar.',
-    step1IncomeLabel: 'Inkomst',
-    step1IncomeVal: '25 000 kr',
-    step1FixedLabel: 'Fasta kostnader',
-    step1FixedVal: '−12 000 kr',
-    step1SavingsLabel: 'Sparande',
-    step1SavingsVal: '−3 000 kr',
-    step1LeftLabel: 'Kvar att spendera',
-    step1LeftVal: '10 000 kr',
-    step2Num: '2',
-    step2Title: 'Registrera utgifter',
-    step2Desc: 'Lägg snabbt till dina köp och välj kategori.',
-    step2SampleName: 'Lunch',
-    step2SampleVal: '−120 kr',
-    step2Receipt: 'Bifoga kvitto',
-    step3Num: '3',
-    step3Title: 'Se vad du kan spendera',
-    step3Desc: 'När du registrerar nya utgifter uppdaterar Dejz automatiskt hur mycket du har kvar.',
-    step3LeftVal: '10 000 kr',
-    step3Realtime: 'Uppdateras i realtid',
-    featuresHeading: 'Din ekonomi, på dina villkor.',
-    featuresSubheading: 'Dejz hjälper dig att få full kontroll över vardagsekonomin. Ingen bankkoppling och inga onödigt komplicerade verktyg – bara en tydlig överblick över dina pengar.',
-    check1: 'Manuell inmatning – du bestämmer',
-    check2: 'Smarta analyser',
-    check3: 'Koll från lön till lön',
-    check4: 'Säker och privat',
-    check5: 'Kvitton och historik',
-    check6: 'Ingen data säljs',
-    allInOneHeadingLine1: 'Allt du behöver',
-    allInOneHeadingLine2: '– samlat på ett ställe.',
-    allInOneSub: 'Se dina utgifter, budget, historik och analyser på ett och samma ställe.',
-    screenHome: 'Hem',
-    screenHomeDesc: 'Se vad du kan spendera.',
-    screenHistory: 'Historik',
-    screenHistoryDesc: 'Alla dina transaktioner samlade.',
-    screenAnalysis: 'Analys',
-    screenAnalysisDesc: 'Förstå vart pengarna går.',
-    screenEconomy: 'Ekonomi',
-    screenEconomyDesc: 'Hantera inkomster och fasta utgifter.',
-    reviewsBadge: '4.9 av 5 i betyg bland 20+ tidiga användare',
-    reviewsHeading: 'Vad säger de som provat?',
-    reviewsSubheading: 'Dejz har testats noggrant för att säkerställa att upplevelsen sitter perfekt från dag ett.',
-    review1Text: '"Slutligen en app som inte kräver krångliga bankkopplingar. Har äntligen full koll på pengarna mellan lönerna!"',
-    review1Author: 'Marcus Lindström',
-    review1City: 'Betatestare (Stockholm)',
-    review2Text: '"Periodkalkylen är guld värd. Man ser direkt vad som faktiskt finns kvar att spendera efter alla fasta utgifter."',
-    review2Author: 'Sofia Karlsson',
-    review2City: 'Betatestare (Göteborg)',
-    review3Text: '"Superenkel, snabb och stilren design. Precis det ekonomiverktyg jag har letat efter i flera år."',
-    review3Author: 'Alexander Ek',
-    review3City: 'Betatestare (Malmö)',
-    faqTitle: 'Vanliga frågor',
-    faq1Q: 'Är Dejz gratis att använda?',
-    faq1A: 'Ja, du kan komma igång och använda grundläggande funktioner helt gratis.',
-    faq2Q: 'Hur fungerar Dejz utan bankkoppling?',
-    faq2A: 'Du lägger enkelt till dina transaktioner manuellt, via snabbval eller genom att fota kvitton. Det ger dig fullständig kontroll och ökad medvetenhet om varje köp utan att dela dina bankinloggningsuppgifter.',
-    faq3Q: 'Kan jag testa Dejz innan jag skapar konto?',
-    faq3A: 'Absolut! Du kan klicka på "Testa demo direkt" för att utforska appen med färdig demo-data direkt i webbläsaren.',
-    faq4Q: 'Hur fungerar perioderna mellan två löner?',
-    faq4A: 'Du ställer in din egen lönedag (t.ex. den 25:e i månaden). Dejz räknar sedan automatiskt ut din budgetperiod och vad du har kvar att spendera fram till nästa lön.',
-    finalCtaTitle: 'Redo att få koll på ekonomin?',
-    finalCtaSub: 'Kom igång med Dejz på några minuter.',
-    footerPrivacy: 'Integritetspolicy',
-    footerTerms: 'Användarvillkor',
-    footerContact: 'Kontakt',
-  },
-  da: {
-    navHow: 'Sådan fungerer det',
-    navFeatures: 'Funktioner',
-    login: 'Log ind',
-    getStarted: 'Kom i gang gratis',
-    demoDirect: 'Prøv demo direkte',
-    continueWithGoogle: 'Fortsæt med Google',
-    heroTitleLine1: 'Hele din økonomi.',
-    heroTitleLine2: 'Sort på hvidt.',
-    heroSubtitle: 'Saml indtægter, faste udgifter, opsparing og budget ét sted. Se præcis hvad du har tilbage at bruge mellem to lønninger.',
-    trust1Title: 'Ingen bankforbindelse',
-    trust1Desc: 'Fuld kontrol over dine data.',
-    trust2Title: 'Sikker og privat',
-    trust2Desc: 'Dine oplysninger forbliver dine.',
-    trust3Title: 'Bygget til enkelhed',
-    trust3Desc: 'Fokus på det, der virker.',
-    howTitle: 'Sådan fungerer Dejz',
-    howSubtitle: 'Tre enkle trin til bedre styr på økonomien.',
-    step1Num: '1',
-    step1Title: 'Periodeberegning',
-    step1Desc: 'Indtast din indkomst, faste omkostninger og opsparing. Dejz regner ud, hvad du reelt har tilbage.',
-    step1IncomeLabel: 'Indkomst',
-    step1IncomeVal: '25.000 kr.',
-    step1FixedLabel: 'Faste udgifter',
-    step1FixedVal: '−12.000 kr.',
-    step1SavingsLabel: 'Opsparing',
-    step1SavingsVal: '−3.000 kr.',
-    step1LeftLabel: 'Tilbage at bruge',
-    step1LeftVal: '10.000 kr.',
-    step2Num: '2',
-    step2Title: 'Registrer udgifter',
-    step2Desc: 'Tilføj hurtigt dine køb og vælg en kategori.',
-    step2SampleName: 'Frokost',
-    step2SampleVal: '−120 kr.',
-    step2Receipt: 'Vedhæft kvittering',
-    step3Num: '3',
-    step3Title: 'Se hvad du kan bruge',
-    step3Desc: 'Når du registrerer nye udgifter, opdaterer Dejz automatisk dit rådighedsbeløb.',
-    step3LeftVal: '10.000 kr.',
-    step3Realtime: 'Opdateres i realtid',
-    featuresHeading: 'Din økonomi, på dine præmisser.',
-    featuresSubheading: 'Dejz hjælper dig med at få fuld kontrol over hverdagsøkonomien. Ingen bankforbindelse og ingen overkomplicerede grafer – bare et klart overblik.',
-    check1: 'Manuel indtastning – du bestemmer',
-    check2: 'Smarte analyser',
-    check3: 'Overblik fra løn til løn',
-    check4: 'Sikker og privat',
-    check5: 'Kvitteringer og historik',
-    check6: 'Ingen data sælges',
-    allInOneHeadingLine1: 'Alt du behøver',
-    allInOneHeadingLine2: '– samlet ét sted.',
-    allInOneSub: 'Se dine udgifter, budget, historik og analyser samlet på en enkel skærm.',
-    screenHome: 'Hjem',
-    screenHomeDesc: 'Se hvad du kan bruge i dag.',
-    screenHistory: 'Historik',
-    screenHistoryDesc: 'Alle dine transaktioner samlet.',
-    screenAnalysis: 'Analyse',
-    screenAnalysisDesc: 'Forstå hvor pengene forsvinder hen.',
-    screenEconomy: 'Økonomi',
-    screenEconomyDesc: 'Håndter faste indtægter og udgifter.',
-    reviewsBadge: '4.9 ud af 5 i bedømmelse blandt tidlige brugere',
-    reviewsHeading: 'Hvad siger brugerne?',
-    reviewsSubheading: 'Dejz er grundigt testet, så appen fungerer gnidningsfrit fra første dag.',
-    review1Text: '"Endelig en app, der ikke kræver besværlig bankintegration. Har endelig fuldt overblik over pengene mellem lønninger!"',
-    review1Author: 'Mads Lind',
-    review1City: 'Bruger (København)',
-    review2Text: '"Periodeberegningen er guld værd. Man ser straks, hvad der reelt er tilbage at bruge efter faste udgifter."',
-    review2Author: 'Sofie Holm',
-    review2City: 'Bruger (Aarhus)',
-    review3Text: '"Super enkelt, hurtigt og stilrent design. Præcis det budgetværktøj jeg har ledt efter."',
-    review3Author: 'Alexander M.',
-    review3City: 'Bruger (Odense)',
-    faqTitle: 'Ofte stillede spørgsmål',
-    faq1Q: 'Er Dejz gratis at bruge?',
-    faq1A: 'Ja, du kan oprette en profil og bruge de centrale budgetfunktioner helt gratis.',
-    faq2Q: 'Hvordan fungerer Dejz uden bankforbindelse?',
-    faq2A: 'Du indtaster blot dine køb manuelt eller fotograferer kvitteringer. Det giver dig fuld kontrol og større bevidsthed om dine penge uden at dele bankkoder.',
-    faq3Q: 'Kan jeg prøve Dejz før jeg opretter en konto?',
-    faq3A: 'Ja! Klik på "Prøv demo direkte" for at udforske hele appen med demodata direkte i browseren.',
-    faq4Q: 'Hvordan fungerer perioden mellem to lønninger?',
-    faq4A: 'Du angiver din egen lønningsdag. Dejz beregner automatisk din budgetperiode og hvad du har tilbage at bruge frem til næste løn.',
-    finalCtaTitle: 'Klar til at få styr på økonomien?',
-    finalCtaSub: 'Kom i gang med Dejz på få minutter.',
-    footerPrivacy: 'Privatlivspolitik',
-    footerTerms: 'Betingelser',
-    footerContact: 'Kontakt',
-  },
-  no: {
-    navHow: 'Slik fungerer det',
-    navFeatures: 'Funksjoner',
-    login: 'Logg inn',
-    getStarted: 'Kom i gang gratis',
-    demoDirect: 'Prøv demo direkte',
-    continueWithGoogle: 'Fortsett med Google',
-    heroTitleLine1: 'Hele din økonomi.',
-    heroTitleLine2: 'Svart på hvitt.',
-    heroSubtitle: 'Samle inntekter, faste utgifter, sparing og budsjett på ett sted. Se nøyaktig hva du har igjen å bruke mellom to lønninger.',
-    trust1Title: 'Ingen banktilkobling',
-    trust1Desc: 'Full kontroll over egne data.',
-    trust2Title: 'Trygt og privat',
-    trust2Desc: 'Informasjonen din forblir din.',
-    trust3Title: 'Bygget for enkelhet',
-    trust3Desc: 'Fokus på det som hjelper deg.',
-    howTitle: 'Slik fungerer Dejz',
-    howSubtitle: 'Tre enkle steg til full kontroll på pengene.',
-    step1Num: '1',
-    step1Title: 'Periodeberegning',
-    step1Desc: 'Legg inn inntekt, faste utgifter og sparing. Dejz regner ut hva du faktisk har igjen.',
-    step1IncomeLabel: 'Inntekt',
-    step1IncomeVal: '25 000 kr',
-    step1FixedLabel: 'Faste utgifter',
-    step1FixedVal: '−12 000 kr',
-    step1SavingsLabel: 'Sparing',
-    step1SavingsVal: '−3 000 kr',
-    step1LeftLabel: 'Igjen å bruke',
-    step1LeftVal: '10 000 kr',
-    step2Num: '2',
-    step2Title: 'Registrer utgifter',
-    step2Desc: 'Legg raskt inn kjøpene dine og velg kategori.',
-    step2SampleName: 'Lunsj',
-    step2SampleVal: '−120 kr',
-    step2Receipt: 'Legg ved kvittering',
-    step3Num: '3',
-    step3Title: 'Se hva du kan bruke',
-    step3Desc: 'Når du registrerer nye utgifter, oppdaterer Dejz automatisk hva du har igjen å bruke.',
-    step3LeftVal: '10 000 kr',
-    step3Realtime: 'Oppdateres i sanntid',
-    featuresHeading: 'Din økonomi, på dine premisser.',
-    featuresSubheading: 'Dejz hjelper deg med å få full kontroll over hverdagsøkonomien. Ingen bankkobling og ingen unødvendig kompliserte menyer – bare en krystallklar oversikt.',
-    check1: 'Manuell registrering – du bestemmer',
-    check2: 'Smarte analyser',
-    check3: 'Oversikt fra lønn til lønn',
-    check4: 'Trygt og privat',
-    check5: 'Kvitteringer og historikk',
-    check6: 'Ingen data selges',
-    allInOneHeadingLine1: 'Alt du trenger',
-    allInOneHeadingLine2: '– samlet på ett sted.',
-    allInOneSub: 'Se dine utgifter, budsjett, historikk og analyser på en oversiktlig skjerm.',
-    screenHome: 'Hjem',
-    screenHomeDesc: 'Se hva du kan bruke i dag.',
-    screenHistory: 'Historikk',
-    screenHistoryDesc: 'Alle transaksjonene dine samlet.',
-    screenAnalysis: 'Analyse',
-    screenAnalysisDesc: 'Forstå hvor pengene tar veien.',
-    screenEconomy: 'Økonomi',
-    screenEconomyDesc: 'Administrer inntekter og faste utgifter.',
-    reviewsBadge: '4.9 av 5 i vurdering blant tidlige brukere',
-    reviewsHeading: 'Hva sier brukerne?',
-    reviewsSubheading: 'Dejz er testet og finpusset for at opplevelsen skal sitte fra første dag.',
-    review1Text: '"Endelig en app som ikke krever bankinnlogging. Har endelig full oversikt over pengene mellom lønningene!"',
-    review1Author: 'Marius Lind',
-    review1City: 'Bruker (Oslo)',
-    review2Text: '"Periodeberegningen er genial. Man ser med en gang hva man faktisk har igjen å bruke etter faste regninger."',
-    review2Author: 'Silje Karlsen',
-    review2City: 'Bruker (Bergen)',
-    review3Text: '"Superenkel, rask og minimalistisk design. Akkurat det økonomiverktøyet jeg har lett etter."',
-    review3Author: 'Alexander E.',
-    review3City: 'Bruker (Trondheim)',
-    faqTitle: 'Vanlige spørsmål',
-    faq1Q: 'Er Dejz gratis å bruke?',
-    faq1A: 'Ja, du kan opprette bruker og bruke kjernefunksjonene helt gratis.',
-    faq2Q: 'Hvordan fungerer Dejz uten banktilkobling?',
-    faq2A: 'Du legger enkelt til kjøpene dine manuelt eller ved å ta bilde av kvitteringer. Det gir deg full kontroll og økt bevissthet rundt forbruket ditt.',
-    faq3Q: 'Kan jeg teste Dejz før jeg oppretter konto?',
-    faq3A: 'Ja! Klikk på "Prøv demo direkte" for å utforske appen med ferdige demodata direkte i nettleseren.',
-    faq4Q: 'Hvordan fungerer perioden mellom to lønninger?',
-    faq4A: 'Du stiller inn din egen lønningsdag. Dejz regner automatisk ut budsjettperioden din og hva du har igjen å bruke frem til neste lønning.',
-    finalCtaTitle: 'Klar for å få kontroll på økonomien?',
-    finalCtaSub: 'Kom i gang med Dejz på få minutter.',
-    footerPrivacy: 'Personvern',
-    footerTerms: 'Brukervilkår',
-    footerContact: 'Kontakt',
-  },
-  fi: {
-    navHow: 'Miten se toimii',
-    navFeatures: 'Ominaisuudet',
-    login: 'Kirjaudu sisään',
-    getStarted: 'Aloita ilmaiseksi',
-    demoDirect: 'Kokeile demoa heti',
-    continueWithGoogle: 'Jatka Googlella',
-    heroTitleLine1: 'Koko taloutesi.',
-    heroTitleLine2: 'Mustaa valkoisella.',
-    heroSubtitle: 'Kokoa tulot, kiinteät kulut, säästöt ja budjetti yhteen paikkaan. Näe tarkalleen, mitä sinulla on jäljellä käytettäväksi kahden palkan välillä.',
-    trust1Title: 'Ei pankkiyhteyttä',
-    trust1Desc: 'Täysi hallinta omiin tietoihisi.',
-    trust2Title: 'Turvallinen ja yksityinen',
-    trust2Desc: 'Tietosi pysyvät vain sinulla.',
-    trust3Title: 'Rakennettu yksinkertaiseksi',
-    trust3Desc: 'Keskity siihen mikä oikeasti auttaa.',
-    howTitle: 'Miten Dejz toimii',
-    howSubtitle: 'Kolme helppoa askelta parempaan taloudenhallintaan.',
-    step1Num: '1',
-    step1Title: 'Kausilaskelma',
-    step1Desc: 'Syötä tulosi, kiinteät kulusi ja säästösi. Dejz laskee mitä sinulle todellisuudessa jää käteen.',
-    step1IncomeLabel: 'Tulot',
-    step1IncomeVal: '2 500 €',
-    step1FixedLabel: 'Kiinteät kulut',
-    step1FixedVal: '−1 200 €',
-    step1SavingsLabel: 'Säästöt',
-    step1SavingsVal: '−300 €',
-    step1LeftLabel: 'Käytettävissä',
-    step1LeftVal: '1 000 €',
-    step2Num: '2',
-    step2Title: 'Kirjaa kulut',
-    step2Desc: 'Lisää ostoksesi vaivattomasti ja valitse kategoria.',
-    step2SampleName: 'Lounas',
-    step2SampleVal: '−12 €',
-    step2Receipt: 'Liitä kuitti',
-    step3Num: '3',
-    step3Title: 'Näe mitä voit käyttää',
-    step3Desc: 'Kun kirjaat uusia kuluja, Dejz päivittää automaattisesti mitä sinulla on jäljellä käytettäväksi.',
-    step3LeftVal: '1 000 €',
-    step3Realtime: 'Päivittyy reaaliajassa',
-    featuresHeading: 'Taloutesi, sinun ehdoillasi.',
-    featuresSubheading: 'Dejz auttaa sinua saamaan täyden hallinnan arjen taloudesta. Ei monimutkaisia pankkiliitoksia – vain selkeä ja rauhallinen yleisnäkymä rahoistasi.',
-    check1: 'Manuaalinen kirjaus – sinä päätät',
-    check2: 'Älykkäät analyysit',
-    check3: 'Hallinta palkasta palkkaan',
-    check4: 'Turvallinen ja yksityinen',
-    check5: 'Kuitit ja historia',
-    check6: 'Tietoja ei myydä koskaan',
-    allInOneHeadingLine1: 'Kaikki mitä tarvitset',
-    allInOneHeadingLine2: '– yhdessä paikassa.',
-    allInOneSub: 'Näe kulusi, budjettisi, historiasi ja analyysisi yhdellä selkeällä ruudulla.',
-    screenHome: 'Koti',
-    screenHomeDesc: 'Katso paljonko voit käyttää tänään.',
-    screenHistory: 'Historia',
-    screenHistoryDesc: 'Kaikki tapahtumasi koottuna.',
-    screenAnalysis: 'Analyysi',
-    screenAnalysisDesc: 'Ymmärrä minne rahasi kuluvat.',
-    screenEconomy: 'Talous',
-    screenEconomyDesc: 'Hallinnoi tuloja ja kiinteitä kuluja.',
-    reviewsBadge: '4.9 / 5 tähtiluokitus varhaisilta käyttäjiltä',
-    reviewsHeading: 'Mitä testaajat sanovat?',
-    reviewsSubheading: 'Dejz on testattu huolellisesti, jotta käyttökokemus tuntuu vaivattomalta ensimmäisestä päivästä alkaen.',
-    review1Text: '"Vihdoinkin sovellus, joka ei vaadi pankkitunnuksia. Nyt tiedän tarkalleen missä mennään palkkapäivien välillä!"',
-    review1Author: 'Markus L.',
-    review1City: 'Käyttäjä (Helsinki)',
-    review2Text: '"Kausilaskuri on uskomattoman hyödyllinen. Näkee heti mitä jää vapaasti käytettäväksi kiinteiden kulujen jälkeen."',
-    review2Author: 'Sofia K.',
-    review2City: 'Käyttäjä (Tampere)',
-    review3Text: '"Superhelppo, nopea ja kaunis ulkoasu. Juuri se budjettityökalu jota olen etsinyt vuosia."',
-    review3Author: 'Aleksi E.',
-    review3City: 'Käyttäjä (Turku)',
-    faqTitle: 'Usein kysytyt kysymykset',
-    faq1Q: 'Onko Dejz ilmainen?',
-    faq1A: 'Kyllä, voit luoda profiilin ja käyttää sovelluksen ydinominaisuuksia täysin ilmaiseksi.',
-    faq2Q: 'Miten Dejz toimii ilman pankkiyhteyttä?',
-    faq2A: 'Lisäät kulusi kätevästi käsin tai kuvaamalla kuitin. Tämä antaa sinulle täyden hallinnan ja vahvistaa tietoisuutta rahan käytöstä.',
-    faq3Q: 'Voinko kokeilla sovellusta ennen tilin luomista?',
-    faq3A: 'Kyllä! Napsauta "Kokeile demoa heti" testataksesi sovellusta valmiilla esimerkkidatalla suoraan selaimessa.',
-    faq4Q: 'Miten palkkakaudet toimivat?',
-    faq4A: 'Asetat oman palkkapäiväsi. Dejz laskee automaattisesti budjettikautesi ja mitä sinulla on käytettävissä seuraavaan palkkapäivään asti.',
-    finalCtaTitle: 'Valmis ottamaan taloutesi haltuun?',
-    finalCtaSub: 'Aloita Dejzin käyttö parissa minuutissa.',
-    footerPrivacy: 'Tietosuojaseloste',
-    footerTerms: 'Käyttöehdot',
-    footerContact: 'Yhteystiedot',
-  },
-  en: {
-    navHow: 'How it works',
-    navFeatures: 'Features',
-    login: 'Log in',
-    getStarted: 'Get started free',
-    demoDirect: 'Try demo directly',
-    continueWithGoogle: 'Continue with Google',
-    heroTitleLine1: 'Your whole budget.',
-    heroTitleLine2: 'In black and white.',
-    heroSubtitle: 'Bring income, fixed expenses, savings, and budget together in one place. See exactly what you have left to spend between two paydays.',
-    trust1Title: 'No bank connection',
-    trust1Desc: 'Total control over your data.',
-    trust2Title: 'Secure and private',
-    trust2Desc: 'Your financial data stays yours.',
-    trust3Title: 'Built for simplicity',
-    trust3Desc: 'Focused on what actually helps.',
-    howTitle: 'How Dejz works',
-    howSubtitle: 'Three simple steps to better control of your money.',
-    step1Num: '1',
-    step1Title: 'Period calculation',
-    step1Desc: 'Enter your income, fixed costs, and savings. Dejz calculates what you genuinely have available.',
-    step1IncomeLabel: 'Income',
-    step1IncomeVal: '25 000 kr',
-    step1FixedLabel: 'Fixed expenses',
-    step1FixedVal: '−12 000 kr',
-    step1SavingsLabel: 'Savings',
-    step1SavingsVal: '−3 000 kr',
-    step1LeftLabel: 'Available to spend',
-    step1LeftVal: '10 000 kr',
-    step2Num: '2',
-    step2Title: 'Log expenses',
-    step2Desc: 'Quickly enter purchases and assign categories.',
-    step2SampleName: 'Lunch',
-    step2SampleVal: '−120 kr',
-    step2Receipt: 'Attach receipt',
-    step3Num: '3',
-    step3Title: 'See what you can spend',
-    step3Desc: 'When you record new expenses, Dejz automatically recalculates your remaining balance.',
-    step3LeftVal: '10 000 kr',
-    step3Realtime: 'Updates in real time',
-    featuresHeading: 'Your finances, on your terms.',
-    featuresSubheading: 'Dejz helps you gain complete clarity over daily spending. No forced bank linking, no complicated tables – just an honest overview.',
-    check1: 'Manual tracking – you are in charge',
-    check2: 'Smart spending insights',
-    check3: 'Payday to payday peace of mind',
-    check4: 'Safe and private',
-    check5: 'Receipts and history',
-    check6: 'We never sell your data',
-    allInOneHeadingLine1: 'Everything you need',
-    allInOneHeadingLine2: '– all in one place.',
-    allInOneSub: 'View expenses, budget, history, and analyses cleanly unified.',
-    screenHome: 'Home',
-    screenHomeDesc: 'See what you can spend today.',
-    screenHistory: 'Log',
-    screenHistoryDesc: 'All transactions gathered.',
-    screenAnalysis: 'Analysis',
-    screenAnalysisDesc: 'Understand where money flows.',
-    screenEconomy: 'Finances',
-    screenEconomyDesc: 'Manage income and fixed costs.',
-    reviewsBadge: '4.9 out of 5 rated by early users',
-    reviewsHeading: 'What do users say?',
-    reviewsSubheading: 'Dejz has been crafted and tested to make everyday budgeting genuinely effortless.',
-    review1Text: '"Finally an app that does not require linking bank accounts. I finally have full visibility into my budget!"',
-    review1Author: 'Marcus L.',
-    review1City: 'Beta tester (Stockholm)',
-    review2Text: '"The pay period calculator is incredible. You immediately see what remains after fixed bills are covered."',
-    review2Author: 'Sofia K.',
-    review2City: 'Beta tester (Gothenburg)',
-    review3Text: '"Super clean, responsive, and minimalist design. Exactly the finance tool I was wishing for."',
-    review3Author: 'Alexander E.',
-    review3City: 'Beta tester (Malmö)',
-    faqTitle: 'Frequently asked questions',
-    faq1Q: 'Is Dejz free to use?',
-    faq1A: 'Yes, you can register and use the core budget features completely free.',
-    faq2Q: 'How does Dejz work without linking a bank account?',
-    faq2A: 'You quickly log purchases manually or snap receipt photos. This fosters awareness and keeps your credentials entirely safe.',
-    faq3Q: 'Can I try Dejz before creating an account?',
-    faq3A: 'Absolutely! Click "Try demo directly" to explore the application pre-populated with realistic demo data.',
-    faq4Q: 'How do pay periods work?',
-    faq4A: 'Set your regular payday. Dejz calculates your period boundaries and what you have left to spend until your next payday.',
-    finalCtaTitle: 'Ready to take control of your finances?',
-    finalCtaSub: 'Get started with Dejz in just a few minutes.',
-    footerPrivacy: 'Privacy Policy',
-    footerTerms: 'Terms of Service',
-    footerContact: 'Contact',
-  },
-};
+/**
+ * 3D Torus Ring Decoration with specular highlights and depth
+ */
+export const Torus3DRing = ({ className = '' }: { className?: string }) => (
+  <svg
+    viewBox="0 0 200 200"
+    className={`select-none pointer-events-none ${className}`}
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="torusGradBrand" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FFE0CE" />
+        <stop offset="45%" stopColor="#F8C4DF" />
+        <stop offset="100%" stopColor="#CEB9EF" />
+      </linearGradient>
+      <radialGradient id="torusHighlight" cx="35%" cy="30%" r="65%">
+        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
+        <stop offset="40%" stopColor="#F8C4DF" stopOpacity="0.4" />
+        <stop offset="100%" stopColor="#CEB9EF" stopOpacity="0.05" />
+      </radialGradient>
+      <filter id="softShadow3d" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="6" dy="16" stdDeviation="12" floodColor="#151718" floodOpacity="0.14" />
+      </filter>
+    </defs>
+    <g filter="url(#softShadow3d)">
+      <path
+        d="M 100 20 A 80 80 0 1 0 100 180 A 80 80 0 1 0 100 20 Z M 100 55 A 45 45 0 1 1 100 145 A 45 45 0 1 1 100 55 Z"
+        fill="url(#torusGradBrand)"
+        fillRule="evenodd"
+      />
+      <path
+        d="M 100 20 A 80 80 0 1 0 100 180 A 80 80 0 1 0 100 20 Z M 100 55 A 45 45 0 1 1 100 145 A 45 45 0 1 1 100 55 Z"
+        fill="url(#torusHighlight)"
+        fillRule="evenodd"
+      />
+    </g>
+  </svg>
+);
 
-const PlaceholderBox = ({ 
-  id, 
-  className = 'aspect-[16/10]',
-  labelClass = 'text-xs sm:text-sm'
-}: { 
-  id: string; 
+interface PhoneScreenshotFrameProps {
+  label: string;
+  src?: string;
+  alt: string;
   className?: string;
-  labelClass?: string;
+  perspectiveTilt?: boolean;
+}
+
+export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
+  label,
+  src,
+  alt,
+  className = '',
+  perspectiveTilt = false,
 }) => {
   return (
-    <div className={`w-full relative rounded-[var(--radius-card-nested,12px)] overflow-hidden shadow-2xs border border-[var(--border-subtle)] bg-[var(--surface-color)] flex items-center justify-center ${className}`}>
-      <div className="absolute inset-0 bg-gradient-to-br from-black/[0.01] to-black/[0.04] dark:from-white/[0.01] dark:to-white/[0.03]" />
-      <span className={`relative font-semibold text-[var(--text-tertiary)] uppercase tracking-wider text-center px-4 ${labelClass}`}>
-        {id}
-      </span>
+    <div className={`relative mx-auto w-full max-w-[280px] sm:max-w-[310px] ${className}`}>
+      {/* Outer Phone Mockup Frame with subtle shadow and 3D depth */}
+      <div 
+        className={`relative rounded-modal p-2.5 sm:p-3 bg-[var(--text-primary)] shadow-[0_28px_65px_rgba(0,0,0,0.25)] dark:shadow-[0_28px_65px_rgba(0,0,0,0.65)] border border-white/10 ring-1 ring-black/30 overflow-hidden transition-all duration-500 ${
+          perspectiveTilt ? 'sm:rotate-[-2deg] hover:rotate-0 hover:scale-[1.015]' : ''
+        }`}
+      >
+        {/* Top Notch / Camera Island */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-30 flex items-center justify-center pointer-events-none">
+          <div className="w-2.5 h-2.5 rounded-full bg-black border border-white/10" />
+        </div>
+
+        {/* Inner Screen Container */}
+        <div className={`relative w-full aspect-[9/19.5] rounded-card overflow-hidden bg-[var(--surface-color)] border border-subtle/50 flex flex-col items-center justify-center text-center ${src ? 'p-0' : 'p-4'}`}>
+          {src ? (
+            <img
+              src={src}
+              alt={alt}
+              className="w-full h-full object-cover object-top pointer-events-none select-none"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center p-4 space-y-3 text-[var(--text-secondary)]">
+              <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] border border-subtle shadow-xs">
+                <Smartphone size={24} strokeWidth={1.75} />
+              </div>
+              <div className="space-y-1 max-w-[210px]">
+                <p className="text-xs font-semibold text-[var(--text-primary)] leading-snug">
+                  {label}
+                </p>
+                <p className="text-[10px] text-[var(--text-tertiary)] font-mono tracking-tight">
+                  [ Screenshot Placeholder ]
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
-const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
+const FAQAccordionItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-[var(--border-subtle)]">
+    <div className="border-b border-[var(--border-divider)] last:border-none">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 text-left flex items-center justify-between gap-4 group cursor-pointer focus:outline-none"
+        className="w-full py-4 sm:py-5 text-left flex items-center justify-between gap-4 group cursor-pointer focus:outline-none"
         aria-expanded={isOpen}
       >
         <span className="text-base sm:text-lg font-semibold text-[var(--text-primary)] group-hover:text-[var(--text-primary)] transition-colors">
@@ -498,88 +167,110 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
           className={`text-[var(--text-secondary)] shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <div className="pb-6 pr-6">
-              <p className="text-[var(--text-secondary)] leading-relaxed font-normal text-sm sm:text-base">
-                {answer}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div className="pb-5 pr-6 text-body text-[var(--text-secondary)] leading-relaxed animate-fade-in">
+          {answer}
+        </div>
+      )}
     </div>
   );
 };
 
-export function LandingPage({ 
-  onGetStarted, 
-  onLogin, 
-  onStartDemo, 
-  onGoogleLogin, 
-  onLegalClick: _onLegalClick,
+export function LandingPage({
+  onGetStarted,
+  onLogin,
+  onStartDemo,
+  onGoogleLogin,
+  onLegalClick,
   currentLanguage,
   onLanguageChange,
+  screenshots = SCREENSHOT_CONFIG,
 }: LandingPageProps) {
-  const [activePolicy, setActivePolicy] = React.useState<'privacy' | 'terms' | null>(null);
+  const [activePolicyModal, setActivePolicyModal] = useState<'privacy' | 'terms' | 'cookies' | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
+  // Mouse tilt position for hero desktop interaction
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  // Voice registration sequence interactive animation state
+  const [voiceStep, setVoiceStep] = useState<0 | 1 | 2>(0);
+  const [animatedBalance, setAnimatedBalance] = useState(6420);
+
+  const isEn = currentLanguage === 'en';
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (window.innerWidth < 1024) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 12;
+    setMousePos({ x, y });
+  };
+
+  // Close mobile menu on ESC
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const normalizedLang = (currentLanguage === 'da' || currentLanguage === 'no' || currentLanguage === 'fi' || currentLanguage === 'en')
-    ? currentLanguage
-    : 'sv';
-  const c = LANDING_TEXTS[normalizedLang] || LANDING_TEXTS.sv;
+  // Step-by-step timer for voice registration sequence demo
+  useEffect(() => {
+    const timer1 = setTimeout(() => setVoiceStep(1), 1200);
+    const timer2 = setTimeout(() => {
+      setVoiceStep(2);
+      setAnimatedBalance(6133);
+    }, 2400);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, []);
+
+  const handleRestartVoiceDemo = () => {
+    setVoiceStep(0);
+    setAnimatedBalance(6420);
+    setTimeout(() => setVoiceStep(1), 1000);
+    setTimeout(() => {
+      setVoiceStep(2);
+      setAnimatedBalance(6133);
+    }, 2200);
+  };
+
+  const handlePolicyOpen = (type: 'privacy' | 'terms' | 'cookies') => {
+    if (onLegalClick) {
+      onLegalClick(type);
+    } else {
+      setActivePolicyModal(type);
+    }
+  };
 
   return (
-    <div className="min-h-dvh font-sans text-[var(--text-primary)] bg-[var(--bg-color)] relative selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
-      {/* Policy Modal */}
-      <PolicyModal 
-        isOpen={activePolicy !== null}
-        type={activePolicy || 'privacy'}
-        onClose={() => setActivePolicy(null)}
-      />
-
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/95 border-b border-[var(--border-subtle)] transition-all pt-[env(safe-area-inset-top)]">
-        <div className="max-w-[1240px] mx-auto px-3 sm:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-6 lg:gap-10 shrink-0">
-            <div
-              className="flex items-center select-none cursor-pointer shrink-0"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              <DejzLogo className="text-xl sm:text-2xl font-black tracking-tight text-[var(--text-primary)] shrink-0" />
-            </div>
-
-            <nav className="hidden md:flex items-center gap-6">
-              <a 
-                href="#how-it-works" 
-                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap"
-              >
-                {c.navHow}
-              </a>
-              <a 
-                href="#features" 
-                className="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap"
-              >
-                {c.navFeatures}
-              </a>
-            </nav>
+    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-hidden">
+      
+      {/* 1. DISCRETE STICKY HEADER WITH SAFE AREA INSET TOP */}
+      <header className="sticky top-0 z-50 bg-[var(--bg-color)]/95 backdrop-blur-xl border-b border-[var(--border-divider)] pt-[env(safe-area-inset-top,0px)] transition-all">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-18 flex items-center justify-between gap-4">
+          
+          {/* Logo */}
+          <div className="flex items-center gap-2 shrink-0">
+            <DejzLogo className="h-6 sm:h-7 w-auto" />
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3 shrink-0">
+          {/* Desktop Navigation (md+) */}
+          <div className="hidden md:flex items-center gap-3 lg:gap-4">
+            <a
+              href="#how-it-works"
+              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-2 py-1"
+            >
+              {isEn ? 'How it works' : 'Så fungerar det'}
+            </a>
+
             <LanguagePicker
               currentLanguage={currentLanguage}
               onLanguageChange={onLanguageChange}
-              variant="header"
             />
 
             {onLogin && (
@@ -587,658 +278,583 @@ export function LandingPage({
                 variant="ghost"
                 size="sm"
                 onClick={onLogin}
-                className="text-[var(--text-primary)] whitespace-nowrap text-xs sm:text-sm font-semibold h-8 sm:h-9 px-2.5 sm:px-3.5 shrink-0"
+                className="text-xs font-semibold text-[var(--text-primary)] px-3"
               >
-                {c.login}
+                {isEn ? 'Log in' : 'Logga in'}
               </Button>
             )}
+
             <Button
               variant="primary"
               size="sm"
               onClick={onGetStarted}
-              className="hidden sm:inline-flex whitespace-nowrap text-xs sm:text-sm font-semibold h-8 sm:h-9 px-3.5 sm:px-4 shrink-0"
+              className="text-xs font-semibold shadow-xs px-4"
             >
-              {c.getStarted}
+              {isEn ? 'Get started free' : 'Kom igång gratis'}
             </Button>
           </div>
-        </div>
-      </header>
 
-      {/* HERO SECTION */}
-      <section className="relative w-full bg-[var(--bg-color)] pt-6 pb-16 sm:py-20">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
-          
-          {/* ==================== DESKTOP LAYOUT (lg:block) ==================== */}
-          <div className="hidden lg:grid lg:grid-cols-12 gap-14 items-center">
-            {/* LEFT COLUMN: Text, CTAs, Trust */}
-            <div className="lg:col-span-6 space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-[1.2]">
-                  {c.heroTitleLine1}<br />
-                  {c.heroTitleLine2}
-                </h1>
-                <p className="text-lg text-[var(--text-secondary)] font-normal leading-relaxed max-w-xl">
-                  {c.heroSubtitle}
-                </p>
-              </div>
-
-              {/* CTA buttons */}
-              <div className="space-y-3">
-                <div className="flex items-stretch gap-3">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={onGetStarted}
-                    className="flex-1 shadow-subtle shadow-[var(--accent-color)]/20"
-                  >
-                    {c.getStarted}
-                  </Button>
-                  {onStartDemo && (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      onClick={onStartDemo}
-                    >
-                      {c.demoDirect}
-                    </Button>
-                  )}
-                </div>
-
-                {onGoogleLogin && (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={onGoogleLogin}
-                    fullWidth
-                    className="gap-3 font-semibold"
-                  >
-                    <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    {c.continueWithGoogle}
-                  </Button>
-                )}
-              </div>
-
-              {/* Trust points */}
-              <div className="grid grid-cols-3 gap-3 pt-4">
-                <div className="space-y-1">
-                  <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] mb-1">
-                    <Shield size={14} strokeWidth={2} />
-                  </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust1Title}</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust1Desc}</p>
-                </div>
-                <div className="space-y-1">
-                  <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] mb-1">
-                    <Lock size={14} strokeWidth={2} />
-                  </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust2Title}</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust2Desc}</p>
-                </div>
-                <div className="space-y-1">
-                  <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] mb-1">
-                    <Sparkles size={14} strokeWidth={2} />
-                  </div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust3Title}</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust3Desc}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: Image */}
-            <div className="lg:col-span-6 flex justify-center">
-              <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)]">
-                <img 
-                  src="/hero.png" 
-                  alt="Dejz App" 
-                  className="w-full h-auto object-cover object-center block"
-                />
-              </div>
-            </div>
+          {/* Mobile Menu Toggle Button (< md) */}
+          <div className="md:hidden flex items-center">
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? (isEn ? 'Close menu' : 'Stäng meny') : (isEn ? 'Open menu' : 'Öppna meny')}
+              aria-expanded={isMobileMenuOpen}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
+            >
+              {isMobileMenuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
+            </button>
           </div>
 
-          {/* ==================== MOBILE LAYOUT (block lg:hidden) ==================== */}
-          <div className="block lg:hidden space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-[1.25]">
-                {c.heroTitleLine1}<br />
-                {c.heroTitleLine2}
+        </div>
+
+        {/* Mobile Slide-Down Menu Panel */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-[var(--border-divider)] bg-[var(--surface-color)]/98 backdrop-blur-2xl shadow-modal px-5 py-6 space-y-4 animate-fade-in">
+            <div className="flex flex-col space-y-3 text-left">
+              <a
+                href="#how-it-works"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-sm font-semibold text-[var(--text-primary)] py-2 border-b border-subtle"
+              >
+                {isEn ? 'How it works' : 'Så fungerar det'}
+              </a>
+
+              <div className="flex items-center justify-between py-2 border-b border-subtle">
+                <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                  {isEn ? 'Language' : 'Språk'}
+                </span>
+                <LanguagePicker
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={onLanguageChange}
+                />
+              </div>
+
+              {onLogin && (
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onLogin();
+                  }}
+                  className="justify-center text-sm font-semibold text-[var(--text-primary)] py-2.5"
+                >
+                  {isEn ? 'Log in' : 'Logga in'}
+                </Button>
+              )}
+
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onGetStarted();
+                }}
+                className="justify-center text-sm font-semibold shadow-subtle py-3 mt-1"
+              >
+                {isEn ? 'Get started free' : 'Kom igång gratis'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* 2. HERO SECTION WITH COMPACT COPY & RICH 3D DEPTH */}
+      <section 
+        onMouseMove={handleMouseMove}
+        className="relative pt-6 sm:pt-16 pb-14 sm:pb-24 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-[#FFE0CE]/40 via-[#F8C4DF]/25 to-transparent dark:from-[#FFE0CE]/10 dark:via-[#F8C4DF]/5 dark:to-transparent"
+      >
+        {/* Soft Ambient Background Orbs */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#FFE0CE]/40 dark:bg-[#FFE0CE]/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 -right-24 w-96 h-96 rounded-full bg-[#CEB9EF]/35 dark:bg-[#CEB9EF]/10 blur-3xl pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center relative z-10">
+          
+          {/* Left Column: Headline, Copy & CTAs */}
+          <div className="lg:col-span-7 space-y-5 text-left">
+            
+            <div className="space-y-2.5">
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12]">
+                Koll på pengarna.<br />
+                <span className="text-[var(--text-primary)] opacity-90">Från lön till lön.</span>
               </h1>
-              <p className="text-base text-[var(--text-secondary)] font-normal leading-relaxed">
-                {c.heroSubtitle}
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl font-normal">
+                Samla inkomster, fasta utgifter och sparande. Se vad du har kvar fram till nästa lön.
               </p>
             </div>
 
-            {/* CTA buttons */}
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row items-stretch gap-3">
+            {/* CTAs & Registration Options */}
+            <div className="space-y-3.5 pt-1">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Button
                   variant="primary"
                   size="lg"
                   onClick={onGetStarted}
-                  fullWidth
-                  className="shadow-subtle shadow-[var(--accent-color)]/20"
+                  className="font-semibold text-sm shadow-subtle flex items-center justify-center gap-2 px-6"
                 >
-                  {c.getStarted}
+                  <span>{isEn ? 'Get started free' : 'Kom igång gratis'}</span>
+                  <ArrowRight size={16} strokeWidth={2} />
                 </Button>
+
                 {onStartDemo && (
-                  <Button
-                    variant="secondary"
-                    size="lg"
+                  <button
+                    type="button"
                     onClick={onStartDemo}
-                    fullWidth
+                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-2.5 rounded-button hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
                   >
-                    {c.demoDirect}
-                  </Button>
+                    <span>{isEn ? 'Try demo' : 'Testa demo'}</span>
+                    <ArrowRight size={14} />
+                  </button>
                 )}
               </div>
 
+              {/* Discrete Google Sign-In */}
               {onGoogleLogin && (
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={onGoogleLogin}
-                  fullWidth
-                  className="gap-3 font-semibold"
-                >
-                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  {c.continueWithGoogle}
-                </Button>
+                <div className="pt-0.5">
+                  <button
+                    type="button"
+                    onClick={onGoogleLogin}
+                    className="inline-flex items-center gap-2.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-3.5 py-2 rounded-button border border-subtle transition-all cursor-pointer shadow-2xs"
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>{isEn ? 'Continue with Google' : 'Fortsätt med Google'}</span>
+                  </button>
+                </div>
               )}
-            </div>
 
-            {/* Mobile Image */}
-            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)] my-4">
-              <img 
-                src="/hero.png" 
-                alt="Dejz App" 
-                className="w-full h-auto object-cover object-center block"
+              {/* Reassuring note */}
+              <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center gap-1.5 pt-0.5">
+                <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
+                <span>Ingen bankkoppling behövs.</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column: Hero Composition with 3D Ring & Phone Mockup */}
+          <div className="lg:col-span-5 relative flex items-center justify-center min-h-[340px] sm:min-h-[420px]">
+            
+            {/* 3D Shaded Brand Ring partially behind phone */}
+            <Torus3DRing className="absolute -top-4 -right-2 sm:-top-8 sm:right-2 w-52 h-52 sm:w-72 sm:h-72 opacity-90 animate-pulse-subtle z-0" />
+
+            {/* Interactive / Floating Phone Frame Container */}
+            <div 
+              style={{
+                transform: `translate3d(${mousePos.x * 0.8}px, ${mousePos.y * 0.8}px, 0px)`,
+                transition: 'transform 0.2s ease-out',
+              }}
+              className="relative z-10 w-full animate-float"
+            >
+              <PhoneScreenshotFrame
+                label="Screenshot: Hem – kvar att spendera och aktuell löneperiod"
+                src={screenshots.heroHome}
+                alt="Dejz Hemvy - kvar att spendera och löneperiod"
+                perspectiveTilt={true}
               />
             </div>
 
-            {/* Mobile Trust Points */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
-              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-[var(--surface-color)] sm:bg-transparent p-3 sm:p-0 rounded-[var(--radius-card-nested,10px)] border sm:border-0 border-[var(--border-subtle)]">
-                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--bg-color)] sm:bg-[var(--surface-color)] border sm:border-0 border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                  <Shield size={14} strokeWidth={2} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust1Title}</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust1Desc}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-[var(--surface-color)] sm:bg-transparent p-3 sm:p-0 rounded-[var(--radius-card-nested,10px)] border sm:border-0 border-[var(--border-subtle)]">
-                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--bg-color)] sm:bg-[var(--surface-color)] border sm:border-0 border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                  <Lock size={14} strokeWidth={2} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust2Title}</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust2Desc}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-[var(--surface-color)] sm:bg-transparent p-3 sm:p-0 rounded-[var(--radius-card-nested,10px)] border sm:border-0 border-[var(--border-subtle)]">
-                <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] bg-[var(--bg-color)] sm:bg-[var(--surface-color)] border sm:border-0 border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                  <Sparkles size={14} strokeWidth={2} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[var(--text-primary)] leading-tight">{c.trust3Title}</h4>
-                  <p className="text-[11px] text-[var(--text-tertiary)] leading-snug">{c.trust3Desc}</p>
-                </div>
-              </div>
-            </div>
-
           </div>
 
         </div>
       </section>
 
-      {/* 3. SÅ FUNGERAR DEJZ */}
-      <section id="how-it-works" className="py-24 bg-[var(--surface-color)] border-y border-[var(--border-subtle)]">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-14">
-          <div className="max-w-2xl space-y-3">
-            <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
-              {c.howTitle}
+      {/* 3. ÖVERBLICK ÖVER EKONOMIN (Warm Peach Surface) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#FFE0CE]/30 dark:bg-[#FFE0CE]/10 border-y border-[var(--border-divider)] relative">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <div className="lg:col-span-6 space-y-4 text-left">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+              <Layers size={14} className="text-[var(--text-primary)]" />
+              <span>{isEn ? 'Financial Overview' : 'Fasta kostnader'}</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
+              Alla fasta kostnader. En tydlig överblick.
             </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)]">
-              {c.howSubtitle}
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal">
+              Se dina återkommande inkomster och utgifter samlade. Med fasta kostnader och sparande i budgeten ser du vad som finns kvar att spendera.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {/* Block 1 */}
-            <Card variant="default" padding="lg" className="space-y-6 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-bold text-sm flex items-center justify-center">
-                  {c.step1Num}
-                </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{c.step1Title}</h3>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                  {c.step1Desc}
-                </p>
-              </div>
-
-              <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,10px)] p-4 border border-[var(--border-subtle)] space-y-2 text-xs sm:text-sm">
-                <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>{c.step1IncomeLabel}</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{c.step1IncomeVal}</span>
-                </div>
-                <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>{c.step1FixedLabel}</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{c.step1FixedVal}</span>
-                </div>
-                <div className="flex justify-between text-[var(--text-secondary)]">
-                  <span>{c.step1SavingsLabel}</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{c.step1SavingsVal}</span>
-                </div>
-                <div className="border-t border-[var(--border-subtle)] pt-2 flex justify-between font-bold text-[var(--text-primary)] text-sm">
-                  <span>{c.step1LeftLabel}</span>
-                  <span className="text-emerald-600">{c.step1LeftVal}</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Block 2 */}
-            <Card variant="default" padding="lg" className="space-y-6 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-bold text-sm flex items-center justify-center">
-                  {c.step2Num}
-                </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{c.step2Title}</h3>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                  {c.step2Desc}
-                </p>
-              </div>
-
-              <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,10px)] p-4 border border-[var(--border-subtle)] space-y-3">
-                <div className="flex items-center justify-between bg-[var(--bg-color)] p-3 rounded-[var(--radius-card-nested,10px)] border border-[var(--border-subtle)] shadow-xs">
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.step2SampleName}</span>
-                  <span className="text-sm font-bold text-rose-600">{c.step2SampleVal}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] px-1">
-                  <Receipt size={14} className="text-[var(--text-tertiary)]" />
-                  <span>{c.step2Receipt}</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Block 3 */}
-            <Card variant="default" padding="lg" className="space-y-6 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-bold text-sm flex items-center justify-center">
-                  {c.step3Num}
-                </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{c.step3Title}</h3>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                  {c.step3Desc}
-                </p>
-              </div>
-
-              <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,10px)] p-4 border border-[var(--border-subtle)] space-y-1.5 text-center">
-                <span className="text-xs text-[var(--text-tertiary)] font-medium uppercase tracking-wider">{c.step1LeftLabel}</span>
-                <div className="text-2xl font-black text-emerald-600 tracking-tight">
-                  {c.step3LeftVal}
-                </div>
-                <div className="text-[11px] text-[var(--text-tertiary)]">{c.step3Realtime}</div>
-              </div>
-            </Card>
+          <div className="lg:col-span-6 flex justify-center">
+            <PhoneScreenshotFrame
+              label="Screenshot: Ekonomi – inkomster och fasta utgifter"
+              src={screenshots.economy}
+              alt="Dejz Ekonomi - inkomster och fasta utgifter"
+            />
           </div>
+
         </div>
       </section>
 
-      {/* 4. STOR PRODUKTSEKTION ("Din ekonomi, på dina villkor") */}
-      <section id="features" className="py-24 bg-[var(--bg-color)]">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
-            {/* Left Image */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-[340px] sm:max-w-[380px] relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)]">
-                <img 
-                  src="/IMG_3049.PNG" 
-                  alt="Dejz App Screenshot" 
-                  className="w-full h-auto object-cover object-center block"
-                />
-              </div>
-            </div>
-
-            {/* Right Text */}
-            <div className="lg:col-span-7 space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
-                  {c.featuresHeading}
-                </h2>
-                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
-                  {c.featuresSubheading}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 pt-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check1}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check2}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check3}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check4}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check5}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                    <Check size={12} strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{c.check6}</span>
-                </div>
-              </div>
-            </div>
+      {/* 4. SMIDIG RÖSTREGISTRERING (Interactive Scroll & Flow Story) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          {/* Left Side: Screenshot Placeholder */}
+          <div className="lg:col-span-6 order-2 lg:order-1 flex justify-center">
+            <PhoneScreenshotFrame
+              label="Screenshot: Röstregistrering – registrera en transaktion"
+              src={screenshots.voiceInput}
+              alt="Dejz Röstregistrering"
+            />
           </div>
+
+          {/* Right Side: Copy & Step-by-Step Flow Simulation Card */}
+          <div className="lg:col-span-6 order-1 lg:order-2 space-y-6 text-left">
+            
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+                <Mic size={14} className="text-[var(--text-primary)]" />
+                <span>{isEn ? 'Voice Input' : 'Smidig röstinmatning'}</span>
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
+                Säg det. Registrera det. Klart.
+              </h2>
+
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+                Lägg till utgifter och inkomster med rösten eller skriv in dem själv. Appen hjälper dig med kategoriseringen.
+              </p>
+            </div>
+
+            {/* Interactive Illustrative Flow Card */}
+            <Card variant="default" padding="lg" className="border border-subtle space-y-4 bg-[var(--surface-color)] shadow-subtle relative overflow-hidden">
+              
+              {/* Card Header & Replay Control */}
+              <div className="flex items-center justify-between pb-2 border-b border-subtle">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+                  <Sparkles size={14} className="text-[var(--accent-color)] shrink-0" />
+                  <span>Exempel — så tolkar Dejz din röst</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRestartVoiceDemo}
+                  className="p-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none"
+                  title="Spela upp exemplet igen"
+                >
+                  <RotateCcw size={14} />
+                </button>
+              </div>
+
+              {/* Step 1: Voice Input Quote */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+                  <Mic size={13} className="text-[var(--accent-color)]" />
+                  <span>1. Du säger</span>
+                </div>
+                <div className="p-3 rounded-card-nested bg-[var(--surface-high)] text-sm font-semibold text-[var(--text-primary)] italic">
+                  ”Jag handlade mat för 287 kronor på Coop.”
+                </div>
+              </div>
+
+              {/* Step 2: Parsed Transaction Card */}
+              <div className={`space-y-1.5 transition-all duration-500 ${voiceStep >= 1 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'}`}>
+                <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+                  <Sparkles size={13} className="text-[var(--accent-color)]" />
+                  <span>2. Appen tolkar & föreslår</span>
+                </div>
+                <div className="p-3 rounded-card-nested bg-[var(--surface-color)] border border-subtle flex items-center justify-between gap-3 shadow-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-[#FFE0CE] text-[#151718] font-bold text-xs flex items-center justify-center shrink-0">
+                      C
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">Coop</p>
+                      <p className="text-[11px] text-[var(--text-secondary)]">Mat & dagligvaror</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)]">−287 kr</p>
+                    <span className="text-[10px] font-semibold text-[var(--success-color)] flex items-center gap-0.5 justify-end">
+                      <CheckCircle2 size={11} /> Bekräfta
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Remaining Balance Update */}
+              <div className={`pt-2 border-t border-subtle flex items-center justify-between text-xs transition-all duration-500 ${voiceStep >= 2 ? 'opacity-100' : 'opacity-40'}`}>
+                <span className="text-[var(--text-secondary)]">3. Kvar att spendera uppdateras:</span>
+                <div className="flex items-baseline gap-1.5 font-amount tabular-nums font-bold text-sm">
+                  <span className="line-through opacity-50 text-[var(--text-tertiary)] text-xs">6 420 kr</span>
+                  <span className="text-[var(--text-primary)] text-sm font-bold bg-[#CEB9EF]/30 px-1.5 py-0.5 rounded-md">
+                    {animatedBalance.toLocaleString('sv-SE')} kr
+                  </span>
+                </div>
+              </div>
+
+            </Card>
+
+            <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
+              Du har alltid full kontroll och bekräftar uppgifterna innan köpet sparas i din budget.
+            </p>
+
+          </div>
+
         </div>
       </section>
 
-      {/* 5. ALLT DU BEHÖVER – SAMLAT PÅ ETT STÄLLE */}
-      <section className="py-24 bg-[var(--surface-color)] border-y border-[var(--border-subtle)]">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
-          <Card variant="default" padding="lg" className="p-8 sm:p-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              {/* Left Content */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="space-y-4">
-                  <h2 className="text-2xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-[1.25] max-w-sm">
-                    {c.allInOneHeadingLine1}<br />
-                    {c.allInOneHeadingLine2}
-                  </h2>
-                  <p className="text-[var(--text-secondary)] text-base sm:text-lg leading-relaxed max-w-md">
-                    {c.allInOneSub}
-                  </p>
-                </div>
-
-                <div>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={onGetStarted}
-                  >
-                    {c.getStarted}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Right Content */}
-              <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="space-y-2.5">
-                  <PlaceholderBox id="HEM" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenHome}</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenHomeDesc}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  <PlaceholderBox id="HISTORIK" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenHistory}</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenHistoryDesc}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  <PlaceholderBox id="ANALYS" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenAnalysis}</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenAnalysisDesc}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  <PlaceholderBox id="EKONOMI" className="aspect-[9/18] min-h-[360px] sm:min-h-[420px]" labelClass="text-xs sm:text-sm font-bold" />
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{c.screenEconomy}</h4>
-                    <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] leading-snug">{c.screenEconomyDesc}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* 8. SOCIAL PROOF / REVIEWS */}
-      <section className="py-24 bg-[var(--bg-color)] border-b border-[var(--border-subtle)]">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] shadow-2xs">
-              <div className="flex items-center gap-1 text-amber-500">
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-              </div>
-              <span>{c.reviewsBadge}</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-semibold font-display tracking-tight text-[var(--text-primary)]">
-              {c.reviewsHeading}
+      {/* 5. SÅ FUNGERAR DET (3 Steps Clean Grid) */}
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--surface-color)] border-y border-[var(--border-divider)] scroll-mt-12">
+        <div className="max-w-4xl mx-auto text-center space-y-12">
+          
+          <div className="space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+              Från lön till lön, i tre steg.
             </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)]">
-              {c.reviewsSubheading}
+            <p className="text-base text-[var(--text-secondary)] max-w-xl mx-auto">
+              Ett enkelt flöde som hjälper dig hålla koll utan krångliga menystrukturer.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card variant="default" padding="lg" className="space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-500">
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                </div>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
-                  {c.review1Text}
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            {/* Step 1 */}
+            <Card variant="default" padding="lg" className="border border-subtle space-y-3 relative overflow-hidden bg-[var(--bg-color)]">
+              <div className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--surface-color)] text-sm font-bold flex items-center justify-center shadow-xs">
+                1
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center">
-                  ML
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{c.review1Author}</h4>
-                  <p className="text-xs text-[var(--text-tertiary)]">{c.review1City}</p>
-                </div>
-              </div>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">
+                Sätt upp din budget.
+              </h3>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                Lägg in din löneperiod, inkomster, fasta utgifter och sparande.
+              </p>
             </Card>
 
-            <Card variant="default" padding="lg" className="space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-500">
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                </div>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
-                  {c.review2Text}
-                </p>
+            {/* Step 2 */}
+            <Card variant="default" padding="lg" className="border border-subtle space-y-3 relative overflow-hidden bg-[var(--bg-color)]">
+              <div className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--surface-color)] text-sm font-bold flex items-center justify-center shadow-xs">
+                2
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center">
-                  SK
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{c.review2Author}</h4>
-                  <p className="text-xs text-[var(--text-tertiary)]">{c.review2City}</p>
-                </div>
-              </div>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">
+                Registrera det som händer.
+              </h3>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                Tala in eller skriv in utgifter och inkomster under månadens gång.
+              </p>
             </Card>
 
-            <Card variant="default" padding="lg" className="space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-500">
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                  <Star size={16} fill="currentColor" />
-                </div>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
-                  {c.review3Text}
-                </p>
+            {/* Step 3 */}
+            <Card variant="default" padding="lg" className="border border-subtle space-y-3 relative overflow-hidden bg-[var(--bg-color)]">
+              <div className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--surface-color)] text-sm font-bold flex items-center justify-center shadow-xs">
+                3
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center">
-                  AE
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[var(--text-primary)]">{c.review3Author}</h4>
-                  <p className="text-xs text-[var(--text-tertiary)]">{c.review3City}</p>
-                </div>
-              </div>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">
+                Följ vad du har kvar.
+              </h3>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                Se hur budgeten förändras och anpassas fram till nästa lön.
+              </p>
             </Card>
           </div>
+
         </div>
       </section>
 
-      {/* 9. FAQ */}
-      <section className="py-24 bg-[var(--bg-color)]">
-        <div className="max-w-[1000px] mx-auto px-6 sm:px-8 space-y-10">
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--text-primary)]">
-            {c.faqTitle}
-          </h2>
+      {/* 6. FÖRSTÅ VART PENGARNA GÅR (Soft Lavender Surface) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#CEB9EF]/20 dark:bg-[#CEB9EF]/10 border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <div className="lg:col-span-6 space-y-4 text-left">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+              <PieChart size={14} className="text-[var(--text-primary)]" />
+              <span>{isEn ? 'Spending Insights' : 'Kategorier & Analys'}</span>
+            </div>
 
-          <div className="space-y-0">
-            <FAQItem 
-              question={c.faq1Q} 
-              answer={c.faq1A} 
-            />
-            <FAQItem 
-              question={c.faq2Q} 
-              answer={c.faq2A} 
-            />
-            <FAQItem 
-              question={c.faq3Q} 
-              answer={c.faq3A} 
-            />
-            <FAQItem 
-              question={c.faq4Q} 
-              answer={c.faq4A} 
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* 10. SLUTLIG CTA */}
-      <section className="py-12 px-6 sm:px-8 max-w-[1240px] mx-auto">
-        <Card variant="default" padding="lg" className="p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 border border-[var(--border-subtle)]">
-          <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
-              {c.finalCtaTitle}
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
+              Se helheten. Förstå detaljerna.
             </h2>
-            <p className="text-[var(--text-secondary)] text-sm sm:text-lg font-medium leading-relaxed">
-              {c.finalCtaSub}
+
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal">
+              Följ dina kategorier och se hur utgifterna fördelas. Få en tydligare bild av vad du spenderar pengarna på.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3.5 w-full lg:w-auto">
-            {onGoogleLogin && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={onGoogleLogin}
-                className="w-full sm:w-auto gap-2.5 font-semibold"
-              >
-                <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                {c.continueWithGoogle}
-              </Button>
-            )}
+          <div className="lg:col-span-6 flex justify-center">
+            <PhoneScreenshotFrame
+              label="Screenshot: Analys – kategorier och fördelning"
+              src={screenshots.analysis}
+              alt="Dejz Analys - kategorier och fördelning"
+            />
+          </div>
+
+        </div>
+      </section>
+
+      {/* 7. KONTROLL UTAN BANKKOPPLING */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
+        <div className="max-w-4xl mx-auto space-y-8 text-left">
+          
+          <div className="space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+              Du bestämmer vad som hamnar i din budget.
+            </h2>
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+              När du registrerar dina köp blir du mer delaktig i din ekonomi. Med smidig inmatning och hjälp med kategoriseringen blir det enkelt att hålla budgeten uppdaterad.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                <ShieldCheck size={18} strokeWidth={2} />
+              </div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                Ingen bankkoppling behövs
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                Du slipper dela dina bankinloggningsuppgifter eller lita på automatiska synkningar.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                <Check size={18} strokeWidth={2} />
+              </div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                Du väljer vad du registrerar
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                Bara de köp och inkomster du väljer att lägga till påverkar din periodbudget.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                <Sparkles size={18} strokeWidth={2} />
+              </div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                Kontrollera och ändra
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                Du kan alltid ändra kategori, belopp eller datum i efterhand med ett klick.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 8. VANLIGA FRÅGOR (FAQ) */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto space-y-6 text-left">
+          
+          <div className="space-y-1.5">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+              Vanliga frågor
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Svar på det du kan undra om Dejz och din budget.
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <FAQAccordionItem
+              question="Behöver jag koppla min bank?"
+              answer="Nej, Dejz kräver ingen bankkoppling eller delning av bankinloggningar. Du registrerar dina köp manuellt eller med rösten, vilket ger dig full medvetenhet och kontroll utan säkerhetsrisker."
+            />
+            <FAQAccordionItem
+              question="Hur fungerar perioden från lön till lön?"
+              answer="Du ställer in din vanliga lönedag (exempelvis den 25:e). Dejz beräknar automatiskt din budgetperiod fram till nästa lönedag så att du ser vad som faktiskt finns kvar att spendera."
+            />
+            <FAQAccordionItem
+              question="Hur registrerar jag utgifter och inkomster?"
+              answer="Du kan skriva in dem manuellt på några sekunder eller enkelt tala in dem (t.ex. 'Kaffe 45 kr på Espresso House'). Appen tolkar belopp, butik och kategori och ber dig bekräfta innan det sparas."
+            />
+            <FAQAccordionItem
+              question="Kan jag ändra kategorin på en transaktion?"
+              answer="Ja, absolut. Du kan när som helst klicka på vilken transaktion som helst för att justera kategori, belopp, datum eller betalningsmetod."
+            />
+            <FAQAccordionItem
+              question="Vad kostar appen?"
+              answer="Dejz är helt gratis att komma igång med och använda för dina grundläggande behov från lön till lön."
+            />
+          </div>
+
+        </div>
+      </section>
+
+      {/* 9. AVSLUTANDE REGISTRERING (Compact Rich Pink-Lavender Gradient Background) */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-[#F8C4DF]/40 via-[#CEB9EF]/30 to-[#FFE0CE]/40 border-t border-[var(--border-divider)] text-center relative overflow-hidden">
+        <div className="max-w-2xl mx-auto space-y-5 relative z-10">
+          
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
+              Få koll fram till nästa lön.
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+              Samla din ekonomi och se vad du har kvar att spendera.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center pt-2">
             <Button
               variant="primary"
               size="lg"
               onClick={onGetStarted}
-              className="w-full sm:w-auto font-bold"
+              className="w-full sm:w-auto font-semibold text-sm shadow-subtle px-8"
             >
-              {c.getStarted}
+              <span>{isEn ? 'Get started free' : 'Kom igång gratis'}</span>
+              <ArrowRight size={16} strokeWidth={2} className="ml-2" />
             </Button>
           </div>
-        </Card>
+
+        </div>
       </section>
 
-      {/* 11. FOOTER */}
-      <footer className="py-12 border-t border-[var(--border-subtle)] mt-12 bg-[var(--bg-color)]">
-        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-[var(--text-secondary)]">
-          <div className="flex items-center gap-2 select-none">
-            <DejzLogo className="text-xl font-bold tracking-tight text-[var(--text-primary)]" />
+      {/* 10. FOOTER */}
+      <footer className="py-10 px-4 sm:px-6 border-t border-[var(--border-divider)] bg-[var(--bg-color)] text-xs text-[var(--text-tertiary)]">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          
+          <div className="flex items-center gap-2">
+            <DejzLogo className="h-6 w-auto" />
+            <span className="ml-2 text-micro-label text-[var(--text-tertiary)]">
+              © {new Date().getFullYear()} Dejz. Alla rättigheter förbehålls.
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 font-semibold">
-            <a href="#features" className="hover:text-[var(--text-primary)] transition-colors">{c.navFeatures}</a>
-            <button onClick={() => setActivePolicy('privacy')} className="hover:text-[var(--text-primary)] transition-colors cursor-pointer">{c.footerPrivacy}</button>
-            <button onClick={() => setActivePolicy('terms')} className="hover:text-[var(--text-primary)] transition-colors cursor-pointer">{c.footerTerms}</button>
-            <a href="#how-it-works" className="hover:text-[var(--text-primary)] transition-colors">{c.footerContact}</a>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <LanguagePicker
-              currentLanguage={currentLanguage}
-              onLanguageChange={onLanguageChange}
-              variant="footer"
-            />
-            <a 
-              href="https://instagram.com" 
-              target="_blank" 
-              rel="noreferrer"
-              className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] flex items-center justify-center transition-colors"
-              aria-label="Instagram"
+          <div className="flex items-center gap-6">
+            <button
+              type="button"
+              onClick={() => handlePolicyOpen('privacy')}
+              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              <Instagram size={18} />
-            </a>
-            <span className="text-xs text-[var(--text-tertiary)] font-medium">© 2026 Dejz</span>
+              Integritetspolicy
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePolicyOpen('terms')}
+              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
+              Användarvillkor
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePolicyOpen('privacy')}
+              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
+              Kontakt
+            </button>
           </div>
+
         </div>
       </footer>
+
+      {/* Policy Modal fallback */}
+      {activePolicyModal && (
+        <PolicyModal
+          type={activePolicyModal}
+          onClose={() => setActivePolicyModal(null)}
+          currentLanguage={currentLanguage}
+        />
+      )}
+
     </div>
   );
 }
-
-export default LandingPage;

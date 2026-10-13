@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@100..900&family=Outfit:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -6,29 +6,29 @@
 @theme {
   --color-black: #141414;
   --font-sans:
-    "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
-    "Outfit", "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-unbounded:
-    "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-editorial:
-    "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-ui:
-    "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-amount:
-    "Outfit", "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Space Grotesk", "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-shoulders:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-barlow:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-barlow-standard:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-exo:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-logo:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Sora", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
@@ -354,9 +354,6 @@ h6 {
   line-height: 1.1;
   letter-spacing: -0.03em;
   font-family: var(--font-amount);
-  @media (min-width: 640px) {
-    font-size: 40px;
-  }
 }
 
 @utility text-large-amount {
@@ -387,8 +384,8 @@ h6 {
 }
 
 @utility text-section-title {
-  font-size: 15.5px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.015em;
   font-family: var(--font-display);
@@ -406,7 +403,7 @@ h6 {
 
 @utility text-body {
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 450;
   line-height: 1.5;
   letter-spacing: 0em;
   font-family: var(--font-sans);
@@ -415,7 +412,7 @@ h6 {
 
 @utility text-body-medium {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 550;
   line-height: 1.45;
   letter-spacing: -0.01em;
   font-family: var(--font-sans);
@@ -424,7 +421,7 @@ h6 {
 
 @utility text-secondary {
   font-size: 11.5px;
-  font-weight: 400;
+  font-weight: 450;
   line-height: 1.45;
   letter-spacing: 0em;
   font-family: var(--font-sans);
@@ -433,7 +430,7 @@ h6 {
 
 @utility text-label {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 550;
   line-height: 1.35;
   letter-spacing: 0.01em;
   font-family: var(--font-sans);
@@ -442,7 +439,7 @@ h6 {
 
 @utility text-metric-label {
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 550;
   line-height: 1.35;
   letter-spacing: normal;
   font-family: var(--font-sans);
@@ -451,7 +448,7 @@ h6 {
 
 @utility text-micro-label {
   font-size: 10px;
-  font-weight: 400;
+  font-weight: 450;
   line-height: 1.35;
   letter-spacing: 0.01em;
   font-family: var(--font-sans);
@@ -623,13 +620,13 @@ h6 {
 }
 
 :root {
-  /* Global Font System: DM Sans + Outfit */
-  --font-display: 'Outfit', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-editorial: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-ui: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-amount: 'Outfit', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-unbounded: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Global Font System: Plus Jakarta Sans + Sora + Space Grotesk */
+  --font-display: 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-editorial: 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-amount: 'Space Grotesk', 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-unbounded: 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
@@ -649,12 +646,12 @@ h6 {
   --orange-800: #9A4D00;
   --orange-900: #713800;
 
-  /* Brand Gradient & Scale */
-  --brand-mint: #D4F1E3;
-  --brand-aqua: #CBECF2;
-  --brand-sky: #C7D8FF;
-  --brand-cream: #F6F1E8;
-  --brand-gradient: linear-gradient(120deg, var(--brand-mint) 0%, var(--brand-aqua) 50%, var(--brand-sky) 100%);
+  /* Brand Gradient & Scale (Peach - Pink - Lavender) */
+  --brand-peach: #FFE0CE;
+  --brand-pink: #F8C4DF;
+  --brand-lavender: #CEB9EF;
+  --brand-cream: #FDF7F2;
+  --brand-gradient: linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%);
 
   /* Dejz Official Brand Logo Color */
   --logo-color: #151718;
@@ -664,19 +661,19 @@ h6 {
   --menu-content-gap: 1.5rem;
 
   /* Seamless Light Theme Background & Surfaces */
-  --bg-top-color: #CBECF2;
-  --bg-color: #F7F8FA;
-  --bg-secondary: #F7F8FA;
-  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(247, 248, 250, 0) 0%, #F7F8FA 400px), linear-gradient(120deg, var(--brand-mint) 0%, var(--brand-aqua) 50%, var(--brand-sky) 100%));
+  --bg-top-color: #F8C4DF;
+  --bg-color: #F2F0F0;
+  --bg-secondary: #F2F0F0;
+  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(242, 240, 240, 0) 0%, #F2F0F0 400px), linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%));
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-raised: #FFFFFF;
-  --surface-high: #F0F3F4;
+  --surface-high: #ECEAEA;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #F0F3F4;
+  --surface-muted: #ECEAEA;
   --surface-tint: rgba(0, 0, 0, 0.01);
 
   --text-primary: #151718;
@@ -695,12 +692,12 @@ h6 {
   --border-menu-divider: rgba(21, 23, 24, 0.06);
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #F0F3F4;
+  --chip-bg: #ECEAEA;
   --chip-text: #60686B;
   --chip-active-bg: #151718;
   --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F0F3F4;
+  --card-nested-bg: #ECEAEA;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -708,33 +705,33 @@ h6 {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents & Colors - Dejz Accent */
-  --accent-color: #3B82F6;
-  --accent-hover: #2563EB;
-  --accent-pressed: #1D4ED8;
+  /* Brand Accents & Colors - Dejz Accent (Default Neutral) */
+  --accent-color: #151718;
+  --accent-hover: #292C2E;
+  --accent-pressed: #080A0B;
   --accent-gradient: var(--accent-color);
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: color-mix(in srgb, var(--accent-color) 10%, transparent);
-  --accent-container: color-mix(in srgb, var(--accent-color) 12%, var(--surface-color));
-  --on-accent-container: var(--accent-color);
+  --accent-soft: rgba(21, 23, 24, 0.08);
+  --accent-container: rgba(21, 23, 24, 0.08);
+  --on-accent-container: #151718;
   --accent-on-solid: #FFFFFF;
   --dejz-accent: var(--accent-color);
   --accent-glow: none;
   --accent-secondary-color: var(--accent-container);
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #3B82F6;
+  --btn-primary-bg: #151718;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #2563EB;
-  --btn-primary-pressed: #1D4ED8;
+  --btn-primary-hover: #292C2E;
+  --btn-primary-pressed: #080A0B;
 
   --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.025), 0 4px 14px rgba(0, 0, 0, 0.035);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #F2F4F7;
+  --bg-hover: #E8E6E6;
 
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
@@ -749,9 +746,9 @@ h6 {
   --info-container: var(--surface-muted);
   --scrim-color: rgba(0, 0, 0, 0.60);
 
-  --nav-active-color: #3B82F6;
+  --nav-active-color: #151718;
   --nav-inactive-color: #8C867C;
-  --nav-plus-bg: #3B82F6;
+  --nav-plus-bg: #151718;
   --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
 
@@ -1474,4 +1471,39 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: var(--card-gap);
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.02);
+  }
+}
+
+@utility animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@utility animate-pulse-subtle {
+  animation: pulseSubtle 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse-subtle {
+    animation: none !important;
+  }
 }

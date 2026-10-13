@@ -503,8 +503,53 @@ export default function App() {
 
   const handlePlusQuickExpenseSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (isSubmittingQuick || isAudioTranscribing) return;
+
+    if (isRecording) {
+      const res = await stopRecordingAndProcess(plusQuickText);
+      if (res && !res.handled && plusQuickText.trim()) {
+        const clean = plusQuickText.trim();
+        setIsSubmittingQuick(true);
+        try {
+          const defaultCategory = config?.language === "en" ? "Uncategorized" : "Okategoriserat";
+          const parsed = await parseQuickExpense(
+            clean,
+            config?.categories || [],
+            transactions,
+            defaultCategory
+          );
+
+          if (parsed.amount && parsed.amount > 0) {
+            await addTransaction({
+              amount: parsed.amount,
+              type: "expense",
+              category: parsed.category || defaultCategory,
+              merchant: parsed.merchant || (config?.language === "en" ? "Quick Add" : "Snabbköp"),
+              timestamp: Date.now(),
+              tags: []
+            });
+
+            feedback.success();
+            setPlusSuccessMsg({
+              text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
+            });
+            setPlusQuickText("");
+            setTimeout(() => {
+              setPlusSuccessMsg(null);
+              setIsPlusMenuOpen(false);
+            }, 1500);
+          }
+        } catch (_err) {
+          console.error("Quick expense failed", _err);
+        } finally {
+          setIsSubmittingQuick(false);
+        }
+      }
+      return;
+    }
+
     const clean = plusQuickText.trim();
-    if (!clean || isSubmittingQuick) return;
+    if (!clean) return;
 
     setIsSubmittingQuick(true);
     try {
@@ -544,13 +589,10 @@ export default function App() {
   };
 
   const handlePlusMicClick = async () => {
-    if (isRecording) {
-      const res = await stopRecordingAndProcess(plusQuickText);
-      if (res && !res.handled && plusQuickText.trim()) {
-        handlePlusQuickExpenseSubmit();
-      }
-    } else {
+    if (!isRecording) {
       toggleRecording(plusQuickText);
+    } else {
+      await stopRecordingAndProcess(plusQuickText);
     }
   };
   const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
@@ -945,7 +987,7 @@ export default function App() {
           darkMode:
             (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
           themeMode: dbSettings.themeMode || 'system',
-          themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || '#3B82F6',
+          themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
           savingsGoals: dbSettings.savingsGoals || [],
@@ -1309,8 +1351,8 @@ export default function App() {
 
   useEffect(() => {
     if (!config) return;
-    const isDark = session ? !!config.darkMode : false;
-    const themeHex = session ? (config.themeColor || '#3B82F6') : '#3B82F6';
+    const isDark = !!config.darkMode;
+    const themeHex = config.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
     applyThemeColor(themeHex, isDark);
   }, [config?.themeColor, config?.darkMode, session]);
 
@@ -1573,7 +1615,7 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const userThemeHex = session ? (config?.themeColor || '#3B82F6') : '#3B82F6';
+      const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
       applyThemeColor(userThemeHex, isDark);
 
       const themeColor = isDark ? "#191919" : "#FFFFFF";
@@ -1781,7 +1823,7 @@ export default function App() {
     document.body.classList.remove("dark");
     document.body.classList.add("light");
     localStorage.removeItem('dejz_theme_color');
-    applyThemeColor('#3B82F6', false);
+    applyThemeColor('neutral', false);
     
     window.scrollTo({ top: 0, behavior: 'instant' });
     localStorage.removeItem('app_language');
@@ -1965,7 +2007,7 @@ export default function App() {
       securityLock: false,
       darkMode: false,
       themeMode: 'system',
-      themeColor: localStorage.getItem('dejz_theme_color') || '#3B82F6',
+      themeColor: localStorage.getItem('dejz_theme_color') || 'neutral',
       quickChoices: [],
       savingsPot: 0,
       savingsGoals: [],
@@ -2328,7 +2370,7 @@ export default function App() {
           securityLock: dbProfile.security_lock,
           darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
           themeMode: dbProfile.theme_mode || 'system',
-          themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || '#3B82F6',
+          themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
@@ -5964,13 +6006,14 @@ export default function App() {
                   onSubmit={handlePlusQuickExpenseSubmit}
                   placeholder={
                     isRecording
-                      ? (config?.language === "en" ? "Listening... Speak purchase" : "Lyssnar... Prata in köpet")
+                      ? (config?.language === "en" ? "Listening... Press right button when done" : "Lyssnar... Tryck på knappen till höger när du är klar")
                       : isAudioTranscribing
                         ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
                         : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
                   }
                   isProcessing={isSubmittingQuick || isAudioTranscribing}
-                  disabled={isRecording}
+                  disabled={false}
+                  allowSubmitWhenEmpty={isRecording}
                   inputRef={plusQuickInputRef}
                   leftElement={
                     <button
@@ -5987,15 +6030,22 @@ export default function App() {
                     >
                       {isAudioTranscribing ? (
                         <Loader2 size={15} className="animate-spin text-[var(--danger-color)]" />
-                      ) : isRecording ? (
-                        <Square size={13} className="fill-current" />
                       ) : (
-                        <Mic size={17} strokeWidth={2} />
+                        <Mic size={17} strokeWidth={2} className={isRecording ? "animate-pulse text-white" : ""} />
                       )}
                     </button>
                   }
                   submitVariant="inside"
-                  submitIcon={<Plus size={18} strokeWidth={2} />}
+                  submitIcon={
+                    isRecording ? (
+                      <Square size={13} className="fill-current text-white" />
+                    ) : (
+                      <Plus size={18} strokeWidth={2} />
+                    )
+                  }
+                  submitButtonClassName={
+                    isRecording ? "bg-[var(--danger-color)] border-[var(--danger-color)] text-white animate-pulse" : ""
+                  }
                   feedback={
                     plusSuccessMsg
                       ? { type: 'success', message: plusSuccessMsg.text }

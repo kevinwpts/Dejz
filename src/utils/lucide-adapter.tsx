@@ -279,6 +279,7 @@ export const Megaphone = wrapIcon(Phosphor.Megaphone);
 export const Send = wrapIcon(Phosphor.PaperPlaneTilt);
 export const Check = wrapIcon(Phosphor.Check);
 export const X = wrapIcon(Phosphor.X);
+export const Menu = wrapIcon(Phosphor.List);
 export const HelpCircle = wrapIcon(Phosphor.Question);
 
 // General replacements from across the applet

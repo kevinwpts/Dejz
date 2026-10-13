@@ -140,26 +140,18 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
         </div>
       ) : (
         <>
-          {/* Creator greeting & portrait card - compact & balanced with creator portrait icon */}
-          <div className="p-3.5 rounded-card-nested bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-center gap-3">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-[var(--border-color)] bg-[var(--surface-color)] flex items-center justify-center shadow-2xs shrink-0">
+          {/* Creator greeting & portrait card - compact & balanced with enlarged creator portrait */}
+          <div className="p-3.5 sm:p-4 rounded-card-nested bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-center gap-3.5">
+            <div className="relative w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden border-2 border-[var(--border-color)] bg-[var(--surface-color)] shadow-xs shrink-0">
               <img 
-                src="/creator-avatar.jpg"
+                src="/selfie.JPEG"
                 onError={(e) => {
-                  // Fallback to stylish vector illustration if creator-avatar.jpg isn't placed yet
+                  // Fallback if image fails to load
                   e.currentTarget.style.display = 'none';
                 }}
                 alt="Creator of Dejz"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[var(--accent-color)]/20 to-transparent text-[var(--text-primary)] font-bold text-xs select-none pointer-events-none">
-                <svg viewBox="0 0 36 36" fill="none" className="w-7 h-7 text-[var(--accent-color)]">
-                  <circle cx="18" cy="14" r="6" fill="currentColor" fillOpacity="0.2" />
-                  <path d="M6 30C6 24.4772 10.4772 20 16 20H20C25.5228 20 30 24.4772 30 30V32H6V30Z" fill="currentColor" fillOpacity="0.2" />
-                  <circle cx="18" cy="13" r="5" fill="currentColor" />
-                  <path d="M8 29C8 24.0294 12.0294 20 17 20H19C23.9706 20 28 24.0294 28 29V31H8V29Z" fill="currentColor" />
-                </svg>
-              </div>
             </div>
 
             <div className="space-y-1 min-w-0 flex-1">

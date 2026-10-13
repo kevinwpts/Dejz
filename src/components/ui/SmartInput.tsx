@@ -100,6 +100,8 @@ export interface SmartInputProps {
   submitVariant?: 'inline' | 'inside' | 'none';
   submitText?: string;
   submitIcon?: React.ReactNode;
+  submitButtonClassName?: string;
+  allowSubmitWhenEmpty?: boolean;
   feedback?: SmartInputFeedbackData | null;
   onClear?: () => void;
   autoFocus?: boolean;
@@ -134,6 +136,8 @@ export const SmartInput: React.FC<SmartInputProps> = ({
   submitVariant = 'inline',
   submitText = 'Lägg till',
   submitIcon,
+  submitButtonClassName = '',
+  allowSubmitWhenEmpty = false,
   feedback,
   onClear,
   autoFocus,
@@ -147,7 +151,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!value.trim() || isProcessing || disabled) return;
+    if ((!value.trim() && !allowSubmitWhenEmpty) || isProcessing || disabled) return;
     if (onSubmit) onSubmit(e);
   };
 
@@ -216,8 +220,8 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           {hasInsideSubmit && (
             <button
               type="submit"
-              disabled={!value.trim() || isProcessing || disabled}
-              className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-button-sm,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)]"
+              disabled={(!value.trim() && !allowSubmitWhenEmpty) || isProcessing || disabled}
+              className={`absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-button-sm,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)] ${submitButtonClassName}`}
             >
               {isProcessing ? (
                 <Icon name="spinner" size={14} className="animate-spin" />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Transaction, Config } from '../types';
 import { TransactionLogo } from './TransactionLogo';
-import { formatAmount, capitalize } from '../utils/format';
+import { formatAmount, capitalize, formatDeductionDayDisplay } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
 import { Paperclip, Trash2, RotateCw, Heart, Clock } from 'lucide-react';
@@ -175,17 +175,14 @@ export function TransactionItem({
 
   const methodStr = methodRaw ? capitalize(methodRaw.trim()) : '';
 
-  const dayStr = transaction?.deductionDay 
-    ? `${transaction.deductionDay}${config?.language === 'en' ? 'th' : ':e'}`
+  const dayFormatted = transaction?.deductionDay 
+    ? formatDeductionDayDisplay(transaction.deductionDay, config?.language || 'sv', true)
     : '';
 
-  let fixedBadgeLabel = '';
-  if (dayStr && methodStr) {
-    fixedBadgeLabel = `${dayStr} (${methodStr})`;
-  } else if (dayStr) {
-    fixedBadgeLabel = dayStr;
-  } else if (methodStr) {
-    fixedBadgeLabel = methodStr;
+  const isEnLanguage = config?.language === 'en';
+  let formattedDayText = dayFormatted;
+  if (dayFormatted && !isEnLanguage && !dayFormatted.toLowerCase().startsWith('sista')) {
+    formattedDayText = `Den ${dayFormatted}`;
   }
 
   return (
@@ -300,9 +297,14 @@ export function TransactionItem({
                   </span>
                 )}
                 {hideCategoryBadge ? (
-                  (transaction.timestamp || transaction.date) ? (
+                  (transaction.timestamp || transaction.date || transaction.createdAt) ? (
                     <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
-                      {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
+                      {(() => {
+                        const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+                        const d = new Date(ts);
+                        if (isNaN(d.getTime())) return null;
+                        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                      })()}
                     </span>
                   ) : null
                 ) : showAllCategories && isSplit ? (
@@ -342,14 +344,21 @@ export function TransactionItem({
                 ) : ''}
               </span>
             </p>
-            {(transaction.timestamp || transaction.date) && !isFixedItem ? (
+            {(transaction.timestamp || transaction.date || transaction.createdAt) && !isFixedItem ? (
               <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
-                  : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
+                  : (() => {
+                      const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+                      const d = new Date(ts);
+                      if (isNaN(d.getTime())) return null;
+                      const hrs = d.getHours().toString().padStart(2, '0');
+                      const mins = d.getMinutes().toString().padStart(2, '0');
+                      return `${hrs}:${mins}`;
+                    })()}
               </p>
             ) : isFixedItem && (
-              <div className="mt-1 flex items-center justify-end gap-1 flex-wrap">
+              <div className="mt-1 flex items-center justify-end gap-1.5 flex-wrap">
                 {transaction.originalAmount ? (
                   <span className="text-secondary text-[var(--text-tertiary)] font-normal mr-0.5 tabular-nums">
                     {formatAmount(transaction.originalAmount, config?.language || "sv")} {config?.currency || "kr"}
@@ -358,13 +367,26 @@ export function TransactionItem({
                      (config?.language === "en" ? "/yr" : "/år")}
                   </span>
                 ) : null}
-                {fixedBadgeLabel ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-secondary)] border border-[var(--border-subtle)] select-none leading-none tracking-tight">
-                    {fixedBadgeLabel}
+                {formattedDayText ? (
+                  <span className="text-secondary text-[var(--text-tertiary)] font-medium tabular-nums">
+                    {formattedDayText}
+                  </span>
+                ) : null}
+                {formattedDayText && methodStr ? (
+                  <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label">·</span>
+                ) : null}
+                {methodStr ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-subtle)] select-none leading-none tracking-tight">
+                    {methodStr}
                   </span>
                 ) : (transaction.timestamp || transaction.date) ? (
                   <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
-                    {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
+                    {(() => {
+                      const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+                      const d = new Date(ts);
+                      if (isNaN(d.getTime())) return null;
+                      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                    })()}
                   </span>
                 ) : null}
               </div>

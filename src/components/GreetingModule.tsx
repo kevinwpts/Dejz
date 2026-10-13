@@ -124,10 +124,12 @@ export function GreetingModule({
           <div className="flex items-baseline gap-1.5 min-w-0 py-0.5">
             <AnimatedNumber
               value={remainingCents}
-              className="text-hero-amount leading-none font-bold tabular-nums tracking-tight text-[var(--text-primary)]"
+              className={`text-hero-amount leading-none font-bold tabular-nums tracking-tight ${
+                remainingCents < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
+              }`}
               formatter={(val) => formatAmount(val, language)}
             />
-            <span className="text-sm sm:text-base leading-none shrink-0 font-medium text-[var(--text-secondary)]">
+            <span className="text-[14px] leading-none shrink-0 font-medium text-[var(--text-secondary)] align-baseline">
               {currency || 'kr'}
             </span>
           </div>
@@ -137,14 +139,14 @@ export function GreetingModule({
             <div className="flex items-center justify-between text-micro-label font-medium text-[var(--text-secondary)]">
               <span>{isEn ? 'Remaining spendable' : 'Spenderbart kvar'}</span>
               <span className="font-amount tabular-nums font-bold text-[var(--text-primary)]">
-                {percentage} % {isEn ? 'left' : 'kvar'}
+                {remainingCents < 0 ? '0' : percentage} % {isEn ? 'left' : 'kvar'}
               </span>
             </div>
             <div className="w-full h-1.5 rounded-full bg-[var(--surface-muted)] overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{ 
-                  width: `${Math.max(0, Math.min(100, clampedFraction * 100))}%`,
+                  width: `${remainingCents < 0 ? 0 : Math.max(0, Math.min(100, clampedFraction * 100))}%`,
                   backgroundColor: 'var(--accent-color)'
                 }}
               />
@@ -153,26 +155,30 @@ export function GreetingModule({
         </div>
       </motion.div>
 
-      {/* 2. Two Smaller Info Cards Underneath (Side by Side) */}
-      <div className="grid grid-cols-2 gap-2.5">
-        {/* Left Card: Aktuell period */}
-        <div className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 flex flex-col justify-between gap-2 shadow-subtle cursor-pointer hover:border-[var(--border-control)] transition-all" onClick={onOpenPeriodInfo}>
-          <div className="flex items-center gap-1.5 text-label font-medium text-[var(--text-secondary)]">
-            <Icon name="calendar" size={14} className="text-[var(--text-secondary)] shrink-0" />
-            <span className="truncate">{isEn ? 'Current period' : 'Aktuell period'}</span>
-          </div>
-          <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate block font-sans">
+      {/* 2. Two Separate White Modules: Aktuell period & Nästa lön */}
+      <div className="grid grid-cols-2 gap-3 select-none">
+        {/* Module 1: Aktuell period */}
+        <div 
+          className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 sm:p-4 flex flex-col justify-between gap-1 text-left min-w-0 shadow-subtle cursor-pointer hover:border-[var(--border-control)] transition-all"
+          onClick={onOpenPeriodInfo}
+        >
+          <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            {isEn ? 'Current period' : 'Aktuell period'}
+          </span>
+          <span className="text-body-medium font-medium text-[var(--text-primary)] truncate mt-0.5">
             {periodIntervalText || (isEn ? 'Current period' : 'Aktuell period')}
           </span>
         </div>
 
-        {/* Right Card: Nästa lön */}
-        <div className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 flex flex-col justify-between gap-2 shadow-subtle">
-          <div className="flex items-center gap-1.5 text-label font-medium text-[var(--text-secondary)] justify-end">
-            <span className="truncate">{isEn ? 'Next payday' : 'Nästa lön'}</span>
-            <Icon name="coins" size={14} className="text-[var(--text-secondary)] shrink-0" />
-          </div>
-          <span className="text-xs sm:text-sm font-bold font-amount tabular-nums text-[var(--text-primary)] truncate text-right block">
+        {/* Module 2: Nästa lön */}
+        <div 
+          className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 sm:p-4 flex flex-col justify-between gap-1 text-left min-w-0 shadow-subtle cursor-pointer hover:border-[var(--border-control)] transition-all"
+          onClick={onOpenPeriodInfo}
+        >
+          <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            {isEn ? 'Next payday' : 'Nästa lön'}
+          </span>
+          <span className="text-body-medium font-medium font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
             {paydayText || '-'}
           </span>
         </div>

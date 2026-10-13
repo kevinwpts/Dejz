@@ -914,7 +914,7 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-black/[0.015] dark:bg-white/[0.02] border-t border-subtle"
+                        className="overflow-hidden bg-[var(--card-nested-bg)] border-t border-subtle"
                       >
                         <div className="p-3.5 sm:p-4 space-y-3.5">
                           {/* Transaktioner */}

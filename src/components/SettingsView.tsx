@@ -213,6 +213,8 @@ export function SettingsView({
   const isEn = config.language === 'en';
 
   const THEME_COLOR_OPTIONS = [
+    { id: 'neutral', name: 'Dejz Neutral', hex: 'neutral' },
+    { id: 'lavender', name: isEn ? 'Dejz Lavender' : 'Dejz Lavendel', hex: '#CEB9EF' },
     { id: 'dejz', name: 'Dejz Mint', hex: '#8BDCC0' },
     { id: 'purple', name: isEn ? 'Purple' : 'Lila', hex: '#635BFF' },
     { id: 'black', name: isEn ? 'Black' : 'Svart', hex: '#1C1917' },
@@ -239,6 +241,7 @@ export function SettingsView({
               onClick={() => {
                 const newConfig = { ...config, themeMode: 'light' as const, darkMode: false };
                 setConfig(newConfig);
+                applyThemeColor(config.themeColor || 'neutral', false);
                 if (userId) {
                   dataService.saveSettings(userId, newConfig).catch((err) => {
                     console.warn('Could not save theme mode:', err);
@@ -325,6 +328,7 @@ export function SettingsView({
               onClick={() => {
                 const newConfig = { ...config, themeMode: 'dark' as const, darkMode: true };
                 setConfig(newConfig);
+                applyThemeColor(config.themeColor || 'neutral', true);
                 if (userId) {
                   dataService.saveSettings(userId, newConfig).catch((err) => {
                     console.warn('Could not save theme mode:', err);
@@ -414,8 +418,17 @@ export function SettingsView({
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
             {THEME_COLOR_OPTIONS.map((theme) => {
-              const currentHex = (config.themeColor || '#3B82F6').toLowerCase();
-              const isSelected = currentHex === theme.hex.toLowerCase();
+              const currentHex = (config.themeColor || 'neutral').toLowerCase();
+              const isNeutralSelected = currentHex === 'neutral' || currentHex === '#neutral' || currentHex === 'default' || !config.themeColor;
+              const isSelected = theme.hex === 'neutral' ? isNeutralSelected : (!isNeutralSelected && currentHex === theme.hex.toLowerCase());
+
+              const circleBg = theme.hex === 'neutral'
+                ? (config.darkMode ? '#F5F5F5' : '#151718')
+                : theme.hex;
+
+              const checkColor = theme.hex === 'neutral'
+                ? (config.darkMode ? '#151718' : '#FFFFFF')
+                : '#FFFFFF';
 
               return (
                 <button
@@ -424,6 +437,7 @@ export function SettingsView({
                   onClick={() => {
                     const newConfig = { ...config, themeColor: theme.hex };
                     setConfig(newConfig);
+                    applyThemeColor(theme.hex, config.darkMode);
                     if (userId) {
                       dataService.saveSettings(userId, newConfig).catch((err) => {
                         console.warn('Could not save theme color:', err);
@@ -437,8 +451,8 @@ export function SettingsView({
                   }`}
                 >
                   <div
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform border border-subtle shadow-2xs"
-                    style={{ backgroundColor: theme.hex }}
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform border border-subtle shadow-2xs"
+                    style={{ backgroundColor: circleBg, color: checkColor }}
                   >
                     {isSelected && <Icon name="check" size={15} weight="bold" />}
                   </div>

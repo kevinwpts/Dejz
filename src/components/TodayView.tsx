@@ -464,7 +464,7 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       handleCategoryClick(cat.name);
                     }}
-                    className="snap-start flex-shrink-0 min-w-[152px] sm:min-w-[172px] p-3.5 sm:p-4 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-3 shadow-subtle group select-none"
+                    className="snap-start flex-shrink-0 min-w-[144px] sm:min-w-[160px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
                   >
                     {/* Ikon */}
                     <div className="flex items-center justify-between gap-2">
@@ -473,17 +473,18 @@ export function TodayView({
 
                     {/* Kategorinamn och Belopp */}
                     <div className="min-w-0 pt-0.5">
-                      <span className="text-body-medium font-bold text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-1">
+                      <span className="text-card-title text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
                         {cat.name}
                       </span>
                       <span
-                        className={`text-body-medium font-bold font-amount tabular-nums block ${
+                        className={`text-list-amount font-amount tabular-nums block ${
                           isOverBudget ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
                         }`}
                       >
                         {!cat.hasBudget
-                          ? `${formatAmount(Math.round(cat.spent), lang)} ${currency}`
-                          : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`}
+                          ? `${formatAmount(Math.round(cat.spent), lang)}`
+                          : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)}`}
+                        <span className="text-[11.5px] font-normal text-[var(--text-secondary)] ml-1 inline-flex items-baseline align-baseline">{currency}</span>
                       </span>
                     </div>
                   </button>
@@ -494,17 +495,7 @@ export function TodayView({
         ) : null}
       </div>
 
-      {/* Monthly Deductions Timeline (Betalningar) - Sparad kod
-      {fixedExpenses && fixedExpenses.length > 0 && (
-        <div className="animate-fade-in -mx-0.5">
-          <FixedExpenseScrollTimeline
-            expenses={fixedExpenses}
-            config={config}
-            onSelectExpense={(expense) => onViewFixedExpense?.(expense)}
-          />
-        </div>
-      )}
-      */}
+      {/* Monthly Deductions Timeline (Betalningar) - Sparad kod */}
 
       {/* 3. Unified Timeline & Transactions Section */}
       <div className="space-y-3.5 sm:space-y-4">
@@ -544,7 +535,7 @@ export function TodayView({
                 <button
                   type="button"
                   onClick={handleGoToToday}
-                  className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none"
+                  className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-[var(--surface-muted)] text-micro-label font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all active:scale-95 cursor-pointer border-none shadow-none"
                 >
                   <RotateCcw size={11} strokeWidth={2.5} />
                   <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -582,8 +573,8 @@ export function TodayView({
               </motion.div>
             ) : displayedFixedTransactions.length === 0 ? (
               <EmptyState
-                title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                description={isTodaySelected ? (lang === "en" ? "Add an expense or income to keep track of your finances." : "Lägg till en utgift eller inkomst för att hålla koll på din ekonomi.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                title={isTodaySelected ? (lang === "en" ? "No transactions today" : "Inga transaktioner idag") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                description={isTodaySelected ? (lang === "en" ? "Log an expense or income with +." : "Registrera en utgift eller inkomst med +.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
                 onAction={() => onAddTransaction(selectedDate)}
                 actionLabel={`+ ${t("addExpense")}`}
               />
