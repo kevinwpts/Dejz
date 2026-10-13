@@ -739,13 +739,13 @@ h6 {
   --card-inner-stroke: none;
 
   --success-color: #05B862;
-  --success-container: var(--surface-muted);
+  --success-container: rgba(5, 184, 98, 0.10);
   --danger-color: #EF4444;
-  --danger-container: var(--surface-muted);
+  --danger-container: rgba(239, 68, 68, 0.10);
   --warning-color: #F59E0B;
-  --warning-container: var(--surface-muted);
+  --warning-container: rgba(245, 158, 11, 0.12);
   --info-color: #1C1917;
-  --info-container: var(--surface-muted);
+  --info-container: rgba(21, 23, 24, 0.06);
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-active-color: #151718;
@@ -877,10 +877,10 @@ h6 {
   --on-accent-container: #FFFFFF;
   --accent-secondary-color: var(--accent-container);
 
-  --success-container: var(--surface-muted);
-  --warning-container: var(--surface-muted);
-  --danger-container: var(--surface-muted);
-  --info-container: var(--surface-muted);
+  --success-container: rgba(74, 222, 128, 0.12);
+  --warning-container: rgba(251, 191, 36, 0.12);
+  --danger-container: rgba(255, 128, 128, 0.12);
+  --info-container: rgba(255, 255, 255, 0.08);
 }
 
 .dark {
@@ -955,13 +955,13 @@ h6 {
 
   /* Status Colors */
   --success-color: #4ADE80;
-  --success-container: var(--surface-muted);
+  --success-container: rgba(74, 222, 128, 0.12);
   --warning-color: #FBBF24;
-  --warning-container: var(--surface-muted);
+  --warning-container: rgba(251, 191, 36, 0.12);
   --danger-color: #FF8080;
-  --danger-container: var(--surface-muted);
+  --danger-container: rgba(255, 128, 128, 0.12);
   --info-color: #FFFFFF;
-  --info-container: var(--surface-muted);
+  --info-container: rgba(255, 255, 255, 0.08);
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-inactive-color: #B8B8B8;
@@ -1072,17 +1072,17 @@ h6 {
   }
 
   .app-header-scrolled {
-    background-color: var(--bg-color);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-subtle);
+    background-color: color-mix(in srgb, var(--bg-color) 84%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-divider);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   }
 
   .dark .app-header-scrolled,
   .black-theme .app-header-scrolled {
-    background-color: var(--bg-color);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+    background-color: color-mix(in srgb, var(--bg-color) 86%, transparent);
+    border-bottom-color: var(--border-divider);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   }
 

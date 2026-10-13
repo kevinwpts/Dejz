@@ -22,15 +22,15 @@ Använd alltid de semantiska hörnradie-token som styrs centralt. Hårdkoda **al
 
 | Token / Utility | CSS-variabel | Target-värde | Användningsområde |
 | :--- | :--- | :--- | :--- |
-| `rounded-card` / `DS.radius.card` | `--radius-card` | **16px** | Standardkort, rader och huvudsakliga moduler |
+| `rounded-card` / `DS.radius.card` | `--radius-card` | **20px** | Standardkort, rader och huvudsakliga moduler |
 | `rounded-card-nested` / `DS.radius.cardNested` | `--radius-card-nested` | **12px** | Nästlade kort, rader och element inuti andra kort |
 | `rounded-btn` / `DS.radius.button` | `--radius-button` | **12px** | Primära och sekundära standardknappar |
 | `rounded-btn-sm` / `DS.radius.buttonSm` | `--radius-button-sm` | **10px** | Små knappar, pills och filterknappar |
 | `rounded-btn-lg` / `DS.radius.buttonLg` | `--radius-button-lg` | **12px** | Stora primära aktiveringsknappar |
 | `rounded-input` / `DS.radius.input` | `--radius-input` | **12px** | Inmatningsfält (Inputs, Selects, Sökfält) |
-| `rounded-modal` / `DS.radius.modal` | `--radius-modal` | **20px** | Modaler, dialoger och överlagrade paneler |
+| `rounded-modal` / `DS.radius.modal` | `--radius-modal` | **24px** | Modaler, dialoger och överlagrade paneler |
 | `rounded-icon-button` / `DS.radius.icon` | `--radius-icon-button` | **10px** | Ikonknappar, logotypcontainrar och verktygsknappar |
-| `rounded-container` / `DS.radius.container` | `--radius-container` | **16px** | Sektionscontainrar och stora produktblock |
+| `rounded-container` / `DS.radius.container` | `--radius-container` | **24px** | Sektionscontainrar och stora produktblock |
 | `rounded-chip` / `rounded-badge` / `rounded-pill` | `--radius-chip` | **9999px** | Cirkulära badges, pills, avatarer och statuspiller |
 
 ---
@@ -83,8 +83,8 @@ Dejz stöder **Light Mode**, **Dark Mode** och **Black Theme**. Färgerna hämta
 
 ---
 
-### 2.3 Typografi – DM Sans och Central Semantisk Skala
-Dejz använder **DM Sans** genomgående som enda UI-typsnitt för alla rubriker, belopp och texter. All typografi styrs via en central semantisk skala:
+### 2.5 Typografi – Outfit, DM Sans och Central Semantisk Skala
+Dejz använder **Outfit** (`--font-display` / `--font-amount`) för rubriker (`h1`–`h4`), hero-titlar och alla ekonomiska belopp/siffror, samt **DM Sans** (`--font-sans`) för brödtext, knappar, inmatningsfält, etiketter och listrader. All typografi styrs via en central semantisk skala:
 
 | Typografisk roll | CSS Utility-klass | Storlek | Vikt | Radavstånd | Bokstavsavstånd | Användning |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -163,8 +163,8 @@ Vissa delar av källkoden är undantagna från de automatiska kontrollerna av te
 
 ---
 
-## 6. Slutstatus efter Steg 7B
+## 6. Aktuell Status
 * **Kritiska fel:** 0
-* **Varningar:** 121 (reducerat från 137 efter centralisering av kvarvarande text- och ytfärger i `TransactionItem`, `TransactionModal`, `CategoryTile`, `BudgetItem` m.fl.).
-* **Central styrning:** Fullt implementerad för knappar, flikar, filter, modaler, listrader och semantiska färger/radier.
-
+* **Varningar:** 0 (både i `scripts/lint-design-system.js` och `eslint --max-warnings 0`)
+* **Publika vyer (`LandingPage`, `Auth`, `PublicLegalPage`):** Konsekvent låsta till ljust tema (`.landing-light`) och använder samma `LanguagePicker` (`variant="compact"`).
+* **Central styrning:** Fullt implementerad för knappar, flikar, filter, modaler, listrader, skeletons och semantiska färger/radier i hela kodbasen.

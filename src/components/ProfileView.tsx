@@ -345,7 +345,7 @@ export function ProfileView({
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-[var(--radius-sm,6px)] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
+            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-[var(--radius-button-sm,10px)] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />

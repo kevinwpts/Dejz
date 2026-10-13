@@ -54,7 +54,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full h-[var(--height-input,46px)] bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,12px)] ${icon ? 'pl-10' : 'px-4'} pr-10 text-body outline-none transition-all cursor-pointer appearance-none ${className}`}
+            className={`w-full h-[var(--height-input,46px)] bg-[var(--surface-color)] dark:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 rounded-[var(--radius-input,12px)] ${icon ? 'pl-10' : 'px-4'} pr-10 text-body outline-none transition-all cursor-pointer appearance-none ${className}`}
             {...props}
           >
             {options

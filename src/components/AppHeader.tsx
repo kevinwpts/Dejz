@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
 import { DejzLogo } from "./DejzLogo";
+import { IconButton } from "./ui";
 
 interface AppHeaderProps {
   userName?: string;
@@ -90,13 +91,14 @@ export function AppHeader({
         <div className="flex items-center gap-2.5 shrink-0 z-10 min-w-0">
           {onBack ? (
             <>
-              <button
+              <IconButton
                 onClick={onBack}
-                className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] flex items-center justify-center touch-press cursor-pointer shrink-0"
+                icon={<ChevronLeft size={18} strokeWidth={2} />}
+                variant="surface"
+                size="md"
+                className="w-9 h-9 text-[var(--text-primary)]"
                 aria-label="Tillbaka"
-              >
-                <ChevronLeft size={18} strokeWidth={2} />
-              </button>
+              />
               {title && (
                 <h1 className="text-section-title truncate select-none text-[var(--text-primary)]">
                   {title}
@@ -121,7 +123,7 @@ export function AppHeader({
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
+              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-[var(--surface-color)]/80 dark:hover:bg-white/[0.08]"
               aria-label="Notiser"
               title="Notiser"
             >
@@ -144,7 +146,7 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
+            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-[var(--surface-color)]/80 dark:hover:bg-white/[0.08]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
@@ -158,7 +160,7 @@ export function AppHeader({
             aria-label="Profil"
             title="Profil"
           >
-            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center ${
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle flex items-center justify-center ${
               activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
             }`}>
               {avatarUrl ? (

@@ -12,6 +12,7 @@ export interface SegmentedControlProps<T extends string = string> {
   value: T;
   onChange: (value: T) => void;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'muted' | 'surface';
   fullWidth?: boolean;
   className?: string;
 }
@@ -21,24 +22,28 @@ export function SegmentedControl<T extends string = string>({
   value,
   onChange,
   size = 'md',
+  variant: _variant = 'surface',
   fullWidth = true,
   className = '',
 }: SegmentedControlProps<T>) {
   const sizeStyles = {
-    sm: 'p-1 rounded-[var(--radius-icon-button,6px)] text-label',
-    md: 'p-1 rounded-[var(--radius-card-nested,10px)] text-secondary',
-    lg: 'p-1.5 rounded-[var(--radius-card-nested,10px)] text-body-medium',
+    sm: 'p-1 rounded-[var(--radius-icon-button,10px)] text-label',
+    md: 'p-1 rounded-[var(--radius-card-nested,12px)] text-secondary',
+    lg: 'p-1.5 rounded-[var(--radius-card-nested,12px)] text-body-medium',
   }[size];
 
   const itemSizeStyles = {
-    sm: 'py-1.5 px-3 rounded-[var(--radius-xs,4px)]',
-    md: 'py-2 px-4 rounded-[var(--radius-button-sm,8px)]',
-    lg: 'py-2.5 px-5 rounded-[var(--radius-button-sm,8px)]',
+    sm: 'py-1.5 px-3 rounded-[var(--radius-xs,6px)]',
+    md: 'py-2 px-4 rounded-[var(--radius-button-sm,10px)]',
+    lg: 'py-2.5 px-5 rounded-[var(--radius-button-sm,10px)]',
   }[size];
+
+  const containerVariantStyles =
+    'bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] backdrop-blur-md border border-[var(--border-divider)] shadow-subtle';
 
   return (
     <div
-      className={`bg-[var(--surface-muted)] border border-transparent flex items-center relative ${sizeStyles} ${
+      className={`${containerVariantStyles} flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >

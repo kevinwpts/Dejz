@@ -15,10 +15,10 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { Language, TranslationKey } from '../i18n';
+import { Language, TranslationKey, translations } from '../i18n';
 import { PolicyModal } from './PolicyModal';
 import { DejzLogo } from './DejzLogo';
-import { Button, Card } from './ui';
+import { Button, Card, IconButton } from './ui';
 import { LanguagePicker } from './LanguagePicker';
 import { NORDIC_LANGUAGES } from '../utils/nordic';
 
@@ -149,7 +149,7 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
   );
 };
 
-const FAQAccordionItem = ({ question, answer }: { question: string; answer: string }) => {
+const FAQAccordionItem = ({ question, answer }: { question: string; answer: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -198,7 +198,10 @@ export function LandingPage({
   const [voiceStep, setVoiceStep] = useState<0 | 1 | 2>(0);
   const [animatedBalance, setAnimatedBalance] = useState(6420);
 
-  const isEn = currentLanguage === 'en';
+  const tr = (key: TranslationKey): string => {
+    return translations[currentLanguage]?.[key] || translations.sv[key] || key;
+  };
+
   const currentLangOption = NORDIC_LANGUAGES.find(l => l.code === currentLanguage) || NORDIC_LANGUAGES[0];
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -323,7 +326,7 @@ export function LandingPage({
               href="#how-it-works"
               className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-2 py-1"
             >
-              {isEn ? 'How it works' : 'Så fungerar det'}
+              {tr('landing_nav_how_it_works')}
             </a>
 
             <LanguagePicker
@@ -338,7 +341,7 @@ export function LandingPage({
                 onClick={onLogin}
                 className="text-xs font-semibold text-[var(--text-primary)] px-3"
               >
-                {isEn ? 'Log in' : 'Logga in'}
+                {tr('landing_nav_login')}
               </Button>
             )}
 
@@ -348,24 +351,24 @@ export function LandingPage({
               onClick={onGetStarted}
               className="text-xs font-semibold shadow-xs px-4"
             >
-              {isEn ? 'Get started free' : 'Kom igång gratis'}
+              {tr('landing_nav_get_started')}
             </Button>
           </div>
 
           {/* Mobile Menu Toggle Button (< md) */}
           <div className="md:hidden flex items-center">
-            <button
-              type="button"
+            <IconButton
               onClick={() => {
                 setIsMobileMenuOpen(true);
                 setIsMobileLangOpen(false);
               }}
-              aria-label={isEn ? 'Open menu' : 'Öppna meny'}
+              aria-label={tr('landing_nav_open_menu')}
               aria-expanded={isMobileMenuOpen}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
-            >
-              <Menu size={20} strokeWidth={2} />
-            </button>
+              variant="ghost"
+              size="lg"
+              className="text-[var(--text-primary)]"
+              icon={<Menu size={20} strokeWidth={2} />}
+            />
           </div>
 
         </div>
@@ -388,7 +391,7 @@ export function LandingPage({
           <div 
             role="dialog"
             aria-modal="true"
-            aria-label={isEn ? 'Navigation menu' : 'Navigationsmeny'}
+            aria-label={tr('landing_nav_menu_label')}
             className="fixed top-0 left-0 right-0 z-[9995] bg-[var(--surface-color)] border-b border-[var(--border-divider)] shadow-modal rounded-b-2xl pt-[env(safe-area-inset-top,0px)] animate-in slide-in-from-top-2 duration-200"
           >
             {/* Top Bar inside Menu: Logo Left, Clear Close (X) Right */}
@@ -396,17 +399,17 @@ export function LandingPage({
               <div className="flex items-center gap-2 shrink-0">
                 <DejzLogo className="h-6 sm:h-7 w-auto" />
               </div>
-              <button
-                type="button"
+              <IconButton
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   setIsMobileLangOpen(false);
                 }}
-                aria-label={isEn ? 'Close menu' : 'Stäng meny'}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
-              >
-                <X size={20} strokeWidth={2} />
-              </button>
+                aria-label={tr('landing_nav_close_menu')}
+                variant="ghost"
+                size="lg"
+                className="text-[var(--text-primary)]"
+                icon={<X size={20} strokeWidth={2} />}
+              />
             </div>
 
             {/* Menu Items Container - 16px below top bar */}
@@ -420,7 +423,7 @@ export function LandingPage({
                 }}
                 className="w-full h-12 flex items-center px-3.5 rounded-[var(--radius-button-sm,10px)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)]"
               >
-                <span>{isEn ? 'How it works' : 'Så fungerar det'}</span>
+                <span>{tr('landing_nav_how_it_works')}</span>
               </a>
 
               {/* Row 2: Logga in */}
@@ -434,7 +437,7 @@ export function LandingPage({
                   }}
                   className="w-full h-12 text-left flex items-center px-3.5 rounded-[var(--radius-button-sm,10px)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
                 >
-                  <span>{isEn ? 'Log in' : 'Logga in'}</span>
+                  <span>{tr('landing_nav_login')}</span>
                 </button>
               )}
 
@@ -446,7 +449,7 @@ export function LandingPage({
                   aria-expanded={isMobileLangOpen}
                   className="w-full h-12 text-left flex items-center justify-between px-3.5 rounded-[var(--radius-button-sm,10px)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
                 >
-                  <span className="text-[var(--text-secondary)] font-medium">{isEn ? 'Language' : 'Språk'}</span>
+                  <span className="text-[var(--text-secondary)] font-medium">{tr('landing_nav_language')}</span>
                   <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold">
                     <span className="text-base select-none leading-none" aria-hidden="true">{currentLangOption.flag}</span>
                     <span>{currentLangOption.nativeLabel}</span>
@@ -500,7 +503,7 @@ export function LandingPage({
                 }}
                 className="w-full justify-center text-center text-sm font-semibold shadow-subtle h-12"
               >
-                {isEn ? 'Get started free' : 'Kom igång gratis'}
+                {tr('landing_nav_get_started')}
               </Button>
             </div>
           </div>
@@ -508,7 +511,7 @@ export function LandingPage({
         document.body
       )}
 
-      {/* 2. HERO SECTION WITH COMPACT COPY & RICH 3D DEPTH */}
+      {/* 1. HERO SECTION */}
       <section 
         onMouseMove={handleMouseMove}
         className="relative pt-4 sm:pt-14 pb-12 sm:pb-24 px-4 sm:px-6 overflow-hidden z-10"
@@ -522,13 +525,12 @@ export function LandingPage({
           {/* Left Column: Headline, Copy & CTAs */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
             
-            <div className="space-y-2 sm:space-y-2.5">
-              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12]">
-                Koll på pengarna.<br />
-                <span className="text-[var(--text-primary)] opacity-90">Från lön till lön.</span>
+            <div className="space-y-2.5 sm:space-y-3">
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12] text-balance">
+                {tr('landing_hero_title')}
               </h1>
-              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl font-normal">
-                Samla inkomster, fasta utgifter och sparande. Se vad du har kvar fram till nästa lön.
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl font-normal text-pretty">
+                {tr('landing_hero_subtitle')}
               </p>
             </div>
 
@@ -543,7 +545,7 @@ export function LandingPage({
                 onClick={onGetStarted}
                 className="w-full h-12 justify-center text-center font-semibold text-sm shadow-subtle"
               >
-                {isEn ? 'Get started free' : 'Kom igång gratis'}
+                {tr('landing_hero_button')}
               </Button>
 
               {/* Fortsätt med Google: Full-width, same height, centered Google icon & text */}
@@ -559,7 +561,7 @@ export function LandingPage({
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                   </svg>
-                  <span>{isEn ? 'Continue with Google' : 'Fortsätt med Google'}</span>
+                  <span>{tr('landing_hero_google')}</span>
                 </button>
               )}
 
@@ -571,7 +573,7 @@ export function LandingPage({
                     onClick={onStartDemo}
                     className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer border-none bg-transparent"
                   >
-                    {isEn ? 'Try demo' : 'Testa demo'}
+                    {tr('landing_hero_demo')}
                   </button>
                 </div>
               )}
@@ -579,7 +581,7 @@ export function LandingPage({
               {/* Reassuring note: Centered under button group with tight margin */}
               <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center justify-center gap-1.5 pt-0 text-center">
                 <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
-                <span>Ingen bankkoppling behövs.</span>
+                <span>{tr('landing_no_bank_needed')}</span>
               </p>
             </div>
 
@@ -592,7 +594,7 @@ export function LandingPage({
                   onClick={onGetStarted}
                   className="font-semibold text-sm shadow-subtle px-6 h-12 whitespace-nowrap"
                 >
-                  {isEn ? 'Get started free' : 'Kom igång gratis'}
+                  {tr('landing_hero_button')}
                 </Button>
 
                 {onStartDemo && (
@@ -601,7 +603,7 @@ export function LandingPage({
                     onClick={onStartDemo}
                     className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-4 h-12 rounded-[var(--radius-button,12px)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap"
                   >
-                    {isEn ? 'Try demo' : 'Testa demo'}
+                    {tr('landing_hero_demo')}
                   </button>
                 )}
               </div>
@@ -620,7 +622,7 @@ export function LandingPage({
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                     </svg>
-                    <span>{isEn ? 'Continue with Google' : 'Fortsätt med Google'}</span>
+                    <span>{tr('landing_hero_google')}</span>
                   </button>
                 </div>
               )}
@@ -628,7 +630,7 @@ export function LandingPage({
               {/* Reassuring note */}
               <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center gap-1.5 pt-0.5">
                 <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
-                <span>Ingen bankkoppling behövs.</span>
+                <span>{tr('landing_no_bank_needed')}</span>
               </p>
             </div>
           </div>
@@ -660,36 +662,8 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 3. ÖVERBLICK ÖVER EKONOMIN (Warm Peach Surface) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-peach)]/30 dark:bg-[var(--brand-peach)]/10 border-y border-[var(--border-divider)] relative">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          
-          <div className="lg:col-span-6 space-y-4 text-left">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-              <Layers size={14} className="text-[var(--text-primary)]" />
-              <span>{isEn ? 'Financial Overview' : 'Fasta kostnader'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
-              Alla fasta kostnader. En tydlig överblick.
-            </h2>
-            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal">
-              Se dina återkommande inkomster och utgifter samlade. Med fasta kostnader och sparande i budgeten ser du vad som finns kvar att spendera.
-            </p>
-          </div>
-
-          <div className="lg:col-span-6 flex justify-center">
-            <PhoneScreenshotFrame
-              label="Screenshot: Ekonomi – inkomster och fasta utgifter"
-              src={screenshots.economy}
-              alt="Dejz Ekonomi - inkomster och fasta utgifter"
-            />
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. SMIDIG RÖSTREGISTRERING (Interactive Scroll & Flow Story) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+      {/* 2. RÖSTREGISTRERING MED BEFINTLIG DEMONSTRATION */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-[var(--border-divider)] relative overflow-hidden">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           {/* Left Side: Screenshot Placeholder */}
@@ -707,15 +681,19 @@ export function LandingPage({
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
                 <Mic size={14} className="text-[var(--text-primary)]" />
-                <span>{isEn ? 'Voice Input' : 'Smidig röstinmatning'}</span>
+                <span>{tr('landing_voice_badge')}</span>
               </div>
 
-              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
-                Säg det. Registrera det. Klart.
+              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
+                {tr('landing_voice_title')}
               </h2>
 
-              <p className="text-base text-[var(--text-secondary)] leading-relaxed">
-                Lägg till utgifter och inkomster med rösten eller skriv in dem själv. Appen hjälper dig med kategoriseringen.
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed text-pretty">
+                {tr('landing_voice_desc')}
+              </p>
+
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                {tr('landing_voice_subdesc')}
               </p>
             </div>
 
@@ -726,13 +704,13 @@ export function LandingPage({
               <div className="flex items-center justify-between pb-2 border-b border-subtle">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
                   <Sparkles size={14} className="text-[var(--accent-color)] shrink-0" />
-                  <span>Exempel — så tolkar Dejz din röst</span>
+                  <span>{tr('landing_voice_demo_label')}</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleRestartVoiceDemo}
                   className="p-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none"
-                  title="Spela upp exemplet igen"
+                  title={tr('landing_voice_demo_replay')}
                 >
                   <RotateCcw size={14} />
                 </button>
@@ -742,10 +720,10 @@ export function LandingPage({
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
                   <Mic size={13} className="text-[var(--accent-color)]" />
-                  <span>1. Du säger</span>
+                  <span>{tr('landing_voice_demo_step1')}</span>
                 </div>
                 <div className="p-3 rounded-card-nested bg-[var(--surface-high)] text-sm font-semibold text-[var(--text-primary)] italic">
-                  ”Jag handlade mat för 287 kronor på Coop.”
+                  {tr('landing_voice_demo_quote')}
                 </div>
               </div>
 
@@ -753,7 +731,7 @@ export function LandingPage({
               <div className={`space-y-1.5 transition-all duration-500 ${voiceStep >= 1 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'}`}>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
                   <Sparkles size={13} className="text-[var(--accent-color)]" />
-                  <span>2. Appen tolkar & föreslår</span>
+                  <span>{tr('landing_voice_demo_step2')}</span>
                 </div>
                 <div className="p-3 rounded-card-nested bg-[var(--surface-color)] border border-subtle flex items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -762,13 +740,13 @@ export function LandingPage({
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-[var(--text-primary)] truncate">Coop</p>
-                      <p className="text-[11px] text-[var(--text-secondary)]">Mat & dagligvaror</p>
+                      <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_voice_demo_category')}</p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)]">−287 kr</p>
                     <span className="text-[10px] font-semibold text-[var(--success-color)] flex items-center gap-0.5 justify-end">
-                      <CheckCircle2 size={11} /> Bekräfta
+                      <CheckCircle2 size={11} /> {tr('landing_voice_demo_confirm')}
                     </span>
                   </div>
                 </div>
@@ -776,7 +754,7 @@ export function LandingPage({
 
               {/* Step 3: Remaining Balance Update */}
               <div className={`pt-2 border-t border-subtle flex items-center justify-between text-xs transition-all duration-500 ${voiceStep >= 2 ? 'opacity-100' : 'opacity-40'}`}>
-                <span className="text-[var(--text-secondary)]">3. Kvar att spendera uppdateras:</span>
+                <span className="text-[var(--text-secondary)]">{tr('landing_voice_demo_step3')}</span>
                 <div className="flex items-baseline gap-1.5 font-amount tabular-nums font-bold text-sm">
                   <span className="line-through opacity-50 text-[var(--text-tertiary)] text-xs">6 420 kr</span>
                   <span className="text-[var(--text-primary)] text-sm font-bold bg-[var(--brand-lavender)]/30 px-1.5 py-0.5 rounded-md">
@@ -788,7 +766,7 @@ export function LandingPage({
             </Card>
 
             <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
-              Du har alltid full kontroll och bekräftar uppgifterna innan köpet sparas i din budget.
+              {tr('landing_voice_footer')}
             </p>
 
           </div>
@@ -796,17 +774,42 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 5. SÅ FUNGERAR DET (3 Steps Clean Grid) */}
+      {/* 3. FASTA KOSTNADER OCH EKONOMISK ÖVERBLICK (Warm Peach Surface) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-peach)]/30 dark:bg-[var(--brand-peach)]/10 border-t border-[var(--border-divider)] relative">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <div className="lg:col-span-6 space-y-4 text-left">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+              <Layers size={14} className="text-[var(--text-primary)]" />
+              <span>{tr('landing_fixed_badge')}</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
+              {tr('landing_fixed_title')}
+            </h2>
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
+              {tr('landing_fixed_desc')}
+            </p>
+          </div>
+
+          <div className="lg:col-span-6 flex justify-center">
+            <PhoneScreenshotFrame
+              label="Screenshot: Ekonomi – inkomster och fasta utgifter"
+              src={screenshots.economy}
+              alt="Dejz Ekonomi - inkomster och fasta utgifter"
+            />
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. SÅ FUNGERAR DET I TRE STEG (3 Steps Clean Grid) */}
       <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--surface-color)] border-y border-[var(--border-divider)] scroll-mt-12">
-        <div className="max-w-4xl mx-auto text-center space-y-12">
+        <div className="max-w-4xl mx-auto text-center space-y-10 sm:space-y-12">
           
           <div className="space-y-3">
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
-              Från lön till lön, i tre steg.
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
+              {tr('landing_how_title')}
             </h2>
-            <p className="text-base text-[var(--text-secondary)] max-w-xl mx-auto">
-              Ett enkelt flöde som hjälper dig hålla koll utan krångliga menystrukturer.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
@@ -816,10 +819,10 @@ export function LandingPage({
                 1
               </div>
               <h3 className="text-base font-bold text-[var(--text-primary)]">
-                Sätt upp din budget.
+                {tr('landing_step1_title')}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                Lägg in din löneperiod, inkomster, fasta utgifter och sparande.
+                {tr('landing_step1_desc')}
               </p>
             </Card>
 
@@ -829,10 +832,10 @@ export function LandingPage({
                 2
               </div>
               <h3 className="text-base font-bold text-[var(--text-primary)]">
-                Registrera det som händer.
+                {tr('landing_step2_title')}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                Tala in eller skriv in utgifter och inkomster under månadens gång.
+                {tr('landing_step2_desc')}
               </p>
             </Card>
 
@@ -842,33 +845,37 @@ export function LandingPage({
                 3
               </div>
               <h3 className="text-base font-bold text-[var(--text-primary)]">
-                Följ vad du har kvar.
+                {tr('landing_step3_title')}
               </h3>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                Se hur budgeten förändras och anpassas fram till nästa lön.
+                {tr('landing_step3_desc')}
               </p>
             </Card>
           </div>
 
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
+            {tr('landing_steps_note')}
+          </p>
+
         </div>
       </section>
 
-      {/* 6. FÖRSTÅ VART PENGARNA GÅR (Soft Lavender Surface) */}
+      {/* 5. KATEGORIER OCH ANALYS (Soft Lavender Surface) */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/20 dark:bg-[var(--brand-lavender)]/10 border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div className="lg:col-span-6 space-y-4 text-left">
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
               <PieChart size={14} className="text-[var(--text-primary)]" />
-              <span>{isEn ? 'Spending Insights' : 'Kategorier & Analys'}</span>
+              <span>{tr('landing_analysis_badge')}</span>
             </div>
 
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight">
-              Se helheten. Förstå detaljerna.
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
+              {tr('landing_analysis_title')}
             </h2>
 
-            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal">
-              Följ dina kategorier och se hur utgifterna fördelas. Få en tydligare bild av vad du spenderar pengarna på.
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
+              {tr('landing_analysis_desc')}
             </p>
           </div>
 
@@ -883,16 +890,16 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 7. KONTROLL UTAN BANKKOPPLING */}
+      {/* 6. KONTROLL UTAN BANKKOPPLING */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
         <div className="max-w-4xl mx-auto space-y-8 text-left">
           
           <div className="space-y-3">
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
-              Du bestämmer vad som hamnar i din budget.
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
+              {tr('landing_control_title')}
             </h2>
-            <p className="text-base text-[var(--text-secondary)] leading-relaxed">
-              När du registrerar dina köp blir du mer delaktig i din ekonomi. Med smidig inmatning och hjälp med kategoriseringen blir det enkelt att hålla budgeten uppdaterad.
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed text-pretty">
+              {tr('landing_control_desc')}
             </p>
           </div>
 
@@ -902,10 +909,10 @@ export function LandingPage({
                 <ShieldCheck size={18} strokeWidth={2} />
               </div>
               <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                Ingen bankkoppling behövs
+                {tr('landing_control_item1_title')}
               </h3>
               <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                Du slipper dela dina bankinloggningsuppgifter eller lita på automatiska synkningar.
+                {tr('landing_control_item1_desc')}
               </p>
             </div>
 
@@ -914,10 +921,10 @@ export function LandingPage({
                 <Check size={18} strokeWidth={2} />
               </div>
               <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                Du väljer vad du registrerar
+                {tr('landing_control_item2_title')}
               </h3>
               <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                Bara de köp och inkomster du väljer att lägga till påverkar din periodbudget.
+                {tr('landing_control_item2_desc')}
               </p>
             </div>
 
@@ -926,91 +933,120 @@ export function LandingPage({
                 <Sparkles size={18} strokeWidth={2} />
               </div>
               <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                Kontrollera och ändra
+                {tr('landing_control_item3_title')}
               </h3>
               <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                Du kan alltid ändra kategori, belopp eller datum i efterhand med ett klick.
+                {tr('landing_control_item3_desc')}
               </p>
             </div>
           </div>
 
+          <p className="text-xs text-[var(--text-tertiary)] leading-relaxed pt-1">
+            {tr('landing_control_footer')}
+          </p>
+
         </div>
       </section>
 
-      {/* 8. VANLIGA FRÅGOR (FAQ) */}
+      {/* 7. VANLIGA FRÅGOR (FAQ) */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto space-y-6 text-left">
           
           <div className="space-y-1.5">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-              Vanliga frågor
+              {tr('landing_faq_title')}
             </h2>
             <p className="text-sm text-[var(--text-secondary)]">
-              Svar på det du kan undra om Dejz och din budget.
+              {tr('landing_faq_subtitle')}
             </p>
           </div>
 
           <div className="space-y-1">
             <FAQAccordionItem
-              question="Behöver jag koppla min bank?"
-              answer="Nej, Dejz kräver ingen bankkoppling eller delning av bankinloggningar. Du registrerar dina köp manuellt eller med rösten, vilket ger dig full medvetenhet och kontroll utan säkerhetsrisker."
+              question={tr('landing_faq1_q')}
+              answer={tr('landing_faq1_a')}
             />
             <FAQAccordionItem
-              question="Hur fungerar perioden från lön till lön?"
-              answer="Du ställer in din vanliga lönedag (exempelvis den 25:e). Dejz beräknar automatiskt din budgetperiod fram till nästa lönedag så att du ser vad som faktiskt finns kvar att spendera."
+              question={tr('landing_faq2_q')}
+              answer={tr('landing_faq2_a')}
             />
             <FAQAccordionItem
-              question="Hur registrerar jag utgifter och inkomster?"
-              answer="Du kan skriva in dem manuellt på några sekunder eller enkelt tala in dem (t.ex. 'Kaffe 45 kr på Espresso House'). Appen tolkar belopp, butik och kategori och ber dig bekräfta innan det sparas."
+              question={tr('landing_faq3_q')}
+              answer={tr('landing_faq3_a')}
             />
             <FAQAccordionItem
-              question="Kan jag ändra kategorin på en transaktion?"
-              answer="Ja, absolut. Du kan när som helst klicka på vilken transaktion som helst för att justera kategori, belopp, datum eller betalningsmetod."
+              question={tr('landing_faq4_q')}
+              answer={tr('landing_faq4_a')}
             />
             <FAQAccordionItem
-              question="Vad kostar appen?"
-              answer="Dejz är helt gratis att komma igång med och använda för dina grundläggande behov från lön till lön."
+              question={tr('landing_faq5_q')}
+              answer={
+                <>
+                  {tr('landing_faq5_a_before')}
+                  {onStartDemo ? (
+                    <button
+                      type="button"
+                      onClick={onStartDemo}
+                      className="underline font-semibold text-[var(--text-primary)] hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none p-0 inline"
+                    >
+                      {tr('landing_faq5_a_link')}
+                    </button>
+                  ) : (
+                    tr('landing_faq5_a_link')
+                  )}
+                  {tr('landing_faq5_a_after')}
+                </>
+              }
+            />
+            <FAQAccordionItem
+              question={tr('landing_faq6_q')}
+              answer={tr('landing_faq6_a')}
             />
           </div>
 
         </div>
       </section>
 
-      {/* 9. AVSLUTANDE REGISTRERING */}
+      {/* 8. AVSLUTANDE REGISTRERING */}
       <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-transparent via-[var(--brand-peach)]/20 to-[var(--brand-peach)]/30 border-t border-[var(--border-divider)] text-center relative overflow-hidden">
         <div className="max-w-2xl mx-auto space-y-5 relative z-10">
           
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
-              Få koll fram till nästa lön.
+          <div className="space-y-2.5">
+            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)] text-balance">
+              {tr('landing_cta_title')}
             </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-              Samla din ekonomi och se vad du har kvar att spendera.
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto text-pretty">
+              {tr('landing_cta_subtitle')}
             </p>
           </div>
 
-          <div className="flex items-center justify-center pt-2">
+          <div className="flex flex-col items-center justify-center gap-2.5 pt-2">
             <Button
               variant="primary"
               size="lg"
               onClick={onGetStarted}
               className="w-full sm:w-auto font-semibold text-sm shadow-subtle px-8 h-11 sm:h-12 justify-center text-center"
             >
-              {isEn ? 'Get started free' : 'Kom igång gratis'}
+              {tr('landing_hero_button')}
             </Button>
+
+            <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center justify-center gap-1.5">
+              <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
+              <span>{tr('landing_no_bank_needed')}</span>
+            </p>
           </div>
 
         </div>
       </section>
 
-      {/* 10. FOOTER */}
+      {/* 9. FOOTER */}
       <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] px-4 sm:px-6 border-t border-[var(--border-divider)] bg-[var(--bg-color)] text-xs text-[var(--text-tertiary)]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           
           <div className="flex items-center gap-2">
             <DejzLogo className="h-6 w-auto" />
             <span className="ml-2 text-micro-label text-[var(--text-tertiary)]">
-              © {new Date().getFullYear()} Dejz. Alla rättigheter förbehålls.
+              © {new Date().getFullYear()} Dejz. {tr('landing_footer_rights')}
             </span>
           </div>
 
@@ -1020,21 +1056,21 @@ export function LandingPage({
               onClick={() => handlePolicyOpen('privacy')}
               className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              Integritetspolicy
+              {tr('landing_footer_privacy')}
             </button>
             <button
               type="button"
               onClick={() => handlePolicyOpen('terms')}
               className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              Användarvillkor
+              {tr('landing_footer_terms')}
             </button>
             <button
               type="button"
               onClick={() => handlePolicyOpen('privacy')}
               className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              Kontakt
+              {tr('landing_footer_contact')}
             </button>
           </div>
 

@@ -33,11 +33,11 @@ export function CustomBottomNavigation({
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-[var(--bg-color)] select-none overflow-visible rounded-none m-0 p-0 border-none shadow-none pb-[min(14px,env(safe-area-inset-bottom,0px))]"
+      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-[var(--bg-color)] select-none overflow-visible rounded-none m-0 p-0 border-t border-[var(--border-divider)] shadow-none pb-[min(14px,env(safe-area-inset-bottom,0px))]"
     >
       {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg som appen */}
       <div 
-        className="absolute left-1/2 -top-[23px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-[var(--bg-color)] pointer-events-none z-0 border-none shadow-none"
+        className="absolute left-1/2 -top-[23px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-[var(--bg-color)] pointer-events-none z-0 border-t border-[var(--border-divider)] shadow-none"
         aria-hidden="true"
       />
 

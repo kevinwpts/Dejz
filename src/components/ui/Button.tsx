@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from './Icon';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'pill' | 'accent' | 'danger' | 'destructive' | 'ghost' | 'outline' | 'subtle';
+  variant?: 'primary' | 'secondary' | 'pill' | 'accent' | 'danger' | 'destructive' | 'ghost' | 'outline' | 'subtle' | 'surface';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   icon?: React.ReactNode;
@@ -36,13 +36,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       lg: 'h-[var(--height-button-lg,48px)] px-6 rounded-[var(--radius-button-lg,12px)] text-body-medium font-semibold gap-2.5 active:scale-[0.98]',
     }[size];
 
+    const surfaceButtonStyle =
+      'bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-divider)] shadow-subtle hover:bg-black/[0.03] dark:hover:bg-white/10 active:bg-black/[0.06] dark:active:bg-white/15';
+
     const variantStyles = {
       primary:
         'bg-[var(--text-primary)] text-[var(--surface-color)] dark:bg-[var(--text-primary)] dark:text-[var(--bg-color)] font-semibold hover:opacity-90 active:opacity-80 shadow-none border-none',
-      secondary:
-        'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:bg-black/15 dark:active:bg-white/15 border-none',
-      pill:
-        'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-none rounded-[var(--radius-pill,9999px)]',
+      secondary: surfaceButtonStyle,
+      pill: `${surfaceButtonStyle} rounded-[var(--radius-pill,9999px)]`,
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] border-none',
       danger:
@@ -52,9 +53,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost:
         'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5',
       outline:
-        'bg-transparent text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/5 dark:hover:bg-white/5',
-      subtle:
-        'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10',
+        'bg-transparent text-[var(--text-primary)] border border-[var(--border-divider)] hover:bg-black/5 dark:hover:bg-white/5',
+      subtle: surfaceButtonStyle,
+      surface: surfaceButtonStyle,
     }[variant];
 
     const widthStyle = fullWidth ? 'w-full' : '';

@@ -159,7 +159,7 @@ export function AdminDashboardView({
           onClick={onBack}
           className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group"
         >
-          <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center group-hover:bg-black/10 dark:group-hover:bg-white/10 transition-colors">
+          <div className="w-8 h-8 rounded-full bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle flex items-center justify-center group-hover:bg-[var(--surface-color)] dark:group-hover:bg-white/10 transition-colors">
             <ChevronLeft size={16} strokeWidth={2.5} />
           </div>
           <span>{isEn ? 'Back to profile' : 'Tillbaka till profilen'}</span>

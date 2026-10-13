@@ -506,11 +506,11 @@ export function BudgetView({
                         className="w-full p-3 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] flex items-center justify-between transition-colors cursor-pointer text-left border-none shadow-none"
                       >
                         <div className="flex items-center gap-2">
-                          <Clock size={15} className="text-amber-500 shrink-0" />
+                          <Clock size={15} className="text-[var(--warning-color)] shrink-0" />
                           <span className="text-xs font-bold text-[var(--text-primary)]">
                             {config.language === 'en' ? 'Cancelled / Ended Subscriptions' : 'Uppsagda & avslutade abonnemang'}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-[11px]">
+                          <span className="px-2 py-0.5 rounded-full bg-[var(--warning-color)]/12 text-[var(--warning-color)] font-semibold text-micro-label">
                             {expiredCancelledExpenses.length}
                           </span>
                         </div>

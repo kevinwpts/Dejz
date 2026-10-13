@@ -549,7 +549,7 @@ export function LogView({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onClear={() => setSearchQuery('')}
-          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none"
+          className="h-[42px] sm:h-[44px] text-xs sm:text-sm"
         />
       </div>
 

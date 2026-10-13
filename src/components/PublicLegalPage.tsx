@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, FileText, ArrowLeft, Copy, Check, Globe, Lock } from 'lucide-react';
 import { DejzLogo } from './DejzLogo';
-import { Button } from './ui';
+import { Button, SegmentedControl } from './ui';
 import { LanguagePicker } from './LanguagePicker';
 import { Language } from '../i18n';
 
@@ -74,7 +74,7 @@ export function PublicLegalPage({
   return (
     <div className="min-h-dvh bg-[var(--bg-color)] bg-gradient-to-b from-[var(--brand-peach)]/25 via-[var(--brand-pink)]/10 to-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-x-hidden">
       {/* Sticky Public Header */}
-      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-[var(--border-subtle)] px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">
+      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-[var(--border-divider)] px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <button
@@ -109,62 +109,50 @@ export function PublicLegalPage({
       {/* Main Content Area */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Navigation Tabs between Legal Docs */}
-        <div className="flex flex-col gap-3 mb-6 pb-4 border-none">
-          <div className="flex items-center gap-1 p-1 bg-[var(--surface-color)] border-none rounded-card shadow-none overflow-x-auto no-scrollbar w-full">
-            <button
-              onClick={() => handleSelectDoc('privacy')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card-nested,12px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                currentDoc === 'privacy'
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
-              }`}
-            >
-              <Shield size={14} />
-              <span>{language === 'sv' ? 'Integritet' : 'Privacy'}</span>
-            </button>
-
-            <button
-              onClick={() => handleSelectDoc('terms')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card-nested,12px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                currentDoc === 'terms'
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
-              }`}
-            >
-              <FileText size={14} />
-              <span>{language === 'sv' ? 'Villkor' : 'Terms'}</span>
-            </button>
-
-            <button
-              onClick={() => handleSelectDoc('cookies')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card-nested,12px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                currentDoc === 'cookies'
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
-              }`}
-            >
-              <Globe size={14} />
-              <span>Cookies</span>
-            </button>
-          </div>
+        <div className="flex flex-col gap-3 mb-6 pb-2 border-none">
+          <SegmentedControl
+            variant="surface"
+            value={currentDoc}
+            onChange={(val) => handleSelectDoc(val as LegalDocType)}
+            options={[
+              {
+                value: 'privacy',
+                label: language === 'sv' ? 'Integritet' : 'Privacy',
+                icon: <Shield size={14} />,
+              },
+              {
+                value: 'terms',
+                label: language === 'sv' ? 'Villkor' : 'Terms',
+                icon: <FileText size={14} />,
+              },
+              {
+                value: 'cookies',
+                label: 'Cookies',
+                icon: <Globe size={14} />,
+              },
+            ]}
+          />
 
           {/* Quick Action: Copy Public Link */}
-          <button
-            onClick={handleCopyLink}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-none rounded-[var(--radius-button,12px)] transition-all shadow-none cursor-pointer"
-            title="Kopiera länk till detta dokument"
-          >
-            {copied ? <Check size={14} className="text-neutral-800 dark:text-white" /> : <Copy size={14} />}
-            <span>
-              {copied
-                ? (language === 'sv' ? 'Kopierad!' : 'Copied!')
-                : (language === 'sv' ? 'Kopiera direktlänk' : 'Copy Public Link')}
-            </span>
-          </button>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleCopyLink}
+              variant="secondary"
+              size="sm"
+              icon={copied ? <Check size={14} className="text-[var(--success-color)]" /> : <Copy size={14} />}
+              title="Kopiera länk till detta dokument"
+            >
+              <span>
+                {copied
+                  ? (language === 'sv' ? 'Kopierad!' : 'Copied!')
+                  : (language === 'sv' ? 'Kopiera direktlänk' : 'Copy Public Link')}
+              </span>
+            </Button>
+          </div>
         </div>
 
         {/* Document Card Container */}
-        <div className="bg-[var(--surface-color)] border-none rounded-container p-5 shadow-none space-y-6">
+        <div className="bg-[var(--surface-color)] border border-[var(--border-divider)] rounded-container p-5 sm:p-6 shadow-subtle space-y-6">
           {currentDoc === 'privacy' && (
             language === 'sv' ? <SwedishPrivacyPolicy /> : <EnglishPrivacyPolicy />
           )}

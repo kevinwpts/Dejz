@@ -49,10 +49,10 @@ export function LanguagePicker({
         aria-label="Välj språk / Choose language"
         className={`inline-flex items-center gap-1.5 transition-all cursor-pointer select-none whitespace-nowrap shrink-0 ${
           variant === 'footer'
-            ? 'px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)]/30'
+            ? 'px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
             : variant === 'compact'
-            ? 'px-3 h-9 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/5 dark:hover:bg-white/5 border border-transparent active:scale-[0.98]'
-            : 'px-2 sm:px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)]/30'
+            ? 'px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)]/90 backdrop-blur-md hover:bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-subtle active:scale-[0.98]'
+            : 'px-2 sm:px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
         }`}
       >
         <span className="text-sm select-none leading-none shrink-0" aria-hidden="true">{currentOption.flag}</span>
@@ -68,7 +68,7 @@ export function LanguagePicker({
       {isOpen && (
         <div
           role="listbox"
-          className={`absolute z-50 w-48 rounded-[var(--radius-card-nested,12px)] bg-white dark:bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-lg overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0 ${
+          className={`absolute z-50 w-48 rounded-[var(--radius-card-nested,12px)] bg-white dark:bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-modal overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0 ${
             variant === 'footer' ? 'bottom-full mb-1.5' : 'mt-1.5'
           }`}
         >

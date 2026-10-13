@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from './Icon';
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'muted' | 'default' | 'ghost' | 'danger' | 'accent' | 'primary';
+  variant?: 'muted' | 'default' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'primary' | 'surface';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   shape?: 'circle' | 'rounded' | 'button';
   icon: React.ReactNode;
@@ -14,7 +14,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   (
     {
       icon,
-      variant = 'muted',
+      variant = 'surface',
       size = 'md',
       shape = 'circle',
       loading = false,
@@ -43,11 +43,14 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       xl: 'w-[var(--height-button-lg,48px)] h-[var(--height-button-lg,48px)] text-base',
     }[size];
 
+    const surfaceStyle =
+      'bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] hover:bg-[var(--surface-color)] dark:hover:bg-white/10 border border-[var(--border-divider)] shadow-subtle';
+
     const variantStyles = {
-      muted:
-        'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-none shadow-none',
-      default:
-        'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-none shadow-none',
+      muted: surfaceStyle,
+      default: surfaceStyle,
+      secondary: surfaceStyle,
+      surface: surfaceStyle,
       ghost:
         'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 border-none',
       accent:
