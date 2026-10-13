@@ -13,7 +13,15 @@ import {
   PieChart,
   RotateCcw,
   Menu,
-  X
+  X,
+  Camera,
+  Zap,
+  Calendar,
+  PiggyBank,
+  Wallet,
+  Image as ImageIcon,
+  MessageSquareHeart,
+  Users
 } from 'lucide-react';
 import { Language, TranslationKey, translations } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -23,21 +31,41 @@ import { LanguagePicker } from './LanguagePicker';
 import { NORDIC_LANGUAGES } from '../utils/nordic';
 
 export interface LandingPageScreenshots {
-  heroHome?: string;      // Placeholder 1: "Screenshot: Hem – kvar att spendera och aktuell löneperiod"
-  economy?: string;       // Placeholder 2: "Screenshot: Ekonomi – inkomster och fasta utgifter"
-  voiceInput?: string;    // Placeholder 3: "Screenshot: Röstregistrering – registrera en transaktion"
-  analysis?: string;      // Placeholder 4: "Screenshot: Analys – kategorier och fördelning"
+  heroHome?: string;         // Placeholder 1: "Screenshot: Hem – kvar att spendera och aktuell löneperiod"
+  economy?: string;          // Placeholder 2: "Screenshot: Ekonomi – inkomster och fasta utgifter"
+  voiceInput?: string;       // Placeholder 3: "Screenshot: Röstregistrering – registrera en transaktion"
+  dailyAndSavings?: string;  // Placeholder 4: "Screenshot: Dagsbudget & Spargris – dagens utrymme, kalender och sparat överskott"
+  analysis?: string;         // Placeholder 5: "Screenshot: Analys – kategorier, budgetgränser och fördelning"
+  lifestyleGrocery?: string; // Miljöbild: Vardag & matinköp (Röstregistrering)
+  lifestyleHome?: string;    // Miljöbild: Hem & ekonomisk överblick (Fasta kostnader)
+  lifestyleSavings?: string; // Miljöbild: Vardagskoll & sparande (Dagsbudget & Spargris)
+  lifestyleControl?: string; // Livsstilsbild: Kontroll utan bankkoppling
 }
 
 /**
- * Centralized screenshot configuration for uploaded app images.
- * Simply set the URL/path here when screenshots are uploaded in AI Studio.
+ * Centralized screenshot & lifestyle image configuration.
+ * Simply set the URL/path here when images or screenshots are uploaded in AI Studio.
  */
 export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
   heroHome: '/hero.PNG',
   economy: undefined,
   voiceInput: undefined,
+  dailyAndSavings: undefined,
   analysis: undefined,
+  lifestyleGrocery: '/images/lifestyle-grocery.jpg',
+  lifestyleHome: '/images/lifestyle-home.jpg',
+  lifestyleSavings: undefined,
+  lifestyleControl: '/images/lifestyle-control.jpg',
+};
+
+/**
+ * Centralized Social Proof configuration.
+ * Set `userCountStat` when you want to display a verified user count or milestone badge.
+ */
+export const SOCIAL_PROOF_CONFIG: {
+  userCountStat?: string;
+} = {
+  userCountStat: undefined,
 };
 
 interface LandingPageProps {
@@ -98,6 +126,9 @@ interface PhoneScreenshotFrameProps {
   alt: string;
   className?: string;
   perspectiveTilt?: boolean;
+  lifestyleImage?: string;
+  lifestyleAlt?: string;
+  placeholderNote?: string;
 }
 
 export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
@@ -106,12 +137,37 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
   alt,
   className = '',
   perspectiveTilt = false,
+  lifestyleImage,
+  lifestyleAlt = '',
+  placeholderNote = '[ Screenshot Placeholder ]',
 }) => {
+  // If no app screenshot is provided and a real lifestyle photo is configured,
+  // render the clean photograph without a phone mockup covering it.
+  if (!src && lifestyleImage) {
+    return (
+      <div className={`relative mx-auto w-full max-w-[460px] ${className}`}>
+        <div className="relative rounded-modal overflow-hidden border border-subtle shadow-subtle bg-[var(--bg-color)] aspect-[4/3]">
+          <img
+            src={lifestyleImage}
+            alt={lifestyleAlt || alt}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-center select-none"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-[var(--brand-peach)]/15 pointer-events-none"
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative mx-auto w-full max-w-[280px] sm:max-w-[310px] ${className}`}>
       {/* Outer Phone Mockup Frame with subtle shadow and 3D depth */}
       <div 
-        className={`relative rounded-modal p-2.5 sm:p-3 bg-[var(--text-primary)] shadow-[0_28px_65px_rgba(0,0,0,0.25)] dark:shadow-[0_28px_65px_rgba(0,0,0,0.65)] border border-white/10 ring-1 ring-black/30 overflow-hidden transition-all duration-500 ${
+        className={`relative z-10 w-full rounded-modal p-2.5 sm:p-3 bg-[var(--text-primary)] shadow-[0_28px_65px_rgba(0,0,0,0.22)] dark:shadow-[0_28px_65px_rgba(0,0,0,0.6)] border border-white/10 ring-1 ring-black/30 overflow-hidden transition-all duration-500 ${
           perspectiveTilt ? 'sm:rotate-[-2deg] hover:rotate-0 hover:scale-[1.015]' : ''
         }`}
       >
@@ -126,6 +182,7 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
             <img
               src={src}
               alt={alt}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover object-top pointer-events-none select-none"
             />
           ) : (
@@ -138,7 +195,7 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
                   {label}
                 </p>
                 <p className="text-[10px] text-[var(--text-tertiary)] font-mono tracking-tight">
-                  [ Screenshot Placeholder ]
+                  {placeholderNote}
                 </p>
               </div>
             </div>
@@ -666,12 +723,14 @@ export function LandingPage({
       <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-[var(--border-divider)] relative overflow-hidden">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
-          {/* Left Side: Screenshot Placeholder */}
+          {/* Left Side: Lifestyle Photo (or uploaded voice screenshot) */}
           <div className="lg:col-span-6 order-2 lg:order-1 flex justify-center">
             <PhoneScreenshotFrame
               label="Screenshot: Röstregistrering – registrera en transaktion"
               src={screenshots.voiceInput}
               alt="Dejz Röstregistrering"
+              lifestyleImage={screenshots.lifestyleGrocery}
+              lifestyleAlt={tr('landing_voice_title')}
             />
           </div>
 
@@ -695,6 +754,22 @@ export function LandingPage({
               <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
                 {tr('landing_voice_subdesc')}
               </p>
+
+              {/* Registration Method Highlights */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)] border border-subtle text-[var(--text-primary)] shadow-2xs">
+                  <Mic size={13} className="text-[var(--text-secondary)]" />
+                  {tr('landing_voice_pill_voice')}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)] border border-subtle text-[var(--text-primary)] shadow-2xs">
+                  <Camera size={13} className="text-[var(--text-secondary)]" />
+                  {tr('landing_voice_pill_receipt')}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)] border border-subtle text-[var(--text-primary)] shadow-2xs">
+                  <Zap size={13} className="text-[var(--text-secondary)]" />
+                  {tr('landing_voice_pill_quick')}
+                </span>
+              </div>
             </div>
 
             {/* Interactive Illustrative Flow Card */}
@@ -789,6 +864,20 @@ export function LandingPage({
             <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
               {tr('landing_fixed_desc')}
             </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)]/90 border border-subtle text-[var(--text-primary)] shadow-2xs">
+                <Calendar size={13} className="text-[var(--text-secondary)]" />
+                {tr('landing_fixed_pill_intervals')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)]/90 border border-subtle text-[var(--text-primary)] shadow-2xs">
+                <Layers size={13} className="text-[var(--text-secondary)]" />
+                {tr('landing_fixed_pill_variable')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)]/90 border border-subtle text-[var(--text-primary)] shadow-2xs">
+                <PiggyBank size={13} className="text-[var(--text-secondary)]" />
+                {tr('landing_fixed_pill_goals')}
+              </span>
+            </div>
           </div>
 
           <div className="lg:col-span-6 flex justify-center">
@@ -796,6 +885,8 @@ export function LandingPage({
               label="Screenshot: Ekonomi – inkomster och fasta utgifter"
               src={screenshots.economy}
               alt="Dejz Ekonomi - inkomster och fasta utgifter"
+              lifestyleImage={screenshots.lifestyleHome}
+              lifestyleAlt={tr('landing_fixed_title')}
             />
           </div>
 
@@ -860,7 +951,82 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 5. KATEGORIER OCH ANALYS (Soft Lavender Surface) */}
+      {/* 5. VARDAGSKOLL OCH SPARANDE (Dagsbudget, Spargris & Kalender) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          {/* Left Side: Screenshot or Lifestyle Photo Placeholder */}
+          <div className="lg:col-span-5 order-2 lg:order-1 flex justify-center">
+            <PhoneScreenshotFrame
+              label="Screenshot: Dagsbudget & Spargris – dagens utrymme, kalender och sparat överskott"
+              src={screenshots.dailyAndSavings}
+              alt="Dejz Dagsbudget, Spargris och Kalender"
+              lifestyleImage={screenshots.lifestyleSavings}
+              lifestyleAlt={tr('landing_daily_title')}
+              placeholderNote="[ Screenshot / Miljöbild Placeholder ]"
+            />
+          </div>
+
+          {/* Right Side: Copy & 3 Feature Highlights */}
+          <div className="lg:col-span-7 order-1 lg:order-2 space-y-6 text-left">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+                <PiggyBank size={14} className="text-[var(--text-primary)]" />
+                <span>{tr('landing_daily_badge')}</span>
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
+                {tr('landing_daily_title')}
+              </h2>
+
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty max-w-xl">
+                {tr('landing_daily_desc')}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="p-4 rounded-card border border-subtle bg-[var(--surface-color)] space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                  <Wallet size={18} strokeWidth={2} />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  {tr('landing_daily_item1_title')}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                  {tr('landing_daily_item1_desc')}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-card border border-subtle bg-[var(--surface-color)] space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                  <PiggyBank size={18} strokeWidth={2} />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  {tr('landing_daily_item2_title')}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                  {tr('landing_daily_item2_desc')}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-card border border-subtle bg-[var(--surface-color)] space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                  <Calendar size={18} strokeWidth={2} />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  {tr('landing_daily_item3_title')}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                  {tr('landing_daily_item3_desc')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6. KATEGORIER OCH ANALYS (Soft Lavender Surface) */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/20 dark:bg-[var(--brand-lavender)]/10 border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
@@ -881,7 +1047,7 @@ export function LandingPage({
 
           <div className="lg:col-span-6 flex justify-center">
             <PhoneScreenshotFrame
-              label="Screenshot: Analys – kategorier och fördelning"
+              label="Screenshot: Analys – kategorier, budgetgränser och fördelning"
               src={screenshots.analysis}
               alt="Dejz Analys - kategorier och fördelning"
             />
@@ -891,64 +1057,199 @@ export function LandingPage({
       </section>
 
       {/* 6. KONTROLL UTAN BANKKOPPLING */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
-        <div className="max-w-4xl mx-auto space-y-8 text-left">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-left">
           
-          <div className="space-y-3">
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
-              {tr('landing_control_title')}
-            </h2>
-            <p className="text-base text-[var(--text-secondary)] leading-relaxed text-pretty">
-              {tr('landing_control_desc')}
+          {/* Left Column: Heading, Description & 3 Control Points */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="space-y-3">
+              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
+                {tr('landing_control_title')}
+              </h2>
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed text-pretty max-w-xl">
+                {tr('landing_control_desc')}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                  <ShieldCheck size={18} strokeWidth={2} />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  {tr('landing_control_item1_title')}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                  {tr('landing_control_item1_desc')}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                  <Check size={18} strokeWidth={2} />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  {tr('landing_control_item2_title')}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                  {tr('landing_control_item2_desc')}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
+                  <Sparkles size={18} strokeWidth={2} />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  {tr('landing_control_item3_title')}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                  {tr('landing_control_item3_desc')}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[var(--text-tertiary)] leading-relaxed pt-1">
+              {tr('landing_control_footer')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                <ShieldCheck size={18} strokeWidth={2} />
+          {/* Right Column: Editorial Lifestyle Photo or Image Placeholder */}
+          <div className="lg:col-span-5">
+            {screenshots.lifestyleControl ? (
+              <div className="relative rounded-modal overflow-hidden border border-subtle shadow-subtle bg-[var(--bg-color)] aspect-[4/3]">
+                <img
+                  src={screenshots.lifestyleControl}
+                  alt={tr('landing_control_title')}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover object-center select-none"
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-[var(--brand-peach)]/15 pointer-events-none"
+                />
               </div>
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                {tr('landing_control_item1_title')}
-              </h3>
-              <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                {tr('landing_control_item1_desc')}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                <Check size={18} strokeWidth={2} />
+            ) : (
+              <div className="relative rounded-modal overflow-hidden border border-subtle shadow-subtle bg-[var(--bg-color)] aspect-[4/3] flex flex-col items-center justify-center p-6 text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] border border-subtle shadow-xs">
+                  <ImageIcon size={24} strokeWidth={1.75} />
+                </div>
+                <div className="space-y-1 max-w-[220px]">
+                  <p className="text-xs font-semibold text-[var(--text-primary)] leading-snug">
+                    Miljöbild: Kontroll utan bankkoppling
+                  </p>
+                  <p className="text-[10px] text-[var(--text-tertiary)] font-mono tracking-tight">
+                    [ Bild-placeholder ]
+                  </p>
+                </div>
               </div>
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                {tr('landing_control_item2_title')}
-              </h3>
-              <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                {tr('landing_control_item2_desc')}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                <Sparkles size={18} strokeWidth={2} />
-              </div>
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                {tr('landing_control_item3_title')}
-              </h3>
-              <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                {tr('landing_control_item3_desc')}
-              </p>
-            </div>
+            )}
           </div>
-
-          <p className="text-xs text-[var(--text-tertiary)] leading-relaxed pt-1">
-            {tr('landing_control_footer')}
-          </p>
 
         </div>
       </section>
 
-      {/* 7. VANLIGA FRÅGOR (FAQ) */}
+      {/* 7. SOCIAL PROOF (Omdömen & användarsiffra / placeholder) */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto space-y-10 sm:space-y-12">
+          
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+              <MessageSquareHeart size={14} className="text-[var(--text-primary)]" />
+              <span>{tr('landing_testimonials_badge')}</span>
+            </div>
+
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
+              {tr('landing_testimonials_title')}
+            </h2>
+
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed text-pretty">
+              {tr('landing_testimonials_subtitle')}
+            </p>
+
+            {/* User count stat or placeholder badge */}
+            <div className="pt-2 flex justify-center">
+              {SOCIAL_PROOF_CONFIG.userCountStat ? (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] border border-subtle shadow-2xs text-xs font-semibold text-[var(--text-primary)]">
+                  <Users size={14} className="text-[var(--text-secondary)]" />
+                  <span>{SOCIAL_PROOF_CONFIG.userCountStat}</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] border border-dashed border-[var(--border-color)] text-[11px] font-mono text-[var(--text-tertiary)]">
+                  <Users size={13} className="text-[var(--text-tertiary)]" />
+                  <span>{tr('landing_testimonials_stat_placeholder')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            {/* Quote 1 */}
+            <Card variant="default" padding="lg" className="border border-subtle bg-[var(--surface-color)] flex flex-col justify-between space-y-5">
+              <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                &ldquo;{tr('landing_testimonial1_quote')}&rdquo;
+              </p>
+              <div className="flex items-center gap-3 pt-3 border-t border-subtle">
+                <div className="w-9 h-9 rounded-full bg-[var(--brand-peach)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center shrink-0">
+                  A
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                    {tr('landing_testimonial1_name')}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                    {tr('landing_testimonial1_role')}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Quote 2 */}
+            <Card variant="default" padding="lg" className="border border-subtle bg-[var(--surface-color)] flex flex-col justify-between space-y-5">
+              <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                &ldquo;{tr('landing_testimonial2_quote')}&rdquo;
+              </p>
+              <div className="flex items-center gap-3 pt-3 border-t border-subtle">
+                <div className="w-9 h-9 rounded-full bg-[var(--brand-pink)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center shrink-0">
+                  E
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                    {tr('landing_testimonial2_name')}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                    {tr('landing_testimonial2_role')}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Quote 3 */}
+            <Card variant="default" padding="lg" className="border border-subtle bg-[var(--surface-color)] flex flex-col justify-between space-y-5">
+              <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                &ldquo;{tr('landing_testimonial3_quote')}&rdquo;
+              </p>
+              <div className="flex items-center gap-3 pt-3 border-t border-subtle">
+                <div className="w-9 h-9 rounded-full bg-[var(--brand-lavender)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center shrink-0">
+                  S
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                    {tr('landing_testimonial3_name')}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                    {tr('landing_testimonial3_role')}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 8. VANLIGA FRÅGOR (FAQ) */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto space-y-6 text-left">
           
