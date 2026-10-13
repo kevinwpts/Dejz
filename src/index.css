@@ -481,7 +481,7 @@ h6 {
   border-color: var(--border-divider);
 }
 
-/* Central Divide Utilities (16px inset pseudo-element dividers) */
+/* Central Divide Utilities (full-width on plain lists, 16px inset on cards / padded rows) */
 @utility divide-subtle {
   & > :not(:last-child) {
     position: relative;
@@ -490,12 +490,17 @@ h6 {
       content: '';
       position: absolute;
       bottom: 0;
-      left: 16px;
-      right: 16px;
+      left: 0;
+      right: 0;
       height: 1px;
       background-color: var(--border-divider);
       pointer-events: none;
     }
+  }
+  &:is([class*="rounded-"], [class*="bg-"]) > :not(:last-child)::after,
+  & > :not(:last-child):is([class~="p-4"], [class~="px-4"], [class~="p-3.5"], [class~="px-3.5"], [class~="card-p"])::after {
+    left: 16px;
+    right: 16px;
   }
 }
 
@@ -507,12 +512,18 @@ h6 {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 16px;
-    right: 16px;
+    left: 0;
+    right: 0;
     height: 1px;
     background-color: var(--border-divider);
     pointer-events: none;
   }
+}
+
+.divide-subtle:is([class*="rounded-"], [class*="bg-"]) > :not(:last-child)::after,
+.divide-subtle > :not(:last-child):is([class~="p-4"], [class~="px-4"], [class~="p-3.5"], [class~="px-3.5"], [class~="card-p"])::after {
+  left: 16px;
+  right: 16px;
 }
 
 @utility divide-divider {
@@ -523,12 +534,17 @@ h6 {
       content: '';
       position: absolute;
       bottom: 0;
-      left: 16px;
-      right: 16px;
+      left: 0;
+      right: 0;
       height: 1px;
       background-color: var(--border-divider);
       pointer-events: none;
     }
+  }
+  &:is([class*="rounded-"], [class*="bg-"]) > :not(:last-child)::after,
+  & > :not(:last-child):is([class~="p-4"], [class~="px-4"], [class~="p-3.5"], [class~="px-3.5"], [class~="card-p"])::after {
+    left: 16px;
+    right: 16px;
   }
 }
 
@@ -540,12 +556,18 @@ h6 {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 16px;
-    right: 16px;
+    left: 0;
+    right: 0;
     height: 1px;
     background-color: var(--border-divider);
     pointer-events: none;
   }
+}
+
+.divide-divider:is([class*="rounded-"], [class*="bg-"]) > :not(:last-child)::after,
+.divide-divider > :not(:last-child):is([class~="p-4"], [class~="px-4"], [class~="p-3.5"], [class~="px-3.5"], [class~="card-p"])::after {
+  left: 16px;
+  right: 16px;
 }
 
 @utility divide-menu {
@@ -1404,7 +1426,7 @@ html, body {
 *, *::before, *::after {
   --tw-shadow: 0 0 #0000 !important;
   --tw-shadow-colored: 0 0 #0000 !important;
-  --tw-drop-shadow: none !important;
+  --tw-drop-shadow: initial !important;
 }
 
 [class*="shadow-"]:not(.shadow-modal):not(.shadow-subtle),

@@ -38,10 +38,14 @@ export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv
 
   return (
     <div className="min-h-dvh relative flex flex-col bg-[var(--bg-color)] z-50 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
-      {/* Subtle Ambient Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-40 dark:opacity-100">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[340px] sm:w-[480px] h-[340px] sm:h-[480px] bg-gradient-to-tr from-[var(--accent-color)]/[0.12] via-transparent to-transparent dark:from-[var(--accent-color)]/[0.05] dark:via-transparent dark:to-transparent blur-[120px] rounded-full pointer-events-none" />
-      </div>
+      {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
+      <div
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)',
+        }}
+      />
 
       {/* Center Content: Logo & Headline */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 relative z-10 max-w-md mx-auto w-full text-center">

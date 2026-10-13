@@ -11,17 +11,19 @@ interface OnboardingCharacterArtProps {
 }
 
 export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: OnboardingCharacterArtProps) {
+  const isWelcomeStep = step === 'name' || step === 'age' || step === 'gender';
+
   return (
     <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto flex items-center justify-center select-none py-1 overflow-visible">
       {/* Dynamic Ambient Background Glow */}
       <motion.div
         animate={{
-          scale: [1, 1.18, 1],
-          opacity: [0.4, 0.65, 0.4],
+          scale: [1, 1.12, 1],
+          opacity: [0.45, 0.7, 0.45],
         }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className={`absolute inset-0 rounded-full blur-xl pointer-events-none ${
-          step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-cyan-500/35 via-cyan-400/30 to-teal-400/25' :
+          isWelcomeStep ? 'bg-[var(--accent-color)]/15 dark:bg-[var(--accent-color)]/20' :
           step === 'payday' ? 'bg-gradient-to-tr from-amber-500/40 via-yellow-400/30 to-orange-500/25' :
           step === 'income' ? 'bg-gradient-to-tr from-emerald-500/35 via-teal-400/30 to-green-500/25' :
           step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/40 via-purple-400/30 to-pink-500/25' :
@@ -32,17 +34,18 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         }`}
       />
 
-      {/* Floating Mascot Character Container */}
+      {/* Floating Artwork Container */}
       <motion.div
-        animate={{
-          y: [0, -5, 0],
-          rotate: [0, 1.2, -1.2, 0],
-        }}
+        animate={
+          isWelcomeStep
+            ? { y: [0, -3, 0] }
+            : { y: [0, -5, 0], rotate: [0, 1.2, -1.2, 0] }
+        }
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center overflow-visible"
       >
-        {/* Render Step-Specific Character Artwork */}
-        {(step === 'name' || step === 'age' || step === 'gender') && <CharacterWelcome />}
+        {/* Render Step-Specific Artwork */}
+        {isWelcomeStep && <CharacterWelcome />}
         {step === 'payday' && <CharacterPayday payday={payday} />}
         {step === 'income' && <CharacterIncome />}
         {step === 'expenses' && <CharacterExpenses />}
@@ -51,98 +54,144 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         {step === 'midMonth' && <CharacterMidMonth days={days} />}
         {step === 'summary' && <CharacterCelebration />}
 
-        {/* Micro Sparkle Accents */}
-        <motion.div
-          animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6], rotate: [0, 90, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-          className="absolute -top-1 -right-1 text-[var(--warning-color)] drop-shadow-subtle"
-        >
-          <Sparkles size={18} />
-        </motion.div>
+        {/* Micro Sparkle Accents (only on non-welcome steps) */}
+        {!isWelcomeStep && (
+          <>
+            <motion.div
+              animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6], rotate: [0, 90, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+              className="absolute -top-1 -right-1 text-[var(--warning-color)] drop-shadow-subtle"
+            >
+              <Sparkles size={18} />
+            </motion.div>
 
-        <motion.div
-          animate={{ scale: [1.2, 0.8, 1.2], opacity: [0.5, 0.9, 0.5], rotate: [0, -60, 0] }}
-          transition={{ duration: 3.2, repeat: Infinity, delay: 0.5 }}
-          className="absolute -bottom-1 -left-1 text-[var(--accent-color)] drop-shadow-subtle"
-        >
-          <Star size={14} className="fill-current" />
-        </motion.div>
+            <motion.div
+              animate={{ scale: [1.2, 0.8, 1.2], opacity: [0.5, 0.9, 0.5], rotate: [0, -60, 0] }}
+              transition={{ duration: 3.2, repeat: Infinity, delay: 0.5 }}
+              className="absolute -bottom-1 -left-1 text-[var(--accent-color)] drop-shadow-subtle"
+            >
+              <Star size={14} className="fill-current" />
+            </motion.div>
+          </>
+        )}
       </motion.div>
     </div>
   );
 }
 
-// 1. WELCOME STEP - DEJZY WAVING WITH A SMILE & GLOWING STAR
+// 1. WELCOME STEP - DEJZ PERSONAL PROFILE CARD IN BRAND GRADIENT & ACCENT COLOR
 function CharacterWelcome() {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        {/* Skin gradients */}
-        <radialGradient id="mascotBody" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="35%" stopColor="#E0F2FE" />
-          <stop offset="75%" stopColor="#BAE6FD" />
-          <stop offset="100%" stopColor="#7DD3FC" />
-        </radialGradient>
-        <radialGradient id="mascotCheek" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FDA4AF" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#FDA4AF" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="goldCoinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FEF08A" />
-          <stop offset="40%" stopColor="#FBBF24" />
-          <stop offset="100%" stopColor="#D97706" />
+        {/* Dejz Signature Brand Gradient (Peach -> Soft Pink -> Lavender) */}
+        <linearGradient id="dejzBrandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFE0CE" />
+          <stop offset="50%" stopColor="#F8C4DF" />
+          <stop offset="100%" stopColor="#CEB9EF" />
         </linearGradient>
-        <linearGradient id="haloAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#34D399" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
+        <filter id="dejzCardShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#151718" floodOpacity="0.10" />
+        </filter>
       </defs>
 
-      {/* Halo Ring */}
-      <ellipse cx="70" cy="74" rx="56" ry="18" transform="rotate(-15 70 74)" fill="none" stroke="url(#haloAccent)" strokeWidth="3" strokeDasharray="160 30" opacity="0.75" />
-
-      {/* Cute Mascot Ears / Antenna Tufts */}
-      <circle cx="48" cy="38" r="9" fill="url(#haloAccent)" stroke="#FFFFFF" strokeWidth="2" />
-      <circle cx="92" cy="38" r="9" fill="url(#haloAccent)" stroke="#FFFFFF" strokeWidth="2" />
-
-      {/* Main Mascot Round Head / Body */}
-      <circle cx="70" cy="72" r="42" fill="url(#mascotBody)" stroke="#FFFFFF" strokeWidth="3" />
-
-      {/* Soft Blush Cheeks */}
-      <circle cx="50" cy="78" r="7" fill="url(#mascotCheek)" />
-      <circle cx="90" cy="78" r="7" fill="url(#mascotCheek)" />
-
-      {/* Cute Expressive Eyes with Gloss Sparkles */}
-      {/* Left Eye */}
-      <ellipse cx="56" cy="68" rx="6" ry="7.5" fill="#0F172A" />
-      <circle cx="54" cy="65" r="2.5" fill="#FFFFFF" />
-      <circle cx="58" cy="70" r="1.2" fill="#FFFFFF" />
-
-      {/* Right Eye (Happy Wink / Smile) */}
-      <ellipse cx="84" cy="68" rx="6" ry="7.5" fill="#0F172A" />
-      <circle cx="82" cy="65" r="2.5" fill="#FFFFFF" />
-      <circle cx="86" cy="70" r="1.2" fill="#FFFFFF" />
-
-      {/* Cute Cheerful Smile */}
-      <path d="M 64 78 Q 70 85 76 78" fill="none" stroke="#0F172A" strokeWidth="2.8" strokeLinecap="round" />
-
-      {/* Waving Hand / Arm (Right side) */}
-      <g transform="translate(102, 60) rotate(-20)">
-        <ellipse cx="10" cy="10" rx="8" ry="11" fill="url(#mascotBody)" stroke="#FFFFFF" strokeWidth="2.5" />
-        {/* Motion Wave Trails */}
-        <path d="M 16 0 C 20 4 20 16 16 20" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Tilted Background Signature Gradient Card */}
+      <g transform="translate(70, 70) rotate(-8) translate(-70, -70)">
+        <rect
+          x="24"
+          y="22"
+          width="88"
+          height="92"
+          rx="22"
+          fill="url(#dejzBrandGrad)"
+        />
       </g>
 
-      {/* Left Hand Holding Shiny Star Badge */}
-      <g transform="translate(22, 70)">
-        <circle cx="10" cy="10" r="8" fill="url(#mascotBody)" stroke="#FFFFFF" strokeWidth="2.5" />
-        <circle cx="10" cy="10" r="12" fill="url(#goldCoinGrad)" stroke="#FFFFFF" strokeWidth="1.5" />
-        <text x="10" y="14" fontSize="10" fontWeight="900" fill="#78350F" textAnchor="middle">★</text>
+      {/* Foreground Personal Profile Card */}
+      <g filter="url(#dejzCardShadow)">
+        <rect
+          x="26"
+          y="24"
+          width="88"
+          height="92"
+          rx="22"
+          fill="var(--surface-color, #FFFFFF)"
+          stroke="var(--border-divider, rgba(21, 23, 24, 0.08))"
+          strokeWidth="1.5"
+        />
       </g>
 
-      {/* Foreground Halo Arc */}
-      <path d="M 22 84 Q 70 114 118 84" transform="rotate(-15 70 74)" fill="none" stroke="url(#haloAccent)" strokeWidth="3.5" strokeLinecap="round" />
+      {/* Subtle Brand Gradient Halo Ring Around Avatar */}
+      <circle
+        cx="70"
+        cy="58"
+        r="23"
+        fill="url(#dejzBrandGrad)"
+        opacity="0.35"
+      />
+
+      {/* Avatar Circle in User/App Accent Color */}
+      <circle
+        cx="70"
+        cy="58"
+        r="19"
+        fill="var(--accent-color, #151718)"
+      />
+
+      {/* Minimalist User Silhouette in On-Accent Color */}
+      <circle
+        cx="70"
+        cy="52.5"
+        r="6"
+        fill="var(--on-accent, #FFFFFF)"
+      />
+      <path
+        d="M 58.5 68.5 C 58.5 62.5 63.5 59.5 70 59.5 C 76.5 59.5 81.5 62.5 81.5 68.5"
+        stroke="var(--on-accent, #FFFFFF)"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* Name & Profile Placeholder Lines on Card */}
+      <rect
+        x="45"
+        y="88"
+        width="50"
+        height="6"
+        rx="3"
+        fill="var(--text-primary, #151718)"
+        opacity="0.85"
+      />
+      <rect
+        x="54"
+        y="99"
+        width="32"
+        height="4.5"
+        rx="2.25"
+        fill="var(--text-secondary, #60686B)"
+        opacity="0.35"
+      />
+
+      {/* Verified / Welcome Badge in Bottom-Right Corner */}
+      <g transform="translate(94, 92)">
+        <circle
+          cx="12"
+          cy="12"
+          r="13"
+          fill="var(--accent-color, #151718)"
+          stroke="var(--surface-color, #FFFFFF)"
+          strokeWidth="2.5"
+        />
+        <path
+          d="M 7.5 12.2 L 10.6 15.2 L 16.8 9"
+          stroke="var(--on-accent, #FFFFFF)"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
     </svg>
   );
 }

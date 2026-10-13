@@ -247,10 +247,15 @@ export function Auth({
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] bg-gradient-to-b from-[var(--brand-peach)]/30 via-[var(--brand-pink)]/15 to-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
-      {/* Soft Ambient Brand Gradient Orbs */}
-      <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-[var(--brand-peach)]/35 blur-3xl pointer-events-none" />
-      <div className="absolute top-10 -right-32 w-80 h-80 rounded-full bg-[var(--brand-lavender)]/30 blur-3xl pointer-events-none" />
+    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+      {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
+      <div
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)',
+        }}
+      />
       {/* Top Left Back Button */}
       {onBack && (
         <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-6 sm:left-8 z-30">

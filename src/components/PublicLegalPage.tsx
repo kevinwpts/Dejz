@@ -72,7 +72,14 @@ export function PublicLegalPage({
   };
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] bg-gradient-to-b from-[var(--brand-peach)]/25 via-[var(--brand-pink)]/10 to-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-x-hidden">
+    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-x-hidden">
+      <div
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)',
+        }}
+      />
       {/* Sticky Public Header */}
       <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-[var(--border-divider)] px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-2">

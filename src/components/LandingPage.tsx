@@ -52,10 +52,10 @@ export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
   voiceInput: undefined,
   dailyAndSavings: undefined,
   analysis: undefined,
-  lifestyleGrocery: '/images/lifestyle-grocery.jpg',
-  lifestyleHome: '/images/lifestyle-home.jpg',
+  lifestyleGrocery: '/dejz_01.png',
+  lifestyleHome: '/dejz_02.png',
   lifestyleSavings: undefined,
-  lifestyleControl: '/images/lifestyle-control.jpg',
+  lifestyleControl: '/dejz_03.png',
 };
 
 /**
@@ -356,10 +356,13 @@ export function LandingPage({
   return (
     <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-hidden relative">
       
-      {/* Seamless Top Ambient Brand Gradient extending behind status bar, header and hero */}
+      {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
       <div 
         aria-hidden="true" 
-        className="absolute top-0 left-0 right-0 h-[640px] pointer-events-none bg-gradient-to-b from-[var(--brand-peach)]/45 via-[var(--brand-pink)]/20 to-transparent dark:from-[var(--brand-peach)]/10 dark:via-[var(--brand-pink)]/5 dark:to-transparent z-0" 
+        className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)'
+        }}
       />
 
       {/* 1. DISCRETE STICKY HEADER WITH SAFE AREA INSET TOP */}
@@ -573,10 +576,6 @@ export function LandingPage({
         onMouseMove={handleMouseMove}
         className="relative pt-4 sm:pt-14 pb-12 sm:pb-24 px-4 sm:px-6 overflow-hidden z-10"
       >
-        {/* Soft Ambient Background Orbs */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--brand-peach)]/40 dark:bg-[var(--brand-peach)]/10 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/4 -right-24 w-96 h-96 rounded-full bg-[var(--brand-lavender)]/35 dark:bg-[var(--brand-lavender)]/10 blur-3xl pointer-events-none" />
-
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-8 items-center relative z-10">
           
           {/* Left Column: Headline, Copy & CTAs */}
@@ -692,11 +691,8 @@ export function LandingPage({
             </div>
           </div>
 
-          {/* Right Column: Hero Composition with 3D Ring & Phone Mockup */}
+          {/* Right Column: Hero Phone Mockup */}
           <div className="lg:col-span-5 relative flex items-center justify-center min-h-[300px] sm:min-h-[420px] pt-1 sm:pt-0">
-            
-            {/* 3D Shaded Brand Ring partially behind phone */}
-            <Torus3DRing className="absolute -top-4 -right-2 sm:-top-8 sm:right-2 w-52 h-52 sm:w-72 sm:h-72 opacity-90 animate-pulse-subtle z-0" />
 
             {/* Interactive / Floating Phone Frame Container */}
             <div 
