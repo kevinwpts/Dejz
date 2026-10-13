@@ -396,7 +396,7 @@ export function FixedExpenseScrollTimeline({
                     setSelectedDayGroup(null);
                     onSelectExpense(exp);
                   }}
-                  className="w-full flex items-center justify-between p-3 rounded-[var(--radius-card-nested,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-subtle)] transition-all cursor-pointer text-left active:scale-[0.99]"
+                  className="w-full flex items-center justify-between p-3 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-subtle)] transition-all cursor-pointer text-left active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-3 min-w-0 pr-2">
                     <TransactionLogo transaction={itemTx} config={config} size="sm" />
@@ -410,7 +410,7 @@ export function FixedExpenseScrollTimeline({
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums">
+                    <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
                       −{formatAmount(exp.amount, config?.language)} {config?.currency || 'kr'}
                     </span>
                   </div>

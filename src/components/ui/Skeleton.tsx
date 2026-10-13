@@ -8,12 +8,12 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const roundedMap = {
   none: 'rounded-none',
-  sm: 'rounded-[4px]',
-  md: 'rounded-[6px]',
-  lg: 'rounded-[8px]',
-  xl: 'rounded-[8px]',
-  '2xl': 'rounded-[10px]',
-  '3xl': 'rounded-[12px]',
+  sm: 'rounded-[var(--radius-sm,6px)]',
+  md: 'rounded-[var(--radius-xs,8px)]',
+  lg: 'rounded-card-nested',
+  xl: 'rounded-card-nested',
+  '2xl': 'rounded-card',
+  '3xl': 'rounded-modal',
   full: 'rounded-full',
 };
 
@@ -44,7 +44,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
 export const TransactionItemSkeleton: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-[#1C1C1C] rounded-[8px] p-4 flex items-center justify-between gap-3 shadow-none border-none select-none">
+    <div className="bg-[var(--surface-color)] rounded-card p-4 flex items-center justify-between gap-3 shadow-none border-none select-none">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Logo skeleton */}
         <Skeleton className="w-[42px] h-[42px] shrink-0" rounded="full" />
@@ -72,7 +72,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
         {/* 1. App Header Skeleton */}
         <div className="flex items-center justify-between h-12">
           {/* Avatar pill skeleton */}
-          <div className="flex items-center gap-2.5 bg-white dark:bg-[#1C1C1C] rounded-full p-1.5 pr-3.5 shadow-none border-none">
+          <div className="flex items-center gap-2.5 bg-[var(--surface-color)] rounded-full p-1.5 pr-3.5 shadow-none border-none">
             <Skeleton className="w-8 h-8" rounded="full" />
             <Skeleton className="w-16 h-3" rounded="sm" />
           </div>
@@ -88,7 +88,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
         </div>
 
         {/* 2. Hero Greeting & Gauge Skeleton Card */}
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[8px] p-5 sm:p-6 shadow-none border-none space-y-5">
+        <div className="bg-[var(--surface-color)] rounded-card p-5 sm:p-6 shadow-none border-none space-y-5">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <Skeleton className="h-3.5 w-24" rounded="sm" />
@@ -129,7 +129,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
             {Array.from({ length: 7 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-[#1C1C1C] rounded-[8px] p-2 flex flex-col items-center gap-1.5 py-3 shadow-none border-none"
+                className="bg-[var(--surface-color)] rounded-card-nested p-2 flex flex-col items-center gap-1.5 py-3 shadow-none border-none"
               >
                 <Skeleton className="w-3 h-2" rounded="sm" />
                 <Skeleton className="w-6 h-4" rounded="sm" />
@@ -156,7 +156,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
 
       {/* Floating Bottom Navigation Skeleton Dock */}
       <div className="fixed bottom-0 inset-x-0 z-40 p-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pointer-events-none flex justify-center">
-        <div className="bg-white/80 dark:bg-[#1C1C1C]/80 backdrop-blur-xl rounded-full h-14 w-72 flex items-center justify-around px-4 shadow-none border-none">
+        <div className="bg-[var(--surface-color)]/80 backdrop-blur-xl rounded-full h-14 w-72 flex items-center justify-around px-4 shadow-none border-none">
           <Skeleton className="w-6 h-6" rounded="full" />
           <Skeleton className="w-6 h-6" rounded="full" />
           <Skeleton className="w-10 h-10 -mt-3 shadow-none" rounded="full" />

@@ -7,7 +7,7 @@ export const getPin = () => {
   try {
     return atob(pin);
   } catch (_e) {
-    console.error('Failed to decode PIN:', e);
+    console.error('Failed to decode PIN:', _e);
     localStorage.removeItem(PIN_KEY);
     return null;
   }

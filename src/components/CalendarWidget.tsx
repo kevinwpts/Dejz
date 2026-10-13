@@ -123,14 +123,14 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               }}
               className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-[0.94] cursor-pointer text-center ${
                 isSelected 
-                  ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs z-10' 
+                  ? 'bg-black/5 dark:bg-white/10 text-[var(--text-primary)] font-semibold border-none z-10 shadow-none' 
                   : isToday
-                  ? 'bg-black/[0.06] dark:bg-white/[0.08] text-[var(--text-primary)] border border-subtle'
+                  ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-subtle'
                   : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
               <span className={`text-secondary font-semibold tabular-nums leading-none text-center ${
-                isSelected ? 'text-[var(--on-accent)] font-semibold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
+                isSelected ? 'text-[var(--text-primary)] font-semibold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
               }`}>
                 {dayDate.getDate()}
               </span>
@@ -138,13 +138,13 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               {/* Activity Indicators */}
               <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                 {hasIncome && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-[var(--success-color)]'}`} />
+                  <span className="w-1 h-1 rounded-full bg-[var(--success-color)]" />
                 )}
                 {hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-[var(--accent-color)]'}`} />
+                  <span className="w-1 h-1 rounded-full bg-[var(--accent-color)]" />
                 )}
                 {hasFixed && !hasIncome && !hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-[var(--warning-color)]'}`} />
+                  <span className="w-1 h-1 rounded-full bg-[var(--warning-color)]" />
                 )}
               </div>
             </button>

@@ -592,7 +592,7 @@ export default function App() {
     if (!isRecording) {
       toggleRecording(plusQuickText);
     } else {
-      await stopRecordingAndProcess(plusQuickText);
+      await handlePlusQuickExpenseSubmit();
     }
   };
   const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
@@ -1234,7 +1234,7 @@ export default function App() {
       const newConfig = { ...config, savingsGoals: redistributedGoals };
       setConfig(newConfig);
       await dataService.saveSettings(session.user.id, newConfig);
-    } catch (_error) {
+    } catch (error) {
       console.error('Reorder error:', error);
       addToast(t("errorSaving"), "error");
     }
@@ -1398,7 +1398,7 @@ export default function App() {
               mode: "no-cors", // Google's revoke endpoint doesn't support CORS but still works with no-cors
             },
           );
-        } catch (_e) {
+        } catch (e) {
           console.warn("Could not revoke Google token automatically:", e);
         }
       }
@@ -1586,8 +1586,8 @@ export default function App() {
     const applyTheme = () => {
       let isDark = false;
       
-      // Pre-login screens (LandingPage, Auth, Welcome) are ALWAYS locked to light mode
-      if (session) {
+      // Pre-login screens (LandingPage, Auth, Welcome, PublicLegalPage) are ALWAYS locked to light mode
+      if (session && !publicLegalDoc) {
         const themeMode = config?.themeMode || 'system';
 
         if (themeMode === 'dark') {
@@ -1618,7 +1618,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#191919" : "#FFFFFF";
+      const themeColor = isDark ? "#191919" : "#F2F0F0";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -1651,7 +1651,7 @@ export default function App() {
         return () => mediaQuery.removeListener(handleSystemThemeChange);
       }
     }
-  }, [config?.themeMode, config?.darkMode, config?.themeColor, session]);
+  }, [config?.themeMode, config?.darkMode, config?.themeColor, session, publicLegalDoc]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
@@ -1963,7 +1963,7 @@ export default function App() {
       }
       setAvatarUrl(publicUrl);
       addToast("Bild uppdaterad!", "success");
-    } catch (_error) {
+    } catch (error: any) {
       console.error("Error uploading avatar:", error.message);
       addToast(`Kunde inte ladda upp bild: ${error.message}`, "error");
     }
@@ -2591,7 +2591,6 @@ export default function App() {
     const endOffset = 12;
 
     const newLockedPeriods = { ...(config?.lockedPeriods || {}) };
-    let hasNewLocks = false;
 
     for (let i = startOffset; i <= endOffset; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -2622,13 +2621,6 @@ export default function App() {
         start = new Date(newLockedPeriods[pId].start);
         end = new Date(newLockedPeriods[pId].end);
         name = newLockedPeriods[pId].name;
-      } else if (end < actualToday) {
-        newLockedPeriods[pId] = {
-          start: start.toISOString(),
-          end: end.toISOString(),
-          name,
-        };
-        hasNewLocks = true;
       }
 
       p.push({
@@ -2642,14 +2634,35 @@ export default function App() {
       });
     }
 
-    if (hasNewLocks && config && session?.user?.id) {
-      const updatedConfig = { ...config, lockedPeriods: newLockedPeriods };
+    return p;
+  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions, config?.lockedPeriods]);
+
+  // Persist any newly locked past periods outside of render
+  useEffect(() => {
+    if (!config || !session?.user?.id) return;
+    const actualToday = new Date();
+    actualToday.setHours(0, 0, 0, 0);
+    const currentLocks = config.lockedPeriods || {};
+    const nextLocks = { ...currentLocks };
+    let changed = false;
+
+    for (const period of periods) {
+      if (period.end < actualToday && !nextLocks[period.periodId]) {
+        nextLocks[period.periodId] = {
+          start: period.start.toISOString(),
+          end: period.end.toISOString(),
+          name: period.name,
+        };
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      const updatedConfig = { ...config, lockedPeriods: nextLocks };
       setConfig(updatedConfig);
       dataService.saveSettings(session.user.id, updatedConfig).catch(() => {});
     }
-
-    return p;
-  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions, config?.lockedPeriods, session?.user?.id]);
+  }, [periods, config, session?.user?.id]);
 
   const calculateStats = useCallback(
     (targetDate: Date) => {
@@ -4426,6 +4439,12 @@ export default function App() {
       <div className="light">
         <PublicLegalPage
           initialDoc={publicLegalDoc}
+          currentLanguage={landingLanguage}
+          onLanguageChange={(lang) => {
+            setLandingLanguage(lang);
+            localStorage.setItem('app_language', lang);
+            localStorage.setItem('app_language_manual', 'true');
+          }}
           onNavigateHome={() => {
             try {
               window.history.pushState({}, '', '/');
@@ -4951,7 +4970,6 @@ export default function App() {
                 onResetCompletedGoals={handleResetCompletedGoals}
                 onClearTransactions={handleClearTransactions}
                 onResetAll={resetAll}
-                onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
                 onRenameCategory={handleRenameCategory}
                 transactions={transactions}
                 onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
@@ -5920,7 +5938,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-modal font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y border-none"
+              className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-modal font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y border-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
@@ -6006,7 +6024,7 @@ export default function App() {
                   onSubmit={handlePlusQuickExpenseSubmit}
                   placeholder={
                     isRecording
-                      ? (config?.language === "en" ? "Listening... Press right button when done" : "Lyssnar... Tryck på knappen till höger när du är klar")
+                      ? (config?.language === "en" ? "Listening... Press the stop button to the right when done" : "Lyssnar... Tryck på knappen till höger när du är klar")
                       : isAudioTranscribing
                         ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
                         : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
@@ -6020,9 +6038,14 @@ export default function App() {
                       type="button"
                       onClick={handlePlusMicClick}
                       disabled={isSubmittingQuick || isAudioTranscribing}
+                      aria-label={
+                        isRecording
+                          ? (config?.language === "en" ? "Recording in progress (press right button when done)" : "Inspelning pågår (tryck på knappen till höger när du är klar)")
+                          : (config?.language === "en" ? "Speak expense" : "Tala in utgift")
+                      }
                       className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
                         isRecording
-                          ? "bg-[var(--danger-color)] text-white border-rose-400 animate-pulse scale-105"
+                          ? "bg-[var(--danger-color)]/15 text-[var(--danger-color)] border-[var(--danger-color)]/30 animate-pulse scale-102"
                           : isAudioTranscribing
                             ? "bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]"
                             : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
@@ -6031,11 +6054,21 @@ export default function App() {
                       {isAudioTranscribing ? (
                         <Loader2 size={15} className="animate-spin text-[var(--danger-color)]" />
                       ) : (
-                        <Mic size={17} strokeWidth={2} className={isRecording ? "animate-pulse text-white" : ""} />
+                        <Mic size={17} strokeWidth={2} className={isRecording ? "text-[var(--danger-color)] animate-pulse" : ""} />
                       )}
                     </button>
                   }
                   submitVariant="inside"
+                  submitTitle={
+                    isRecording
+                      ? (config?.language === "en" ? "Done – Stop & Save" : "Klar – Stoppa och spara")
+                      : (config?.language === "en" ? "Add expense" : "Lägg till utgift")
+                  }
+                  submitAriaLabel={
+                    isRecording
+                      ? (config?.language === "en" ? "Done – Stop & Save" : "Klar – Stoppa och spara")
+                      : (config?.language === "en" ? "Add expense" : "Lägg till utgift")
+                  }
                   submitIcon={
                     isRecording ? (
                       <Square size={13} className="fill-current text-white" />
@@ -6044,7 +6077,7 @@ export default function App() {
                     )
                   }
                   submitButtonClassName={
-                    isRecording ? "bg-[var(--danger-color)] border-[var(--danger-color)] text-white animate-pulse" : ""
+                    isRecording ? "bg-[var(--danger-color)] border-2 border-white/30 text-white shadow-md animate-pulse ring-2 ring-rose-500/40" : ""
                   }
                   feedback={
                     plusSuccessMsg

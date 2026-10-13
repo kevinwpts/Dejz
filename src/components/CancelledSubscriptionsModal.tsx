@@ -86,7 +86,7 @@ export function CancelledSubscriptionsModal({
       {/* Body */}
       <div className="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
         {/* Total Savings Banner */}
-        <div className="p-4 rounded-[var(--radius-card,14px)] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-[var(--success-color)] flex items-center justify-between gap-3">
+        <div className="p-4 rounded-[var(--radius-card,20px)] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-[var(--success-color)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-[var(--success-container)] text-[var(--success-color)] flex items-center justify-center shrink-0">
               <Sparkles size={20} strokeWidth={2} />

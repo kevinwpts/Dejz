@@ -2,21 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { Shield, FileText, ArrowLeft, Copy, Check, Globe, Lock } from 'lucide-react';
 import { DejzLogo } from './DejzLogo';
 import { Button } from './ui';
+import { LanguagePicker } from './LanguagePicker';
+import { Language } from '../i18n';
 
 export type LegalDocType = 'privacy' | 'terms' | 'cookies';
 
 interface PublicLegalPageProps {
   initialDoc?: LegalDocType;
   onNavigateHome?: () => void;
+  currentLanguage?: Language;
+  onLanguageChange?: (lang: Language) => void;
 }
 
 export function PublicLegalPage({
   initialDoc = 'privacy',
-  onNavigateHome
+  onNavigateHome,
+  currentLanguage: externalLanguage,
+  onLanguageChange,
 }: PublicLegalPageProps) {
   const [currentDoc, setCurrentDoc] = useState<LegalDocType>(initialDoc);
-  const [language, setLanguage] = useState<'sv' | 'en'>('sv');
+  const [internalLanguage, setInternalLanguage] = useState<Language>('sv');
   const [copied, setCopied] = useState(false);
+
+  const activeLang = externalLanguage || internalLanguage;
+  const language: 'sv' | 'en' = activeLang === 'en' ? 'en' : 'sv';
+
+  const handleLanguageChange = (lang: Language) => {
+    setInternalLanguage(lang);
+    if (onLanguageChange) {
+      onLanguageChange(lang);
+    }
+  };
 
   useEffect(() => {
     // Sync with browser URL if changed externally
@@ -56,10 +72,10 @@ export function PublicLegalPage({
   };
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] sm:max-w-[430px] sm:mx-auto sm:shadow-subtle sm:border sm:border-subtle sm:border-subtle sm:relative sm:min-h-dvh sm:overflow-hidden">
+    <div className="min-h-dvh bg-[var(--bg-color)] bg-gradient-to-b from-[var(--brand-peach)]/25 via-[var(--brand-pink)]/10 to-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-x-hidden">
       {/* Sticky Public Header */}
-      <header className="sticky top-0 z-50 bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-color)] px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">
-        <div className="max-w-[430px] mx-auto flex items-center justify-between gap-2">
+      <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-[var(--border-subtle)] px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <button
               onClick={handleBackToApp}
@@ -71,29 +87,11 @@ export function PublicLegalPage({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-[var(--surface-muted)] border-none rounded-full p-0.5 text-xs font-medium">
-              <button
-                onClick={() => setLanguage('sv')}
-                className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                  language === 'sv'
-                    ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs font-semibold'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                🇸🇪 SV
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-2.5 py-1 rounded-full transition-all cursor-pointer ${
-                  language === 'en'
-                    ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs font-semibold'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                🇬🇧 EN
-              </button>
-            </div>
+            <LanguagePicker
+              currentLanguage={activeLang}
+              onLanguageChange={handleLanguageChange}
+              variant="compact"
+            />
 
             {/* Back to app button */}
             <Button
@@ -102,20 +100,20 @@ export function PublicLegalPage({
               size="sm"
               icon={<ArrowLeft size={14} />}
             >
-              <span>{language === 'sv' ? 'App' : 'App'}</span>
+              <span>{language === 'sv' ? 'Tillbaka' : 'Back'}</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-[430px] mx-auto px-4 py-6">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Navigation Tabs between Legal Docs */}
         <div className="flex flex-col gap-3 mb-6 pb-4 border-none">
           <div className="flex items-center gap-1 p-1 bg-[var(--surface-color)] border-none rounded-card shadow-none overflow-x-auto no-scrollbar w-full">
             <button
               onClick={() => handleSelectDoc('privacy')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card-nested,12px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 currentDoc === 'privacy'
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
@@ -127,7 +125,7 @@ export function PublicLegalPage({
 
             <button
               onClick={() => handleSelectDoc('terms')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card-nested,12px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 currentDoc === 'terms'
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
@@ -139,7 +137,7 @@ export function PublicLegalPage({
 
             <button
               onClick={() => handleSelectDoc('cookies')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card-nested,12px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 currentDoc === 'cookies'
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
@@ -153,7 +151,7 @@ export function PublicLegalPage({
           {/* Quick Action: Copy Public Link */}
           <button
             onClick={handleCopyLink}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-none rounded-[var(--radius-card,14px)] transition-all shadow-none cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-none rounded-[var(--radius-button,12px)] transition-all shadow-none cursor-pointer"
             title="Kopiera länk till detta dokument"
           >
             {copied ? <Check size={14} className="text-neutral-800 dark:text-white" /> : <Copy size={14} />}
@@ -216,7 +214,7 @@ function SwedishPrivacyPolicy() {
       </header>
 
       {/* Summary highlight */}
-      <div className="p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
+      <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
         <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
           <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
           Kort sammanfattning av din integritet:
@@ -251,7 +249,7 @@ function SwedishPrivacyPolicy() {
         </div>
       </section>
 
-      <section className="space-y-2 p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-muted)] border-none">
+      <section className="space-y-2 p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none">
         <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-1.5">
           <Lock size={16} className="text-[var(--accent-color)] shrink-0" />
           3. Google API & Begränsad användning
@@ -288,7 +286,7 @@ function EnglishPrivacyPolicy() {
           Last updated: September 23, 2026
         </p>
       </header>
-      <div className="p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
+      <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
         <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
           <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
           Summary:

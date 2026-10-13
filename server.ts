@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
+import fs from "fs";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from 'stripe';

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, Clock, ChevronDown } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
-import { TranslationKey } from '../i18n';
+import { Language, TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { Button, Card, FilterButtonGroup } from './ui';

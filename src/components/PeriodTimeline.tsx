@@ -273,7 +273,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-0.5 w-[54px] sm:w-[58px] h-[56px] sm:h-[60px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border shadow-none ${
                 isSelected
-                  ? 'bg-[var(--accent-color)]/15 dark:bg-[var(--accent-color)]/25 border-[var(--accent-color)]/60 text-[var(--text-primary)] scale-[1.03] font-semibold z-10 opacity-100 shadow-xs'
+                  ? 'bg-black/5 dark:bg-white/10 border-transparent text-[var(--text-primary)] font-semibold z-10 opacity-100 shadow-none'
                   : hasCategoryMatch
                   ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle opacity-100'
                   : isRealToday
@@ -301,8 +301,8 @@ export function PeriodTimeline({
               </span>
 
               {/* Day Number */}
-              <span className={`text-card-title leading-none font-medium tabular-nums ${
-                isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-[var(--text-primary)]'
+              <span className={`text-card-title leading-none tabular-nums ${
+                isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-primary)] font-medium'
               }`}>
                 {dayNumber}
               </span>

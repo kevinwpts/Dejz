@@ -247,7 +247,10 @@ export function Auth({
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] bg-gradient-to-b from-[var(--brand-peach)]/30 via-[var(--brand-pink)]/15 to-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+      {/* Soft Ambient Brand Gradient Orbs */}
+      <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-[var(--brand-peach)]/35 blur-3xl pointer-events-none" />
+      <div className="absolute top-10 -right-32 w-80 h-80 rounded-full bg-[var(--brand-lavender)]/30 blur-3xl pointer-events-none" />
       {/* Top Left Back Button */}
       {onBack && (
         <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-6 sm:left-8 z-30">
@@ -372,6 +375,7 @@ export function Auth({
                 placeholder={t('email')}
                 icon={<Mail size={16} />}
                 error={error}
+                className="!bg-white border-[var(--border-subtle)] focus:!border-[var(--text-primary)] focus:ring-2 focus:ring-black/10 shadow-2xs"
               />
 
               <div className="pt-2">
@@ -430,6 +434,7 @@ export function Auth({
                   }}
                   placeholder={t('email')}
                   icon={<Mail size={16} />}
+                  className="!bg-white border-[var(--border-subtle)] focus:!border-[var(--text-primary)] focus:ring-2 focus:ring-black/10 shadow-2xs"
                 />
 
                 <div className="space-y-1.5">
@@ -444,6 +449,7 @@ export function Auth({
                     placeholder={t('passwordPlaceholder' as any)}
                     icon={<Lock size={16} />}
                     error={error}
+                    className="!bg-white border-[var(--border-subtle)] focus:!border-[var(--text-primary)] focus:ring-2 focus:ring-black/10 shadow-2xs"
                   />
 
                   {!isRegistering && (
@@ -479,35 +485,31 @@ export function Auth({
             <Divider label={t('orContinueWith')} />
 
             <div className="space-y-3">
-              <Button 
+              <button 
                 type="button"
                 onClick={() => handleSocialLogin('google')}
-                variant="secondary"
-                fullWidth
-                size="lg"
-                icon={
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fill="#4285F4"
-                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
-                    />
-                  </svg>
-                }
+                className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-semibold text-[var(--text-primary)] bg-white hover:bg-black/[0.02] active:bg-black/[0.05] rounded-[var(--radius-button,12px)] border border-[var(--border-subtle)] transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
               >
-                {t('continueWithGoogle' as any)}
-              </Button>
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
+                  />
+                </svg>
+                <span>{t('continueWithGoogle' as any)}</span>
+              </button>
             </div>
           </div>
         )}

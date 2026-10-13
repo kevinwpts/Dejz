@@ -142,14 +142,15 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
         <>
           {/* Creator greeting & portrait card - compact & balanced with enlarged creator portrait */}
           <div className="p-3.5 sm:p-4 rounded-card-nested bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-center gap-3.5">
-            <div className="relative w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden border-2 border-[var(--border-color)] bg-[var(--surface-color)] shadow-xs shrink-0">
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm shrink-0">
               <img 
-                src="/selfie.JPEG"
+                src="/selfie.jpeg"
                 onError={(e) => {
-                  // Fallback if image fails to load
-                  e.currentTarget.style.display = 'none';
+                  if (!e.currentTarget.src.includes('selfie.JPEG')) {
+                    e.currentTarget.src = '/selfie.JPEG';
+                  }
                 }}
-                alt="Creator of Dejz"
+                alt="Skaparen av Dejz"
                 className="w-full h-full object-cover"
               />
             </div>

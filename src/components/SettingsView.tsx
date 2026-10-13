@@ -12,6 +12,7 @@ import { CategoryIcon } from './CategoryIcon';
 
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 import { dataService } from '../services/dataService';
+import { applyThemeColor } from '../utils/theme';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
@@ -57,7 +58,7 @@ export function SettingsView({
   profile: _profile,
   userId,
   session: _session,
-  onRefresh: _onRefresh,
+  onRefresh,
   onNavigateToProfile: _onNavigateToProfile,
   onResetSavingsPot: _onResetSavingsPot,
   onResetCompletedGoals: _onResetCompletedGoals,

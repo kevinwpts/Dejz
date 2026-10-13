@@ -187,7 +187,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[var(--radius-card,14px)]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[var(--radius-card,20px)]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 

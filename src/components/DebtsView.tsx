@@ -230,7 +230,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 text-right ml-auto">
                       <div>
                         <span
-                          className={`text-body-medium font-bold tabular-nums whitespace-nowrap block shrink-0 ${
+                          className={`text-body-medium font-bold font-amount tabular-nums whitespace-nowrap block shrink-0 ${
                             item.isSettled
                               ? 'line-through text-[var(--text-tertiary)]'
                               : isOweMe

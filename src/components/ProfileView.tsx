@@ -312,13 +312,13 @@ export function ProfileView({
       className="space-y-[var(--menu-content-gap)] w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-5 border border-subtle shadow-2xs flex items-center gap-4">
+      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,20px)] p-5 border border-subtle shadow-2xs flex items-center gap-4">
         <div 
           onClick={() => handleSectionClick('manageAccount')}
           className="relative shrink-0 cursor-pointer group"
           title={t('manageAccount')}
         >
-          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
+          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,12px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
             {avatarUrl ? (
               <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
             ) : (
@@ -357,7 +357,7 @@ export function ProfileView({
       <div className="grid grid-cols-3 gap-2.5">
         <button
           onClick={() => handleSectionClick('receipts')}
-          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
           <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <Receipt size={20} strokeWidth={2} />
@@ -369,7 +369,7 @@ export function ProfileView({
 
         <button
           onClick={() => handleSectionClick('debts')}
-          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
           <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <HandCoins size={20} strokeWidth={2} />
@@ -381,7 +381,7 @@ export function ProfileView({
 
         <button
           onClick={() => handleSectionClick('starred')}
-          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
           <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <Heart size={20} strokeWidth={2} />

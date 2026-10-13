@@ -740,7 +740,7 @@ export function AnalysisView({
                         <span className="text-secondary font-medium text-[var(--text-secondary)] truncate max-w-full">
                           {hoveredItem.name}
                         </span>
-                        <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                        <span className="text-xl sm:text-2xl font-bold font-amount text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
                           {formatAmount(Math.round(hoveredItem.value), config.language)}
                           <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                         </span>

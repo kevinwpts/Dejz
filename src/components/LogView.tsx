@@ -963,14 +963,14 @@ export function LogView({
                       }}
                       className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                         isSelected 
-                          ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
+                          ? 'bg-black/5 dark:bg-white/10 text-[var(--text-primary)] font-semibold border-none z-10 shadow-none' 
                           : isToday
                           ? 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none font-bold'
                           : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] font-medium'
                       }`}
                     >
                       <span className={`text-xs sm:text-body leading-none tabular-nums ${
-                        isSelected ? 'text-[var(--on-accent)]' : 'text-[var(--text-primary)]'
+                        isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-primary)]'
                       }`}>
                         {dayNum}
                       </span>
@@ -978,10 +978,10 @@ export function LogView({
                       {/* Transaction Dots */}
                       <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                         {dayTx?.hasIncome && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--success-color)]'}`} />
+                          <span className="w-1 h-1 rounded-full bg-[var(--success-color)]" />
                         )}
                         {dayTx?.hasExpense && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--danger-color)]'}`} />
+                          <span className="w-1 h-1 rounded-full bg-[var(--danger-color)]" />
                         )}
                       </div>
                     </button>

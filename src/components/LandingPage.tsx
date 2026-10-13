@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   ChevronDown, 
   ShieldCheck, 
   Check, 
   Mic, 
   Smartphone, 
-  ArrowRight, 
   Sparkles,
   CheckCircle2,
   Lock,
@@ -20,6 +20,7 @@ import { PolicyModal } from './PolicyModal';
 import { DejzLogo } from './DejzLogo';
 import { Button, Card } from './ui';
 import { LanguagePicker } from './LanguagePicker';
+import { NORDIC_LANGUAGES } from '../utils/nordic';
 
 export interface LandingPageScreenshots {
   heroHome?: string;      // Placeholder 1: "Screenshot: Hem – kvar att spendera och aktuell löneperiod"
@@ -188,6 +189,7 @@ export function LandingPage({
 }: LandingPageProps) {
   const [activePolicyModal, setActivePolicyModal] = useState<'privacy' | 'terms' | 'cookies' | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileLangOpen, setIsMobileLangOpen] = useState(false);
 
   // Mouse tilt position for hero desktop interaction
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -197,6 +199,17 @@ export function LandingPage({
   const [animatedBalance, setAnimatedBalance] = useState(6420);
 
   const isEn = currentLanguage === 'en';
+  const currentLangOption = NORDIC_LANGUAGES.find(l => l.code === currentLanguage) || NORDIC_LANGUAGES[0];
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 15);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (window.innerWidth < 1024) return;
@@ -209,11 +222,44 @@ export function LandingPage({
   // Close mobile menu on ESC
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setIsMobileLangOpen(false);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Lock body scroll while mobile menu is open, preserving scroll position
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu on resize to desktop (>= 768px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+        setIsMobileLangOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobileMenuOpen]);
 
   // Step-by-step timer for voice registration sequence demo
   useEffect(() => {
@@ -248,10 +294,22 @@ export function LandingPage({
   };
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-hidden">
+    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-hidden relative">
       
+      {/* Seamless Top Ambient Brand Gradient extending behind status bar, header and hero */}
+      <div 
+        aria-hidden="true" 
+        className="absolute top-0 left-0 right-0 h-[640px] pointer-events-none bg-gradient-to-b from-[var(--brand-peach)]/45 via-[var(--brand-pink)]/20 to-transparent dark:from-[var(--brand-peach)]/10 dark:via-[var(--brand-pink)]/5 dark:to-transparent z-0" 
+      />
+
       {/* 1. DISCRETE STICKY HEADER WITH SAFE AREA INSET TOP */}
-      <header className="sticky top-0 z-50 bg-[var(--bg-color)]/95 backdrop-blur-xl border-b border-[var(--border-divider)] pt-[env(safe-area-inset-top,0px)] transition-all">
+      <header className={`sticky top-0 z-40 pt-[env(safe-area-inset-top,0px)] transition-all duration-300 ${
+        isMobileMenuOpen 
+          ? 'opacity-0 pointer-events-none' 
+          : isScrolled
+          ? 'bg-white/85 dark:bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-divider)]/80 shadow-2xs opacity-100'
+          : 'bg-transparent border-b border-transparent opacity-100'
+      }`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-18 flex items-center justify-between gap-4">
           
           {/* Logo */}
@@ -298,84 +356,173 @@ export function LandingPage({
           <div className="md:hidden flex items-center">
             <button
               type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label={isMobileMenuOpen ? (isEn ? 'Close menu' : 'Stäng meny') : (isEn ? 'Open menu' : 'Öppna meny')}
+              onClick={() => {
+                setIsMobileMenuOpen(true);
+                setIsMobileLangOpen(false);
+              }}
+              aria-label={isEn ? 'Open menu' : 'Öppna meny'}
               aria-expanded={isMobileMenuOpen}
               className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
             >
-              {isMobileMenuOpen ? <X size={20} strokeWidth={2} /> : <Menu size={20} strokeWidth={2} />}
+              <Menu size={20} strokeWidth={2} />
             </button>
           </div>
 
         </div>
+      </header>
 
-        {/* Mobile Slide-Down Menu Panel */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-[var(--border-divider)] bg-[var(--surface-color)]/98 backdrop-blur-2xl shadow-modal px-5 py-6 space-y-4 animate-fade-in">
-            <div className="flex flex-col space-y-3 text-left">
+      {/* MOBILE MENU: SEAMLESS PORTAL TO document.body WITH FULL-SCREEN OVERLAY */}
+      {typeof document !== 'undefined' && isMobileMenuOpen && createPortal(
+        <div className="fixed inset-0 z-[9990] pointer-events-auto">
+          {/* Backdrop Overlay - pure full-screen dimming covering bottom safe area without blur */}
+          <div 
+            className="fixed inset-0 w-full h-full min-h-dvh bg-black/40 z-[9991] transition-opacity animate-in fade-in duration-200"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              setIsMobileLangOpen(false);
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Continuous Panel from Top of Screen (covers safe-area) */}
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-label={isEn ? 'Navigation menu' : 'Navigationsmeny'}
+            className="fixed top-0 left-0 right-0 z-[9995] bg-[var(--surface-color)] border-b border-[var(--border-divider)] shadow-modal rounded-b-2xl pt-[env(safe-area-inset-top,0px)] animate-in slide-in-from-top-2 duration-200"
+          >
+            {/* Top Bar inside Menu: Logo Left, Clear Close (X) Right */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-18 flex items-center justify-between border-b border-[var(--border-divider)]/40">
+              <div className="flex items-center gap-2 shrink-0">
+                <DejzLogo className="h-6 sm:h-7 w-auto" />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsMobileLangOpen(false);
+                }}
+                aria-label={isEn ? 'Close menu' : 'Stäng meny'}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
+              >
+                <X size={20} strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Menu Items Container - 16px below top bar */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-5 space-y-1 text-left">
+              {/* Row 1: Så fungerar det */}
               <a
                 href="#how-it-works"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-sm font-semibold text-[var(--text-primary)] py-2 border-b border-subtle"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsMobileLangOpen(false);
+                }}
+                className="w-full h-12 flex items-center px-3.5 rounded-[var(--radius-button-sm,10px)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)]"
               >
-                {isEn ? 'How it works' : 'Så fungerar det'}
+                <span>{isEn ? 'How it works' : 'Så fungerar det'}</span>
               </a>
 
-              <div className="flex items-center justify-between py-2 border-b border-subtle">
-                <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                  {isEn ? 'Language' : 'Språk'}
-                </span>
-                <LanguagePicker
-                  currentLanguage={currentLanguage}
-                  onLanguageChange={onLanguageChange}
-                />
-              </div>
-
+              {/* Row 2: Logga in */}
               {onLogin && (
-                <Button
-                  variant="ghost"
-                  fullWidth
+                <button
+                  type="button"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
+                    setIsMobileLangOpen(false);
                     onLogin();
                   }}
-                  className="justify-center text-sm font-semibold text-[var(--text-primary)] py-2.5"
+                  className="w-full h-12 text-left flex items-center px-3.5 rounded-[var(--radius-button-sm,10px)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
                 >
-                  {isEn ? 'Log in' : 'Logga in'}
-                </Button>
+                  <span>{isEn ? 'Log in' : 'Logga in'}</span>
+                </button>
               )}
 
+              {/* Row 3: Språk / Language Selection Row with Flag and Full Name */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileLangOpen(!isMobileLangOpen)}
+                  aria-expanded={isMobileLangOpen}
+                  className="w-full h-12 text-left flex items-center justify-between px-3.5 rounded-[var(--radius-button-sm,10px)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
+                >
+                  <span className="text-[var(--text-secondary)] font-medium">{isEn ? 'Language' : 'Språk'}</span>
+                  <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold">
+                    <span className="text-base select-none leading-none" aria-hidden="true">{currentLangOption.flag}</span>
+                    <span>{currentLangOption.nativeLabel}</span>
+                    <ChevronDown size={16} className={`shrink-0 opacity-60 transition-transform duration-200 ${isMobileLangOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+
+                {/* Expanded Language Picker directly on white panel */}
+                {isMobileLangOpen && (
+                  <div className="pt-0.5 pb-1 space-y-0.5">
+                    {NORDIC_LANGUAGES.map((lang) => {
+                      const isSelected = lang.code === currentLanguage;
+                      return (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={() => {
+                            onLanguageChange(lang.code);
+                            setIsMobileLangOpen(false);
+                          }}
+                          className={`w-full h-11 px-3.5 rounded-[var(--radius-button-sm,10px)] text-left text-sm flex items-center justify-between gap-3 transition-colors cursor-pointer border-none ${
+                            isSelected 
+                              ? 'bg-black/[0.03] dark:bg-white/[0.06] text-[var(--text-primary)] font-semibold' 
+                              : 'bg-transparent text-[var(--text-primary)] font-medium hover:bg-black/[0.02] dark:hover:bg-white/[0.04]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-base select-none leading-none" aria-hidden="true">{lang.flag}</span>
+                            <span className="text-[var(--text-primary)]">{lang.nativeLabel}</span>
+                          </div>
+                          {isSelected && <Check size={16} strokeWidth={2.5} className="shrink-0 text-[var(--text-primary)]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Divider before CTA */}
+              <div className="border-t border-[var(--border-divider)] pt-1 my-2" />
+
+              {/* Full-Width Primary CTA at Bottom */}
               <Button
                 variant="primary"
                 fullWidth
+                size="lg"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
+                  setIsMobileLangOpen(false);
                   onGetStarted();
                 }}
-                className="justify-center text-sm font-semibold shadow-subtle py-3 mt-1"
+                className="w-full justify-center text-center text-sm font-semibold shadow-subtle h-12"
               >
                 {isEn ? 'Get started free' : 'Kom igång gratis'}
               </Button>
             </div>
           </div>
-        )}
-      </header>
+        </div>,
+        document.body
+      )}
 
       {/* 2. HERO SECTION WITH COMPACT COPY & RICH 3D DEPTH */}
       <section 
         onMouseMove={handleMouseMove}
-        className="relative pt-6 sm:pt-16 pb-14 sm:pb-24 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-[#FFE0CE]/40 via-[#F8C4DF]/25 to-transparent dark:from-[#FFE0CE]/10 dark:via-[#F8C4DF]/5 dark:to-transparent"
+        className="relative pt-4 sm:pt-14 pb-12 sm:pb-24 px-4 sm:px-6 overflow-hidden z-10"
       >
         {/* Soft Ambient Background Orbs */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#FFE0CE]/40 dark:bg-[#FFE0CE]/10 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/4 -right-24 w-96 h-96 rounded-full bg-[#CEB9EF]/35 dark:bg-[#CEB9EF]/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[var(--brand-peach)]/40 dark:bg-[var(--brand-peach)]/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 -right-24 w-96 h-96 rounded-full bg-[var(--brand-lavender)]/35 dark:bg-[var(--brand-lavender)]/10 blur-3xl pointer-events-none" />
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center relative z-10">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-8 items-center relative z-10">
           
           {/* Left Column: Headline, Copy & CTAs */}
-          <div className="lg:col-span-7 space-y-5 text-left">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
             
-            <div className="space-y-2.5">
+            <div className="space-y-2 sm:space-y-2.5">
               <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12]">
                 Koll på pengarna.<br />
                 <span className="text-[var(--text-primary)] opacity-90">Från lön till lön.</span>
@@ -386,26 +533,75 @@ export function LandingPage({
             </div>
 
             {/* CTAs & Registration Options */}
-            <div className="space-y-3.5 pt-1">
-              <div className="flex items-center gap-3 flex-wrap">
+            {/* Mobile Button Group (< sm) */}
+            <div className="sm:hidden w-full space-y-2.5 pt-0.5">
+              {/* Kom igång gratis: Full-width primary button */}
+              <Button
+                variant="primary"
+                fullWidth
+                size="lg"
+                onClick={onGetStarted}
+                className="w-full h-12 justify-center text-center font-semibold text-sm shadow-subtle"
+              >
+                {isEn ? 'Get started free' : 'Kom igång gratis'}
+              </Button>
+
+              {/* Fortsätt med Google: Full-width, same height, centered Google icon & text */}
+              {onGoogleLogin && (
+                <button
+                  type="button"
+                  onClick={onGoogleLogin}
+                  className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[var(--radius-button,12px)] border border-[var(--border-subtle)] transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                  </svg>
+                  <span>{isEn ? 'Continue with Google' : 'Fortsätt med Google'}</span>
+                </button>
+              )}
+
+              {/* Testa demo: Centered text button with compact margin */}
+              {onStartDemo && (
+                <div className="flex justify-center pt-0">
+                  <button
+                    type="button"
+                    onClick={onStartDemo}
+                    className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer border-none bg-transparent"
+                  >
+                    {isEn ? 'Try demo' : 'Testa demo'}
+                  </button>
+                </div>
+              )}
+
+              {/* Reassuring note: Centered under button group with tight margin */}
+              <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center justify-center gap-1.5 pt-0 text-center">
+                <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
+                <span>Ingen bankkoppling behövs.</span>
+              </p>
+            </div>
+
+            {/* Desktop Button Group (sm+) */}
+            <div className="hidden sm:block space-y-3.5 pt-1">
+              <div className="flex items-center gap-3">
                 <Button
                   variant="primary"
                   size="lg"
                   onClick={onGetStarted}
-                  className="font-semibold text-sm shadow-subtle flex items-center justify-center gap-2 px-6"
+                  className="font-semibold text-sm shadow-subtle px-6 h-12 whitespace-nowrap"
                 >
-                  <span>{isEn ? 'Get started free' : 'Kom igång gratis'}</span>
-                  <ArrowRight size={16} strokeWidth={2} />
+                  {isEn ? 'Get started free' : 'Kom igång gratis'}
                 </Button>
 
                 {onStartDemo && (
                   <button
                     type="button"
                     onClick={onStartDemo}
-                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-2.5 rounded-button hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent"
+                    className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-4 h-12 rounded-[var(--radius-button,12px)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap"
                   >
-                    <span>{isEn ? 'Try demo' : 'Testa demo'}</span>
-                    <ArrowRight size={14} />
+                    {isEn ? 'Try demo' : 'Testa demo'}
                   </button>
                 )}
               </div>
@@ -416,7 +612,7 @@ export function LandingPage({
                   <button
                     type="button"
                     onClick={onGoogleLogin}
-                    className="inline-flex items-center gap-2.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-3.5 py-2 rounded-button border border-subtle transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex items-center justify-center gap-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-4 py-2.5 h-11 rounded-[var(--radius-button,12px)] border border-subtle transition-all cursor-pointer shadow-2xs whitespace-nowrap"
                   >
                     <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -438,7 +634,7 @@ export function LandingPage({
           </div>
 
           {/* Right Column: Hero Composition with 3D Ring & Phone Mockup */}
-          <div className="lg:col-span-5 relative flex items-center justify-center min-h-[340px] sm:min-h-[420px]">
+          <div className="lg:col-span-5 relative flex items-center justify-center min-h-[300px] sm:min-h-[420px] pt-1 sm:pt-0">
             
             {/* 3D Shaded Brand Ring partially behind phone */}
             <Torus3DRing className="absolute -top-4 -right-2 sm:-top-8 sm:right-2 w-52 h-52 sm:w-72 sm:h-72 opacity-90 animate-pulse-subtle z-0" />
@@ -465,7 +661,7 @@ export function LandingPage({
       </section>
 
       {/* 3. ÖVERBLICK ÖVER EKONOMIN (Warm Peach Surface) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#FFE0CE]/30 dark:bg-[#FFE0CE]/10 border-y border-[var(--border-divider)] relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-peach)]/30 dark:bg-[var(--brand-peach)]/10 border-y border-[var(--border-divider)] relative">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div className="lg:col-span-6 space-y-4 text-left">
@@ -561,7 +757,7 @@ export function LandingPage({
                 </div>
                 <div className="p-3 rounded-card-nested bg-[var(--surface-color)] border border-subtle flex items-center justify-between gap-3 shadow-xs">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-[#FFE0CE] text-[#151718] font-bold text-xs flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-[var(--brand-peach)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center shrink-0">
                       C
                     </div>
                     <div className="min-w-0">
@@ -583,7 +779,7 @@ export function LandingPage({
                 <span className="text-[var(--text-secondary)]">3. Kvar att spendera uppdateras:</span>
                 <div className="flex items-baseline gap-1.5 font-amount tabular-nums font-bold text-sm">
                   <span className="line-through opacity-50 text-[var(--text-tertiary)] text-xs">6 420 kr</span>
-                  <span className="text-[var(--text-primary)] text-sm font-bold bg-[#CEB9EF]/30 px-1.5 py-0.5 rounded-md">
+                  <span className="text-[var(--text-primary)] text-sm font-bold bg-[var(--brand-lavender)]/30 px-1.5 py-0.5 rounded-md">
                     {animatedBalance.toLocaleString('sv-SE')} kr
                   </span>
                 </div>
@@ -658,7 +854,7 @@ export function LandingPage({
       </section>
 
       {/* 6. FÖRSTÅ VART PENGARNA GÅR (Soft Lavender Surface) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#CEB9EF]/20 dark:bg-[#CEB9EF]/10 border-b border-[var(--border-divider)]">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/20 dark:bg-[var(--brand-lavender)]/10 border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div className="lg:col-span-6 space-y-4 text-left">
@@ -780,8 +976,8 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 9. AVSLUTANDE REGISTRERING (Compact Rich Pink-Lavender Gradient Background) */}
-      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-[#F8C4DF]/40 via-[#CEB9EF]/30 to-[#FFE0CE]/40 border-t border-[var(--border-divider)] text-center relative overflow-hidden">
+      {/* 9. AVSLUTANDE REGISTRERING */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-transparent via-[var(--brand-peach)]/20 to-[var(--brand-peach)]/30 border-t border-[var(--border-divider)] text-center relative overflow-hidden">
         <div className="max-w-2xl mx-auto space-y-5 relative z-10">
           
           <div className="space-y-2">
@@ -798,10 +994,9 @@ export function LandingPage({
               variant="primary"
               size="lg"
               onClick={onGetStarted}
-              className="w-full sm:w-auto font-semibold text-sm shadow-subtle px-8"
+              className="w-full sm:w-auto font-semibold text-sm shadow-subtle px-8 h-11 sm:h-12 justify-center text-center"
             >
-              <span>{isEn ? 'Get started free' : 'Kom igång gratis'}</span>
-              <ArrowRight size={16} strokeWidth={2} className="ml-2" />
+              {isEn ? 'Get started free' : 'Kom igång gratis'}
             </Button>
           </div>
 
@@ -809,7 +1004,7 @@ export function LandingPage({
       </section>
 
       {/* 10. FOOTER */}
-      <footer className="py-10 px-4 sm:px-6 border-t border-[var(--border-divider)] bg-[var(--bg-color)] text-xs text-[var(--text-tertiary)]">
+      <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] px-4 sm:px-6 border-t border-[var(--border-divider)] bg-[var(--bg-color)] text-xs text-[var(--text-tertiary)]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           
           <div className="flex items-center gap-2">

@@ -188,7 +188,9 @@ h6 {
   font-feature-settings: "tnum" 1;
 }
 
-.font-amount {
+.font-amount,
+.font-amount button,
+.font-amount input {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
@@ -661,7 +663,7 @@ h6 {
   --menu-content-gap: 1.5rem;
 
   /* Seamless Light Theme Background & Surfaces */
-  --bg-top-color: #F8C4DF;
+  --bg-top-color: #F2F0F0;
   --bg-color: #F2F0F0;
   --bg-secondary: #F2F0F0;
   --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(242, 240, 240, 0) 0%, #F2F0F0 400px), linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%));
@@ -1038,7 +1040,7 @@ h6 {
     margin: 0;
     padding: 0;
     overflow-y: auto;                
-    background-color: var(--bg-top-color, var(--bg-color)) !important;
+    background-color: var(--bg-color) !important;
     background: var(--bg-gradient);     
     min-height: 100%;
     touch-action: pan-x pan-y;

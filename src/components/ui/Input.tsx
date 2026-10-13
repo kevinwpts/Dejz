@@ -48,7 +48,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       : 'border-transparent focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20';
 
     const typographyStyles = isAmount
-      ? 'text-section-title tabular-nums'
+      ? 'text-section-title font-amount tabular-nums'
       : 'text-body';
 
     return (

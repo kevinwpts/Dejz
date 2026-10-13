@@ -101,6 +101,8 @@ export interface SmartInputProps {
   submitText?: string;
   submitIcon?: React.ReactNode;
   submitButtonClassName?: string;
+  submitTitle?: string;
+  submitAriaLabel?: string;
   allowSubmitWhenEmpty?: boolean;
   feedback?: SmartInputFeedbackData | null;
   onClear?: () => void;
@@ -137,6 +139,8 @@ export const SmartInput: React.FC<SmartInputProps> = ({
   submitText = 'Lägg till',
   submitIcon,
   submitButtonClassName = '',
+  submitTitle,
+  submitAriaLabel,
   allowSubmitWhenEmpty = false,
   feedback,
   onClear,
@@ -220,8 +224,12 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           {hasInsideSubmit && (
             <button
               type="submit"
+              title={submitTitle || (isProcessing ? 'Bearbetar...' : submitText)}
+              aria-label={submitAriaLabel || (isProcessing ? 'Bearbetar...' : submitText)}
               disabled={(!value.trim() && !allowSubmitWhenEmpty) || isProcessing || disabled}
-              className={`absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-button-sm,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)] ${submitButtonClassName}`}
+              className={`absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-button-sm,12px)] ${
+                submitButtonClassName || 'bg-[var(--accent-color)] text-[var(--on-accent)] border border-[var(--accent-color)]'
+              } hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed`}
             >
               {isProcessing ? (
                 <Icon name="spinner" size={14} className="animate-spin" />
@@ -237,7 +245,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           <button
             type="submit"
             disabled={!value.trim() || isProcessing || disabled}
-            className="h-[46px] px-4 rounded-[var(--radius-button,14px)] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-body-medium flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+            className="h-[46px] px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-body-medium flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
           >
             {isProcessing ? (
               <Icon name="spinner" size={15} className="animate-spin" />

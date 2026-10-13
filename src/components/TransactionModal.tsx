@@ -644,7 +644,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -717,7 +717,7 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-2.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border-none shadow-none space-y-2.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -1355,7 +1355,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-modal font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,24px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
@@ -1422,7 +1422,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-modal z-10"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,24px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-modal z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-subtle shrink-0">
                   <div>

@@ -32,17 +32,17 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex items-center justify-center h-screen bg-[var(--bg-color)] text-[var(--text-primary)]">
-          <div className="text-center p-8 border border-danger/30 rounded-[var(--radius-modal,16px)] surface-card page-max w-full mx-4">
+          <div className="text-center p-8 border border-danger/30 rounded-[var(--radius-modal,24px)] surface-card page-max w-full mx-4">
             <h1 className="text-2xl font-semibold mb-2">{this.getTranslation('errorTitle')}</h1>
             <p className="mb-4 text-sm opacity-80">{this.getTranslation('errorMessage')}</p>
             {this.state.error && (
-              <pre className="text-left text-micro-label bg-danger/10 p-3 rounded-[var(--radius-card-nested,10px)] overflow-auto max-h-48 font-mono border border-danger/20">
+              <pre className="text-left text-micro-label bg-danger/10 p-3 rounded-[var(--radius-card-nested,12px)] overflow-auto max-h-48 font-mono border border-danger/20">
                 {this.state.error.toString()}
               </pre>
             )}
             <button 
               onClick={() => window.location.reload()}
-              className="mt-6 px-6 py-2 bg-danger text-[var(--text-primary)] rounded-[var(--radius-button,14px)] font-semibold hover:opacity-90 transition-colors cursor-pointer"
+              className="mt-6 px-6 py-2 bg-danger text-[var(--text-primary)] rounded-[var(--radius-button,12px)] font-semibold hover:opacity-90 transition-colors cursor-pointer"
             >
               Ladda om sidan
             </button>

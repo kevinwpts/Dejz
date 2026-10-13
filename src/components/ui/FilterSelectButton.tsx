@@ -22,8 +22,8 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
   onClick,
   className = '',
   disabled = false,
-  _variant = 'default',
-}: FilterSelectButtonProps & { _variant?: 'default' | 'cardDarker' }) => {
+  variant: _variant = 'default',
+}: FilterSelectButtonProps) => {
   return (
     <button
       type="button"
@@ -34,7 +34,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
           onClick();
         }
       }}
-      className={`h-11 px-3.5 rounded-[var(--radius-button,14px)] transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans border-none shadow-none bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)] ${className}`}
+      className={`h-11 px-3.5 rounded-[var(--radius-button,12px)] transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans border-none shadow-none bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)] ${className}`}
     >
       <div className="flex items-center gap-2.5 min-w-0 flex-1">
         {icon && <span className="text-[var(--text-secondary)] shrink-0">{icon}</span>}

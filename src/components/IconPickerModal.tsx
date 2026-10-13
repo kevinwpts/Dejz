@@ -139,7 +139,7 @@ export function IconPickerModal({
                 <button
                   key={item.key}
                   onClick={() => handleSelect(item.key)}
-                  className={`relative aspect-square rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                  className={`relative aspect-square rounded-[var(--radius-card,20px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                     isSelected
                       ? 'bg-[var(--accent-color)]/10 border-2 border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/20 shadow-xs scale-[1.02]'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-color)] hover:border-[var(--accent-color)]/40'

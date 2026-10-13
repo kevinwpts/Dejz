@@ -217,7 +217,7 @@ export function IconSelector({
                 fileInputRef.current?.click();
               }
             }}
-            className={`flex-1 h-16 rounded-[var(--radius-button,14px)] border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+            className={`flex-1 h-16 rounded-[var(--radius-button,12px)] border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
               isCustomLogoSelected
                 ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-1 ring-[var(--accent-color)] text-[var(--accent-color)]'
                 : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--accent-color)]/30'
@@ -263,7 +263,7 @@ export function IconSelector({
                   onIconChange(resolvedKey);
                   onLogoChange(undefined);
                 }}
-                className={`relative aspect-square rounded-[var(--radius-button,14px)] flex items-center justify-center text-[var(--text-primary)] transition-all border cursor-pointer ${
+                className={`relative aspect-square rounded-[var(--radius-button,12px)] flex items-center justify-center text-[var(--text-primary)] transition-all border cursor-pointer ${
                   selected
                     ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
                     : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[var(--accent-color)]/30'
@@ -282,7 +282,7 @@ export function IconSelector({
           <button
             type="button"
             onClick={() => setShowEmojiPicker(true)}
-            className={`relative aspect-square rounded-[var(--radius-button,14px)] flex items-center justify-center transition-all border border-solid cursor-pointer ${
+            className={`relative aspect-square rounded-[var(--radius-button,12px)] flex items-center justify-center transition-all border border-solid cursor-pointer ${
               hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected
                 ? 'border-[var(--accent-color)] bg-[var(--accent-light)] ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
                 : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-subtle dark:hover:border-subtle'

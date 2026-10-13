@@ -88,7 +88,7 @@ export function CategoryModal({
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="flex flex-col items-center gap-1.5 p-2 rounded-[var(--radius-card,14px)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all active:scale-95 group cursor-pointer relative"
+            className="flex flex-col items-center gap-1.5 p-2 rounded-[var(--radius-card,20px)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all active:scale-95 group cursor-pointer relative"
             title="Tryck för att byta ikon"
           >
             <div className="relative">

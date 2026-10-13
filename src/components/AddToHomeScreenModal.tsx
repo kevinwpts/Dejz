@@ -205,7 +205,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-[420px] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] p-6 sm:p-7 border-none shadow-modal relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7 font-sans"
+            className="bg-[var(--bg-color)] w-full sm:max-w-[420px] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] p-6 sm:p-7 border-none shadow-modal relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7 font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Drag Handle for mobile */}
@@ -268,7 +268,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <button
                   type="button"
                   onClick={handleInstallClick}
-                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[var(--radius-button,14px)] font-semibold text-sm shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[var(--radius-button,12px)] font-semibold text-sm shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download size={18} strokeWidth={2} />
                   <span>{localized.installBtn}</span>
@@ -276,7 +276,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="w-full h-10 bg-transparent text-[var(--text-secondary)] rounded-[var(--radius-button,14px)] font-medium text-xs hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                  className="w-full h-10 bg-transparent text-[var(--text-secondary)] rounded-[var(--radius-button,12px)] font-medium text-xs hover:text-[var(--text-primary)] transition-all cursor-pointer"
                 >
                   {localized.maybeLater}
                 </button>
@@ -320,7 +320,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[var(--radius-button,14px)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shadow-xs"
+                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[var(--radius-button,12px)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shadow-xs"
                 >
                   {localized.gotIt}
                 </button>

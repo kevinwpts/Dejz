@@ -181,7 +181,7 @@ export function CategoryBottomSheetModal({
       bodyClassName="px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0"
     >
               {/* Category Budget Status Card */}
-              <div className="p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shrink-0 space-y-3">
+              <div className="p-4 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle shrink-0 space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   {/* Left: Main text + Subtext */}
                   <div className="flex flex-col min-w-0 flex-1">
@@ -277,7 +277,7 @@ export function CategoryBottomSheetModal({
                       </span>
                     </div>
 
-                    <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] border border-subtle overflow-hidden divide-y divide-subtle">
+                    <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,20px)] border border-subtle overflow-hidden divide-y divide-subtle">
                       {matchingFixedExpenses.map((fe) => (
                         <BudgetItem
                           key={fe.id}
@@ -332,7 +332,7 @@ export function CategoryBottomSheetModal({
                       ))}
                     </div>
                   ) : matchingFixedExpenses.length > 0 ? (
-                    <div className="p-4 rounded-[var(--radius-card-nested,10px)] bg-black/[0.02] dark:bg-white/[0.02] border border-subtle text-center">
+                    <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.02] dark:bg-white/[0.02] border border-subtle text-center">
                       <p className="text-xs text-[var(--text-tertiary)]">
                         {isEn ? 'No variable expenses recorded in this period' : 'Inga rörliga utgifter registrerade denna period'}
                       </p>

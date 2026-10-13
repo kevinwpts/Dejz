@@ -134,7 +134,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -412,6 +412,8 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
 
 
+  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+
   if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
@@ -434,7 +436,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -462,7 +464,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -525,7 +527,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
@@ -700,7 +702,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -805,7 +807,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
@@ -958,7 +960,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1405,6 +1407,8 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
 
 
+  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+
   if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
@@ -1427,7 +1431,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -1455,7 +1459,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-2.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border-none shadow-none space-y-2.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -1759,7 +1763,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1887,7 +1891,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-subtle">
                   <div>
@@ -2045,7 +2049,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2314,6 +2318,8 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
     });
   };
 
+  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+
   if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
@@ -2336,7 +2342,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2360,7 +2366,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -2616,7 +2622,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>

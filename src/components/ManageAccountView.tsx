@@ -154,7 +154,7 @@ export function ManageAccountView({
           {/* Profile Avatar Card */}
           <Card padding="md" className="flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden bg-[var(--surface-color)] border border-subtle shadow-2xs">
             <label htmlFor="avatar-manage" className="relative cursor-pointer group">
-              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,14px)] overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
+              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,12px)] overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
