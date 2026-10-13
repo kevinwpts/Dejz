@@ -350,7 +350,7 @@ h6 {
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
   font-family: var(--font-amount);
@@ -361,7 +361,7 @@ h6 {
 
 @utility text-large-amount {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.03em;
   font-family: var(--font-amount);
@@ -379,7 +379,7 @@ h6 {
 
 @utility text-page-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.025em;
   font-family: var(--font-display);
@@ -388,7 +388,7 @@ h6 {
 
 @utility text-section-title {
   font-size: 15.5px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.015em;
   font-family: var(--font-display);
@@ -649,52 +649,58 @@ h6 {
   --orange-800: #9A4D00;
   --orange-900: #713800;
 
+  /* Brand Gradient & Scale */
+  --brand-mint: #D4F1E3;
+  --brand-aqua: #CBECF2;
+  --brand-sky: #C7D8FF;
+  --brand-cream: #F6F1E8;
+  --brand-gradient: linear-gradient(120deg, var(--brand-mint) 0%, var(--brand-aqua) 50%, var(--brand-sky) 100%);
+
   /* Dejz Official Brand Logo Color */
-  --logo-color: #211F1C;
+  --logo-color: #151718;
 
   /* Universal Card Gap / Spacing */
   --card-gap: 0.5rem;
   --menu-content-gap: 1.5rem;
 
-  /* Seamless Light Theme Background - Soft, harmonious, tinted ambient design */
-  --bg-top-color: #ECEFF3;
-  --bg-color: #ECEFF3;
-  --bg-secondary: #ECEFF3;
-  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(59, 130, 246, 0.075) 0%, rgba(59, 130, 246, 0.035) 420px, rgba(59, 130, 246, 0.015) 100%));
- 
-  /* Pure White Elevated Modules & Surfaces */
+  /* Seamless Light Theme Background & Surfaces */
+  --bg-top-color: #CBECF2;
+  --bg-color: #F7F8FA;
+  --bg-secondary: #F7F8FA;
+  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(247, 248, 250, 0) 0%, #F7F8FA 400px), linear-gradient(120deg, var(--brand-mint) 0%, var(--brand-aqua) 50%, var(--brand-sky) 100%));
+
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-raised: #FFFFFF;
-  --surface-high: #F6F7F9;
+  --surface-high: #F0F3F4;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #F2F4F7;
+  --surface-muted: #F0F3F4;
   --surface-tint: rgba(0, 0, 0, 0.01);
 
-  --text-primary: #211F1C;
-  --text-metric-label: #4A463F;
-  --text-secondary: #6D6962;
-  --text-tertiary: #777168;
-  --text-muted: #777168;
-  --text-disabled: #A8A39D;
-  --text-inactive: #A8A39D;
+  --text-primary: #151718;
+  --text-metric-label: #454C4E;
+  --text-secondary: #60686B;
+  --text-tertiary: #747D80;
+  --text-muted: #747D80;
+  --text-disabled: #A4ACAF;
+  --text-inactive: #A4ACAF;
 
   --border-subtle: transparent;
   --border-color: transparent;
   --border-control: transparent;
   --border-strong: transparent;
-  --border-divider: rgba(0, 0, 0, 0.05);
-  --border-menu-divider: rgba(0, 0, 0, 0.05);
+  --border-divider: rgba(21, 23, 24, 0.06);
+  --border-menu-divider: rgba(21, 23, 24, 0.06);
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #F0F0F0;
-  --chip-text: #6D6962;
-  --chip-active-bg: #1C1917;
+  --chip-bg: #F0F3F4;
+  --chip-text: #60686B;
+  --chip-active-bg: #151718;
   --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F5F5F5;
+  --card-nested-bg: #F0F3F4;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -734,13 +740,13 @@ h6 {
   --card-inner-stroke: none;
 
   --success-color: #05B862;
-  --success-container: #DCFCE7;
+  --success-container: var(--surface-muted);
   --danger-color: #EF4444;
-  --danger-container: #FEE2E2;
+  --danger-container: var(--surface-muted);
   --warning-color: #F59E0B;
-  --warning-container: #FEF3C7;
+  --warning-container: var(--surface-muted);
   --info-color: #1C1917;
-  --info-container: #DBEAFE;
+  --info-container: var(--surface-muted);
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-active-color: #3B82F6;
@@ -851,11 +857,11 @@ h6 {
   --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
   --shadow-subtle: none;
-  --surface-high: #202020;
+  --surface-high: #1A1A1A;
   --surface-muted: #1A1A1A;
   --bg-hover: #222222;
   --transaction-bg: #121212;
-  --card-nested-bg: #181818;
+  --card-nested-bg: #1A1A1A;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
   --chip-bg: #181818;
@@ -871,6 +877,11 @@ h6 {
   --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
   --on-accent-container: #FFFFFF;
   --accent-secondary-color: var(--accent-container);
+
+  --success-container: var(--surface-muted);
+  --warning-container: var(--surface-muted);
+  --danger-container: var(--surface-muted);
+  --info-container: var(--surface-muted);
 }
 
 .dark {
@@ -886,15 +897,15 @@ h6 {
   --surface-solid: #1C1C1C;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #1C1C1C;
-  --surface-elevated: #1C1C1C;
-  --surface-elevated-gradient: #1C1C1C;
+  --surface-raised: #242424;
+  --surface-elevated: #242424;
+  --surface-elevated-gradient: #242424;
   --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: rgba(255, 255, 255, 0.06);
-  --surface-muted: rgba(255, 255, 255, 0.05);
-  --bg-hover: rgba(255, 255, 255, 0.08);
+  --surface-high: #252525;
+  --surface-muted: #252525;
+  --bg-hover: #2E2E2E;
   --surface-tint: transparent;
 
   /* Typography */
@@ -926,7 +937,7 @@ h6 {
   --chip-active-text: #FFFFFF;
 
   --transaction-bg: #1C1C1C;
-  --card-nested-bg: rgba(255, 255, 255, 0.05);
+  --card-nested-bg: #252525;
   --remaining-today-gradient: #1C1C1C;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
@@ -945,13 +956,13 @@ h6 {
 
   /* Status Colors */
   --success-color: #4ADE80;
-  --success-container: #163025;
+  --success-container: var(--surface-muted);
   --warning-color: #FBBF24;
-  --warning-container: #342A16;
+  --warning-container: var(--surface-muted);
   --danger-color: #FF8080;
-  --danger-container: #381F1F;
+  --danger-container: var(--surface-muted);
   --info-color: #FFFFFF;
-  --info-container: #1C1C1C;
+  --info-container: var(--surface-muted);
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-inactive-color: #B8B8B8;

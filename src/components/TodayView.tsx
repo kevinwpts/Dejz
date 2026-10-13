@@ -393,9 +393,9 @@ export function TodayView({
       />
 
       {/* 2. Category Budgets */}
-      <div className="animate-fade-in space-y-[var(--card-gap)]">
+      <div className="animate-fade-in space-y-2.5 sm:space-y-3">
         {!hasSavedBudget ? (
-          <div className="space-y-[var(--card-gap)]">
+          <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between px-0.5">
               <h2 className="text-section-title">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
@@ -423,7 +423,7 @@ export function TodayView({
             </button>
           </div>
         ) : categoryBudgetData.length > 0 ? (
-          <div className="space-y-[var(--card-gap)]">
+          <div className="space-y-2.5 sm:space-y-3">
             <div className="flex items-center justify-between px-0.5">
               <h2 className="text-section-title">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
@@ -443,7 +443,7 @@ export function TodayView({
 
             {/* Horisontell karusell av mini-kort för kategoribudgetar (utan mätare) */}
             <div
-              className="flex gap-2.5 overflow-x-auto py-1 px-0.5 no-scrollbar select-none snap-x snap-mandatory"
+              className="flex gap-3 overflow-x-auto py-1.5 px-0.5 no-scrollbar select-none snap-x snap-mandatory"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -464,7 +464,7 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       handleCategoryClick(cat.name);
                     }}
-                    className="snap-start flex-shrink-0 min-w-[140px] sm:min-w-[155px] p-3 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2.5 shadow-subtle group select-none"
+                    className="snap-start flex-shrink-0 min-w-[152px] sm:min-w-[172px] p-3.5 sm:p-4 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-3 shadow-subtle group select-none"
                   >
                     {/* Ikon */}
                     <div className="flex items-center justify-between gap-2">
@@ -472,8 +472,8 @@ export function TodayView({
                     </div>
 
                     {/* Kategorinamn och Belopp */}
-                    <div className="min-w-0">
-                      <span className="text-body-medium font-bold text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
+                    <div className="min-w-0 pt-0.5">
+                      <span className="text-body-medium font-bold text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-1">
                         {cat.name}
                       </span>
                       <span
@@ -507,9 +507,9 @@ export function TodayView({
       */}
 
       {/* 3. Unified Timeline & Transactions Section */}
-      <div className="space-y-[var(--card-gap)] sm:space-y-[var(--card-gap)]">
+      <div className="space-y-3.5 sm:space-y-4">
         {/* Timeline + Connected Date Header */}
-        <div className="space-y-2.5 sm:space-y-3">
+        <div className="space-y-3 sm:space-y-3.5">
           {calendarDays && calendarDays.length > 0 && (
             <div className="animate-fade-in -mx-1 px-1">
               <PeriodTimeline
@@ -555,7 +555,7 @@ export function TodayView({
         </div>
 
         {/* Selected Day's Transactions List */}
-        <div className="space-y-[var(--card-gap)] pt-1">
+        <div className="space-y-2.5 pt-0.5">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
               <motion.div className="space-y-[var(--card-gap)]" key="transactions">
@@ -583,7 +583,7 @@ export function TodayView({
             ) : displayedFixedTransactions.length === 0 ? (
               <EmptyState
                 title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                description={isTodaySelected ? (lang === "en" ? "Add an expense or income to track today's spending." : "Lägg till en utgift eller inkomst för att hålla koll på dagsbudgeten.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                description={isTodaySelected ? (lang === "en" ? "Add an expense or income to keep track of your finances." : "Lägg till en utgift eller inkomst för att hålla koll på din ekonomi.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
                 onAction={() => onAddTransaction(selectedDate)}
                 actionLabel={`+ ${t("addExpense")}`}
               />

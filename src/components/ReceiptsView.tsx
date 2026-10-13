@@ -41,7 +41,14 @@ export function ReceiptsView({
     return merchantMatch || categoryMatch || noteMatch || amountMatch;
   });
 
-  const totalAmount = filteredTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const getCountText = (count: number) => {
+    if (isEn) {
+      if (count === 1) return '1 receipt';
+      return `${count} receipts`;
+    }
+    if (count === 1) return '1 kvitto';
+    return `${count} kvitton`;
+  };
 
   const getLocale = () => {
     const lang = config?.language || 'sv';
@@ -70,44 +77,7 @@ export function ReceiptsView({
       exit={{ opacity: 0, y: -8 }}
       className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0"
     >
-      {/* 1. Metric Summary Cards matching AnalysisView standard */}
-      {receiptTransactions.length > 0 && (
-        <div className="grid grid-cols-2 gap-2.5 select-none">
-          {/* Card 1: Totalt belopp */}
-          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between min-w-0">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
-                {isEn ? 'Total amount' : 'Totalt belopp'}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
-              <span className="text-large-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] truncate max-w-full">
-                {formatAmount(totalAmount, config.language)}
-              </span>
-              <span className="text-label font-medium text-[var(--text-secondary)] shrink-0">
-                {curr}
-              </span>
-            </div>
-          </Card>
-
-          {/* Card 2: Sparade kvitton */}
-          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between min-w-0">
-            <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
-              {isEn ? 'Saved receipts' : 'Sparade kvitton'}
-            </span>
-            <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
-              <span className="text-large-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] truncate max-w-full">
-                {filteredTransactions.length}
-              </span>
-              <span className="text-label font-medium text-[var(--text-secondary)] shrink-0">
-                {isEn ? 'st' : 'st'}
-              </span>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* 2. Search Input adhering to standard Input search variant */}
+      {/* 1. Search Input adhering to standard Input search variant */}
       {receiptTransactions.length > 0 && (
         <Input
           variant="search"
@@ -120,8 +90,14 @@ export function ReceiptsView({
         />
       )}
 
-      {/* 3. Receipts List matching Dejz Card and TransactionItem hierarchy */}
+      {/* 2. Receipts List matching Dejz Card and TransactionItem hierarchy */}
       <div className="space-y-[var(--card-gap)] min-w-0 w-full">
+        {receiptTransactions.length > 0 && (
+          <p className="text-secondary text-[var(--text-secondary)] font-medium px-0.5 select-none">
+            {getCountText(filteredTransactions.length)}
+          </p>
+        )}
+
         {filteredTransactions.length > 0 ? (
           <div className="space-y-[var(--card-gap)] min-w-0 w-full">
             <AnimatePresence mode="popLayout">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, RotateCcw, ChevronRight } from 'lucide-react';
+import { Plus, RotateCcw, ChevronRight, Sparkles } from 'lucide-react';
 import { Config, Income, FixedExpense, Frequency, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
@@ -84,7 +84,107 @@ export function BudgetCategoriesView({
   } | null>(null);
   const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
 
-  // --- Calculations ---
+  // --- Auto Allocate Modal State ---
+  const [isAutoAllocateModalOpen, setIsAutoAllocateModalOpen] = useState(false);
+  const [autoAllocateData, setAutoAllocateData] = useState<{
+    proposed: { name: string; budget: number; icon: string; color?: string; id?: string }[];
+    unallocatedPool: number;
+  } | null>(null);
+  const [editableProposedBudgets, setEditableProposedBudgets] = useState<Record<string, string>>({});
+
+  const handleOpenAutoAllocate = () => {
+    const categories = config.categories || DEFAULT_EXPENSE_CATEGORIES;
+    const pool = totalPoolToAllocate;
+    
+    const catData = categories.map((cat) => {
+      const fixed = Math.round(getFixedSpentForCategory(cat.name));
+      const manual = Number(cat.budget) || 0;
+      const hasManual = manual > fixed;
+      return {
+        ...cat,
+        fixedSpent: fixed,
+        manualBudget: manual,
+        hasManual,
+      };
+    });
+
+    const lockedSum = catData.reduce((sum, c) => {
+      return sum + Math.max(c.fixedSpent, c.hasManual ? c.manualBudget : c.fixedSpent);
+    }, 0);
+
+    const unallocatedPool = Math.max(0, pool - lockedSum);
+    const eligibleCats = catData.filter((c) => !c.hasManual && c.fixedSpent <= 2000);
+
+    const getVariableWeight = (name: string) => {
+      const lower = name.toLowerCase();
+      if (lower.includes('mat') || lower.includes('dagligvaror') || lower.includes('livsmedel') || lower.includes('mad') || lower.includes('ruoka') || lower.includes('groceries')) return 0.50;
+      if (lower.includes('transport') || lower.includes('bensin') || lower.includes('bil') || lower.includes('liikenne')) return 0.20;
+      if (lower.includes('restaurang') || lower.includes('fika') || lower.includes('cafe') || lower.includes('ravintola')) return 0.15;
+      if (lower.includes('shopping') || lower.includes('kläder') || lower.includes('ostokset')) return 0.10;
+      return 0.05;
+    };
+
+    const totalWeight = eligibleCats.reduce((sum, c) => sum + getVariableWeight(c.name), 0) || 1;
+
+    const proposed = catData.map((c) => {
+      if (c.hasManual) {
+        return { name: c.name, budget: c.manualBudget, icon: c.icon, color: c.color, id: c.id };
+      }
+      if (c.fixedSpent > 2000) {
+        // Heavy fixed cost category (e.g. Rent/Boende), set budget equal to fixed expenses
+        return { name: c.name, budget: c.fixedSpent, icon: c.icon, color: c.color, id: c.id };
+      }
+      const weight = getVariableWeight(c.name);
+      const rawShare = (weight / totalWeight) * unallocatedPool;
+      // Round to nearest 100 kr for natural rounded numbers
+      const roundedShare = Math.round(rawShare / 100) * 100;
+      const finalVal = Math.max(c.fixedSpent, c.fixedSpent + roundedShare);
+      return { name: c.name, budget: finalVal, icon: c.icon, color: c.color, id: c.id };
+    });
+
+    const initialEditable: Record<string, string> = {};
+    proposed.forEach(p => {
+      initialEditable[p.name] = String(p.budget);
+    });
+
+    setAutoAllocateData({ proposed, unallocatedPool });
+    setEditableProposedBudgets(initialEditable);
+    setIsAutoAllocateModalOpen(true);
+  };
+
+  const handleApplyAutoAllocate = async () => {
+    if (!autoAllocateData) return;
+    const updatedCategories = (config.categories || DEFAULT_EXPENSE_CATEGORIES).map((c) => {
+      const newBudgetValue = Number(editableProposedBudgets[c.name]);
+      const fixed = Math.round(getFixedSpentForCategory(c.name));
+      const finalVal = Math.max(fixed, !isNaN(newBudgetValue) ? newBudgetValue : 0);
+      return {
+        ...c,
+        budget: finalVal > 0 ? finalVal : null,
+      };
+    });
+
+    try {
+      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
+    } catch (_e) {
+      // ignore
+    }
+
+    const updatedConfig = {
+      ...config,
+      categories: updatedCategories,
+      hasSavedInitialBudget: true,
+    };
+    setConfig(updatedConfig);
+    if (userId) {
+      try {
+        await dataService.saveSettings(userId, updatedConfig);
+      } catch (err) {
+        console.warn('Could not save auto-allocated budget:', err);
+      }
+    }
+    setIsAutoAllocateModalOpen(false);
+  };
   const activeExpenses = getActiveFixedExpenses(fixedExpenses, new Date(), stats?.periodStart, stats?.periodEnd);
 
   const getFixedSpentForCategory = (catName: string) => {
@@ -353,7 +453,7 @@ export function BudgetCategoriesView({
               </div>
 
               {/* Diskret förloppslinje */}
-              <div className="w-full h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
+              <div className="w-full h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden mb-2">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
                     isOverAllocated ? 'bg-[var(--danger-color)]' : 'bg-[var(--accent-color)]'
@@ -362,6 +462,21 @@ export function BudgetCategoriesView({
                     width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
                   }}
                 />
+              </div>
+
+              {/* Auto Allocate Button */}
+              <div className="flex justify-end pt-1">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleOpenAutoAllocate}
+                  disabled={remainingToAllocate <= 0}
+                  icon={<Sparkles size={14} className="text-[var(--accent-color)]" />}
+                  className="text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isEn ? 'Auto-allocate' : config.language === 'da' ? 'Fordel automatisk' : config.language === 'no' ? 'Fordel automatisk' : config.language === 'fi' ? 'Jaa automaattisesti' : 'Fördela automatiskt'}
+                </Button>
               </div>
             </motion.div>
           )}
@@ -711,6 +826,80 @@ export function BudgetCategoriesView({
           t={t}
         />
       )}
+
+      {/* Auto Allocate Modal / Bottom Sheet */}
+      <Modal
+        isOpen={isAutoAllocateModalOpen}
+        onClose={() => setIsAutoAllocateModalOpen(false)}
+        size="md"
+        title={isEn ? 'Automatic budget proposal' : config.language === 'da' ? 'Automatisk budgetforslag' : config.language === 'no' ? 'Automatisk budsjettforslag' : config.language === 'fi' ? 'Automaattinen budjettiehdotus' : 'Automatiskt budgetförslag'}
+        subtitle={isEn ? 'Based on your income, fixed expenses, and recommended weights.' : config.language === 'da' ? 'Baseret på dine indtægter, faste udgifter og anbefalede vægte.' : config.language === 'no' ? 'Basert på inntekter, faste utgifter og anbefalte vekter.' : config.language === 'fi' ? 'Perustuu tuloihin, kiinteisiin kuluihin ja suositeltuihin painotuksiin.' : 'Baserat på dina inkomster, fasta kostnader och rekommenderade vikter.'}
+        showCloseButton={true}
+        bodyClassName="p-5 sm:p-6 space-y-4"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            {isEn
+              ? 'We have allocated your budget based on your fixed expenses and available funds. Adjust the amounts before saving.'
+              : config.language === 'da'
+              ? 'Vi har fordelt dit budget ud fra dine faste udgifter og tilgængelige penge. Juster beløbene, før du gemmer.'
+              : config.language === 'no'
+              ? 'Vi har fordelt budsjettet ditt basert på faste utgifter og tilgjengelige penger. Juster beløpene før du lagrer.'
+              : config.language === 'fi'
+              ? 'Olemme jaanut budjettisi kiinteiden kulujen ja käytettävissä olevien varojen perusteella. Säädä summia ennen tallennusta.'
+              : 'Vi har fördelat din budget utifrån dina fasta utgifter och tillgängliga pengar. Justera beloppen innan du sparar.'}
+          </p>
+
+          <div className="max-h-60 overflow-y-auto space-y-2 pr-1 divide-y divide-[var(--border-subtle)]">
+            {(autoAllocateData?.proposed || []).map((item) => {
+              const catColor = item.color || getCategoryColor(item.name, config?.categories);
+              return (
+                <div key={item.name} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <CategoryIcon icon={item.icon} color={catColor} size="xs" categoryName={item.name} />
+                    <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                      {item.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={editableProposedBudgets[item.name] !== undefined ? editableProposedBudgets[item.name] : item.budget}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEditableProposedBudgets((prev) => ({ ...prev, [item.name]: val }));
+                      }}
+                      className="w-24 text-right bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-md px-2 py-1 text-xs font-bold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
+                    />
+                    <span className="text-xs text-[var(--text-secondary)]">{curr}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-2 flex items-center gap-3">
+            <Button
+              variant="secondary"
+              fullWidth
+              size="md"
+              onClick={() => setIsAutoAllocateModalOpen(false)}
+            >
+              {isEn ? 'Cancel' : config.language === 'da' ? 'Annuller' : config.language === 'no' ? 'Avbryt' : config.language === 'fi' ? 'Peruuta' : 'Avbryt'}
+            </Button>
+            <Button
+              variant="primary"
+              fullWidth
+              size="md"
+              onClick={handleApplyAutoAllocate}
+            >
+              {isEn ? 'Apply proposal' : config.language === 'da' ? 'Brug forslag' : config.language === 'no' ? 'Bruk forslag' : config.language === 'fi' ? 'Käytä ehdotusta' : 'Använd förslag'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

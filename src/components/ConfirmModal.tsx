@@ -29,8 +29,9 @@ export function ConfirmModal({
   const displayConfirmText = confirmText || (t ? t('confirm') : 'Bekräfta');
   const displayCancelText = cancelText || (t ? t('cancel') : 'Avbryt');
 
-  const iconColor = 'text-[var(--accent-color)]';
-  const iconBg = 'bg-[var(--accent-color)]/10 border-[var(--accent-color)]/20';
+  const isDanger = _variant === 'danger';
+  const iconColor = isDanger ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]';
+  const iconBg = 'bg-[var(--surface-muted)] border-transparent';
 
   return (
     <Modal
@@ -43,7 +44,7 @@ export function ConfirmModal({
       bodyClassName="p-6 sm:p-7 text-center"
     >
       <div className="relative z-10 text-center">
-        <div className={`w-14 h-14 ${iconBg} ${iconColor} rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border shadow-xs`}>
+        <div className={`w-14 h-14 ${iconBg} ${iconColor} rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border shadow-none`}>
           <AlertCircle size={28} strokeWidth={2} />
         </div>
 

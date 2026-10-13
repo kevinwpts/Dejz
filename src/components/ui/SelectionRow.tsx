@@ -42,7 +42,7 @@ export function SelectionRow<T = string>({
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
           <div
-            className="w-8 h-8 rounded-[var(--radius-icon-button,10px)] flex items-center justify-center shrink-0 bg-[var(--surface-muted)] text-[var(--text-primary)]"
+            className="w-8 h-8 flex items-center justify-center shrink-0 bg-transparent text-[var(--text-primary)]"
           >
             {icon}
           </div>

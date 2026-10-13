@@ -2,9 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Icon } from './ui';
 import { TranslationKey } from '../i18n';
-import { BudgetGauge } from './BudgetGauge';
+import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 import { getBudgetStatus } from '../utils/budgetStatus';
+import { feedback } from '../utils/feedback';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -35,6 +36,9 @@ export function GreetingModule({
   const isEn = language === 'en';
   const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
 
+  const remainingCents = stats?.remainingPeriodCents || 0;
+  const disposablePotCents = stats?.disposablePot || 0;
+
   const effectiveRemainingDays = useMemo(() => {
     if (!stats) return 1;
     const normDate = new Date();
@@ -60,38 +64,119 @@ export function GreetingModule({
 
   const status = useMemo(() => {
     return getBudgetStatus({
-      remainingCents: stats?.remainingPeriodCents || 0,
-      disposablePotCents: stats?.disposablePot || 0,
+      remainingCents: remainingCents,
+      disposablePotCents: disposablePotCents,
       remainingDays: effectiveRemainingDays,
       totalDays: totalDaysInPeriod,
     });
-  }, [stats?.remainingPeriodCents, stats?.disposablePot, effectiveRemainingDays, totalDaysInPeriod]);
+  }, [remainingCents, disposablePotCents, effectiveRemainingDays, totalDaysInPeriod]);
+
+  const startPot = useMemo(() => {
+    if (disposablePotCents > 0) return disposablePotCents;
+    if (remainingCents > 0) return remainingCents;
+    return 0;
+  }, [disposablePotCents, remainingCents]);
+
+  const percentage = useMemo(() => {
+    if (startPot <= 0) return 0;
+    if (remainingCents <= 0) return 0;
+    return Math.round((remainingCents / startPot) * 100);
+  }, [remainingCents, startPot]);
+
+  const clampedFraction = useMemo(() => {
+    if (startPot <= 0) return 0;
+    if (remainingCents <= 0) return 0;
+    return Math.max(0, Math.min(1, remainingCents / startPot));
+  }, [remainingCents, startPot]);
 
   return (
-    <div className="flex flex-col font-sans relative">
-      {/* Unified Summary Main Module Card */}
+    <div className="flex flex-col font-sans relative space-y-3.5">
+      {/* 1. Main Neutral Hero Card - Kvar att spendera */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         className="w-full select-none"
       >
-        {/* Budget Gauge with Status-based Color & Integrated Period/Payday */}
-        <BudgetGauge
-          remainingCents={stats?.remainingPeriodCents || 0}
-          disposablePotCents={stats?.disposablePot || 0}
-          currency={currency}
-          language={language}
-          label={t('totalRemaining')}
-          onOpenInfo={() => setIsCalculationInfoOpen(true)}
-          remainingDays={effectiveRemainingDays}
-          totalDays={totalDaysInPeriod}
-          calendarDays={calendarDays}
-          periodIntervalText={periodIntervalText}
-          paydayText={paydayText}
-          onOpenPeriodInfo={onOpenPeriodInfo}
-        />
+        <div
+          className="bg-[var(--surface-color)] border border-subtle rounded-card p-4 sm:p-5 relative overflow-hidden transition-all shadow-subtle flex flex-col justify-between gap-3 text-[var(--text-primary)]"
+        >
+          {/* Top Row: Label & Info button */}
+          <div className="flex items-center justify-between">
+            <span className="text-card-title sm:text-body font-medium text-[var(--text-secondary)]">
+              {t('totalRemaining') || (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.tap === 'function') feedback.tap();
+                setIsCalculationInfoOpen(true);
+              }}
+              className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
+              aria-label="Info"
+              title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
+            >
+              <Icon name="info" size={14} />
+            </button>
+          </div>
+
+          {/* Middle: Large Amount */}
+          <div className="flex items-baseline gap-1.5 min-w-0 py-0.5">
+            <AnimatedNumber
+              value={remainingCents}
+              className="text-hero-amount leading-none font-bold tabular-nums tracking-tight text-[var(--text-primary)]"
+              formatter={(val) => formatAmount(val, language)}
+            />
+            <span className="text-sm sm:text-base leading-none shrink-0 font-medium text-[var(--text-secondary)]">
+              {currency || 'kr'}
+            </span>
+          </div>
+
+          {/* Bottom: Thin progress bar + percentage text */}
+          <div className="space-y-1 pt-1">
+            <div className="flex items-center justify-between text-micro-label font-medium text-[var(--text-secondary)]">
+              <span>{isEn ? 'Remaining spendable' : 'Spenderbart kvar'}</span>
+              <span className="font-amount tabular-nums font-bold text-[var(--text-primary)]">
+                {percentage} % {isEn ? 'left' : 'kvar'}
+              </span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-[var(--surface-muted)] overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-500 ease-out"
+                style={{ 
+                  width: `${Math.max(0, Math.min(100, clampedFraction * 100))}%`,
+                  backgroundColor: 'var(--accent-color)'
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </motion.div>
+
+      {/* 2. Two Smaller Info Cards Underneath (Side by Side) */}
+      <div className="grid grid-cols-2 gap-2.5">
+        {/* Left Card: Aktuell period */}
+        <div className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 flex flex-col justify-between gap-2 shadow-subtle cursor-pointer hover:border-[var(--border-control)] transition-all" onClick={onOpenPeriodInfo}>
+          <div className="flex items-center gap-1.5 text-label font-medium text-[var(--text-secondary)]">
+            <Icon name="calendar" size={14} className="text-[var(--text-secondary)] shrink-0" />
+            <span className="truncate">{isEn ? 'Current period' : 'Aktuell period'}</span>
+          </div>
+          <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate block font-sans">
+            {periodIntervalText || (isEn ? 'Current period' : 'Aktuell period')}
+          </span>
+        </div>
+
+        {/* Right Card: Nästa lön */}
+        <div className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 flex flex-col justify-between gap-2 shadow-subtle">
+          <div className="flex items-center gap-1.5 text-label font-medium text-[var(--text-secondary)] justify-end">
+            <span className="truncate">{isEn ? 'Next payday' : 'Nästa lön'}</span>
+            <Icon name="coins" size={14} className="text-[var(--text-secondary)] shrink-0" />
+          </div>
+          <span className="text-xs sm:text-sm font-bold font-amount tabular-nums text-[var(--text-primary)] truncate text-right block">
+            {paydayText || '-'}
+          </span>
+        </div>
+      </div>
 
       {/* Detailed Calculation Info Modal */}
       {isCalculationInfoOpen && (

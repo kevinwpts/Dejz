@@ -136,7 +136,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="calendar" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={t('salary')}
           subtitle={
             config.payday 
@@ -151,7 +150,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="chart-pie" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config.language === 'en' ? 'Budget' : 'Budget'}
           subtitle={config.language === 'en' ? 'Allocate monthly budget per category' : 'Fördela budget per kategori'}
           onClick={() => handleSectionClick('budget')}
@@ -162,7 +160,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="tag" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config.language === 'en' ? 'Categories' : 'Kategorier'}
           subtitle={config.language === 'en' ? 'Manage expense and income categories' : 'Hantera utgifts- och inkomstkategorier'}
           onClick={() => handleSectionClick('categories')}
@@ -173,7 +170,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="credit-card" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}
           subtitle={`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
           onClick={() => handleSectionClick('paymentMethods')}
@@ -184,7 +180,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="coins" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config?.language === 'en' ? 'Currency' : 'Valuta'}
           subtitle={config.currency || 'kr'}
           onClick={() => handleSectionClick('currency')}
@@ -195,7 +190,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="globe" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={t('language')}
           subtitle={config.language === 'en' ? 'English' : 'Svenska'}
           onClick={() => handleSectionClick('language')}
@@ -206,9 +200,8 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="palette" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config?.language === 'en' ? 'Appearance' : 'Utseende'}
-          subtitle={config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
+          subtitle={config.darkMode ? (config?.language === 'en' ? 'Dark' : 'Mörkt') : (config?.language === 'en' ? 'Light' : 'Ljust')}
           onClick={() => handleSectionClick('appearance')}
         />
 
@@ -217,7 +210,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="bell" size={18} />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config?.language === 'en' ? 'Notifications' : 'Notiser'}
           subtitle={config?.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
           onClick={() => handleSectionClick('notifications')}
@@ -228,7 +220,6 @@ export function SettingsMainView({
           density="compact"
           showChevron
           icon={<Icon name="ban" size={18} className="text-[var(--danger-color)]" />}
-          iconBg="bg-black/5 dark:bg-white/5"
           title={config?.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
           subtitle={config?.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
           onClick={onCancelledSubscriptionsClick}

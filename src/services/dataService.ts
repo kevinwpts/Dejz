@@ -67,7 +67,7 @@ export const dataService = {
       securityLock: profileData.security_lock,
       darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
       themeMode: profileData.theme_mode || localSavedConfig?.themeMode || 'system',
-      themeColor: profileData.theme_color || localSavedConfig?.themeColor || '#3B82F6',
+      themeColor: profileData.theme_color || localSavedConfig?.themeColor || '#8BDCC0',
       quickChoices: profileData.quick_choices || [],
       savingsGoals: (profileData.savings_goals && Array.isArray(profileData.savings_goals) && profileData.savings_goals.length > 0)
         ? profileData.savings_goals

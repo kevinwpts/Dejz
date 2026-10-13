@@ -359,7 +359,7 @@ export function ProfileView({
           onClick={() => handleSectionClick('receipts')}
           className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
-          <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:bg-[var(--accent-color)]/10 group-hover:text-[var(--accent-color)] transition-colors">
+          <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <Receipt size={20} strokeWidth={2} />
           </div>
           <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
@@ -371,7 +371,7 @@ export function ProfileView({
           onClick={() => handleSectionClick('debts')}
           className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
-          <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:bg-[var(--accent-color)]/10 group-hover:text-[var(--accent-color)] transition-colors">
+          <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <HandCoins size={20} strokeWidth={2} />
           </div>
           <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
@@ -383,7 +383,7 @@ export function ProfileView({
           onClick={() => handleSectionClick('starred')}
           className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
-          <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:bg-[var(--accent-color)]/10 group-hover:text-[var(--accent-color)] transition-colors">
+          <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <Heart size={20} strokeWidth={2} />
           </div>
           <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
@@ -407,7 +407,6 @@ export function ProfileView({
                 showChevron
                 multiline={true}
                 icon={<ShieldCheck size={18} strokeWidth={2} />}
-                iconBg="bg-[var(--warning-container)]"
                 iconColor="text-[var(--warning-color)]"
                 title={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'}
                 subtitle={config.language === 'en' ? 'Owner tools, subscription simulator & feedback' : 'Ägarverktyg, prenumerationssimulator & feedback'}
@@ -428,7 +427,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Calendar size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('salary')}
               onClick={() => handleSectionClick('salary')}
             />
@@ -437,7 +435,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<PieChart size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={config.language === 'en' ? 'Budget' : 'Budget'}
               onClick={() => handleSectionClick('budget')}
             />
@@ -446,7 +443,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Tag size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={config.language === 'en' ? 'Categories' : 'Kategorier'}
               onClick={() => handleSectionClick('categories')}
             />
@@ -455,7 +451,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<CreditCard size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('paymentMethod')}
               onClick={() => handleSectionClick('paymentMethods')}
             />
@@ -464,7 +459,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Coins size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={config.language === 'en' ? 'Currency' : 'Valuta'}
               value={
                 <span className="text-label font-semibold text-[var(--text-secondary)]">
@@ -489,7 +483,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Users2 size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'}
               onClick={() => handleSectionClick('sharedBudget')}
             />
@@ -498,7 +491,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<BookOpen size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'}
               onClick={() => handleSectionClick('guides')}
             />
@@ -516,7 +508,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Bell size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={config.language === 'en' ? 'Notifications' : 'Notiser'}
               onClick={() => handleSectionClick('notifications')}
             />
@@ -526,7 +517,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Palette size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('appearance' as any) || 'Utseende'}
               value={
                 <span className="text-label font-semibold text-[var(--text-secondary)]">
@@ -540,7 +530,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Globe size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('language')}
               onClick={() => handleSectionClick('language')}
             />
@@ -549,7 +538,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Lock size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('pinLock')}
               onClick={onSecurityClick}
             />
@@ -558,7 +546,6 @@ export function ProfileView({
               density="compact"
               multiline
               icon={<Calendar size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('showFixedExpensesInCalendar')}
               subtitle={t('showFixedExpensesInCalendarDesc')}
               control={
@@ -581,7 +568,6 @@ export function ProfileView({
               density="compact"
               multiline
               icon={<History size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('showFixedExpensesInHistory')}
               subtitle={t('showFixedExpensesInHistoryDesc')}
               control={
@@ -609,7 +595,6 @@ export function ProfileView({
               density="compact"
               multiline
               icon={<EyeOff size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
               subtitle={t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
               control={
@@ -643,7 +628,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Mail size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('feedback')}
               onClick={onFeedbackClick}
             />
@@ -652,7 +636,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Download size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('exportData')}
               onClick={onExportData}
             />
@@ -661,7 +644,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<Shield size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('privacyPolicy')}
               onClick={() => onLegalClick('privacy')}
             />
@@ -670,7 +652,6 @@ export function ProfileView({
               density="compact"
               showChevron
               icon={<FileText size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('termsOfService')}
               onClick={() => onLegalClick('terms')}
             />
@@ -710,7 +691,6 @@ export function ProfileView({
               variant="grouped"
               density="compact"
               icon={<LogOut size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
               title={t('logout')}
               onClick={onLogout}
             />
@@ -719,7 +699,6 @@ export function ProfileView({
               density="compact"
               destructive
               icon={<Trash2 size={18} strokeWidth={2} />}
-              iconBg="bg-[var(--danger-container)]"
               iconColor="text-[var(--danger-color)]"
               title={t('deleteAccount')}
               titleClassName="text-[var(--danger-color)]"

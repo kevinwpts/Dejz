@@ -525,14 +525,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[58px]"
+              className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[58px] border-b border-subtle"
             >
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
@@ -558,7 +558,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Row 2: Arrival / Payout Day */}
-            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group border-b border-subtle">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('arrivalDay')}
               </span>
@@ -586,7 +586,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Row 3: Frequency */}
-            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group border-b border-subtle">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
@@ -615,7 +615,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Row 4 (if non-monthly): Start Month (directly below frequency) */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group border-b border-subtle">
                 <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('startMonthLabel')}
                 </span>
@@ -649,7 +649,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             )}
 
             {/* Row 5: Type (Fixed / Variable) */}
-            <div className="p-4 flex items-center justify-between min-h-[58px]">
+            <div className="p-4 flex items-center justify-between min-h-[58px] border-b border-subtle">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
@@ -667,7 +667,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Row 6: Own Note */}
-            <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-3 last:border-none">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('ownNote')}
               </span>

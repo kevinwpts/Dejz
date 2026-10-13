@@ -807,8 +807,9 @@ export function TransactionModal({
           </AnimatePresence>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
+          <div className="rounded-card bg-[var(--surface-color)] overflow-hidden border-none shadow-none">
             {/* Row 1: Category or Split Categories */}
+            <div className="border-b border-subtle">
             {type === 'expense' && splits.length > 0 ? (
               /* Expanded Split Category View */
               <div>
@@ -1102,9 +1103,10 @@ export function TransactionModal({
                 )}
               </div>
             )}
+            </div>
 
             {/* Row 2: Date */}
-            <div className="p-4 flex items-center justify-between min-h-[60px]">
+            <div className="p-4 flex items-center justify-between min-h-[60px] border-b border-subtle">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
@@ -1160,7 +1162,7 @@ export function TransactionModal({
             </div>
 
             {/* Row 3: Note */}
-            <div className="p-4 flex items-center justify-between min-h-[60px] gap-3">
+            <div className="p-4 flex items-center justify-between min-h-[60px] gap-3 border-b border-subtle">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('ownNote')}
               </span>
@@ -1193,13 +1195,13 @@ export function TransactionModal({
               </div>
             </div>
 
-            {/* Row 5: Heart / Starred */}
+            {/* Row 4: Heart / Starred */}
             <div 
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsStarred(!isStarred);
               }}
-              className="p-4 flex items-center justify-between min-h-[60px] border-t border-subtle cursor-pointer select-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+              className="p-4 flex items-center justify-between min-h-[60px] border-b border-subtle cursor-pointer select-none hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
             >
               <div className="flex items-center gap-2">
                 <Heart size={16} className={isStarred ? "fill-rose-500 text-rose-500 shrink-0" : "text-[var(--text-secondary)] shrink-0"} />
@@ -1216,8 +1218,8 @@ export function TransactionModal({
               />
             </div>
 
-            {/* Row 4: Receipt / Attachment */}
-            <div className="p-4 flex items-center justify-between min-h-[60px]">
+            {/* Row 5: Receipt / Attachment */}
+            <div className="p-4 flex items-center justify-between min-h-[60px] last:border-none">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Kvitto / Bilaga'}
               </span>

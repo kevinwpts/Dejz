@@ -28,7 +28,7 @@ export interface ListRowProps {
 
 export const ListRow: React.FC<ListRowProps> = ({
   icon,
-  iconBg = 'bg-[var(--surface-muted)]',
+  iconBg = 'bg-transparent',
   iconColor = 'text-[var(--text-primary)]',
   iconClassName = '',
   title,
@@ -48,6 +48,7 @@ export const ListRow: React.FC<ListRowProps> = ({
   titleClassName = '',
   subtitleClassName = '',
   multiline = false,
+  isLast = false,
 }) => {
   const isClickable = Boolean(onClick && !disabled);
   const isCompact = density === 'compact' || (density !== 'default' && variant === 'grouped');
@@ -57,8 +58,8 @@ export const ListRow: React.FC<ListRowProps> = ({
       ? 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[54px] rounded-[var(--radius-card,20px)] shadow-subtle'
       : 'bg-[var(--surface-color)] border-none card-p min-h-[60px] rounded-[var(--radius-card,20px)] shadow-subtle',
     grouped: isCompact
-      ? 'bg-transparent px-4 py-2.5 min-h-[50px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
-      : 'bg-transparent px-4 py-3 min-h-[56px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
+      ? `bg-transparent px-4 py-2.5 min-h-[50px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] ${isLast ? '' : 'border-b border-subtle'}`
+      : `bg-transparent px-4 py-3 min-h-[56px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] ${isLast ? '' : 'border-b border-subtle'}`,
     plain: isCompact ? 'bg-transparent px-3 py-2 min-h-[46px]' : 'bg-transparent px-3.5 py-2.5 min-h-[50px]',
   }[variant];
 

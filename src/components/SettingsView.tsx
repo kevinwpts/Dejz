@@ -137,7 +137,6 @@ export function SettingsView({
                     <CategoryIcon icon={method.icon || 'credit-card'} size="sm" noBackground />
                   )
                 }
-                iconBg="bg-black/5 dark:bg-white/5"
                 iconColor="text-[var(--text-secondary)]"
                 title={method.name}
                 onClick={() => {
@@ -214,7 +213,7 @@ export function SettingsView({
   const isEn = config.language === 'en';
 
   const THEME_COLOR_OPTIONS = [
-    { id: 'dejz', name: 'Dejz', hex: '#3B82F6' },
+    { id: 'dejz', name: 'Dejz Mint', hex: '#8BDCC0' },
     { id: 'purple', name: isEn ? 'Purple' : 'Lila', hex: '#635BFF' },
     { id: 'black', name: isEn ? 'Black' : 'Svart', hex: '#1C1917' },
     { id: 'green', name: isEn ? 'Green' : 'Grön', hex: '#16B878' },
@@ -223,37 +222,188 @@ export function SettingsView({
   ];
 
   const renderAppearanceSettings = () => {
+    const isDarkSelected = config.darkMode;
+
     return (
       <div className="space-y-6 w-full py-2">
+        {/* Utseendeläge - Phone Mockup Selection */}
         <div className="space-y-3">
           <label className="text-sm font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
             {isEn ? 'Appearance mode' : 'Utseendeläge'}
           </label>
-          <div className="grid grid-cols-3 gap-2.5">
-            {[
-              { id: 'system', label: isEn ? 'System' : 'System', icon: <Icon name="monitor" size={18} /> },
-              { id: 'light', label: isEn ? 'Light' : 'Ljust', icon: <Icon name="sun" size={18} /> },
-              { id: 'dark', label: isEn ? 'Dark' : 'Mörkt', icon: <Icon name="moon" size={18} /> },
-            ].map((mode) => {
-              const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
-              return (
-                <button
-                  key={mode.id}
-                  onClick={() => {
-                    const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                    setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
-                  }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[var(--radius-card)] transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none border-[var(--accent-color)]'
-                      : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
-                  }`}
-                >
-                  {mode.icon}
-                  <span className="text-xs font-bold">{mode.label}</span>
-                </button>
-              );
-            })}
+          
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 max-w-sm mx-auto sm:max-w-md pt-1">
+            {/* Light Phone Option */}
+            <button
+              type="button"
+              onClick={() => {
+                const newConfig = { ...config, themeMode: 'light' as const, darkMode: false };
+                setConfig(newConfig);
+                if (userId) {
+                  dataService.saveSettings(userId, newConfig).catch((err) => {
+                    console.warn('Could not save theme mode:', err);
+                  });
+                }
+              }}
+              className={`group flex flex-col items-center gap-2.5 p-3 sm:p-4 rounded-[var(--radius-card)] transition-all cursor-pointer relative text-left border-2 ${
+                !isDarkSelected
+                  ? 'border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/20 bg-[var(--surface-color)] shadow-xs'
+                  : 'border-subtle bg-[var(--surface-color)] hover:border-[var(--text-tertiary)] opacity-80 hover:opacity-100'
+              }`}
+            >
+              {/* Selected Badge */}
+              {!isDarkSelected && (
+                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shadow-2xs z-10">
+                  <Icon name="check" size={12} weight="bold" />
+                </div>
+              )}
+
+              {/* Phone Mockup Frame - Light */}
+              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#ECEFF3] border-4 border-[#262626] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
+                {/* Speaker / Dynamic Island */}
+                <div className="w-10 h-2 bg-[#262626] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
+                
+                {/* Mini App Header */}
+                <div className="flex items-center justify-between mb-1.5 px-0.5">
+                  <span className="text-[10px] font-black tracking-tight text-slate-800">Dejz</span>
+                  <div className="w-3.5 h-3.5 rounded-full bg-amber-400/20 flex items-center justify-center text-amber-600">
+                    <Icon name="sun" size={9} />
+                  </div>
+                </div>
+
+                {/* Mini Balance Card */}
+                <div className="bg-white rounded-lg p-2 shadow-2xs border border-slate-200/60 space-y-1 mb-1.5">
+                  <div className="text-[6.5px] uppercase font-bold text-slate-400 tracking-wider">
+                    {isEn ? 'Remaining' : 'Kvar att spendera'}
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-900 leading-tight">
+                    12 450 kr
+                  </div>
+                  <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-0.5">
+                    <div className="bg-[var(--accent-color)] h-full w-2/3 rounded-full" />
+                  </div>
+                </div>
+
+                {/* Mini List Rows */}
+                <div className="bg-white rounded-lg p-1.5 shadow-2xs border border-slate-200/60 space-y-1 mb-auto">
+                  <div className="flex items-center justify-between text-[7px]">
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="font-semibold text-slate-700">{isEn ? 'Salary' : 'Lön'}</span>
+                    </div>
+                    <span className="font-bold text-emerald-600">+32 000 kr</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[7px]">
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                      <span className="font-semibold text-slate-700">ICA Maxi</span>
+                    </div>
+                    <span className="font-bold text-slate-800">-850 kr</span>
+                  </div>
+                </div>
+
+                {/* Mini Bottom Nav Bar */}
+                <div className="pt-1 mt-1 border-t border-slate-200/80 flex justify-around items-center text-slate-400">
+                  <div className="w-2 h-2 rounded-full bg-[var(--accent-color)]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                </div>
+              </div>
+
+              {/* Label */}
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <Icon name="sun" size={15} className={!isDarkSelected ? 'text-[var(--accent-color)]' : 'text-[var(--text-secondary)]'} />
+                <span className={`text-xs font-bold tracking-tight ${!isDarkSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+                  {isEn ? 'Light' : 'Ljust'}
+                </span>
+              </div>
+            </button>
+
+            {/* Dark Phone Option */}
+            <button
+              type="button"
+              onClick={() => {
+                const newConfig = { ...config, themeMode: 'dark' as const, darkMode: true };
+                setConfig(newConfig);
+                if (userId) {
+                  dataService.saveSettings(userId, newConfig).catch((err) => {
+                    console.warn('Could not save theme mode:', err);
+                  });
+                }
+              }}
+              className={`group flex flex-col items-center gap-2.5 p-3 sm:p-4 rounded-[var(--radius-card)] transition-all cursor-pointer relative text-left border-2 ${
+                isDarkSelected
+                  ? 'border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/20 bg-[var(--surface-color)] shadow-xs'
+                  : 'border-subtle bg-[var(--surface-color)] hover:border-[var(--text-tertiary)] opacity-80 hover:opacity-100'
+              }`}
+            >
+              {/* Selected Badge */}
+              {isDarkSelected && (
+                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shadow-2xs z-10">
+                  <Icon name="check" size={12} weight="bold" />
+                </div>
+              )}
+
+              {/* Phone Mockup Frame - Dark */}
+              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#141414] border-4 border-[#262626] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
+                {/* Speaker / Dynamic Island */}
+                <div className="w-10 h-2 bg-[#262626] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
+                
+                {/* Mini App Header */}
+                <div className="flex items-center justify-between mb-1.5 px-0.5">
+                  <span className="text-[10px] font-black tracking-tight text-white">Dejz</span>
+                  <div className="w-3.5 h-3.5 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300">
+                    <Icon name="moon" size={9} />
+                  </div>
+                </div>
+
+                {/* Mini Balance Card */}
+                <div className="bg-[#242424] rounded-lg p-2 shadow-2xs border border-white/5 space-y-1 mb-1.5">
+                  <div className="text-[6.5px] uppercase font-bold text-zinc-400 tracking-wider">
+                    {isEn ? 'Remaining' : 'Kvar att spendera'}
+                  </div>
+                  <div className="text-[11px] font-bold text-white leading-tight">
+                    12 450 kr
+                  </div>
+                  <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden mt-0.5">
+                    <div className="bg-[var(--accent-color)] h-full w-2/3 rounded-full" />
+                  </div>
+                </div>
+
+                {/* Mini List Rows */}
+                <div className="bg-[#242424] rounded-lg p-1.5 shadow-2xs border border-white/5 space-y-1 mb-auto">
+                  <div className="flex items-center justify-between text-[7px]">
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span className="font-semibold text-zinc-200">{isEn ? 'Salary' : 'Lön'}</span>
+                    </div>
+                    <span className="font-bold text-emerald-400">+32 000 kr</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[7px]">
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                      <span className="font-semibold text-zinc-200">ICA Maxi</span>
+                    </div>
+                    <span className="font-bold text-zinc-300">-850 kr</span>
+                  </div>
+                </div>
+
+                {/* Mini Bottom Nav Bar */}
+                <div className="pt-1 mt-1 border-t border-zinc-800 flex justify-around items-center text-zinc-500">
+                  <div className="w-2 h-2 rounded-full bg-[var(--accent-color)]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+                </div>
+              </div>
+
+              {/* Label */}
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <Icon name="moon" size={15} className={isDarkSelected ? 'text-[var(--accent-color)]' : 'text-[var(--text-secondary)]'} />
+                <span className={`text-xs font-bold tracking-tight ${isDarkSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+                  {isEn ? 'Dark' : 'Mörkt'}
+                </span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -272,7 +422,13 @@ export function SettingsView({
                   key={theme.id}
                   type="button"
                   onClick={() => {
-                    setConfig({ ...config, themeColor: theme.hex });
+                    const newConfig = { ...config, themeColor: theme.hex };
+                    setConfig(newConfig);
+                    if (userId) {
+                      dataService.saveSettings(userId, newConfig).catch((err) => {
+                        console.warn('Could not save theme color:', err);
+                      });
+                    }
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[var(--radius-card)] transition-all cursor-pointer active:scale-95 ${
                     isSelected
@@ -380,7 +536,6 @@ export function SettingsView({
             variant="grouped"
             multiline
             icon={<Icon name="receipt" size={18} />}
-            iconBg="bg-black/5 dark:bg-white/5"
             title={isEn ? 'Variable amounts' : 'Rörliga belopp'}
             subtitle={
               isEn
@@ -401,7 +556,6 @@ export function SettingsView({
             variant="grouped"
             multiline
             icon={<Icon name="calendar" size={18} />}
-            iconBg="bg-black/5 dark:bg-white/5"
             title={isEn ? 'Payday & income' : 'Lön & utbetalningar'}
             subtitle={
               isEn
@@ -422,7 +576,6 @@ export function SettingsView({
             variant="grouped"
             multiline
             icon={<Icon name="clock" size={18} />}
-            iconBg="bg-black/5 dark:bg-white/5"
             title={isEn ? 'Fixed expense due dates' : 'Fasta utgifter & förfallodagar'}
             subtitle={
               isEn
@@ -443,7 +596,6 @@ export function SettingsView({
             variant="grouped"
             multiline
             icon={<Icon name="bell" size={18} />}
-            iconBg="bg-black/5 dark:bg-white/5"
             title={isEn ? 'Weekly summary & budget alerts' : 'Veckoöversikt & budgetvarningar'}
             subtitle={
               isEn
@@ -474,7 +626,6 @@ export function SettingsView({
                 variant="grouped"
                 showChevron
                 icon={<Icon name="calendar" size={18} />}
-                iconBg="bg-black/5 dark:bg-white/5"
                 title={config.language === 'en' ? 'Payday' : 'Lönedag'}
                 subtitle={formatPaydaySummary(config.payday || 25, config.language)}
                 value={
@@ -492,7 +643,6 @@ export function SettingsView({
                 variant="grouped"
                 multiline
                 icon={<Icon name="clock" size={18} />}
-                iconBg="bg-black/5 dark:bg-white/5"
                 title={config.language === 'en' ? 'Pay early if weekend' : 'Helghantering'}
                 subtitle={
                   config.language === 'en' 
