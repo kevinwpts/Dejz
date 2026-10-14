@@ -47,18 +47,20 @@ export function LanguagePicker({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Välj språk / Choose language"
-        className={`inline-flex items-center gap-1.5 transition-all cursor-pointer select-none whitespace-nowrap shrink-0 ${
+        className={`inline-flex items-center gap-1 transition-all cursor-pointer select-none whitespace-nowrap shrink-0 ${
           variant === 'footer'
             ? 'px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
             : variant === 'compact'
             ? 'px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)]/90 backdrop-blur-md hover:bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-subtle active:scale-[0.98]'
-            : 'px-2 sm:px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
+            : 'px-2 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
         }`}
       >
-        <span className="text-sm select-none leading-none shrink-0" aria-hidden="true">{currentOption.flag}</span>
-        <span className="text-xs font-semibold text-[var(--text-primary)] shrink-0">
-          {variant === 'compact' ? currentOption.nativeLabel : (currentOption.shortCode || currentOption.code.toUpperCase())}
-        </span>
+        <span className="text-base select-none leading-none shrink-0" aria-hidden="true">{currentOption.flag}</span>
+        {variant === 'compact' && (
+          <span className="text-xs font-semibold text-[var(--text-primary)] shrink-0">
+            {currentOption.nativeLabel}
+          </span>
+        )}
         <ChevronDown
           size={13}
           className={`shrink-0 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}

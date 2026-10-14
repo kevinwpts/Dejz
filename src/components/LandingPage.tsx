@@ -21,7 +21,10 @@ import {
   Wallet,
   Image as ImageIcon,
   MessageSquareHeart,
-  Users
+  Users,
+  User,
+  Scissors,
+  ArrowRight
 } from 'lucide-react';
 import { Language, TranslationKey, translations } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -31,31 +34,47 @@ import { LanguagePicker } from './LanguagePicker';
 import { NORDIC_LANGUAGES } from '../utils/nordic';
 
 export interface LandingPageScreenshots {
-  heroHome?: string;         // Placeholder 1: "Screenshot: Hem – kvar att spendera och aktuell löneperiod"
-  economy?: string;          // Placeholder 2: "Screenshot: Ekonomi – inkomster och fasta utgifter"
-  voiceInput?: string;       // Placeholder 3: "Screenshot: Röstregistrering – registrera en transaktion"
-  dailyAndSavings?: string;  // Placeholder 4: "Screenshot: Dagsbudget & Spargris – dagens utrymme, kalender och sparat överskott"
-  analysis?: string;         // Placeholder 5: "Screenshot: Analys – kategorier, budgetgränser och fördelning"
-  lifestyleGrocery?: string; // Miljöbild: Vardag & matinköp (Röstregistrering)
-  lifestyleHome?: string;    // Miljöbild: Hem & ekonomisk överblick (Fasta kostnader)
-  lifestyleSavings?: string; // Miljöbild: Vardagskoll & sparande (Dagsbudget & Spargris)
-  lifestyleControl?: string; // Livsstilsbild: Kontroll utan bankkoppling
+  heroHome?: string;             // Hero: Stor frilagd telefon-mockup (/mockup_01.png)
+  lifestyleGrocery?: string;     // Miljöbild 1: Vardag & matinköp (/dejz_01.png)
+  lifestyleHome?: string;        // Miljöbild 2: Hem & fasta kostnader (/dejz_02.png)
+  lifestyleSavings?: string;     // Miljöbild 3 (valfri): Vardagskoll & period
+  lifestyleControl?: string;     // Miljöbild 4: Kontroll utan bankkoppling (/dejz_03.png)
+
+  // Photoshop-urklipp / App-detaljer (lägg in i public/ och ange sökvägen nedan när du är klar)
+  voiceInput?: string;           // Urklipp 1: Snabbutgift med mikrofon / Rösttolkat köp (t.ex. /crop_voice_card.png)
+  snippetQuickActions?: string;  // Urklipp 2: Plus-menyn (Utgift, Inkomst, Kvitto) eller Kategoriuppdelning (t.ex. /crop_plus_menu.png)
+  economy?: string;              // Urklipp 3: Lista med fasta utgifter & intervall under Ekonomi (t.ex. /crop_fixed_list.png)
+  snippetPayPeriod?: string;     // Urklipp 4: Översiktskortet under Ekonomi / Hur räknas det ut? (t.ex. /crop_pay_period.png)
+  dailyAndSavings?: string;      // Urklipp 5: Kortet "Kvar att spendera" + Aktuell period & Nästa lön (t.ex. /crop_remaining_card.png)
+  snippetPiggyBank?: string;     // Urklipp 6: Horisontella korten för "Kategoribudgetar" på hemskärmen (t.ex. /crop_category_cards.png)
+  snippetCalendar?: string;      // Urklipp 7: Horisontella tidslinjen med dagar & dagens transaktioner (t.ex. /crop_timeline.png)
+  analysis?: string;             // Urklipp 8: Analys – cirkeldiagrammet (donut-grafen) & mot förra perioden (t.ex. /crop_analysis_chart.png)
+  snippetCategoryBars?: string;  // Urklipp 9: Kategorilistan i Analys med "kvar av budget" & procentandel (t.ex. /crop_category_list.png)
+  snippetEditModal?: string;     // Urklipp 10: Redigera transaktion (belopp, kategori, datum, kvitto) (t.ex. /crop_edit_tx.png)
 }
 
 /**
- * Centralized screenshot & lifestyle image configuration.
- * Simply set the URL/path here when images or screenshots are uploaded in AI Studio.
+ * Centralized screenshot & UI snippet configuration.
+ * Ladda upp dina tillklippta Photoshop-bilder i `public/` och lägg in sökvägen här!
  */
 export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
   heroHome: '/mockup_01.png',
-  economy: undefined,
-  voiceInput: undefined,
-  dailyAndSavings: undefined,
-  analysis: undefined,
   lifestyleGrocery: '/dejz_01.png',
   lifestyleHome: '/dejz_02.png',
   lifestyleSavings: undefined,
   lifestyleControl: '/dejz_03.png',
+
+  // --- PHOTOSHOP-URKLIPP PLACEHOLDERS (sätt t.ex. '/crop_01.png' när du laddat upp) ---
+  voiceInput: undefined,          // Urklipp 1 (Sektion: Röst & Snabbutgift - nederkant på dejz_01.png)
+  snippetQuickActions: undefined, // Urklipp 2 (Sektion: Plus-menyn / Kvitto - överkant på dejz_01.png)
+  economy: undefined,             // Urklipp 3 (Sektion: Fasta kostnader - lista med fasta utgifter)
+  snippetPayPeriod: undefined,    // Urklipp 4 (Sektion: Fasta kostnader - överlappande summeringskort)
+  dailyAndSavings: undefined,     // Urklipp 5 (Bento-kort 1: Kvar att spendera + Aktuell period & Nästa lön)
+  snippetPiggyBank: undefined,    // Urklipp 6 (Bento-kort 2: Kategoribudgetar på hemskärmen)
+  snippetCalendar: undefined,     // Urklipp 7 (Bento-kort 3: Tidslinjen dag för dag)
+  analysis: undefined,            // Urklipp 8 (Sektion: Analys - cirkeldiagrammet)
+  snippetCategoryBars: undefined, // Urklipp 9 (Sektion: Analys - kategorilistan med kvar av budget)
+  snippetEditModal: undefined,    // Urklipp 10 (Mörk sektion: Redigera transaktion på dejz_03.png)
 };
 
 /**
@@ -119,6 +138,120 @@ export const Torus3DRing = ({ className = '' }: { className?: string }) => (
     </g>
   </svg>
 );
+
+/**
+ * Dedicated Placeholder & Renderer for cropped UI snippets (Photoshop cutouts).
+ * Clearly instructs the user what app element to crop, recommended aspect/size, and file path.
+ */
+interface UISnippetPlaceholderProps {
+  src?: string;
+  alt: string;
+  badgeNumber: string;
+  title: string;
+  whatToCrop: string;
+  recommendedSize: string;
+  fileHint: string;
+  variant?: 'floating' | 'bento' | 'dark-floating';
+  className?: string;
+}
+
+export const UISnippetPlaceholder: React.FC<UISnippetPlaceholderProps> = ({
+  src,
+  alt,
+  badgeNumber,
+  title,
+  whatToCrop,
+  recommendedSize,
+  fileHint,
+  variant = 'bento',
+  className = '',
+}) => {
+  if (src) {
+    return (
+      <div className={`relative select-none ${className}`}>
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          className="w-full h-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/40 dark:border-white/10 object-contain"
+        />
+      </div>
+    );
+  }
+
+  const isDark = variant === 'dark-floating';
+  const isFloating = variant === 'floating' || variant === 'dark-floating';
+
+  return (
+    <div
+      className={`relative rounded-2xl transition-all duration-300 text-left ${
+        isDark
+          ? 'bg-[var(--text-primary)]/95 backdrop-blur-md border-2 border-dashed border-white/25 text-white shadow-[0_24px_60px_rgba(0,0,0,0.55)] p-4 sm:p-5'
+          : isFloating
+          ? 'bg-white/95 dark:bg-[var(--surface-color)]/95 backdrop-blur-md border-2 border-dashed border-[var(--text-primary)]/25 text-[var(--text-primary)] shadow-[0_20px_50px_rgba(0,0,0,0.16)] p-4 sm:p-5'
+          : 'bg-[var(--bg-color)]/90 dark:bg-black/20 border-2 border-dashed border-[var(--text-primary)]/20 text-[var(--text-primary)] p-4 sm:p-5'
+      } ${className}`}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+            isDark
+              ? 'bg-white/10 text-[var(--brand-peach)]'
+              : 'bg-[var(--brand-peach)]/60 text-[var(--text-primary)]'
+          }`}
+        >
+          <Scissors size={15} strokeWidth={2.2} />
+        </div>
+
+        <div className="space-y-1.5 min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                isDark
+                  ? 'bg-white/15 text-white'
+                  : 'bg-[var(--text-primary)] text-[var(--surface-color)]'
+              }`}
+            >
+              {badgeNumber}
+            </span>
+            <span
+              className={`text-[10px] font-mono ${
+                isDark ? 'text-white/65' : 'text-[var(--text-tertiary)]'
+              }`}
+            >
+              {recommendedSize}
+            </span>
+          </div>
+
+          <p
+            className={`text-xs sm:text-sm font-bold leading-snug ${
+              isDark ? 'text-white' : 'text-[var(--text-primary)]'
+            }`}
+          >
+            {title}
+          </p>
+
+          <p
+            className={`text-[11px] sm:text-xs leading-relaxed ${
+              isDark ? 'text-white/75' : 'text-[var(--text-secondary)]'
+            }`}
+          >
+            {whatToCrop}
+          </p>
+
+          <p
+            className={`text-[10px] font-mono pt-0.5 ${
+              isDark ? 'text-[var(--brand-peach)]' : 'text-[var(--text-tertiary)]'
+            }`}
+          >
+            {fileHint}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface PhoneScreenshotFrameProps {
   label: string;
@@ -378,7 +511,7 @@ export function LandingPage({
       {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
       <div 
         aria-hidden="true" 
-        className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none dark:hidden z-0"
+        className="absolute top-0 left-0 right-0 h-[550px] pointer-events-none dark:hidden z-0"
         style={{
           background: 'var(--bg-gradient)'
         }}
@@ -403,7 +536,7 @@ export function LandingPage({
           <div className="hidden md:flex items-center gap-3 lg:gap-4">
             <a
               href="#how-it-works"
-              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-2 py-1"
+              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-2 py-1 whitespace-nowrap"
             >
               {tr('landing_nav_how_it_works')}
             </a>
@@ -418,7 +551,8 @@ export function LandingPage({
                 variant="ghost"
                 size="sm"
                 onClick={onLogin}
-                className="text-xs font-semibold text-[var(--text-primary)] px-3"
+                icon={<User size={14} strokeWidth={2} />}
+                className="text-xs font-semibold text-[var(--text-primary)] px-3 whitespace-nowrap"
               >
                 {tr('landing_nav_login')}
               </Button>
@@ -428,18 +562,28 @@ export function LandingPage({
               variant="primary"
               size="sm"
               onClick={onGetStarted}
-              className="text-xs font-semibold shadow-xs px-4"
+              className="text-xs font-semibold shadow-xs px-4 whitespace-nowrap"
             >
               {tr('landing_nav_get_started')}
             </Button>
           </div>
 
-          {/* Mobile Header Actions (< md): Language Picker + Menu Toggle */}
-          <div className="md:hidden flex items-center gap-2">
+          {/* Mobile Header Actions (< md): Language Picker + Login + Menu Toggle */}
+          <div className="md:hidden flex items-center gap-1.5 sm:gap-2">
             <LanguagePicker
               currentLanguage={currentLanguage}
               onLanguageChange={onLanguageChange}
             />
+            {onLogin && (
+              <button
+                type="button"
+                onClick={onLogin}
+                className="inline-flex items-center gap-1.5 px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle transition-colors cursor-pointer whitespace-nowrap active:scale-[0.98]"
+              >
+                <User size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
+                <span>{tr('landing_nav_login')}</span>
+              </button>
+            )}
             <IconButton
               onClick={() => {
                 setIsMobileMenuOpen(true);
@@ -460,7 +604,6 @@ export function LandingPage({
       {/* MOBILE MENU: SEAMLESS PORTAL TO document.body WITH FULL-SCREEN OVERLAY */}
       {typeof document !== 'undefined' && isMobileMenuOpen && createPortal(
         <div className="fixed inset-0 z-[9990] pointer-events-auto">
-          {/* Backdrop Overlay - pure full-screen dimming covering bottom safe area without blur */}
           <div 
             className="fixed inset-0 w-full h-full min-h-dvh bg-black/40 z-[9991] transition-opacity animate-in fade-in duration-200"
             onClick={() => {
@@ -470,14 +613,12 @@ export function LandingPage({
             aria-hidden="true"
           />
 
-          {/* Continuous Panel from Top of Screen (covers safe-area) */}
           <div 
             role="dialog"
             aria-modal="true"
             aria-label={tr('landing_nav_menu_label')}
             className="fixed top-0 left-0 right-0 z-[9995] bg-[var(--surface-color)] border-b border-[var(--border-divider)] shadow-modal rounded-b-2xl pt-[env(safe-area-inset-top,0px)] animate-in slide-in-from-top-2 duration-200"
           >
-            {/* Top Bar inside Menu: Logo Left, Clear Close (X) Right */}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-18 flex items-center justify-between border-b border-[var(--border-divider)]/40">
               <div className="flex items-center gap-2 shrink-0">
                 <DejzLogo className="h-6 sm:h-7 w-auto" />
@@ -495,9 +636,7 @@ export function LandingPage({
               />
             </div>
 
-            {/* Menu Items Container - 16px below top bar */}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-5 space-y-1 text-left">
-              {/* Row 1: Så fungerar det */}
               <a
                 href="#how-it-works"
                 onClick={() => {
@@ -509,7 +648,6 @@ export function LandingPage({
                 <span>{tr('landing_nav_how_it_works')}</span>
               </a>
 
-              {/* Row 2: Logga in */}
               {onLogin && (
                 <button
                   type="button"
@@ -524,7 +662,6 @@ export function LandingPage({
                 </button>
               )}
 
-              {/* Row 3: Språk / Language Selection Row with Flag and Full Name */}
               <div className="relative">
                 <button
                   type="button"
@@ -540,7 +677,6 @@ export function LandingPage({
                   </div>
                 </button>
 
-                {/* Expanded Language Picker directly on white panel */}
                 {isMobileLangOpen && (
                   <div className="pt-0.5 pb-1 space-y-0.5">
                     {NORDIC_LANGUAGES.map((lang) => {
@@ -571,10 +707,8 @@ export function LandingPage({
                 )}
               </div>
 
-              {/* Divider before CTA */}
               <div className="border-t border-[var(--border-divider)] pt-1 my-2" />
 
-              {/* Full-Width Primary CTA at Bottom */}
               <Button
                 variant="primary"
                 fullWidth
@@ -594,16 +728,17 @@ export function LandingPage({
         document.body
       )}
 
-      {/* 1. HERO SECTION */}
+      {/* =====================================================================
+          1. HERO SECTION — Big floating phone mockup + Editorial Highlight Strip
+      ===================================================================== */}
       <section 
         onMouseMove={handleMouseMove}
-        className="relative pt-4 sm:pt-14 pb-12 sm:pb-24 px-4 sm:px-6 overflow-hidden z-10"
+        className="relative pt-4 sm:pt-14 pb-10 sm:pb-20 px-4 sm:px-6 overflow-hidden z-10"
       >
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-8 items-center relative z-10">
           
           {/* Left Column: Headline, Copy & CTAs */}
           <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
-            
             <div className="space-y-2.5 sm:space-y-3">
               <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12] text-balance">
                 {tr('landing_hero_title')}
@@ -613,87 +748,23 @@ export function LandingPage({
               </p>
             </div>
 
-            {/* CTAs & Registration Options */}
-            {/* Mobile Button Group (< sm) */}
-            <div className="sm:hidden w-full space-y-2.5 pt-0.5">
-              {/* Kom igång gratis: Full-width primary button */}
-              <Button
-                variant="primary"
-                fullWidth
-                size="lg"
-                onClick={onGetStarted}
-                className="w-full h-12 justify-center text-center font-semibold text-sm shadow-subtle"
-              >
-                {tr('landing_hero_button')}
-              </Button>
-
-              {/* Fortsätt med Google: Full-width, same height, centered Google icon & text */}
-              {onGoogleLogin && (
-                <button
-                  type="button"
-                  onClick={onGoogleLogin}
-                  className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[var(--radius-button,12px)] border border-[var(--border-subtle)] transition-all cursor-pointer shadow-2xs active:scale-[0.99]"
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                  </svg>
-                  <span>{tr('landing_hero_google')}</span>
-                </button>
-              )}
-
-              {/* Testa demo: Centered text button with compact margin */}
-              {onStartDemo && (
-                <div className="flex justify-center pt-0">
-                  <button
-                    type="button"
-                    onClick={onStartDemo}
-                    className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer border-none bg-transparent"
-                  >
-                    {tr('landing_hero_demo')}
-                  </button>
-                </div>
-              )}
-
-              {/* Reassuring note: Centered under button group with tight margin */}
-              <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center justify-center gap-1.5 pt-0 text-center">
-                <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
-                <span>{tr('landing_no_bank_needed')}</span>
-              </p>
-            </div>
-
-            {/* Desktop Button Group (sm+) */}
-            <div className="hidden sm:block space-y-3.5 pt-1">
-              <div className="flex items-center gap-3">
+            {/* CTAs & Registration Options — Compact natural widths */}
+            <div className="space-y-3 pt-1">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <Button
                   variant="primary"
                   size="lg"
                   onClick={onGetStarted}
-                  className="font-semibold text-sm shadow-subtle px-6 h-12 whitespace-nowrap"
+                  className="w-auto font-semibold text-sm shadow-subtle px-5 h-11 whitespace-nowrap"
                 >
                   {tr('landing_hero_button')}
                 </Button>
 
-                {onStartDemo && (
-                  <button
-                    type="button"
-                    onClick={onStartDemo}
-                    className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-4 h-12 rounded-[var(--radius-button,12px)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap"
-                  >
-                    {tr('landing_hero_demo')}
-                  </button>
-                )}
-              </div>
-
-              {/* Discrete Google Sign-In */}
-              {onGoogleLogin && (
-                <div className="pt-0.5">
+                {onGoogleLogin && (
                   <button
                     type="button"
                     onClick={onGoogleLogin}
-                    className="inline-flex items-center justify-center gap-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-4 py-2.5 h-11 rounded-[var(--radius-button,12px)] border border-subtle transition-all cursor-pointer shadow-2xs whitespace-nowrap"
+                    className="w-auto inline-flex items-center justify-center gap-2 text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-4 h-11 rounded-[var(--radius-button,12px)] border border-subtle transition-all cursor-pointer shadow-2xs whitespace-nowrap active:scale-[0.99]"
                   >
                     <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -703,11 +774,20 @@ export function LandingPage({
                     </svg>
                     <span>{tr('landing_hero_google')}</span>
                   </button>
-                </div>
-              )}
+                )}
 
-              {/* Reassuring note */}
-              <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center gap-1.5 pt-0.5">
+                {onStartDemo && (
+                  <button
+                    type="button"
+                    onClick={onStartDemo}
+                    className="inline-flex items-center justify-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3.5 h-11 rounded-[var(--radius-button,12px)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap"
+                  >
+                    {tr('landing_hero_demo')}
+                  </button>
+                )}
+              </div>
+
+              <p className="text-xs font-medium text-[var(--text-tertiary)] flex items-center gap-1.5">
                 <Lock size={13} className="shrink-0 text-[var(--text-tertiary)]" />
                 <span>{tr('landing_no_bank_needed')}</span>
               </p>
@@ -716,8 +796,6 @@ export function LandingPage({
 
           {/* Right Column: Hero Phone Mockup */}
           <div className="lg:col-span-6 relative flex items-center justify-center min-h-[340px] sm:min-h-[460px] lg:min-h-[500px] pt-2 sm:pt-0">
-
-            {/* Interactive / Floating Phone Frame Container */}
             <div 
               style={{
                 transform: `translate3d(${mousePos.x * 0.8}px, ${mousePos.y * 0.8}px, 0px)`,
@@ -733,30 +811,120 @@ export function LandingPage({
                 isPreframedMockup={true}
               />
             </div>
-
           </div>
 
         </div>
-      </section>
 
-      {/* 2. RÖSTREGISTRERING MED BEFINTLIG DEMONSTRATION */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-[var(--border-divider)] relative overflow-hidden">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          
-          {/* Left Side: Lifestyle Photo (or uploaded voice screenshot) */}
-          <div className="lg:col-span-6 order-2 lg:order-1 flex justify-center">
-            <PhoneScreenshotFrame
-              label="Screenshot: Röstregistrering – registrera en transaktion"
-              src={screenshots.voiceInput}
-              alt="Dejz Röstregistrering"
-              lifestyleImage={screenshots.lifestyleGrocery}
-              lifestyleAlt={tr('landing_voice_title')}
-            />
+        {/* Full-Width Architectural Highlight Strip under Hero */}
+        <div className="max-w-6xl mx-auto mt-10 sm:mt-14 pt-6 border-t border-[var(--border-divider)]/80 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[var(--brand-peach)]/55 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
+              <Mic size={16} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_voice_pill_voice')}</p>
+              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_voice_pill_receipt')} · {tr('landing_voice_pill_quick')}</p>
+            </div>
           </div>
 
-          {/* Right Side: Copy & Step-by-Step Flow Simulation Card */}
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[var(--brand-pink)]/45 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
+              <Layers size={16} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_fixed_badge')}</p>
+              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_fixed_pill_intervals')}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[var(--brand-lavender)]/45 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
+              <PiggyBank size={16} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_daily_item1_title')} & {tr('landing_daily_item2_title')}</p>
+              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_daily_item3_title')}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
+              <ShieldCheck size={16} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_control_item1_title')}</p>
+              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_control_item3_title')}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================================
+          2. RÖSTREGISTRERING — Editorial Collage with Overlapping UI Cutouts
+      ===================================================================== */}
+      <section className="py-16 sm:py-28 px-4 sm:px-6 border-t border-[var(--border-divider)] relative overflow-hidden">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+          
+          {/* Left Side: Editorial Photo (dejz_01.png) + 2 Overlapping Photoshop UI Snippet Placeholders */}
+          <div className="lg:col-span-6 order-2 lg:order-1">
+            <div className="relative mx-auto max-w-[520px] pt-6 pb-8 sm:pt-10 sm:pb-12">
+              
+              {/* Floating Top-Right Cutout Placeholder: Plus Menu (Utgift, Inkomst, Kvitto) */}
+              <div className="relative sm:absolute sm:-top-2 sm:-right-6 z-20 mb-4 sm:mb-0 sm:w-[290px] sm:rotate-[1.5deg] hover:rotate-0 transition-transform">
+                <UISnippetPlaceholder
+                  src={screenshots.snippetQuickActions}
+                  alt="Plus-menyn med Utgift, Inkomst och Kvitto i Dejz"
+                  badgeNumber="URKLIPP 2"
+                  title="Plus-menyn (Utgift, Inkomst, Kvitto) eller Kategoriuppdelning"
+                  whatToCrop="Klipp ut de tre runda valen (Utgift, Inkomst, Kvitto) i +-menyn — eller rutan där ett köp delas upp på flera kategorier."
+                  recommendedSize="ca 560 × 200 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.snippetQuickActions"
+                  variant="floating"
+                />
+              </div>
+
+              {/* Main Lifestyle Photo dejz_01.png */}
+              <div className="relative rounded-3xl overflow-hidden border border-subtle shadow-[0_24px_60px_rgba(0,0,0,0.12)] bg-[var(--surface-color)] aspect-[4/3.4]">
+                {screenshots.lifestyleGrocery ? (
+                  <img
+                    src={screenshots.lifestyleGrocery}
+                    alt={tr('landing_voice_title')}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-center select-none"
+                  />
+                ) : (
+                  <PhoneScreenshotFrame
+                    label="Screenshot: Röstregistrering"
+                    src={screenshots.voiceInput}
+                    alt="Dejz Röstregistrering"
+                  />
+                )}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"
+                />
+              </div>
+
+              {/* Floating Bottom-Left Cutout Placeholder: Quick Expense & Voice Input Bar */}
+              <div className="relative sm:absolute sm:-bottom-4 sm:-left-6 z-20 mt-4 sm:mt-0 sm:w-[340px] sm:rotate-[-1.5deg] hover:rotate-0 transition-transform">
+                <UISnippetPlaceholder
+                  src={screenshots.voiceInput}
+                  alt="Snabbutgift med röstinmatning i Dejz"
+                  badgeNumber="URKLIPP 1"
+                  title="Snabbutgift-fältet med mikrofon (”t.ex. 45 ICA...”)"
+                  whatToCrop="Klipp ut fältet 'Snabbutgift: t.ex. 45 ICA...' med mikrofonknappen längst ner i +-menyn, eller ett färdigtolkat köp."
+                  recommendedSize="ca 640 × 220 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.voiceInput"
+                  variant="floating"
+                />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Right Side: Copy & Live Interactive Flow Simulation Card */}
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-6 text-left">
-            
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
                 <Mic size={14} className="text-[var(--text-primary)]" />
@@ -775,18 +943,19 @@ export function LandingPage({
                 {tr('landing_voice_subdesc')}
               </p>
 
-              {/* Registration Method Highlights */}
-              <div className="flex flex-wrap gap-2 pt-1">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)] border border-subtle text-[var(--text-primary)] shadow-2xs">
-                  <Mic size={13} className="text-[var(--text-secondary)]" />
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-xs font-semibold text-[var(--text-primary)]">
+                <span className="inline-flex items-center gap-1.5">
+                  <Mic size={14} className="text-[var(--text-secondary)]" />
                   {tr('landing_voice_pill_voice')}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)] border border-subtle text-[var(--text-primary)] shadow-2xs">
-                  <Camera size={13} className="text-[var(--text-secondary)]" />
+                <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Camera size={14} className="text-[var(--text-secondary)]" />
                   {tr('landing_voice_pill_receipt')}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)] border border-subtle text-[var(--text-primary)] shadow-2xs">
-                  <Zap size={13} className="text-[var(--text-secondary)]" />
+                <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Zap size={14} className="text-[var(--text-secondary)]" />
                   {tr('landing_voice_pill_quick')}
                 </span>
               </div>
@@ -794,10 +963,8 @@ export function LandingPage({
 
             {/* Interactive Illustrative Flow Card */}
             <Card variant="default" padding="lg" className="border border-subtle space-y-4 bg-[var(--surface-color)] shadow-subtle relative overflow-hidden">
-              
-              {/* Card Header & Replay Control */}
               <div className="flex items-center justify-between pb-2 border-b border-subtle">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+                <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-tertiary)]">
                   <Sparkles size={14} className="text-[var(--accent-color)] shrink-0" />
                   <span>{tr('landing_voice_demo_label')}</span>
                 </div>
@@ -857,200 +1024,303 @@ export function LandingPage({
                   </span>
                 </div>
               </div>
-
             </Card>
 
             <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
               {tr('landing_voice_footer')}
             </p>
-
           </div>
 
         </div>
       </section>
 
-      {/* 3. FASTA KOSTNADER OCH EKONOMISK ÖVERBLICK (Warm Peach Surface) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-peach)]/30 dark:bg-[var(--brand-peach)]/10 border-t border-[var(--border-divider)] relative">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      {/* =====================================================================
+          3. FASTA KOSTNADER — Contained Editorial Island + Split Visual Showcase
+      ===================================================================== */}
+      <section className="py-10 sm:py-16 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto rounded-3xl bg-[var(--brand-peach)]/35 dark:bg-[var(--brand-peach)]/10 border border-[var(--border-divider)] p-6 sm:p-10 lg:p-14 space-y-10">
           
-          <div className="lg:col-span-6 space-y-4 text-left">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-              <Layers size={14} className="text-[var(--text-primary)]" />
-              <span>{tr('landing_fixed_badge')}</span>
+          {/* Top Editorial Split Header (Breaks the 50/50 left-right repetition!) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end text-left">
+            <div className="lg:col-span-6 space-y-3">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+                <Layers size={14} className="text-[var(--text-primary)]" />
+                <span>{tr('landing_fixed_badge')}</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
+                {tr('landing_fixed_title')}
+              </h2>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
-              {tr('landing_fixed_title')}
-            </h2>
-            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
-              {tr('landing_fixed_desc')}
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)]/90 border border-subtle text-[var(--text-primary)] shadow-2xs">
-                <Calendar size={13} className="text-[var(--text-secondary)]" />
-                {tr('landing_fixed_pill_intervals')}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)]/90 border border-subtle text-[var(--text-primary)] shadow-2xs">
-                <Layers size={13} className="text-[var(--text-secondary)]" />
-                {tr('landing_fixed_pill_variable')}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-color)]/90 border border-subtle text-[var(--text-primary)] shadow-2xs">
-                <PiggyBank size={13} className="text-[var(--text-secondary)]" />
-                {tr('landing_fixed_pill_goals')}
-              </span>
+
+            <div className="lg:col-span-6 space-y-4">
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
+                {tr('landing_fixed_desc')}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-[var(--text-primary)]">
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar size={14} className="text-[var(--text-secondary)]" />
+                  {tr('landing_fixed_pill_intervals')}
+                </span>
+                <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Layers size={14} className="text-[var(--text-secondary)]" />
+                  {tr('landing_fixed_pill_variable')}
+                </span>
+                <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <PiggyBank size={14} className="text-[var(--text-secondary)]" />
+                  {tr('landing_fixed_pill_goals')}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-6 flex justify-center">
-            <PhoneScreenshotFrame
-              label="Screenshot: Ekonomi – inkomster och fasta utgifter"
-              src={screenshots.economy}
-              alt="Dejz Ekonomi - inkomster och fasta utgifter"
-              lifestyleImage={screenshots.lifestyleHome}
-              lifestyleAlt={tr('landing_fixed_title')}
-            />
+          {/* Bottom Asymmetric Visual Grid: Lifestyle Photo (dejz_02.png) + 2 Cropped App Snippet Placeholders */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            {/* Left 7 cols: dejz_02.png with floating pay-period snippet */}
+            <div className="lg:col-span-7 relative flex flex-col justify-between">
+              <div className="relative rounded-2xl overflow-hidden border border-subtle shadow-subtle bg-[var(--surface-color)] aspect-[16/10] h-full">
+                {screenshots.lifestyleHome ? (
+                  <img
+                    src={screenshots.lifestyleHome}
+                    alt={tr('landing_fixed_title')}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-center select-none"
+                  />
+                ) : (
+                  <PhoneScreenshotFrame
+                    label="Screenshot: Ekonomi"
+                    src={screenshots.economy}
+                    alt="Dejz Ekonomi"
+                  />
+                )}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-gradient-to-tr from-black/25 via-transparent to-transparent pointer-events-none"
+                />
+              </div>
+
+              {/* Overlapping Pay-Period Summary Cutout */}
+              <div className="mt-4 sm:mt-0 sm:absolute sm:bottom-4 sm:left-4 sm:right-12 z-20">
+                <UISnippetPlaceholder
+                  src={screenshots.snippetPayPeriod}
+                  alt="Ekonomi-översikt i Dejz"
+                  badgeNumber="URKLIPP 4"
+                  title="Flikarna Fasta utgifter / Inkomster / Månadssparande + Totalbelopp"
+                  whatToCrop="Klipp ut toppen av Ekonomi-fliken med de tre filterknapparna och kortet 'Totala fasta utgifter' (eller 'Hur räknas det ut?'-modalen)."
+                  recommendedSize="ca 640 × 200 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.snippetPayPeriod"
+                  variant="floating"
+                />
+              </div>
+            </div>
+
+            {/* Right 5 cols: Tall Cropped List of Fixed Expenses Placeholder */}
+            <div className="lg:col-span-5 flex flex-col justify-center">
+              <UISnippetPlaceholder
+                src={screenshots.economy}
+                alt="Dejz Ekonomi - fasta kostnader och intervall"
+                badgeNumber="URKLIPP 3"
+                title="Lista med fasta utgifter, dragningsdagar & intervall"
+                whatToCrop="Klipp ut 3–4 rader från Ekonomi-fliken (t.ex. Hyra, Försäkring kvartalsvis, El med rörligt belopp eller Uppsagda abonnemang)."
+                recommendedSize="ca 580 × 440 px • PNG"
+                fileHint="SCREENSHOT_CONFIG.economy"
+                variant="floating"
+                className="h-full flex flex-col justify-center"
+              />
+            </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* 4. SÅ FUNGERAR DET I TRE STEG (3 Steps Clean Grid) */}
+      {/* =====================================================================
+          4. SÅ FUNGERAR DET I TRE STEG — Editorial Numbered Horizontal Flow
+      ===================================================================== */}
       <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--surface-color)] border-y border-[var(--border-divider)] scroll-mt-12">
-        <div className="max-w-4xl mx-auto text-center space-y-10 sm:space-y-12">
+        <div className="max-w-6xl mx-auto space-y-12">
           
-          <div className="space-y-3">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 text-left border-b border-[var(--border-divider)] pb-6">
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
               {tr('landing_how_title')}
             </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-md">
+              {tr('landing_steps_note')}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 text-left">
             {/* Step 1 */}
-            <Card variant="default" padding="lg" className="border border-subtle space-y-3 relative overflow-hidden bg-[var(--bg-color)]">
-              <div className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--surface-color)] text-sm font-bold flex items-center justify-center shadow-xs">
-                1
+            <div className="space-y-3 relative">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl sm:text-4xl font-extrabold font-amount tabular-nums tracking-tight text-[var(--text-primary)]">
+                  01.
+                </span>
+                <ArrowRight size={18} className="hidden md:block text-[var(--text-tertiary)]" />
               </div>
-              <h3 className="text-base font-bold text-[var(--text-primary)]">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {tr('landing_step1_title')}
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                 {tr('landing_step1_desc')}
               </p>
-            </Card>
+            </div>
 
             {/* Step 2 */}
-            <Card variant="default" padding="lg" className="border border-subtle space-y-3 relative overflow-hidden bg-[var(--bg-color)]">
-              <div className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--surface-color)] text-sm font-bold flex items-center justify-center shadow-xs">
-                2
+            <div className="space-y-3 relative">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl sm:text-4xl font-extrabold font-amount tabular-nums tracking-tight text-[var(--text-primary)]">
+                  02.
+                </span>
+                <ArrowRight size={18} className="hidden md:block text-[var(--text-tertiary)]" />
               </div>
-              <h3 className="text-base font-bold text-[var(--text-primary)]">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {tr('landing_step2_title')}
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                 {tr('landing_step2_desc')}
               </p>
-            </Card>
+            </div>
 
             {/* Step 3 */}
-            <Card variant="default" padding="lg" className="border border-subtle space-y-3 relative overflow-hidden bg-[var(--bg-color)]">
-              <div className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--surface-color)] text-sm font-bold flex items-center justify-center shadow-xs">
-                3
+            <div className="space-y-3 relative">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl sm:text-4xl font-extrabold font-amount tabular-nums tracking-tight text-[var(--text-primary)]">
+                  03.
+                </span>
               </div>
-              <h3 className="text-base font-bold text-[var(--text-primary)]">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {tr('landing_step3_title')}
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                 {tr('landing_step3_desc')}
               </p>
-            </Card>
+            </div>
           </div>
-
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
-            {tr('landing_steps_note')}
-          </p>
 
         </div>
       </section>
 
-      {/* 5. VARDAGSKOLL OCH SPARANDE (Dagsbudget, Spargris & Kalender) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      {/* =====================================================================
+          5. VARDAGSKOLL & SPARANDE — Asymmetric Multi-Size Bento Grid!
+      ===================================================================== */}
+      <section className="py-16 sm:py-28 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto space-y-10 sm:space-y-12">
           
-          {/* Left Side: Screenshot or Lifestyle Photo Placeholder */}
-          <div className="lg:col-span-5 order-2 lg:order-1 flex justify-center">
-            <PhoneScreenshotFrame
-              label="Screenshot: Dagsbudget & Spargris – dagens utrymme, kalender och sparat överskott"
-              src={screenshots.dailyAndSavings}
-              alt="Dejz Dagsbudget, Spargris och Kalender"
-              lifestyleImage={screenshots.lifestyleSavings}
-              lifestyleAlt={tr('landing_daily_title')}
-              placeholderNote="[ Screenshot / Miljöbild Placeholder ]"
-            />
-          </div>
-
-          {/* Right Side: Copy & 3 Feature Highlights */}
-          <div className="lg:col-span-7 order-1 lg:order-2 space-y-6 text-left">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                <PiggyBank size={14} className="text-[var(--text-primary)]" />
-                <span>{tr('landing_daily_badge')}</span>
-              </div>
-
-              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
-                {tr('landing_daily_title')}
-              </h2>
-
-              <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty max-w-xl">
-                {tr('landing_daily_desc')}
-              </p>
+          {/* Section Header */}
+          <div className="max-w-2xl text-left space-y-3">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
+              <PiggyBank size={14} className="text-[var(--text-primary)]" />
+              <span>{tr('landing_daily_badge')}</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-              <div className="p-4 rounded-card border border-subtle bg-[var(--surface-color)] space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                  <Wallet size={18} strokeWidth={2} />
+            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
+              {tr('landing_daily_title')}
+            </h2>
+
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
+              {tr('landing_daily_desc')}
+            </p>
+          </div>
+
+          {/* Asymmetric Bento Grid (7 cols + 5 cols, then full 12-col horizontal card) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 text-left">
+            
+            {/* Bento Card 1 (7 columns): Kvar att spendera + Aktuell period & Nästa lön */}
+            <div className="lg:col-span-7 rounded-3xl p-6 sm:p-8 bg-[var(--surface-color)] border border-subtle shadow-2xs flex flex-col justify-between gap-6">
+              <div className="space-y-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-[var(--brand-peach)]/55 flex items-center justify-center text-[var(--text-primary)]">
+                  <Wallet size={20} strokeWidth={2} />
                 </div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
                   {tr('landing_daily_item1_title')}
                 </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-lg">
                   {tr('landing_daily_item1_desc')}
                 </p>
               </div>
 
-              <div className="p-4 rounded-card border border-subtle bg-[var(--surface-color)] space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                  <PiggyBank size={18} strokeWidth={2} />
+              <UISnippetPlaceholder
+                src={screenshots.dailyAndSavings}
+                alt="Dejz Kvar att spendera urklipp"
+                badgeNumber="URKLIPP 5"
+                title="Huvudkortet ”Kvar att spendera” + Aktuell period & Nästa lön"
+                whatToCrop="Klipp ut toppkortet på Hem-vyn som visar 'Kvar att spendera', procentstapeln ('Spenderbart kvar') samt de två rutorna 'Aktuell period' och 'Nästa lön'."
+                recommendedSize="ca 720 × 300 px • PNG"
+                fileHint="SCREENSHOT_CONFIG.dailyAndSavings"
+                variant="bento"
+              />
+            </div>
+
+            {/* Bento Card 2 (5 columns): Kategoribudgetar på hemskärmen */}
+            <div className="lg:col-span-5 rounded-3xl p-6 sm:p-8 bg-[var(--brand-lavender)]/25 dark:bg-[var(--brand-lavender)]/10 border border-subtle shadow-2xs flex flex-col justify-between gap-6">
+              <div className="space-y-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] shadow-2xs">
+                  <Layers size={20} strokeWidth={2} />
                 </div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
                   {tr('landing_daily_item2_title')}
                 </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
                   {tr('landing_daily_item2_desc')}
                 </p>
               </div>
 
-              <div className="p-4 rounded-card border border-subtle bg-[var(--surface-color)] space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                  <Calendar size={18} strokeWidth={2} />
+              <UISnippetPlaceholder
+                src={screenshots.snippetPiggyBank}
+                alt="Dejz Kategoribudgetar på hemskärmen"
+                badgeNumber="URKLIPP 6"
+                title="Kategoribudgetar på hemskärmen"
+                whatToCrop="Klipp ut den horisontella raden med mini-kort under 'Kategoribudgetar' på Hem-vyn (t.ex. Mat & dryck, Shopping, Nöje med belopp kvar)."
+                recommendedSize="ca 520 × 260 px • PNG"
+                fileHint="SCREENSHOT_CONFIG.snippetPiggyBank"
+                variant="floating"
+              />
+            </div>
+
+            {/* Bento Card 3 (12 columns horizontal split): Tidslinje & kalender */}
+            <div className="lg:col-span-12 rounded-3xl p-6 sm:p-8 bg-[var(--surface-color)] border border-subtle shadow-2xs grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-5 space-y-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-[var(--brand-pink)]/45 flex items-center justify-center text-[var(--text-primary)]">
+                  <Calendar size={20} strokeWidth={2} />
                 </div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
                   {tr('landing_daily_item3_title')}
                 </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-normal">
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
                   {tr('landing_daily_item3_desc')}
                 </p>
               </div>
+
+              <div className="lg:col-span-7">
+                <UISnippetPlaceholder
+                  src={screenshots.snippetCalendar}
+                  alt="Dejz Tidslinje och transaktioner"
+                  badgeNumber="URKLIPP 7"
+                  title="Horisontella tidslinjen med dagar + Dagens transaktioner"
+                  whatToCrop="Klipp ut raden med dagar (Idag, Mån, Tis, Ons...) på Hem-vyn tillsammans med 1–2 transaktionsrader under datumrubriken."
+                  recommendedSize="ca 820 × 280 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.snippetCalendar"
+                  variant="bento"
+                />
+              </div>
             </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* 6. KATEGORIER OCH ANALYS (Soft Lavender Surface) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/20 dark:bg-[var(--brand-lavender)]/10 border-b border-[var(--border-divider)]">
+      {/* =====================================================================
+          6. KATEGORIER OCH ANALYS — Staggered Dual-Crop Showcase
+      ===================================================================== */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/15 dark:bg-[var(--brand-lavender)]/5 border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
-          <div className="lg:col-span-6 space-y-4 text-left">
+          <div className="lg:col-span-5 space-y-4 text-left">
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
               <PieChart size={14} className="text-[var(--text-primary)]" />
               <span>{tr('landing_analysis_badge')}</span>
@@ -1065,112 +1335,146 @@ export function LandingPage({
             </p>
           </div>
 
-          <div className="lg:col-span-6 flex justify-center">
-            <PhoneScreenshotFrame
-              label="Screenshot: Analys – kategorier, budgetgränser och fördelning"
-              src={screenshots.analysis}
-              alt="Dejz Analys - kategorier och fördelning"
-            />
+          {/* Staggered 2-part UI Snippet Stack instead of a generic single phone */}
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5">
+            <div className="sm:mr-8">
+              <UISnippetPlaceholder
+                src={screenshots.analysis}
+                alt="Dejz Analys - cirkeldiagram och periodjämförelse"
+                badgeNumber="URKLIPP 8"
+                title="Analysvyn – Cirkeldiagrammet (Donut-grafen) & sammanfattningskorten"
+                whatToCrop="Klipp ut cirkeldiagrammet i Analys-fliken (gärna tillsammans med de två korten 'Kvar att spendera' och 'Mot förra perioden' ovanför)."
+                recommendedSize="ca 720 × 340 px • PNG"
+                fileHint="SCREENSHOT_CONFIG.analysis"
+                variant="floating"
+              />
+            </div>
+
+            <div className="sm:ml-10">
+              <UISnippetPlaceholder
+                src={screenshots.snippetCategoryBars}
+                alt="Dejz Kategorilista under Analys"
+                badgeNumber="URKLIPP 9"
+                title="Kategorilistan under Analys (med ”kvar av budget” & procent)"
+                whatToCrop="Klipp ut 2–3 rader ur kategorilistan i Analys som visar kategoriikon, 'X kr kvar av budget', totalt spenderat och procentandel."
+                recommendedSize="ca 720 × 260 px • PNG"
+                fileHint="SCREENSHOT_CONFIG.snippetCategoryBars"
+                variant="floating"
+              />
+            </div>
           </div>
 
         </div>
       </section>
 
-      {/* 6. KONTROLL UTAN BANKKOPPLING */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-left">
+      {/* =====================================================================
+          7. KONTROLL UTAN BANKKOPPLING — High-Contrast Obsidian Editorial Block
+      ===================================================================== */}
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto rounded-3xl bg-[var(--text-primary)] text-[var(--surface-color)] p-6 sm:p-12 lg:p-16 shadow-modal relative overflow-hidden">
           
-          {/* Left Column: Heading, Description & 3 Control Points */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="space-y-3">
-              <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
-                {tr('landing_control_title')}
-              </h2>
-              <p className="text-base text-[var(--text-secondary)] leading-relaxed text-pretty max-w-xl">
-                {tr('landing_control_desc')}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left relative z-10">
+            
+            {/* Left Column: Heading, Description & 3 Control Points on Dark Canvas */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white text-balance">
+                  {tr('landing_control_title')}
+                </h2>
+                <p className="text-base text-white/75 leading-relaxed text-pretty max-w-xl">
+                  {tr('landing_control_desc')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--brand-peach)]/20 flex items-center justify-center text-[var(--brand-peach)]">
+                    <ShieldCheck size={18} strokeWidth={2} />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">
+                    {tr('landing_control_item1_title')}
+                  </h3>
+                  <p className="text-xs text-white/70 leading-normal">
+                    {tr('landing_control_item1_desc')}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--brand-pink)]/20 flex items-center justify-center text-[var(--brand-pink)]">
+                    <Check size={18} strokeWidth={2} />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">
+                    {tr('landing_control_item2_title')}
+                  </h3>
+                  <p className="text-xs text-white/70 leading-normal">
+                    {tr('landing_control_item2_desc')}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-2">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--brand-lavender)]/20 flex items-center justify-center text-[var(--brand-lavender)]">
+                    <Sparkles size={18} strokeWidth={2} />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">
+                    {tr('landing_control_item3_title')}
+                  </h3>
+                  <p className="text-xs text-white/70 leading-normal">
+                    {tr('landing_control_item3_desc')}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-white/55 leading-relaxed pt-1">
+                {tr('landing_control_footer')}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-              <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                  <ShieldCheck size={18} strokeWidth={2} />
+            {/* Right Column: Editorial Lifestyle Photo (dejz_03.png) + Overlapping Edit Transaction Cutout */}
+            <div className="lg:col-span-5 space-y-4">
+              {screenshots.lifestyleControl ? (
+                <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-subtle bg-black/40 aspect-[4/3]">
+                  <img
+                    src={screenshots.lifestyleControl}
+                    alt={tr('landing_control_title')}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-center select-none"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none"
+                  />
                 </div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  {tr('landing_control_item1_title')}
-                </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                  {tr('landing_control_item1_desc')}
-                </p>
-              </div>
+              ) : (
+                <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-white/5 aspect-[4/3] flex flex-col items-center justify-center p-6 text-center space-y-3">
+                  <ImageIcon size={24} className="text-white/70" />
+                  <p className="text-xs font-semibold text-white">Miljöbild: Kontroll utan bankkoppling</p>
+                </div>
+              )}
 
-              <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                  <Check size={18} strokeWidth={2} />
-                </div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  {tr('landing_control_item2_title')}
-                </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                  {tr('landing_control_item2_desc')}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-card border border-subtle bg-[var(--bg-color)] space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)]">
-                  <Sparkles size={18} strokeWidth={2} />
-                </div>
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  {tr('landing_control_item3_title')}
-                </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-normal">
-                  {tr('landing_control_item3_desc')}
-                </p>
+              {/* Overlapping Dark-Mode Cutout Placeholder: Edit Transaction */}
+              <div className="sm:-mt-10 sm:-ml-6 relative z-20">
+                <UISnippetPlaceholder
+                  src={screenshots.snippetEditModal}
+                  alt="Redigera transaktion i Dejz"
+                  badgeNumber="URKLIPP 10"
+                  title="Redigera transaktion (belopp, kategori, datum, kvitto)"
+                  whatToCrop="Klipp ut vyn 'Redigera transaktion' där man kan ändra belopp, byta eller dela upp kategori, välja datum (Idag / Igår), hjärtmarkera eller bifoga kvitto."
+                  recommendedSize="ca 560 × 240 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.snippetEditModal"
+                  variant="dark-floating"
+                />
               </div>
             </div>
 
-            <p className="text-xs text-[var(--text-tertiary)] leading-relaxed pt-1">
-              {tr('landing_control_footer')}
-            </p>
-          </div>
-
-          {/* Right Column: Editorial Lifestyle Photo or Image Placeholder */}
-          <div className="lg:col-span-5">
-            {screenshots.lifestyleControl ? (
-              <div className="relative rounded-modal overflow-hidden border border-subtle shadow-subtle bg-[var(--bg-color)] aspect-[4/3]">
-                <img
-                  src={screenshots.lifestyleControl}
-                  alt={tr('landing_control_title')}
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover object-center select-none"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-[var(--brand-peach)]/15 pointer-events-none"
-                />
-              </div>
-            ) : (
-              <div className="relative rounded-modal overflow-hidden border border-subtle shadow-subtle bg-[var(--bg-color)] aspect-[4/3] flex flex-col items-center justify-center p-6 text-center space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] border border-subtle shadow-xs">
-                  <ImageIcon size={24} strokeWidth={1.75} />
-                </div>
-                <div className="space-y-1 max-w-[220px]">
-                  <p className="text-xs font-semibold text-[var(--text-primary)] leading-snug">
-                    Miljöbild: Kontroll utan bankkoppling
-                  </p>
-                  <p className="text-[10px] text-[var(--text-tertiary)] font-mono tracking-tight">
-                    [ Bild-placeholder ]
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
 
         </div>
       </section>
 
-      {/* 7. SOCIAL PROOF (Omdömen & användarsiffra / placeholder) */}
+      {/* =====================================================================
+          8. SOCIAL PROOF (Omdömen & användarsiffra / placeholder)
+      ===================================================================== */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto space-y-10 sm:space-y-12">
           
@@ -1188,15 +1492,14 @@ export function LandingPage({
               {tr('landing_testimonials_subtitle')}
             </p>
 
-            {/* User count stat or placeholder badge */}
             <div className="pt-2 flex justify-center">
               {SOCIAL_PROOF_CONFIG.userCountStat ? (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] border border-subtle shadow-2xs text-xs font-semibold text-[var(--text-primary)]">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
                   <Users size={14} className="text-[var(--text-secondary)]" />
                   <span>{SOCIAL_PROOF_CONFIG.userCountStat}</span>
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] border border-dashed border-[var(--border-color)] text-[11px] font-mono text-[var(--text-tertiary)]">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-dashed border-[var(--border-color)] text-[11px] font-mono text-[var(--text-tertiary)]">
                   <Users size={13} className="text-[var(--text-tertiary)]" />
                   <span>{tr('landing_testimonials_stat_placeholder')}</span>
                 </div>
@@ -1269,7 +1572,9 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 8. VANLIGA FRÅGOR (FAQ) */}
+      {/* =====================================================================
+          9. VANLIGA FRÅGOR (FAQ)
+      ===================================================================== */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto space-y-6 text-left">
           
@@ -1328,7 +1633,9 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 8. AVSLUTANDE REGISTRERING */}
+      {/* =====================================================================
+          10. AVSLUTANDE REGISTRERING
+      ===================================================================== */}
       <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-transparent via-[var(--brand-peach)]/20 to-[var(--brand-peach)]/30 border-t border-[var(--border-divider)] text-center relative overflow-hidden">
         <div className="max-w-2xl mx-auto space-y-5 relative z-10">
           
@@ -1346,7 +1653,7 @@ export function LandingPage({
               variant="primary"
               size="lg"
               onClick={onGetStarted}
-              className="w-full sm:w-auto font-semibold text-sm shadow-subtle px-8 h-11 sm:h-12 justify-center text-center"
+              className="w-auto font-semibold text-sm shadow-subtle px-7 h-11 sm:h-12 justify-center text-center"
             >
               {tr('landing_hero_button')}
             </Button>
@@ -1360,7 +1667,9 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* 9. FOOTER */}
+      {/* =====================================================================
+          11. FOOTER
+      ===================================================================== */}
       <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] px-4 sm:px-6 border-t border-[var(--border-divider)] bg-[var(--bg-color)] text-xs text-[var(--text-tertiary)]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           
