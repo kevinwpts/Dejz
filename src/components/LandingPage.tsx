@@ -3,16 +3,11 @@ import { createPortal } from 'react-dom';
 import { 
   ChevronDown, 
   Check, 
-  Mic, 
   Smartphone, 
-  Sparkles,
-  CheckCircle2,
   Lock,
-  RotateCcw,
   Menu,
   X,
   Image as ImageIcon,
-  Users,
   User,
   Scissors,
   ArrowRight
@@ -394,10 +389,6 @@ export function LandingPage({
   // Mouse tilt position for hero desktop interaction
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Voice registration sequence interactive animation state
-  const [voiceStep, setVoiceStep] = useState<0 | 1 | 2>(0);
-  const [animatedBalance, setAnimatedBalance] = useState(6420);
-
   const tr = (key: TranslationKey): string => {
     return translations[currentLanguage]?.[key] || translations.sv[key] || key;
   };
@@ -463,30 +454,6 @@ export function LandingPage({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobileMenuOpen]);
-
-  // Step-by-step timer for voice registration sequence demo
-  useEffect(() => {
-    const timer1 = setTimeout(() => setVoiceStep(1), 1200);
-    const timer2 = setTimeout(() => {
-      setVoiceStep(2);
-      setAnimatedBalance(6133);
-    }, 2400);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
-
-  const handleRestartVoiceDemo = () => {
-    setVoiceStep(0);
-    setAnimatedBalance(6420);
-    setTimeout(() => setVoiceStep(1), 1000);
-    setTimeout(() => {
-      setVoiceStep(2);
-      setAnimatedBalance(6133);
-    }, 2200);
-  };
 
   const handlePolicyOpen = (type: 'privacy' | 'terms' | 'cookies') => {
     if (onLegalClick) {
@@ -871,7 +838,7 @@ export function LandingPage({
             </div>
           </div>
 
-          {/* Right Side: Copy & Live Interactive Flow Simulation Card */}
+          {/* Right Side: Copy */}
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-6 text-left">
             <div className="space-y-3">
               <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
@@ -894,75 +861,6 @@ export function LandingPage({
                 <span>{tr('landing_voice_pill_quick')}</span>
               </div>
             </div>
-
-            {/* Interactive Illustrative Flow Card */}
-            <Card variant="default" padding="lg" className="border border-subtle space-y-4 bg-[var(--surface-color)] shadow-subtle relative overflow-hidden">
-              <div className="flex items-center justify-between pb-2 border-b border-subtle">
-                <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-tertiary)]">
-                  <Sparkles size={14} className="text-[var(--accent-color)] shrink-0" />
-                  <span>{tr('landing_voice_demo_label')}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleRestartVoiceDemo}
-                  className="p-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer border-none"
-                  title={tr('landing_voice_demo_replay')}
-                >
-                  <RotateCcw size={14} />
-                </button>
-              </div>
-
-              {/* Step 1: Voice Input Quote */}
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                  <Mic size={13} className="text-[var(--accent-color)]" />
-                  <span>{tr('landing_voice_demo_step1')}</span>
-                </div>
-                <div className="p-3 rounded-card-nested bg-[var(--surface-high)] text-sm font-semibold text-[var(--text-primary)] italic">
-                  {tr('landing_voice_demo_quote')}
-                </div>
-              </div>
-
-              {/* Step 2: Parsed Transaction Card */}
-              <div className={`space-y-1.5 transition-all duration-500 ${voiceStep >= 1 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-2'}`}>
-                <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                  <Sparkles size={13} className="text-[var(--accent-color)]" />
-                  <span>{tr('landing_voice_demo_step2')}</span>
-                </div>
-                <div className="p-3 rounded-card-nested bg-[var(--surface-color)] border border-subtle flex items-center justify-between gap-3 shadow-xs">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-[var(--brand-peach)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center shrink-0">
-                      C
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">Coop</p>
-                      <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_voice_demo_category')}</p>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)]">−287 kr</p>
-                    <span className="text-[10px] font-semibold text-[var(--success-color)] flex items-center gap-0.5 justify-end">
-                      <CheckCircle2 size={11} /> {tr('landing_voice_demo_confirm')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3: Remaining Balance Update */}
-              <div className={`pt-2 border-t border-subtle flex items-center justify-between text-xs transition-all duration-500 ${voiceStep >= 2 ? 'opacity-100' : 'opacity-40'}`}>
-                <span className="text-[var(--text-secondary)]">{tr('landing_voice_demo_step3')}</span>
-                <div className="flex items-baseline gap-1.5 font-amount tabular-nums font-bold text-sm">
-                  <span className="line-through opacity-50 text-[var(--text-tertiary)] text-xs">6 420 kr</span>
-                  <span className="text-[var(--text-primary)] text-sm font-bold bg-[var(--brand-lavender)]/30 px-1.5 py-0.5 rounded-md">
-                    {animatedBalance.toLocaleString('sv-SE')} kr
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
-              {tr('landing_voice_footer')}
-            </p>
           </div>
 
         </div>
