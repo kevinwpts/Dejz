@@ -47,7 +47,7 @@ export interface LandingPageScreenshots {
  * Simply set the URL/path here when images or screenshots are uploaded in AI Studio.
  */
 export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
-  heroHome: '/hero.PNG',
+  heroHome: '/mockup_01.png',
   economy: undefined,
   voiceInput: undefined,
   dailyAndSavings: undefined,
@@ -126,6 +126,7 @@ interface PhoneScreenshotFrameProps {
   alt: string;
   className?: string;
   perspectiveTilt?: boolean;
+  isPreframedMockup?: boolean;
   lifestyleImage?: string;
   lifestyleAlt?: string;
   placeholderNote?: string;
@@ -137,10 +138,28 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
   alt,
   className = '',
   perspectiveTilt = false,
+  isPreframedMockup = false,
   lifestyleImage,
   lifestyleAlt = '',
   placeholderNote = '[ Screenshot Placeholder ]',
 }) => {
+  // If the image itself is already a complete phone mockup (with transparent background),
+  // render it directly without wrapping a second CSS phone bezel around it.
+  if (src && isPreframedMockup) {
+    return (
+      <div className={`relative mx-auto w-full flex justify-center items-center ${className}`}>
+        <img
+          src={src}
+          alt={alt}
+          referrerPolicy="no-referrer"
+          className={`w-[162%] max-w-[640px] sm:w-[680px] sm:max-w-[680px] lg:w-[780px] lg:max-w-[780px] h-auto shrink-0 object-contain select-none pointer-events-none drop-shadow-[0_24px_48px_rgba(0,0,0,0.18)] dark:drop-shadow-[0_28px_50px_rgba(0,0,0,0.5)] transition-transform duration-500 ${
+            perspectiveTilt ? 'hover:scale-[1.015]' : ''
+          }`}
+        />
+      </div>
+    );
+  }
+
   // If no app screenshot is provided and a real lifestyle photo is configured,
   // render the clean photograph without a phone mockup covering it.
   if (!src && lifestyleImage) {
@@ -415,8 +434,12 @@ export function LandingPage({
             </Button>
           </div>
 
-          {/* Mobile Menu Toggle Button (< md) */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Header Actions (< md): Language Picker + Menu Toggle */}
+          <div className="md:hidden flex items-center gap-2">
+            <LanguagePicker
+              currentLanguage={currentLanguage}
+              onLanguageChange={onLanguageChange}
+            />
             <IconButton
               onClick={() => {
                 setIsMobileMenuOpen(true);
@@ -579,7 +602,7 @@ export function LandingPage({
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-8 items-center relative z-10">
           
           {/* Left Column: Headline, Copy & CTAs */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
+          <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
             
             <div className="space-y-2.5 sm:space-y-3">
               <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.12] text-balance">
@@ -692,7 +715,7 @@ export function LandingPage({
           </div>
 
           {/* Right Column: Hero Phone Mockup */}
-          <div className="lg:col-span-5 relative flex items-center justify-center min-h-[300px] sm:min-h-[420px] pt-1 sm:pt-0">
+          <div className="lg:col-span-6 relative flex items-center justify-center min-h-[340px] sm:min-h-[460px] lg:min-h-[500px] pt-2 sm:pt-0">
 
             {/* Interactive / Floating Phone Frame Container */}
             <div 
@@ -707,6 +730,7 @@ export function LandingPage({
                 src={screenshots.heroHome}
                 alt="Dejz Hemvy - kvar att spendera och löneperiod"
                 perspectiveTilt={true}
+                isPreframedMockup={true}
               />
             </div>
 
