@@ -56,7 +56,7 @@ export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
   lifestyleControl: '/dejz_03.png',
 
   // --- PHOTOSHOP-URKLIPP PLACEHOLDERS (sätt t.ex. '/crop_01.png' när du laddat upp) ---
-  voiceInput: undefined,          // Urklipp 1 (Sektion: Röst & Snabbutgift - nederkant på dejz_01.png)
+  voiceInput: '/intalat.png',     // Urklipp 1 (Sektion: Röst & Snabbutgift - nederkant på dejz_01.png)
   snippetQuickActions: '/lagga_till_transaktion.png', // Urklipp 2 (Sektion: Plus-menyn / Lägg till transaktion - överkant på dejz_01.png)
   economy: '/fasta_utgifter.jpg', // Urklipp 3 (Sektion: Fasta kostnader - lista med fasta utgifter)
   snippetPayPeriod: '/totalt_fasta.jpg', // Urklipp 4 (Sektion: Fasta kostnader - överlappande summeringskort)
@@ -276,7 +276,7 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
           src={src}
           alt={alt}
           referrerPolicy="no-referrer"
-          className={`w-[162%] max-w-[640px] sm:w-[680px] sm:max-w-[680px] lg:w-[780px] lg:max-w-[780px] h-auto shrink-0 object-contain select-none pointer-events-none drop-shadow-[0_24px_48px_rgba(0,0,0,0.18)] dark:drop-shadow-[0_28px_50px_rgba(0,0,0,0.5)] transition-transform duration-500 ${
+          className={`w-[138%] max-w-[540px] sm:w-[580px] sm:max-w-[580px] lg:w-[660px] lg:max-w-[660px] h-auto shrink-0 object-contain select-none pointer-events-none drop-shadow-[0_24px_48px_rgba(0,0,0,0.18)] dark:drop-shadow-[0_28px_50px_rgba(0,0,0,0.5)] transition-transform duration-500 ${
             perspectiveTilt ? 'hover:scale-[1.015]' : ''
           }`}
         />
@@ -785,8 +785,8 @@ export function LandingPage({
             </div>
           </div>
 
-          {/* Right Column: Hero Phone Mockup */}
-          <div className="lg:col-span-6 relative flex items-center justify-center min-h-[340px] sm:min-h-[460px] lg:min-h-[500px] pt-2 sm:pt-0">
+          {/* Right Column: Hero Phone Mockup (reduced ~15%) */}
+          <div className="lg:col-span-6 relative flex items-center justify-center min-h-[290px] sm:min-h-[390px] lg:min-h-[420px] pt-2 sm:pt-0">
             <div 
               style={{
                 transform: `translate3d(${mousePos.x * 0.8}px, ${mousePos.y * 0.8}px, 0px)`,
@@ -810,15 +810,15 @@ export function LandingPage({
       {/* =====================================================================
           2. RÖSTREGISTRERING — Editorial Collage with Overlapping UI Cutouts
       ===================================================================== */}
-      <section className="py-16 sm:py-28 px-4 sm:px-6 border-t border-[var(--border-divider)] relative overflow-hidden">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+      <section className="py-14 sm:py-22 px-4 sm:px-6 border-t border-[var(--border-divider)] relative overflow-hidden">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-10 items-center">
           
-          {/* Left Side: Editorial Photo (dejz_01.png) + 2 Overlapping Photoshop UI Snippet Placeholders */}
+          {/* Left Side: Editorial Photo (dejz_01.png) + 2 Overlapping UI Snippets (reduced ~20%) */}
           <div className="lg:col-span-6 order-2 lg:order-1">
-            <div className="relative mx-auto max-w-[520px] pt-6 pb-8 sm:pt-10 sm:pb-12">
+            <div className="relative mx-auto max-w-[416px] pt-4 pb-6 sm:pt-8 sm:pb-9">
               
-              {/* Floating Top-Right Cutout Placeholder: Plus Menu (Utgift, Inkomst, Kvitto) */}
-              <div className="relative sm:absolute sm:-top-2 sm:-right-6 z-20 mb-4 sm:mb-0 sm:w-[290px] sm:rotate-[1.5deg] hover:rotate-0 transition-transform">
+              {/* Floating Top-Right Cutout: Plus Menu (Utgift, Inkomst, Kvitto) */}
+              <div className="relative sm:absolute sm:-top-2 sm:-right-5 z-20 mb-3 sm:mb-0 max-w-[232px] mx-auto sm:mx-0 sm:w-[232px] sm:rotate-[1.5deg] hover:rotate-0 transition-transform">
                 <UISnippetPlaceholder
                   src={screenshots.snippetQuickActions}
                   alt="Plus-menyn med Utgift, Inkomst och Kvitto i Dejz"
@@ -832,7 +832,7 @@ export function LandingPage({
               </div>
 
               {/* Main Lifestyle Photo dejz_01.png */}
-              <div className="relative rounded-3xl overflow-hidden border border-subtle shadow-[0_24px_60px_rgba(0,0,0,0.12)] bg-[var(--surface-color)] aspect-[4/3.4]">
+              <div className="relative rounded-3xl overflow-hidden border border-subtle shadow-[0_20px_50px_rgba(0,0,0,0.12)] bg-[var(--surface-color)] aspect-[4/3.4]">
                 {screenshots.lifestyleGrocery ? (
                   <img
                     src={screenshots.lifestyleGrocery}
@@ -855,7 +855,7 @@ export function LandingPage({
               </div>
 
               {/* Floating Bottom-Left Cutout Placeholder: Quick Expense & Voice Input Bar */}
-              <div className="relative sm:absolute sm:-bottom-4 sm:-left-6 z-20 mt-4 sm:mt-0 sm:w-[340px] sm:rotate-[-1.5deg] hover:rotate-0 transition-transform">
+              <div className="relative sm:absolute sm:-bottom-3 sm:-left-5 z-20 mt-3 sm:mt-0 max-w-[272px] mx-auto sm:mx-0 sm:w-[272px] sm:rotate-[-1.5deg] hover:rotate-0 transition-transform">
                 <UISnippetPlaceholder
                   src={screenshots.voiceInput}
                   alt="Snabbutgift med röstinmatning i Dejz"
@@ -996,12 +996,12 @@ export function LandingPage({
             </div>
           </div>
 
-          {/* Bottom Asymmetric Visual Grid: Lifestyle Photo (dejz_02.png) + 2 Cropped App Snippet Placeholders */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Bottom Asymmetric Visual Grid: Lifestyle Photo (dejz_02.png) + 2 Cropped App Snippets (reduced ~20%) */}
+          <div className="max-w-[840px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
             
             {/* Left 7 cols: dejz_02.png with floating pay-period snippet */}
-            <div className="lg:col-span-7 relative flex flex-col justify-between">
-              <div className="relative rounded-2xl overflow-hidden border border-subtle shadow-subtle bg-[var(--surface-color)] aspect-[16/10] h-full">
+            <div className="lg:col-span-7 relative">
+              <div className="relative rounded-2xl overflow-hidden border border-subtle shadow-subtle bg-[var(--surface-color)] aspect-[16/10] max-w-[460px] mx-auto">
                 {screenshots.lifestyleHome ? (
                   <img
                     src={screenshots.lifestyleHome}
@@ -1024,7 +1024,7 @@ export function LandingPage({
               </div>
 
               {/* Overlapping Pay-Period Summary Cutout */}
-              <div className="mt-4 sm:mt-0 sm:absolute sm:bottom-4 sm:left-4 sm:right-12 z-20">
+              <div className="mt-3 sm:mt-0 sm:absolute sm:bottom-3 sm:left-4 z-20 max-w-[290px] sm:w-[310px] mx-auto sm:mx-0">
                 <UISnippetPlaceholder
                   src={screenshots.snippetPayPeriod}
                   alt="Ekonomi-översikt i Dejz"
@@ -1038,8 +1038,8 @@ export function LandingPage({
               </div>
             </div>
 
-            {/* Right 5 cols: Tall Cropped List of Fixed Expenses Placeholder */}
-            <div className="lg:col-span-5 flex flex-col justify-center">
+            {/* Right 5 cols: Cropped List of Fixed Expenses (reduced ~20%) */}
+            <div className="lg:col-span-5 flex flex-col justify-center max-w-[300px] sm:max-w-[320px] mx-auto w-full">
               <UISnippetPlaceholder
                 src={screenshots.economy}
                 alt="Dejz Ekonomi - fasta kostnader och intervall"
@@ -1049,7 +1049,7 @@ export function LandingPage({
                 recommendedSize="ca 580 × 440 px • PNG"
                 fileHint="SCREENSHOT_CONFIG.economy"
                 variant="floating"
-                className="h-full flex flex-col justify-center"
+                className="flex flex-col justify-center"
               />
             </div>
 
@@ -1222,47 +1222,51 @@ export function LandingPage({
       </section>
 
       {/* =====================================================================
-          6. KATEGORIER OCH ANALYS — Staggered Dual-Crop Showcase
+          6. KATEGORIER OCH ANALYS — Compact Staggered Dual-Crop Showcase (reduced ~30%)
       ===================================================================== */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/15 dark:bg-[var(--brand-lavender)]/5 border-b border-[var(--border-divider)]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <section className="py-12 sm:py-18 px-4 sm:px-6 bg-[var(--brand-lavender)]/15 dark:bg-[var(--brand-lavender)]/5 border-b border-[var(--border-divider)]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           
-          <div className="lg:col-span-5 space-y-3 text-left">
+          <div className="lg:col-span-6 space-y-3 text-left">
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
               {tr('landing_analysis_title')}
             </h2>
 
-            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
+            <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty max-w-lg">
               {tr('landing_analysis_desc')}
             </p>
           </div>
 
-          {/* Staggered 2-part UI Snippet Stack instead of a generic single phone */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-5">
-            <div className="sm:mr-8">
-              <UISnippetPlaceholder
-                src={screenshots.analysis}
-                alt="Dejz Analys - cirkeldiagram och periodjämförelse"
-                badgeNumber="URKLIPP 8"
-                title="Analysvyn – Cirkeldiagrammet (Donut-grafen) & sammanfattningskorten"
-                whatToCrop="Klipp ut cirkeldiagrammet i Analys-fliken (gärna tillsammans med de två korten 'Kvar att spendera' och 'Mot förra perioden' ovanför)."
-                recommendedSize="ca 720 × 340 px • PNG"
-                fileHint="SCREENSHOT_CONFIG.analysis"
-                variant="floating"
-              />
-            </div>
+          {/* Compact Staggered 2-part UI Snippet Stack (reduced ~30% in size & height) */}
+          <div className="lg:col-span-6">
+            <div className="max-w-[380px] sm:max-w-[410px] mx-auto space-y-3 sm:space-y-0">
+              <div className="w-[82%] sm:w-[78%]">
+                <UISnippetPlaceholder
+                  src={screenshots.analysis}
+                  alt="Dejz Analys - cirkeldiagram och periodjämförelse"
+                  badgeNumber="URKLIPP 8"
+                  title="Analysvyn – Cirkeldiagrammet (Donut-grafen) & sammanfattningskorten"
+                  whatToCrop="Klipp ut cirkeldiagrammet i Analys-fliken (gärna tillsammans med de två korten 'Kvar att spendera' och 'Mot förra perioden' ovanför)."
+                  recommendedSize="ca 720 × 340 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.analysis"
+                  variant="floating"
+                  className="[&_img]:max-h-[220px] sm:[&_img]:max-h-[240px] [&_img]:w-auto"
+                />
+              </div>
 
-            <div className="sm:ml-10">
-              <UISnippetPlaceholder
-                src={screenshots.snippetCategoryBars}
-                alt="Dejz Kategorilista under Analys"
-                badgeNumber="URKLIPP 9"
-                title="Kategorilistan under Analys (med ”kvar av budget” & procent)"
-                whatToCrop="Klipp ut 2–3 rader ur kategorilistan i Analys som visar kategoriikon, 'X kr kvar av budget', totalt spenderat och procentandel."
-                recommendedSize="ca 720 × 260 px • PNG"
-                fileHint="SCREENSHOT_CONFIG.snippetCategoryBars"
-                variant="floating"
-              />
+              <div className="w-[84%] sm:w-[80%] ml-auto sm:-mt-5 relative z-10">
+                <UISnippetPlaceholder
+                  src={screenshots.snippetCategoryBars}
+                  alt="Dejz Kategorilista under Analys"
+                  badgeNumber="URKLIPP 9"
+                  title="Kategorilistan under Analys (med ”kvar av budget” & procent)"
+                  whatToCrop="Klipp ut 2–3 rader ur kategorilistan i Analys som visar kategoriikon, 'X kr kvar av budget', totalt spenderat och procentandel."
+                  recommendedSize="ca 720 × 260 px • PNG"
+                  fileHint="SCREENSHOT_CONFIG.snippetCategoryBars"
+                  variant="floating"
+                  className="[&_img]:max-h-[190px] sm:[&_img]:max-h-[210px] [&_img]:w-auto"
+                />
+              </div>
             </div>
           </div>
 
@@ -1322,41 +1326,43 @@ export function LandingPage({
               </p>
             </div>
 
-            {/* Right Column: Editorial Lifestyle Photo (dejz_03.png) + Overlapping Edit Transaction Cutout */}
-            <div className="lg:col-span-5 space-y-4">
-              {screenshots.lifestyleControl ? (
-                <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-subtle bg-black/40 aspect-[4/3]">
-                  <img
-                    src={screenshots.lifestyleControl}
-                    alt={tr('landing_control_title')}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-center select-none"
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none"
-                  />
-                </div>
-              ) : (
-                <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-white/5 aspect-[4/3] flex flex-col items-center justify-center p-6 text-center space-y-3">
-                  <ImageIcon size={24} className="text-white/70" />
-                  <p className="text-xs font-semibold text-white">Miljöbild: Kontroll utan bankkoppling</p>
-                </div>
-              )}
+            {/* Right Column: Editorial Lifestyle Photo (dejz_03.png) + Overlapping Edit Transaction Cutout (reduced ~15%) */}
+            <div className="lg:col-span-5">
+              <div className="max-w-[330px] sm:max-w-[360px] mx-auto lg:ml-auto lg:mr-0 space-y-3">
+                {screenshots.lifestyleControl ? (
+                  <div className="relative rounded-2xl overflow-hidden border border-white/15 shadow-subtle bg-black/40 aspect-[4/3]">
+                    <img
+                      src={screenshots.lifestyleControl}
+                      alt={tr('landing_control_title')}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-center select-none"
+                    />
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-white/5 aspect-[4/3] flex flex-col items-center justify-center p-6 text-center space-y-3">
+                    <ImageIcon size={24} className="text-white/70" />
+                    <p className="text-xs font-semibold text-white">Miljöbild: Kontroll utan bankkoppling</p>
+                  </div>
+                )}
 
-              {/* Overlapping Dark-Mode Cutout Placeholder: Edit Transaction */}
-              <div className="sm:-mt-10 sm:-ml-6 relative z-20">
-                <UISnippetPlaceholder
-                  src={screenshots.snippetEditModal}
-                  alt="Redigera transaktion i Dejz"
-                  badgeNumber="URKLIPP 10"
-                  title="Redigera transaktion (belopp, kategori, datum, kvitto)"
-                  whatToCrop="Klipp ut vyn 'Redigera transaktion' där man kan ändra belopp, byta eller dela upp kategori, välja datum (Idag / Igår), hjärtmarkera eller bifoga kvitto."
-                  recommendedSize="ca 560 × 240 px • PNG"
-                  fileHint="SCREENSHOT_CONFIG.snippetEditModal"
-                  variant="dark-floating"
-                />
+                {/* Overlapping Dark-Mode Cutout: Edit Transaction (reduced ~15%) */}
+                <div className="sm:-mt-8 sm:-ml-4 relative z-20 max-w-[275px] sm:max-w-[295px] mx-auto sm:mx-0">
+                  <UISnippetPlaceholder
+                    src={screenshots.snippetEditModal}
+                    alt="Redigera transaktion i Dejz"
+                    badgeNumber="URKLIPP 10"
+                    title="Redigera transaktion (belopp, kategori, datum, kvitto)"
+                    whatToCrop="Klipp ut vyn 'Redigera transaktion' där man kan ändra belopp, byta eller dela upp kategori, välja datum (Idag / Igår), hjärtmarkera eller bifoga kvitto."
+                    recommendedSize="ca 560 × 240 px • PNG"
+                    fileHint="SCREENSHOT_CONFIG.snippetEditModal"
+                    variant="dark-floating"
+                  />
+                </div>
               </div>
             </div>
 
