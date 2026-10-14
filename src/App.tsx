@@ -6045,16 +6045,16 @@ export default function App() {
                       }
                       className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
                         isRecording
-                          ? "bg-[var(--danger-color)]/15 text-[var(--danger-color)] border-[var(--danger-color)]/30 animate-pulse scale-102"
+                          ? "bg-[var(--accent-color)]/15 text-[var(--accent-color)] border-[var(--accent-color)]/30"
                           : isAudioTranscribing
-                            ? "bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]"
+                            ? "bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--accent-color)] border-subtle"
                             : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
-                        <Loader2 size={15} className="animate-spin text-[var(--danger-color)]" />
+                        <Loader2 size={15} className="animate-spin text-[var(--accent-color)]" />
                       ) : (
-                        <Mic size={17} strokeWidth={2} className={isRecording ? "text-[var(--danger-color)] animate-pulse" : ""} />
+                        <Mic size={17} strokeWidth={2} className={isRecording ? "text-[var(--accent-color)] animate-pulse" : ""} />
                       )}
                     </button>
                   }
@@ -6071,13 +6071,13 @@ export default function App() {
                   }
                   submitIcon={
                     isRecording ? (
-                      <Square size={13} className="fill-current text-white" />
+                      <Square size={13} className="fill-current" />
                     ) : (
                       <Plus size={18} strokeWidth={2} />
                     )
                   }
                   submitButtonClassName={
-                    isRecording ? "bg-[var(--danger-color)] border-2 border-white/30 text-white shadow-md animate-pulse ring-2 ring-rose-500/40" : ""
+                    isRecording ? "bg-[var(--accent-color)] text-[var(--on-accent)] border border-[var(--accent-color)] shadow-xs" : ""
                   }
                   feedback={
                     plusSuccessMsg
@@ -6087,7 +6087,7 @@ export default function App() {
                         : null
                   }
                   inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
-                    isRecording ? "border-[var(--danger-color)]/80 ring-2 ring-rose-500/30" : "border-subtle"
+                    isRecording ? "border-[var(--accent-color)]/60 ring-2 ring-[var(--accent-color)]/15" : "border-subtle"
                   }`}
                 />
               </div>

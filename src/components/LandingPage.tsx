@@ -2,25 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   ChevronDown, 
-  ShieldCheck, 
   Check, 
   Mic, 
   Smartphone, 
   Sparkles,
   CheckCircle2,
   Lock,
-  Layers,
-  PieChart,
   RotateCcw,
   Menu,
   X,
-  Camera,
-  Zap,
-  Calendar,
-  PiggyBank,
-  Wallet,
   Image as ImageIcon,
-  MessageSquareHeart,
   Users,
   User,
   Scissors,
@@ -66,15 +57,15 @@ export const SCREENSHOT_CONFIG: LandingPageScreenshots = {
 
   // --- PHOTOSHOP-URKLIPP PLACEHOLDERS (sätt t.ex. '/crop_01.png' när du laddat upp) ---
   voiceInput: undefined,          // Urklipp 1 (Sektion: Röst & Snabbutgift - nederkant på dejz_01.png)
-  snippetQuickActions: undefined, // Urklipp 2 (Sektion: Plus-menyn / Kvitto - överkant på dejz_01.png)
-  economy: undefined,             // Urklipp 3 (Sektion: Fasta kostnader - lista med fasta utgifter)
-  snippetPayPeriod: undefined,    // Urklipp 4 (Sektion: Fasta kostnader - överlappande summeringskort)
-  dailyAndSavings: undefined,     // Urklipp 5 (Bento-kort 1: Kvar att spendera + Aktuell period & Nästa lön)
-  snippetPiggyBank: undefined,    // Urklipp 6 (Bento-kort 2: Kategoribudgetar på hemskärmen)
-  snippetCalendar: undefined,     // Urklipp 7 (Bento-kort 3: Tidslinjen dag för dag)
-  analysis: undefined,            // Urklipp 8 (Sektion: Analys - cirkeldiagrammet)
-  snippetCategoryBars: undefined, // Urklipp 9 (Sektion: Analys - kategorilistan med kvar av budget)
-  snippetEditModal: undefined,    // Urklipp 10 (Mörk sektion: Redigera transaktion på dejz_03.png)
+  snippetQuickActions: '/lagga_till_transaktion.png', // Urklipp 2 (Sektion: Plus-menyn / Lägg till transaktion - överkant på dejz_01.png)
+  economy: '/fasta_utgifter.jpg', // Urklipp 3 (Sektion: Fasta kostnader - lista med fasta utgifter)
+  snippetPayPeriod: '/totalt_fasta.jpg', // Urklipp 4 (Sektion: Fasta kostnader - överlappande summeringskort)
+  dailyAndSavings: '/kvar_att_spendera.jpg', // Urklipp 5 (Bento-kort 1: Kvar att spendera + Aktuell period & Nästa lön)
+  snippetPiggyBank: '/kategoribudgetar.png', // Urklipp 6 (Bento-kort 2: Kategoribudgetar på hemskärmen)
+  snippetCalendar: '/tidslinje.png', // Urklipp 7 (Bento-kort 3: Tidslinjen dag för dag)
+  analysis: '/cirkeldiagram.jpg', // Urklipp 8 (Sektion: Analys - cirkeldiagrammet)
+  snippetCategoryBars: '/analys_kategorier.jpg', // Urklipp 9 (Sektion: Analys - kategorilistan med kvar av budget)
+  snippetEditModal: '/redigera_transaktion.png', // Urklipp 10 (Mörk sektion: Redigera transaktion på dejz_03.png)
 };
 
 /**
@@ -174,7 +165,7 @@ export const UISnippetPlaceholder: React.FC<UISnippetPlaceholderProps> = ({
           alt={alt}
           loading="lazy"
           referrerPolicy="no-referrer"
-          className="w-full h-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-white/40 dark:border-white/10 object-contain"
+          className="w-full h-auto rounded-2xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.22)] object-contain"
         />
       </div>
     );
@@ -814,49 +805,6 @@ export function LandingPage({
           </div>
 
         </div>
-
-        {/* Full-Width Architectural Highlight Strip under Hero */}
-        <div className="max-w-6xl mx-auto mt-10 sm:mt-14 pt-6 border-t border-[var(--border-divider)]/80 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[var(--brand-peach)]/55 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
-              <Mic size={16} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_voice_pill_voice')}</p>
-              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_voice_pill_receipt')} · {tr('landing_voice_pill_quick')}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[var(--brand-pink)]/45 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
-              <Layers size={16} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_fixed_badge')}</p>
-              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_fixed_pill_intervals')}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[var(--brand-lavender)]/45 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
-              <PiggyBank size={16} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_daily_item1_title')} & {tr('landing_daily_item2_title')}</p>
-              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_daily_item3_title')}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
-              <ShieldCheck size={16} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{tr('landing_control_item1_title')}</p>
-              <p className="text-[11px] text-[var(--text-secondary)]">{tr('landing_control_item3_title')}</p>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* =====================================================================
@@ -926,11 +874,6 @@ export function LandingPage({
           {/* Right Side: Copy & Live Interactive Flow Simulation Card */}
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-6 text-left">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                <Mic size={14} className="text-[var(--text-primary)]" />
-                <span>{tr('landing_voice_badge')}</span>
-              </div>
-
               <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
                 {tr('landing_voice_title')}
               </h2>
@@ -943,21 +886,12 @@ export function LandingPage({
                 {tr('landing_voice_subdesc')}
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-xs font-semibold text-[var(--text-primary)]">
-                <span className="inline-flex items-center gap-1.5">
-                  <Mic size={14} className="text-[var(--text-secondary)]" />
-                  {tr('landing_voice_pill_voice')}
-                </span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 text-xs font-semibold text-[var(--text-primary)]">
+                <span>{tr('landing_voice_pill_voice')}</span>
                 <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Camera size={14} className="text-[var(--text-secondary)]" />
-                  {tr('landing_voice_pill_receipt')}
-                </span>
+                <span>{tr('landing_voice_pill_receipt')}</span>
                 <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Zap size={14} className="text-[var(--text-secondary)]" />
-                  {tr('landing_voice_pill_quick')}
-                </span>
+                <span>{tr('landing_voice_pill_quick')}</span>
               </div>
             </div>
 
@@ -1042,11 +976,7 @@ export function LandingPage({
           
           {/* Top Editorial Split Header (Breaks the 50/50 left-right repetition!) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end text-left">
-            <div className="lg:col-span-6 space-y-3">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                <Layers size={14} className="text-[var(--text-primary)]" />
-                <span>{tr('landing_fixed_badge')}</span>
-              </div>
+            <div className="lg:col-span-6">
               <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
                 {tr('landing_fixed_title')}
               </h2>
@@ -1056,21 +986,12 @@ export function LandingPage({
               <p className="text-base text-[var(--text-secondary)] leading-relaxed font-normal text-pretty">
                 {tr('landing_fixed_desc')}
               </p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-[var(--text-primary)]">
-                <span className="inline-flex items-center gap-1.5">
-                  <Calendar size={14} className="text-[var(--text-secondary)]" />
-                  {tr('landing_fixed_pill_intervals')}
-                </span>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold text-[var(--text-primary)]">
+                <span>{tr('landing_fixed_pill_intervals')}</span>
                 <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Layers size={14} className="text-[var(--text-secondary)]" />
-                  {tr('landing_fixed_pill_variable')}
-                </span>
+                <span>{tr('landing_fixed_pill_variable')}</span>
                 <span aria-hidden="true" className="text-[var(--text-tertiary)]">·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <PiggyBank size={14} className="text-[var(--text-secondary)]" />
-                  {tr('landing_fixed_pill_goals')}
-                </span>
+                <span>{tr('landing_fixed_pill_goals')}</span>
               </div>
             </div>
           </div>
@@ -1211,12 +1132,7 @@ export function LandingPage({
         <div className="max-w-6xl mx-auto space-y-10 sm:space-y-12">
           
           {/* Section Header */}
-          <div className="max-w-2xl text-left space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-              <PiggyBank size={14} className="text-[var(--text-primary)]" />
-              <span>{tr('landing_daily_badge')}</span>
-            </div>
-
+          <div className="max-w-2xl text-left space-y-2.5">
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
               {tr('landing_daily_title')}
             </h2>
@@ -1231,10 +1147,7 @@ export function LandingPage({
             
             {/* Bento Card 1 (7 columns): Kvar att spendera + Aktuell period & Nästa lön */}
             <div className="lg:col-span-7 rounded-3xl p-6 sm:p-8 bg-[var(--surface-color)] border border-subtle shadow-2xs flex flex-col justify-between gap-6">
-              <div className="space-y-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--brand-peach)]/55 flex items-center justify-center text-[var(--text-primary)]">
-                  <Wallet size={20} strokeWidth={2} />
-                </div>
+              <div className="space-y-2">
                 <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
                   {tr('landing_daily_item1_title')}
                 </h3>
@@ -1257,10 +1170,7 @@ export function LandingPage({
 
             {/* Bento Card 2 (5 columns): Kategoribudgetar på hemskärmen */}
             <div className="lg:col-span-5 rounded-3xl p-6 sm:p-8 bg-[var(--brand-lavender)]/25 dark:bg-[var(--brand-lavender)]/10 border border-subtle shadow-2xs flex flex-col justify-between gap-6">
-              <div className="space-y-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] shadow-2xs">
-                  <Layers size={20} strokeWidth={2} />
-                </div>
+              <div className="space-y-2">
                 <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
                   {tr('landing_daily_item2_title')}
                 </h3>
@@ -1283,10 +1193,7 @@ export function LandingPage({
 
             {/* Bento Card 3 (12 columns horizontal split): Tidslinje & kalender */}
             <div className="lg:col-span-12 rounded-3xl p-6 sm:p-8 bg-[var(--surface-color)] border border-subtle shadow-2xs grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-              <div className="lg:col-span-5 space-y-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[var(--brand-pink)]/45 flex items-center justify-center text-[var(--text-primary)]">
-                  <Calendar size={20} strokeWidth={2} />
-                </div>
+              <div className="lg:col-span-5 space-y-2">
                 <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
                   {tr('landing_daily_item3_title')}
                 </h3>
@@ -1320,12 +1227,7 @@ export function LandingPage({
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--brand-lavender)]/15 dark:bg-[var(--brand-lavender)]/5 border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
-          <div className="lg:col-span-5 space-y-4 text-left">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-              <PieChart size={14} className="text-[var(--text-primary)]" />
-              <span>{tr('landing_analysis_badge')}</span>
-            </div>
-
+          <div className="lg:col-span-5 space-y-3 text-left">
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] leading-tight text-balance">
               {tr('landing_analysis_title')}
             </h2>
@@ -1387,10 +1289,7 @@ export function LandingPage({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-2">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--brand-peach)]/20 flex items-center justify-center text-[var(--brand-peach)]">
-                    <ShieldCheck size={18} strokeWidth={2} />
-                  </div>
+                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-1.5">
                   <h3 className="text-sm font-bold text-white">
                     {tr('landing_control_item1_title')}
                   </h3>
@@ -1399,10 +1298,7 @@ export function LandingPage({
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-2">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--brand-pink)]/20 flex items-center justify-center text-[var(--brand-pink)]">
-                    <Check size={18} strokeWidth={2} />
-                  </div>
+                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-1.5">
                   <h3 className="text-sm font-bold text-white">
                     {tr('landing_control_item2_title')}
                   </h3>
@@ -1411,10 +1307,7 @@ export function LandingPage({
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-2">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--brand-lavender)]/20 flex items-center justify-center text-[var(--brand-lavender)]">
-                    <Sparkles size={18} strokeWidth={2} />
-                  </div>
+                <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.04] space-y-1.5">
                   <h3 className="text-sm font-bold text-white">
                     {tr('landing_control_item3_title')}
                   </h3>
@@ -1478,12 +1371,7 @@ export function LandingPage({
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
         <div className="max-w-6xl mx-auto space-y-10 sm:space-y-12">
           
-          <div className="max-w-2xl mx-auto text-center space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-              <MessageSquareHeart size={14} className="text-[var(--text-primary)]" />
-              <span>{tr('landing_testimonials_badge')}</span>
-            </div>
-
+          <div className="max-w-2xl mx-auto text-center space-y-2.5">
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] text-balance">
               {tr('landing_testimonials_title')}
             </h2>
@@ -1491,20 +1379,6 @@ export function LandingPage({
             <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed text-pretty">
               {tr('landing_testimonials_subtitle')}
             </p>
-
-            <div className="pt-2 flex justify-center">
-              {SOCIAL_PROOF_CONFIG.userCountStat ? (
-                <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
-                  <Users size={14} className="text-[var(--text-secondary)]" />
-                  <span>{SOCIAL_PROOF_CONFIG.userCountStat}</span>
-                </div>
-              ) : (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-dashed border-[var(--border-color)] text-[11px] font-mono text-[var(--text-tertiary)]">
-                  <Users size={13} className="text-[var(--text-tertiary)]" />
-                  <span>{tr('landing_testimonials_stat_placeholder')}</span>
-                </div>
-              )}
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
