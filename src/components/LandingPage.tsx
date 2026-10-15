@@ -586,7 +586,7 @@ const DualCounterParallaxBand = ({
     <section
       ref={bandRef}
       aria-label={isEn ? 'Live app transactions' : 'Transaktioner i appen'}
-      className="py-9 sm:py-12 bg-editorial-forest border-b border-[var(--border-divider)] overflow-hidden select-none space-y-4"
+      className="py-8 sm:py-10 bg-[var(--bg-color)] border-b border-[var(--border-divider)] overflow-hidden select-none space-y-3.5"
     >
       <motion.div style={{ x: xRow1 }} className="flex items-center gap-3.5 w-max px-4">
         {[...row1Cards, ...row1Cards, ...row1Cards].map((item, idx) =>
@@ -673,9 +673,6 @@ const EditorialParallaxGallery = ({
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-10 sm:mb-14 flex items-end justify-between gap-4 text-left">
         <div className="space-y-2.5 max-w-2xl">
-          <p className="text-xs font-bold tracking-widest uppercase text-[var(--text-tertiary)]">
-            {isEn ? 'Designed for real life' : 'Byggd för vardagen'}
-          </p>
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
             {isEn
               ? 'Less time in spreadsheets. More calm between paydays.'
@@ -1127,10 +1124,6 @@ export function LandingPage({
             className="lg:col-span-6 space-y-6 sm:space-y-8 text-left"
           >
             <div className="space-y-4">
-              <span className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-editorial-lavender text-[var(--text-primary)] text-xs font-bold tracking-tight">
-                {isEn ? 'Payday to payday · No bank link' : 'Från lön till lön · Utan bankkoppling'}
-              </span>
-
               <h1 className="text-[2.45rem] sm:text-6xl lg:text-[3.85rem] font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.02] text-balance">
                 {tr('landing_hero_title')}
               </h1>
@@ -1416,9 +1409,6 @@ export function LandingPage({
 
           {/* Right Column (6 cols): Editorial Copy */}
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-5 text-left">
-            <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-tertiary)]">
-              {tr('landing_voice_badge')}
-            </p>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
               {tr('landing_voice_title')}
             </h2>
@@ -1443,10 +1433,6 @@ export function LandingPage({
           {/* Left Column (5 cols): Editorial Copy + Payday Logic */}
           <div className="lg:col-span-5 space-y-6 text-left">
             <div className="space-y-4">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-                {tr('landing_fixed_badge')}
-              </p>
-
               <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
                 {tr('landing_fixed_title')}
               </h2>
@@ -1648,9 +1634,6 @@ export function LandingPage({
             transition={{ duration: 0.5 }}
             className="max-w-2xl space-y-3 mb-4"
           >
-            <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-editorial-lavender text-[var(--text-primary)] text-xs font-bold">
-              {tr('landing_daily_badge')}
-            </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
               {tr('landing_daily_title')}
             </h2>
@@ -1816,9 +1799,6 @@ export function LandingPage({
               className="lg:col-span-12 rounded-modal bg-editorial-forest p-6 sm:p-9 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center select-none shadow-subtle"
             >
               <div className="lg:col-span-5 space-y-3 text-white">
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-editorial-lavender text-[var(--text-primary)] text-xs font-bold">
-                  {isEn ? 'Day by day' : 'Dag för dag'}
-                </span>
                 <h3 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
                   {tr('landing_daily_item3_title')}
                 </h3>
@@ -2048,9 +2028,6 @@ export function LandingPage({
           {/* Right Column (6 cols): Copy + Exact Category Breakdown Excerpt (analys_kategorier.jpg) */}
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-tertiary)]">
-                {tr('landing_analysis_badge')}
-              </p>
               <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
                 {tr('landing_analysis_title')}
               </h2>
@@ -2287,9 +2264,6 @@ export function LandingPage({
           {/* Right Column (6 cols): Editorial Copy & 3 Pillars */}
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-6">
             <div className="space-y-4">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-tertiary)]">
-                {isEn ? 'Privacy & Control' : 'Integritet & Kontroll'}
-              </p>
               <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
                 {tr('landing_control_title')}
               </h2>
@@ -2348,9 +2322,6 @@ export function LandingPage({
           
           <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6">
             <div className="space-y-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-tertiary)]">
-                {tr('landing_faq_badge')}
-              </p>
               <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-tight text-balance">
                 {tr('landing_faq_title')}
               </h2>
