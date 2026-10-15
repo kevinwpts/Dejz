@@ -678,12 +678,22 @@ h6 {
   --brand-cream: #FFFFFF;
   --brand-gradient: #68B2FF;
 
+  /* Centralized Landing Page Color & Layout Tokens */
+  --landing-max-w: 73.5rem; /* 1176px (within 1120–1200px brief) */
+  --landing-px: 1.25rem;
+  --landing-signature: #78BAFF;
+  --landing-signature-strong: #5AA7FA;
+  --landing-sky-soft: #E9F2FC;
+  --landing-surface-base: #F3F6FA;
+  --landing-surface-card: #FFFFFF;
+  --landing-contrast-dark: #0F141C;
+
   /* Architectural Section & Stage Surfaces */
-  --editorial-peach: #E8F1FF;
-  --editorial-rose: #FFFFFF;
-  --editorial-lavender: #78BAFF;
-  --editorial-electric: #0F141C;
-  --editorial-cream: #FFFFFF;
+  --editorial-peach: var(--landing-sky-soft);
+  --editorial-rose: var(--landing-surface-card);
+  --editorial-lavender: var(--landing-signature);
+  --editorial-electric: var(--landing-contrast-dark);
+  --editorial-cream: var(--landing-surface-card);
 
   /* Dejz Official Brand Logo Color (Deep Midnight Obsidian) */
   --logo-color: #0F141C;
@@ -922,6 +932,11 @@ h6 {
   --bg-gradient: #141312;
 
   /* 100% Flat, Tonal Matte Surfaces (Dark Mode) */
+  --landing-signature: #24374D;
+  --landing-sky-soft: #1B222C;
+  --landing-surface-base: #141312;
+  --landing-surface-card: #1C1B19;
+  --landing-contrast-dark: #0D1117;
   --editorial-peach: #22201E;
   --editorial-rose: #1C1B19;
   --editorial-lavender: #1B242E;
@@ -1019,30 +1034,50 @@ h6 {
   --date-inactive-color: #B3ADA5;
 }
 
-/* Glass-Card Surface Utility (borderless translucent glass) */
+/* Centralized Landing Layout & Surface Utilities */
+.landing-container {
+  width: 100%;
+  max-width: var(--landing-max-w, 73.5rem);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  .landing-container {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .landing-container {
+    padding-inline: 2rem;
+  }
+}
+
+.bg-landing-signature,
+.bg-editorial-lavender {
+  background-color: var(--landing-signature);
+}
+.bg-landing-sky-soft,
 .bg-editorial-peach {
-  background-color: var(--editorial-peach);
+  background-color: var(--landing-sky-soft);
+}
+.bg-landing-contrast-dark,
+.bg-editorial-forest {
+  background-color: var(--landing-contrast-dark);
 }
 .bg-editorial-rose {
   background-color: var(--editorial-rose);
 }
-.bg-editorial-lavender {
-  background-color: var(--editorial-lavender);
-}
 .bg-editorial-electric {
-  background-color: var(--editorial-electric, #1F5EFF);
+  background-color: var(--editorial-electric, #0F141C);
 }
 .text-editorial-electric {
-  color: var(--editorial-electric, #1F5EFF);
+  color: var(--editorial-electric, #0F141C);
 }
 .border-editorial-electric {
-  border-color: var(--editorial-electric, #1F5EFF);
+  border-color: var(--editorial-electric, #0F141C);
 }
 .bg-editorial-cream {
   background-color: var(--editorial-cream);
-}
-.bg-editorial-forest {
-  background-color: #0F141C;
 }
 .voice-bar-surface {
   background-color: rgba(235, 122, 122, 0.08);
@@ -1632,11 +1667,25 @@ html:not(.dark) .bg-white {
   animation: pulseSubtle 8s ease-in-out infinite;
 }
 
+@keyframes marqueeSlow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@utility animate-marquee-slow {
+  animation: marqueeSlow 52s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
   .animate-float-slow,
   .animate-float-slow-reverse,
-  .animate-pulse-subtle {
+  .animate-pulse-subtle,
+  .animate-marquee-slow {
     animation: none !important;
   }
 }
