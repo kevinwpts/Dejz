@@ -99,10 +99,10 @@ export function GreetingModule({
         className="w-full select-none"
       >
         <div
-          className="bg-[var(--surface-color)] border border-subtle rounded-card p-4 sm:p-5 relative overflow-hidden transition-all shadow-subtle flex flex-col justify-between gap-3 text-[var(--text-primary)]"
+          className="bg-[var(--surface-color)] border border-subtle rounded-card p-5 sm:p-6 relative overflow-hidden transition-all shadow-subtle flex flex-col justify-between gap-3.5 text-[var(--text-primary)]"
         >
           {/* Top Row: Label & Info button */}
-          <div className="flex items-center justify-between">
+          <div className="relative z-10 flex items-center justify-between">
             <span className="text-card-title sm:text-body font-medium text-[var(--text-secondary)]">
               {t('totalRemaining') || (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
             </span>
@@ -121,7 +121,7 @@ export function GreetingModule({
           </div>
 
           {/* Middle: Large Amount */}
-          <div className="flex items-baseline gap-1.5 min-w-0 py-0.5">
+          <div className="relative z-10 flex items-baseline gap-1.5 min-w-0 py-0.5">
             <AnimatedNumber
               value={remainingCents}
               className={`text-hero-amount leading-none font-bold tabular-nums tracking-tight ${
@@ -135,19 +135,19 @@ export function GreetingModule({
           </div>
 
           {/* Bottom: Thin progress bar + percentage text */}
-          <div className="space-y-1 pt-1">
+          <div className="relative z-10 space-y-1.5 pt-1">
             <div className="flex items-center justify-between text-micro-label font-medium text-[var(--text-secondary)]">
               <span>{isEn ? 'Remaining spendable' : 'Spenderbart kvar'}</span>
               <span className="font-amount tabular-nums font-bold text-[var(--text-primary)]">
                 {remainingCents < 0 ? '0' : percentage} % {isEn ? 'left' : 'kvar'}
               </span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-[var(--surface-muted)] overflow-hidden">
+            <div className="w-full h-2.5 rounded-full bg-black/[0.07] dark:bg-white/[0.09] overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{ 
                   width: `${remainingCents < 0 ? 0 : Math.max(0, Math.min(100, clampedFraction * 100))}%`,
-                  backgroundColor: 'var(--accent-color)'
+                  backgroundColor: 'var(--brand-signature, var(--accent-color))'
                 }}
               />
             </div>

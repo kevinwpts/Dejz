@@ -9,28 +9,39 @@ interface DejzLogoProps {
 
 export function DejzLogo({
   className = "h-7 w-auto",
+  textColor,
   style,
 }: DejzLogoProps) {
   const hasExplicitHeight = /\b(h-\d+|h-\[|h-auto|h-full)\b/.test(className);
 
   return (
     <span 
-      className={`inline-flex items-center shrink-0 select-none ${
+      className={`relative inline-flex items-center shrink-0 select-none ${
         hasExplicitHeight ? "" : "h-[1.15em]"
       } w-auto ${className}`} 
       style={style}
     >
-      {/* Light mode: dejz_mork.png */}
+      {/* Invisible sizing reference image so exact aspect ratio and width are preserved */}
       <img
         src="/dejz_mork.png"
         alt="dejz"
-        className="h-full w-auto object-contain block dark:hidden select-none pointer-events-none"
+        className="h-full w-auto object-contain opacity-0 select-none pointer-events-none block"
       />
-      {/* Dark mode: dejz_ljus.png */}
-      <img
-        src="/dejz_ljus.png"
-        alt="dejz"
-        className="h-full w-auto object-contain hidden dark:block select-none pointer-events-none"
+      {/* Masked color layer that renders the logo in the active primary brand color */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none transition-colors duration-200"
+        style={{
+          backgroundColor: textColor || "var(--logo-color, var(--accent-color))",
+          WebkitMaskImage: "url('/dejz_mork.png')",
+          maskImage: "url('/dejz_mork.png')",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+        }}
       />
     </span>
   );

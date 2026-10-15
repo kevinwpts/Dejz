@@ -31,13 +31,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center font-medium transition-all duration-[var(--duration-normal,150ms)] select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30';
 
     const sizeStyles = {
-      sm: 'h-[var(--height-button-sm,32px)] px-3.5 rounded-[var(--radius-button-sm,10px)] text-label gap-1.5 active:scale-95',
-      md: 'h-[var(--height-button,46px)] px-5 rounded-[var(--radius-button,12px)] text-body-medium gap-2 active:scale-[0.98]',
-      lg: 'h-[var(--height-button-lg,48px)] px-6 rounded-[var(--radius-button-lg,12px)] text-body-medium font-semibold gap-2.5 active:scale-[0.98]',
+      sm: 'h-[var(--height-button-sm,34px)] px-4 rounded-full text-label gap-1.5 active:scale-95',
+      md: 'h-[var(--height-button,46px)] px-5.5 rounded-full text-body-medium gap-2 active:scale-[0.98]',
+      lg: 'h-[var(--height-button-lg,48px)] px-7 rounded-full text-body-medium font-semibold gap-2.5 active:scale-[0.98]',
     }[size];
 
     const surfaceButtonStyle =
-      'bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-divider)] shadow-subtle hover:bg-black/[0.03] dark:hover:bg-white/10 active:bg-black/[0.06] dark:active:bg-white/15';
+      'bg-[var(--surface-color)] dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-divider)]/60 shadow-subtle hover:bg-[var(--surface-muted)]/70 dark:hover:bg-white/10 active:bg-black/[0.06] dark:active:bg-white/15';
 
     const variantStyles = {
       primary:

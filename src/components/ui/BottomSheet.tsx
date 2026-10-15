@@ -215,11 +215,11 @@ export function BottomSheetOption<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[var(--radius-button-sm,8px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
+      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[var(--radius-card-nested,16px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
-          <div className="w-8 h-8 rounded-[var(--radius-icon-button,6px)] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+          <div className="w-8 h-8 rounded-[var(--radius-icon-button,9999px)] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
             {icon}
           </div>
         )}

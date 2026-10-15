@@ -1618,7 +1618,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#191919" : "#F2F0F0";
+      const themeColor = isDark ? "#141312" : "#F4F1EC";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 

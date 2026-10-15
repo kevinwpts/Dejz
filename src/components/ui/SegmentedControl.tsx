@@ -27,19 +27,19 @@ export function SegmentedControl<T extends string = string>({
   className = '',
 }: SegmentedControlProps<T>) {
   const sizeStyles = {
-    sm: 'p-1 rounded-[var(--radius-icon-button,10px)] text-label',
-    md: 'p-1 rounded-[var(--radius-card-nested,12px)] text-secondary',
-    lg: 'p-1.5 rounded-[var(--radius-card-nested,12px)] text-body-medium',
+    sm: 'p-1 rounded-full text-label',
+    md: 'p-1 rounded-full text-secondary',
+    lg: 'p-1.5 rounded-full text-body-medium',
   }[size];
 
   const itemSizeStyles = {
-    sm: 'py-1.5 px-3 rounded-[var(--radius-xs,6px)]',
-    md: 'py-2 px-4 rounded-[var(--radius-button-sm,10px)]',
-    lg: 'py-2.5 px-5 rounded-[var(--radius-button-sm,10px)]',
+    sm: 'py-1.5 px-3.5 rounded-full',
+    md: 'py-2 px-4 rounded-full',
+    lg: 'py-2.5 px-5 rounded-full',
   }[size];
 
   const containerVariantStyles =
-    'bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] backdrop-blur-md border border-[var(--border-divider)] shadow-subtle';
+    'bg-[var(--surface-muted)]/90 dark:bg-[var(--surface-muted)] backdrop-blur-md border-none shadow-none';
 
   return (
     <div

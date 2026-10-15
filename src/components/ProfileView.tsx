@@ -2,7 +2,7 @@ import { StarredTransactionsView } from './StarredTransactionsView';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Switch, Card, ListRow } from './ui';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag , Heart} from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, BookOpen, Bell, PieChart, Tag, Heart } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -470,22 +470,12 @@ export function ProfileView({
           </Card>
         </div>
 
-        {/* Verktyg & Delning */}
+        {/* Verktyg & Guider */}
         <div className="space-y-2.5">
           <h4 className="text-section-title px-1.5">
-            {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
+            {config.language === 'en' ? 'Tools & Guides' : 'Verktyg & Funktioner'}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
-            
-            
-            <ListRow
-              variant="grouped"
-              density="compact"
-              showChevron
-              icon={<Users2 size={18} strokeWidth={2} />}
-              title={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'}
-              onClick={() => handleSectionClick('sharedBudget')}
-            />
             <ListRow
               variant="grouped"
               density="compact"

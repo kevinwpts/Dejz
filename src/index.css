@@ -670,58 +670,66 @@ h6 {
   --orange-800: #9A4D00;
   --orange-900: #713800;
 
-  /* Brand Gradient & Scale (Peach - Pink - Lavender) */
-  --brand-peach: #FFE0CE;
-  --brand-pink: #F8C4DF;
-  --brand-lavender: #CEB9EF;
-  --brand-cream: #FDF7F2;
-  --brand-gradient: linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%);
+  /* High-Contrast Nordic Fintech Palette — Pure White (#FFFFFF), Cool Mist (#F3F6FA), Glacier Ice (#E8F1FF), Signature Nordic Sky (#78BAFF) & Deep Obsidian (#0F141C) */
+  --brand-signature: #68B2FF;
+  --brand-peach: #E8F1FF;
+  --brand-pink: #68B2FF;
+  --brand-lavender: #78BAFF;
+  --brand-cream: #FFFFFF;
+  --brand-gradient: #68B2FF;
 
-  /* Dejz Official Brand Logo Color */
-  --logo-color: #151718;
+  /* Architectural Section & Stage Surfaces */
+  --editorial-peach: #E8F1FF;
+  --editorial-rose: #FFFFFF;
+  --editorial-lavender: #78BAFF;
+  --editorial-electric: #0F141C;
+  --editorial-cream: #FFFFFF;
+
+  /* Dejz Official Brand Logo Color (Deep Midnight Obsidian) */
+  --logo-color: #0F141C;
 
   /* Universal Card Gap / Spacing */
   --card-gap: 0.5rem;
   --menu-content-gap: 1.5rem;
 
-  /* Seamless Light Theme Background & Surfaces */
-  --bg-top-color: #F2F0F0;
-  --bg-color: #F2F0F0;
-  --bg-secondary: #F2F0F0;
-  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(242, 240, 240, 0) 0%, #F2F0F0 400px), linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%));
+  /* Two-Step High-Contrast Hierarchy: Cool Nordic Mist (#F3F6FA) + Pure White Cards (#FFFFFF) */
+  --bg-top-color: #F3F6FA;
+  --bg-color: #F3F6FA;
+  --bg-secondary: #EDF2F8;
+  --bg-gradient: #F3F6FA;
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-raised: #FFFFFF;
-  --surface-high: #ECEAEA;
+  --surface-high: #E8EEF5;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #ECEAEA;
-  --surface-tint: rgba(0, 0, 0, 0.01);
+  --surface-muted: #E8EEF5;
+  --surface-tint: rgba(15, 20, 28, 0.025);
 
-  --text-primary: #151718;
-  --text-metric-label: #454C4E;
-  --text-secondary: #60686B;
-  --text-tertiary: #747D80;
-  --text-muted: #747D80;
-  --text-disabled: #A4ACAF;
-  --text-inactive: #A4ACAF;
+  --text-primary: #0F141C;
+  --text-metric-label: #2D3542;
+  --text-secondary: #4B5563;
+  --text-tertiary: #6B7280;
+  --text-muted: #6B7280;
+  --text-disabled: #9CA3AF;
+  --text-inactive: #9CA3AF;
 
-  --border-subtle: transparent;
-  --border-color: transparent;
-  --border-control: transparent;
-  --border-strong: transparent;
-  --border-divider: rgba(21, 23, 24, 0.06);
-  --border-menu-divider: rgba(21, 23, 24, 0.06);
+  --border-subtle: rgba(15, 20, 28, 0.06);
+  --border-color: rgba(15, 20, 28, 0.06);
+  --border-control: rgba(15, 20, 28, 0.08);
+  --border-strong: rgba(15, 20, 28, 0.12);
+  --border-divider: rgba(15, 20, 28, 0.08);
+  --border-menu-divider: rgba(15, 20, 28, 0.08);
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #ECEAEA;
-  --chip-text: #60686B;
-  --chip-active-bg: #151718;
+  --chip-bg: #E8EEF5;
+  --chip-text: #4B5563;
+  --chip-active-bg: #0F141C;
   --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #ECEAEA;
+  --card-nested-bg: #EEF2F7;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -729,51 +737,52 @@ h6 {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents & Colors - Dejz Accent (Default Neutral) */
-  --accent-color: #151718;
-  --accent-hover: #292C2E;
-  --accent-pressed: #080A0B;
+  /* Brand Accents & Colors - Deep Obsidian (#0F141C) + Signature Nordic Sky (#78BAFF) */
+  --accent-color: #0F141C;
+  --accent-hover: #1E2633;
+  --accent-pressed: #070A0E;
   --accent-gradient: var(--accent-color);
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(21, 23, 24, 0.08);
-  --accent-container: rgba(21, 23, 24, 0.08);
-  --on-accent-container: #151718;
+  --accent-soft: rgba(120, 186, 255, 0.28);
+  --accent-container: rgba(120, 186, 255, 0.28);
+  --on-accent-container: #0F141C;
   --accent-on-solid: #FFFFFF;
   --dejz-accent: var(--accent-color);
   --accent-glow: none;
   --accent-secondary-color: var(--accent-container);
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #151718;
+  --btn-primary-bg: #0F141C;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #292C2E;
-  --btn-primary-pressed: #080A0B;
+  --btn-primary-hover: #1E2633;
+  --btn-primary-pressed: #070A0E;
 
   --modal-bg: var(--bg-color);
-  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.025), 0 4px 14px rgba(0, 0, 0, 0.035);
+  --shadow-modal: 0 24px 42px -8px rgba(15, 20, 28, 0.14), 0 8px 16px -6px rgba(15, 20, 28, 0.06);
+  --shadow-subtle: 0 2px 10px rgba(15, 20, 28, 0.045), 0 10px 28px rgba(15, 20, 28, 0.045), 0 0 0 1px rgba(15, 20, 28, 0.045);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #E8E6E6;
+  --bg-hover: #E2E8F0;
 
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
 
-  --success-color: #05B862;
-  --success-container: rgba(5, 184, 98, 0.10);
-  --danger-color: #EF4444;
-  --danger-container: rgba(239, 68, 68, 0.10);
-  --warning-color: #F59E0B;
-  --warning-container: rgba(245, 158, 11, 0.12);
-  --info-color: #1C1917;
-  --info-container: rgba(21, 23, 24, 0.06);
-  --scrim-color: rgba(0, 0, 0, 0.60);
+  /* Status Colors (Refined & Harmonious) */
+  --success-color: #15804A;
+  --success-container: rgba(21, 128, 74, 0.11);
+  --danger-color: #D9483B;
+  --danger-container: rgba(217, 72, 59, 0.11);
+  --warning-color: #D97706;
+  --warning-container: rgba(217, 119, 6, 0.12);
+  --info-color: #181715;
+  --info-container: rgba(24, 23, 21, 0.07);
+  --scrim-color: rgba(15, 14, 13, 0.58);
 
-  --nav-active-color: #151718;
-  --nav-inactive-color: #8C867C;
-  --nav-plus-bg: #151718;
-  --nav-plus-color: #FFFFFF;
+  --nav-active-color: #181715;
+  --nav-inactive-color: #857F77;
+  --nav-plus-bg: #181715;
+  --nav-plus-color: #FCFBF9;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -783,34 +792,34 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #F0F0F0;
-  --date-active-color: #1C1917;
+  --date-active-bg: #9EC5E8;
+  --date-active-color: #181715;
   --date-active-shadow: none;
-  --date-inactive-bg: #FFFFFF;
-  --date-inactive-border: #E2DDD4;
-  --date-inactive-color: #6E6961;
+  --date-inactive-bg: #FCFBF9;
+  --date-inactive-border: #E5DFD6;
+  --date-inactive-color: #78736C;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
   --backdrop-blur: 22px;
 
   /* ==========================================================================
-     CENTRALIZED SEMANTIC DESIGN TOKENS - DEJZ PHASE 1
+     CENTRALIZED SEMANTIC DESIGN TOKENS - WINT-INSPIRED NORDIC SOFT GEOMETRY
      Single source of truth for component radii, dimensions, spacing & motion
      ========================================================================== */
-  /* Corner Radii */
-  --radius-card: 20px;
-  --radius-card-nested: 12px;
-  --radius-button: 12px;
-  --radius-button-sm: 10px;
-  --radius-button-lg: 12px;
-  --radius-input: 12px;
-  --radius-modal: 24px;
+  /* Corner Radii — Pill Buttons & Generous 24px Cards */
+  --radius-card: 24px;
+  --radius-card-nested: 16px;
+  --radius-button: 9999px;
+  --radius-button-sm: 9999px;
+  --radius-button-lg: 9999px;
+  --radius-input: 16px;
+  --radius-modal: 28px;
   --radius-chip: 9999px;
   --radius-badge: 9999px;
-  --radius-icon-button: 10px;
+  --radius-icon-button: 9999px;
   --radius-pill: 9999px;
-  --radius-container: 20px;
+  --radius-container: 24px;
 
   /* Component Dimensions / Heights */
   --height-input: 46px;
@@ -906,45 +915,51 @@ h6 {
 }
 
 .dark {
-  /* Neutral Dark Graphite Theme (Specification) */
-  --bg-top-color: #141414;
-  --bg-color: #141414;
-  --bg-secondary: #141414;
-  --bg-gradient: #191919;
+  /* Warm Nordic Charcoal Dark Theme */
+  --bg-top-color: #141312;
+  --bg-color: #141312;
+  --bg-secondary: #141312;
+  --bg-gradient: #141312;
+
+  /* 100% Flat, Tonal Matte Surfaces (Dark Mode) */
+  --editorial-peach: #22201E;
+  --editorial-rose: #1C1B19;
+  --editorial-lavender: #1B242E;
+  --editorial-cream: #1C1B19;
 
   /* Layer 1: Surface */
-  --surface-color: #1C1C1C;
-  --surface-gradient: #1C1C1C;
-  --surface-solid: #1C1C1C;
+  --surface-color: #1C1B19;
+  --surface-gradient: #1C1B19;
+  --surface-solid: #1C1B19;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #242424;
-  --surface-elevated: #242424;
-  --surface-elevated-gradient: #242424;
+  --surface-raised: #242320;
+  --surface-elevated: #242320;
+  --surface-elevated-gradient: #242320;
   --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #252525;
-  --surface-muted: #252525;
-  --bg-hover: #2E2E2E;
+  --surface-high: #292724;
+  --surface-muted: #292724;
+  --bg-hover: #312F2B;
   --surface-tint: transparent;
 
   /* Typography */
-  --text-primary: #FFFFFF;
-  --text-metric-label: #D6D6D6;
-  --text-secondary: #B8B8B8;
-  --text-tertiary: #999999;
-  --text-muted: #999999;
-  --text-disabled: #707070;
-  --text-inactive: #707070;
+  --text-primary: #F4F1EC;
+  --text-metric-label: #D8D3CC;
+  --text-secondary: #B3ADA5;
+  --text-tertiary: #918B83;
+  --text-muted: #918B83;
+  --text-disabled: #6B6660;
+  --text-inactive: #6B6660;
 
   /* Borders */
   --border-subtle: transparent;
   --border-color: transparent;
   --border-control: transparent;
   --border-strong: transparent;
-  --border-divider: rgba(255, 255, 255, 0.05);
-  --border-menu-divider: rgba(255, 255, 255, 0.05);
+  --border-divider: rgba(255, 255, 255, 0.06);
+  --border-menu-divider: rgba(255, 255, 255, 0.06);
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.05);
   --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
@@ -952,14 +967,14 @@ h6 {
   --on-accent-container: #FFFFFF;
   --accent-secondary-color: var(--accent-container);
 
-  --chip-bg: rgba(255, 255, 255, 0.05);
-  --chip-text: #B8B8B8;
-  --chip-active-bg: rgba(255, 255, 255, 0.1);
-  --chip-active-text: #FFFFFF;
+  --chip-bg: rgba(255, 255, 255, 0.06);
+  --chip-text: #B3ADA5;
+  --chip-active-bg: #9EC5E8;
+  --chip-active-text: #141312;
 
-  --transaction-bg: #1C1C1C;
-  --card-nested-bg: #252525;
-  --remaining-today-gradient: #1C1C1C;
+  --transaction-bg: #1C1B19;
+  --card-nested-bg: #292724;
+  --remaining-today-gradient: #1C1B19;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 
@@ -970,7 +985,7 @@ h6 {
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
   --shadow-subtle: none;
 
-  --logo-color: #FFFFFF;
+  --logo-color: #F4F1EC;
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -982,11 +997,11 @@ h6 {
   --warning-container: rgba(251, 191, 36, 0.12);
   --danger-color: #FF8080;
   --danger-container: rgba(255, 128, 128, 0.12);
-  --info-color: #FFFFFF;
-  --info-container: rgba(255, 255, 255, 0.08);
+  --info-color: #9EC5E8;
+  --info-container: rgba(158, 197, 232, 0.12);
   --scrim-color: rgba(0, 0, 0, 0.60);
 
-  --nav-inactive-color: #B8B8B8;
+  --nav-inactive-color: #B3ADA5;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -996,15 +1011,54 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #FFFFFF;
-  --date-active-color: #141414;
+  --date-active-bg: #9EC5E8;
+  --date-active-color: #141312;
   --date-active-shadow: none;
-  --date-inactive-bg: #191919;
-  --date-inactive-border: #2A2A2A;
-  --date-inactive-color: #B8B8B8;
+  --date-inactive-bg: #1C1B19;
+  --date-inactive-border: #2C2A27;
+  --date-inactive-color: #B3ADA5;
 }
 
 /* Glass-Card Surface Utility (borderless translucent glass) */
+.bg-editorial-peach {
+  background-color: var(--editorial-peach);
+}
+.bg-editorial-rose {
+  background-color: var(--editorial-rose);
+}
+.bg-editorial-lavender {
+  background-color: var(--editorial-lavender);
+}
+.bg-editorial-electric {
+  background-color: var(--editorial-electric, #1F5EFF);
+}
+.text-editorial-electric {
+  color: var(--editorial-electric, #1F5EFF);
+}
+.border-editorial-electric {
+  border-color: var(--editorial-electric, #1F5EFF);
+}
+.bg-editorial-cream {
+  background-color: var(--editorial-cream);
+}
+.bg-editorial-forest {
+  background-color: #0F141C;
+}
+.voice-bar-surface {
+  background-color: rgba(235, 122, 122, 0.08);
+  border: 1px solid rgba(229, 98, 98, 0.55);
+}
+.voice-mic-box {
+  background-color: rgba(235, 122, 122, 0.16);
+  border: 1px solid rgba(229, 98, 98, 0.32);
+  color: #D66565;
+}
+.voice-stop-btn {
+  background-color: #EA7B7B;
+  border: 2px solid #F2A8A8;
+  color: #FFFFFF;
+}
+
 .glass-card,
 .surface-card {
   background: rgba(255, 255, 255, 0.8) !important;
@@ -1016,7 +1070,7 @@ h6 {
 
 .dark .glass-card,
 .dark .surface-card {
-  background: #191919 !important;
+  background: #1E1D1B !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -1025,14 +1079,14 @@ h6 {
 
 /* Glass-Navigation Utility */
 .glass-nav {
-  background: rgba(255, 255, 255, 0.75) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
   backdrop-filter: blur(26px) !important;
   -webkit-backdrop-filter: blur(26px) !important;
   border: none !important;
   box-shadow: none !important;
 }
 .dark .glass-nav {
-  background: rgba(20, 20, 20, 0.94) !important;
+  background: rgba(22, 21, 20, 0.94) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -1429,12 +1483,28 @@ html, body {
   --tw-drop-shadow: initial !important;
 }
 
-[class*="shadow-"]:not(.shadow-modal):not(.shadow-subtle),
-[class*="drop-shadow-"],
+[class*="shadow-"]:not(.shadow-modal):not(.shadow-subtle):not(.landing-cutout-shadow):not(.landing-photo-shadow):not(.landing-bento-shadow),
+[class*="drop-shadow-"]:not(.landing-hero-shadow),
 [class*="glow"] {
   box-shadow: none !important;
   filter: none !important;
   text-shadow: none !important;
+}
+
+.landing-cutout-shadow {
+  box-shadow: 0 18px 42px -10px rgba(20, 20, 20, 0.22), 0 4px 12px -2px rgba(20, 20, 20, 0.08) !important;
+}
+
+.landing-photo-shadow {
+  box-shadow: 0 22px 50px -14px rgba(20, 20, 20, 0.14), 0 4px 14px -4px rgba(20, 20, 20, 0.06) !important;
+}
+
+.landing-bento-shadow {
+  box-shadow: 0 -8px 28px -6px rgba(20, 20, 20, 0.10), 0 2px 8px 0 rgba(20, 20, 20, 0.05) !important;
+}
+
+.landing-hero-shadow {
+  filter: drop-shadow(0 24px 44px rgba(20, 20, 20, 0.16)) !important;
 }
 
 ::placeholder {
@@ -1451,7 +1521,7 @@ html, body {
   }
 }
 
-/* Global Border Radius Scaling Overrides to return to beautiful, soft curved interfaces */
+/* Global Border Radius & Typography Normalization (Wint-inspired Nordic Softness) */
 [class*="rounded-[6px]"] {
   border-radius: 10px !important;
 }
@@ -1483,6 +1553,17 @@ html, body {
   border-radius: 32px !important;
 }
 
+/* Replace cold technical ALL-CAPS micro-labels with human-friendly normal casing */
+.uppercase:not(.font-mono) {
+  text-transform: none !important;
+  letter-spacing: -0.005em !important;
+}
+
+/* Crisp pure #FFFFFF (.bg-white) in Light Mode */
+html:not(.dark) .bg-white {
+  background-color: #FFFFFF !important;
+}
+
 .font-unbounded {
   font-family: var(--font-unbounded) !important;
 }
@@ -1506,6 +1587,24 @@ html, body {
   }
 }
 
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes floatSlowReverse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
 @keyframes pulseSubtle {
   0%, 100% {
     opacity: 0.9;
@@ -1521,13 +1620,24 @@ html, body {
   animation: float 6s ease-in-out infinite;
 }
 
+@utility animate-float-slow {
+  animation: floatSlow 5.5s ease-in-out infinite;
+}
+
+@utility animate-float-slow-reverse {
+  animation: floatSlowReverse 6.5s ease-in-out infinite;
+}
+
 @utility animate-pulse-subtle {
   animation: pulseSubtle 8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
+  .animate-float-slow,
+  .animate-float-slow-reverse,
   .animate-pulse-subtle {
     animation: none !important;
   }
 }
+

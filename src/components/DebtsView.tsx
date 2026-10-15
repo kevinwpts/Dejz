@@ -24,26 +24,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
 
-  const debts: Debt[] = config.debts || [
-    {
-      id: 'demo-1',
-      type: 'owe_me',
-      personName: 'Rasmus',
-      amount: 1000,
-      description: 'Padel & lunch',
-      date: new Date().toISOString().split('T')[0],
-      isSettled: false,
-    },
-    {
-      id: 'demo-2',
-      type: 'i_owe',
-      personName: 'Pia',
-      amount: 500,
-      description: 'Present till mamma',
-      date: new Date().toISOString().split('T')[0],
-      isSettled: false,
-    }
-  ];
+  const debts: Debt[] = config.debts || [];
 
   // Totals for active unsettled debts
   const totalOweMe = debts
@@ -75,7 +56,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       isSettled: false,
     };
 
-    const updated = [newDebt, ...(config.debts || debts.filter(d => !d.id.startsWith('demo-')))];
+    const updated = [newDebt, ...debts];
     setConfig({ ...config, debts: updated });
 
     // Reset & close

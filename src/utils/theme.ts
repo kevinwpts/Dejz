@@ -15,13 +15,15 @@ export function applyThemeColor(themeColorHex: string = 'neutral', isDark: boole
   if (typeof document === 'undefined') return;
 
   const rawInput = (themeColorHex || 'neutral').trim();
-  const isNeutral = rawInput.toLowerCase() === 'neutral' || rawInput.toLowerCase() === '#neutral' || rawInput.toLowerCase() === 'default' || rawInput === '';
+  const legacyRemovedHexes = ['#ceb9ef', '#ec5f8d', '#f8c4df', '#ffe0ce', '#f4d3bc', '#183b2e', '#133a2b', '#312261', '#cee876', '#c5e86c'];
+  const isNeutral = rawInput.toLowerCase() === 'neutral' || rawInput.toLowerCase() === '#neutral' || rawInput.toLowerCase() === 'default' || rawInput === '' || legacyRemovedHexes.includes(rawInput.toLowerCase());
 
   let hex: string;
   let hoverColor: string;
   let pressedColor: string;
   let onAccentColor: string;
   let activeIconColor: string;
+  let brandSignatureColor: string;
   let r: number, g: number, b: number;
 
   if (isNeutral) {
@@ -31,25 +33,28 @@ export function applyThemeColor(themeColorHex: string = 'neutral', isDark: boole
       // Ignore storage errors
     }
 
+    brandSignatureColor = '#9EC5E8';
+
     if (isDark) {
-      // Dark / Black Theme - Dejz Neutral
-      hex = '#F5F5F5';
-      r = 245; g = 245; b = 245;
-      onAccentColor = '#151718';
-      hoverColor = '#E5E5E5';
-      pressedColor = '#D5D5D5';
-      activeIconColor = '#F5F5F5';
+      // Dark / Black Theme - Signature Nordic Sky (#9EC5E8)
+      hex = '#9EC5E8';
+      r = 158; g = 197; b = 232;
+      onAccentColor = '#141312';
+      hoverColor = '#87B5DF';
+      pressedColor = '#72A5D5';
+      activeIconColor = '#9EC5E8';
     } else {
-      // Light Theme - Dejz Neutral
-      hex = '#151718';
-      r = 21; g = 23; b = 24;
-      onAccentColor = '#FFFFFF';
-      hoverColor = '#292C2E';
-      pressedColor = '#080A0B';
-      activeIconColor = '#151718';
+      // Light Theme - Deep Warm Obsidian Ink (#181715) + Signature Nordic Sky (#9EC5E8)
+      hex = '#181715';
+      r = 24; g = 23; b = 21;
+      onAccentColor = '#FCFBF9';
+      hoverColor = '#2C2A27';
+      pressedColor = '#0D0C0B';
+      activeIconColor = '#181715';
     }
   } else {
     hex = rawInput;
+    brandSignatureColor = hex;
     try {
       localStorage.setItem('dejz_theme_color', hex);
     } catch {
@@ -62,9 +67,9 @@ export function applyThemeColor(themeColorHex: string = 'neutral', isDark: boole
     hoverColor = `color-mix(in srgb, ${hex} 88%, black)`;
     pressedColor = `color-mix(in srgb, ${hex} 75%, black)`;
 
-    const isLightAccent = ['#ceb9ef', '#ffe0ce', '#f8c4df', '#8bdcc0', '#d4f1e3', '#cbecf2'].includes(hex.toLowerCase());
-    onAccentColor = isLightAccent ? '#151718' : '#FFFFFF';
-    activeIconColor = (!isDark && isLightAccent) ? `color-mix(in srgb, ${hex} 55%, #151718)` : hex;
+    const isLightAccent = ['#c5e86c', '#dce5d8', '#dfe6e9', '#e8e1d5', '#cee876', '#d8eaac', '#dfecc6', '#c8e29b', '#f4cb6e', '#f3c86b', '#c5d4f7', '#9ec6e8', '#cfe0ee', '#8bdcc0', '#d4f1e3', '#cbecf2'].includes(hex.toLowerCase());
+    onAccentColor = isLightAccent ? '#181715' : '#FCFBF9';
+    activeIconColor = (!isDark && isLightAccent) ? '#181715' : hex;
   }
 
   const targets = [document.documentElement, document.body].filter(Boolean);
@@ -72,11 +77,11 @@ export function applyThemeColor(themeColorHex: string = 'neutral', isDark: boole
   targets.forEach((target) => {
     target.style.setProperty('--user-accent-hex', hex);
     target.style.setProperty('--user-accent-rgb', `${r}, ${g}, ${b}`);
+    target.style.setProperty('--brand-signature', brandSignatureColor);
+    target.style.setProperty('--logo-color', isDark ? (isNeutral ? '#F4F1EC' : activeIconColor) : activeIconColor);
 
-    // Soft, premium, tinted ambient background for Light Mode (Peach - Pink - Lavender gradient)
-    const lightBgGradient = 'linear-gradient(180deg, rgba(242, 240, 240, 0) 0%, #F2F0F0 400px), linear-gradient(120deg, #FFE0CE 0%, #F8C4DF 50%, #CEB9EF 100%)';
-
-    target.style.setProperty('--app-bg-gradient', isDark ? 'none' : lightBgGradient);
+    // 100% Flat Matte Nordic Canvas — Zero Gradients
+    target.style.setProperty('--app-bg-gradient', 'none');
     target.style.setProperty('--app-bg-top-tint', 'transparent');
     target.style.setProperty('--app-bg-bottom-tint', 'transparent');
 
@@ -85,18 +90,18 @@ export function applyThemeColor(themeColorHex: string = 'neutral', isDark: boole
     target.style.setProperty('--app-bg-tint', 'transparent');
 
     target.style.setProperty('--user-accent', hex);
-    target.style.setProperty('--user-accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.08)`);
+    target.style.setProperty('--user-accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.09)`);
     target.style.setProperty('--user-accent-surface', isDark ? `rgba(${r}, ${g}, ${b}, 0.08)` : `rgba(${r}, ${g}, ${b}, 0.04)`);
 
     target.style.setProperty('--accent-color', hex);
     target.style.setProperty('--accent-hover', hoverColor);
     target.style.setProperty('--accent-pressed', pressedColor);
     target.style.setProperty('--accent-gradient', hex);
-    target.style.setProperty('--accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.08)`);
+    target.style.setProperty('--accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.09)`);
     target.style.setProperty('--on-accent', onAccentColor);
     target.style.setProperty('--text-on-accent', onAccentColor);
-    target.style.setProperty('--accent-container', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.08)`);
-    target.style.setProperty('--accent-secondary-color', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.08)`);
+    target.style.setProperty('--accent-container', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.09)`);
+    target.style.setProperty('--accent-secondary-color', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.09)`);
     target.style.setProperty('--on-accent-container', isDark ? '#FFFFFF' : activeIconColor);
     target.style.setProperty('--accent-on-solid', onAccentColor);
     target.style.setProperty('--dejz-accent', hex);

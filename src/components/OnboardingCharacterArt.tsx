@@ -84,18 +84,12 @@ function CharacterWelcome() {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        {/* Dejz Signature Brand Gradient (Peach -> Soft Pink -> Lavender) */}
-        <linearGradient id="dejzBrandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FFE0CE" />
-          <stop offset="50%" stopColor="#F8C4DF" />
-          <stop offset="100%" stopColor="#CEB9EF" />
-        </linearGradient>
         <filter id="dejzCardShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#151718" floodOpacity="0.10" />
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141816" floodOpacity="0.10" />
         </filter>
       </defs>
 
-      {/* Tilted Background Signature Gradient Card */}
+      {/* Tilted Background Signature Nordic Sky Card (Flat Matte, Zero Gradient) */}
       <g transform="translate(70, 70) rotate(-8) translate(-70, -70)">
         <rect
           x="24"
@@ -103,7 +97,7 @@ function CharacterWelcome() {
           width="88"
           height="92"
           rx="22"
-          fill="url(#dejzBrandGrad)"
+          fill="var(--editorial-lavender, #9EC5E8)"
         />
       </g>
 
