@@ -679,12 +679,12 @@ h6 {
   --brand-gradient: #68B2FF;
 
   /* Centralized Landing Page Color & Layout Tokens */
-  --landing-max-w: 73.5rem; /* 1176px (within 1120–1200px brief) */
+  --landing-max-w: 72.5rem; /* 1160px */
   --landing-px: 1.25rem;
   --landing-signature: #78BAFF;
   --landing-signature-strong: #5AA7FA;
-  --landing-sky-soft: #E9F2FC;
-  --landing-surface-base: #F3F6FA;
+  --landing-sky-soft: #EDF4FC;
+  --landing-surface-base: #FFFFFF;
   --landing-surface-card: #FFFFFF;
   --landing-contrast-dark: #0F141C;
 
@@ -1037,7 +1037,7 @@ h6 {
 /* Centralized Landing Layout & Surface Utilities */
 .landing-container {
   width: 100%;
-  max-width: var(--landing-max-w, 73.5rem);
+  max-width: var(--landing-max-w, 72.5rem);
   margin-inline: auto;
   padding-inline: 1rem;
 }
@@ -1049,6 +1049,17 @@ h6 {
 @media (min-width: 1024px) {
   .landing-container {
     padding-inline: 2rem;
+  }
+}
+
+.landing-body-copy {
+  font-size: 1rem; /* 16px minimum */
+  line-height: 1.55;
+}
+@media (min-width: 640px) {
+  .landing-body-copy {
+    font-size: 1.0625rem; /* 17px on sm+ */
+    line-height: 1.55;
   }
 }
 
@@ -1539,7 +1550,7 @@ html, body {
 }
 
 .landing-hero-shadow {
-  filter: drop-shadow(0 24px 44px rgba(20, 20, 20, 0.16)) !important;
+  filter: drop-shadow(0 14px 26px rgba(15, 20, 28, 0.13)) !important;
 }
 
 ::placeholder {

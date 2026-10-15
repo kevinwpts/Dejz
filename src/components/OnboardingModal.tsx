@@ -50,7 +50,7 @@ const texts: Record<string, any> = {
     incomeTitle: 'Månadsinkomst',
     incomeQuestion: 'Vilka inkomster har du varje månad?',
     incomeDesc: 'Lägg till dina återkommande inkomster.',
-    aiPlaceholder: 'T.ex. 25 000 från Ur & Penn',
+    aiPlaceholder: 'T.ex. 28 500 från IKEA',
     addIncome: 'Lägg till inkomst manuellt',
     expensesTitle: 'Fasta kostnader',
     expensesQuestion: 'Vilka fasta kostnader har du?',
@@ -230,7 +230,7 @@ const texts: Record<string, any> = {
     incomeTitle: 'Monthly Income',
     incomeQuestion: 'What recurring income do you have each month?',
     incomeDesc: 'Add your recurring income.',
-    aiPlaceholder: 'E.g. 25 000 from Ur & Penn',
+    aiPlaceholder: 'E.g. 28 500 from IKEA',
     addIncome: 'Add income manually',
     expensesTitle: 'Fixed Expenses',
     expensesQuestion: 'What fixed expenses do you have?',
@@ -741,8 +741,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
       if (parsed.amount <= 0) {
         setAiFeedback({
           message: isEn 
-            ? 'Could not detect an amount. E.g. "25 000 from Ur & Penn".' 
-            : 'Kunde inte hitta något belopp. Skriv t.ex. "25 000 från Ur & Penn".',
+            ? 'Could not detect an amount. E.g. "28 500 from IKEA".' 
+            : 'Kunde inte hitta något belopp. Skriv t.ex. "28 500 från IKEA".',
           type: 'error',
         });
         return;

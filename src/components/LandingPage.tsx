@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  useSpring,
+} from 'motion/react';
 import { 
   ChevronDown, 
-  ChevronUp,
   Check, 
   Smartphone, 
   Lock,
@@ -13,12 +19,9 @@ import {
   Scissors,
   Mic,
   Camera,
-  Calendar,
   ArrowDownLeft,
   ArrowUpRight,
-  PiggyBank,
-  Pause,
-  Play
+  Zap
 } from 'lucide-react';
 import { Language, TranslationKey, translations } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -86,6 +89,93 @@ interface LandingPageProps {
   screenshots?: LandingPageScreenshots;
 }
 
+/**
+ * Smooth Scroll-Linked Parallax Layer
+ */
+const ParallaxLayer = ({
+  children,
+  offset = 24,
+  scaleFrom = 1,
+  className = '',
+}: {
+  children: React.ReactNode;
+  offset?: number;
+  scaleFrom?: number;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  const rawY = useTransform(scrollYProgress, [0, 0.5, 1], [offset, 0, -offset]);
+  const smoothY = useSpring(rawY, { stiffness: 105, damping: 28, mass: 0.35 });
+
+  const rawScale = useTransform(scrollYProgress, [0, 0.45, 1], [scaleFrom, 1, 1]);
+  const smoothScale = useSpring(rawScale, { stiffness: 105, damping: 28, mass: 0.35 });
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ y: smoothY, scale: scaleFrom !== 1 ? smoothScale : undefined }}
+      className={`will-change-transform ${className}`}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+/**
+ * Parallax Photo Frame (Borderless, clean rounded frame with smooth inner image scroll)
+ */
+const ParallaxPhotoFrame = ({
+  src,
+  alt,
+  aspectClass = 'aspect-[16/9]',
+  className = '',
+}: {
+  src: string;
+  alt: string;
+  aspectClass?: string;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  });
+
+  const rawY = useTransform(scrollYProgress, [0, 1], ['-5%', '5%']);
+  const smoothY = useSpring(rawY, { stiffness: 100, damping: 30, mass: 0.4 });
+
+  return (
+    <div
+      ref={ref}
+      className={`rounded-modal overflow-hidden bg-landing-sky-soft ${className}`}
+    >
+      <div className={`${aspectClass} w-full overflow-hidden relative`}>
+        <motion.img
+          src={src}
+          alt={alt}
+          width={640}
+          height={420}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          style={prefersReducedMotion ? undefined : { y: smoothY, scale: 1.1 }}
+          className="w-full h-full object-cover object-center select-none will-change-transform"
+        />
+      </div>
+    </div>
+  );
+};
+
 export const Torus3DRing = ({ className = '' }: { className?: string }) => (
   <svg
     viewBox="0 0 200 200"
@@ -147,7 +237,7 @@ export const UISnippetPlaceholder: React.FC<UISnippetPlaceholderProps> = ({
   if (src) {
     const isBentoFlush = variant === 'bento';
     return (
-      <div className={`relative select-none group/snippet ${className}`}>
+      <div className={`relative select-none pointer-events-none group/snippet ${className}`}>
         <img
           src={src}
           alt={alt}
@@ -155,10 +245,10 @@ export const UISnippetPlaceholder: React.FC<UISnippetPlaceholderProps> = ({
           height={420}
           loading="lazy"
           referrerPolicy="no-referrer"
-          className={`w-full h-auto object-contain ring-1 ring-black/[0.08] dark:ring-white/15 transition-transform duration-500 ease-out ${
+          className={`w-full h-auto object-contain transition-transform duration-500 ease-out ${
             isBentoFlush
-              ? 'rounded-t-2xl rounded-b-none landing-bento-shadow group-hover/bento:translate-y-[-3px] group-hover/bento:scale-[1.015]'
-              : 'rounded-2xl landing-cutout-shadow group-hover/snippet:scale-[1.025] group-hover/snippet:-translate-y-0.5'
+              ? 'rounded-t-2xl rounded-b-none landing-bento-shadow'
+              : 'rounded-2xl landing-cutout-shadow'
           }`}
         />
       </div>
@@ -172,10 +262,10 @@ export const UISnippetPlaceholder: React.FC<UISnippetPlaceholderProps> = ({
     <div
       className={`relative rounded-2xl transition-all duration-300 text-left ${
         isDark
-          ? 'bg-[var(--text-primary)]/95 backdrop-blur-md border-2 border-dashed border-white/25 text-white shadow-modal p-4 sm:p-5'
+          ? 'bg-[var(--text-primary)]/95 backdrop-blur-md text-white shadow-modal p-4 sm:p-5'
           : isFloating
-          ? 'bg-white/95 dark:bg-[var(--surface-color)]/95 backdrop-blur-md border-2 border-dashed border-[var(--text-primary)]/25 text-[var(--text-primary)] shadow-modal p-4 sm:p-5'
-          : 'bg-[var(--bg-color)]/90 dark:bg-black/20 border-2 border-dashed border-[var(--text-primary)]/20 text-[var(--text-primary)] p-4 sm:p-5'
+          ? 'bg-white/95 dark:bg-[var(--surface-color)]/95 backdrop-blur-md text-[var(--text-primary)] shadow-modal p-4 sm:p-5'
+          : 'bg-[var(--bg-color)]/90 dark:bg-black/20 text-[var(--text-primary)] p-4 sm:p-5'
       } ${className}`}
     >
       <div className="flex items-start gap-3">
@@ -263,15 +353,15 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
 }) => {
   if (src && isPreframedMockup) {
     return (
-      <div className={`relative mx-auto w-full flex justify-center items-center ${className}`}>
+      <div className={`relative mx-auto w-full flex justify-center items-center py-2 px-1 sm:p-2 ${className}`}>
         <img
           src={src}
           alt={alt}
-          width={520}
-          height={640}
+          width={620}
+          height={760}
           fetchPriority="high"
           referrerPolicy="no-referrer"
-          className={`w-full max-w-[360px] sm:max-w-[430px] lg:max-w-[490px] h-auto shrink-0 object-contain select-none pointer-events-none landing-hero-shadow transition-transform duration-500 ${
+          className={`w-full max-w-[430px] sm:max-w-[520px] lg:max-w-[580px] h-auto shrink-0 object-contain select-none pointer-events-none landing-hero-shadow transition-transform duration-500 ${
             perspectiveTilt ? 'hover:scale-[1.015]' : ''
           }`}
         />
@@ -282,7 +372,7 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
   if (!src && lifestyleImage) {
     return (
       <div className={`relative mx-auto w-full max-w-[460px] ${className}`}>
-        <div className="relative rounded-modal overflow-hidden border border-subtle shadow-subtle bg-[var(--bg-color)] aspect-[4/3]">
+        <div className="relative rounded-modal overflow-hidden shadow-subtle bg-[var(--bg-color)] aspect-[4/3]">
           <img
             src={lifestyleImage}
             alt={lifestyleAlt || alt}
@@ -300,15 +390,15 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
   return (
     <div className={`relative mx-auto w-full max-w-[280px] sm:max-w-[310px] ${className}`}>
       <div 
-        className={`relative z-10 w-full rounded-modal p-2.5 sm:p-3 bg-[var(--text-primary)] shadow-modal border border-white/10 ring-1 ring-black/30 overflow-hidden transition-all duration-500 ${
+        className={`relative z-10 w-full rounded-modal p-2.5 sm:p-3 bg-[var(--text-primary)] shadow-modal overflow-hidden transition-all duration-500 ${
           perspectiveTilt ? 'hover:scale-[1.015]' : ''
         }`}
       >
         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-30 flex items-center justify-center pointer-events-none">
-          <div className="w-2.5 h-2.5 rounded-full bg-black border border-white/10" />
+          <div className="w-2.5 h-2.5 rounded-full bg-black" />
         </div>
 
-        <div className={`relative w-full aspect-[9/19.5] rounded-card overflow-hidden bg-[var(--surface-color)] border border-subtle/50 flex flex-col items-center justify-center text-center ${src ? 'p-0' : 'p-4'}`}>
+        <div className={`relative w-full aspect-[9/19.5] rounded-card overflow-hidden bg-[var(--surface-color)] flex flex-col items-center justify-center text-center ${src ? 'p-0' : 'p-4'}`}>
           {src ? (
             <img
               src={src}
@@ -320,7 +410,7 @@ export const PhoneScreenshotFrame: React.FC<PhoneScreenshotFrameProps> = ({
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-4 space-y-3 text-[var(--text-secondary)]">
-              <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] border border-subtle shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] shadow-xs">
                 <Smartphone size={24} strokeWidth={1.75} />
               </div>
               <div className="space-y-1 max-w-[210px]">
@@ -360,6 +450,382 @@ const GoogleGLogo = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
+/**
+ * AppIdenticalTransactionRow
+ * Matches src/components/TransactionItem.tsx & src/components/BudgetItem.tsx 1:1.
+ */
+interface AppIdenticalTransactionProps {
+  id: string;
+  merchant: string;
+  category: string;
+  icon: string;
+  amount: string;
+  time?: string;
+  method?: string;
+  isFixed?: boolean;
+  isVariable?: boolean;
+  type?: 'expense' | 'income';
+  className?: string;
+}
+
+const AppIdenticalTransactionRow: React.FC<AppIdenticalTransactionProps> = ({
+  id,
+  merchant,
+  category,
+  icon,
+  amount,
+  time,
+  method,
+  isFixed = false,
+  isVariable = false,
+  type = 'expense',
+  className = '',
+}) => (
+  <div
+    className={`px-4 py-3 sm:py-3.5 min-h-[56px] rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] shadow-subtle flex items-center justify-between gap-3 text-left select-none pointer-events-none ${className}`}
+  >
+    <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex-shrink-0 relative">
+        <TransactionLogo
+          size="md"
+          transaction={{
+            id,
+            merchant,
+            category,
+            amount: 100,
+            type,
+            timestamp: Date.now(),
+          }}
+        />
+        {isVariable && (
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-micro-label font-bold flex items-center justify-center leading-none border-[1.5px] border-[var(--surface-color)] z-20 font-sans">
+            R
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1 flex flex-col justify-center">
+        <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis">
+          {merchant}
+        </p>
+
+        <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[var(--text-secondary)]">
+          <div className="flex items-end gap-1 shrink-0 text-[var(--text-secondary)]">
+            <CategoryIcon
+              icon={icon}
+              categoryName={category}
+              variant="minimal"
+              size="2xs"
+            />
+            <span className="text-secondary text-[var(--text-secondary)] whitespace-nowrap">
+              {category}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
+      <p
+        className={`text-list-amount whitespace-nowrap ${
+          type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
+        }`}
+      >
+        <span className="opacity-80 mr-0.5">{type === 'income' ? '+' : '−'}</span>
+        <span className="tabular-nums">{amount}</span>
+        <span className="text-secondary opacity-80 font-normal ml-1">
+          kr
+          {isFixed && <span className="text-micro-label opacity-70 ml-0.5">/mån</span>}
+        </span>
+      </p>
+
+      {(time || method) && (
+        <div className="mt-0.5 flex items-center justify-end gap-1.5">
+          {time && (
+            <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
+              {time}
+            </span>
+          )}
+          {time && method && (
+            <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label">·</span>
+          )}
+          {method && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-[var(--surface-muted)] text-[var(--text-secondary)] select-none leading-none tracking-tight">
+              {method}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+/**
+ * LiveVoiceShowcase
+ * Animates the spoken phrase word-by-word ("Mat" -> "Mat 378 kr" -> "Mat 378 kr Coop")
+ * and smoothly reveals the resulting Coop transaction row below it.
+ */
+const LiveVoiceShowcase = ({ isEn }: { isEn: boolean }) => {
+  const prefersReducedMotion = useReducedMotion();
+  const words = isEn ? ['Groceries', '425 kr', 'ICA'] : ['Mat', '425 kr', 'ICA'];
+  const [step, setStep] = useState(prefersReducedMotion ? 4 : 1);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setStep(4);
+      return;
+    }
+    const durations = [700, 650, 750, 1100, 3200];
+    const timer = window.setTimeout(() => {
+      setStep((prev) => (prev + 1) % 5);
+    }, durations[step]);
+    return () => window.clearTimeout(timer);
+  }, [step, prefersReducedMotion]);
+
+  const visiblePhrase =
+    step === 0
+      ? isEn
+        ? 'Listening...'
+        : 'Lyssnar...'
+      : words.slice(0, Math.min(step, 3)).join(' ');
+
+  const isSaved = step >= 4;
+
+  return (
+    <div className="max-w-[440px] mx-auto w-full space-y-3 select-none pointer-events-none">
+      {/* Voice Card */}
+      <div className="rounded-card bg-[var(--surface-color)]/95 backdrop-blur-md shadow-subtle p-4 sm:p-5 space-y-4">
+        <div className="grid grid-cols-3 gap-3 max-w-[250px] mx-auto text-center">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-10 h-10 rounded-full bg-landing-sky-soft flex items-center justify-center text-[var(--text-primary)]">
+              <ArrowDownLeft size={17} strokeWidth={1.9} />
+            </div>
+            <span className="text-secondary font-medium text-[var(--text-primary)]">
+              {isEn ? 'Expense' : 'Utgift'}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-10 h-10 rounded-full bg-landing-sky-soft flex items-center justify-center text-[var(--text-primary)]">
+              <ArrowUpRight size={17} strokeWidth={1.9} />
+            </div>
+            <span className="text-secondary font-medium text-[var(--text-primary)]">
+              {isEn ? 'Income' : 'Inkomst'}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-10 h-10 rounded-full bg-landing-sky-soft flex items-center justify-center text-[var(--text-primary)]">
+              <Camera size={17} strokeWidth={1.9} />
+            </div>
+            <span className="text-secondary font-medium text-[var(--text-primary)]">
+              {isEn ? 'Receipt' : 'Kvitto'}
+            </span>
+          </div>
+        </div>
+
+        {/* Live Voice Input Bar */}
+        <div className="voice-bar-surface rounded-card-nested p-2.5 flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="voice-mic-box w-9 h-9 rounded-lg flex items-center justify-center shrink-0 relative">
+              <Mic size={16} strokeWidth={2} />
+              {!isSaved && !prefersReducedMotion && (
+                <span className="w-2 h-2 rounded-full bg-[var(--danger-color)] absolute -top-0.5 -right-0.5 animate-pulse" />
+              )}
+            </div>
+            <span
+              className={`text-body-medium font-medium truncate transition-opacity duration-200 ${
+                step === 0 ? 'text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'
+              }`}
+            >
+              {visiblePhrase}
+            </span>
+          </div>
+
+          <div className="voice-stop-btn w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+            {isSaved ? (
+              <Check size={15} strokeWidth={2.5} className="text-white" />
+            ) : (
+              <div className="w-2.5 h-2.5 border-[1.75px] border-white rounded-xs" />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Resulting App-Identical Transaction Card */}
+      <motion.div
+        animate={
+          prefersReducedMotion
+            ? { opacity: 1, y: 0, scale: 1 }
+            : {
+                opacity: step >= 3 ? 1 : 0.45,
+                y: step >= 3 ? 0 : 4,
+                scale: step >= 4 ? 1 : 0.985,
+              }
+        }
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <AppIdenticalTransactionRow
+          id="voice-ica-preview"
+          merchant="ICA"
+          category={isEn ? 'Groceries' : 'Mat & dagligvaror'}
+          icon="shopping-basket"
+          amount="425"
+          time={isEn ? 'Today, 14 Oct' : 'Idag, 14 okt.'}
+          method={isEn ? 'Voice' : 'Röst'}
+        />
+      </motion.div>
+    </div>
+  );
+};
+
+/**
+ * InteractiveTimelineShowcase
+ * Lets the visitor tap any day (11–16 Oct) inside the dark Bento card
+ * to experience how the daily timeline works in the real app.
+ */
+const InteractiveTimelineShowcase = ({ isEn }: { isEn: boolean }) => {
+  const [selectedDay, setSelectedDay] = useState<string>('14');
+
+  const daysData: {
+    num: string;
+    dayLabel: string;
+    tx: AppIdenticalTransactionProps;
+  }[] = [
+    {
+      num: '11',
+      dayLabel: isEn ? 'sun' : 'sön',
+      tx: {
+        id: 'tl-11',
+        merchant: 'Willys',
+        category: isEn ? 'Groceries' : 'Mat & dagligvaror',
+        icon: 'shopping-basket',
+        amount: '685',
+        time: '17:40',
+        method: isEn ? 'Receipt' : 'Kvitto',
+      },
+    },
+    {
+      num: '12',
+      dayLabel: isEn ? 'mon' : 'mån',
+      tx: {
+        id: 'tl-12',
+        merchant: 'Circle K',
+        category: 'Transport',
+        icon: 'car',
+        amount: '480',
+        time: '14:15',
+        method: isEn ? 'Card' : 'Kort',
+      },
+    },
+    {
+      num: '13',
+      dayLabel: isEn ? 'tue' : 'tis',
+      tx: {
+        id: 'tl-13',
+        merchant: 'Apoteket',
+        category: isEn ? 'Health & Fitness' : 'Hälsa & Träning',
+        icon: 'heart',
+        amount: '195',
+        time: '12:08',
+        method: isEn ? 'Card' : 'Kort',
+      },
+    },
+    {
+      num: '14',
+      dayLabel: isEn ? 'Today' : 'Idag',
+      tx: {
+        id: 'tl-14',
+        merchant: 'ICA',
+        category: isEn ? 'Groceries' : 'Mat & dagligvaror',
+        icon: 'shopping-basket',
+        amount: '425',
+        time: '18:19',
+        method: isEn ? 'Voice' : 'Röst',
+      },
+    },
+    {
+      num: '15',
+      dayLabel: isEn ? 'thu' : 'tor',
+      tx: {
+        id: 'tl-15',
+        merchant: 'Espresso House',
+        category: isEn ? 'Restaurants & Café' : 'Uteliv & café',
+        icon: 'coffee',
+        amount: '78',
+        time: '08:45',
+        method: isEn ? 'Shortcut' : 'Snabbval',
+      },
+    },
+    {
+      num: '16',
+      dayLabel: isEn ? 'fri' : 'fre',
+      tx: {
+        id: 'tl-16',
+        merchant: 'SL',
+        category: 'Transport',
+        icon: 'car',
+        amount: '42',
+        time: '08:12',
+        method: 'Swish',
+      },
+    },
+  ];
+
+  const activeEntry = daysData.find((d) => d.num === selectedDay) || daysData[3];
+
+  return (
+    <div className="max-w-[440px] mx-auto lg:ml-auto lg:mr-0 w-full space-y-3">
+      <div className="grid grid-cols-6 gap-2" role="tablist" aria-label={isEn ? 'Choose day' : 'Välj dag'}>
+        {daysData.map((d) => {
+          const isActive = d.num === selectedDay;
+          return (
+            <button
+              key={d.num}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setSelectedDay(d.num)}
+              className={`h-[52px] sm:h-[56px] rounded-card-nested flex flex-col items-center justify-center gap-0.5 transition-all duration-200 cursor-pointer border-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                isActive
+                  ? 'bg-landing-signature font-semibold text-[var(--text-primary)] shadow-xs scale-[1.03]'
+                  : 'bg-white/10 hover:bg-white/15 text-white/75'
+              }`}
+            >
+              <span
+                className={`text-micro-label leading-none ${
+                  isActive ? 'font-bold text-[var(--text-primary)]' : 'font-medium'
+                }`}
+              >
+                {d.dayLabel}
+              </span>
+              <span
+                className={`text-body-medium font-amount tabular-nums font-semibold leading-tight ${
+                  isActive ? 'text-[var(--text-primary)]' : 'text-white'
+                }`}
+              >
+                {d.num}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeEntry.num}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        >
+          <AppIdenticalTransactionRow {...activeEntry.tx} />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const FAQAccordionItem = ({
   index,
   question,
@@ -372,7 +838,7 @@ const FAQAccordionItem = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-[var(--border-divider)]">
+    <div className="border-b border-black/[0.06]">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -403,7 +869,7 @@ const FAQAccordionItem = ({
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="pb-6 pl-8 pr-6 text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-[62ch]">
+            <div className="pb-6 pl-8 pr-6 landing-body-copy text-[var(--text-secondary)] max-w-[58ch]">
               {answer}
             </div>
           </motion.div>
@@ -414,11 +880,9 @@ const FAQAccordionItem = ({
 };
 
 /**
- * Single Calm App Transaction Strip
- * One calm row of clear transaction examples, discreetly marked as examples,
- * with slow movement, hover/button pause control, and prefers-reduced-motion support.
+ * Two-Row Scroll-Driven App Transaction Strip
  */
-const CalmTransactionStrip = ({
+const ScrollTransactionStrip = ({
   currentLanguage,
   tr,
 }: {
@@ -426,170 +890,173 @@ const CalmTransactionStrip = ({
   tr: (key: TranslationKey) => string;
 }) => {
   const prefersReducedMotion = useReducedMotion();
-  const [isPaused, setIsPaused] = useState(false);
+  const { scrollY } = useScroll();
   const isEn = currentLanguage === 'en';
 
-  const exampleCards = [
+  const rawRow1X = useTransform(scrollY, [0, 3200], [-40, -780]);
+  const rawRow2X = useTransform(scrollY, [0, 3200], [-740, 0]);
+  const row1X = useSpring(rawRow1X, { stiffness: 90, damping: 26, mass: 0.35 });
+  const row2X = useSpring(rawRow2X, { stiffness: 90, damping: 26, mass: 0.35 });
+
+  const row1Cards: AppIdenticalTransactionProps[] = [
     {
-      merchant: 'Coop',
+      id: 'strip-r1-ica',
+      merchant: 'ICA',
       category: isEn ? 'Groceries' : 'Mat & dagligvaror',
       icon: 'shopping-basket',
-      amount: '378',
-      time: isEn ? 'Today' : 'Idag',
+      amount: '425',
+      time: isEn ? 'Today, 14 Oct' : 'Idag, 14 okt.',
       method: isEn ? 'Voice' : 'Röst',
-      type: 'expense' as const,
     },
     {
-      merchant: 'Sveafastigheter',
-      category: isEn ? 'Housing' : 'Boende & hushåll',
-      icon: 'home',
-      amount: '6 766',
+      id: 'strip-r1-spotify',
+      merchant: 'Spotify',
+      category: 'Streaming',
+      icon: 'tv',
+      amount: '119',
       time: isEn ? 'The 25th' : 'Den 25:e',
-      method: isEn ? 'Invoice' : 'Faktura',
+      method: isEn ? 'Card' : 'Kort',
       isFixed: true,
-      isVariable: true,
-      type: 'expense' as const,
     },
     {
-      merchant: 'Parkster',
+      id: 'strip-r1-uber',
+      merchant: 'Uber',
       category: 'Transport',
       icon: 'car',
-      amount: '61',
-      time: '12 okt.',
-      method: 'Swish',
-      type: 'expense' as const,
+      amount: '100',
+      time: isEn ? '14 Oct' : '14 okt.',
+      method: isEn ? 'Card' : 'Kort',
     },
     {
-      merchant: 'Telenor (Mobil)',
-      category: isEn ? 'Subscriptions' : 'Abonnemang',
-      icon: 'smartphone',
-      amount: '529',
-      time: isEn ? 'The 28th' : 'Den 28:e',
-      method: 'Autogiro',
-      isFixed: true,
-      type: 'expense' as const,
-    },
-    {
-      merchant: 'Öresundskraft',
+      id: 'strip-r1-vattenfall',
+      merchant: 'Vattenfall',
       category: isEn ? 'Housing' : 'Boende & hushåll',
       icon: 'home',
-      amount: '548',
-      time: isEn ? 'The 6th' : 'Den 6:e',
+      amount: '640',
+      time: isEn ? 'The 28th' : 'Den 28:e',
       method: isEn ? 'Invoice' : 'Faktura',
       isFixed: true,
       isVariable: true,
-      type: 'expense' as const,
     },
     {
-      merchant: 'ICA Kvantum',
+      id: 'strip-r1-espresso',
+      merchant: 'Espresso House',
+      category: isEn ? 'Restaurants & Café' : 'Uteliv & café',
+      icon: 'coffee',
+      amount: '78',
+      time: isEn ? '15 Oct' : '15 okt.',
+      method: isEn ? 'Shortcut' : 'Snabbval',
+    },
+    {
+      id: 'strip-r1-willys',
+      merchant: 'Willys',
       category: isEn ? 'Groceries' : 'Mat & dagligvaror',
       icon: 'shopping-basket',
-      amount: '642',
-      time: isEn ? 'Receipt' : 'Kvitto',
-      method: isEn ? 'Card' : 'Kort',
-      type: 'expense' as const,
+      amount: '685',
+      time: isEn ? '11 Oct' : '11 okt.',
+      method: isEn ? 'Receipt' : 'Kvitto',
     },
   ];
 
-  const renderExampleCard = (item: (typeof exampleCards)[number], key: string) => (
-    <div
-      key={key}
-      className="w-[305px] sm:w-[340px] shrink-0 rounded-card bg-[var(--surface-color)] px-4 py-3.5 flex items-center justify-between gap-3.5 shadow-subtle text-left select-none"
-    >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="relative shrink-0">
-          <TransactionLogo
-            transaction={{
-              id: key,
-              merchant: item.merchant,
-              category: item.category,
-              amount: 100,
-              type: item.type,
-              timestamp: Date.now(),
-            }}
-          />
-          {item.isVariable && (
-            <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-[10px] font-bold flex items-center justify-center leading-none border-[1.5px] border-[var(--surface-color)] z-20">
-              R
-            </span>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm sm:text-[15px] font-semibold text-[var(--text-primary)] truncate leading-snug">
-            {item.merchant}
-          </p>
-          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-[var(--text-secondary)]">
-            <CategoryIcon
-              icon={item.icon}
-              categoryName={item.category}
-              variant="minimal"
-              size="2xs"
-            />
-            <span className="truncate">{item.category}</span>
-          </div>
-        </div>
-      </div>
+  const row2Cards: AppIdenticalTransactionProps[] = [
+    {
+      id: 'strip-r2-sbab',
+      merchant: 'SBAB',
+      category: isEn ? 'Housing' : 'Boende & hushåll',
+      icon: 'home',
+      amount: '7 200',
+      time: isEn ? 'The 27th' : 'Den 27:e',
+      method: 'Autogiro',
+      isFixed: true,
+    },
+    {
+      id: 'strip-r2-apoteket',
+      merchant: 'Apoteket',
+      category: isEn ? 'Health & Fitness' : 'Hälsa & Träning',
+      icon: 'heart',
+      amount: '195',
+      time: isEn ? '13 Oct' : '13 okt.',
+      method: isEn ? 'Card' : 'Kort',
+    },
+    {
+      id: 'strip-r2-netflix',
+      merchant: 'Netflix',
+      category: 'Streaming',
+      icon: 'tv',
+      amount: '149',
+      time: isEn ? 'The 26th' : 'Den 26:e',
+      method: isEn ? 'Card' : 'Kort',
+      isFixed: true,
+    },
+    {
+      id: 'strip-r2-circlek',
+      merchant: 'Circle K',
+      category: 'Transport',
+      icon: 'car',
+      amount: '480',
+      time: isEn ? '12 Oct' : '12 okt.',
+      method: isEn ? 'Card' : 'Kort',
+    },
+    {
+      id: 'strip-r2-telia',
+      merchant: 'Telia',
+      category: isEn ? 'Subscriptions' : 'Abonnemang',
+      icon: 'smartphone',
+      amount: '399',
+      time: isEn ? 'The 27th' : 'Den 27:e',
+      method: 'Autogiro',
+      isFixed: true,
+    },
+    {
+      id: 'strip-r2-sl',
+      merchant: 'SL',
+      category: 'Transport',
+      icon: 'car',
+      amount: '42',
+      time: isEn ? '16 Oct' : '16 okt.',
+      method: 'Swish',
+    },
+  ];
 
-      <div className="text-right shrink-0 pl-2">
-        <p className="text-sm sm:text-[15px] font-bold font-amount tabular-nums text-[var(--text-primary)] leading-snug">
-          − {item.amount}{' '}
-          <span className="text-xs font-normal text-[var(--text-secondary)]">
-            kr{item.isFixed ? '/mån' : ''}
-          </span>
-        </p>
-        <div className="flex items-center justify-end gap-1.5 mt-0.5 text-[11px] text-[var(--text-tertiary)] tabular-nums">
-          <span>{item.time}</span>
-          {item.method && (
-            <>
-              <span>·</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-[var(--surface-muted)] text-[10px] font-medium text-[var(--text-secondary)] leading-none">
-                {item.method}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  const repeatedRow1 = [...row1Cards, ...row1Cards, ...row1Cards];
+  const repeatedRow2 = [...row2Cards, ...row2Cards, ...row2Cards];
 
   return (
     <section
       aria-label={tr('landing_tx_strip_label')}
-      className="py-6 sm:py-8 bg-[var(--bg-color)] border-b border-[var(--border-divider)] overflow-hidden"
+      className="py-8 sm:py-10 bg-landing-sky-soft overflow-x-clip"
     >
-      <div className="landing-container mb-3 flex items-center justify-between gap-4">
-        <p className="text-xs font-medium text-[var(--text-tertiary)]">
-          {tr('landing_tx_strip_label')}
-        </p>
-        {!prefersReducedMotion && (
-          <button
-            type="button"
-            onClick={() => setIsPaused((prev) => !prev)}
-            aria-pressed={isPaused}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-divider)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
-          >
-            {isPaused ? <Play size={11} /> : <Pause size={11} />}
-            <span>{isPaused ? tr('landing_tx_strip_play') : tr('landing_tx_strip_pause')}</span>
-          </button>
-        )}
-      </div>
+      <div className="space-y-3.5 py-2">
+        {/* Row 1: Moves left as user scrolls down */}
+        <motion.div
+          style={{ x: prefersReducedMotion ? 0 : row1X }}
+          className="flex items-center gap-3.5 w-max px-4 py-1.5 will-change-transform"
+        >
+          {repeatedRow1.map((item, idx) => (
+            <div key={`r1-${idx}`} className="w-[345px] sm:w-[380px] shrink-0">
+              <AppIdenticalTransactionRow
+                {...item}
+                id={`r1-${idx}-${item.id}`}
+              />
+            </div>
+          ))}
+        </motion.div>
 
-      {prefersReducedMotion ? (
-        <div className="landing-container flex gap-3.5 overflow-x-auto no-scrollbar pb-1">
-          {exampleCards.map((item, idx) => renderExampleCard(item, `static-${idx}`))}
-        </div>
-      ) : (
-        <div className="relative overflow-hidden">
-          <div
-            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
-            className="flex items-center gap-3.5 w-max px-4 animate-marquee-slow hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
-          >
-            {[...exampleCards, ...exampleCards].map((item, idx) =>
-              renderExampleCard(item, `marquee-${idx}`)
-            )}
-          </div>
-        </div>
-      )}
+        {/* Row 2: Moves right as user scrolls down */}
+        <motion.div
+          style={{ x: prefersReducedMotion ? 0 : row2X }}
+          className="flex items-center gap-3.5 w-max px-4 py-1.5 will-change-transform"
+        >
+          {repeatedRow2.map((item, idx) => (
+            <div key={`r2-${idx}`} className="w-[345px] sm:w-[380px] shrink-0">
+              <AppIdenticalTransactionRow
+                {...item}
+                id={`r2-${idx}-${item.id}`}
+              />
+            </div>
+          ))}
+        </motion.div>
+      </div>
     </section>
   );
 };
@@ -608,6 +1075,13 @@ export function LandingPage({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileLangOpen, setIsMobileLangOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+
+  // Global scroll for Hero multi-plane parallax
+  const { scrollY } = useScroll();
+  const rawHeroPhoneY = useTransform(scrollY, [0, 700], [0, -34]);
+  const rawHeroBackdropY = useTransform(scrollY, [0, 700], [0, 20]);
+  const heroPhoneY = useSpring(rawHeroPhoneY, { stiffness: 100, damping: 28, mass: 0.35 });
+  const heroBackdropY = useSpring(rawHeroBackdropY, { stiffness: 100, damping: 28, mass: 0.35 });
 
   const tr = (key: TranslationKey): string => {
     return translations[currentLanguage]?.[key] || translations.sv[key] || key;
@@ -639,9 +1113,9 @@ export function LandingPage({
 
   useEffect(() => {
     if (isMobileMenuOpen) {
-      const scrollY = window.scrollY;
+      const scrollYPos = window.scrollY;
       document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
+      document.body.style.top = `-${scrollYPos}px`;
       document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
       return () => {
@@ -649,7 +1123,7 @@ export function LandingPage({
         document.body.style.top = '';
         document.body.style.width = '';
         document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
+        window.scrollTo(0, scrollYPos);
       };
     }
   }, [isMobileMenuOpen]);
@@ -676,14 +1150,14 @@ export function LandingPage({
   const revealMotion = prefersReducedMotion
     ? {}
     : {
-        initial: { opacity: 0.01, y: 12 },
+        initial: { opacity: 0.01, y: 20 },
         whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, margin: '-40px' },
-        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+        viewport: { once: true, margin: '-50px' },
+        transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
       };
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-hidden relative">
+    <div className="min-h-dvh bg-[var(--surface-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-clip relative">
 
       {/* =====================================================================
           NAVIGATION HEADER
@@ -692,8 +1166,8 @@ export function LandingPage({
         isMobileMenuOpen 
           ? 'opacity-0 pointer-events-none' 
           : isScrolled
-          ? 'bg-[var(--surface-color)]/92 backdrop-blur-xl border-b border-[var(--border-divider)]'
-          : 'bg-[var(--surface-color)] border-b border-transparent'
+          ? 'bg-[var(--surface-color)]/95 backdrop-blur-xl shadow-xs'
+          : 'bg-landing-sky-soft'
       }`}>
         <div className="landing-container h-16 sm:h-20 flex items-center justify-between gap-4">
           
@@ -706,26 +1180,24 @@ export function LandingPage({
           <nav aria-label={tr('landing_nav_menu_label')} className="hidden md:flex items-center gap-5 lg:gap-7">
             <a
               href="#how-it-works"
-              className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
             >
               {tr('landing_nav_how_it_works')}
             </a>
 
             <a
               href="#features"
-              className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
             >
               {tr('landing_footer_features')}
             </a>
 
             <a
               href="#faq"
-              className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
             >
               {tr('landing_faq_title')}
             </a>
-
-            <div className="h-4 w-px bg-[var(--border-divider)]" />
 
             <LanguagePicker
               currentLanguage={currentLanguage}
@@ -764,7 +1236,7 @@ export function LandingPage({
               <button
                 type="button"
                 onClick={onLogin}
-                className="inline-flex items-center gap-1.5 px-2.5 h-8 sm:h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle transition-colors cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+                className="inline-flex items-center gap-1.5 px-3 h-8 sm:h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] shadow-xs transition-colors cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)] border-none"
               >
                 <User size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
                 <span>{tr('landing_nav_login')}</span>
@@ -803,9 +1275,9 @@ export function LandingPage({
             role="dialog"
             aria-modal="true"
             aria-label={tr('landing_nav_menu_label')}
-            className="fixed top-0 left-0 right-0 z-[9995] bg-[var(--surface-color)] border-b border-[var(--border-divider)] shadow-modal rounded-b-2xl pt-[env(safe-area-inset-top,0px)] animate-in slide-in-from-top-2 duration-200"
+            className="fixed top-0 left-0 right-0 z-[9995] bg-[var(--surface-color)] shadow-modal rounded-b-2xl pt-[env(safe-area-inset-top,0px)] animate-in slide-in-from-top-2 duration-200"
           >
-            <div className="landing-container h-16 flex items-center justify-between border-b border-[var(--border-divider)]/40">
+            <div className="landing-container h-16 flex items-center justify-between">
               <div className="flex items-center gap-2 shrink-0">
                 <DejzLogo className="h-6 sm:h-7 w-auto" />
               </div>
@@ -822,7 +1294,7 @@ export function LandingPage({
               />
             </div>
 
-            <div className="landing-container pt-4 pb-5 space-y-1 text-left">
+            <div className="landing-container pt-2 pb-5 space-y-1 text-left">
               <a
                 href="#how-it-works"
                 onClick={() => {
@@ -915,21 +1387,21 @@ export function LandingPage({
                 )}
               </div>
 
-              <div className="border-t border-[var(--border-divider)] pt-1 my-2" />
-
-              <Button
-                variant="primary"
-                fullWidth
-                size="lg"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileLangOpen(false);
-                  onGetStarted();
-                }}
-                className="w-full justify-center text-center text-sm font-semibold shadow-subtle h-12"
-              >
-                {tr('landing_nav_get_started')}
-              </Button>
+              <div className="pt-2">
+                <Button
+                  variant="primary"
+                  fullWidth
+                  size="lg"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsMobileLangOpen(false);
+                    onGetStarted();
+                  }}
+                  className="w-full justify-center text-center text-sm font-semibold h-12"
+                >
+                  {tr('landing_nav_get_started')}
+                </Button>
+              </div>
             </div>
           </div>
         </div>,
@@ -940,29 +1412,34 @@ export function LandingPage({
         {/* =====================================================================
             1. HERO SECTION
         ===================================================================== */}
-        <section className="relative pt-8 sm:pt-12 lg:pt-16 pb-14 sm:pb-20 bg-[var(--surface-color)] border-b border-[var(--border-divider)] overflow-hidden">
-          <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <section className="relative pt-6 sm:pt-10 lg:pt-14 pb-8 sm:pb-12 bg-landing-sky-soft">
+          <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             
-            {/* Left Column (7 cols): Clear Headline, Lead, Stacked Mobile / Inline Desktop CTAs */}
-            <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
-              <div className="space-y-4 max-w-[38rem]">
-                <h1 className="text-[2.45rem] sm:text-5xl lg:text-[3.65rem] font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.04] text-balance">
+            {/* Left Column (6 cols) */}
+            <motion.div
+              initial={prefersReducedMotion ? false : { opacity: 0.01, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6"
+            >
+              <div className="space-y-4 max-w-[34rem]">
+                <h1 className="text-[2.2rem] sm:text-5xl lg:text-[3.55rem] font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.06] text-balance">
                   {tr('landing_hero_title')}
                 </h1>
 
-                <p className="text-base sm:text-lg lg:text-[1.125rem] text-[var(--text-secondary)] leading-[1.6] max-w-[54ch] mx-auto lg:mx-0 font-normal text-pretty">
+                <p className="landing-body-copy text-[var(--text-secondary)] max-w-[46ch] mx-auto lg:mx-0 font-normal text-pretty">
                   {tr('landing_hero_subtitle')}
                 </p>
               </div>
 
-              {/* Registration CTAs: Full-width stacked on mobile, inline on sm+ */}
-              <div className="w-full max-w-sm sm:max-w-none space-y-3">
+              {/* Registration CTAs */}
+              <div className="w-full max-w-sm sm:max-w-none mx-auto lg:mx-0 space-y-3">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3">
                   <Button
                     variant="primary"
                     size="lg"
                     onClick={onGetStarted}
-                    className="w-full sm:w-auto justify-center font-semibold text-sm shadow-subtle px-7 h-12 whitespace-nowrap"
+                    className="w-full sm:w-auto justify-center text-center font-semibold text-sm px-7 h-12 whitespace-nowrap"
                   >
                     {tr('landing_hero_button')}
                   </Button>
@@ -971,7 +1448,7 @@ export function LandingPage({
                     <button
                       type="button"
                       onClick={onGoogleLogin}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)]/70 px-6 h-12 rounded-full border border-[var(--border-strong)] transition-all cursor-pointer shadow-subtle whitespace-nowrap active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+                      className="w-full sm:w-auto inline-flex items-center justify-center text-center gap-2.5 text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-6 h-12 rounded-full shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)] border-none"
                     >
                       <GoogleGLogo size={17} />
                       <span>{tr('landing_hero_google')}</span>
@@ -982,460 +1459,305 @@ export function LandingPage({
                     <button
                       type="button"
                       onClick={onStartDemo}
-                      className="inline-flex items-center justify-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline underline-offset-4 px-3 h-10 sm:h-12 rounded-full transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+                      className="w-full sm:w-auto inline-flex items-center justify-center text-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline underline-offset-4 px-3 h-10 sm:h-12 rounded-full transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
                     >
                       {tr('landing_hero_demo')}
                     </button>
                   )}
                 </div>
 
-                {/* Discreet note directly under buttons */}
                 <p className="text-xs font-medium text-[var(--text-tertiary)] pt-0.5">
                   {tr('landing_no_bank_needed')}
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Right Column (5 cols): Integrated Signature Stage + Phone Mockup */}
-            <div className="lg:col-span-5 relative flex items-center justify-center">
-              <div className="relative w-full max-w-[440px] lg:max-w-none rounded-modal bg-landing-sky-soft border border-[var(--border-divider)] p-5 sm:p-7 flex items-center justify-center overflow-hidden">
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-x-6 top-6 bottom-6 rounded-card bg-landing-signature/35 pointer-events-none"
+            {/* Right Column (6 cols): Frilagda telefoner med mjuk signaturblå cirkel bakom */}
+            <div className="lg:col-span-6 relative flex items-center justify-center">
+              <motion.div
+                aria-hidden="true"
+                style={prefersReducedMotion ? undefined : { y: heroBackdropY }}
+                className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] rounded-full bg-landing-signature/45 blur-2xl absolute pointer-events-none will-change-transform"
+              />
+              <motion.div
+                initial={prefersReducedMotion ? false : { opacity: 0.01, y: 20, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                style={prefersReducedMotion ? undefined : { y: heroPhoneY }}
+                className="relative z-10 w-full flex items-center justify-center will-change-transform"
+              >
+                <PhoneScreenshotFrame
+                  label="Screenshot: Hem – kvar att spendera och aktuell löneperiod"
+                  src={screenshots.heroHome}
+                  alt="Dejz hemvy som visar kvar att spendera och aktuell löneperiod"
+                  perspectiveTilt={true}
+                  isPreframedMockup={true}
                 />
-                <div className="relative z-10 w-full">
-                  <PhoneScreenshotFrame
-                    label="Screenshot: Hem – kvar att spendera och aktuell löneperiod"
-                    src={screenshots.heroHome}
-                    alt="Dejz hemvy som visar kvar att spendera och aktuell löneperiod"
-                    perspectiveTilt={true}
-                    isPreframedMockup={true}
-                  />
-                </div>
-              </div>
+              </motion.div>
             </div>
 
           </div>
         </section>
 
         {/* =====================================================================
-            2. ENKEL TRANSAKTIONSREMSA (1 lugn rad, tydligt märkt som exempel)
+            2. TVÅ RADER TRANSAKTIONER (rör sig vid scroll med mjuk fjäderfysik)
         ===================================================================== */}
-        <CalmTransactionStrip currentLanguage={currentLanguage} tr={tr} />
+        <ScrollTransactionStrip currentLanguage={currentLanguage} tr={tr} />
 
         {/* =====================================================================
-            3. TRE STEG — ”Så kommer du igång”
+            3. INTRODUKTION + TRE STEG
         ===================================================================== */}
         <section
           id="how-it-works"
-          className="py-14 sm:py-20 bg-[var(--surface-color)] border-b border-[var(--border-divider)] scroll-mt-20"
+          className="py-16 sm:py-22 bg-[var(--surface-color)] scroll-mt-20"
         >
-          <div className="landing-container space-y-8 sm:space-y-10 text-left">
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-tight">
-              {tr('landing_how_title')}
-            </h2>
+          <div className="landing-container space-y-10 text-left">
+            <motion.div {...revealMotion} className="max-w-xl space-y-2.5">
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+                {tr('landing_how_title')}
+              </h2>
+              <p className="landing-body-copy text-[var(--text-secondary)] text-pretty">
+                {tr('landing_how_subtitle')}
+              </p>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 pt-2 border-t border-[var(--border-divider)]">
-              <div className="pt-4 md:pt-6 flex items-start gap-4">
-                <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold font-amount tabular-nums flex items-center justify-center shrink-0 mt-0.5">
-                  1
-                </span>
-                <div className="space-y-1.5">
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                    {tr('landing_step1_title')}
-                  </h3>
-                  <p className="text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed">
-                    {tr('landing_step1_desc')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 md:pt-6 flex items-start gap-4 border-t md:border-t-0 border-[var(--border-divider)]">
-                <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold font-amount tabular-nums flex items-center justify-center shrink-0 mt-0.5">
-                  2
-                </span>
-                <div className="space-y-1.5">
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                    {tr('landing_step2_title')}
-                  </h3>
-                  <p className="text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed">
-                    {tr('landing_step2_desc')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 md:pt-6 flex items-start gap-4 border-t md:border-t-0 border-[var(--border-divider)]">
-                <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold font-amount tabular-nums flex items-center justify-center shrink-0 mt-0.5">
-                  3
-                </span>
-                <div className="space-y-1.5">
-                  <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                    {tr('landing_step3_title')}
-                  </h3>
-                  <p className="text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed">
-                    {tr('landing_step3_desc')}
-                  </p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+              {[
+                {
+                  num: '1',
+                  title: tr('landing_step1_title'),
+                  desc: tr('landing_step1_desc'),
+                },
+                {
+                  num: '2',
+                  title: tr('landing_step2_title'),
+                  desc: tr('landing_step2_desc'),
+                },
+                {
+                  num: '3',
+                  title: tr('landing_step3_title'),
+                  desc: tr('landing_step3_desc'),
+                },
+              ].map((step, idx) => (
+                <motion.div
+                  key={step.num}
+                  initial={prefersReducedMotion ? false : { opacity: 0.01, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{
+                    duration: 0.5,
+                    delay: idx * 0.09,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="flex items-start gap-4"
+                >
+                  <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold font-amount tabular-nums flex items-center justify-center shrink-0 mt-0.5">
+                    {step.num}
+                  </span>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
+                      {step.title}
+                    </h3>
+                    <p className="landing-body-copy text-[var(--text-secondary)]">
+                      {step.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* =====================================================================
             4. SMIDIG REGISTRERING
-               Rubrik: ”Ett köp. Några ord. Budgeten uppdaterad.”
-               Integrerad med vardagsfoto (dejz_01.png) & identiskt app-utdrag (Coop 378 kr)
+               Ny rytm: Levande röst-animation (ord för ord -> Coop-kort) som
+               svävar i förgrunden framför miljöbilden (dejz_01.png) till höger.
         ===================================================================== */}
-        <section id="features" className="py-16 sm:py-24 bg-[var(--bg-color)] scroll-mt-20">
+        <section id="features" className="py-14 sm:py-24 bg-[var(--surface-color)] scroll-mt-20">
           <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
-            {/* Left Column (6 cols): Copy + Everyday Nordic Photo (dejz_01.png) */}
-            <motion.div {...revealMotion} className="lg:col-span-6 space-y-6 text-left">
-              <div className="space-y-4">
-                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+            {/* Left Column (5 cols): Fokuserad copy + 3 snabba sätt att registrera */}
+            <motion.div {...revealMotion} className="lg:col-span-5 space-y-6 text-left">
+              <div className="space-y-3">
+                <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] max-w-[18ch] text-balance">
                   {tr('landing_voice_title')}
                 </h2>
-                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-[1.6] max-w-[54ch] text-pretty">
+                <p className="landing-body-copy text-[var(--text-secondary)] max-w-[44ch] text-pretty">
                   {tr('landing_voice_desc')}
                 </p>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-[1.6] max-w-[54ch]">
-                  {tr('landing_voice_subdesc')}
-                </p>
               </div>
 
-              {/* Integrated Nordic Everyday Photo (dejz_01.png) */}
-              <div className="rounded-card overflow-hidden border border-[var(--border-divider)] bg-[var(--surface-color)] shadow-subtle">
-                <div className="aspect-[16/9] w-full overflow-hidden bg-landing-sky-soft">
-                  <img
-                    src={screenshots.lifestyleGrocery || '/dejz_01.png'}
-                    alt={isEn ? 'Logging a grocery purchase on the go' : 'Registrera matinköp i vardagen'}
-                    width={640}
-                    height={360}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-center"
-                  />
-                </div>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {[
+                  { icon: <Mic size={14} strokeWidth={2.2} />, label: tr('landing_voice_pill_voice') },
+                  { icon: <Camera size={14} strokeWidth={2.2} />, label: tr('landing_voice_pill_receipt') },
+                  { icon: <Zap size={14} strokeWidth={2.2} />, label: tr('landing_voice_pill_quick') },
+                ].map((pill) => (
+                  <span
+                    key={pill.label}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-landing-sky-soft text-xs font-semibold text-[var(--text-primary)]"
+                  >
+                    {pill.icon}
+                    <span>{pill.label}</span>
+                  </span>
+                ))}
               </div>
             </motion.div>
 
-            {/* Right Column (6 cols): Clear Product Illustration (Coop 378 kr + Mat & dagligvaror) */}
-            <motion.div {...revealMotion} className="lg:col-span-6">
-              <div className="rounded-modal bg-landing-sky-soft border border-[var(--border-divider)] p-5 sm:p-7 space-y-4 select-none">
-                {/* Excerpt 1: Voice & Action Sheet (lagga_till_transaktion.png) */}
-                <div className="rounded-card bg-[var(--surface-color)] p-5 sm:p-6 shadow-subtle space-y-5">
-                  <div className="w-12 h-1.5 rounded-full bg-black/15 mx-auto" />
+            {/* Right Column (7 cols): Miljöbild som fond + Levande röstkort som överlappar lagom utan att täcka bilden */}
+            <div className="lg:col-span-7 relative">
+              <ParallaxLayer offset={6}>
+                <ParallaxPhotoFrame
+                  src={screenshots.lifestyleGrocery || '/dejz_01.png'}
+                  alt={isEn ? 'Logging a grocery purchase on the go' : 'Registrera matinköp i vardagen'}
+                  aspectClass="aspect-[16/9]"
+                />
+              </ParallaxLayer>
 
-                  <div className="grid grid-cols-3 gap-4 max-w-[300px] mx-auto text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)]">
-                        <ArrowDownLeft size={20} strokeWidth={1.9} />
-                      </div>
-                      <span className="text-xs font-medium text-[var(--text-primary)]">
-                        {isEn ? 'Expense' : 'Utgift'}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)]">
-                        <ArrowUpRight size={20} strokeWidth={1.9} />
-                      </div>
-                      <span className="text-xs font-medium text-[var(--text-primary)]">
-                        {isEn ? 'Income' : 'Inkomst'}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)]">
-                        <Camera size={20} strokeWidth={1.9} />
-                      </div>
-                      <span className="text-xs font-medium text-[var(--text-primary)]">
-                        {isEn ? 'Receipt' : 'Kvitto'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Voice Input Bar (Mat 378 kr Coop) */}
-                  <div className="voice-bar-surface rounded-card-nested p-2.5 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="voice-mic-box w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                        <Mic size={19} strokeWidth={1.9} />
-                      </div>
-                      <span className="text-base sm:text-lg font-medium text-[var(--text-primary)] truncate">
-                        {isEn ? 'Groceries 378 kr Coop' : 'Mat 378 kr Coop'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <X size={17} className="text-[var(--text-tertiary)]" />
-                      <div className="voice-stop-btn w-9 h-9 rounded-xl flex items-center justify-center">
-                        <div className="w-3 h-3 border-[1.75px] border-white rounded-sm" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Excerpt 2: Interpreted Transaction Preview (Coop, Mat & dagligvaror, 378 KR) */}
-                <div className="rounded-card bg-[var(--surface-color)] p-5 sm:p-6 shadow-subtle space-y-4 text-left">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <TransactionLogo
-                        size="lg"
-                        transaction={{
-                          id: 'voice-coop-preview',
-                          merchant: 'Coop',
-                          category: 'Mat & dagligvaror',
-                          amount: 378,
-                          type: 'expense',
-                          timestamp: Date.now(),
-                        }}
-                      />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-medium text-[var(--text-tertiary)] tracking-wider">
-                          {isEn ? 'STORE & CATEGORY' : 'BUTIK & KATEGORI'}
-                        </p>
-                        <p className="text-lg font-bold text-[var(--text-primary)] leading-snug mt-0.5">
-                          Coop
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-[var(--text-secondary)]">
-                          <CategoryIcon
-                            icon="shopping-basket"
-                            categoryName="Mat & dagligvaror"
-                            variant="minimal"
-                            size="2xs"
-                          />
-                          <span>{isEn ? 'Groceries' : 'Mat & dagligvaror'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <p className="text-[11px] font-medium text-[var(--text-tertiary)] tracking-wider">
-                        {isEn ? 'AMOUNT' : 'BELOPP'}
-                      </p>
-                      <div className="flex items-baseline justify-end gap-1 mt-0.5">
-                        <span className="text-2xl sm:text-3xl font-bold font-amount tabular-nums leading-none text-[var(--text-primary)]">
-                          378
-                        </span>
-                        <span className="text-xs font-medium text-[var(--text-secondary)]">
-                          kr
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+              <ParallaxLayer offset={-8} className="-mt-6 sm:-mt-8 relative z-10 px-2 sm:px-6">
+                <LiveVoiceShowcase isEn={isEn} />
+              </ParallaxLayer>
+            </div>
 
           </div>
         </section>
 
         {/* =====================================================================
             5. BUDGET & FASTA UTGIFTER
-               Rubrik: ”Lönen är inte hela din budget.”
+               Korten ligger direkt mot den ljusblå sektionen utan extra modulram.
         ===================================================================== */}
-        <section className="py-16 sm:py-24 bg-landing-sky-soft border-y border-[var(--border-divider)]">
+        <section className="py-16 sm:py-24 bg-landing-sky-soft">
           <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
-            {/* Left Column (7 cols): App Excerpt (totalt_fasta.jpg + fasta_utgifter.jpg) */}
-            <motion.div {...revealMotion} className="lg:col-span-7 order-2 lg:order-1">
-              <div className="rounded-modal bg-[var(--bg-color)] border border-[var(--border-divider)] p-5 sm:p-7 space-y-3.5 shadow-subtle text-left select-none">
-                {/* Top Filter Pills */}
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
-                  <span className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-[var(--text-primary)] text-[var(--surface-color)] text-xs font-semibold shrink-0">
-                    <Calendar size={13} strokeWidth={2} />
-                    <span>{isEn ? 'Fixed expenses' : 'Fasta utgifter'}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-[var(--surface-color)] text-[var(--text-secondary)] text-xs font-medium shrink-0">
-                    <ArrowDownLeft size={13} strokeWidth={2} />
-                    <span>{isEn ? 'Income' : 'Inkomster'}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-[var(--surface-color)] text-[var(--text-secondary)] text-xs font-medium shrink-0">
-                    <PiggyBank size={13} strokeWidth={2} />
-                    <span>{isEn ? 'Monthly savings' : 'Månadssparande'}</span>
-                  </span>
-                </div>
-
-                {/* Totala fasta utgifter Card */}
-                <div className="rounded-card bg-[var(--surface-color)] p-5 shadow-subtle flex flex-wrap items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                      {isEn ? 'Total monthly fixed expenses' : 'Totala fasta utgifter'}
-                    </p>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl sm:text-3xl font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                        −11 379
-                      </span>
-                      <span className="text-xs sm:text-sm text-[var(--text-secondary)]">
-                        kr<span className="text-[11px] opacity-75">/mån</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-left sm:text-right">
-                    <p className="text-xs font-medium text-[var(--text-tertiary)]">
-                      {isEn ? 'Pay period' : 'Löneperiod'}
-                    </p>
-                    <p className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)] mt-0.5">
-                      24 sep – 22 okt
-                    </p>
-                  </div>
-                </div>
-
-                {/* Fixed Expense Rows */}
-                <div className="space-y-2">
-                  {[
-                    {
-                      id: 'fe-svea',
-                      merchant: 'Sveafastigheter',
-                      category: isEn ? 'Housing' : 'Boende & hushåll',
-                      icon: 'home',
-                      amount: '6 766',
-                      day: isEn ? 'The 25th' : 'Den 25:e',
-                      method: isEn ? 'Invoice' : 'Faktura',
-                      isVariable: true,
-                    },
-                    {
-                      id: 'fe-google',
-                      merchant: 'Google AI Ultra',
-                      category: 'Dejz',
-                      icon: 'cloud',
-                      amount: '999',
-                      day: isEn ? 'The 10th' : 'Den 10:e',
-                      method: 'Google',
-                      isVariable: false,
-                    },
-                    {
-                      id: 'fe-oresund',
-                      merchant: 'Öresundskraft',
-                      category: isEn ? 'Housing' : 'Boende & hushåll',
-                      icon: 'home',
-                      amount: '548',
-                      day: isEn ? 'The 6th' : 'Den 6:e',
-                      method: isEn ? 'Invoice' : 'Faktura',
-                      isVariable: true,
-                    },
-                    {
-                      id: 'fe-telenor',
-                      merchant: 'Telenor (Mobil)',
-                      category: isEn ? 'Subscriptions' : 'Abonnemang',
-                      icon: 'smartphone',
-                      amount: '529',
-                      day: isEn ? 'The 28th' : 'Den 28:e',
-                      method: 'Autogiro',
-                      isVariable: false,
-                    },
-                  ].map((fe) => (
-                    <div
-                      key={fe.id}
-                      className="rounded-card bg-[var(--surface-color)] px-4 py-3.5 flex items-center justify-between gap-3 shadow-subtle transition-transform duration-200 hover:translate-x-0.5"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="relative shrink-0">
-                          <TransactionLogo
-                            transaction={{
-                              id: fe.id,
-                              merchant: fe.merchant,
-                              category: fe.category,
-                              amount: 100,
-                              type: 'expense',
-                              timestamp: Date.now(),
-                            }}
-                          />
-                          {fe.isVariable && (
-                            <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-[10px] font-bold flex items-center justify-center leading-none border-[1.5px] border-[var(--surface-color)] z-20">
-                              R
-                            </span>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm sm:text-base font-medium text-[var(--text-primary)] truncate leading-snug">
-                            {fe.merchant}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-[var(--text-secondary)]">
-                            <CategoryIcon
-                              icon={fe.icon}
-                              categoryName={fe.category}
-                              variant="minimal"
-                              size="2xs"
-                            />
-                            <span className="truncate">{fe.category}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0 pl-2">
-                        <p className="text-sm sm:text-base font-bold font-amount tabular-nums text-[var(--text-primary)] leading-snug">
-                          − {fe.amount}{' '}
-                          <span className="text-xs font-normal text-[var(--text-secondary)]">
-                            kr<span className="text-[10px] opacity-75">/mån</span>
-                          </span>
-                        </p>
-                        <div className="flex items-center justify-end gap-1.5 mt-1 text-xs text-[var(--text-tertiary)] tabular-nums">
-                          <span>{fe.day}</span>
-                          <span>·</span>
-                          <span className="px-2 py-0.5 rounded-full bg-[var(--surface-muted)] text-[11px] font-medium text-[var(--text-secondary)] leading-none">
-                            {fe.method}
-                          </span>
-                        </div>
+            {/* Left Column (6 cols): Korten ligger direkt mot sektionen med kaskad-parallax */}
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <ParallaxLayer offset={-20}>
+                <div className="max-w-[440px] mx-auto w-full space-y-2.5 py-2 text-left select-none pointer-events-none">
+                  {/* Totala fasta utgifter Card */}
+                  <motion.div
+                    initial={prefersReducedMotion ? false : { opacity: 0.01, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="rounded-card bg-[var(--surface-color)] p-4 shadow-subtle flex items-center justify-between gap-3"
+                  >
+                    <div className="space-y-0.5 min-w-0">
+                      <p className="text-card-title text-[var(--text-secondary)] truncate">
+                        {isEn ? 'Total fixed expenses' : 'Totala fasta utgifter'}
+                      </p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-large-amount font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                          −11 379
+                        </span>
+                        <span className="text-secondary text-[var(--text-secondary)]">
+                          kr<span className="text-micro-label opacity-75">/mån</span>
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
 
-            {/* Right Column (5 cols): Copy + Payment Intervals & Variable Amounts Detail + Home Photo */}
-            <motion.div {...revealMotion} className="lg:col-span-5 order-1 lg:order-2 space-y-6 text-left">
-              <div className="space-y-4">
-                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+                    <div className="text-right shrink-0">
+                      <p className="text-micro-label font-medium text-[var(--text-tertiary)]">
+                        {isEn ? 'Pay period' : 'Löneperiod'}
+                      </p>
+                      <p className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)] mt-0.5">
+                        24 sep – 22 okt
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Fixed Expense Rows med stegvis kaskad-effekt */}
+                  <div className="space-y-2.5 pt-0.5">
+                    {[
+                      {
+                        id: 'fe-sbab',
+                        merchant: 'SBAB',
+                        category: isEn ? 'Housing' : 'Boende & hushåll',
+                        icon: 'home',
+                        amount: '7 200',
+                        time: isEn ? 'The 27th' : 'Den 27:e',
+                        method: 'Autogiro',
+                        isFixed: true,
+                        isVariable: false,
+                      },
+                      {
+                        id: 'fe-vattenfall',
+                        merchant: 'Vattenfall',
+                        category: isEn ? 'Housing' : 'Boende & hushåll',
+                        icon: 'home',
+                        amount: '640',
+                        time: isEn ? 'The 28th' : 'Den 28:e',
+                        method: isEn ? 'Invoice' : 'Faktura',
+                        isFixed: true,
+                        isVariable: true,
+                      },
+                      {
+                        id: 'fe-telia',
+                        merchant: 'Telia',
+                        category: isEn ? 'Subscriptions' : 'Abonnemang',
+                        icon: 'smartphone',
+                        amount: '399',
+                        time: isEn ? 'The 27th' : 'Den 27:e',
+                        method: 'Autogiro',
+                        isFixed: true,
+                        isVariable: false,
+                      },
+                      {
+                        id: 'fe-spotify',
+                        merchant: 'Spotify',
+                        category: 'Streaming',
+                        icon: 'tv',
+                        amount: '119',
+                        time: isEn ? 'The 25th' : 'Den 25:e',
+                        method: isEn ? 'Card' : 'Kort',
+                        isFixed: true,
+                        isVariable: false,
+                      },
+                    ].map((fe, idx) => (
+                      <motion.div
+                        key={fe.id}
+                        initial={prefersReducedMotion ? false : { opacity: 0.01, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: '-30px' }}
+                        transition={{
+                          duration: 0.45,
+                          delay: 0.06 * (idx + 1),
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                      >
+                        <AppIdenticalTransactionRow {...fe} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </ParallaxLayer>
+            </div>
+
+            {/* Right Column (6 cols): Ren, luftig text och två tydliga punkter som balanserar de 5 utgiftskorten */}
+            <motion.div {...revealMotion} className="lg:col-span-6 order-1 lg:order-2 text-left space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] max-w-[18ch] text-balance">
                   {tr('landing_fixed_title')}
                 </h2>
 
-                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-[1.6] font-normal text-pretty">
+                <p className="landing-body-copy text-[var(--text-secondary)] max-w-[46ch] font-normal text-pretty">
                   {tr('landing_fixed_desc')}
                 </p>
               </div>
 
-              {/* Short details for payment intervals & variable bills */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="rounded-card-nested bg-[var(--surface-color)] p-3.5 border border-[var(--border-divider)]">
-                  <p className="text-xs font-bold text-[var(--text-primary)]">
-                    {tr('landing_fixed_pill_intervals')}
-                  </p>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-snug">
-                    {isEn
-                      ? 'Support for monthly, quarterly, semi-annual, and annual bills.'
-                      : 'Lägg in räkningar som dras varje månad, kvartal, halvår eller år.'}
-                  </p>
-                </div>
-
-                <div className="rounded-card-nested bg-[var(--surface-color)] p-3.5 border border-[var(--border-divider)]">
-                  <p className="text-xs font-bold text-[var(--text-primary)]">
-                    {tr('landing_fixed_pill_variable')}
-                  </p>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-snug">
-                    {isEn
-                      ? 'Mark bills that vary in amount, such as electricity or water.'
-                      : 'Markera räkningar där beloppet varierar, som el eller bredband.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Integrated Nordic Home Photo (dejz_02.png) */}
-              <div className="rounded-card overflow-hidden border border-[var(--border-divider)] bg-[var(--surface-color)] shadow-subtle">
-                <div className="aspect-[16/9] w-full overflow-hidden">
-                  <img
-                    src={screenshots.lifestyleHome || '/dejz_02.png'}
-                    alt={isEn ? 'Calm overview of household fixed expenses' : 'Överblick över hemmets fasta kostnader'}
-                    width={600}
-                    height={338}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-center"
-                  />
-                </div>
-              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 landing-body-copy font-medium text-[var(--text-primary)]">
+                  <span className="w-6 h-6 rounded-full bg-landing-signature text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                    <Check size={13} strokeWidth={2.6} />
+                  </span>
+                  <span>{tr('landing_fixed_pill_intervals')}</span>
+                </li>
+                <li className="flex items-center gap-3 landing-body-copy font-medium text-[var(--text-primary)]">
+                  <span className="w-6 h-6 rounded-full bg-landing-signature text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                    <Check size={13} strokeWidth={2.6} />
+                  </span>
+                  <span>{tr('landing_fixed_pill_variable')}</span>
+                </li>
+              </ul>
             </motion.div>
 
           </div>
@@ -1443,240 +1765,180 @@ export function LandingPage({
 
         {/* =====================================================================
             6. ÖVERBLICK
-               Rubrik: ”Se vad du har kvar till nästa lön.”
-               Kort för återstående budget, kategorier och tidslinje (dagsöverblick som komplettering)
+               Bento-kort + Interaktiv tidslinje där besökaren kan klicka på dagarna (11–16 okt).
         ===================================================================== */}
-        <section className="py-16 sm:py-24 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
+        <section className="py-16 sm:py-24 bg-[var(--surface-color)]">
           <div className="landing-container space-y-8 sm:space-y-10 text-left">
-            <motion.div {...revealMotion} className="max-w-2xl space-y-3">
-              <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+            <motion.div {...revealMotion} className="max-w-xl space-y-2.5">
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
                 {tr('landing_daily_title')}
               </h2>
-              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-[58ch]">
+              <p className="landing-body-copy text-[var(--text-secondary)] text-pretty">
                 {tr('landing_daily_desc')}
               </p>
             </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              {/* Card 1 (6 cols): Återstående budget (kvar_att_spendera.jpg) */}
-              <motion.div
-                {...revealMotion}
-                className="lg:col-span-6 rounded-modal bg-landing-signature p-6 sm:p-8 flex flex-col justify-between gap-6 select-none shadow-subtle"
-              >
-                <div className="space-y-1.5">
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
-                    {tr('landing_daily_item1_title')}
-                  </h3>
-                  <p className="text-sm sm:text-base text-[var(--text-primary)]/85 leading-relaxed">
-                    {tr('landing_daily_item1_desc')}
-                  </p>
-                </div>
+              {/* Card 1 (6 cols): Kvar att spendera */}
+              <ParallaxLayer offset={-16} className="lg:col-span-6 flex">
+                <motion.div
+                  {...revealMotion}
+                  className="w-full rounded-modal bg-landing-signature p-6 sm:p-8 flex flex-col justify-between gap-6 select-none pointer-events-none"
+                >
+                  <div className="space-y-1">
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
+                      {tr('landing_daily_item1_title')}
+                    </h3>
+                    <p className="landing-body-copy text-[var(--text-primary)]/85">
+                      {tr('landing_daily_item1_desc')}
+                    </p>
+                  </div>
 
-                <div className="space-y-3">
-                  <div className="rounded-card bg-[var(--surface-color)] p-5 sm:p-6 shadow-subtle space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm sm:text-base font-medium text-[var(--text-secondary)]">
+                  <ParallaxLayer offset={-8} className="max-w-[440px] mx-auto w-full space-y-2.5 py-0.5">
+                    <div className="rounded-card bg-[var(--surface-color)] shadow-subtle p-4 sm:p-5 space-y-3">
+                      <span className="text-card-title sm:text-body font-medium text-[var(--text-secondary)] block">
                         {isEn ? 'Remaining to spend' : 'Kvar att spendera'}
                       </span>
-                    </div>
 
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl sm:text-[42px] font-bold font-amount tabular-nums tracking-tight leading-none text-[var(--text-primary)]">
-                        23 536
-                      </span>
-                      <span className="text-sm font-medium text-[var(--text-secondary)]">
-                        kr
-                      </span>
-                    </div>
-
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex items-center justify-end">
-                        <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                          72 % {isEn ? 'left' : 'kvar'}
+                      <div className="flex items-baseline gap-1.5 py-0.5">
+                        <span className="text-hero-amount font-bold font-amount tabular-nums tracking-tight leading-none text-[var(--text-primary)]">
+                          23 536
+                        </span>
+                        <span className="text-[14px] leading-none font-medium text-[var(--text-secondary)]">
+                          kr
                         </span>
                       </div>
-                      <div className="w-full h-2.5 rounded-full bg-black/[0.07] overflow-hidden">
-                        <div className="h-full w-[72%] rounded-full bg-[var(--text-primary)]" />
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-card bg-[var(--surface-color)] p-3.5 sm:p-4 shadow-subtle">
-                      <p className="text-xs font-medium text-[var(--text-secondary)]">
-                        {isEn ? 'Current period' : 'Aktuell period'}
-                      </p>
-                      <p className="text-sm sm:text-base font-medium text-[var(--text-primary)] mt-0.5">
-                        24 sep – 22 okt
-                      </p>
-                    </div>
-                    <div className="rounded-card bg-[var(--surface-color)] p-3.5 sm:p-4 shadow-subtle">
-                      <p className="text-xs font-medium text-[var(--text-secondary)]">
-                        {isEn ? 'Next payday' : 'Nästa lön'}
-                      </p>
-                      <p className="text-sm sm:text-base font-medium font-amount tabular-nums text-[var(--text-primary)] mt-0.5">
-                        19 {isEn ? 'days left' : 'dagar kvar'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Card 2 (6 cols): Kategoribudgetar på hemskärmen */}
-              <motion.div
-                {...revealMotion}
-                className="lg:col-span-6 rounded-modal bg-landing-sky-soft border border-[var(--border-divider)] p-6 sm:p-8 flex flex-col justify-between gap-6 select-none shadow-subtle"
-              >
-                <div className="space-y-1.5">
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
-                    {tr('landing_daily_item2_title')}
-                  </h3>
-                  <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                    {tr('landing_daily_item2_desc')}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 my-auto">
-                  {[
-                    {
-                      name: isEn ? 'Health & Fitness' : 'Hälsa & Träning',
-                      icon: 'heart',
-                      amount: '347',
-                    },
-                    {
-                      name: isEn ? 'Insurance' : 'Försäkringar',
-                      icon: 'shield',
-                      amount: '160',
-                    },
-                    {
-                      name: isEn ? 'Subscriptions' : 'Abonnemang',
-                      icon: 'smartphone',
-                      amount: '300',
-                    },
-                  ].map((cat) => (
-                    <div
-                      key={cat.name}
-                      className="rounded-card bg-[var(--surface-color)] p-3.5 sm:p-4 shadow-subtle flex flex-col justify-between gap-4 min-h-[132px] sm:min-h-[146px] transition-transform duration-200 hover:-translate-y-0.5"
-                    >
-                      <CategoryIcon
-                        icon={cat.icon}
-                        categoryName={cat.name}
-                        size="md"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
-                          {cat.name}
-                        </p>
-                        <p className="text-base sm:text-xl font-bold font-amount tabular-nums text-[var(--text-primary)] mt-0.5">
-                          {cat.amount}{' '}
-                          <span className="text-xs font-normal text-[var(--text-secondary)]">
-                            kr
+                      <div className="space-y-1.5 pt-0.5">
+                        <div className="flex items-center justify-between text-micro-label font-medium text-[var(--text-secondary)]">
+                          <span>{isEn ? 'Remaining spendable' : 'Spenderbart kvar'}</span>
+                          <span className="font-amount tabular-nums font-bold text-[var(--text-primary)]">
+                            72 % {isEn ? 'left' : 'kvar'}
                           </span>
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="text-xs font-medium text-[var(--text-secondary)]">
-                  {isEn
-                    ? 'Swipe through your categories directly on the home screen.'
-                    : 'Svep genom dina kategorier direkt på hemskärmen.'}
-                </p>
-              </motion.div>
-
-              {/* Card 3 (12 cols): Tidslinje & dagsöverblick som kompletterande funktion */}
-              <motion.div
-                {...revealMotion}
-                className="lg:col-span-12 rounded-modal bg-landing-contrast-dark p-6 sm:p-9 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center select-none shadow-subtle"
-              >
-                <div className="lg:col-span-5 space-y-3 text-white">
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                    {tr('landing_daily_item3_title')}
-                  </h3>
-                  <p className="text-sm sm:text-base text-white/80 leading-relaxed">
-                    {tr('landing_daily_item3_desc')}
-                  </p>
-                </div>
-
-                {/* App Excerpt: tidslinje.png */}
-                <div className="lg:col-span-7 rounded-modal bg-[var(--bg-color)] p-4 sm:p-6 space-y-4">
-                  <div className="grid grid-cols-6 gap-2">
-                    {[
-                      { day: isEn ? 'sun' : 'sön', num: '11', active: false },
-                      { day: isEn ? 'mon' : 'mån', num: '12', active: false },
-                      { day: isEn ? 'tue' : 'tis', num: '13', active: false },
-                      { day: isEn ? 'Today' : 'Idag', num: '14', active: true },
-                      { day: isEn ? 'thu' : 'tor', num: '15', active: false },
-                      { day: isEn ? 'fri' : 'fre', num: '16', active: false },
-                    ].map((d) => (
-                      <div
-                        key={d.num}
-                        className={`h-[56px] sm:h-[62px] rounded-card-nested flex flex-col items-center justify-center gap-0.5 transition-transform duration-200 hover:-translate-y-0.5 ${
-                          d.active
-                            ? 'bg-landing-signature font-semibold text-[var(--text-primary)] shadow-subtle'
-                            : 'bg-[var(--surface-color)] text-[var(--text-secondary)] shadow-subtle'
-                        }`}
-                      >
-                        <span
-                          className={`text-[11px] leading-none ${
-                            d.active ? 'font-bold text-[var(--text-primary)]' : 'font-medium'
-                          }`}
-                        >
-                          {d.day}
-                        </span>
-                        <span className="text-base sm:text-lg font-amount tabular-nums font-semibold text-[var(--text-primary)] leading-tight">
-                          {d.num}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="text-base sm:text-lg font-bold text-[var(--text-primary)] pt-0.5">
-                    {isEn ? 'Today, October 14' : 'Idag, 14 oktober'}
-                  </p>
-
-                  <div className="rounded-card bg-[var(--surface-color)] px-4 py-3.5 flex items-center justify-between gap-3 shadow-subtle">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <TransactionLogo
-                        transaction={{
-                          id: 'timeline-coop',
-                          merchant: 'Coop',
-                          category: 'Mat & dagligvaror',
-                          amount: 378,
-                          type: 'expense',
-                          timestamp: Date.now(),
-                        }}
-                      />
-                      <div className="min-w-0">
-                        <p className="text-sm sm:text-base font-medium text-[var(--text-primary)] truncate">
-                          Coop
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-[var(--text-secondary)]">
-                          <CategoryIcon
-                            icon="shopping-basket"
-                            categoryName="Mat & dagligvaror"
-                            variant="minimal"
-                            size="2xs"
+                        </div>
+                        <div className="w-full h-2.5 rounded-full bg-black/[0.07] overflow-hidden">
+                          <motion.div
+                            initial={prefersReducedMotion ? { width: '72%' } : { width: '0%' }}
+                            whileInView={{ width: '72%' }}
+                            viewport={{ once: true, margin: '-40px' }}
+                            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                            className="h-full rounded-full bg-[var(--text-primary)]"
                           />
-                          <span>{isEn ? 'Groceries' : 'Mat & dagligvaror'}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <p className="text-sm sm:text-base font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                        − 378{' '}
-                        <span className="text-xs font-normal text-[var(--text-secondary)]">
-                          kr
-                        </span>
-                      </p>
-                      <p className="text-xs text-[var(--text-tertiary)] tabular-nums mt-0.5">
-                        01:19
-                      </p>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div className="rounded-card bg-[var(--surface-color)] shadow-subtle p-3 sm:p-3.5 min-w-0">
+                        <p className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                          {isEn ? 'Current period' : 'Aktuell period'}
+                        </p>
+                        <p className="text-body-medium font-medium text-[var(--text-primary)] truncate mt-0.5">
+                          24 sep – 22 okt
+                        </p>
+                      </div>
+                      <div className="rounded-card bg-[var(--surface-color)] shadow-subtle p-3 sm:p-3.5 min-w-0">
+                        <p className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                          {isEn ? 'Next payday' : 'Nästa lön'}
+                        </p>
+                        <p className="text-body-medium font-medium font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
+                          19 {isEn ? 'days left' : 'dagar kvar'}
+                        </p>
+                      </div>
                     </div>
+                  </ParallaxLayer>
+                </motion.div>
+              </ParallaxLayer>
+
+              {/* Card 2 (6 cols): Kategoribudgetar */}
+              <ParallaxLayer offset={18} className="lg:col-span-6 flex">
+                <motion.div
+                  {...revealMotion}
+                  className="w-full rounded-modal bg-landing-sky-soft p-6 sm:p-8 flex flex-col justify-between gap-6 select-none pointer-events-none"
+                >
+                  <div className="space-y-1">
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
+                      {tr('landing_daily_item2_title')}
+                    </h3>
+                    <p className="landing-body-copy text-[var(--text-secondary)]">
+                      {tr('landing_daily_item2_desc')}
+                    </p>
                   </div>
+
+                  <ParallaxLayer offset={-8} className="max-w-[440px] mx-auto w-full my-auto">
+                    <div className="flex gap-2.5 overflow-x-auto py-2 px-1 -mx-1 no-scrollbar">
+                      {[
+                        {
+                          name: isEn ? 'Health & Fitness' : 'Hälsa & Träning',
+                          icon: 'heart',
+                          amount: '347',
+                        },
+                        {
+                          name: isEn ? 'Insurance' : 'Försäkringar',
+                          icon: 'shield',
+                          amount: '160',
+                        },
+                        {
+                          name: isEn ? 'Subscriptions' : 'Abonnemang',
+                          icon: 'smartphone',
+                          amount: '300',
+                        },
+                      ].map((cat, idx) => (
+                        <motion.div
+                          key={cat.name}
+                          initial={prefersReducedMotion ? false : { opacity: 0.01, y: 14 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: '-30px' }}
+                          transition={{
+                            duration: 0.45,
+                            delay: 0.08 * idx,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="flex-shrink-0 min-w-[138px] sm:min-w-[146px] flex-1 p-3.5 rounded-card bg-[var(--surface-color)] shadow-subtle flex flex-col justify-between gap-2.5 text-left"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <CategoryIcon
+                              icon={cat.icon}
+                              categoryName={cat.name}
+                              size="sm"
+                            />
+                          </div>
+                          <div className="min-w-0 pt-0.5">
+                            <span className="text-card-title text-[var(--text-primary)] whitespace-nowrap block mb-0.5">
+                              {cat.name}
+                            </span>
+                            <span className="text-list-amount font-amount tabular-nums block text-[var(--text-primary)]">
+                              {cat.amount}
+                              <span className="text-[11.5px] font-normal text-[var(--text-secondary)] ml-1">
+                                kr
+                              </span>
+                            </span>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </ParallaxLayer>
+                </motion.div>
+              </ParallaxLayer>
+
+              {/* Card 3 (12 cols): Interaktiv Tidslinje dag för dag */}
+              <motion.div
+                {...revealMotion}
+                className="lg:col-span-12 rounded-modal bg-landing-contrast-dark p-6 sm:p-9 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+              >
+                <div className="lg:col-span-5 space-y-2 text-white">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                    {tr('landing_daily_item3_title')}
+                  </h3>
+                  <p className="landing-body-copy text-white/80">
+                    {tr('landing_daily_item3_desc')}
+                  </p>
                 </div>
+
+                {/* Interaktiv 6-dagars tidslinje (klicka på valfri dag 11–16) */}
+                <ParallaxLayer offset={-12} className="lg:col-span-7">
+                  <InteractiveTimelineShowcase isEn={isEn} />
+                </ParallaxLayer>
               </motion.div>
             </div>
           </div>
@@ -1685,264 +1947,222 @@ export function LandingPage({
         {/* =====================================================================
             7. ANALYS
                Rubrik: ”Förstå vart pengarna tar vägen.”
-               Hela diagrammet och tydliga kategorier utan dubblerat "Kvar att spendera"-kort
         ===================================================================== */}
-        <section className="py-16 sm:py-24 bg-[var(--bg-color)] border-b border-[var(--border-divider)]">
+        <section className="py-16 sm:py-24 bg-landing-sky-soft">
           <div className="landing-container space-y-8 sm:space-y-10 text-left">
-            <motion.div {...revealMotion} className="max-w-2xl space-y-3">
-              <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+            <motion.div {...revealMotion} className="max-w-xl space-y-2.5">
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
                 {tr('landing_analysis_title')}
               </h2>
-              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-[1.6] max-w-[58ch] text-pretty">
+              <p className="landing-body-copy text-[var(--text-secondary)] text-pretty">
                 {tr('landing_analysis_desc')}
               </p>
             </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-              {/* Left Column (5 cols): Full Donut Chart Card */}
-              <motion.div {...revealMotion} className="lg:col-span-5 flex">
-                <div className="w-full rounded-modal bg-[var(--surface-color)] border border-[var(--border-divider)] p-6 sm:p-7 flex flex-col justify-between gap-6 shadow-subtle select-none">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="h-9 px-3.5 rounded-full bg-[var(--bg-color)] inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)]">
-                      <Calendar size={14} className="text-[var(--text-secondary)]" />
-                      <span>{isEn ? 'October' : 'Oktober'}</span>
-                      <span className="px-1.5 py-0.5 rounded-full bg-black/[0.06] text-[10px] font-bold">
-                        {isEn ? 'Current' : 'Nu'}
-                      </span>
-                    </div>
+              {/* Left Column (6 cols): Cirkeldiagram i samma höjd som kategorilistan på desktop */}
+              <ParallaxLayer offset={-12} className="lg:col-span-6 flex">
+                <motion.div {...revealMotion} className="max-w-[440px] mx-auto w-full flex">
+                  <div className="w-full rounded-modal bg-[var(--surface-color)] shadow-subtle p-6 flex flex-col justify-between gap-5 select-none pointer-events-none">
+                    <div className="flex-1 flex items-center justify-center py-1">
+                      <motion.div
+                        initial={prefersReducedMotion ? false : { scale: 0.92, opacity: 0.01 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        viewport={{ once: true, margin: '-40px' }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative w-[196px] h-[196px] sm:w-[212px] sm:h-[212px] flex items-center justify-center"
+                      >
+                        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90" aria-hidden="true">
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="41"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="9.5"
+                            className="text-black/[0.04]"
+                          />
+                          {(() => {
+                            const radius = 41;
+                            const circumference = 2 * Math.PI * radius;
+                            const segments = [
+                              { pct: 0.52, strokeColor: 'rgb(239, 68, 68)' },
+                              { pct: 0.17, strokeColor: 'rgb(244, 63, 94)' },
+                              { pct: 0.15, strokeColor: 'rgb(14, 165, 233)' },
+                              { pct: 0.07, strokeColor: 'rgb(232, 155, 184)' },
+                              { pct: 0.04, strokeColor: 'rgb(139, 92, 246)' },
+                              { pct: 0.05, strokeColor: 'rgb(115, 109, 132)' },
+                            ];
+                            let acc = 0;
+                            return segments.map((seg, i) => {
+                              const len = seg.pct * circumference;
+                              const visible = Math.max(1, len - 2.5);
+                              const dashArray = `${visible} ${circumference - visible}`;
+                              const dashOffset = -acc * circumference;
+                              acc += seg.pct;
+                              return (
+                                <circle
+                                  key={i}
+                                  cx="50"
+                                  cy="50"
+                                  r={radius}
+                                  fill="none"
+                                  stroke={seg.strokeColor}
+                                  strokeWidth="9.5"
+                                  strokeDasharray={dashArray}
+                                  strokeDashoffset={dashOffset}
+                                  strokeLinecap="round"
+                                />
+                              );
+                            });
+                          })()}
+                        </svg>
 
-                    <div className="flex items-center gap-1">
-                      <span className="h-8 px-3 rounded-full bg-[var(--bg-color)] text-xs font-medium text-[var(--text-secondary)] inline-flex items-center">
-                        {isEn ? 'All' : 'Alla'}
-                      </span>
-                      <span className="h-8 px-3 rounded-full bg-[var(--text-primary)] text-[var(--surface-color)] text-xs font-semibold inline-flex items-center">
-                        {isEn ? 'Variable' : 'Rörliga'}
-                      </span>
-                      <span className="h-8 px-3 rounded-full bg-[var(--bg-color)] text-xs font-medium text-[var(--text-secondary)] inline-flex items-center">
-                        {isEn ? 'Fixed' : 'Fasta'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Full Uncropped Donut Chart */}
-                  <div className="my-auto py-2 flex items-center justify-center">
-                    <div className="relative w-[220px] h-[220px] sm:w-[240px] sm:h-[240px] flex items-center justify-center">
-                      <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90" aria-hidden="true">
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="41"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="9.5"
-                          className="text-black/[0.04]"
-                        />
-                        {(() => {
-                          const radius = 41;
-                          const circumference = 2 * Math.PI * radius;
-                          const segments = [
-                            { pct: 0.52, strokeColor: 'rgb(239, 68, 68)' },
-                            { pct: 0.17, strokeColor: 'rgb(244, 63, 94)' },
-                            { pct: 0.15, strokeColor: 'rgb(14, 165, 233)' },
-                            { pct: 0.07, strokeColor: 'rgb(232, 155, 184)' },
-                            { pct: 0.04, strokeColor: 'rgb(139, 92, 246)' },
-                            { pct: 0.05, strokeColor: 'rgb(115, 109, 132)' },
-                          ];
-                          let acc = 0;
-                          return segments.map((seg, i) => {
-                            const len = seg.pct * circumference;
-                            const visible = Math.max(1, len - 2.5);
-                            const dashArray = `${visible} ${circumference - visible}`;
-                            const dashOffset = -acc * circumference;
-                            acc += seg.pct;
-                            return (
-                              <circle
-                                key={i}
-                                cx="50"
-                                cy="50"
-                                r={radius}
-                                fill="none"
-                                stroke={seg.strokeColor}
-                                strokeWidth="9.5"
-                                strokeDasharray={dashArray}
-                                strokeDashoffset={dashOffset}
-                                strokeLinecap="round"
-                              />
-                            );
-                          });
-                        })()}
-                      </svg>
-
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span className="text-[11px] font-medium tracking-wider text-[var(--text-tertiary)]">
-                          {isEn ? 'VARIABLE EXPENSES' : 'RÖRLIGA UTGIFTER'}
-                        </span>
-                        <span className="text-2xl sm:text-3xl font-bold font-amount tabular-nums text-[var(--text-primary)] mt-0.5">
-                          11 105{' '}
-                          <span className="text-xs font-normal text-[var(--text-secondary)]">
-                            kr
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
+                          <span className="text-metric-label font-medium uppercase tracking-wider text-[var(--text-tertiary)]">
+                            {isEn ? 'Variable expenses' : 'Rörliga utgifter'}
                           </span>
-                        </span>
+                          <span className="text-large-amount font-bold font-amount tabular-nums tracking-tight text-[var(--text-primary)] mt-0.5">
+                            11 105
+                            <span className="text-secondary font-normal opacity-80 ml-1">
+                              kr
+                            </span>
+                          </span>
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-black/[0.05]">
+                      <div className="rounded-card-nested bg-landing-sky-soft p-3 text-left">
+                        <p className="text-metric-label font-medium text-[var(--text-secondary)]">
+                          {isEn ? 'Largest share' : 'Största post'}
+                        </p>
+                        <p className="text-body-medium font-semibold text-[var(--text-primary)] truncate mt-0.5">
+                          {isEn ? 'Groceries (52 %)' : 'Mat & Dagligvaror (52 %)'}
+                        </p>
+                      </div>
+                      <div className="rounded-card-nested bg-landing-sky-soft p-3 text-left">
+                        <p className="text-metric-label font-medium text-[var(--text-secondary)]">
+                          {isEn ? 'Category budgets' : 'Kategoribudget'}
+                        </p>
+                        <p className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
+                          895 kr {isEn ? 'left' : 'kvar'}
+                        </p>
                       </div>
                     </div>
                   </div>
+                </motion.div>
+              </ParallaxLayer>
 
-                  <p className="text-xs text-[var(--text-tertiary)] text-center">
-                    {isEn ? 'Distribution across categories in the current period' : 'Fördelning per kategori under aktuell löneperiod'}
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Right Column (7 cols): Clear Category Breakdown (analys_kategorier.jpg) */}
-              <motion.div {...revealMotion} className="lg:col-span-7 flex">
-                <div className="w-full rounded-modal bg-landing-sky-soft border border-[var(--border-divider)] p-4 sm:p-6 flex flex-col justify-center select-none">
-                  <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-[var(--border-divider)] shadow-subtle">
+              {/* Right Column (6 cols): Kategorirader i samma höjd */}
+              <ParallaxLayer offset={12} className="lg:col-span-6 flex">
+                <motion.div {...revealMotion} className="max-w-[440px] mx-auto w-full flex select-none pointer-events-none">
+                  <div className="w-full rounded-modal bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-y divide-black/[0.05] flex flex-col justify-between">
                     {/* Row 1: Mat & Dagligvaror */}
-                    <div className="p-4 sm:p-5 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
+                    <div className="p-4 flex items-center justify-between gap-2.5">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <CategoryIcon
                           icon="shopping-basket"
                           categoryName="Mat & Dagligvaror"
-                          size="md"
+                          size="sm"
                         />
-                        <div className="min-w-0">
-                          <p className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate">
+                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                          <p className="text-body-medium font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis text-[var(--text-primary)]">
                             {isEn ? 'Groceries' : 'Mat & Dagligvaror'}
                           </p>
-                          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                          <p className="text-secondary leading-tight mt-1 whitespace-nowrap overflow-hidden text-ellipsis text-[var(--text-tertiary)]">
                             184 kr {isEn ? 'left of budget' : 'kvar av budget'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="text-right">
-                          <p className="text-sm sm:text-base font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                            5 816{' '}
-                            <span className="text-xs font-normal text-[var(--text-secondary)]">
-                              kr
-                            </span>
-                          </p>
-                          <p className="text-xs text-[var(--text-tertiary)] tabular-nums">
-                            52 %
-                          </p>
-                        </div>
-                        <ChevronDown size={16} className="text-[var(--text-secondary)] opacity-60" />
+                      <div className="text-right flex flex-col items-end justify-center shrink-0 pl-2">
+                        <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight tabular-nums">
+                          5 816
+                          <span className="text-secondary font-normal opacity-80 ml-1">
+                            kr
+                          </span>
+                        </p>
+                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-0.5 leading-tight font-normal">
+                          52 %
+                        </span>
                       </div>
                     </div>
 
                     {/* Row 2: Hälsa & Träning */}
-                    <div className="p-4 sm:p-5 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
+                    <div className="p-4 flex items-center justify-between gap-2.5">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <CategoryIcon
                           icon="heart"
                           categoryName="Hälsa & Träning"
-                          size="md"
+                          size="sm"
                         />
-                        <div className="min-w-0">
-                          <p className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate">
+                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                          <p className="text-body-medium font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis text-[var(--text-primary)]">
                             {isEn ? 'Health & Fitness' : 'Hälsa & Träning'}
                           </p>
-                          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                          <p className="text-secondary leading-tight mt-1 whitespace-nowrap overflow-hidden text-ellipsis text-[var(--text-tertiary)]">
                             646 kr {isEn ? 'left of budget' : 'kvar av budget'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="text-right">
-                          <p className="text-sm sm:text-base font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                            1 854{' '}
-                            <span className="text-xs font-normal text-[var(--text-secondary)]">
-                              kr
-                            </span>
-                          </p>
-                          <p className="text-xs text-[var(--text-tertiary)] tabular-nums">
-                            17 %
-                          </p>
-                        </div>
-                        <ChevronDown size={16} className="text-[var(--text-secondary)] opacity-60" />
+                      <div className="text-right flex flex-col items-end justify-center shrink-0 pl-2">
+                        <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight tabular-nums">
+                          1 854
+                          <span className="text-secondary font-normal opacity-80 ml-1">
+                            kr
+                          </span>
+                        </p>
+                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-0.5 leading-tight font-normal">
+                          17 %
+                        </span>
                       </div>
                     </div>
 
                     {/* Row 3: Transport (Expanded with Parkster) */}
                     <div>
-                      <div className="p-4 sm:p-5 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div className="p-4 flex items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <CategoryIcon
                             icon="car"
                             categoryName="Transport"
-                            size="md"
+                            size="sm"
                           />
-                          <div className="min-w-0">
-                            <p className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate">
+                          <div className="min-w-0 flex-1 flex flex-col justify-center">
+                            <p className="text-body-medium font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis text-[var(--text-primary)]">
                               Transport
                             </p>
-                            <p className="text-xs font-medium text-[var(--danger-color)] mt-0.5">
+                            <p className="text-secondary font-medium text-[var(--danger-color)] leading-tight mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
                               451 kr {isEn ? 'over budget' : 'över budget'}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2.5 shrink-0">
-                          <div className="text-right">
-                            <p className="text-sm sm:text-base font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                              1 651{' '}
-                              <span className="text-xs font-normal text-[var(--text-secondary)]">
-                                kr
-                              </span>
-                            </p>
-                            <p className="text-xs text-[var(--text-tertiary)] tabular-nums">
-                              15 %
-                            </p>
-                          </div>
-                          <ChevronUp size={16} className="text-[var(--text-primary)]" />
+                        <div className="text-right flex flex-col items-end justify-center shrink-0 pl-2">
+                          <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight tabular-nums">
+                            1 651
+                            <span className="text-secondary font-normal opacity-80 ml-1">
+                              kr
+                            </span>
+                          </p>
+                          <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-0.5 leading-tight font-normal">
+                            15 %
+                          </span>
                         </div>
                       </div>
 
-                      {/* Expanded Nested Transaction (Parkster - 61 kr 12 okt.) */}
-                      <div className="bg-[var(--card-nested-bg)] p-3.5 border-t border-[var(--border-divider)]">
-                        <div className="rounded-card bg-[var(--surface-color)] px-4 py-3 flex items-center justify-between gap-3 shadow-subtle">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <TransactionLogo
-                              transaction={{
-                                id: 'analysis-parkster',
-                                merchant: 'Parkster',
-                                category: 'Transport',
-                                amount: 61,
-                                type: 'expense',
-                                timestamp: Date.now(),
-                              }}
-                            />
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                                Parkster
-                              </p>
-                              <div className="flex items-center gap-1 mt-0.5 text-xs text-[var(--text-secondary)]">
-                                <CategoryIcon
-                                  icon="car"
-                                  categoryName="Transport"
-                                  variant="minimal"
-                                  size="2xs"
-                                />
-                                <span>Transport</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                              − 61{' '}
-                              <span className="text-xs font-normal text-[var(--text-secondary)]">
-                                kr
-                              </span>
-                            </p>
-                            <p className="text-xs text-[var(--text-tertiary)] tabular-nums mt-0.5">
-                              12 okt.
-                            </p>
-                          </div>
-                        </div>
+                      <div className="bg-[var(--card-nested-bg)] p-3">
+                        <AppIdenticalTransactionRow
+                          id="analysis-uber"
+                          merchant="Uber"
+                          category="Transport"
+                          icon="car"
+                          amount="100"
+                          time={isEn ? '14 Oct' : '14 okt.'}
+                        />
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </ParallaxLayer>
             </div>
           </div>
         </section>
@@ -1950,198 +2170,164 @@ export function LandingPage({
         {/* =====================================================================
             8. KONTROLL
                Rubrik: ”Du har sista ordet om din budget.”
-               Manuell registrering som delaktighet + redigera_transaktion.png + dejz_03.png
+               Ny rytm: Uber-kortet svävar i förgrunden över miljöbilden (dejz_03.png).
         ===================================================================== */}
-        <section className="py-16 sm:py-24 bg-[var(--surface-color)] border-b border-[var(--border-divider)]">
+        <section className="py-16 sm:py-24 bg-[var(--surface-color)]">
           <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left">
             
-            {/* Left Column (6 cols): Editorial Copy & 3 Pillars */}
-            <motion.div {...revealMotion} className="lg:col-span-6 space-y-6">
-              <div className="space-y-4">
-                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+            {/* Left Column (5 cols): Korta punkter */}
+            <motion.div {...revealMotion} className="lg:col-span-5 space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] max-w-[18ch] text-balance">
                   {tr('landing_control_title')}
                 </h2>
-                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-[1.6] max-w-[54ch] text-pretty">
+                <p className="landing-body-copy text-[var(--text-secondary)] max-w-[44ch] text-pretty">
                   {tr('landing_control_desc')}
                 </p>
               </div>
 
-              <div className="divide-y divide-[var(--border-divider)] border-t border-b border-[var(--border-divider)]">
-                <div className="py-4 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
-                      {tr('landing_control_item1_title')}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5 leading-relaxed">
-                      {tr('landing_control_item1_desc')}
-                    </p>
-                  </div>
-                  <Check size={18} className="text-[var(--text-primary)] shrink-0 mt-1" />
-                </div>
-
-                <div className="py-4 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
-                      {tr('landing_control_item2_title')}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5 leading-relaxed">
-                      {tr('landing_control_item2_desc')}
-                    </p>
-                  </div>
-                  <Check size={18} className="text-[var(--text-primary)] shrink-0 mt-1" />
-                </div>
-
-                <div className="py-4 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
-                      {tr('landing_control_item3_title')}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5 leading-relaxed">
-                      {tr('landing_control_item3_desc')}
-                    </p>
-                  </div>
-                  <Check size={18} className="text-[var(--text-primary)] shrink-0 mt-1" />
-                </div>
-              </div>
-
-              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                {tr('landing_control_footer')}
-              </p>
-            </motion.div>
-
-            {/* Right Column (6 cols): App Excerpt (redigera_transaktion.png) + Nordic Photo (dejz_03.png) */}
-            <motion.div {...revealMotion} className="lg:col-span-6 space-y-4">
-              <div className="rounded-modal bg-landing-sky-soft border border-[var(--border-divider)] p-5 sm:p-7 space-y-4 select-none">
-                <div className="rounded-card bg-[var(--bg-color)] p-5 sm:p-6 shadow-subtle space-y-4">
-                  <div className="w-12 h-1.5 rounded-full bg-black/15 mx-auto" />
-
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                      {isEn ? 'Edit transaction' : 'Redigera transaktion'}
-                    </h3>
-                    <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)]">
-                      <X size={15} strokeWidth={2.2} />
+              <div className="space-y-4 pt-1">
+                {[
+                  {
+                    title: tr('landing_control_item1_title'),
+                    desc: tr('landing_control_item1_desc'),
+                  },
+                  {
+                    title: tr('landing_control_item2_title'),
+                    desc: tr('landing_control_item2_desc'),
+                  },
+                  {
+                    title: tr('landing_control_item3_title'),
+                    desc: tr('landing_control_item3_desc'),
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex items-start gap-3.5">
+                    <span className="w-6 h-6 rounded-full bg-landing-signature text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check size={13} strokeWidth={2.6} />
+                    </span>
+                    <div>
+                      <h3 className="text-base font-bold text-[var(--text-primary)]">
+                        {item.title}
+                      </h3>
+                      <p className="landing-body-copy text-[var(--text-secondary)]">
+                        {item.desc}
+                      </p>
                     </div>
                   </div>
+                ))}
+              </div>
+            </motion.div>
 
-                  {/* Inner White Card: Uber + 100 KR + Category & Date */}
-                  <div className="rounded-card bg-[var(--surface-color)] p-4 sm:p-5 space-y-3.5 shadow-subtle">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <TransactionLogo
-                          size="lg"
-                          transaction={{
-                            id: 'edit-uber-preview',
-                            merchant: 'Uber',
-                            category: 'Transport',
-                            amount: 100,
-                            type: 'expense',
-                            timestamp: Date.now(),
-                          }}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-medium text-[var(--text-tertiary)] tracking-wider">
-                            {isEn ? 'NAME / MERCHANT' : 'NAMN / MOTTAGARE'}
-                          </p>
-                          <p className="text-base sm:text-lg font-semibold text-[var(--text-primary)] leading-snug mt-0.5">
-                            Uber
-                          </p>
-                        </div>
-                      </div>
+            {/* Right Column (7 cols): Fotografiet som fond med Uber-kortet lagom överlappande i nedkant */}
+            <div className="lg:col-span-7 relative">
+              <ParallaxLayer offset={6}>
+                <ParallaxPhotoFrame
+                  src={screenshots.lifestyleControl || '/dejz_03.png'}
+                  alt={isEn ? 'Personal control over your budget without bank connection' : 'Personlig kontroll över din budget utan bankkoppling'}
+                  aspectClass="aspect-[16/9]"
+                />
+              </ParallaxLayer>
 
-                      <div className="text-right shrink-0">
-                        <p className="text-[11px] font-medium text-[var(--text-tertiary)] tracking-wider">
-                          {isEn ? 'AMOUNT' : 'BELOPP'}
+              <ParallaxLayer offset={-8} className="-mt-6 sm:-mt-8 relative z-10 px-3 sm:px-8">
+                <motion.div
+                  {...revealMotion}
+                  className="max-w-[420px] mx-auto w-full rounded-card bg-[var(--surface-color)]/95 backdrop-blur-md shadow-subtle p-4 sm:p-5 space-y-3 select-none pointer-events-none"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <TransactionLogo
+                        size="md"
+                        transaction={{
+                          id: 'edit-uber-preview',
+                          merchant: 'Uber',
+                          category: 'Transport',
+                          amount: 100,
+                          type: 'expense',
+                          timestamp: Date.now(),
+                        }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-micro-label font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
+                          {isEn ? 'MERCHANT' : 'MOTTAGARE'}
                         </p>
-                        <div className="flex items-baseline justify-end gap-1 mt-0.5">
-                          <span className="text-2xl sm:text-3xl font-bold font-amount tabular-nums leading-none text-[var(--text-primary)]">
-                            100
-                          </span>
-                          <span className="text-xs font-medium text-[var(--text-secondary)]">
-                            KR
-                          </span>
-                        </div>
+                        <p className="text-body-medium font-semibold text-[var(--text-primary)] leading-snug mt-0.5">
+                          Uber
+                        </p>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[var(--border-divider)] flex items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
-                      <span className="inline-flex items-center gap-1.5 font-medium">
-                        <CategoryIcon icon="car" categoryName="Transport" variant="minimal" size="2xs" />
-                        <span>Transport</span>
-                      </span>
-                      <span className="font-medium tabular-nums">14 okt. 2026</span>
+                    <div className="text-right shrink-0">
+                      <p className="text-micro-label font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
+                        {isEn ? 'AMOUNT' : 'BELOPP'}
+                      </p>
+                      <div className="flex items-baseline justify-end gap-1 mt-0.5">
+                        <span className="text-large-amount font-bold font-amount tabular-nums leading-none text-[var(--text-primary)]">
+                          100
+                        </span>
+                        <span className="text-secondary font-medium text-[var(--text-secondary)]">
+                          kr
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Integrated Nordic Lifestyle Photo (dejz_03.png) */}
-                <div className="rounded-card overflow-hidden border border-[var(--border-divider)] bg-[var(--surface-color)] shadow-subtle">
-                  <div className="aspect-[16/9] w-full overflow-hidden">
-                    <img
-                      src={screenshots.lifestyleControl || '/dejz_03.png'}
-                      alt={isEn ? 'Personal control over your budget without bank connection' : 'Personlig kontroll över din budget utan bankkoppling'}
-                      width={600}
-                      height={338}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-center"
-                    />
+                  <div className="pt-2.5 border-t border-black/[0.05] flex items-center justify-between gap-2 text-secondary text-[var(--text-secondary)]">
+                    <span className="inline-flex items-center gap-1.5 font-medium">
+                      <CategoryIcon icon="car" categoryName="Transport" variant="minimal" size="2xs" />
+                      <span>Transport</span>
+                    </span>
+                    <span className="font-medium tabular-nums">{isEn ? '14 Oct' : '14 okt.'}</span>
                   </div>
-                </div>
-              </div>
-            </motion.div>
+                </motion.div>
+              </ParallaxLayer>
+            </div>
 
           </div>
         </section>
 
         {/* =====================================================================
-            9. VANLIGA FRÅGOR (FAQ) — Prioriterade frågor (bankkoppling, löneperiod, registrering, ändra uppgifter, pris, demo)
+            9. PERSONLIG GRUNDARTEXT (Redaktionell, centrerad inramning före FAQ)
         ===================================================================== */}
-        <section id="faq" className="py-16 sm:py-24 bg-[var(--bg-color)] scroll-mt-20">
-          <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start text-left">
-            
-            <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6">
-              <div className="space-y-3">
-                <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-tight text-balance">
-                  {tr('landing_faq_title')}
-                </h2>
-                <p className="text-base text-[var(--text-secondary)] leading-relaxed max-w-md">
-                  {tr('landing_faq_subtitle')}
-                </p>
+        <section className="py-16 sm:py-22 bg-landing-sky-soft">
+          <div className="landing-container">
+            <motion.div
+              {...revealMotion}
+              className="max-w-2xl mx-auto text-center rounded-modal bg-[var(--surface-color)] shadow-subtle px-6 py-10 sm:px-12 sm:py-12 space-y-5"
+            >
+              <h2 className="text-2xl sm:text-3xl lg:text-[2.2rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.12] text-balance">
+                {tr('landing_founder_title')}
+              </h2>
+              <p className="landing-body-copy text-[var(--text-secondary)] max-w-[50ch] mx-auto text-pretty">
+                {tr('landing_founder_body')}
+              </p>
+              <div className="pt-2 flex items-center justify-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold flex items-center justify-center shrink-0">
+                  K
+                </span>
+                <span className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                  {tr('landing_founder_signature')}
+                </span>
               </div>
+            </motion.div>
+          </div>
+        </section>
 
-              <div className="rounded-card bg-[var(--surface-color)] border border-[var(--border-divider)] p-5 sm:p-6 space-y-3 shadow-subtle">
-                <p className="text-sm font-bold text-[var(--text-primary)]">
-                  {isEn ? 'Want to explore the app first?' : 'Vill du testa i egen takt?'}
-                </p>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                  {isEn
-                    ? 'Try the interactive demo directly in your browser or create a free account.'
-                    : 'Öppna demot direkt i webbläsaren eller skapa ett gratis konto.'}
-                </p>
-                <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={onGetStarted}
-                    className="text-xs font-semibold px-4"
-                  >
-                    {tr('landing_nav_get_started')}
-                  </Button>
-                  {onStartDemo && (
-                    <button
-                      type="button"
-                      onClick={onStartDemo}
-                      className="text-xs font-semibold text-[var(--text-primary)] px-3.5 py-2 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-divider)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
-                    >
-                      {tr('landing_hero_demo')}
-                    </button>
-                  )}
-                </div>
-              </div>
+        {/* =====================================================================
+            10. VANLIGA FRÅGOR (FAQ)
+        ===================================================================== */}
+        <section id="faq" className="py-16 sm:py-24 bg-[var(--surface-color)] scroll-mt-20">
+          <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-left">
+            
+            <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-2.5">
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-tight text-balance">
+                {tr('landing_faq_title')}
+              </h2>
+              <p className="landing-body-copy text-[var(--text-secondary)] max-w-sm">
+                {tr('landing_faq_subtitle')}
+              </p>
             </div>
 
-            <div className="lg:col-span-7 border-t border-[var(--border-divider)]">
+            <div className="lg:col-span-7">
               <FAQAccordionItem
                 index="01"
                 question={tr('landing_faq1_q')}
@@ -2194,18 +2380,15 @@ export function LandingPage({
         </section>
 
         {/* =====================================================================
-            10. AVSLUTANDE CTA
-                Rubrik: ”Börja nästa löneperiod med bättre koll.”
-                Undertext: ”Samla din budget i Dejz och följ vad du har kvar fram till nästa lön.”
-                Primärknapp: ”Kom igång gratis”
+            11. AVSLUTANDE CTA
         ===================================================================== */}
-        <section className="py-16 sm:py-24 bg-landing-signature border-t border-[var(--border-divider)]">
+        <section className="py-16 sm:py-24 bg-landing-signature">
           <div className="landing-container text-center space-y-6">
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.06] max-w-2xl mx-auto text-balance">
+            <h2 className="text-2xl sm:text-5xl font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.06] max-w-2xl mx-auto text-balance">
               {tr('landing_cta_title')}
             </h2>
 
-            <p className="text-base sm:text-lg text-[var(--text-primary)]/85 leading-relaxed max-w-xl mx-auto text-pretty">
+            <p className="landing-body-copy text-[var(--text-primary)]/85 max-w-lg mx-auto text-pretty">
               {tr('landing_cta_subtitle')}
             </p>
 
@@ -2214,7 +2397,7 @@ export function LandingPage({
                 variant="primary"
                 size="lg"
                 onClick={onGetStarted}
-                className="w-full max-w-xs sm:w-auto font-semibold text-sm shadow-subtle px-8 h-12 justify-center text-center"
+                className="w-full max-w-sm sm:w-auto font-semibold text-sm px-8 h-12 justify-center text-center"
               >
                 {tr('landing_hero_button')}
               </Button>
@@ -2229,37 +2412,37 @@ export function LandingPage({
       </main>
 
       {/* =====================================================================
-          11. FOOTER
+          12. FOOTER
       ===================================================================== */}
-      <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] border-t border-[var(--border-divider)] bg-[var(--surface-color)] text-xs text-[var(--text-tertiary)]">
+      <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] bg-[var(--surface-color)] text-sm text-[var(--text-secondary)]">
         <div className="landing-container flex flex-col sm:flex-row items-center justify-between gap-6">
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <DejzLogo className="h-6 w-auto" />
-            <span className="ml-2 text-micro-label text-[var(--text-tertiary)]">
+            <span className="text-sm text-[var(--text-secondary)]">
               © {new Date().getFullYear()} Dejz. {tr('landing_footer_rights')}
             </span>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
             <button
               type="button"
               onClick={() => handlePolicyOpen('privacy')}
-              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0 rounded-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+              className="min-h-11 px-3 inline-flex items-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
             >
               {tr('landing_footer_privacy')}
             </button>
             <button
               type="button"
               onClick={() => handlePolicyOpen('terms')}
-              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0 rounded-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+              className="min-h-11 px-3 inline-flex items-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
             >
               {tr('landing_footer_terms')}
             </button>
             <button
               type="button"
               onClick={() => handlePolicyOpen('privacy')}
-              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0 rounded-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+              className="min-h-11 px-3 inline-flex items-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
             >
               {tr('landing_footer_contact')}
             </button>
