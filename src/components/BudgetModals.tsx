@@ -179,7 +179,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--success-color)]">
               <span className="opacity-80 mr-1">+</span>
               <span>{formatAmount(displayAmount, config.language)}</span>
-              <span className="text-sm font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+              <span className="text-body font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
             </p>
             {hasAdjustment && (
               <p className="text-secondary font-normal text-[var(--text-secondary)] mt-1 tabular-nums">
@@ -207,7 +207,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   return (
                     <>
                       {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="xs" />}
-                      <span className="text-sm font-medium text-[var(--text-primary)]">{catName}</span>
+                      <span className="text-body font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
                 })()}
@@ -219,7 +219,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
+              <span className="text-body font-medium text-[var(--text-primary)] text-right">
                 {income.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
@@ -229,7 +229,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('arrivalDay')}
               </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-body font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(income.deductionDay, config.language, true)}
               </span>
             </div>
@@ -240,7 +240,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                 <span className="text-body font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
                   {t('ownNote')}
                 </span>
-                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-body font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {income.note}
                 </span>
               </div>
@@ -489,7 +489,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('incomePayerPlaceholder')} 
-                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-section-title font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
@@ -552,7 +552,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     />
                   );
                 })()}
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || t('income')}
                 </span>
                 <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
@@ -568,7 +568,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -596,7 +596,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -625,7 +625,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -656,7 +656,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+                <span className="text-body font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <Switch
@@ -679,7 +679,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                  className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  className="text-body font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                 />
                 {note && (
                   <button 
@@ -743,7 +743,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                             variant="primary" 
                             categoryName={cat.name} 
                           />
-                          <span className={`text-sm truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
+                          <span className={`text-body truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                             {cat.name}
                           </span>
                         </div>
@@ -811,8 +811,8 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
-                    <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
+                    <h3 className="text-page-title font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
+                    <p className="text-secondary font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
                   <IconButton 
                     icon={<X size={16} strokeWidth={2} />}
@@ -1014,7 +1014,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             )}
             {expense.isCancelled && (
               <div className="mt-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold text-xs border border-amber-500/30">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold text-secondary border border-amber-500/30">
                   <Clock size={13} />
                   <span>{getCancellationBadgeText(expense, config.language)}</span>
                 </span>
@@ -1181,7 +1181,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   });
                   onClose();
                 }}
-                className="w-full p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] flex items-center justify-between text-left cursor-pointer active:scale-[0.99] border-none text-[var(--accent-color)] font-semibold text-sm"
+                className="w-full p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] flex items-center justify-between text-left cursor-pointer active:scale-[0.99] border-none text-[var(--accent-color)] font-semibold text-body"
               >
                 <span>{config.language === 'en' ? 'Reactivate subscription' : 'Återaktivera abonnemang'}</span>
                 <RotateCcw size={15} />
@@ -1484,7 +1484,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('fixedExpensePlaceholder')} 
-                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-section-title font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
@@ -1547,7 +1547,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     />
                   );
                 })()}
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
                 <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
@@ -1565,7 +1565,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1593,7 +1593,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1622,7 +1622,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1656,7 +1656,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <div className="w-7 h-7 rounded-[var(--radius-icon-button,8px)] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   {pmIcon}
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -1684,7 +1684,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+                <span className="text-body font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <Switch
@@ -1702,7 +1702,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {config?.language === 'en' ? 'Sagt upp abonnemang' : 'Sagt upp abonnemang'}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+                <span className="text-body font-medium text-[var(--text-primary)]">
                   {isCancelled ? (config?.language === 'en' ? 'Yes, cancelled' : 'Ja, sagt upp') : (config?.language === 'en' ? 'No, active' : 'Nej, aktivt')}
                 </span>
                 <Switch
@@ -1740,7 +1740,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                  className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  className="text-body font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                 />
                 {note && (
                   <button 
@@ -1807,7 +1807,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             variant="primary" 
                             categoryName={cat.name} 
                           />
-                          <span className={`text-sm truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
+                          <span className={`text-body truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                             {cat.name}
                           </span>
                         </div>
@@ -1895,8 +1895,8 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-subtle">
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
-                    <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
+                    <h3 className="text-page-title font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
+                    <p className="text-secondary font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
                   <button 
                     type="button"
@@ -2094,7 +2094,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--text-primary)]">
               <span className="opacity-80 mr-1">→</span>
               <span>{formatAmount(saving.amount, config.language)}</span>
-              <span className="text-sm font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+              <span className="text-body font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
             </p>
           </div>
 
@@ -2107,7 +2107,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               </span>
               <div className="flex items-center justify-end gap-2">
                 <CategoryIcon icon={saving.icon || 'piggy-bank'} variant="minimal" size="xs" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+                <span className="text-body font-medium text-[var(--text-primary)]">
                   {t('monthlySavings')}
                 </span>
               </div>
@@ -2118,7 +2118,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
+              <span className="text-body font-medium text-[var(--text-primary)] text-right">
                 {freqText}
               </span>
             </div>
@@ -2128,7 +2128,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {config.language === 'en' ? 'Deduction day' : 'Dragningsdag'}
               </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-body font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(saving.deductionDay, config.language, true)}
               </span>
             </div>
@@ -2141,7 +2141,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
                 </span>
                 <div className="flex items-center justify-end gap-2">
                   {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
-                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                  <span className="text-body font-medium text-[var(--text-primary)]">
                     {methodStr}
                   </span>
                 </div>
@@ -2398,7 +2398,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('savingsGoalPlaceholder')} 
-                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-section-title font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
@@ -2446,7 +2446,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2474,7 +2474,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2503,7 +2503,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2538,7 +2538,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {pmIcon}
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                  <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                     {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                   </span>
                   <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
@@ -2563,7 +2563,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+                <span className="text-body font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <Switch
@@ -2626,8 +2626,8 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
-                    <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
+                    <h3 className="text-page-title font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
+                    <p className="text-secondary font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
                   <IconButton 
                     icon={<X size={16} strokeWidth={2} />}

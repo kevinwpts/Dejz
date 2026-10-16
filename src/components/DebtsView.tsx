@@ -148,7 +148,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           size="sm"
           onClick={() => setIsAddModalOpen(true)}
           icon={<Plus size={14} strokeWidth={2.5} />}
-          className="shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full text-xs sm:text-[13px] font-bold"
+          className="shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full text-secondary sm:text-[13px] font-bold"
         >
           {isEn ? 'Add' : 'Lägg till'}
         </Button>
@@ -174,7 +174,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
                       {/* Avatar initial */}
                       <div
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center font-bold text-sm shrink-0 ${
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center font-bold text-body shrink-0 ${
                           item.isSettled
                             ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
                             : isOweMe

@@ -549,17 +549,12 @@ export function TodayView({
         <div className="space-y-2.5 pt-0.5">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
-              <motion.div className="space-y-[var(--card-gap)]" key="transactions">
-                {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
-                  <motion.div
-                    key={transaction.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.02 }}
-                  >
+              <motion.div className="tx-group-card" key="transactions">
+                {displayedVariableTransactions.map((transaction: Transaction) => (
+                  <div key={transaction.id}>
                     <TransactionItem
                       transaction={transaction}
+                      isGrouped={true}
                       onView={onViewTransaction}
                       onDelete={onDeleteTransaction}
                       onToggleStar={onToggleStar}
@@ -568,7 +563,7 @@ export function TodayView({
                         if (onViewTransaction) onViewTransaction(transaction);
                       }}
                     />
-                  </motion.div>
+                  </div>
                 ))}
               </motion.div>
             ) : displayedFixedTransactions.length === 0 ? (
@@ -583,7 +578,7 @@ export function TodayView({
 
           {/* Fixed transactions for the day */}
           {displayedFixedTransactions.length > 0 && (
-            <div className="space-y-[var(--card-gap)]">
+            <div className="tx-group-card">
               {displayedFixedTransactions.map((item) => {
                 const isItemVariable = Boolean(item.isVariable || item.originalItem?.isVariable || item.originalItem?.is_variable);
                 const tx: Transaction = {
@@ -603,6 +598,7 @@ export function TodayView({
                     <TransactionItem
                       transaction={tx}
                       isFixed={true}
+                      isGrouped={true}
                       isVariable={isItemVariable}
                       config={config}
                       onClick={() => {

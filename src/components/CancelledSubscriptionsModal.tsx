@@ -92,12 +92,12 @@ export function CancelledSubscriptionsModal({
               <Sparkles size={20} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-[var(--text-secondary)]">
+              <p className="text-secondary font-semibold text-[var(--text-secondary)]">
                 {isEn ? 'Total monthly savings' : 'Total besparing per månad'}
               </p>
-              <p className="text-xl font-bold font-amount tabular-nums text-[var(--success-color)]">
+              <p className="text-page-title font-bold font-amount tabular-nums text-[var(--success-color)]">
                 +{formatAmount(totalMonthlySavings, config.language)} {config.currency || 'kr'}
-                <span className="text-xs font-normal text-[var(--text-secondary)] ml-1 font-sans">
+                <span className="text-secondary font-normal text-[var(--text-secondary)] ml-1 font-sans">
                   /{isEn ? 'mo' : 'mån'}
                 </span>
               </p>
@@ -109,10 +109,10 @@ export function CancelledSubscriptionsModal({
         {cancelledItems.length === 0 ? (
           <div className="py-12 text-center space-y-2">
             <CheckCircle2 size={36} className="mx-auto text-[var(--text-tertiary)] opacity-60" />
-            <p className="text-sm font-semibold text-[var(--text-primary)]">
+            <p className="text-body font-semibold text-[var(--text-primary)]">
               {isEn ? 'No cancelled subscriptions' : 'Inga uppsagda abonnemang ännu'}
             </p>
-            <p className="text-xs text-[var(--text-secondary)] max-w-xs mx-auto">
+            <p className="text-secondary text-[var(--text-secondary)] max-w-xs mx-auto">
               {isEn
                 ? 'When you cancel a subscription, mark it with a cancellation date to track your savings.'
                 : 'När du säger upp ett abonnemang kan du ange uppsägnings- och slutdatum så att det automatiskt slutar räknas när sista betalningen genomförts.'}
@@ -140,10 +140,10 @@ export function CancelledSubscriptionsModal({
                         <BudgetItemLogo item={item} type="expense" config={config} />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-[15px] font-bold text-[var(--text-primary)] truncate">
+                        <h4 className="text-section-title font-bold text-[var(--text-primary)] truncate">
                           {item.name}
                         </h4>
-                        <p className="text-xs text-[var(--text-secondary)] font-medium truncate">
+                        <p className="text-secondary text-[var(--text-secondary)] font-medium truncate">
                           {typeof item.category === 'object'
                             ? (item.category as any)?.name
                             : item.category || (isEn ? 'Fixed expense' : 'Fast utgift')}
@@ -152,7 +152,7 @@ export function CancelledSubscriptionsModal({
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                      <span className="text-body font-bold font-amount tabular-nums text-[var(--text-primary)]">
                         {formatAmount(item.amount, config.language)} {config.currency || 'kr'}
                       </span>
                       <span className="block text-secondary text-[var(--text-secondary)] font-medium">
@@ -162,7 +162,7 @@ export function CancelledSubscriptionsModal({
                   </div>
 
                   {/* Dates breakdown */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs py-1.5 px-2.5 rounded-lg bg-[var(--surface-muted)] text-[var(--text-secondary)]">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-secondary py-1.5 px-2.5 rounded-card-nested bg-[var(--surface-muted)] text-[var(--text-secondary)]">
                     {noticeDate && (
                       <div>
                         <span className="block text-micro-label text-[var(--text-tertiary)]">{isEn ? 'Sades upp' : 'Sades upp'}</span>
@@ -185,7 +185,7 @@ export function CancelledSubscriptionsModal({
 
                   {/* Status pill & actions */}
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)]">
-                    <div className="flex items-center gap-1.5 text-xs font-medium">
+                    <div className="flex items-center gap-1.5 text-secondary font-medium">
                       {isExpired ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--success-container)] text-[var(--success-color)] font-semibold text-secondary">
                           <CheckCircle2 size={12} />
@@ -238,7 +238,7 @@ export function CancelledSubscriptionsModal({
                   {isEditingThis && (
                     <div className="pt-2 space-y-3 bg-[var(--surface-muted)] p-3 rounded-[var(--radius-card-nested,10px)] border border-subtle">
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[var(--text-primary)] block">
+                        <label className="text-secondary font-semibold text-[var(--text-primary)] block">
                           {isEn ? 'Slutdatum (sista giltighetsdag)' : 'Slutdatum (sista giltighetsdag)'}
                         </label>
                         <Input
@@ -253,7 +253,7 @@ export function CancelledSubscriptionsModal({
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[var(--text-primary)] block">
+                        <label className="text-secondary font-semibold text-[var(--text-primary)] block">
                           {isEn ? 'Sista betalningsdag' : 'Sista betalningsdag'}
                         </label>
                         <Input

@@ -137,13 +137,15 @@ const ParallaxLayer = ({
 const ParallaxPhotoFrame = ({
   src,
   alt,
-  aspectClass = 'aspect-[16/9]',
+  aspectClass = 'aspect-[4/3]',
   className = '',
+  imgClassName = 'object-center',
 }: {
   src: string;
   alt: string;
   aspectClass?: string;
   className?: string;
+  imgClassName?: string;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -164,12 +166,12 @@ const ParallaxPhotoFrame = ({
         <motion.img
           src={src}
           alt={alt}
-          width={640}
-          height={420}
+          width={1200}
+          height={900}
           loading="lazy"
           referrerPolicy="no-referrer"
-          style={prefersReducedMotion ? undefined : { y: smoothY, scale: 1.1 }}
-          className="w-full h-full object-cover object-center select-none will-change-transform"
+          style={prefersReducedMotion ? undefined : { y: smoothY, scale: 1.08 }}
+          className={`w-full h-full object-cover ${imgClassName} select-none will-change-transform`}
         />
       </div>
     </div>
@@ -184,13 +186,13 @@ export const Torus3DRing = ({ className = '' }: { className?: string }) => (
   >
     <defs>
       <linearGradient id="torusGradBrand" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#78B8FF" />
-        <stop offset="100%" stopColor="#EAE4DC" />
+        <stop offset="0%" stopColor="#E85D34" />
+        <stop offset="100%" stopColor="#EAE0D0" />
       </linearGradient>
       <radialGradient id="torusHighlight" cx="35%" cy="30%" r="65%">
-        <stop offset="0%" stopColor="#FCFBF9" stopOpacity="0.85" />
-        <stop offset="40%" stopColor="#78B8FF" stopOpacity="0.4" />
-        <stop offset="100%" stopColor="#EAE4DC" stopOpacity="0.05" />
+        <stop offset="0%" stopColor="#FFFDF9" stopOpacity="0.85" />
+        <stop offset="40%" stopColor="#E85D34" stopOpacity="0.35" />
+        <stop offset="100%" stopColor="#EAE0D0" stopOpacity="0.05" />
       </radialGradient>
       <filter id="softShadow3d" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="6" dy="16" stdDeviation="12" floodColor="#151718" floodOpacity="0.14" />
@@ -482,7 +484,7 @@ const AppIdenticalTransactionRow: React.FC<AppIdenticalTransactionProps> = ({
   className = '',
 }) => (
   <div
-    className={`px-4 py-3 sm:py-3.5 min-h-[56px] rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] shadow-subtle flex items-center justify-between gap-3 text-left select-none pointer-events-none ${className}`}
+    className={`px-4 py-3 sm:py-3.5 min-h-[56px] rounded-[var(--radius-card,24px)] bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex items-center justify-between gap-3 text-left select-none pointer-events-none ${className}`}
   >
     <div className="flex items-center gap-3 min-w-0 flex-1">
       <div className="flex-shrink-0 relative">
@@ -561,6 +563,117 @@ const AppIdenticalTransactionRow: React.FC<AppIdenticalTransactionProps> = ({
 );
 
 /**
+ * HeroLiveBalanceWidget
+ * Discreet, glass-tinted floating Dejz balance & live transaction widget
+ * anchored in the lower corner of the Hero section for immediate product proof.
+ */
+const HeroLiveBalanceWidget = ({ isEn }: { isEn: boolean }) => {
+  const prefersReducedMotion = useReducedMotion();
+  const [isAfterPurchase, setIsAfterPurchase] = useState(true);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setIsAfterPurchase(true);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setIsAfterPurchase((prev) => !prev);
+    }, 3800);
+    return () => window.clearInterval(timer);
+  }, [prefersReducedMotion]);
+
+  const balanceStr = isAfterPurchase ? '23 536' : '23 614';
+  const pct = isAfterPurchase ? 72 : 74;
+
+  return (
+    <div className="w-full max-w-[330px] sm:max-w-[348px] rounded-card bg-[#1E1814]/88 backdrop-blur-2xl border border-[#FFF5E8]/14 shadow-[0_24px_48px_-12px_rgba(20,16,13,0.55)] p-4 space-y-3 text-left select-none pointer-events-none">
+      {/* Top Header Row */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-card-title text-[#F7F1E8]/80 font-medium">
+          {isEn ? 'Remaining to spend' : 'Kvar att spendera'}
+        </span>
+        <span className="text-micro-label font-semibold font-amount tabular-nums text-[#F7F1E8]/75">
+          19 {isEn ? 'days to payday' : 'dagar till lön'}
+        </span>
+      </div>
+
+      {/* Main Balance + Progress Bar */}
+      <div className="space-y-2">
+        <div className="flex items-baseline justify-between gap-2">
+          <div className="flex items-baseline gap-1.5">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={balanceStr}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="text-[28px] sm:text-[30px] font-extrabold font-amount tabular-nums tracking-tight leading-none text-[#FFFDF9]"
+              >
+                {balanceStr}
+              </motion.span>
+            </AnimatePresence>
+            <span className="text-xs font-medium text-[#F7F1E8]/65">kr</span>
+          </div>
+
+          <span className="text-micro-label font-bold font-amount tabular-nums text-[#F06A42]">
+            {pct} % {isEn ? 'left' : 'kvar'}
+          </span>
+        </div>
+
+        <div className="w-full h-2 rounded-full bg-white/12 overflow-hidden">
+          <motion.div
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="h-full rounded-full bg-[#E85D34]"
+          />
+        </div>
+      </div>
+
+      {/* Live Coffee Purchase Row */}
+      <motion.div
+        animate={
+          prefersReducedMotion
+            ? { opacity: 1, scale: 1 }
+            : {
+                opacity: isAfterPurchase ? 1 : 0.55,
+                scale: isAfterPurchase ? 1 : 0.985,
+              }
+        }
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-card-nested bg-white/[0.07] border border-white/[0.08] px-3 py-2.5 flex items-center justify-between gap-2.5"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <TransactionLogo
+            size="sm"
+            transaction={{
+              id: 'hero-espresso-preview',
+              merchant: 'Espresso House',
+              category: isEn ? 'Restaurants & Café' : 'Uteliv & café',
+              amount: 78,
+              type: 'expense',
+              timestamp: Date.now(),
+            }}
+          />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-white truncate leading-tight">
+              Espresso House
+            </p>
+            <p className="text-[11px] text-white/60 truncate leading-tight mt-0.5">
+              {isEn ? 'Restaurants & Café · Just now' : 'Uteliv & café · Nyss'}
+            </p>
+          </div>
+        </div>
+
+        <span className="text-xs font-bold font-amount tabular-nums text-white whitespace-nowrap shrink-0">
+          −78 <span className="font-normal text-white/65">kr</span>
+        </span>
+      </motion.div>
+    </div>
+  );
+};
+
+/**
  * LiveVoiceShowcase
  * Animates the spoken phrase word-by-word ("Mat" -> "Mat 378 kr" -> "Mat 378 kr Coop")
  * and smoothly reveals the resulting Coop transaction row below it.
@@ -594,7 +707,7 @@ const LiveVoiceShowcase = ({ isEn }: { isEn: boolean }) => {
   return (
     <div className="max-w-[440px] mx-auto w-full space-y-3 select-none pointer-events-none">
       {/* Voice Card */}
-      <div className="rounded-card bg-[var(--surface-color)]/95 backdrop-blur-md shadow-subtle p-4 sm:p-5 space-y-4">
+      <div className="rounded-card bg-[var(--surface-color)]/96 backdrop-blur-xl border border-[var(--border-subtle)] shadow-[0_16px_38px_-10px_rgba(20,19,18,0.12)] p-4 sm:p-5 space-y-4">
         <div className="grid grid-cols-3 gap-3 max-w-[250px] mx-auto text-center">
           <div className="flex flex-col items-center gap-1.5">
             <div className="w-10 h-10 rounded-full bg-landing-sky-soft flex items-center justify-center text-[var(--text-primary)]">
@@ -786,23 +899,21 @@ const InteractiveTimelineShowcase = ({ isEn }: { isEn: boolean }) => {
               role="tab"
               aria-selected={isActive}
               onClick={() => setSelectedDay(d.num)}
-              className={`h-[52px] sm:h-[56px] rounded-card-nested flex flex-col items-center justify-center gap-0.5 transition-all duration-200 cursor-pointer border-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+              className={`h-[54px] sm:h-[58px] rounded-card-nested flex flex-col items-center justify-center gap-0.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
                 isActive
-                  ? 'bg-landing-signature font-semibold text-[var(--text-primary)] shadow-xs scale-[1.03]'
-                  : 'bg-white/10 hover:bg-white/15 text-white/75'
+                  ? 'bg-landing-signature font-semibold text-white border border-transparent shadow-[0_6px_18px_-3px_rgba(255,82,38,0.45)] scale-[1.03]'
+                  : 'bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.06] text-white/75'
               }`}
             >
               <span
                 className={`text-micro-label leading-none ${
-                  isActive ? 'font-bold text-[var(--text-primary)]' : 'font-medium'
+                  isActive ? 'font-bold text-white' : 'font-medium text-white/70'
                 }`}
               >
                 {d.dayLabel}
               </span>
               <span
-                className={`text-body-medium font-amount tabular-nums font-semibold leading-tight ${
-                  isActive ? 'text-[var(--text-primary)]' : 'text-white'
-                }`}
+                className="text-body-medium font-amount tabular-nums font-semibold leading-tight text-white"
               >
                 {d.num}
               </span>
@@ -838,7 +949,7 @@ const FAQAccordionItem = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-black/[0.06]">
+    <div className="border-b border-[var(--border-divider)]">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -846,7 +957,11 @@ const FAQAccordionItem = ({
         aria-expanded={isOpen}
       >
         <div className="flex items-baseline gap-4 min-w-0">
-          <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-tertiary)] shrink-0">
+          <span
+            className={`text-xs font-bold font-amount tabular-nums shrink-0 transition-colors ${
+              isOpen ? 'text-[var(--landing-signature)]' : 'text-[var(--text-tertiary)]'
+            }`}
+          >
             {index}
           </span>
           <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:opacity-75 transition-opacity">
@@ -855,8 +970,8 @@ const FAQAccordionItem = ({
         </div>
         <ChevronDown 
           size={18} 
-          className={`text-[var(--text-secondary)] shrink-0 mt-1 transition-transform duration-300 ease-out ${
-            isOpen ? 'rotate-180 text-[var(--text-primary)]' : 'group-hover:translate-y-0.5'
+          className={`shrink-0 mt-1 transition-transform duration-300 ease-out ${
+            isOpen ? 'rotate-180 text-[var(--landing-signature)]' : 'text-[var(--text-secondary)] group-hover:translate-y-0.5'
           }`}
         />
       </button>
@@ -1024,16 +1139,26 @@ const ScrollTransactionStrip = ({
   return (
     <section
       aria-label={tr('landing_tx_strip_label')}
-      className="py-8 sm:py-10 bg-landing-sky-soft overflow-x-clip"
+      className="relative py-8 sm:py-11 bg-landing-sky-soft overflow-x-clip border-b border-[var(--border-subtle)]"
     >
-      <div className="space-y-3.5 py-2">
+      {/* Subtle Left & Right Edge Fade Masks */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-6 sm:w-20 bg-gradient-to-r from-[var(--landing-sky-soft)] to-transparent z-10"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-6 sm:w-20 bg-gradient-to-l from-[var(--landing-sky-soft)] to-transparent z-10"
+      />
+
+      <div className="space-y-3.5 py-1">
         {/* Row 1: Moves left as user scrolls down */}
         <motion.div
           style={{ x: prefersReducedMotion ? 0 : row1X }}
-          className="flex items-center gap-3.5 w-max px-4 py-1.5 will-change-transform"
+          className="flex items-center gap-3.5 w-max px-4 py-1 will-change-transform"
         >
           {repeatedRow1.map((item, idx) => (
-            <div key={`r1-${idx}`} className="w-[345px] sm:w-[380px] shrink-0">
+            <div key={`r1-${idx}`} className="w-[340px] sm:w-[376px] shrink-0">
               <AppIdenticalTransactionRow
                 {...item}
                 id={`r1-${idx}-${item.id}`}
@@ -1045,10 +1170,10 @@ const ScrollTransactionStrip = ({
         {/* Row 2: Moves right as user scrolls down */}
         <motion.div
           style={{ x: prefersReducedMotion ? 0 : row2X }}
-          className="flex items-center gap-3.5 w-max px-4 py-1.5 will-change-transform"
+          className="flex items-center gap-3.5 w-max px-4 py-1 will-change-transform"
         >
           {repeatedRow2.map((item, idx) => (
-            <div key={`r2-${idx}`} className="w-[345px] sm:w-[380px] shrink-0">
+            <div key={`r2-${idx}`} className="w-[340px] sm:w-[376px] shrink-0">
               <AppIdenticalTransactionRow
                 {...item}
                 id={`r2-${idx}-${item.id}`}
@@ -1090,11 +1215,65 @@ export function LandingPage({
   const isEn = currentLanguage === 'en';
   const currentLangOption = NORDIC_LANGUAGES.find(l => l.code === currentLanguage) || NORDIC_LANGUAGES[0];
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+  const lastScrollYRef = useRef(0);
+
+  const navItems = [
+    { id: 'how-it-works', label: tr('landing_nav_how_it_works'), num: '01' },
+    { id: 'features', label: tr('landing_footer_features'), num: '02' },
+    { id: 'faq', label: tr('landing_faq_title'), num: '03' },
+  ];
+
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    setIsMobileLangOpen(false);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+      setActiveSection(id);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+
+      setIsScrolled(currentY > 36);
+
+      if (currentY <= 360) {
+        setIsScrollingDown(false);
+      } else if (delta > 8) {
+        setIsScrollingDown(true);
+      } else if (delta < -6) {
+        setIsScrollingDown(false);
+      }
+
+      lastScrollYRef.current = currentY;
+
+      // Scroll-spy for active section indicator
+      const sectionIds = ['how-it-works', 'features', 'faq'];
+      const viewportTrigger = currentY + window.innerHeight * 0.32;
+      let currentActive: string | null = null;
+
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          if (viewportTrigger >= top) {
+            currentActive = id;
+          }
+        }
+      }
+      if (currentY < 320) {
+        currentActive = null;
+      }
+      setActiveSection(currentActive);
     };
+
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -1156,346 +1335,422 @@ export function LandingPage({
         transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
       };
 
+  const activePillTarget = hoveredNav || activeSection;
+  const isHeroGlass = !isScrolled && !isMobileMenuOpen;
+
   return (
     <div className="min-h-dvh bg-[var(--surface-color)] text-[var(--text-primary)] font-sans antialiased overflow-x-clip relative">
 
       {/* =====================================================================
-          NAVIGATION HEADER
+          ADAPTIVE DYNAMIC ISLAND NAVIGATION HEADER
+          - Hero Top (!isScrolled): Wide smoked-espresso glass seamlessly over the full-bleed photo
+          - Scrolled (isScrolled): Condenses into a compact Warm Ivory / Espresso floating capsule with scroll-spy
       ===================================================================== */}
-      <header className={`sticky top-0 z-40 pt-[env(safe-area-inset-top,0px)] transition-all duration-300 ${
-        isMobileMenuOpen 
-          ? 'opacity-0 pointer-events-none' 
-          : isScrolled
-          ? 'bg-[var(--surface-color)]/95 backdrop-blur-xl shadow-xs'
-          : 'bg-landing-sky-soft'
-      }`}>
-        <div className="landing-container h-16 sm:h-20 flex items-center justify-between gap-4">
-          
-          {/* Logo */}
-          <div className="flex items-center gap-2 shrink-0">
-            <DejzLogo className="h-6 sm:h-7 w-auto" />
-          </div>
-
-          {/* Desktop Navigation (md+) */}
-          <nav aria-label={tr('landing_nav_menu_label')} className="hidden md:flex items-center gap-5 lg:gap-7">
-            <a
-              href="#how-it-works"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
-            >
-              {tr('landing_nav_how_it_works')}
-            </a>
-
-            <a
-              href="#features"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
-            >
-              {tr('landing_footer_features')}
-            </a>
-
-            <a
-              href="#faq"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors whitespace-nowrap rounded-md px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
-            >
-              {tr('landing_faq_title')}
-            </a>
-
-            <LanguagePicker
-              currentLanguage={currentLanguage}
-              onLanguageChange={onLanguageChange}
+      <header
+        onMouseEnter={() => setIsScrollingDown(false)}
+        className="fixed top-0 left-0 right-0 z-50 pt-[max(12px,env(safe-area-inset-top,12px))] px-3 sm:px-6 pointer-events-none"
+      >
+        <div
+          className={`pointer-events-auto mx-auto rounded-full flex items-center justify-between gap-3 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            isHeroGlass
+              ? 'max-w-[1152px] h-14 sm:h-15 px-4 sm:px-5 bg-[#17120E]/42 backdrop-blur-2xl border border-white/[0.14] shadow-[0_14px_38px_-10px_rgba(0,0,0,0.32)]'
+              : 'max-w-[850px] h-12.5 sm:h-13.5 px-3.5 sm:px-4.5 bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-black/[0.08] dark:border-white/[0.12] shadow-[0_18px_44px_-10px_rgba(23,18,14,0.16)] ring-1 ring-white/50 dark:ring-white/5'
+          } ${
+            isScrollingDown && !isMobileMenuOpen
+              ? 'scale-[0.98] -translate-y-0.5'
+              : 'scale-100 translate-y-0'
+          }`}
+        >
+          {/* Zone 1: Brand Wordmark */}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setIsMobileMenuOpen(false);
+              setIsMobileLangOpen(false);
+              window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+              setActiveSection(null);
+            }}
+            className="flex items-center gap-2 shrink-0 pl-1.5 pr-1 focus-visible:outline-none transition-transform active:scale-95"
+            aria-label="Dejz"
+          >
+            <DejzLogo
+              textColor={isHeroGlass ? '#FFFDF9' : undefined}
+              className={`w-auto transition-all duration-300 ${
+                isHeroGlass ? 'h-5.5 sm:h-6' : 'h-5 sm:h-5.5'
+              }`}
             />
+          </a>
 
-            {onLogin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onLogin}
-                icon={<User size={14} strokeWidth={2} />}
-                className="text-xs font-semibold text-[var(--text-primary)] px-3 whitespace-nowrap"
-              >
-                {tr('landing_nav_login')}
-              </Button>
-            )}
-
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onGetStarted}
-              className="text-xs font-semibold shadow-xs px-4 whitespace-nowrap"
-            >
-              {tr('landing_nav_get_started')}
-            </Button>
+          {/* Zone 2: Center Navigation with Spring Sliding Pill (md+) */}
+          <nav
+            aria-label={tr('landing_nav_menu_label')}
+            onMouseLeave={() => setHoveredNav(null)}
+            className="hidden md:flex items-center gap-0.5 p-1 rounded-full relative"
+          >
+            {navItems.map((item) => {
+              const isHighlighted = activePillTarget === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={(e) => scrollToSection(e, item.id)}
+                  onMouseEnter={() => setHoveredNav(item.id)}
+                  className={`relative z-10 text-xs lg:text-[13px] font-semibold px-3.5 py-1.5 rounded-full transition-colors duration-200 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 ${
+                    isHeroGlass
+                      ? isHighlighted
+                        ? 'text-[#FFFDF9] focus-visible:ring-white'
+                        : 'text-[#FFFDF9]/78 hover:text-[#FFFDF9] focus-visible:ring-white'
+                      : isHighlighted
+                      ? 'text-[var(--text-primary)] focus-visible:ring-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] focus-visible:ring-[var(--text-primary)]'
+                  }`}
+                >
+                  {isHighlighted && (
+                    <motion.span
+                      layoutId="landingHeaderNavPill"
+                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                      className={`absolute inset-0 -z-10 rounded-full ${
+                        isHeroGlass
+                          ? 'bg-white/[0.14] border border-white/[0.10]'
+                          : 'bg-black/[0.06] dark:bg-white/[0.10]'
+                      }`}
+                    />
+                  )}
+                  <span className="relative z-10">{item.label}</span>
+                </a>
+              );
+            })}
           </nav>
 
-          {/* Mobile Header Actions (< md) */}
-          <div className="md:hidden flex items-center gap-1.5 sm:gap-2">
+          {/* Zone 3: Desktop Right Actions (md+) */}
+          <div className="hidden md:flex items-center gap-1.5 shrink-0">
             <LanguagePicker
               currentLanguage={currentLanguage}
               onLanguageChange={onLanguageChange}
+              variant={isHeroGlass ? 'pill-hero' : 'pill'}
             />
+
             {onLogin && (
               <button
                 type="button"
                 onClick={onLogin}
-                className="inline-flex items-center gap-1.5 px-3 h-8 sm:h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] shadow-xs transition-colors cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)] border-none"
+                className={`inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 border ${
+                  isHeroGlass
+                    ? 'text-[#FFFDF9] bg-white/[0.08] hover:bg-white/[0.15] border-white/[0.12] focus-visible:ring-white'
+                    : 'text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-transparent focus-visible:ring-[var(--text-primary)]'
+                }`}
               >
-                <User size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
+                <User
+                  size={13.5}
+                  strokeWidth={2.2}
+                  className={`shrink-0 transition-colors ${
+                    isHeroGlass ? 'text-[#FFFDF9]/80' : 'text-[var(--text-secondary)]'
+                  }`}
+                />
                 <span>{tr('landing_nav_login')}</span>
               </button>
             )}
-            <IconButton
-              onClick={() => {
-                setIsMobileMenuOpen(true);
-                setIsMobileLangOpen(false);
-              }}
-              aria-label={tr('landing_nav_open_menu')}
-              aria-expanded={isMobileMenuOpen}
-              variant="ghost"
-              size="lg"
-              className="text-[var(--text-primary)]"
-              icon={<Menu size={20} strokeWidth={2} />}
-            />
+
+            <button
+              type="button"
+              onClick={onGetStarted}
+              className="inline-flex items-center justify-center gap-1.5 h-9 px-4.5 rounded-full text-xs font-bold bg-[var(--landing-signature)] hover:bg-[var(--landing-signature-hover)] text-white shadow-[0_6px_18px_-4px_rgba(232,93,52,0.45)] transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] border-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--landing-signature)]"
+            >
+              <span>{tr('landing_nav_get_started')}</span>
+              <ArrowUpRight size={14} strokeWidth={2.4} className="shrink-0 -mr-0.5" />
+            </button>
           </div>
 
+          {/* Mobile Header Actions (< md) */}
+          <div className="md:hidden flex items-center gap-1.5 shrink-0">
+            <LanguagePicker
+              currentLanguage={currentLanguage}
+              onLanguageChange={onLanguageChange}
+              variant={isHeroGlass ? 'pill-hero' : 'pill'}
+            />
+            {onLogin && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsMobileLangOpen(false);
+                  onLogin();
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold transition-all duration-300 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] focus-visible:outline-none border ${
+                  isHeroGlass
+                    ? 'text-[#FFFDF9] bg-white/[0.08] hover:bg-white/[0.15] border-white/[0.12]'
+                    : 'text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] border-transparent'
+                }`}
+              >
+                <User
+                  size={13}
+                  strokeWidth={2.2}
+                  className={`shrink-0 ${
+                    isHeroGlass ? 'text-[#FFFDF9]/80' : 'text-[var(--text-secondary)]'
+                  }`}
+                />
+                <span>{tr('landing_nav_login')}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+                setIsMobileLangOpen(false);
+              }}
+              aria-label={isMobileMenuOpen ? tr('landing_nav_close_menu') : tr('landing_nav_open_menu')}
+              aria-expanded={isMobileMenuOpen}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer active:scale-95 border ${
+                isHeroGlass
+                  ? 'bg-white/[0.10] hover:bg-white/[0.18] text-[#FFFDF9] border-white/[0.14]'
+                  : 'bg-black/[0.05] dark:bg-white/[0.09] hover:bg-black/[0.09] text-[var(--text-primary)] border-transparent'
+              }`}
+            >
+              {isMobileMenuOpen ? (
+                <X size={17} strokeWidth={2.3} />
+              ) : (
+                <Menu size={17} strokeWidth={2.3} />
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* MOBILE MENU PORTAL */}
-      {typeof document !== 'undefined' && isMobileMenuOpen && createPortal(
-        <div className="fixed inset-0 z-[9990] pointer-events-auto">
-          <div 
-            className="fixed inset-0 w-full h-full min-h-dvh bg-black/40 z-[9991] transition-opacity animate-in fade-in duration-200"
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setIsMobileLangOpen(false);
-            }}
-            aria-hidden="true"
-          />
-
-          <div 
-            role="dialog"
-            aria-modal="true"
-            aria-label={tr('landing_nav_menu_label')}
-            className="fixed top-0 left-0 right-0 z-[9995] bg-[var(--surface-color)] shadow-modal rounded-b-2xl pt-[env(safe-area-inset-top,0px)] animate-in slide-in-from-top-2 duration-200"
-          >
-            <div className="landing-container h-16 flex items-center justify-between">
-              <div className="flex items-center gap-2 shrink-0">
-                <DejzLogo className="h-6 sm:h-7 w-auto" />
-              </div>
-              <IconButton
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileLangOpen(false);
-                }}
-                aria-label={tr('landing_nav_close_menu')}
-                variant="ghost"
-                size="lg"
-                className="text-[var(--text-primary)]"
-                icon={<X size={20} strokeWidth={2} />}
-              />
-            </div>
-
-            <div className="landing-container pt-2 pb-5 space-y-1 text-left">
-              <a
-                href="#how-it-works"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileLangOpen(false);
-                }}
-                className="w-full h-12 flex items-center px-3.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)]"
-              >
-                <span>{tr('landing_nav_how_it_works')}</span>
-              </a>
-
-              <a
-                href="#features"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileLangOpen(false);
-                }}
-                className="w-full h-12 flex items-center px-3.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)]"
-              >
-                <span>{tr('landing_footer_features')}</span>
-              </a>
-
-              <a
-                href="#faq"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsMobileLangOpen(false);
-                }}
-                className="w-full h-12 flex items-center px-3.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)]"
-              >
-                <span>{tr('landing_faq_title')}</span>
-              </a>
-
-              {onLogin && (
-                <button
-                  type="button"
+      {/* UNIFIED FLOATING CAPSULE MOBILE MENU PORTAL */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <div className="fixed inset-0 z-40 pointer-events-auto md:hidden">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 w-full h-full min-h-dvh bg-[#17120E]/55 backdrop-blur-xs"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     setIsMobileLangOpen(false);
-                    onLogin();
                   }}
-                  className="w-full h-12 text-left flex items-center px-3.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
-                >
-                  <span>{tr('landing_nav_login')}</span>
-                </button>
-              )}
+                  aria-hidden="true"
+                />
 
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsMobileLangOpen(!isMobileLangOpen)}
-                  aria-expanded={isMobileLangOpen}
-                  className="w-full h-12 text-left flex items-center justify-between px-3.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
+                <motion.div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={tr('landing_nav_menu_label')}
+                  initial={{ opacity: 0, y: -12, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                  className="fixed top-[calc(max(12px,env(safe-area-inset-top,12px))+58px)] left-3 right-3 z-50 bg-[var(--surface-color)]/96 backdrop-blur-2xl shadow-[0_24px_56px_-12px_rgba(23,18,14,0.28)] rounded-[28px] border border-black/[0.08] dark:border-white/[0.12] overflow-hidden"
                 >
-                  <span className="text-[var(--text-secondary)] font-medium">{tr('landing_nav_language')}</span>
-                  <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold">
-                    <span className="text-base select-none leading-none" aria-hidden="true">{currentLangOption.flag}</span>
-                    <span>{currentLangOption.nativeLabel}</span>
-                    <ChevronDown size={16} className={`shrink-0 opacity-60 transition-transform duration-200 ${isMobileLangOpen ? 'rotate-180' : ''}`} />
+                  <div className="p-3.5 space-y-1 text-left">
+                    {navItems.map((item) => (
+                      <a
+                        key={item.id}
+                        href={`#${item.id}`}
+                        onClick={(e) => scrollToSection(e, item.id)}
+                        className="w-full h-12 flex items-center justify-between px-4 rounded-2xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-[15px] font-semibold text-[var(--text-primary)]"
+                      >
+                        <span>{item.label}</span>
+                        <span className="text-xs font-bold font-amount tabular-nums text-[var(--landing-signature)]">
+                          {item.num}
+                        </span>
+                      </a>
+                    ))}
+
+                    <div className="my-1.5 border-t border-[var(--border-divider)]" />
+
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsMobileLangOpen(!isMobileLangOpen)}
+                        aria-expanded={isMobileLangOpen}
+                        className="w-full h-11 text-left flex items-center justify-between px-4 rounded-2xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors text-sm font-semibold text-[var(--text-primary)] cursor-pointer bg-transparent border-none"
+                      >
+                        <span className="text-[var(--text-secondary)] font-medium">
+                          {tr('landing_nav_language')}
+                        </span>
+                        <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold">
+                          <span className="text-base select-none leading-none" aria-hidden="true">
+                            {currentLangOption.flag}
+                          </span>
+                          <span>{currentLangOption.nativeLabel}</span>
+                          <ChevronDown
+                            size={16}
+                            className={`shrink-0 opacity-60 transition-transform duration-200 ${
+                              isMobileLangOpen ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {isMobileLangOpen && (
+                        <div className="pt-1 pb-1 space-y-0.5 px-1">
+                          {NORDIC_LANGUAGES.map((lang) => {
+                            const isSelected = lang.code === currentLanguage;
+                            return (
+                              <button
+                                key={lang.code}
+                                type="button"
+                                onClick={() => {
+                                  onLanguageChange(lang.code);
+                                  setIsMobileLangOpen(false);
+                                }}
+                                className={`w-full h-10 px-4 rounded-xl text-left text-sm flex items-center justify-between gap-3 transition-colors cursor-pointer border-none ${
+                                  isSelected
+                                    ? 'bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)] font-semibold'
+                                    : 'bg-transparent text-[var(--text-primary)] font-medium hover:bg-black/[0.02] dark:hover:bg-white/[0.04]'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-base select-none leading-none" aria-hidden="true">
+                                    {lang.flag}
+                                  </span>
+                                  <span className="text-[var(--text-primary)]">{lang.nativeLabel}</span>
+                                </div>
+                                {isSelected && (
+                                  <Check size={16} strokeWidth={2.5} className="shrink-0 text-[var(--text-primary)]" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2 flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setIsMobileLangOpen(false);
+                          onGetStarted();
+                        }}
+                        className="w-full h-12 rounded-full bg-[var(--landing-signature)] hover:bg-[var(--landing-signature-hover)] text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_8px_22px_-6px_rgba(232,93,52,0.45)] transition-all cursor-pointer active:scale-[0.98] border-none"
+                      >
+                        <span>{tr('landing_nav_get_started')}</span>
+                        <ArrowUpRight size={15} strokeWidth={2.4} />
+                      </button>
+                    </div>
                   </div>
-                </button>
-
-                {isMobileLangOpen && (
-                  <div className="pt-0.5 pb-1 space-y-0.5">
-                    {NORDIC_LANGUAGES.map((lang) => {
-                      const isSelected = lang.code === currentLanguage;
-                      return (
-                        <button
-                          key={lang.code}
-                          type="button"
-                          onClick={() => {
-                            onLanguageChange(lang.code);
-                            setIsMobileLangOpen(false);
-                          }}
-                          className={`w-full h-11 px-3.5 rounded-xl text-left text-sm flex items-center justify-between gap-3 transition-colors cursor-pointer border-none ${
-                            isSelected 
-                              ? 'bg-black/[0.03] dark:bg-white/[0.06] text-[var(--text-primary)] font-semibold' 
-                              : 'bg-transparent text-[var(--text-primary)] font-medium hover:bg-black/[0.02] dark:hover:bg-white/[0.04]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <span className="text-base select-none leading-none" aria-hidden="true">{lang.flag}</span>
-                            <span className="text-[var(--text-primary)]">{lang.nativeLabel}</span>
-                          </div>
-                          {isSelected && <Check size={16} strokeWidth={2.5} className="shrink-0 text-[var(--text-primary)]" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                </motion.div>
               </div>
-
-              <div className="pt-2">
-                <Button
-                  variant="primary"
-                  fullWidth
-                  size="lg"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setIsMobileLangOpen(false);
-                    onGetStarted();
-                  }}
-                  className="w-full justify-center text-center text-sm font-semibold h-12"
-                >
-                  {tr('landing_nav_get_started')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
 
       <main>
         {/* =====================================================================
-            1. HERO SECTION
+            1. FULL-BLEED REALISTIC HERO SECTION (Dreams-inspired)
         ===================================================================== */}
-        <section className="relative pt-6 sm:pt-10 lg:pt-14 pb-8 sm:pb-12 bg-landing-sky-soft">
-          <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-            
-            {/* Left Column (6 cols) */}
-            <motion.div
-              initial={prefersReducedMotion ? false : { opacity: 0.01, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6"
-            >
-              <div className="space-y-4 max-w-[34rem]">
-                <h1 className="text-[2.2rem] sm:text-5xl lg:text-[3.55rem] font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.06] text-balance">
-                  {tr('landing_hero_title')}
-                </h1>
+        <section className="relative min-h-[90dvh] sm:min-h-[92dvh] lg:min-h-[95dvh] w-full overflow-hidden flex items-end lg:items-center bg-[#17120E]">
+          {/* Full-Bleed Realistic Photograph of Man with Phone */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <motion.img
+              src={screenshots.lifestyleHome || '/dejz_02.png'}
+              alt={
+                isEn
+                  ? 'Person relaxed at home checking their daily budget on their phone'
+                  : 'Kille som sitter hemma vid bordet med en kaffe och kollar sin ekonomi i mobilen'
+              }
+              width={1600}
+              height={1066}
+              fetchPriority="high"
+              referrerPolicy="no-referrer"
+              style={
+                prefersReducedMotion
+                  ? undefined
+                  : { y: heroBackdropY, scale: 1.04 }
+              }
+              className="w-full h-full object-cover object-[66%_center] sm:object-[62%_center] lg:object-center select-none pointer-events-none will-change-transform"
+            />
 
-                <p className="landing-body-copy text-[var(--text-secondary)] max-w-[46ch] mx-auto lg:mx-0 font-normal text-pretty">
-                  {tr('landing_hero_subtitle')}
-                </p>
-              </div>
+            {/* Warm Espresso Scrim Overlays for Effortless Contrast */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-[#17120E]/94 via-[#17120E]/48 to-[#17120E]/18 lg:bg-gradient-to-r lg:from-[#17120E]/90 lg:via-[#17120E]/44 lg:to-transparent"
+            />
+            <div
+              aria-hidden="true"
+              className="hidden lg:block absolute inset-0 bg-gradient-to-t from-[#17120E]/65 via-transparent to-[#17120E]/16"
+            />
+          </div>
 
-              {/* Registration CTAs */}
-              <div className="w-full max-w-sm sm:max-w-none mx-auto lg:mx-0 space-y-3">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={onGetStarted}
-                    className="w-full sm:w-auto justify-center text-center font-semibold text-sm px-7 h-12 whitespace-nowrap"
-                  >
-                    {tr('landing_hero_button')}
-                  </Button>
+          {/* Foreground Hero Content + Discreet Live Product Proof Widget */}
+          <div className="relative z-10 landing-container w-full pt-32 sm:pt-40 pb-12 sm:pb-16 lg:py-28">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-end">
+              <motion.div
+                initial={prefersReducedMotion ? false : { opacity: 0.01, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={prefersReducedMotion ? undefined : { y: heroPhoneY }}
+                className="lg:col-span-7 max-w-[37rem] flex flex-col items-start text-left space-y-6 will-change-transform"
+              >
+                <div className="space-y-4">
+                  <h1 className="text-[2.35rem] sm:text-5xl lg:text-[3.75rem] font-extrabold tracking-[-0.035em] text-[#FFFDF9] leading-[1.04] text-balance">
+                    {tr('landing_hero_title')}
+                  </h1>
 
-                  {onGoogleLogin && (
-                    <button
-                      type="button"
-                      onClick={onGoogleLogin}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center gap-2.5 text-sm font-semibold text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] px-6 h-12 rounded-full shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)] border-none"
-                    >
-                      <GoogleGLogo size={17} />
-                      <span>{tr('landing_hero_google')}</span>
-                    </button>
-                  )}
-
-                  {onStartDemo && (
-                    <button
-                      type="button"
-                      onClick={onStartDemo}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline underline-offset-4 px-3 h-10 sm:h-12 rounded-full transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
-                    >
-                      {tr('landing_hero_demo')}
-                    </button>
-                  )}
+                  <p className="landing-body-copy text-[#F7F1E8]/88 max-w-[46ch] font-normal text-pretty">
+                    {tr('landing_hero_subtitle')}
+                  </p>
                 </div>
 
-                <p className="text-xs font-medium text-[var(--text-tertiary)] pt-0.5">
-                  {tr('landing_no_bank_needed')}
-                </p>
-              </div>
-            </motion.div>
+                {/* Registration CTAs */}
+                <div className="w-full sm:w-auto space-y-3.5 pt-1">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-3">
+                    <button
+                      type="button"
+                      onClick={onGetStarted}
+                      className="w-full sm:w-auto inline-flex items-center justify-center text-center font-bold text-sm sm:text-[15px] text-[#FFFDF9] bg-[#E85D34] hover:bg-[#D44D26] shadow-[0_8px_24px_-4px_rgba(232,93,52,0.42)] px-7 h-12 sm:h-13 rounded-full transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white border-none"
+                    >
+                      {tr('landing_hero_button')}
+                    </button>
 
-            {/* Right Column (6 cols): Frilagda telefoner med mjuk signaturblå cirkel bakom */}
-            <div className="lg:col-span-6 relative flex items-center justify-center">
+                    {onGoogleLogin && (
+                      <button
+                        type="button"
+                        onClick={onGoogleLogin}
+                        className="w-full sm:w-auto inline-flex items-center justify-center text-center gap-2.5 text-sm font-semibold text-white bg-white/14 hover:bg-white/22 backdrop-blur-md border border-white/20 px-6 h-12 sm:h-13 rounded-full transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      >
+                        <GoogleGLogo size={17} />
+                        <span>{tr('landing_hero_google')}</span>
+                      </button>
+                    )}
+
+                    {onStartDemo && (
+                      <button
+                        type="button"
+                        onClick={onStartDemo}
+                        className="w-full sm:w-auto inline-flex items-center justify-center text-center text-sm font-semibold text-white/85 hover:text-white underline underline-offset-4 px-3 h-10 sm:h-12 rounded-full transition-colors cursor-pointer border-none bg-transparent whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      >
+                        {tr('landing_hero_demo')}
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-xs font-medium text-white/75 flex items-center gap-1.5 pt-0.5">
+                    <Lock size={12} className="shrink-0 opacity-85" />
+                    <span>{tr('landing_no_bank_needed')}</span>
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Right Column: Discreet Floating Live Balance Widget */}
               <motion.div
-                aria-hidden="true"
-                style={prefersReducedMotion ? undefined : { y: heroBackdropY }}
-                className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] rounded-full bg-landing-signature/45 blur-2xl absolute pointer-events-none will-change-transform"
-              />
-              <motion.div
-                initial={prefersReducedMotion ? false : { opacity: 0.01, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                initial={prefersReducedMotion ? false : { opacity: 0.01, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.65, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
                 style={prefersReducedMotion ? undefined : { y: heroPhoneY }}
-                className="relative z-10 w-full flex items-center justify-center will-change-transform"
+                className="lg:col-span-5 flex justify-start lg:justify-end will-change-transform"
               >
-                <PhoneScreenshotFrame
-                  label="Screenshot: Hem – kvar att spendera och aktuell löneperiod"
-                  src={screenshots.heroHome}
-                  alt="Dejz hemvy som visar kvar att spendera och aktuell löneperiod"
-                  perspectiveTilt={true}
-                  isPreframedMockup={true}
-                />
+                <HeroLiveBalanceWidget isEn={isEn} />
               </motion.div>
             </div>
-
           </div>
         </section>
 
@@ -1505,15 +1760,15 @@ export function LandingPage({
         <ScrollTransactionStrip currentLanguage={currentLanguage} tr={tr} />
 
         {/* =====================================================================
-            3. INTRODUKTION + TRE STEG
+            3. INTRODUKTION + TRE STEG (Öppen redaktionell typografi utan färgrutor + stora realistiska bilder)
         ===================================================================== */}
         <section
           id="how-it-works"
-          className="py-16 sm:py-22 bg-[var(--surface-color)] scroll-mt-20"
+          className="py-18 sm:py-28 bg-[var(--surface-color)] scroll-mt-20"
         >
-          <div className="landing-container space-y-10 text-left">
-            <motion.div {...revealMotion} className="max-w-xl space-y-2.5">
-              <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
+          <div className="landing-container space-y-12 sm:space-y-16 text-left">
+            <motion.div {...revealMotion} className="max-w-xl space-y-3">
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.06] text-balance">
                 {tr('landing_how_title')}
               </h2>
               <p className="landing-body-copy text-[var(--text-secondary)] text-pretty">
@@ -1521,20 +1776,21 @@ export function LandingPage({
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+            {/* Tre steg – helt utan färgade rutor, med ren arkitektonisk linje och öppen typografi */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
               {[
                 {
-                  num: '1',
+                  num: '01',
                   title: tr('landing_step1_title'),
                   desc: tr('landing_step1_desc'),
                 },
                 {
-                  num: '2',
+                  num: '02',
                   title: tr('landing_step2_title'),
                   desc: tr('landing_step2_desc'),
                 },
                 {
-                  num: '3',
+                  num: '03',
                   title: tr('landing_step3_title'),
                   desc: tr('landing_step3_desc'),
                 },
@@ -1549,31 +1805,48 @@ export function LandingPage({
                     delay: idx * 0.09,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className="flex items-start gap-4"
+                  className="pt-6 border-t border-[var(--border-strong)] flex flex-col gap-3"
                 >
-                  <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold font-amount tabular-nums flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold font-amount tabular-nums tracking-tight text-[var(--landing-signature)] leading-none">
                     {step.num}
                   </span>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
+                  <div className="space-y-2 pt-1">
+                    <h3 className="text-xl sm:text-[22px] font-bold text-[var(--text-primary)] tracking-tight leading-snug">
                       {step.title}
                     </h3>
-                    <p className="landing-body-copy text-[var(--text-secondary)]">
+                    <p className="landing-body-copy text-[var(--text-secondary)] max-w-[34ch]">
                       {step.desc}
                     </p>
                   </div>
                 </motion.div>
               ))}
             </div>
+
+            {/* Stora, realistiska livsstilsfotografier som förankrar vardagskänslan */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch pt-2">
+              <div className="lg:col-span-7">
+                <ParallaxPhotoFrame
+                  src="/images/lifestyle-home.jpg"
+                  alt={isEn ? 'Planning the monthly budget calmly at home with a cup of coffee' : 'Planera månadens budget i lugn och ro hemma vid bordet'}
+                  aspectClass="aspect-[4/3] sm:aspect-[16/10]"
+                />
+              </div>
+              <div className="lg:col-span-5">
+                <ParallaxPhotoFrame
+                  src="/images/lifestyle-control.jpg"
+                  alt={isEn ? 'Checking daily spendable balance over a coffee' : 'Kolla kvar att spendera över en kaffe på stan'}
+                  aspectClass="aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-full"
+                />
+              </div>
+            </div>
           </div>
         </section>
 
         {/* =====================================================================
             4. SMIDIG REGISTRERING
-               Ny rytm: Levande röst-animation (ord för ord -> Coop-kort) som
-               svävar i förgrunden framför miljöbilden (dejz_01.png) till höger.
+               Stor realistisk miljöbild (dejz_01.png) + levande röst-animation i förgrunden.
         ===================================================================== */}
-        <section id="features" className="py-14 sm:py-24 bg-[var(--surface-color)] scroll-mt-20">
+        <section id="features" className="py-16 sm:py-24 bg-[var(--surface-color)] scroll-mt-20">
           <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
             {/* Left Column (5 cols): Fokuserad copy + 3 snabba sätt att registrera */}
@@ -1589,13 +1862,13 @@ export function LandingPage({
 
               <div className="flex flex-wrap gap-2 pt-1">
                 {[
-                  { icon: <Mic size={14} strokeWidth={2.2} />, label: tr('landing_voice_pill_voice') },
-                  { icon: <Camera size={14} strokeWidth={2.2} />, label: tr('landing_voice_pill_receipt') },
-                  { icon: <Zap size={14} strokeWidth={2.2} />, label: tr('landing_voice_pill_quick') },
+                  { icon: <Mic size={14} strokeWidth={2.2} className="text-[var(--landing-signature)] shrink-0" />, label: tr('landing_voice_pill_voice') },
+                  { icon: <Camera size={14} strokeWidth={2.2} className="text-[var(--landing-signature)] shrink-0" />, label: tr('landing_voice_pill_receipt') },
+                  { icon: <Zap size={14} strokeWidth={2.2} className="text-[var(--landing-signature)] shrink-0" />, label: tr('landing_voice_pill_quick') },
                 ].map((pill) => (
                   <span
                     key={pill.label}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-landing-sky-soft text-xs font-semibold text-[var(--text-primary)]"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-landing-sky-soft border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)]"
                   >
                     {pill.icon}
                     <span>{pill.label}</span>
@@ -1604,17 +1877,17 @@ export function LandingPage({
               </div>
             </motion.div>
 
-            {/* Right Column (7 cols): Miljöbild som fond + Levande röstkort som överlappar lagom utan att täcka bilden */}
+            {/* Right Column (7 cols): Stor realistisk miljöbild som fond + Levande röstkort som överlappar i nedkant */}
             <div className="lg:col-span-7 relative">
-              <ParallaxLayer offset={6}>
+              <ParallaxLayer offset={8}>
                 <ParallaxPhotoFrame
                   src={screenshots.lifestyleGrocery || '/dejz_01.png'}
-                  alt={isEn ? 'Logging a grocery purchase on the go' : 'Registrera matinköp i vardagen'}
-                  aspectClass="aspect-[16/9]"
+                  alt={isEn ? 'Logging a purchase by voice on the go' : 'Registrera köp med rösten i vardagen'}
+                  aspectClass="aspect-[4/3] sm:aspect-[5/4]"
                 />
               </ParallaxLayer>
 
-              <ParallaxLayer offset={-8} className="-mt-6 sm:-mt-8 relative z-10 px-2 sm:px-6">
+              <ParallaxLayer offset={-10} className="-mt-8 sm:-mt-12 relative z-10 px-2 sm:px-6">
                 <LiveVoiceShowcase isEn={isEn} />
               </ParallaxLayer>
             </div>
@@ -1624,22 +1897,30 @@ export function LandingPage({
 
         {/* =====================================================================
             5. BUDGET & FASTA UTGIFTER
-               Korten ligger direkt mot den ljusblå sektionen utan extra modulram.
+               Stor realistisk vardagsbild i bakgrunden + fasta utgifter som svävar i förgrunden.
         ===================================================================== */}
-        <section className="py-16 sm:py-24 bg-landing-sky-soft">
+        <section className="py-16 sm:py-26 bg-landing-sky-soft">
           <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             
-            {/* Left Column (6 cols): Korten ligger direkt mot sektionen med kaskad-parallax */}
-            <div className="lg:col-span-6 order-2 lg:order-1">
-              <ParallaxLayer offset={-20}>
-                <div className="max-w-[440px] mx-auto w-full space-y-2.5 py-2 text-left select-none pointer-events-none">
+            {/* Left Column (7 cols): Stor realistisk köks-/vardagsbild + fasta utgifter i förgrunden */}
+            <div className="lg:col-span-7 order-2 lg:order-1 relative">
+              <ParallaxLayer offset={8}>
+                <ParallaxPhotoFrame
+                  src={screenshots.lifestyleSavings || '/images/lifestyle-grocery.jpg'}
+                  alt={isEn ? 'Everyday life at home with full clarity on fixed expenses' : 'Vardagsliv hemma med full koll på månadens fasta utgifter'}
+                  aspectClass="aspect-[4/3] sm:aspect-[5/4]"
+                />
+              </ParallaxLayer>
+
+              <ParallaxLayer offset={-14} className="-mt-12 sm:-mt-16 relative z-10 px-2 sm:px-6">
+                <div className="max-w-[440px] mx-auto w-full space-y-2.5 text-left select-none pointer-events-none">
                   {/* Totala fasta utgifter Card */}
                   <motion.div
                     initial={prefersReducedMotion ? false : { opacity: 0.01, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-40px' }}
                     transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    className="rounded-card bg-[var(--surface-color)] p-4 shadow-subtle flex items-center justify-between gap-3"
+                    className="rounded-card bg-[var(--surface-color)]/96 backdrop-blur-xl border border-[var(--border-subtle)] p-4 shadow-[0_16px_38px_-10px_rgba(30,24,20,0.14)] flex items-center justify-between gap-3"
                   >
                     <div className="space-y-0.5 min-w-0">
                       <p className="text-card-title text-[var(--text-secondary)] truncate">
@@ -1665,8 +1946,8 @@ export function LandingPage({
                     </div>
                   </motion.div>
 
-                  {/* Fixed Expense Rows med stegvis kaskad-effekt */}
-                  <div className="space-y-2.5 pt-0.5">
+                  {/* Fixed Expense Rows */}
+                  <div className="space-y-2">
                     {[
                       {
                         id: 'fe-sbab',
@@ -1689,17 +1970,6 @@ export function LandingPage({
                         method: isEn ? 'Invoice' : 'Faktura',
                         isFixed: true,
                         isVariable: true,
-                      },
-                      {
-                        id: 'fe-telia',
-                        merchant: 'Telia',
-                        category: isEn ? 'Subscriptions' : 'Abonnemang',
-                        icon: 'smartphone',
-                        amount: '399',
-                        time: isEn ? 'The 27th' : 'Den 27:e',
-                        method: 'Autogiro',
-                        isFixed: true,
-                        isVariable: false,
                       },
                       {
                         id: 'fe-spotify',
@@ -1732,8 +2002,8 @@ export function LandingPage({
               </ParallaxLayer>
             </div>
 
-            {/* Right Column (6 cols): Ren, luftig text och två tydliga punkter som balanserar de 5 utgiftskorten */}
-            <motion.div {...revealMotion} className="lg:col-span-6 order-1 lg:order-2 text-left space-y-6">
+            {/* Right Column (5 cols): Ren, luftig text och två tydliga punkter */}
+            <motion.div {...revealMotion} className="lg:col-span-5 order-1 lg:order-2 text-left space-y-6">
               <div className="space-y-3">
                 <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] max-w-[18ch] text-balance">
                   {tr('landing_fixed_title')}
@@ -1746,13 +2016,13 @@ export function LandingPage({
 
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 landing-body-copy font-medium text-[var(--text-primary)]">
-                  <span className="w-6 h-6 rounded-full bg-landing-signature text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-landing-signature text-white flex items-center justify-center shrink-0">
                     <Check size={13} strokeWidth={2.6} />
                   </span>
                   <span>{tr('landing_fixed_pill_intervals')}</span>
                 </li>
                 <li className="flex items-center gap-3 landing-body-copy font-medium text-[var(--text-primary)]">
-                  <span className="w-6 h-6 rounded-full bg-landing-signature text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                  <span className="w-6 h-6 rounded-full bg-landing-signature text-white flex items-center justify-center shrink-0">
                     <Check size={13} strokeWidth={2.6} />
                   </span>
                   <span>{tr('landing_fixed_pill_variable')}</span>
@@ -1786,10 +2056,10 @@ export function LandingPage({
                   className="w-full rounded-modal bg-landing-signature p-6 sm:p-8 flex flex-col justify-between gap-6 select-none pointer-events-none"
                 >
                   <div className="space-y-1">
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
                       {tr('landing_daily_item1_title')}
                     </h3>
-                    <p className="landing-body-copy text-[var(--text-primary)]/85">
+                    <p className="landing-body-copy text-white/90">
                       {tr('landing_daily_item1_desc')}
                     </p>
                   </div>
@@ -1816,13 +2086,13 @@ export function LandingPage({
                             72 % {isEn ? 'left' : 'kvar'}
                           </span>
                         </div>
-                        <div className="w-full h-2.5 rounded-full bg-black/[0.07] overflow-hidden">
+                        <div className="w-full h-2.5 rounded-full bg-black/[0.07] dark:bg-white/[0.10] overflow-hidden">
                           <motion.div
                             initial={prefersReducedMotion ? { width: '72%' } : { width: '0%' }}
                             whileInView={{ width: '72%' }}
                             viewport={{ once: true, margin: '-40px' }}
                             transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                            className="h-full rounded-full bg-[var(--text-primary)]"
+                            className="h-full rounded-full bg-[var(--brand-signature)]"
                           />
                         </div>
                       </div>
@@ -1854,7 +2124,7 @@ export function LandingPage({
               <ParallaxLayer offset={18} className="lg:col-span-6 flex">
                 <motion.div
                   {...revealMotion}
-                  className="w-full rounded-modal bg-landing-sky-soft p-6 sm:p-8 flex flex-col justify-between gap-6 select-none pointer-events-none"
+                  className="w-full rounded-modal bg-landing-sky-soft border border-[var(--border-subtle)] p-6 sm:p-8 flex flex-col justify-between gap-6 select-none pointer-events-none"
                 >
                   <div className="space-y-1">
                     <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
@@ -1866,7 +2136,7 @@ export function LandingPage({
                   </div>
 
                   <ParallaxLayer offset={-8} className="max-w-[440px] mx-auto w-full my-auto">
-                    <div className="flex gap-2.5 overflow-x-auto py-2 px-1 -mx-1 no-scrollbar">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-2.5 py-1">
                       {[
                         {
                           name: isEn ? 'Health & Fitness' : 'Hälsa & Träning',
@@ -1894,7 +2164,7 @@ export function LandingPage({
                             delay: 0.08 * idx,
                             ease: [0.22, 1, 0.36, 1],
                           }}
-                          className="flex-shrink-0 min-w-[138px] sm:min-w-[146px] flex-1 p-3.5 rounded-card bg-[var(--surface-color)] shadow-subtle flex flex-col justify-between gap-2.5 text-left"
+                          className="min-w-0 p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex flex-col justify-between gap-2.5 text-left"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <CategoryIcon
@@ -1904,7 +2174,7 @@ export function LandingPage({
                             />
                           </div>
                           <div className="min-w-0 pt-0.5">
-                            <span className="text-card-title text-[var(--text-primary)] whitespace-nowrap block mb-0.5">
+                            <span className="text-card-title text-[var(--text-primary)] truncate block mb-0.5">
                               {cat.name}
                             </span>
                             <span className="text-list-amount font-amount tabular-nums block text-[var(--text-primary)]">
@@ -1924,7 +2194,7 @@ export function LandingPage({
               {/* Card 3 (12 cols): Interaktiv Tidslinje dag för dag */}
               <motion.div
                 {...revealMotion}
-                className="lg:col-span-12 rounded-modal bg-landing-contrast-dark p-6 sm:p-9 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+                className="lg:col-span-12 rounded-modal bg-[#17120E] border border-[#FFF5E8]/[0.07] p-6 sm:p-9 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
               >
                 <div className="lg:col-span-5 space-y-2 text-white">
                   <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
@@ -1980,7 +2250,7 @@ export function LandingPage({
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="9.5"
-                            className="text-black/[0.04]"
+                            className="text-black/[0.05] dark:text-white/[0.08]"
                           />
                           {(() => {
                             const radius = 41;
@@ -2032,7 +2302,7 @@ export function LandingPage({
                       </motion.div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-black/[0.05]">
+                    <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-[var(--border-divider)]">
                       <div className="rounded-card-nested bg-landing-sky-soft p-3 text-left">
                         <p className="text-metric-label font-medium text-[var(--text-secondary)]">
                           {isEn ? 'Largest share' : 'Största post'}
@@ -2057,7 +2327,7 @@ export function LandingPage({
               {/* Right Column (6 cols): Kategorirader i samma höjd */}
               <ParallaxLayer offset={12} className="lg:col-span-6 flex">
                 <motion.div {...revealMotion} className="max-w-[440px] mx-auto w-full flex select-none pointer-events-none">
-                  <div className="w-full rounded-modal bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-y divide-black/[0.05] flex flex-col justify-between">
+                  <div className="w-full rounded-modal bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-y divide-[var(--border-divider)] flex flex-col justify-between">
                     {/* Row 1: Mat & Dagligvaror */}
                     <div className="p-4 flex items-center justify-between gap-2.5">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -2202,7 +2472,7 @@ export function LandingPage({
                   },
                 ].map((item) => (
                   <div key={item.title} className="flex items-start gap-3.5">
-                    <span className="w-6 h-6 rounded-full bg-landing-signature text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="w-6 h-6 rounded-full bg-landing-signature text-white flex items-center justify-center shrink-0 mt-0.5">
                       <Check size={13} strokeWidth={2.6} />
                     </span>
                     <div>
@@ -2218,20 +2488,20 @@ export function LandingPage({
               </div>
             </motion.div>
 
-            {/* Right Column (7 cols): Fotografiet som fond med Uber-kortet lagom överlappande i nedkant */}
+            {/* Right Column (7 cols): Stor realistisk bild som fond med Uber-kortet överlappande i nedkant */}
             <div className="lg:col-span-7 relative">
-              <ParallaxLayer offset={6}>
+              <ParallaxLayer offset={8}>
                 <ParallaxPhotoFrame
                   src={screenshots.lifestyleControl || '/dejz_03.png'}
                   alt={isEn ? 'Personal control over your budget without bank connection' : 'Personlig kontroll över din budget utan bankkoppling'}
-                  aspectClass="aspect-[16/9]"
+                  aspectClass="aspect-[4/3] sm:aspect-[5/4]"
                 />
               </ParallaxLayer>
 
-              <ParallaxLayer offset={-8} className="-mt-6 sm:-mt-8 relative z-10 px-3 sm:px-8">
+              <ParallaxLayer offset={-10} className="-mt-8 sm:-mt-12 relative z-10 px-3 sm:px-8">
                 <motion.div
                   {...revealMotion}
-                  className="max-w-[420px] mx-auto w-full rounded-card bg-[var(--surface-color)]/95 backdrop-blur-md shadow-subtle p-4 sm:p-5 space-y-3 select-none pointer-events-none"
+                  className="max-w-[420px] mx-auto w-full rounded-card bg-[var(--surface-color)]/96 backdrop-blur-xl border border-[var(--border-subtle)] shadow-[0_16px_38px_-10px_rgba(30,24,20,0.14)] p-4 sm:p-5 space-y-3 select-none pointer-events-none"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
@@ -2271,7 +2541,7 @@ export function LandingPage({
                     </div>
                   </div>
 
-                  <div className="pt-2.5 border-t border-black/[0.05] flex items-center justify-between gap-2 text-secondary text-[var(--text-secondary)]">
+                  <div className="pt-2.5 border-t border-[var(--border-divider)] flex items-center justify-between gap-2 text-secondary text-[var(--text-secondary)]">
                     <span className="inline-flex items-center gap-1.5 font-medium">
                       <CategoryIcon icon="car" categoryName="Transport" variant="minimal" size="2xs" />
                       <span>Transport</span>
@@ -2286,25 +2556,31 @@ export function LandingPage({
         </section>
 
         {/* =====================================================================
-            9. PERSONLIG GRUNDARTEXT (Redaktionell, centrerad inramning före FAQ)
+            9. PERSONLIG GRUNDARTEXT (Öppen redaktionell layout med stort realistiskt porträtt)
         ===================================================================== */}
-        <section className="py-16 sm:py-22 bg-landing-sky-soft">
-          <div className="landing-container">
+        <section className="py-18 sm:py-26 bg-landing-sky-soft">
+          <div className="landing-container grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center text-left">
+            <div className="lg:col-span-5">
+              <ParallaxPhotoFrame
+                src="/selfie.JPEG"
+                alt="Kevin, grundare av Dejz"
+                aspectClass="aspect-[4/4.2] sm:aspect-[4/3.8]"
+                imgClassName="object-top"
+              />
+            </div>
+
             <motion.div
               {...revealMotion}
-              className="max-w-2xl mx-auto text-center rounded-modal bg-[var(--surface-color)] shadow-subtle px-6 py-10 sm:px-12 sm:py-12 space-y-5"
+              className="lg:col-span-7 space-y-6"
             >
-              <h2 className="text-2xl sm:text-3xl lg:text-[2.2rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.12] text-balance">
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.65rem] font-extrabold tracking-[-0.03em] text-[var(--text-primary)] leading-[1.08] text-balance">
                 {tr('landing_founder_title')}
               </h2>
-              <p className="landing-body-copy text-[var(--text-secondary)] max-w-[50ch] mx-auto text-pretty">
+              <p className="landing-body-copy text-[var(--text-secondary)] max-w-[54ch] text-pretty text-lg sm:text-[19px] leading-relaxed">
                 {tr('landing_founder_body')}
               </p>
-              <div className="pt-2 flex items-center justify-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-landing-signature text-[var(--text-primary)] text-xs font-extrabold flex items-center justify-center shrink-0">
-                  K
-                </span>
-                <span className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+              <div className="pt-2 border-t border-[var(--border-divider)] inline-flex items-center gap-3">
+                <span className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
                   {tr('landing_founder_signature')}
                 </span>
               </div>
@@ -2384,25 +2660,24 @@ export function LandingPage({
         ===================================================================== */}
         <section className="py-16 sm:py-24 bg-landing-signature">
           <div className="landing-container text-center space-y-6">
-            <h2 className="text-2xl sm:text-5xl font-extrabold tracking-[-0.035em] text-[var(--text-primary)] leading-[1.06] max-w-2xl mx-auto text-balance">
+            <h2 className="text-2xl sm:text-5xl font-extrabold tracking-[-0.035em] text-white leading-[1.06] max-w-2xl mx-auto text-balance">
               {tr('landing_cta_title')}
             </h2>
 
-            <p className="landing-body-copy text-[var(--text-primary)]/85 max-w-lg mx-auto text-pretty">
+            <p className="landing-body-copy text-white/90 max-w-lg mx-auto text-pretty">
               {tr('landing_cta_subtitle')}
             </p>
 
             <div className="flex flex-col items-center justify-center gap-3 pt-1">
-              <Button
-                variant="primary"
-                size="lg"
+              <button
+                type="button"
                 onClick={onGetStarted}
-                className="w-full max-w-sm sm:w-auto font-semibold text-sm px-8 h-12 justify-center text-center"
+                className="w-full max-w-sm sm:w-auto inline-flex items-center justify-center text-center font-bold text-sm px-8 h-12 rounded-full bg-[#17120E] text-[#FFFDF9] hover:bg-[#241D17] transition-all cursor-pointer active:scale-[0.98] border-none shadow-sm"
               >
                 {tr('landing_hero_button')}
-              </Button>
+              </button>
 
-              <p className="text-xs font-medium text-[var(--text-primary)]/80 flex items-center justify-center gap-1.5">
+              <p className="text-xs font-medium text-white/85 flex items-center justify-center gap-1.5">
                 <Lock size={13} className="shrink-0" />
                 <span>{tr('landing_no_bank_needed')}</span>
               </p>
@@ -2414,7 +2689,7 @@ export function LandingPage({
       {/* =====================================================================
           12. FOOTER
       ===================================================================== */}
-      <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] bg-[var(--surface-color)] text-sm text-[var(--text-secondary)]">
+      <footer className="py-10 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] bg-[var(--surface-color)] border-t border-[var(--border-divider)] text-sm text-[var(--text-secondary)]">
         <div className="landing-container flex flex-col sm:flex-row items-center justify-between gap-6">
           
           <div className="flex items-center gap-2.5">

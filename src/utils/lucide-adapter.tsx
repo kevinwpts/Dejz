@@ -1,374 +1,623 @@
 import React from 'react';
-import * as Phosphor from '@phosphor-icons/react';
+import {
+  Airplane as PhosAirplane,
+  AirplaneLanding as PhosAirplaneLanding,
+  AirplaneTakeoff as PhosAirplaneTakeoff,
+  Anchor as PhosAnchor,
+  AppleLogo as PhosAppleLogo,
+  Armchair as PhosArmchair,
+  ArrowClockwise as PhosArrowClockwise,
+  ArrowCounterClockwise as PhosArrowCounterClockwise,
+  ArrowDownLeft as PhosArrowDownLeft,
+  ArrowDownRight as PhosArrowDownRight,
+  ArrowLeft as PhosArrowLeft,
+  ArrowRight as PhosArrowRight,
+  ArrowSquareOut as PhosArrowSquareOut,
+  ArrowUp as PhosArrowUp,
+  ArrowUpRight as PhosArrowUpRight,
+  ArrowsCounterClockwise as PhosArrowsCounterClockwise,
+  ArrowsDownUp as PhosArrowsDownUp,
+  Baby as PhosBaby,
+  Backpack as PhosBackpack,
+  Backspace as PhosBackspace,
+  Bank as PhosBank,
+  Barbell as PhosBarbell,
+  Bathtub as PhosBathtub,
+  BatteryCharging as PhosBatteryCharging,
+  BatteryHigh as PhosBatteryHigh,
+  Bed as PhosBed,
+  BeerBottle as PhosBeerBottle,
+  Bell as PhosBell,
+  Bicycle as PhosBicycle,
+  Bird as PhosBird,
+  Boat as PhosBoat,
+  Book as PhosBook,
+  BookOpen as PhosBookOpen,
+  Bookmark as PhosBookmark,
+  Books as PhosBooks,
+  BowlFood as PhosBowlFood,
+  Briefcase as PhosBriefcase,
+  Bug as PhosBug,
+  Building as PhosBuilding,
+  Buildings as PhosBuildings,
+  Bus as PhosBus,
+  CableCar as PhosCableCar,
+  Cake as PhosCake,
+  Calculator as PhosCalculator,
+  Calendar as PhosCalendar,
+  CalendarCheck as PhosCalendarCheck,
+  Camera as PhosCamera,
+  CameraRotate as PhosCameraRotate,
+  Car as PhosCar,
+  Cards as PhosCards,
+  CaretDown as PhosCaretDown,
+  CaretLeft as PhosCaretLeft,
+  CaretRight as PhosCaretRight,
+  CaretUp as PhosCaretUp,
+  Carrot as PhosCarrot,
+  Cat as PhosCat,
+  ChartBar as PhosChartBar,
+  ChartDonut as PhosChartDonut,
+  ChartPie as PhosChartPie,
+  Chat as PhosChat,
+  ChatCentered as PhosChatCentered,
+  Check as PhosCheck,
+  CheckCircle as PhosCheckCircle,
+  CheckSquare as PhosCheckSquare,
+  ChefHat as PhosChefHat,
+  CircleHalf as PhosCircleHalf,
+  Clock as PhosClock,
+  ClockCounterClockwise as PhosClockCounterClockwise,
+  Cloud as PhosCloud,
+  CloudRain as PhosCloudRain,
+  Clover as PhosClover,
+  Coffee as PhosCoffee,
+  Coin as PhosCoin,
+  Coins as PhosCoins,
+  Compass as PhosCompass,
+  Confetti as PhosConfetti,
+  Cookie as PhosCookie,
+  Copy as PhosCopy,
+  CornersIn as PhosCornersIn,
+  CornersOut as PhosCornersOut,
+  Couch as PhosCouch,
+  Cpu as PhosCpu,
+  CreditCard as PhosCreditCard,
+  Crown as PhosCrown,
+  CurrencyDollar as PhosCurrencyDollar,
+  CurrencyEur as PhosCurrencyEur,
+  Database as PhosDatabase,
+  DeviceMobile as PhosDeviceMobile,
+  DeviceTablet as PhosDeviceTablet,
+  Diamond as PhosDiamond,
+  DiceFive as PhosDiceFive,
+  Divide as PhosDivide,
+  Dog as PhosDog,
+  Door as PhosDoor,
+  DotsThree as PhosDotsThree,
+  DotsThreeVertical as PhosDotsThreeVertical,
+  Download as PhosDownload,
+  Drop as PhosDrop,
+  Egg as PhosEgg,
+  Envelope as PhosEnvelope,
+  EnvelopeOpen as PhosEnvelopeOpen,
+  Equalizer as PhosEqualizer,
+  Equals as PhosEquals,
+  Eye as PhosEye,
+  EyeSlash as PhosEyeSlash,
+  Eyeglasses as PhosEyeglasses,
+  Fan as PhosFan,
+  File as PhosFile,
+  FileCode as PhosFileCode,
+  FileText as PhosFileText,
+  FilmStrip as PhosFilmStrip,
+  Fingerprint as PhosFingerprint,
+  FirstAid as PhosFirstAid,
+  Fish as PhosFish,
+  Flag as PhosFlag,
+  Flame as PhosFlame,
+  Flower as PhosFlower,
+  Folder as PhosFolder,
+  Footprints as PhosFootprints,
+  ForkKnife as PhosForkKnife,
+  GameController as PhosGameController,
+  GasPump as PhosGasPump,
+  Gauge as PhosGauge,
+  Gear as PhosGear,
+  Gift as PhosGift,
+  GitFork as PhosGitFork,
+  Globe as PhosGlobe,
+  GraduationCap as PhosGraduationCap,
+  GridFour as PhosGridFour,
+  Guitar as PhosGuitar,
+  Hammer as PhosHammer,
+  HandCoins as PhosHandCoins,
+  Handshake as PhosHandshake,
+  HardDrive as PhosHardDrive,
+  HardDrives as PhosHardDrives,
+  HardHat as PhosHardHat,
+  Headphones as PhosHeadphones,
+  Heart as PhosHeart,
+  Heartbeat as PhosHeartbeat,
+  House as PhosHouse,
+  IceCream as PhosIceCream,
+  Image as PhosImage,
+  Info as PhosInfo,
+  InstagramLogo as PhosInstagramLogo,
+  Key as PhosKey,
+  Keyboard as PhosKeyboard,
+  Lamp as PhosLamp,
+  Laptop as PhosLaptop,
+  Layout as PhosLayout,
+  Leaf as PhosLeaf,
+  Lightbulb as PhosLightbulb,
+  Lightning as PhosLightning,
+  LightningSlash as PhosLightningSlash,
+  LinkBreak as PhosLinkBreak,
+  List as PhosList,
+  Lock as PhosLock,
+  MagnifyingGlass as PhosMagnifyingGlass,
+  MapPin as PhosMapPin,
+  MapTrifold as PhosMapTrifold,
+  Martini as PhosMartini,
+  MaskHappy as PhosMaskHappy,
+  Medal as PhosMedal,
+  Megaphone as PhosMegaphone,
+  Microphone as PhosMicrophone,
+  Minus as PhosMinus,
+  Money as PhosMoney,
+  Monitor as PhosMonitor,
+  Moon as PhosMoon,
+  Mountains as PhosMountains,
+  MusicNote as PhosMusicNote,
+  NavigationArrow as PhosNavigationArrow,
+  Newspaper as PhosNewspaper,
+  Orange as PhosOrange,
+  Package as PhosPackage,
+  PaintBrush as PhosPaintBrush,
+  PaintBucket as PhosPaintBucket,
+  Palette as PhosPalette,
+  PaperPlaneTilt as PhosPaperPlaneTilt,
+  Paperclip as PhosPaperclip,
+  Pause as PhosPause,
+  PawPrint as PhosPawPrint,
+  Pen as PhosPen,
+  PencilSimple as PhosPencilSimple,
+  Percent as PhosPercent,
+  Phone as PhosPhone,
+  PhoneCall as PhosPhoneCall,
+  PiggyBank as PhosPiggyBank,
+  Pill as PhosPill,
+  Pizza as PhosPizza,
+  Plant as PhosPlant,
+  Play as PhosPlay,
+  Plus as PhosPlus,
+  PlusSquare as PhosPlusSquare,
+  Popcorn as PhosPopcorn,
+  Power as PhosPower,
+  Presentation as PhosPresentation,
+  Printer as PhosPrinter,
+  Pulse as PhosPulse,
+  QrCode as PhosQrCode,
+  Question as PhosQuestion,
+  Radio as PhosRadio,
+  Receipt as PhosReceipt,
+  Repeat as PhosRepeat,
+  Robot as PhosRobot,
+  Rocket as PhosRocket,
+  Sailboat as PhosSailboat,
+  Scales as PhosScales,
+  Scissors as PhosScissors,
+  ShareNetwork as PhosShareNetwork,
+  Shield as PhosShield,
+  ShieldCheck as PhosShieldCheck,
+  ShoppingBag as PhosShoppingBag,
+  ShoppingCart as PhosShoppingCart,
+  Shower as PhosShower,
+  SignOut as PhosSignOut,
+  Signpost as PhosSignpost,
+  SlidersHorizontal as PhosSlidersHorizontal,
+  Smiley as PhosSmiley,
+  SmileyBlank as PhosSmileyBlank,
+  SmileySad as PhosSmileySad,
+  Snowflake as PhosSnowflake,
+  Sparkle as PhosSparkle,
+  SpeakerHigh as PhosSpeakerHigh,
+  SpeakerSlash as PhosSpeakerSlash,
+  Spinner as PhosSpinner,
+  Square as PhosSquare,
+  SquaresFour as PhosSquaresFour,
+  Stack as PhosStack,
+  Star as PhosStar,
+  Stethoscope as PhosStethoscope,
+  Storefront as PhosStorefront,
+  Suitcase as PhosSuitcase,
+  Sun as PhosSun,
+  SunHorizon as PhosSunHorizon,
+  Syringe as PhosSyringe,
+  TShirt as PhosTShirt,
+  Tag as PhosTag,
+  Target as PhosTarget,
+  Taxi as PhosTaxi,
+  Television as PhosTelevision,
+  Tent as PhosTent,
+  Thermometer as PhosThermometer,
+  Ticket as PhosTicket,
+  TrafficCone as PhosTrafficCone,
+  Train as PhosTrain,
+  Tram as PhosTram,
+  Trash as PhosTrash,
+  Tree as PhosTree,
+  TrendDown as PhosTrendDown,
+  TrendUp as PhosTrendUp,
+  Trophy as PhosTrophy,
+  Truck as PhosTruck,
+  Umbrella as PhosUmbrella,
+  Upload as PhosUpload,
+  User as PhosUser,
+  UserCheck as PhosUserCheck,
+  Users as PhosUsers,
+  Vault as PhosVault,
+  Wallet as PhosWallet,
+  Warehouse as PhosWarehouse,
+  WarningCircle as PhosWarningCircle,
+  WashingMachine as PhosWashingMachine,
+  Watch as PhosWatch,
+  WifiHigh as PhosWifiHigh,
+  Wind as PhosWind,
+  Wine as PhosWine,
+  Wrench as PhosWrench,
+  X as PhosX,
+  XCircle as PhosXCircle,
+} from '@phosphor-icons/react';
 
-export type LucideIcon = React.ComponentType<any>;
+export interface LucideProps extends React.ComponentPropsWithoutRef<'svg'> {
+  size?: number | string;
+  strokeWidth?: number | string;
+  absoluteStrokeWidth?: boolean;
+  color?: string;
+  weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone';
+}
 
-const wrapIcon = (PhosphorComp: any) => {
-  if (!PhosphorComp) {
-    // Fallback to Tag if a component is missing
-    const Fallback = React.forwardRef<any, any>((props, ref) => {
-      return <Phosphor.Tag ref={ref} {...props} />;
-    });
+export type LucideIcon = React.ForwardRefExoticComponent<LucideProps & React.RefAttributes<SVGSVGElement>>;
+
+const wrap = (PhosIcon: React.ComponentType<any>): LucideIcon => {
+  if (!PhosIcon) {
+    const Fallback = React.forwardRef<SVGSVGElement, LucideProps>((props, ref) => (
+      <PhosTag ref={ref} {...props} />
+    ));
     Fallback.displayName = 'FallbackIcon';
     return Fallback;
   }
-  const Comp = React.forwardRef<any, any>((props, ref) => {
-    const { strokeWidth: _strokeWidth, size, ...rest } = props;
-    
-    // Map standard Lucide size defaults if not provided
-    const resolvedSize = size ?? 20;
-
-    return (
-      <PhosphorComp
-        ref={ref}
-        size={resolvedSize}
-        {...rest}
-      />
-    );
+  const Component = React.forwardRef<SVGSVGElement, LucideProps>((props, ref) => {
+    const { strokeWidth: _strokeWidth, absoluteStrokeWidth: _abs, size, ...rest } = props;
+    const finalSize = size ?? 20;
+    return <PhosIcon ref={ref} size={finalSize} {...rest} />;
   });
-  Comp.displayName = PhosphorComp.displayName || 'Icon';
-  return Comp;
+  Component.displayName = PhosIcon.displayName || 'Icon';
+  return Component;
 };
 
-// Base & Finance
-export const Wallet = wrapIcon(Phosphor.Wallet);
-export const Home = wrapIcon(Phosphor.House);
-export const House = wrapIcon(Phosphor.House);
-export const Car = wrapIcon(Phosphor.Car);
-export const Chrome = wrapIcon(Phosphor.Globe);
-export const Zap = wrapIcon(Phosphor.Lightning);
-export const Smartphone = wrapIcon(Phosphor.DeviceMobile);
-export const Wifi = wrapIcon(Phosphor.WifiHigh);
-export const Tv = wrapIcon(Phosphor.Television);
-export const ShoppingBag = wrapIcon(Phosphor.ShoppingBag);
-export const Utensils = wrapIcon(Phosphor.ForkKnife);
-export const Heart = wrapIcon(Phosphor.Heart);
-export const Dumbbell = wrapIcon(Phosphor.Barbell);
-export const Plane = wrapIcon(Phosphor.Airplane);
-export const Gift = wrapIcon(Phosphor.Gift);
-export const Coffee = wrapIcon(Phosphor.Coffee);
-export const Music = wrapIcon(Phosphor.MusicNote);
-export const Gamepad2 = wrapIcon(Phosphor.GameController);
-export const ShieldCheck = wrapIcon(Phosphor.ShieldCheck);
-export const GraduationCap = wrapIcon(Phosphor.GraduationCap);
-export const Briefcase = wrapIcon(Phosphor.Briefcase);
-export const TrendingUp = wrapIcon(Phosphor.TrendUp);
-export const TrendingDown = wrapIcon(Phosphor.TrendDown);
-export const PiggyBank = wrapIcon(Phosphor.PiggyBank);
-export const Coins = wrapIcon(Phosphor.Coins);
-export const Banknote = wrapIcon(Phosphor.Money);
-export const CreditCard = wrapIcon(Phosphor.CreditCard);
-export const Receipt = wrapIcon(Phosphor.Receipt);
-export const CarFront = wrapIcon(Phosphor.Car);
-export const Bus = wrapIcon(Phosphor.Bus);
-export const Train = wrapIcon(Phosphor.Train);
-export const Stethoscope = wrapIcon(Phosphor.Stethoscope);
-export const Baby = wrapIcon(Phosphor.Baby);
-export const Dog = wrapIcon(Phosphor.Dog);
-export const Camera = wrapIcon(Phosphor.Camera);
-export const Book = wrapIcon(Phosphor.Book);
-export const Globe = wrapIcon(Phosphor.Globe);
-export const Star = wrapIcon(Phosphor.Star);
-export const HeartPulse = wrapIcon(Phosphor.Heartbeat);
-export const Flame = wrapIcon(Phosphor.Flame);
-export const Droplets = wrapIcon(Phosphor.Drop);
-export const Lightbulb = wrapIcon(Phosphor.Lightbulb);
-export const Hammer = wrapIcon(Phosphor.Hammer);
-export const Wrench = wrapIcon(Phosphor.Wrench);
-export const Trash2 = wrapIcon(Phosphor.Trash);
-export const Package = wrapIcon(Phosphor.Package);
-export const Truck = wrapIcon(Phosphor.Truck);
-export const ShoppingCart = wrapIcon(Phosphor.ShoppingCart);
-export const Store = wrapIcon(Phosphor.Storefront);
-export const Pizza = wrapIcon(Phosphor.Pizza);
-export const IceCream = wrapIcon(Phosphor.IceCream);
-export const Beer = wrapIcon(Phosphor.BeerBottle);
-export const Wine = wrapIcon(Phosphor.Wine);
-export const Apple = wrapIcon(Phosphor.AppleLogo); 
-export const Banana = wrapIcon(Phosphor.Tag); // fallback
-export const Carrot = wrapIcon(Phosphor.Carrot);
-export const Egg = wrapIcon(Phosphor.Egg);
-export const Fish = wrapIcon(Phosphor.Fish);
-export const Beef = wrapIcon(Phosphor.Tag); // fallback
-export const Cake = wrapIcon(Phosphor.Cake);
-export const Cookie = wrapIcon(Phosphor.Cookie);
-export const Cloud = wrapIcon(Phosphor.Cloud);
-export const Sun = wrapIcon(Phosphor.Sun);
-export const Moon = wrapIcon(Phosphor.Moon);
-export const Wind = wrapIcon(Phosphor.Wind);
-export const Umbrella = wrapIcon(Phosphor.Umbrella);
-export const Scissors = wrapIcon(Phosphor.Scissors);
-export const Brush = wrapIcon(Phosphor.PaintBrush);
-export const PenTool = wrapIcon(Phosphor.Pen);
-export const Map = wrapIcon(Phosphor.MapTrifold);
-export const Navigation = wrapIcon(Phosphor.NavigationArrow);
-export const Flag = wrapIcon(Phosphor.Flag);
-export const Trophy = wrapIcon(Phosphor.Trophy);
-export const Medal = wrapIcon(Phosphor.Medal);
-export const Target = wrapIcon(Phosphor.Target);
-export const Rocket = wrapIcon(Phosphor.Rocket);
-export const Key = wrapIcon(Phosphor.Key);
-export const Lock = wrapIcon(Phosphor.Lock);
-export const Bell = wrapIcon(Phosphor.Bell);
-export const Mail = wrapIcon(Phosphor.Envelope);
-export const Phone = wrapIcon(Phosphor.Phone);
-export const PhoneCall = wrapIcon(Phosphor.PhoneCall);
-export const MessageSquare = wrapIcon(Phosphor.Chat);
-export const User = wrapIcon(Phosphor.User);
-export const Users = wrapIcon(Phosphor.Users);
-export const UserCheck = wrapIcon(Phosphor.UserCheck);
-export const Smile = wrapIcon(Phosphor.Smiley);
-export const Frown = wrapIcon(Phosphor.SmileySad);
-export const Meh = wrapIcon(Phosphor.SmileyBlank);
-export const Eye = wrapIcon(Phosphor.Eye);
-export const Search = wrapIcon(Phosphor.MagnifyingGlass);
-export const Settings = wrapIcon(Phosphor.Gear);
-export const MoreHorizontal = wrapIcon(Phosphor.DotsThree);
-export const RotateCcw = wrapIcon(Phosphor.ArrowCounterClockwise);
-export const ArrowUpDown = wrapIcon(Phosphor.ArrowsDownUp);
-export const DollarSign = wrapIcon(Phosphor.CurrencyDollar);
-export const Euro = wrapIcon(Phosphor.CurrencyEur);
-
-// Categories & Extensions
-export const Sandwich = wrapIcon(Phosphor.ForkKnife); // sandwich fallback
-export const CupSoda = wrapIcon(Phosphor.Coffee);
-export const Croissant = wrapIcon(Phosphor.Cookie);
-export const Soup = wrapIcon(Phosphor.BowlFood);
-export const Salad = wrapIcon(Phosphor.BowlFood);
-export const Citrus = wrapIcon(Phosphor.Orange);
-export const Candy = wrapIcon(Phosphor.Cookie);
-export const Popcorn = wrapIcon(Phosphor.Popcorn);
-export const UtensilsCrossed = wrapIcon(Phosphor.ForkKnife);
-export const Cherry = wrapIcon(Phosphor.Tag);
-export const Drumstick = wrapIcon(Phosphor.ForkKnife);
-export const GlassWater = wrapIcon(Phosphor.Wine);
-export const Donut = wrapIcon(Phosphor.ChartDonut);
-export const ChefHat = wrapIcon(Phosphor.ChefHat);
-export const Martini = wrapIcon(Phosphor.Martini);
-export const Milk = wrapIcon(Phosphor.Coffee);
-export const Wheat = wrapIcon(Phosphor.Tag);
-export const Fuel = wrapIcon(Phosphor.GasPump);
-export const Bike = wrapIcon(Phosphor.Bicycle);
-export const Ship = wrapIcon(Phosphor.Boat);
-export const Anchor = wrapIcon(Phosphor.Anchor);
-export const CarTaxiFront = wrapIcon(Phosphor.Taxi);
-export const BusFront = wrapIcon(Phosphor.Bus);
-export const TrainFront = wrapIcon(Phosphor.Train);
-export const TramFront = wrapIcon(Phosphor.Tram);
-export const CableCar = wrapIcon(Phosphor.CableCar);
-export const Gauge = wrapIcon(Phosphor.Gauge);
-export const PlaneLanding = wrapIcon(Phosphor.AirplaneLanding);
-export const PlaneTakeoff = wrapIcon(Phosphor.AirplaneTakeoff);
-export const Sailboat = wrapIcon(Phosphor.Sailboat);
-export const ParkingSquare = wrapIcon(Phosphor.Tag);
-export const Building = wrapIcon(Phosphor.Building);
-export const Building2 = wrapIcon(Phosphor.Buildings);
-export const Warehouse = wrapIcon(Phosphor.Warehouse);
-export const Bed = wrapIcon(Phosphor.Bed);
-export const BedDouble = wrapIcon(Phosphor.Bed);
-export const Bath = wrapIcon(Phosphor.Bathtub);
-export const Armchair = wrapIcon(Phosphor.Armchair);
-export const Sofa = wrapIcon(Phosphor.Couch);
-export const Lamp = wrapIcon(Phosphor.Lamp);
-export const LampDesk = wrapIcon(Phosphor.Lamp);
-export const PaintBucket = wrapIcon(Phosphor.PaintBucket);
-export const DoorClosed = wrapIcon(Phosphor.Door);
-export const Power = wrapIcon(Phosphor.Power);
-export const Drill = wrapIcon(Phosphor.Hammer);
-export const Construction = wrapIcon(Phosphor.TrafficCone);
-export const HardHat = wrapIcon(Phosphor.HardHat);
-export const WashingMachine = wrapIcon(Phosphor.WashingMachine);
-export const Fan = wrapIcon(Phosphor.Fan);
-export const AirVent = wrapIcon(Phosphor.Fan);
-export const ShowerHead = wrapIcon(Phosphor.Shower);
-export const ShoppingBasket = wrapIcon(Phosphor.ShoppingBag);
-export const Shirt = wrapIcon(Phosphor.TShirt);
-export const Watch = wrapIcon(Phosphor.Watch);
-export const Gem = wrapIcon(Phosphor.Diamond);
-export const Footprints = wrapIcon(Phosphor.Footprints);
-export const Glasses = wrapIcon(Phosphor.Eyeglasses);
-export const Tag = wrapIcon(Phosphor.Tag);
-export const Tags = wrapIcon(Phosphor.Tag);
-export const Percent = wrapIcon(Phosphor.Percent);
-export const BadgePercent = wrapIcon(Phosphor.Percent);
-export const WalletCards = wrapIcon(Phosphor.Cards);
-export const Film = wrapIcon(Phosphor.FilmStrip);
-export const Clapperboard = wrapIcon(Phosphor.FilmStrip);
-export const Ticket = wrapIcon(Phosphor.Ticket);
-export const Dice5 = wrapIcon(Phosphor.DiceFive);
-export const Radio = wrapIcon(Phosphor.Radio);
-export const Headphones = wrapIcon(Phosphor.Headphones);
-export const Mic = wrapIcon(Phosphor.Microphone);
-export const Speaker = wrapIcon(Phosphor.SpeakerHigh);
-export const Volume2 = wrapIcon(Phosphor.SpeakerHigh);
-export const Palette = wrapIcon(Phosphor.Palette);
-export const Guitar = wrapIcon(Phosphor.Guitar);
-export const Piano = wrapIcon(Phosphor.Keyboard);
-export const Drama = wrapIcon(Phosphor.MaskHappy);
-export const Award = wrapIcon(Phosphor.Trophy);
-export const Crown = wrapIcon(Phosphor.Crown);
-export const Sparkles = wrapIcon(Phosphor.Sparkle);
-export const SmilePlus = wrapIcon(Phosphor.Smiley);
-export const PartyPopper = wrapIcon(Phosphor.Confetti);
-export const Activity = wrapIcon(Phosphor.Pulse);
-export const Cross = wrapIcon(Phosphor.FirstAid);
-export const Pill = wrapIcon(Phosphor.Pill);
-export const Syringe = wrapIcon(Phosphor.Syringe);
-export const HeartHandshake = wrapIcon(Phosphor.Handshake);
-export const Shield = wrapIcon(Phosphor.Shield);
-export const Thermometer = wrapIcon(Phosphor.Thermometer);
-export const ReceiptText = wrapIcon(Phosphor.Receipt);
-export const ReceiptCent = wrapIcon(Phosphor.Receipt);
-export const Landmark = wrapIcon(Phosphor.Bank);
-export const CircleDollarSign = wrapIcon(Phosphor.Coin);
-export const BadgeDollarSign = wrapIcon(Phosphor.Coin);
-export const Vault = wrapIcon(Phosphor.Vault);
-export const Scale = wrapIcon(Phosphor.Scales);
-export const Laptop = wrapIcon(Phosphor.Laptop);
-export const Monitor = wrapIcon(Phosphor.Monitor);
-export const Tablet = wrapIcon(Phosphor.DeviceTablet);
-export const Server = wrapIcon(Phosphor.HardDrives);
-export const Cpu = wrapIcon(Phosphor.Cpu);
-export const HardDrive = wrapIcon(Phosphor.HardDrive);
-export const Battery = wrapIcon(Phosphor.BatteryHigh);
-export const BatteryCharging = wrapIcon(Phosphor.BatteryCharging);
-export const Printer = wrapIcon(Phosphor.Printer);
-export const Bot = wrapIcon(Phosphor.Robot);
-export const QrCode = wrapIcon(Phosphor.QrCode);
-export const KeyRound = wrapIcon(Phosphor.Key);
-export const Router = wrapIcon(Phosphor.WifiHigh);
-export const PawPrint = wrapIcon(Phosphor.PawPrint);
-export const Cat = wrapIcon(Phosphor.Cat);
-export const Bird = wrapIcon(Phosphor.Bird);
-export const Bug = wrapIcon(Phosphor.Bug);
-export const Palmtree = wrapIcon(Phosphor.Tree);
-export const Trees = wrapIcon(Phosphor.Tree);
-export const TreePine = wrapIcon(Phosphor.Tree);
-export const Sprout = wrapIcon(Phosphor.Plant);
-export const Flower = wrapIcon(Phosphor.Flower);
-export const Flower2 = wrapIcon(Phosphor.Flower);
-export const Leaf = wrapIcon(Phosphor.Leaf);
-export const Clover = wrapIcon(Phosphor.Clover);
-export const FishSymbol = wrapIcon(Phosphor.Fish);
-export const Mountain = wrapIcon(Phosphor.Mountains);
-export const MountainSnow = wrapIcon(Phosphor.Mountains);
-export const Tent = wrapIcon(Phosphor.Tent);
-export const Compass = wrapIcon(Phosphor.Compass);
-export const Snowflake = wrapIcon(Phosphor.Snowflake);
-export const CloudRain = wrapIcon(Phosphor.CloudRain);
-export const Sunset = wrapIcon(Phosphor.SunHorizon);
-export const Sunrise = wrapIcon(Phosphor.SunHorizon);
-export const Hotel = wrapIcon(Phosphor.Building);
-export const Luggage = wrapIcon(Phosphor.Suitcase);
-export const BaggageClaim = wrapIcon(Phosphor.Suitcase);
-export const MapPin = wrapIcon(Phosphor.MapPin);
-export const School = wrapIcon(Phosphor.GraduationCap);
-export const Library = wrapIcon(Phosphor.Books);
-export const Bookmark = wrapIcon(Phosphor.Bookmark);
-export const Backpack = wrapIcon(Phosphor.Backpack);
-export const Calculator = wrapIcon(Phosphor.Calculator);
-export const Pencil = wrapIcon(Phosphor.PencilSimple);
-export const Paperclip = wrapIcon(Phosphor.Paperclip);
-export const FileText = wrapIcon(Phosphor.FileText);
-export const Folder = wrapIcon(Phosphor.Folder);
-export const Presentation = wrapIcon(Phosphor.Presentation);
-export const Milestone = wrapIcon(Phosphor.Signpost);
-export const Blocks = wrapIcon(Phosphor.SquaresFour);
-export const Newspaper = wrapIcon(Phosphor.Newspaper);
-export const Megaphone = wrapIcon(Phosphor.Megaphone);
-export const Send = wrapIcon(Phosphor.PaperPlaneTilt);
-export const Check = wrapIcon(Phosphor.Check);
-export const X = wrapIcon(Phosphor.X);
-export const Menu = wrapIcon(Phosphor.List);
-export const HelpCircle = wrapIcon(Phosphor.Question);
-
-// General replacements from across the applet
-export const Loader2 = wrapIcon(Phosphor.Spinner);
-export const ChevronRight = wrapIcon(Phosphor.CaretRight);
-export const ChevronLeft = wrapIcon(Phosphor.CaretLeft);
-export const ChevronDown = wrapIcon(Phosphor.CaretDown);
-export const ChevronUp = wrapIcon(Phosphor.CaretUp);
-export const PencilSimple = wrapIcon(Phosphor.PencilSimple);
-export const Edit3 = wrapIcon(Phosphor.PencilSimple);
-export const Edit = wrapIcon(Phosphor.PencilSimple);
-export const AlertCircle = wrapIcon(Phosphor.WarningCircle);
-export const CheckCircle2 = wrapIcon(Phosphor.CheckCircle);
-export const CheckCircle = wrapIcon(Phosphor.CheckCircle);
-export const ArrowRight = wrapIcon(Phosphor.ArrowRight);
-export const RotateCw = wrapIcon(Phosphor.ArrowClockwise);
-export const ActivityIcon = wrapIcon(Phosphor.Pulse);
-export const Users2 = wrapIcon(Phosphor.Users);
-export const MessageSquareHeart = wrapIcon(Phosphor.ChatCentered);
-export const PlusSquare = wrapIcon(Phosphor.PlusSquare);
-export const MoreVertical = wrapIcon(Phosphor.DotsThreeVertical);
-export const ArrowUp = wrapIcon(Phosphor.ArrowUp);
-export const Divide = wrapIcon(Phosphor.Divide);
-export const Minus = wrapIcon(Phosphor.Minus);
-export const Equal = wrapIcon(Phosphor.Equals);
-export const LayoutGrid = wrapIcon(Phosphor.Layout);
-export const CalendarIcon = wrapIcon(Phosphor.Calendar);
-export const RotateCcwIcon = wrapIcon(Phosphor.ArrowCounterClockwise);
-export const ArrowDownLeft = wrapIcon(Phosphor.ArrowDownLeft);
-export const ArrowUpRight = wrapIcon(Phosphor.ArrowUpRight);
-export const ArrowDownRight = wrapIcon(Phosphor.ArrowDownRight);
-export const ArrowLeft = wrapIcon(Phosphor.ArrowLeft);
-export const Copy = wrapIcon(Phosphor.Copy);
-export const Trash = wrapIcon(Phosphor.Trash);
-export const CheckSquare = wrapIcon(Phosphor.CheckSquare);
-export const Grid = wrapIcon(Phosphor.GridFour);
-export const Play = wrapIcon(Phosphor.Play);
-export const Pause = wrapIcon(Phosphor.Pause);
-export const Maximize2 = wrapIcon(Phosphor.CornersOut);
-export const Minimize2 = wrapIcon(Phosphor.CornersIn);
-export const VolumeX = wrapIcon(Phosphor.SpeakerSlash);
-export const File = wrapIcon(Phosphor.File);
-export const BarChart2 = wrapIcon(Phosphor.ChartBar);
-export const SwitchCamera = wrapIcon(Phosphor.CameraRotate);
-export const ZapOff = wrapIcon(Phosphor.LightningSlash);
-export const ImageIcon = wrapIcon(Phosphor.Image);
-export const Unlink = wrapIcon(Phosphor.LinkBreak);
-export const MailCheck = wrapIcon(Phosphor.EnvelopeOpen);
-export const LogOut = wrapIcon(Phosphor.SignOut);
-export const Backspace = wrapIcon(Phosphor.Backspace);
-export const Delete = wrapIcon(Phosphor.Backspace);
-export const Equalizer = wrapIcon(Phosphor.Equalizer);
-export const Equals = wrapIcon(Phosphor.Equals);
-export const Repeat = wrapIcon(Phosphor.Repeat);
-export const RepeatClockwise = wrapIcon(Phosphor.ArrowClockwise);
-export const Info = wrapIcon(Phosphor.Info);
-export const HelpCircleIcon = wrapIcon(Phosphor.Question);
-export const RefreshCw = wrapIcon(Phosphor.ArrowsCounterClockwise);
-export const BookOpen = wrapIcon(Phosphor.BookOpen);
-export const History = wrapIcon(Phosphor.ClockCounterClockwise);
-export const HandCoins = wrapIcon(Phosphor.HandCoins);
-export const Share = wrapIcon(Phosphor.ShareNetwork);
-export const EyeOff = wrapIcon(Phosphor.EyeSlash);
-export const Droplet = wrapIcon(Phosphor.Drop);
-export const ApplePodcasts = wrapIcon(Phosphor.AppleLogo);
-export const ChatBubble = wrapIcon(Phosphor.Chat);
-export const Gemstone = wrapIcon(Phosphor.Diamond);
-export const ChatCenteredHeart = wrapIcon(Phosphor.ChatCentered);
-export const ArrowsRepeat = wrapIcon(Phosphor.Repeat);
-export const HistoryIcon = wrapIcon(Phosphor.ClockCounterClockwise);
-export const EnvelopeSimpleOpen = wrapIcon(Phosphor.EnvelopeOpen);
-export const Calendar = wrapIcon(Phosphor.Calendar);
-export const Clock = wrapIcon(Phosphor.Clock);
-export const Upload = wrapIcon(Phosphor.Upload);
-export const Plus = wrapIcon(Phosphor.Plus);
-export const ExternalLink = wrapIcon(Phosphor.ArrowSquareOut);
-export const Image = wrapIcon(Phosphor.Image);
-export const Layers = wrapIcon(Phosphor.Stack);
-export const SlidersHorizontal = wrapIcon(Phosphor.SlidersHorizontal);
-export const PieChart = wrapIcon(Phosphor.ChartPie);
-export const XCircle = wrapIcon(Phosphor.XCircle);
-export const Database = wrapIcon(Phosphor.Database);
-export const FileCode = wrapIcon(Phosphor.FileCode);
-export const Download = wrapIcon(Phosphor.Download);
-export const Fingerprint = wrapIcon(Phosphor.Fingerprint);
-export const Instagram = wrapIcon(Phosphor.InstagramLogo);
-export const Square = wrapIcon(Phosphor.Square);
-export const CircleHalf = wrapIcon(Phosphor.CircleHalf);
-export const CalendarCheck = wrapIcon(Phosphor.CalendarCheck);
-export const GitFork = wrapIcon(Phosphor.GitFork);
-export const Split = wrapIcon(Phosphor.GitFork);
-
+export const Activity = wrap(PhosPulse);
+export const AirVent = wrap(PhosFan);
+export const AlertCircle = wrap(PhosWarningCircle);
+export const Anchor = wrap(PhosAnchor);
+export const Apple = wrap(PhosAppleLogo);
+export const Armchair = wrap(PhosArmchair);
+export const ArrowDownLeft = wrap(PhosArrowDownLeft);
+export const ArrowDownRight = wrap(PhosArrowDownRight);
+export const ArrowLeft = wrap(PhosArrowLeft);
+export const ArrowRight = wrap(PhosArrowRight);
+export const ArrowUp = wrap(PhosArrowUp);
+export const ArrowUpDown = wrap(PhosArrowsDownUp);
+export const ArrowUpRight = wrap(PhosArrowUpRight);
+export const Award = wrap(PhosTrophy);
+export const Baby = wrap(PhosBaby);
+export const Backpack = wrap(PhosBackpack);
+export const Backspace = wrap(PhosBackspace);
+export const BadgeDollarSign = wrap(PhosCoin);
+export const BadgePercent = wrap(PhosPercent);
+export const BaggageClaim = wrap(PhosSuitcase);
+export const Banana = wrap(PhosTag);
+export const Banknote = wrap(PhosMoney);
+export const BarChart2 = wrap(PhosChartBar);
+export const Bath = wrap(PhosBathtub);
+export const Battery = wrap(PhosBatteryHigh);
+export const BatteryCharging = wrap(PhosBatteryCharging);
+export const Bed = wrap(PhosBed);
+export const BedDouble = wrap(PhosBed);
+export const Beef = wrap(PhosTag);
+export const Beer = wrap(PhosBeerBottle);
+export const Bell = wrap(PhosBell);
+export const Bike = wrap(PhosBicycle);
+export const Bird = wrap(PhosBird);
+export const Blocks = wrap(PhosSquaresFour);
+export const Book = wrap(PhosBook);
+export const Bookmark = wrap(PhosBookmark);
+export const BookOpen = wrap(PhosBookOpen);
+export const Bot = wrap(PhosRobot);
+export const Briefcase = wrap(PhosBriefcase);
+export const Brush = wrap(PhosPaintBrush);
+export const Bug = wrap(PhosBug);
+export const Building = wrap(PhosBuilding);
+export const Building2 = wrap(PhosBuildings);
+export const Bus = wrap(PhosBus);
+export const BusFront = wrap(PhosBus);
+export const CableCar = wrap(PhosCableCar);
+export const Cake = wrap(PhosCake);
+export const Calculator = wrap(PhosCalculator);
+export const Calendar = wrap(PhosCalendar);
+export const CalendarCheck = wrap(PhosCalendarCheck);
+export const Camera = wrap(PhosCamera);
+export const Candy = wrap(PhosCookie);
+export const Car = wrap(PhosCar);
+export const CarFront = wrap(PhosCar);
+export const Carrot = wrap(PhosCarrot);
+export const CarTaxiFront = wrap(PhosTaxi);
+export const Cat = wrap(PhosCat);
+export const Check = wrap(PhosCheck);
+export const CheckCircle = wrap(PhosCheckCircle);
+export const CheckCircle2 = wrap(PhosCheckCircle);
+export const CheckSquare = wrap(PhosCheckSquare);
+export const ChefHat = wrap(PhosChefHat);
+export const Cherry = wrap(PhosTag);
+export const ChevronDown = wrap(PhosCaretDown);
+export const ChevronLeft = wrap(PhosCaretLeft);
+export const ChevronRight = wrap(PhosCaretRight);
+export const ChevronUp = wrap(PhosCaretUp);
+export const Chrome = wrap(PhosGlobe);
+export const CircleDollarSign = wrap(PhosCoin);
+export const CircleHalf = wrap(PhosCircleHalf);
+export const Citrus = wrap(PhosOrange);
+export const Clapperboard = wrap(PhosFilmStrip);
+export const Clock = wrap(PhosClock);
+export const Cloud = wrap(PhosCloud);
+export const CloudRain = wrap(PhosCloudRain);
+export const Clover = wrap(PhosClover);
+export const Coffee = wrap(PhosCoffee);
+export const Coins = wrap(PhosCoins);
+export const Compass = wrap(PhosCompass);
+export const Construction = wrap(PhosTrafficCone);
+export const Cookie = wrap(PhosCookie);
+export const Copy = wrap(PhosCopy);
+export const Cpu = wrap(PhosCpu);
+export const CreditCard = wrap(PhosCreditCard);
+export const Croissant = wrap(PhosCookie);
+export const Cross = wrap(PhosFirstAid);
+export const Crown = wrap(PhosCrown);
+export const CupSoda = wrap(PhosCoffee);
+export const Database = wrap(PhosDatabase);
+export const Delete = wrap(PhosBackspace);
+export const Dice5 = wrap(PhosDiceFive);
+export const Divide = wrap(PhosDivide);
+export const Dog = wrap(PhosDog);
+export const DollarSign = wrap(PhosCurrencyDollar);
+export const Donut = wrap(PhosChartDonut);
+export const DoorClosed = wrap(PhosDoor);
+export const Download = wrap(PhosDownload);
+export const Drama = wrap(PhosMaskHappy);
+export const Drill = wrap(PhosHammer);
+export const Droplet = wrap(PhosDrop);
+export const Droplets = wrap(PhosDrop);
+export const Drumstick = wrap(PhosForkKnife);
+export const Dumbbell = wrap(PhosBarbell);
+export const Edit = wrap(PhosPencilSimple);
+export const Edit2 = wrap(PhosPencilSimple);
+export const Edit3 = wrap(PhosPencilSimple);
+export const Egg = wrap(PhosEgg);
+export const Equal = wrap(PhosEquals);
+export const Equals = wrap(PhosEquals);
+export const Euro = wrap(PhosCurrencyEur);
+export const ExternalLink = wrap(PhosArrowSquareOut);
+export const Eye = wrap(PhosEye);
+export const EyeOff = wrap(PhosEyeSlash);
+export const Fan = wrap(PhosFan);
+export const File = wrap(PhosFile);
+export const FileCode = wrap(PhosFileCode);
+export const FileText = wrap(PhosFileText);
+export const Film = wrap(PhosFilmStrip);
+export const Fingerprint = wrap(PhosFingerprint);
+export const Fish = wrap(PhosFish);
+export const FishSymbol = wrap(PhosFish);
+export const Flag = wrap(PhosFlag);
+export const Flame = wrap(PhosFlame);
+export const Flower = wrap(PhosFlower);
+export const Flower2 = wrap(PhosFlower);
+export const Folder = wrap(PhosFolder);
+export const Footprints = wrap(PhosFootprints);
+export const Frown = wrap(PhosSmileySad);
+export const Fuel = wrap(PhosGasPump);
+export const Gamepad2 = wrap(PhosGameController);
+export const Gauge = wrap(PhosGauge);
+export const Gem = wrap(PhosDiamond);
+export const Gift = wrap(PhosGift);
+export const GitFork = wrap(PhosGitFork);
+export const Glasses = wrap(PhosEyeglasses);
+export const GlassWater = wrap(PhosWine);
+export const Globe = wrap(PhosGlobe);
+export const GraduationCap = wrap(PhosGraduationCap);
+export const Grid = wrap(PhosGridFour);
+export const Guitar = wrap(PhosGuitar);
+export const Hammer = wrap(PhosHammer);
+export const HandCoins = wrap(PhosHandCoins);
+export const HardDrive = wrap(PhosHardDrive);
+export const HardHat = wrap(PhosHardHat);
+export const Headphones = wrap(PhosHeadphones);
+export const Heart = wrap(PhosHeart);
+export const HeartHandshake = wrap(PhosHandshake);
+export const HeartPulse = wrap(PhosHeartbeat);
+export const HelpCircle = wrap(PhosQuestion);
+export const History = wrap(PhosClockCounterClockwise);
+export const Home = wrap(PhosHouse);
+export const Hotel = wrap(PhosBuilding);
+export const House = wrap(PhosHouse);
+export const IceCream = wrap(PhosIceCream);
+export const Image = wrap(PhosImage);
+export const Info = wrap(PhosInfo);
+export const Instagram = wrap(PhosInstagramLogo);
+export const Key = wrap(PhosKey);
+export const KeyRound = wrap(PhosKey);
+export const Lamp = wrap(PhosLamp);
+export const LampDesk = wrap(PhosLamp);
+export const Landmark = wrap(PhosBank);
+export const Laptop = wrap(PhosLaptop);
+export const Layers = wrap(PhosStack);
+export const LayoutGrid = wrap(PhosLayout);
+export const Leaf = wrap(PhosLeaf);
+export const Library = wrap(PhosBooks);
+export const Lightbulb = wrap(PhosLightbulb);
+export const Loader2 = wrap(PhosSpinner);
+export const Lock = wrap(PhosLock);
+export const LogOut = wrap(PhosSignOut);
+export const Luggage = wrap(PhosSuitcase);
+export const Mail = wrap(PhosEnvelope);
+export const MailCheck = wrap(PhosEnvelopeOpen);
+export const Map = wrap(PhosMapTrifold);
+export const MapPin = wrap(PhosMapPin);
+export const Martini = wrap(PhosMartini);
+export const Maximize2 = wrap(PhosCornersOut);
+export const Medal = wrap(PhosMedal);
+export const Megaphone = wrap(PhosMegaphone);
+export const Meh = wrap(PhosSmileyBlank);
+export const Menu = wrap(PhosList);
+export const MessageSquare = wrap(PhosChat);
+export const MessageSquareHeart = wrap(PhosChatCentered);
+export const Mic = wrap(PhosMicrophone);
+export const Milestone = wrap(PhosSignpost);
+export const Milk = wrap(PhosCoffee);
+export const Minimize2 = wrap(PhosCornersIn);
+export const Minus = wrap(PhosMinus);
+export const Monitor = wrap(PhosMonitor);
+export const Moon = wrap(PhosMoon);
+export const MoreHorizontal = wrap(PhosDotsThree);
+export const MoreVertical = wrap(PhosDotsThreeVertical);
+export const Mountain = wrap(PhosMountains);
+export const MountainSnow = wrap(PhosMountains);
+export const Music = wrap(PhosMusicNote);
+export const Navigation = wrap(PhosNavigationArrow);
+export const Newspaper = wrap(PhosNewspaper);
+export const Package = wrap(PhosPackage);
+export const PaintBucket = wrap(PhosPaintBucket);
+export const Palette = wrap(PhosPalette);
+export const Palmtree = wrap(PhosTree);
+export const Paperclip = wrap(PhosPaperclip);
+export const ParkingSquare = wrap(PhosTag);
+export const PartyPopper = wrap(PhosConfetti);
+export const Pause = wrap(PhosPause);
+export const PawPrint = wrap(PhosPawPrint);
+export const Pencil = wrap(PhosPencilSimple);
+export const PenTool = wrap(PhosPen);
+export const Percent = wrap(PhosPercent);
+export const Phone = wrap(PhosPhone);
+export const PhoneCall = wrap(PhosPhoneCall);
+export const Piano = wrap(PhosKeyboard);
+export const PieChart = wrap(PhosChartPie);
+export const PiggyBank = wrap(PhosPiggyBank);
+export const Pill = wrap(PhosPill);
+export const Pizza = wrap(PhosPizza);
+export const Plane = wrap(PhosAirplane);
+export const PlaneLanding = wrap(PhosAirplaneLanding);
+export const PlaneTakeoff = wrap(PhosAirplaneTakeoff);
+export const Play = wrap(PhosPlay);
+export const Plus = wrap(PhosPlus);
+export const PlusSquare = wrap(PhosPlusSquare);
+export const Popcorn = wrap(PhosPopcorn);
+export const Power = wrap(PhosPower);
+export const Presentation = wrap(PhosPresentation);
+export const Printer = wrap(PhosPrinter);
+export const QrCode = wrap(PhosQrCode);
+export const Radio = wrap(PhosRadio);
+export const Receipt = wrap(PhosReceipt);
+export const ReceiptCent = wrap(PhosReceipt);
+export const ReceiptText = wrap(PhosReceipt);
+export const RefreshCw = wrap(PhosArrowsCounterClockwise);
+export const Repeat = wrap(PhosRepeat);
+export const Rocket = wrap(PhosRocket);
+export const RotateCcw = wrap(PhosArrowCounterClockwise);
+export const RotateCw = wrap(PhosArrowClockwise);
+export const Router = wrap(PhosWifiHigh);
+export const Sailboat = wrap(PhosSailboat);
+export const Salad = wrap(PhosBowlFood);
+export const Sandwich = wrap(PhosForkKnife);
+export const Scale = wrap(PhosScales);
+export const School = wrap(PhosGraduationCap);
+export const Scissors = wrap(PhosScissors);
+export const Search = wrap(PhosMagnifyingGlass);
+export const Send = wrap(PhosPaperPlaneTilt);
+export const Server = wrap(PhosHardDrives);
+export const Settings = wrap(PhosGear);
+export const Share = wrap(PhosShareNetwork);
+export const Shield = wrap(PhosShield);
+export const ShieldCheck = wrap(PhosShieldCheck);
+export const Ship = wrap(PhosBoat);
+export const Shirt = wrap(PhosTShirt);
+export const ShoppingBag = wrap(PhosShoppingBag);
+export const ShoppingBasket = wrap(PhosShoppingBag);
+export const ShoppingCart = wrap(PhosShoppingCart);
+export const ShowerHead = wrap(PhosShower);
+export const Sliders = wrap(PhosEqualizer);
+export const SlidersHorizontal = wrap(PhosSlidersHorizontal);
+export const Smartphone = wrap(PhosDeviceMobile);
+export const Smile = wrap(PhosSmiley);
+export const SmilePlus = wrap(PhosSmiley);
+export const Snowflake = wrap(PhosSnowflake);
+export const Sofa = wrap(PhosCouch);
+export const Soup = wrap(PhosBowlFood);
+export const Sparkles = wrap(PhosSparkle);
+export const Speaker = wrap(PhosSpeakerHigh);
+export const Split = wrap(PhosGitFork);
+export const Sprout = wrap(PhosPlant);
+export const Square = wrap(PhosSquare);
+export const Star = wrap(PhosStar);
+export const Stethoscope = wrap(PhosStethoscope);
+export const Store = wrap(PhosStorefront);
+export const Sun = wrap(PhosSun);
+export const Sunrise = wrap(PhosSunHorizon);
+export const Sunset = wrap(PhosSunHorizon);
+export const SwitchCamera = wrap(PhosCameraRotate);
+export const Syringe = wrap(PhosSyringe);
+export const Tablet = wrap(PhosDeviceTablet);
+export const Tag = wrap(PhosTag);
+export const Tags = wrap(PhosTag);
+export const Target = wrap(PhosTarget);
+export const Tent = wrap(PhosTent);
+export const Thermometer = wrap(PhosThermometer);
+export const Ticket = wrap(PhosTicket);
+export const Train = wrap(PhosTrain);
+export const TrainFront = wrap(PhosTrain);
+export const TramFront = wrap(PhosTram);
+export const Trash = wrap(PhosTrash);
+export const Trash2 = wrap(PhosTrash);
+export const TreePine = wrap(PhosTree);
+export const Trees = wrap(PhosTree);
+export const TrendingDown = wrap(PhosTrendDown);
+export const TrendingUp = wrap(PhosTrendUp);
+export const Trophy = wrap(PhosTrophy);
+export const Truck = wrap(PhosTruck);
+export const Tv = wrap(PhosTelevision);
+export const Umbrella = wrap(PhosUmbrella);
+export const Unlink = wrap(PhosLinkBreak);
+export const Upload = wrap(PhosUpload);
+export const User = wrap(PhosUser);
+export const UserCheck = wrap(PhosUserCheck);
+export const Users = wrap(PhosUsers);
+export const Users2 = wrap(PhosUsers);
+export const Utensils = wrap(PhosForkKnife);
+export const UtensilsCrossed = wrap(PhosForkKnife);
+export const Vault = wrap(PhosVault);
+export const Volume2 = wrap(PhosSpeakerHigh);
+export const VolumeX = wrap(PhosSpeakerSlash);
+export const Wallet = wrap(PhosWallet);
+export const WalletCards = wrap(PhosCards);
+export const Warehouse = wrap(PhosWarehouse);
+export const WashingMachine = wrap(PhosWashingMachine);
+export const Watch = wrap(PhosWatch);
+export const Wheat = wrap(PhosTag);
+export const Wifi = wrap(PhosWifiHigh);
+export const Wind = wrap(PhosWind);
+export const Wine = wrap(PhosWine);
+export const Wrench = wrap(PhosWrench);
+export const X = wrap(PhosX);
+export const XCircle = wrap(PhosXCircle);
+export const Zap = wrap(PhosLightning);
+export const ZapOff = wrap(PhosLightningSlash);

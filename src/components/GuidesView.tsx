@@ -152,21 +152,21 @@ export function GuidesView({ config }: GuidesViewProps) {
           <button
             type="button"
             onClick={() => setSelectedGuideId(null)}
-            className="text-xs font-semibold text-[var(--accent-color)] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-secondary font-semibold text-[var(--accent-color)] hover:underline flex items-center gap-1 cursor-pointer"
           >
             ← {isEn ? 'Back to all guides' : 'Tillbaka till alla guider'}
           </button>
 
           {/* Guide Header */}
           <Card variant="default" padding="lg" className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-[var(--accent-color)]">
+            <div className="flex items-center gap-2 text-secondary font-bold text-[var(--accent-color)]">
               <selectedGuide.icon size={16} strokeWidth={2.5} />
               <span>{selectedGuide.readTime} {isEn ? 'read' : 'lästid'}</span>
             </div>
-            <h2 className="text-xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-page-title font-extrabold text-[var(--text-primary)] tracking-tight">
               {selectedGuide.title}
             </h2>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
               {selectedGuide.subtitle}
             </p>
           </Card>
@@ -180,11 +180,11 @@ export function GuidesView({ config }: GuidesViewProps) {
                 padding="lg"
                 className="space-y-[var(--card-gap)]"
               >
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                <h3 className="text-body font-bold text-[var(--text-primary)]">
                   {step.title}
                 </h3>
 
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
                   {step.description}
                 </p>
 
@@ -203,7 +203,7 @@ export function GuidesView({ config }: GuidesViewProps) {
 
                 {/* Tip box if any */}
                 {step.tip && (
-                  <div className="p-3 rounded-[var(--radius-card-nested,10px)] bg-[var(--accent-color)]/10 text-[var(--text-primary)] text-xs flex items-start gap-2">
+                  <div className="p-3 rounded-[var(--radius-card-nested,10px)] bg-[var(--accent-color)]/10 text-[var(--text-primary)] text-secondary flex items-start gap-2">
                     <CheckCircle size={15} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
                     <span className="leading-snug">{step.tip}</span>
                   </div>
@@ -219,10 +219,10 @@ export function GuidesView({ config }: GuidesViewProps) {
             <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center mx-auto">
               <BookOpen size={22} strokeWidth={2} />
             </div>
-            <h2 className="text-lg font-bold text-[var(--text-primary)]">
+            <h2 className="text-page-title font-bold text-[var(--text-primary)]">
               {isEn ? 'Guides & Instructions' : 'Guider & Instruktioner'}
             </h2>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed max-w-xs mx-auto">
+            <p className="text-secondary text-[var(--text-secondary)] leading-relaxed max-w-xs mx-auto">
               {isEn
                 ? 'Learn how to get the most out of Dejz with our step-by-step guides.'
                 : 'Lär dig hur du får ut det mesta av Dejz med våra enkla steg-för-steg-guider.'}
@@ -246,16 +246,16 @@ export function GuidesView({ config }: GuidesViewProps) {
                       <Icon size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0">
-                      <span className="text-sm font-bold text-[var(--text-primary)] block truncate">
+                      <span className="text-body font-bold text-[var(--text-primary)] block truncate">
                         {g.title}
                       </span>
-                      <span className="text-xs text-[var(--text-secondary)] truncate block mt-0.5">
+                      <span className="text-secondary text-[var(--text-secondary)] truncate block mt-0.5">
                         {g.subtitle}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 text-xs font-semibold text-[var(--text-secondary)] shrink-0">
+                  <div className="flex items-center gap-1 text-secondary font-semibold text-[var(--text-secondary)] shrink-0">
                     <span className="text-label opacity-75">{g.readTime}</span>
                     <ChevronRight size={16} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
                   </div>

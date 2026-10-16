@@ -39,10 +39,10 @@ export function StarredTransactionsView({
             <Heart size={28} strokeWidth={2} />
           </div>
           <div className="space-y-1 max-w-sm mx-auto">
-            <h3 className="text-base font-bold text-[var(--text-primary)]">
+            <h3 className="text-section-title font-bold text-[var(--text-primary)]">
               {config.language === 'en' ? 'No starred transactions' : 'Inga hjärtmarkerade transaktioner'}
             </h3>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-body text-[var(--text-secondary)] leading-relaxed">
               {config.language === 'en'
                 ? 'Tap the heart icon on any transaction to save it here for quick access.'
                 : 'Tryck på hjärtikonen på en transaktion för att spara den här för snabb åtkomst.'}

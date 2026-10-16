@@ -40,7 +40,7 @@ export function TransactionItem({
   onClick, 
   displayAmount,
   showAllCategories,
-  isGrouped: _isGrouped,
+  isGrouped,
   variant,
   hideCategoryBadge,
   hideFixedBadge,
@@ -103,19 +103,21 @@ export function TransactionItem({
     ? 'text-[var(--success-color)]' 
     : 'text-[var(--text-metric-label)]';
 
-  // Determine layout style classes with translucent glass surfaces
+  // Determine layout style classes (airy 62px architectural rows + grouped card support)
   let containerClasses = "";
-  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[56px]";
+  let paddingClasses = "px-4 sm:px-5 py-3.5 sm:py-4 min-h-[62px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-4 px-3";
+    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3.5 sm:py-4 px-4 sm:px-5";
     paddingClasses = "";
+  } else if (isGrouped) {
+    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] rounded-none shadow-none border-none transition-colors";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
-    paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[60px]";
+    paddingClasses = "px-4 sm:px-5 py-3.5 sm:py-4 min-h-[62px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] shadow-none border-none rounded-[var(--radius-card,12px)]";
+    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] shadow-none border-none rounded-[var(--radius-card-nested,12px)]";
   } else {
-    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[var(--radius-card,12px)] shadow-none border-none";
+    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[var(--radius-card,18px)] border-none shadow-subtle";
   }
 
   // Neutral discreet category display
@@ -187,7 +189,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[var(--radius-card,20px)]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared || isGrouped ? '' : 'rounded-[var(--radius-card,18px)]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 

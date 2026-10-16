@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck, Receipt } from 'lucide-react';
+import { User, Plus, ChevronLeft, Check, X, PiggyBank, ArrowDownRight, ArrowUpRight, Receipt } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
@@ -13,7 +13,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
-import { SmartInput, Modal, Button, Input } from './ui';
+import { SmartInput, Modal, Button, IconButton, Card, Divider, Input } from './ui';
 import { Switch } from './ui/Switch';
 import { getLogoUrl, fetchLogoForName } from '../utils/logo';
 
@@ -796,7 +796,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                   <div 
                     key={sNum} 
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                      sNum <= stepNumber ? 'bg-[var(--accent-color)]' : 'bg-[var(--border-color)]'
+                      sNum <= stepNumber ? 'bg-[var(--accent-color)]' : 'bg-[var(--surface-muted)]'
                     }`}
                   />
                 ))}
@@ -806,19 +806,20 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
               <div className="flex items-center justify-between mb-2 sm:mb-3 shrink-0">
                 <div className="flex items-center gap-2.5">
                   {step !== 'name' && (
-                    <button 
-                      onClick={handleBack} 
-                      className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[var(--radius-button-sm,10px)] transition-all text-[var(--text-secondary)] border border-[var(--border-color)] shadow-2xs cursor-pointer active:scale-95"
+                    <IconButton
+                      variant="surface"
+                      size="md"
+                      shape="circle"
+                      onClick={handleBack}
                       aria-label={s.back}
-                    >
-                      <ChevronLeft size={16} strokeWidth={2} />
-                    </button>
+                      icon={<ChevronLeft size={16} strokeWidth={2} />}
+                    />
                   )}
                   <div className="flex flex-col">
-                    <span className="text-label font-bold text-[var(--accent-color)] tracking-wide">
+                    <span className="text-label font-semibold text-[var(--text-secondary)]">
                       {s.stepOf(stepNumber, totalSteps)}
                     </span>
-                    <h2 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)]">
+                    <h2 className="text-section-title font-display text-[var(--text-primary)] tracking-tight">
                       {step === 'name' ? s.welcome : 
                        step === 'payday' ? s.paydayTitle :
                        step === 'income' ? s.incomeTitle : 
@@ -831,15 +832,15 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                 </div>
 
                 {/* Exit Onboarding Button */}
-                <button
-                  type="button"
+                <IconButton
+                  variant="surface"
+                  size="md"
+                  shape="circle"
                   onClick={() => setShowExitConfirm(true)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer border border-[var(--border-color)] shadow-2xs active:scale-95 shrink-0"
                   title={s.exitOnboarding}
                   aria-label={s.exitOnboarding}
-                >
-                  <X size={16} strokeWidth={2} />
-                </button>
+                  icon={<X size={16} strokeWidth={2} />}
+                />
               </div>
 
               {/* Content Body: Question / Action */}
@@ -877,17 +878,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         }}
                       />
 
-
-
                       <div className="pt-1">
-                        <button 
+                        <Button
+                          variant="accent"
+                          size="lg"
+                          fullWidth
                           onClick={handleNext}
                           disabled={!fullName.trim()}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
+                          {s.next}
+                        </Button>
                       </div>
                     </motion.div>
                   )}
@@ -908,14 +908,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.paydayQuestion}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                          <p className="text-secondary text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
                             {s.paydayDesc}
                           </p>
                         </div>
                       </div>
 
                       {/* Quick Choices: 25:e, 27:e, 30:e, 1:e & Annan dag */}
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         <div className="grid grid-cols-4 gap-2">
                           {QUICK_PAYDAYS.map((d) => (
                             <button
@@ -925,10 +925,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                 setPayday(d);
                                 setIsCustomDayActive(false);
                               }}
-                              className={`py-3.5 rounded-btn font-bold text-sm sm:text-base transition-all border cursor-pointer active:scale-95 ${
+                              className={`py-3.5 rounded-full font-amount font-bold text-body-medium transition-all cursor-pointer border-none active:scale-95 ${
                                 payday === d && !isCustomDayActive
-                                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-xs scale-[1.02]' 
-                                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/30'
+                                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-dreams-btn' 
+                                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-subtle hover:bg-[var(--surface-muted)]'
                               }`}
                             >
                               {isEn ? `${d}${d === 1 ? 'st' : d === 2 ? 'nd' : d === 3 ? 'rd' : 'th'}` : `${d}:e`}
@@ -936,48 +936,46 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           ))}
                         </div>
 
-                        <button
-                          type="button"
+                        <Button
+                          variant={isCustomDayActive || !QUICK_PAYDAYS.includes(payday) ? 'outline' : 'secondary'}
+                          size="sm"
+                          fullWidth
                           onClick={() => setIsCustomDayActive(prev => !prev)}
-                          className={`w-full py-2.5 rounded-btn-sm text-xs font-bold border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 ${
-                            isCustomDayActive || !QUICK_PAYDAYS.includes(payday)
-                              ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] border-[var(--accent-color)] font-extrabold shadow-2xs'
-                              : 'bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-color)] hover:text-[var(--text-primary)]'
-                          }`}
                         >
-                          <span>{!QUICK_PAYDAYS.includes(payday) ? `${s.customDay} (${payday}:e)` : s.customDay}</span>
-                        </button>
+                          {!QUICK_PAYDAYS.includes(payday) ? `${s.customDay} (${payday}:e)` : s.customDay}
+                        </Button>
 
                         {(isCustomDayActive || !QUICK_PAYDAYS.includes(payday)) && (
                           <motion.div
                             initial={{ opacity: 0, y: -4 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-3 bg-[var(--surface-color)] rounded-card-nested border border-[var(--border-color)] shadow-xs"
                           >
-                            <div className="grid grid-cols-7 gap-1 text-center">
-                              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                                <button
-                                  key={d}
-                                  type="button"
-                                  onClick={() => setPayday(d)}
-                                  className={`h-8 w-8 mx-auto rounded-full font-bold text-xs flex items-center justify-center transition-all cursor-pointer ${
-                                    payday === d
-                                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs scale-105'
-                                      : 'hover:bg-[var(--surface-muted)] text-[var(--text-primary)]'
-                                  }`}
-                                >
-                                  {d}
-                                </button>
-                              ))}
-                            </div>
+                            <Card variant="default" padding="sm">
+                              <div className="grid grid-cols-7 gap-1 text-center">
+                                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                                  <button
+                                    key={d}
+                                    type="button"
+                                    onClick={() => setPayday(d)}
+                                    className={`h-8 w-8 mx-auto rounded-full font-amount font-bold text-secondary flex items-center justify-center transition-all cursor-pointer ${
+                                      payday === d
+                                        ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-2xs scale-105'
+                                        : 'hover:bg-[var(--surface-muted)] text-[var(--text-primary)]'
+                                    }`}
+                                  >
+                                    {d}
+                                  </button>
+                                ))}
+                              </div>
+                            </Card>
                           </motion.div>
                         )}
 
                         {/* Lön tidigare vid helg toggle */}
-                        <div className="pt-3 border-t border-[var(--border-color)]">
-                          <div className="flex items-center justify-between p-1">
-                            <div className="flex flex-col pr-4 text-left">
-                              <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">
+                        <Card variant="default" padding="md">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex flex-col text-left">
+                              <span className="text-secondary font-semibold text-[var(--text-primary)]">
                                 {s.paydayBeforeWeekendTitle}
                               </span>
                               <span className="text-label sm:text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
@@ -989,17 +987,18 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                               onChange={() => setPaydayBeforeWeekend((prev) => !prev)}
                             />
                           </div>
-                        </div>
+                        </Card>
                       </div>
 
                       <div className="pt-1">
-                        <button 
+                        <Button
+                          variant="accent"
+                          size="lg"
+                          fullWidth
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
+                          {s.next}
+                        </Button>
                       </div>
                     </motion.div>
                   )}
@@ -1038,7 +1037,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           inputClassName="h-[46px]"
                         />
 
-
                         {/* Incomes List */}
                         {incomes.map((inc, i) => (
                           <BudgetItem
@@ -1057,27 +1055,29 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         ))}
 
                         {/* Separate Manual Add Button */}
-                        <button 
-                          type="button"
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          fullWidth
+                          icon={<Plus size={15} />}
                           onClick={() => {
                             setEditingIncomeIndex(null);
                             setIsAddingIncome(true);
                           }}
-                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[var(--radius-xs,8px)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
-                          <Plus size={14} />
-                          <span>{s.addIncome}</span>
-                        </button>
+                          {s.addIncome}
+                        </Button>
                       </div>
 
                       <div className="pt-1">
-                        <button 
+                        <Button
+                          variant="accent"
+                          size="lg"
+                          fullWidth
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
+                          {s.next}
+                        </Button>
                       </div>
                     </motion.div>
                   )}
@@ -1090,15 +1090,15 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-6 sm:space-y-7 my-0 sm:my-auto flex flex-col flex-1 pb-0"
+                      className="space-y-5 sm:space-y-6 my-0 sm:my-auto flex flex-col flex-1 pb-0"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
+                      <div className="text-center pb-1 sm:pb-2">
                         <OnboardingCharacterArt step="expenses" />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                        <div className="mt-4 sm:mt-5 space-y-1 text-center">
                           <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.expensesQuestion}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                          <p className="text-secondary text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
                             {s.expensesDesc}
                           </p>
                         </div>
@@ -1117,11 +1117,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       {/* Presets Grid: Scrollable box showing ~6 cards at a time, scrollable for all 30 */}
                       <div className="max-h-[196px] overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
                         {presetSearch.trim() && filteredPresets.length === 0 ? (
-                          <div className="p-3 text-center bg-[var(--surface-color)] rounded-card-nested border border-[var(--border-color)]">
-                            <p className="text-xs text-[var(--text-secondary)] font-medium">
+                          <Card variant="default" padding="sm" className="text-center">
+                            <p className="text-secondary text-[var(--text-secondary)] font-medium">
                               {s.noPresetsFound}
                             </p>
-                          </div>
+                          </Card>
                         ) : (
                           <div className="grid grid-cols-2 gap-2 p-0.5">
                             {(presetSearch.trim() ? filteredPresets : popularPresets).map((preset) => {
@@ -1143,10 +1143,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                   key={preset.id}
                                   type="button"
                                   onClick={() => handleTogglePreset(preset)}
-                                  className={`p-2.5 rounded-card-nested flex items-center justify-between gap-2 text-left transition-all cursor-pointer border relative min-h-[54px] ${
+                                  className={`p-3 rounded-card-nested flex items-center justify-between gap-2 text-left transition-all cursor-pointer border-none relative min-h-[56px] active:scale-[0.98] ${
                                     isAdded 
-                                      ? 'bg-[var(--success-container)] border-[var(--success-color)] shadow-2xs' 
-                                      : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-[var(--border-color)] shadow-2xs'
+                                      ? 'bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)] shadow-subtle' 
+                                      : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] shadow-subtle'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -1154,7 +1154,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                       <TransactionLogo transaction={mockTx} config={config} size="sm" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <p className="text-xs font-bold leading-tight break-words text-[var(--text-primary)]">
+                                      <p className="text-secondary font-bold leading-tight break-words text-[var(--text-primary)]">
                                         {preset.name}
                                       </p>
                                       <p className="text-secondary font-amount font-semibold mt-0.5 text-[var(--text-secondary)]">
@@ -1162,10 +1162,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                       </p>
                                     </div>
                                   </div>
-                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                                    isAdded ? 'bg-white text-[var(--success-color)] border border-[var(--success-color)]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                                    isAdded ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
                                   }`}>
-                                    {isAdded ? <Check size={11} strokeWidth={2.5} className="text-[var(--success-color)]" /> : <Plus size={11} />}
+                                    {isAdded ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} />}
                                   </div>
                                 </button>
                               );
@@ -1176,7 +1176,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
                       {/* Added Fixed Expenses List - Natural height without internal scroll */}
                       {fixedExpenses.length > 0 && (
-                        <div className="space-y-1.5 pt-2 border-t border-[var(--border-color)]/60">
+                        <div className="space-y-1.5 pt-2 border-t border-[var(--border-divider)]">
                           {fixedExpenses.map((exp, i) => (
                             <BudgetItem
                               key={i}
@@ -1197,35 +1197,34 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
                       {/* Create Custom Expense Button */}
                       <div>
-                        <button 
-                          type="button"
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          fullWidth
+                          icon={<Plus size={15} />}
                           onClick={() => {
                             setEditingExpenseIndex(null);
                             setIsAddingExpense(true);
                           }}
-                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[var(--radius-xs,8px)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
-                          <Plus size={14} />
-                          <span>{s.customExpense}</span>
-                        </button>
+                          {s.customExpense}
+                        </Button>
                       </div>
 
                       {/* Generous bottom spacing clearance so the last expense and custom button can be scrolled completely above the fixed Next button */}
                       <div className="h-28 sm:h-24 shrink-0" aria-hidden="true" />
 
                       {/* Fixed Next Button docked to the very bottom */}
-                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)] border-t border-[var(--border-color)]/50 px-4 sm:px-6 pt-3 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] shadow-modal">
-                        {/* Subtle upward gradient fade */}
-                        <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-t from-[var(--bg-color)] to-transparent pointer-events-none" />
-
+                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)]/95 backdrop-blur-md border-t border-[var(--border-divider)] px-4 sm:px-6 pt-3 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] shadow-modal">
                         <div className="max-w-sm sm:max-w-md mx-auto w-full">
-                          <button 
+                          <Button
+                            variant="accent"
+                            size="lg"
+                            fullWidth
                             onClick={handleNext}
-                            className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-subtle hover:opacity-95"
                           >
-                            <span>{s.next}</span>
-                            <ArrowRight size={16} strokeWidth={2.5} />
-                          </button>
+                            {s.next}
+                          </Button>
                         </div>
                       </div>
                     </motion.div>
@@ -1258,9 +1257,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                             value={monthlySavingsInput}
                             onChange={(e) => handleSavingsChange(e.target.value)}
                             placeholder="0"
-                            className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-input px-4 py-3.5 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-tertiary)]"
+                            className="w-full bg-[var(--surface-color)] border-none rounded-card px-4 py-4 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-color)]/30 shadow-subtle outline-none transition-all placeholder-[var(--text-tertiary)]"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary font-bold text-[var(--text-secondary)] pointer-events-none">
                             {config.currency || 'kr'}
                           </span>
                         </div>
@@ -1274,10 +1273,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                 key={amount}
                                 type="button"
                                 onClick={() => handleSavingsChange(amount.toString())}
-                                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-bold font-amount tabular-nums transition-all border cursor-pointer active:scale-95 ${
+                                className={`py-2.5 rounded-full text-secondary font-bold font-amount tabular-nums transition-all border-none cursor-pointer active:scale-95 ${
                                   isSelected
-                                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-2xs'
-                                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40'
+                                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-dreams-btn'
+                                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-subtle hover:bg-[var(--surface-muted)]'
                                 }`}
                               >
                                 {amount === 0 ? formatCurrency(0, config.currency || 'kr', lang) : formatAmount(amount, lang)}
@@ -1288,13 +1287,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       </div>
 
                       <div className="pt-2">
-                        <button 
+                        <Button
+                          variant="accent"
+                          size="lg"
+                          fullWidth
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
                         >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
+                          {s.next}
+                        </Button>
                       </div>
                     </motion.div>
                   )}
@@ -1317,7 +1317,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                               <OnboardingCharacterArt step="midMonth" days={daysSincePayday} payday={payday} />
 
                               {/* Kombinerad huvudrubrik */}
-                              <h3 className="mt-4 sm:mt-5 text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
+                              <h3 className="mt-4 sm:mt-5 text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
                                 {content.headline}
                               </h3>
                             </div>
@@ -1330,25 +1330,26 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                   value={midMonthSpent}
                                   onChange={(e) => setMidMonthSpent(e.target.value)}
                                   placeholder="0"
-                                  className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-input px-4 py-3.5 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-tertiary)]"
+                                  className="w-full bg-[var(--surface-color)] border-none rounded-card px-4 py-4 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-color)]/30 shadow-subtle outline-none transition-all placeholder-[var(--text-tertiary)]"
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary font-bold text-[var(--text-secondary)] pointer-events-none">
                                   {config.currency || 'kr'}
                                 </span>
                               </div>
-                              <p className="text-center text-xs text-[var(--text-secondary)] font-medium">
+                              <p className="text-center text-secondary text-[var(--text-secondary)] font-medium">
                                 {content.helpText}
                               </p>
                             </div>
 
                             <div className="pt-1">
-                              <button 
+                              <Button
+                                variant="accent"
+                                size="lg"
+                                fullWidth
                                 onClick={handleNext}
-                                className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
                               >
-                                <span>{s.next}</span>
-                                <ArrowRight size={16} strokeWidth={2.5} />
-                              </button>
+                                {s.next}
+                              </Button>
                             </div>
                           </>
                         );
@@ -1372,43 +1373,49 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.summaryQuestion}
                           </h3>
-                          <p className="text-xs font-medium text-[var(--text-secondary)]">
+                          <p className="text-secondary font-medium text-[var(--text-secondary)]">
                             {s.untilPayday(nextPaydayFormatted)}
                           </p>
                         </div>
                       </div>
 
                       {/* Clean Breakdown Card: Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda */}
-                      <div className="p-4 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs space-y-2.5 text-left">
+                      <Card variant="default" padding="lg" className="space-y-3 text-left">
                         {/* Income */}
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <ArrowUpRight size={14} className="text-[var(--success-color)]" />
+                          <span className="text-secondary font-semibold text-[var(--text-secondary)] flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-icon-sm bg-[var(--surface-muted)] flex items-center justify-center shrink-0">
+                              <ArrowUpRight size={14} className="text-[var(--success-color)]" />
+                            </span>
                             {s.incomeLabel}
                           </span>
-                          <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
+                          <span className="text-body font-bold font-amount text-[var(--text-primary)] tabular-nums">
                             {formatAmount(totalIncome, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
 
                         {/* Fixed Expenses */}
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <ArrowDownRight size={14} className="text-[var(--danger-color)]" />
+                          <span className="text-secondary font-semibold text-[var(--text-secondary)] flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-icon-sm bg-[var(--surface-muted)] flex items-center justify-center shrink-0">
+                              <ArrowDownRight size={14} className="text-[var(--danger-color)]" />
+                            </span>
                             {s.fixedCostsLabel}
                           </span>
-                          <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
+                          <span className="text-body font-bold font-amount text-[var(--text-primary)] tabular-nums">
                             −{formatAmount(totalFixed, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
 
                         {/* Monthly Savings */}
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <PiggyBank size={14} className="text-[var(--warning-color)]" />
+                          <span className="text-secondary font-semibold text-[var(--text-secondary)] flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-icon-sm bg-[var(--surface-muted)] flex items-center justify-center shrink-0">
+                              <PiggyBank size={14} className="text-[var(--accent-color)]" />
+                            </span>
                             {s.savingsLabel}
                           </span>
-                          <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
+                          <span className="text-body font-bold font-amount text-[var(--text-primary)] tabular-nums">
                             −{formatAmount(totalMonthlySavings, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
@@ -1416,50 +1423,48 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         {/* Spenderat hittills (visas om användaren angett ett spenderat belopp i pågående period) */}
                         {initialSpentAmount > 0 && (
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                              <Receipt size={14} className="text-[var(--warning-color)]" />
+                            <span className="text-secondary font-semibold text-[var(--text-secondary)] flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-icon-sm bg-[var(--surface-muted)] flex items-center justify-center shrink-0">
+                                <Receipt size={14} className="text-[var(--text-secondary)]" />
+                              </span>
                               {s.spentSoFarLabel}
                             </span>
-                            <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
+                            <span className="text-body font-bold font-amount text-[var(--text-primary)] tabular-nums">
                               −{formatAmount(initialSpentAmount, lang)} {config.currency || 'kr'}
                             </span>
                           </div>
                         )}
 
-                        <div className="h-px bg-[var(--border-color)] my-1" />
+                        <Divider className="my-1" />
 
                         {/* Kvar att använda */}
                         <div className="flex items-center justify-between pt-0.5">
-                          <span className="text-xs font-bold text-[var(--text-primary)]">
+                          <span className="text-secondary font-bold text-[var(--text-primary)]">
                             {s.freeSpendLabel}
                           </span>
-                          <span className="text-base font-extrabold font-amount text-[var(--accent-color)] tabular-nums">
+                          <span className="text-section-title font-extrabold font-amount text-[var(--accent-color)] tabular-nums">
                             {formatAmount(calculatedLeftToUse, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
-                      </div>
+                      </Card>
 
                       {error && (
-                        <div className="p-2.5 bg-[var(--surface-color)] border border-subtle rounded-card-nested text-[var(--text-secondary)] text-xs text-center font-medium">
-                          {error}
-                        </div>
+                        <Card variant="default" padding="sm" className="text-center">
+                          <p className="text-[var(--text-secondary)] text-secondary font-medium">{error}</p>
+                        </Card>
                       )}
 
                       <div className="pt-1">
-                        <button 
+                        <Button
+                          variant="accent"
+                          size="lg"
+                          fullWidth
                           onClick={() => handleSave()}
                           disabled={isUpdating}
-                          className="w-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-subtle cursor-pointer"
+                          loading={isUpdating}
                         >
-                          {isUpdating ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <>
-                              <span>{s.openDejz}</span>
-                              <ShieldCheck size={16} />
-                            </>
-                          )}
-                        </button>
+                          {s.openDejz}
+                        </Button>
                       </div>
                     </motion.div>
                   )}
@@ -1521,7 +1526,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
               showCloseButton={true}
               bodyClassName="p-6 space-y-4"
             >
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+              <p className="text-secondary text-[var(--text-secondary)] leading-relaxed font-medium">
                 {s.skipOnboardingDesc}
               </p>
               <div className="flex flex-col gap-2.5 pt-2">

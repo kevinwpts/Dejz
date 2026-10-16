@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Icon } from './ui';
+import { Button, Card, Icon, Modal } from './ui';
 import { TranslationKey } from '../i18n';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
@@ -99,7 +99,7 @@ export function GreetingModule({
         className="w-full select-none"
       >
         <div
-          className="bg-[var(--surface-color)] border border-subtle rounded-card p-5 sm:p-6 relative overflow-hidden transition-all shadow-subtle flex flex-col justify-between gap-3.5 text-[var(--text-primary)]"
+          className="bg-[var(--surface-color)] border-none rounded-card p-5 sm:p-6 relative overflow-hidden transition-all shadow-subtle flex flex-col justify-between gap-3.5 text-[var(--text-primary)]"
         >
           {/* Top Row: Label & Info button */}
           <div className="relative z-10 flex items-center justify-between">
@@ -129,13 +129,13 @@ export function GreetingModule({
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
-            <span className="text-[14px] leading-none shrink-0 font-medium text-[var(--text-secondary)] align-baseline">
+            <span className="text-[20px] leading-none shrink-0 font-semibold text-[var(--text-tertiary)] align-baseline tracking-tight">
               {currency || 'kr'}
             </span>
           </div>
 
-          {/* Bottom: Thin progress bar + percentage text */}
-          <div className="relative z-10 space-y-1.5 pt-1">
+          {/* Bottom: Thin progress bar + percentage */}
+          <div className="relative z-10 space-y-2 pt-1">
             <div className="flex items-center justify-between text-micro-label font-medium text-[var(--text-secondary)]">
               <span>{isEn ? 'Remaining spendable' : 'Spenderbart kvar'}</span>
               <span className="font-amount tabular-nums font-bold text-[var(--text-primary)]">
@@ -147,7 +147,7 @@ export function GreetingModule({
                 className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{ 
                   width: `${remainingCents < 0 ? 0 : Math.max(0, Math.min(100, clampedFraction * 100))}%`,
-                  backgroundColor: 'var(--brand-signature, var(--accent-color))'
+                  backgroundColor: 'var(--accent-color)'
                 }}
               />
             </div>
@@ -156,11 +156,13 @@ export function GreetingModule({
       </motion.div>
 
       {/* 2. Two Separate White Modules: Aktuell period & Nästa lön */}
-      <div className="grid grid-cols-2 gap-3 select-none">
+      <div className="grid grid-cols-2 gap-3.5 sm:gap-4 select-none">
         {/* Module 1: Aktuell period */}
-        <div 
-          className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 sm:p-4 flex flex-col justify-between gap-1 text-left min-w-0 shadow-subtle cursor-pointer hover:border-[var(--border-control)] transition-all"
+        <Card
+          variant="default"
+          padding="default"
           onClick={onOpenPeriodInfo}
+          className="flex flex-col justify-between gap-1.5 text-left min-w-0 cursor-pointer hover:border-[var(--border-control)] transition-all"
         >
           <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
             {isEn ? 'Current period' : 'Aktuell period'}
@@ -168,12 +170,14 @@ export function GreetingModule({
           <span className="text-body-medium font-medium text-[var(--text-primary)] truncate mt-0.5">
             {periodIntervalText || (isEn ? 'Current period' : 'Aktuell period')}
           </span>
-        </div>
+        </Card>
 
         {/* Module 2: Nästa lön */}
-        <div 
-          className="bg-[var(--surface-color)] border border-subtle rounded-card p-3.5 sm:p-4 flex flex-col justify-between gap-1 text-left min-w-0 shadow-subtle cursor-pointer hover:border-[var(--border-control)] transition-all"
+        <Card
+          variant="default"
+          padding="default"
           onClick={onOpenPeriodInfo}
+          className="flex flex-col justify-between gap-1.5 text-left min-w-0 cursor-pointer hover:border-[var(--border-control)] transition-all"
         >
           <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
             {isEn ? 'Next payday' : 'Nästa lön'}
@@ -181,125 +185,115 @@ export function GreetingModule({
           <span className="text-body-medium font-medium font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
             {paydayText || '-'}
           </span>
-        </div>
+        </Card>
       </div>
 
       {/* Detailed Calculation Info Modal */}
-      {isCalculationInfoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-          <div 
-            className="fixed inset-0" 
-            onClick={() => setIsCalculationInfoOpen(false)} 
-          />
-          <div className="relative w-full max-w-[340px] bg-[var(--surface-color)] rounded-card p-5 border border-subtle shadow-subtle space-y-4 z-10 text-left font-sans">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-sm">
-                <Icon name="info" size={16} className="text-[var(--accent-color)]" />
-                <span>{isEn ? 'Calculation Details' : 'Hur räknas det ut?'}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCalculationInfoOpen(false)}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none"
-                aria-label="Stäng"
-              >
-                <Icon name="x" size={17} />
-              </button>
+      <Modal
+        isOpen={isCalculationInfoOpen}
+        onClose={() => setIsCalculationInfoOpen(false)}
+        title={isEn ? 'Calculation Details' : 'Hur räknas det ut?'}
+        headerLeading={
+          <div className="w-8 h-8 rounded-icon-button bg-[var(--accent-color)]/10 flex items-center justify-center shrink-0">
+            <Icon name="info" size={16} className="text-[var(--accent-color)]" />
+          </div>
+        }
+        size="sm"
+        footer={
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            fullWidth
+            onClick={() => setIsCalculationInfoOpen(false)}
+          >
+            {isEn ? 'Got it' : 'Jag förstår'}
+          </Button>
+        }
+      >
+        <div className="space-y-4 text-left font-sans">
+          {/* Explanatory introduction */}
+          <p className="text-secondary text-[var(--text-secondary)] leading-normal">
+            {isEn 
+              ? 'Your remaining budget is what is left for variable spending after deducting bills and savings from your income.' 
+              : 'Kvar att spendera är vad som återstår för rörliga köp under perioden efter att fasta utgifter och sparande räknats bort.'}
+          </p>
+
+          {/* Status Explanation Card */}
+          <div className={`p-3 rounded-card-nested border flex items-start gap-2.5 ${status.badgeBgClass} border-subtle`}>
+            <div className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 shadow-xs" style={{ backgroundColor: status.colorHex }} />
+            <div className="flex flex-col min-w-0 text-secondary">
+              <span className={`font-bold ${status.badgeTextClass}`}>
+                {isEn ? status.labelEn : status.labelSv}
+              </span>
+              <p className="text-label text-[var(--text-secondary)] mt-0.5 leading-snug">
+                {isEn ? status.descriptionEn : status.descriptionSv}
+              </p>
+            </div>
+          </div>
+
+          {/* Real-time Math Breakdown */}
+          <div className="space-y-2 pt-1">
+            {/* 1. Incomes */}
+            <div className="flex justify-between items-center text-secondary py-1 border-b border-subtle">
+              <span className="text-[var(--text-secondary)]">{isEn ? 'Total Income' : 'Totala inkomster'}</span>
+              <span className="font-semibold text-[var(--success-color)] font-amount tabular-nums">
+                +{formatAmount(stats?.totalIncome || 0, language)} {currency}
+              </span>
             </div>
 
-            {/* Explanatory introduction */}
-            <p className="text-xs text-[var(--text-secondary)] leading-normal">
-              {isEn 
-                ? 'Your remaining budget is what is left for variable spending after deducting bills and savings from your income.' 
-                : 'Kvar att spendera är vad som återstår för rörliga köp under perioden efter att fasta utgifter och sparande räknats bort.'}
-            </p>
-
-            {/* Status Explanation Card */}
-            <div className={`p-3 rounded-[var(--radius-sm,6px)] border flex items-start gap-2.5 ${status.badgeBgClass} border-subtle`}>
-              <div className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 shadow-xs" style={{ backgroundColor: status.colorHex }} />
-              <div className="flex flex-col min-w-0 text-xs">
-                <span className={`font-bold ${status.badgeTextClass}`}>
-                  {isEn ? status.labelEn : status.labelSv}
-                </span>
-                <p className="text-label text-[var(--text-secondary)] mt-0.5 leading-snug">
-                  {isEn ? status.descriptionEn : status.descriptionSv}
-                </p>
-              </div>
+            {/* 2. Fixed Expenses */}
+            <div className="flex justify-between items-center text-secondary py-1 border-b border-subtle">
+              <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed Expenses' : 'Fasta utgifter (verkliga)'}</span>
+              <span className="font-semibold text-[var(--danger-color)] font-amount tabular-nums">
+                −{formatAmount(stats?.totalFixed || 0, language)} {currency}
+              </span>
             </div>
 
-            {/* Real-time Math Breakdown */}
-            <div className="space-y-2 pt-1">
-              {/* 1. Incomes */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
-                <span className="text-[var(--text-secondary)]">{isEn ? 'Total Income' : 'Totala inkomster'}</span>
+            {/* 3. Monthly Savings */}
+            <div className="flex justify-between items-center text-secondary py-1 border-b border-subtle">
+              <span className="text-[var(--text-secondary)]">{isEn ? 'Monthly Savings' : 'Månadssparande'}</span>
+              <span className="font-semibold text-[var(--warning-color)] font-amount tabular-nums">
+                −{formatAmount(stats?.totalSavings || 0, language)} {currency}
+              </span>
+            </div>
+
+            {/* 4. Disposable Pot = Income - Fixed - Savings */}
+            <div className="flex justify-between items-center text-secondary py-1.5 px-2 bg-black/[0.03] dark:bg-white/[0.04] rounded-card-nested">
+              <span className="font-medium text-[var(--text-primary)]">{isEn ? 'Disposable Pot' : 'Rörlig pott för perioden'}</span>
+              <span className="font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                ={formatAmount(stats?.disposablePot || 0, language)} {currency}
+              </span>
+            </div>
+
+            {/* 5. Total Spent in Period */}
+            <div className="flex justify-between items-center text-secondary py-1 border-b border-subtle">
+              <span className="text-[var(--text-secondary)]">{isEn ? 'Variable Spent' : 'Spenderat hittills'}</span>
+              <span className="font-semibold text-[var(--danger-color)] font-amount tabular-nums">
+                −{formatAmount(stats?.totalSpentInPeriod || 0, language)} {currency}
+              </span>
+            </div>
+
+            {/* 6. Extra Income / Swish */}
+            {stats?.totalExtraIncomeInPeriod > 0 && (
+              <div className="flex justify-between items-center text-secondary py-1 border-b border-subtle">
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Extra Income' : 'Extra inkomster'}</span>
                 <span className="font-semibold text-[var(--success-color)] font-amount tabular-nums">
-                  +{formatAmount(stats?.totalIncome || 0, language)} {currency}
+                  +{formatAmount(stats?.totalExtraIncomeInPeriod || 0, language)} {currency}
                 </span>
               </div>
+            )}
 
-              {/* 2. Fixed Expenses */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
-                <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed Expenses' : 'Fasta utgifter (verkliga)'}</span>
-                <span className="font-semibold text-[var(--danger-color)] font-amount tabular-nums">
-                  −{formatAmount(stats?.totalFixed || 0, language)} {currency}
-                </span>
-              </div>
-
-              {/* 3. Monthly Savings */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
-                <span className="text-[var(--text-secondary)]">{isEn ? 'Monthly Savings' : 'Månadssparande'}</span>
-                <span className="font-semibold text-[var(--warning-color)] font-amount tabular-nums">
-                  −{formatAmount(stats?.totalSavings || 0, language)} {currency}
-                </span>
-              </div>
-
-              {/* 4. Disposable Pot = Income - Fixed - Savings */}
-              <div className="flex justify-between items-center text-xs py-1.5 px-2 bg-black/[0.03] dark:bg-white/[0.04] rounded-[var(--radius-card-nested,12px)]">
-                <span className="font-medium text-[var(--text-primary)]">{isEn ? 'Disposable Pot' : 'Rörlig pott för perioden'}</span>
-                <span className="font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                  ={formatAmount(stats?.disposablePot || 0, language)} {currency}
-                </span>
-              </div>
-
-              {/* 5. Total Spent in Period */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
-                <span className="text-[var(--text-secondary)]">{isEn ? 'Variable Spent' : 'Spenderat hittills'}</span>
-                <span className="font-semibold text-[var(--danger-color)] font-amount tabular-nums">
-                  −{formatAmount(stats?.totalSpentInPeriod || 0, language)} {currency}
-                </span>
-              </div>
-
-              {/* 6. Extra Income / Swish */}
-              {stats?.totalExtraIncomeInPeriod > 0 && (
-                <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
-                  <span className="text-[var(--text-secondary)]">{isEn ? 'Extra Income' : 'Extra inkomster'}</span>
-                  <span className="font-semibold text-[var(--success-color)] font-amount tabular-nums">
-                    +{formatAmount(stats?.totalExtraIncomeInPeriod || 0, language)} {currency}
-                  </span>
-                </div>
-              )}
-
-              {/* 7. Remaining to Spend */}
-              <div className="flex justify-between items-center text-xs py-2 px-2 bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 rounded-[var(--radius-card-nested,12px)] border border-[var(--accent-color)]/15">
-                <span className="font-bold text-[var(--text-primary)]">{isEn ? 'Remaining to Spend' : 'Kvar att spendera'}</span>
-                <span className="font-extrabold text-[var(--text-primary)] font-amount tabular-nums">
-                  {formatAmount(stats?.remainingPeriodCents || 0, language)} {currency}
-                </span>
-              </div>
+            {/* 7. Remaining to Spend */}
+            <div className="flex justify-between items-center text-secondary py-2 px-2 bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 rounded-card-nested border border-[var(--accent-color)]/15">
+              <span className="font-bold text-[var(--text-primary)]">{isEn ? 'Remaining to Spend' : 'Kvar att spendera'}</span>
+              <span className="font-extrabold text-[var(--text-primary)] font-amount tabular-nums">
+                {formatAmount(stats?.remainingPeriodCents || 0, language)} {currency}
+              </span>
             </div>
-
-            {/* Close action */}
-            <button
-              type="button"
-              onClick={() => setIsCalculationInfoOpen(false)}
-              className="w-full h-11 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
-            >
-              {isEn ? 'Got it' : 'Jag förstår'}
-            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

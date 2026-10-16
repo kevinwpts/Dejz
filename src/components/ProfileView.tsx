@@ -309,16 +309,16 @@ export function ProfileView({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="space-y-[var(--menu-content-gap)] w-full pb-12 font-sans"
+      className="space-y-6 sm:space-y-7 w-full pt-1 pb-14 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,20px)] p-5 border border-subtle shadow-2xs flex items-center gap-4">
+      <div className="bg-[var(--surface-color)] rounded-card p-5 sm:p-6 shadow-subtle flex items-center gap-4 sm:gap-5">
         <div 
           onClick={() => handleSectionClick('manageAccount')}
           className="relative shrink-0 cursor-pointer group"
           title={t('manageAccount')}
         >
-          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,12px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
+          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-card-nested flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
             {avatarUrl ? (
               <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
             ) : (
@@ -329,23 +329,23 @@ export function ProfileView({
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 mb-1">
             <h3 className="text-card-title font-bold text-[var(--text-primary)] truncate">
               {user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('user')}
             </h3>
             {isAdmin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-micro-label font-bold border border-[var(--warning-color)]/20 shrink-0">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-micro-label font-bold shrink-0">
                 <Crown size={11} strokeWidth={2} />
                 Admin
               </span>
             )}
           </div>
-          <p className="text-secondary truncate opacity-60 mb-2.5">
+          <p className="text-secondary truncate opacity-60 mb-3">
             {user?.email}
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-[var(--radius-button-sm,10px)] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
+            className="px-3.5 py-2 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-btn border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />
@@ -353,11 +353,11 @@ export function ProfileView({
         </div>
       </div>
 
-            {/* Quick Access Priority Modules */}
-      <div className="grid grid-cols-3 gap-2.5">
+      {/* Quick Access Priority Modules */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <button
           onClick={() => handleSectionClick('receipts')}
-          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center py-4 sm:py-5 px-3.5 rounded-card bg-[var(--surface-color)] border-none transition-all cursor-pointer group active:scale-[0.98] shadow-subtle"
         >
           <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <Receipt size={20} strokeWidth={2} />
@@ -369,7 +369,7 @@ export function ProfileView({
 
         <button
           onClick={() => handleSectionClick('debts')}
-          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center py-4 sm:py-5 px-3.5 rounded-card bg-[var(--surface-color)] border-none transition-all cursor-pointer group active:scale-[0.98] shadow-subtle"
         >
           <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <HandCoins size={20} strokeWidth={2} />
@@ -381,7 +381,7 @@ export function ProfileView({
 
         <button
           onClick={() => handleSectionClick('starred')}
-          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center py-4 sm:py-5 px-3.5 rounded-card bg-[var(--surface-color)] border-none transition-all cursor-pointer group active:scale-[0.98] shadow-subtle"
         >
           <div className="w-10 h-10 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-color)] transition-colors">
             <Heart size={20} strokeWidth={2} />
@@ -392,18 +392,17 @@ export function ProfileView({
         </button>
       </div>
 
-      <div className="space-y-6 sm:space-y-7">
+      <div className="space-y-7 sm:space-y-8">
         {/* Admin Tools for App Owner */}
         {isAdmin && (
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             <h4 className="text-section-title px-1.5 flex items-center gap-1.5">
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
               <Crown size={14} strokeWidth={2} className="text-[var(--warning-color)] shrink-0" />
             </h4>
-            <Card variant="default" padding="none" className="divide-y divide-menu border border-[var(--warning-color)]/25">
+            <Card variant="default" padding="none" className="divide-y divide-menu">
               <ListRow
                 variant="grouped"
-                density="compact"
                 showChevron
                 multiline={true}
                 icon={<ShieldCheck size={18} strokeWidth={2} />}
@@ -417,14 +416,13 @@ export function ProfileView({
         )}
 
         {/* Ekonomi & Budget */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <h4 className="text-section-title px-1.5">
             {t('economy')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Calendar size={18} strokeWidth={2} />}
               title={t('salary')}
@@ -432,7 +430,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<PieChart size={18} strokeWidth={2} />}
               title={config.language === 'en' ? 'Budget' : 'Budget'}
@@ -440,7 +437,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Tag size={18} strokeWidth={2} />}
               title={config.language === 'en' ? 'Categories' : 'Kategorier'}
@@ -448,7 +444,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<CreditCard size={18} strokeWidth={2} />}
               title={t('paymentMethod')}
@@ -456,7 +451,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Coins size={18} strokeWidth={2} />}
               title={config.language === 'en' ? 'Currency' : 'Valuta'}
@@ -471,14 +465,13 @@ export function ProfileView({
         </div>
 
         {/* Verktyg & Guider */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <h4 className="text-section-title px-1.5">
             {config.language === 'en' ? 'Tools & Guides' : 'Verktyg & Funktioner'}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<BookOpen size={18} strokeWidth={2} />}
               title={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'}
@@ -488,14 +481,13 @@ export function ProfileView({
         </div>
 
         {/* App Settings */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <h4 className="text-section-title px-1.5">
             {t('appSettings')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Bell size={18} strokeWidth={2} />}
               title={config.language === 'en' ? 'Notifications' : 'Notiser'}
@@ -504,7 +496,6 @@ export function ProfileView({
 
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Palette size={18} strokeWidth={2} />}
               title={t('appearance' as any) || 'Utseende'}
@@ -517,7 +508,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Globe size={18} strokeWidth={2} />}
               title={t('language')}
@@ -525,7 +515,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Lock size={18} strokeWidth={2} />}
               title={t('pinLock')}
@@ -533,7 +522,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               multiline
               icon={<Calendar size={18} strokeWidth={2} />}
               title={t('showFixedExpensesInCalendar')}
@@ -555,7 +543,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               multiline
               icon={<History size={18} strokeWidth={2} />}
               title={t('showFixedExpensesInHistory')}
@@ -582,7 +569,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               multiline
               icon={<EyeOff size={18} strokeWidth={2} />}
               title={t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
@@ -608,14 +594,13 @@ export function ProfileView({
         </div>
 
         {/* Support & Legal */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <h4 className="text-section-title px-1.5">
             {t('support')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Mail size={18} strokeWidth={2} />}
               title={t('feedback')}
@@ -623,7 +608,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Download size={18} strokeWidth={2} />}
               title={t('exportData')}
@@ -631,7 +615,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<Shield size={18} strokeWidth={2} />}
               title={t('privacyPolicy')}
@@ -639,7 +622,6 @@ export function ProfileView({
             />
             <ListRow
               variant="grouped"
-              density="compact"
               showChevron
               icon={<FileText size={18} strokeWidth={2} />}
               title={t('termsOfService')}
@@ -649,13 +631,13 @@ export function ProfileView({
         </div>
 
         {/* Account Actions */}
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <h4 className="text-section-title text-[var(--danger-color)] px-1.5">
             {t('dangerZone')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             {isDemoMode && (
-              <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-[var(--card-gap)]">
+              <div className="p-5 bg-black/[0.02] dark:bg-white/[0.03] space-y-[var(--card-gap)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
@@ -679,14 +661,12 @@ export function ProfileView({
             )}
             <ListRow
               variant="grouped"
-              density="compact"
               icon={<LogOut size={18} strokeWidth={2} />}
               title={t('logout')}
               onClick={onLogout}
             />
             <ListRow
               variant="grouped"
-              density="compact"
               destructive
               icon={<Trash2 size={18} strokeWidth={2} />}
               iconColor="text-[var(--danger-color)]"

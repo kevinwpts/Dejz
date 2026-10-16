@@ -222,7 +222,7 @@ export function ReceiptCameraModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] bg-black text-white flex flex-col select-none overflow-hidden font-barlow">
+    <div className="fixed inset-0 z-[120] bg-black text-white flex flex-col select-none overflow-hidden font-sans">
       {/* Shutter Flash Effect */}
       {isShutterFlashing && (
         <div className="absolute inset-0 z-50 bg-white opacity-80 pointer-events-none transition-opacity duration-150" />

@@ -6,7 +6,7 @@ import { NORDIC_LANGUAGES } from '../utils/nordic';
 interface LanguagePickerProps {
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
-  variant?: 'header' | 'footer' | 'compact' | 'settings';
+  variant?: 'header' | 'footer' | 'compact' | 'settings' | 'pill' | 'pill-hero';
   className?: string;
 }
 
@@ -47,11 +47,15 @@ export function LanguagePicker({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Välj språk / Choose language"
-        className={`inline-flex items-center gap-1 transition-all cursor-pointer select-none whitespace-nowrap shrink-0 ${
+        className={`inline-flex items-center gap-1.5 transition-all duration-300 cursor-pointer select-none whitespace-nowrap shrink-0 ${
           variant === 'footer'
             ? 'px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
             : variant === 'compact'
             ? 'px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)]/90 backdrop-blur-md hover:bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-subtle active:scale-[0.98]'
+            : variant === 'pill-hero'
+            ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-[#FFFDF9] bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] active:scale-[0.97]'
+            : variant === 'pill'
+            ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-transparent active:scale-[0.97]'
             : 'px-2 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
         }`}
       >
@@ -63,7 +67,7 @@ export function LanguagePicker({
         )}
         <ChevronDown
           size={13}
-          className={`shrink-0 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`shrink-0 opacity-70 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 

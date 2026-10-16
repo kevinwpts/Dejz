@@ -49,24 +49,24 @@ export function CategoryIcon({
   // Resolve Icons8 Key
   const icons8Key = !isEmoji ? resolveIcons8Key(icon, categoryName) : null;
 
-  // Container sizing
+  // Container sizing (2026 Squircle Geometry)
   const containerSizes: Record<string, string> = {
-    '2xs': 'w-[18px] h-[18px]',
-    xs: 'w-6 h-6',
-    sm: 'w-8 h-8',
-    md: 'w-[38px] h-[38px] sm:w-[42px] sm:h-[42px]',
-    lg: 'w-11 h-11',
-    xl: 'w-14 h-14 sm:w-16 sm:h-16',
+    '2xs': 'w-[18px] h-[18px] rounded-sm',
+    xs: 'w-6 h-6 rounded-xs',
+    sm: 'w-8 h-8 rounded-md',
+    md: 'w-9 h-9 rounded-md',
+    lg: 'w-11 h-11 rounded-card-nested',
+    xl: 'w-14 h-14 sm:w-16 sm:h-16 rounded-lg',
   };
 
   // Icon / image pixel sizing
   const imageSizes: Record<string, number> = {
     '2xs': 14,
     xs: 18,
-    sm: 24,
-    md: 30,
-    lg: 34,
-    xl: 44,
+    sm: 22,
+    md: 26,
+    lg: 32,
+    xl: 42,
   };
 
   const currentPx = imageSizes[size] || 30;
@@ -87,7 +87,7 @@ export function CategoryIcon({
 
     return (
       <div
-        className={`rounded-full flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.08] ${containerSizes[size]} ${
+        className={`flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.07] ${containerSizes[size]} ${
           isActive ? 'ring-2 ring-[var(--accent-color)] scale-105' : ''
         } ${className}`}
         aria-hidden="true"
@@ -138,7 +138,7 @@ export function CategoryIcon({
 
     return (
       <div
-        className={`rounded-full flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.06] ${containerSizes[size]} ${
+        className={`flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.06] ${containerSizes[size]} ${
           isActive ? 'ring-2 ring-[var(--accent-color)] shadow-subtle scale-105' : ''
         } ${className}`}
         aria-hidden="true"
@@ -178,7 +178,7 @@ export function CategoryIcon({
 
   return (
     <div
-      className={`rounded-full flex items-center justify-center shrink-0 text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.06] select-none transition-transform ${containerSizes[size]} ${
+      className={`flex items-center justify-center shrink-0 text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.06] select-none transition-transform ${containerSizes[size]} ${
         isActive ? 'ring-2 ring-[var(--accent-color)] shadow-subtle scale-105' : ''
       } ${className}`}
       aria-hidden="true"

@@ -64,7 +64,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
           <h2 className="text-body-large font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Shared Budget with Partner' : 'Delad budget med partner'}
           </h2>
-          <p className="text-xs text-[var(--text-secondary)] opacity-80 leading-relaxed max-w-xs mx-auto">
+          <p className="text-secondary text-[var(--text-secondary)] opacity-80 leading-relaxed max-w-xs mx-auto">
             {isEn
               ? 'Share grocery budgets, see who paid what, and stay in sync in real time.'
               : 'Dela matbudget, se vem som betalade vad och håll koll på hushållsekonomin tillsammans.'}
@@ -79,7 +79,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
           <Card variant="default" padding="lg" className="bg-[var(--success-container)] border border-[var(--success-color)]/20 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--success-color)] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                <div className="w-10 h-10 rounded-full bg-[var(--success-color)] text-white flex items-center justify-center font-bold text-body shadow-xs">
                   <UserCheck size={18} strokeWidth={2.5} />
                 </div>
                 <div>
@@ -98,7 +98,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
             </div>
 
             {/* Quick Feature List */}
-            <div className="space-y-2 pt-2 text-xs text-[var(--text-secondary)] border-t border-[var(--success-color)]/20">
+            <div className="space-y-2 pt-2 text-secondary text-[var(--text-secondary)] border-t border-[var(--success-color)]/20">
               <div className="flex items-center gap-2">
                 <Check size={14} className="text-[var(--success-color)] shrink-0" />
                 <span>{isEn ? 'Shared category budgets in real time' : 'Gemensamma kategoribudgetar i realtid'}</span>

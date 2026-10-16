@@ -549,7 +549,7 @@ export function LogView({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onClear={() => setSearchQuery('')}
-          className="h-[42px] sm:h-[44px] text-xs sm:text-sm"
+          className="h-[42px] sm:h-[44px] text-secondary"
         />
       </div>
 
@@ -564,7 +564,7 @@ export function LogView({
               setModalPeriod(initial);
               setIsPeriodPickerOpen(true);
             }}
-            className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+            className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-secondary sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
           >
             <CalendarIcon size={15} className="text-[var(--text-secondary)] shrink-0" />
             <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
@@ -633,7 +633,7 @@ export function LogView({
 
       {/* 3. Discrete Results & Clear Row */}
       {(hasActiveSearch || hasActiveFilters) && (
-        <div className="flex items-center justify-between px-1 py-0.5 text-xs text-[var(--text-secondary)]">
+        <div className="flex items-center justify-between px-1 py-0.5 text-secondary text-[var(--text-secondary)]">
           <div className="flex items-center gap-1.5 overflow-hidden">
             <span className="text-label truncate">
               {filteredExpenses.length === 0 ? (
@@ -695,47 +695,49 @@ export function LogView({
 
       {/* 6. Transactions List Grouped by Day */}
       <div className="space-y-[var(--card-gap)]">
-        <div className="space-y-4 sm:space-y-4.5">
+        <div className="space-y-5 sm:space-y-6">
           {groupedExpenses.map(([date, dayData], index) => (
             <motion.div 
               key={date} 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
-              className="space-y-1.5"
+              className="space-y-2.5"
             >
               {/* Day Header with Date */}
-              <div className="px-1 pb-0.5">
+              <div className="px-1.5 pb-0.5">
                 <span className="text-label font-medium text-[var(--text-secondary)]">
                   {formatFullDate(date, currentLang)}
                 </span>
               </div>
 
               {/* Transactions for this Day */}
-              <div className="space-y-1.5">
+              <div className="tx-group-card">
                 {dayData.items.map((transaction: any) => (
-                  <TransactionItem 
-                    key={transaction.id}
-                    transaction={transaction}
-                    isFixed={Boolean(transaction.isFixed)}
-                    config={config}
-                    onView={transaction.isFixed ? undefined : onViewTransaction}
-                    onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
-                    onToggleStar={transaction.isFixed ? undefined : onToggleStar}
-                    onClick={() => {
-                      if (transaction.isFixed) {
-                        if (transaction.type === 'income' && onViewIncome) {
-                          onViewIncome(transaction.originalItem);
-                        } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
-                          onViewMonthlySaving(transaction.originalItem);
-                        } else if (onViewFixedExpense) {
-                          onViewFixedExpense(transaction.originalItem);
+                  <div key={transaction.id}>
+                    <TransactionItem 
+                      transaction={transaction}
+                      isFixed={Boolean(transaction.isFixed)}
+                      isGrouped={true}
+                      config={config}
+                      onView={transaction.isFixed ? undefined : onViewTransaction}
+                      onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
+                      onToggleStar={transaction.isFixed ? undefined : onToggleStar}
+                      onClick={() => {
+                        if (transaction.isFixed) {
+                          if (transaction.type === 'income' && onViewIncome) {
+                            onViewIncome(transaction.originalItem);
+                          } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
+                            onViewMonthlySaving(transaction.originalItem);
+                          } else if (onViewFixedExpense) {
+                            onViewFixedExpense(transaction.originalItem);
+                          }
+                        } else if (onViewTransaction) {
+                          onViewTransaction(transaction);
                         }
-                      } else if (onViewTransaction) {
-                        onViewTransaction(transaction);
-                      }
-                    }}
-                  />
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
             </motion.div>
@@ -872,7 +874,7 @@ export function LogView({
 
               <div className="flex flex-col items-center text-center px-2 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tracking-tight truncate capitalize">
+                  <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight truncate capitalize">
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
@@ -915,7 +917,7 @@ export function LogView({
                   setSelectedDate(null);
                   setIsPeriodPickerOpen(false);
                 }}
-                className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-none active:scale-95 ${
+                className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-secondary font-semibold transition-all cursor-pointer border-none active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
                     ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs'
                     : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10'
@@ -969,7 +971,7 @@ export function LogView({
                           : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] font-medium'
                       }`}
                     >
-                      <span className={`text-xs sm:text-body leading-none tabular-nums ${
+                      <span className={`text-secondary sm:text-body leading-none tabular-nums ${
                         isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-primary)]'
                       }`}>
                         {dayNum}
@@ -1043,7 +1045,7 @@ export function LogView({
               <button
                 type="button"
                 onClick={() => setCategoryFilter(null)}
-                className="text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
+                className="text-secondary font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
               >
                 {getL10n('Återställ', 'Reset')}
               </button>
@@ -1057,7 +1059,7 @@ export function LogView({
                 if (typeof feedback?.selection === 'function') feedback.selection();
                 setCategoryFilter(null);
               }}
-              className={`px-3 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+              className={`px-3 py-2 rounded-full text-secondary font-semibold transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
                 categoryFilter === null
                   ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-transparent shadow-xs'
                   : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
@@ -1082,7 +1084,7 @@ export function LogView({
                     if (typeof feedback?.selection === 'function') feedback.selection();
                     setCategoryFilter(isSelected ? null : cat.name);
                   }}
-                  className={`px-3 py-2 rounded-full text-xs font-medium transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+                  className={`px-3 py-2 rounded-full text-secondary font-medium transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
                     isSelected
                       ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold border-transparent shadow-xs'
                       : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'

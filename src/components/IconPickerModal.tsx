@@ -95,7 +95,7 @@ export function IconPickerModal({
                 key={cat.id}
                 type="button"
                 onClick={() => setActiveCategory(cat.id)}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                className={`whitespace-nowrap px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] text-secondary font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                   isActive
                     ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs scale-[1.02]'
                     : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'

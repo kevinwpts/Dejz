@@ -166,17 +166,17 @@ export function CancelSubscriptionModal({
               <BudgetItemLogo item={expense} type="expense" config={config} />
             </div>
             <div className="min-w-0">
-              <h4 className="text-[15px] font-bold text-[var(--text-primary)] truncate">
+              <h4 className="text-section-title font-bold text-[var(--text-primary)] truncate">
                 {expense.name}
               </h4>
-              <p className="text-xs text-[var(--text-secondary)] font-medium">
+              <p className="text-secondary text-[var(--text-secondary)] font-medium">
                 {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || (isEn ? 'Fixed expense' : 'Fast utgift'))}
               </p>
             </div>
           </div>
 
           <div className="text-right shrink-0">
-            <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
+            <span className="text-body font-bold font-amount tabular-nums text-[var(--text-primary)]">
               −{formatAmount(expense.amount, config.language)} {config.currency || 'kr'}
             </span>
             <span className="block text-secondary text-[var(--text-secondary)] font-medium">
@@ -188,10 +188,10 @@ export function CancelSubscriptionModal({
         {loading ? (
           <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
             <div className="w-8 h-8 rounded-full border-2 border-[var(--text-primary)] border-t-transparent animate-spin" />
-            <p className="text-sm font-semibold text-[var(--text-primary)]">
+            <p className="text-body font-semibold text-[var(--text-primary)]">
               {isEn ? 'Searching for cancellation portal and guide...' : 'Hittar officiell uppsägningslänk och villkor...'}
             </p>
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-secondary text-[var(--text-secondary)]">
               {isEn ? 'Scanning direct links & customer service...' : 'Söker efter direktlänk till kontoinställningar...'}
             </p>
           </div>
@@ -202,7 +202,7 @@ export function CancelSubscriptionModal({
               <a
                 href={`tel:${details.phoneNumber.replace(/\s+/g, '')}`}
                 onClick={() => feedback.tap()}
-                className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-body shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
               >
                 <Phone size={17} strokeWidth={2} />
                 <span>{isEn ? `Call Kundservice: ${details.phoneNumber}` : `Ring kundservice: ${details.phoneNumber}`}</span>
@@ -211,7 +211,7 @@ export function CancelSubscriptionModal({
               <a
                 href={`mailto:${details.supportEmail}?subject=${encodeURIComponent(`Uppsägning av abonnemang - ${expense.name}`)}`}
                 onClick={() => feedback.tap()}
-                className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-body shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
               >
                 <Mail size={17} strokeWidth={2} />
                 <span>{isEn ? `Email Cancellation: ${details.supportEmail}` : `Skicka uppsägning: ${details.supportEmail}`}</span>
@@ -220,7 +220,7 @@ export function CancelSubscriptionModal({
               <button
                 type="button"
                 onClick={handleOpenLink}
-                className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full h-12 px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-body shadow-subtle hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
               >
                 <ExternalLink size={17} strokeWidth={2} />
                 <span>{isEn ? 'Open cancellation portal' : 'Öppna uppsägningssidan'}</span>
@@ -230,14 +230,14 @@ export function CancelSubscriptionModal({
             {/* Step-by-Step Instructions */}
             {details.steps && details.steps.length > 0 && (
               <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-subtle space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] tracking-tight">
+                <div className="flex items-center gap-2 text-secondary font-bold text-[var(--text-primary)] tracking-tight">
                   <HelpCircle size={14} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
                 </div>
 
                 <ol className="space-y-2.5">
                   {details.steps.map((step, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+                    <li key={idx} className="flex items-start gap-2.5 text-secondary text-[var(--text-secondary)] leading-relaxed font-medium">
                       <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-bold text-micro-label flex items-center justify-center shrink-0 mt-0.5 border border-subtle">
                         {idx + 1}
                       </span>
@@ -250,7 +250,7 @@ export function CancelSubscriptionModal({
 
             {/* Notice Period & Tips Box */}
             {(details.noticePeriod || details.tips) && (
-              <div className="p-3.5 rounded-card-nested bg-[var(--surface-color)] border border-subtle text-xs text-[var(--text-secondary)] space-y-2">
+              <div className="p-3.5 rounded-card-nested bg-[var(--surface-color)] border border-subtle text-secondary text-[var(--text-secondary)] space-y-2">
                 {details.noticePeriod && (
                   <div className="flex items-start gap-2">
                     <Clock size={14} className="text-[var(--text-secondary)] shrink-0 mt-0.5" />
@@ -279,7 +279,7 @@ export function CancelSubscriptionModal({
                   href={details.supportUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline inline-flex items-center gap-1 transition-colors font-medium"
+                  className="text-secondary text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline inline-flex items-center gap-1 transition-colors font-medium"
                 >
                   <span>{isEn ? 'Read full cancellation policy' : 'Läs fullständiga uppsägningsvillkor'}</span>
                   <ExternalLink size={11} />
@@ -309,14 +309,14 @@ export function CancelSubscriptionModal({
               <div className="p-4 rounded-card-nested bg-[var(--surface-color)] border border-subtle space-y-4">
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-[var(--text-primary)]" />
-                  <p className="text-xs font-bold text-[var(--text-primary)]">
+                  <p className="text-secondary font-bold text-[var(--text-primary)]">
                     {isEn ? 'Subscription cancellation details' : 'Datum för uppsägning och sista betalning'}
                   </p>
                 </div>
 
                 {/* 1. Slutdatum (Sista giltighetsdag - Primary input) */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[var(--text-primary)] block">
+                  <label className="text-secondary font-semibold text-[var(--text-primary)] block">
                     {isEn ? 'Slutdatum (När slutar abonnemanget gälla?)' : 'Slutdatum (När slutar abonnemanget gälla?)'}
                   </label>
                   <Input
@@ -324,7 +324,7 @@ export function CancelSubscriptionModal({
                     value={endDate}
                     onChange={(e) => handleEndDateChange(e.target.value)}
                   />
-                  <p className="text-[11px] text-[var(--text-secondary)]">
+                  <p className="text-label text-[var(--text-secondary)]">
                     {isEn
                       ? 'The last day your contract or access remains active.'
                       : 'Sista dagen avtalet eller tjänsten gäller.'}
@@ -334,13 +334,13 @@ export function CancelSubscriptionModal({
                 {/* 2. Sista betalningsdag (Calculated with override option) */}
                 <div className="space-y-1.5 pt-1 border-t border-subtle">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-[var(--text-primary)] block">
+                    <label className="text-secondary font-semibold text-[var(--text-primary)] block">
                       {isEn ? 'Sista betalningsdag' : 'Sista betalningsdag'}
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowCustomLastPay(!showCustomLastPay)}
-                      className="text-[11px] font-semibold text-[var(--accent-color)] hover:underline cursor-pointer"
+                      className="text-label font-semibold text-[var(--accent-color)] hover:underline cursor-pointer"
                     >
                       {showCustomLastPay ? (isEn ? 'Auto-calculate' : 'Återställ automatisk') : (isEn ? 'Edit date' : 'Ändra sista betalningsdag')}
                     </button>
@@ -353,7 +353,7 @@ export function CancelSubscriptionModal({
                       onChange={(e) => setLastPayDate(e.target.value)}
                     />
                   ) : (
-                    <div className="px-3 py-2 rounded-lg bg-[var(--surface-muted)] text-xs font-medium text-[var(--text-primary)] flex items-center justify-between">
+                    <div className="px-3 py-2 rounded-card-nested bg-[var(--surface-muted)] text-secondary font-medium text-[var(--text-primary)] flex items-center justify-between">
                       <span>{isEn ? 'Estimated last payment:' : 'Beräknad sista betalning:'}</span>
                       <span className="font-bold font-amount">{formatShortDate(lastPayDate, config.language)}</span>
                     </div>
@@ -362,7 +362,7 @@ export function CancelSubscriptionModal({
 
                 {/* 3. Uppsägningsdatum (När användaren sa upp det) */}
                 <div className="space-y-1.5 pt-1 border-t border-subtle">
-                  <label className="text-xs font-semibold text-[var(--text-secondary)] block">
+                  <label className="text-secondary font-semibold text-[var(--text-secondary)] block">
                     {isEn ? 'Uppsägningsdatum (När sades det upp?)' : 'Uppsägningsdatum (När sades det upp?)'}
                   </label>
                   <Input
@@ -373,12 +373,12 @@ export function CancelSubscriptionModal({
                 </div>
 
                 {/* Budget impact explanation banner */}
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-[var(--text-primary)] space-y-1">
+                <div className="p-3 rounded-card-nested bg-amber-500/10 border border-amber-500/20 text-secondary text-[var(--text-primary)] space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400">
                     <CheckCircle2 size={13} />
                     <span>{isEn ? 'Budget Impact' : 'Påverkan på budgeten'}</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                  <p className="text-label leading-relaxed text-[var(--text-secondary)]">
                     {isEn
                       ? `This subscription will continue to be counted in your budget until its last payment on ${formatShortDate(lastPayDate, config.language)}, and then stop automatically.`
                       : `Abonnemanget kommer att räknas med i budgeten fram till sista betalningen ${formatShortDate(lastPayDate, config.language)}, och därefter automatiskt sluta dras.`}
@@ -424,7 +424,7 @@ export function CancelSubscriptionModal({
               </Button>
             ) : (
               <div className="p-4 rounded-card-nested bg-[var(--surface-color)] border border-subtle space-y-3">
-                <p className="text-xs font-medium text-[var(--text-primary)] text-center">
+                <p className="text-secondary font-medium text-[var(--text-primary)] text-center">
                   {isEn ? 'Are you sure you want to remove this expense from your budget?' : 'Vill du ta bort denna fasta utgift från din framtida budget?'}
                 </p>
                 <div className="grid grid-cols-2 gap-2">

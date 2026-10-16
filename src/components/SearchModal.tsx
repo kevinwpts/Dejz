@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, X } from 'lucide-react';
 import { Transaction, Config, FixedExpense, Income } from '../types';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { Button, Input } from './ui';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -167,14 +167,18 @@ export function SearchModal({
           >
             {/* Top Search Bar */}
             <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 shrink-0">
-              <div className="flex-1 relative flex items-center bg-white dark:bg-white/5 rounded-full border border-subtle px-3.5 h-[44px] transition-all shadow-none">
-                <Search size={18} className="text-[var(--text-tertiary)] shrink-0 mr-2.5" />
-                <input 
+              <div className="flex-1">
+                <Input
                   ref={inputRef}
+                  variant="search"
                   autoFocus
-                  type="text" 
+                  type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onClear={() => {
+                    setQuery('');
+                    inputRef.current?.focus();
+                  }}
                   autoComplete="off"
                   placeholder={getL10n(
                     "Sök transaktion, fast utgift, butik...",
@@ -183,30 +187,16 @@ export function SearchModal({
                     "Søg transaktion, fast udgift, butik...",
                     "Etsi tapahtumaa, kiinteää kulua, kauppaa..."
                   )}
-                  className="w-full h-full bg-transparent text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none"
                 />
-                {query && (
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setQuery('');
-                      inputRef.current?.focus();
-                    }}
-                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
-                    title={getL10n("Rensa", "Clear", "Tøm", "Ryd", "Tyhjennä")}
-                  >
-                    <X size={13} strokeWidth={2.5} />
-                  </button>
-                )}
               </div>
 
-              <button 
-                type="button"
-                onClick={onClose} 
-                className="h-10 px-3 rounded-full text-secondary font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0 active:scale-95"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
               >
                 {getL10n("Avbryt", "Cancel", "Avbryt", "Annuller", "Peruuta")}
-              </button>
+              </Button>
             </div>
 
             {/* Results Scroll Container */}

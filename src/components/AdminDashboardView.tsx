@@ -157,7 +157,7 @@ export function AdminDashboardView({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group"
+          className="flex items-center gap-2 text-body font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group"
         >
           <div className="w-8 h-8 rounded-full bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle flex items-center justify-center group-hover:bg-[var(--surface-color)] dark:group-hover:bg-white/10 transition-colors">
             <ChevronLeft size={16} strokeWidth={2.5} />
@@ -165,7 +165,7 @@ export function AdminDashboardView({
           <span>{isEn ? 'Back to profile' : 'Tillbaka till profilen'}</span>
         </button>
 
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-xs font-bold border border-[var(--warning-color)]/20">
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-secondary font-bold border border-[var(--warning-color)]/20">
           <Crown size={14} strokeWidth={2} />
           <span>{isEn ? 'App Owner' : 'Appägare'}</span>
         </div>
@@ -179,10 +179,10 @@ export function AdminDashboardView({
               <ShieldCheck size={26} strokeWidth={2} />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold font-display text-[var(--text-primary)] tracking-tight">
+              <h2 className="text-page-title font-bold font-display text-[var(--text-primary)] tracking-tight">
                 {isEn ? 'Admin Dashboard' : 'Adminpanel'}
               </h2>
-              <p className="text-xs font-medium text-[var(--text-secondary)] mt-0.5">
+              <p className="text-secondary font-medium text-[var(--text-secondary)] mt-0.5">
                 {user?.email || 'kevinwpts@gmail.com'}
               </p>
             </div>
@@ -211,12 +211,12 @@ export function AdminDashboardView({
               {adminStats.dbHealthy ? (
                 <>
                   <CheckCircle2 size={15} strokeWidth={2} className="text-[var(--success-color)]" />
-                  <span className="text-xs font-bold text-[var(--text-primary)]">Online</span>
+                  <span className="text-secondary font-bold text-[var(--text-primary)]">Online</span>
                 </>
               ) : (
                 <>
                   <XCircle size={15} strokeWidth={2} className="text-[var(--danger-color)]" />
-                  <span className="text-xs font-bold text-[var(--danger-color)]">Offline</span>
+                  <span className="text-secondary font-bold text-[var(--danger-color)]">Offline</span>
                 </>
               )}
             </div>
@@ -226,7 +226,7 @@ export function AdminDashboardView({
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Subscription' : 'Status'}
             </span>
-            <span className="text-xs font-bold text-[var(--text-primary)] block mt-1 tracking-tight">
+            <span className="text-secondary font-bold text-[var(--text-primary)] block mt-1 tracking-tight">
               {subscriptionStatus || 'Free'}
             </span>
           </div>
@@ -235,7 +235,7 @@ export function AdminDashboardView({
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Transactions' : 'Transaktioner'}
             </span>
-            <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)] block mt-1">
+            <span className="text-secondary font-bold font-amount tabular-nums text-[var(--text-primary)] block mt-1">
               {transactions.length} st
             </span>
           </div>
@@ -244,7 +244,7 @@ export function AdminDashboardView({
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Categories' : 'Kategorier'}
             </span>
-            <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)] block mt-1">
+            <span className="text-secondary font-bold font-amount tabular-nums text-[var(--text-primary)] block mt-1">
               {config.categories?.length || 0} st
             </span>
           </div>
@@ -255,11 +255,11 @@ export function AdminDashboardView({
       <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
-          <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+          <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Subscription Simulator (Testing)' : 'Prenumerationssimulator (Testa vyer)'}
           </h3>
         </div>
-        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+        <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
           {isEn
             ? 'Instantly switch your account mode to test how the app behaves for Free, Trial, or Pro subscribers without billing.'
             : 'Växla direkt mellan olika kontolägen för att testa hur appen och funktioner ser ut för gratis-, prov- eller Pro-användare.'}
@@ -269,7 +269,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={() => handleSimulateSubscription('pro')}
-            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
+            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-secondary font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
               subscriptionStatus === 'pro'
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-subtle'
                 : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
@@ -282,7 +282,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={() => handleSimulateSubscription('trial')}
-            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
+            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-secondary font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
               subscriptionStatus === 'trial'
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-subtle'
                 : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
@@ -295,7 +295,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={() => handleSimulateSubscription('free')}
-            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
+            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-secondary font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
               !subscriptionStatus || subscriptionStatus === 'free'
                 ? 'bg-black/80 dark:bg-white/80 text-white dark:text-black shadow-subtle'
                 : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
@@ -311,11 +311,11 @@ export function AdminDashboardView({
       <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={2} className="text-[var(--warning-color)]" />
-          <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+          <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Quick Test Account (Admin Only)' : 'Snabbtest & Testkonto (Endast Admin)'}
           </h3>
         </div>
-        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+        <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
           {isEn
             ? 'Launch a clean test account to test onboarding from scratch, or load complete demo data. This tool is now exclusively accessible from your admin dashboard.'
             : 'Starta ett helt rent testkonto för att testa onboardingflödet från början, eller ladda in fullständig exempeldata. Denna snabbknapp är nu flyttad hit och endast tillgänglig för dig som admin.'}
@@ -335,7 +335,7 @@ export function AdminDashboardView({
             className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-subtle text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
+              <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight">
                 {isEn ? 'Start Fresh Onboarding Test' : 'Testa Onboarding (Rent testkonto)'}
               </span>
               <Play size={14} strokeWidth={2.5} className="text-[var(--warning-color)] group-hover:translate-x-0.5 transition-transform" />
@@ -373,7 +373,7 @@ export function AdminDashboardView({
             className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-subtle text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
+              <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight">
                 {isEn ? 'Load Full Demo Data' : 'Ladda in fullständig exempeldata'}
               </span>
               <Play size={14} strokeWidth={2.5} className="text-[var(--success-color)] group-hover:translate-x-0.5 transition-transform" />
@@ -390,17 +390,17 @@ export function AdminDashboardView({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
-            <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+            <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
               {isEn ? 'User Feedback & Bug Reports' : 'Inkommen Användarfeedback'}
             </h3>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] font-amount tabular-nums">
+          <span className="text-secondary font-semibold px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] font-amount tabular-nums">
             {feedbackList.length} st
           </span>
         </div>
 
         {loadingFeedback ? (
-          <div className="py-6 text-center text-xs text-[var(--text-secondary)]">
+          <div className="py-6 text-center text-secondary text-[var(--text-secondary)]">
             {isEn ? 'Loading feedback...' : 'Hämtar feedback...'}
           </div>
         ) : feedbackList.length > 0 ? (
@@ -428,14 +428,14 @@ export function AdminDashboardView({
                     <Trash2 size={13} strokeWidth={2} />
                   </button>
                 </div>
-                <p className="text-xs text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
+                <p className="text-secondary text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
                   {item.message}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="py-8 text-center text-xs text-[var(--text-secondary)] opacity-70">
+          <div className="py-8 text-center text-secondary text-[var(--text-secondary)] opacity-70">
             {isEn ? 'No feedback received yet.' : 'Ingen feedback har inkommit än.'}
           </div>
         )}
@@ -445,7 +445,7 @@ export function AdminDashboardView({
       <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,20px)] card-p border-none shadow-subtle space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Database size={18} strokeWidth={2} className="text-[var(--success-color)]" />
-          <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+          <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Developer Tools' : 'Utvecklarverktyg & Diagnostik'}
           </h3>
         </div>
@@ -454,7 +454,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={handleCopyDiagnostics}
-            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] border border-subtle text-xs font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
+            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] border border-subtle text-secondary font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
           >
             <div className="flex items-center gap-2.5">
               <FileCode size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
@@ -479,7 +479,7 @@ export function AdminDashboardView({
                 addToast('Kunde inte rensa cache', 'error');
               }
             }}
-            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] border border-subtle text-xs font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
+            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] border border-subtle text-secondary font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
           >
             <div className="flex items-center gap-2.5">
               <RefreshCw size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
@@ -500,7 +500,7 @@ export function AdminDashboardView({
           showCloseButton={true}
           bodyClassName="p-6 space-y-[var(--card-gap)]"
         >
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+          <p className="text-secondary text-[var(--text-secondary)] leading-relaxed font-medium">
             {isEn
               ? 'Are you sure you want to delete this feedback entry?'
               : 'Är du säker på att du vill ta bort detta feedback-meddelande?'}

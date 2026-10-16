@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { IconButton } from './ui';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -54,13 +55,14 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onDismiss }) => {
       <p className="text-label font-semibold tracking-tight flex-1 leading-snug">
         {toast.message}
       </p>
-      <button
+      <IconButton
+        variant="ghost"
+        size="xs"
+        shape="circle"
         onClick={() => onDismiss(toast.id)}
-        className="w-6 h-6 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all shrink-0 opacity-70 group-hover:opacity-100"
         aria-label="Stäng"
-      >
-        <X size={14} />
-      </button>
+        icon={<X size={14} />}
+      />
     </motion.div>
   );
 };
@@ -81,4 +83,3 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
     </div>
   );
 }
-

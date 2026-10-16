@@ -28,32 +28,32 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-all duration-[var(--duration-normal,150ms)] select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30';
+      'group inline-flex items-center justify-center font-medium transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/35';
 
     const sizeStyles = {
-      sm: 'h-[var(--height-button-sm,34px)] px-4 rounded-full text-label gap-1.5 active:scale-95',
-      md: 'h-[var(--height-button,46px)] px-5.5 rounded-full text-body-medium gap-2 active:scale-[0.98]',
-      lg: 'h-[var(--height-button-lg,48px)] px-7 rounded-full text-body-medium font-semibold gap-2.5 active:scale-[0.98]',
+      sm: 'h-[var(--height-button-sm,36px)] px-4 rounded-full text-label gap-1.5 active:scale-[0.96]',
+      md: 'h-[var(--height-button,48px)] px-5.5 rounded-full text-body-medium gap-2 active:scale-[0.97]',
+      lg: 'h-[var(--height-button-lg,54px)] px-7 rounded-full text-body-medium font-semibold gap-2.5 active:scale-[0.97]',
     }[size];
 
     const surfaceButtonStyle =
-      'bg-[var(--surface-color)] dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] border border-[var(--border-divider)]/60 shadow-subtle hover:bg-[var(--surface-muted)]/70 dark:hover:bg-white/10 active:bg-black/[0.06] dark:active:bg-white/15';
+      'bg-[var(--surface-muted)]/85 dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] border-none shadow-subtle hover:bg-[var(--surface-muted)] dark:hover:bg-white/10 active:bg-black/[0.08] dark:active:bg-white/15';
 
     const variantStyles = {
       primary:
-        'bg-[var(--text-primary)] text-[var(--surface-color)] dark:bg-[var(--text-primary)] dark:text-[var(--bg-color)] font-semibold hover:opacity-90 active:opacity-80 shadow-none border-none',
+        'bg-[var(--btn-primary-bg,var(--accent-color))] text-[var(--btn-primary-text,var(--on-accent))] font-semibold hover:bg-[var(--btn-primary-hover,var(--accent-hover))] hover:-translate-y-[1px] active:translate-y-0 active:bg-[var(--btn-primary-pressed,var(--accent-pressed))] shadow-dreams-btn border-none',
       secondary: surfaceButtonStyle,
-      pill: `${surfaceButtonStyle} rounded-[var(--radius-pill,9999px)]`,
+      pill: `${surfaceButtonStyle} !rounded-full`,
       accent:
-        'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] border-none',
+        'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold hover:bg-[var(--accent-hover)] hover:-translate-y-[1px] active:translate-y-0 active:bg-[var(--accent-pressed)] shadow-dreams-btn border-none',
       danger:
         'bg-[var(--danger-container)] text-[var(--danger-color)] hover:opacity-90 active:opacity-80 border-none',
       destructive:
         'bg-[var(--danger-container)] text-[var(--danger-color)] hover:opacity-90 active:opacity-80 border-none',
       ghost:
-        'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5',
+        'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 border-none',
       outline:
-        'bg-transparent text-[var(--text-primary)] border border-[var(--border-divider)] hover:bg-black/5 dark:hover:bg-white/5',
+        'bg-transparent text-[var(--text-primary)] border border-[var(--border-control)] hover:bg-black/5 dark:hover:bg-white/5',
       subtle: surfaceButtonStyle,
       surface: surfaceButtonStyle,
     }[variant];
@@ -73,8 +73,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           icon && <span className="shrink-0 flex items-center">{icon}</span>
         )}
-        {children}
-        {!loading && iconRight && <span className="shrink-0 flex items-center">{iconRight}</span>}
+        <span>{children}</span>
+        {!loading && iconRight && (
+          <span className="shrink-0 flex items-center">{iconRight}</span>
+        )}
       </button>
     );
   }

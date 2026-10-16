@@ -25,13 +25,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const baseStyles = 'overflow-hidden transition-all duration-[var(--duration-normal,150ms)] ease-out';
 
     const variantStyles = {
-      default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
-      accent: 'bg-[var(--accent-color)] text-[var(--on-accent)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
-      hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
+      default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
+      accent: 'bg-[var(--accent-color)] text-[var(--on-accent)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
+      hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
       nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
-      flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-none',
-      elevated: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
-      outlined: 'bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-card,20px)] shadow-none',
+      flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-none',
+      elevated: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
+      outlined: 'bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[var(--radius-card,18px)] shadow-none',
       muted: 'bg-[var(--surface-muted)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
     }[variant];
 

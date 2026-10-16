@@ -1618,7 +1618,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#141312" : "#F4F1EC";
+      const themeColor = isDark ? "#14100D" : "#F3ECE1";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -4663,16 +4663,16 @@ export default function App() {
           <div className="page-max mx-auto w-full flex items-center justify-between px-2 sm:px-4">
             <div className="flex items-center gap-2.5">
               <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-color)]" />
               </span>
-              <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
+              <span className="text-xs font-bold text-[var(--accent-color)]">Demoläge aktivt</span>
               <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-label">— Du utforskar appen med exempeldata</span>
             </div>
             <button
               type="button"
               onClick={handleExitDemo}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-subtle"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-subtle"
             >
               <span>{t('exitDemo')}</span>
               <LogOut size={12} strokeWidth={2} />

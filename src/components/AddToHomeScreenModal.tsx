@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Share, PlusSquare, X, Download, MoreVertical, Smartphone } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { Button, Card, IconButton, SegmentedControl, Modal } from './ui';
 
 interface AddToHomeScreenModalProps {
   t: (key: TranslationKey) => string;
@@ -18,7 +18,6 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
   const [activePlatform, setActivePlatform] = useState<'ios' | 'android'>('ios');
 
   useEffect(() => {
-    // Listen for the beforeinstallprompt event (Android/Chrome)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -27,24 +26,18 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Custom event to trigger opening this modal from anywhere
     const handleOpenModal = () => setIsOpen(true);
     window.addEventListener('open-add-to-home-screen', handleOpenModal);
     window.addEventListener('trigger-pwa-modal', handleOpenModal);
 
-    // Check if running in standalone mode (already installed as PWA)
     const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || 
                            (window.navigator as any).standalone === true;
     
     setIsStandalone(isStandaloneMode);
 
-    // Check device type
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setActivePlatform(isIosDevice ? 'ios' : 'android');
-
-    // We don't auto-open here anymore based on a fixed timer on mount
-    // It's now handled by the 'trigger-pwa-modal' event from App.tsx
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -68,7 +61,6 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
     }
   };
 
-  // Clean localized texts
   const stepTexts: Record<string, {
     title: string;
     desc: string;
@@ -190,145 +182,127 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
   if (isStandalone) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-5 bg-black/60 backdrop-blur-sm"
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="xs"
+      showCloseButton={false}
+      bodyClassName="p-6 sm:p-7 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7 relative"
+    >
+      {/* Close Button */}
+      <div className="absolute top-4 right-5 z-20">
+        <IconButton
+          variant="surface"
+          size="md"
+          shape="circle"
           onClick={handleClose}
-        >
-            <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 15 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-[420px] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] p-6 sm:p-7 border-none shadow-modal relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7 font-sans"
-            onClick={(e) => e.stopPropagation()}
+          aria-label="Stäng"
+          icon={<X size={16} strokeWidth={2} />}
+        />
+      </div>
+
+      {/* Header: Title & Description */}
+      <div className="flex flex-col items-center text-center mb-5 pt-1">
+        <h3 className="text-page-title font-bold font-display tracking-tight text-[var(--text-primary)]">
+          {localized.title}
+        </h3>
+        <p className="text-secondary font-medium text-[var(--text-secondary)] mt-1 max-w-[280px] mx-auto leading-relaxed">
+          {localized.desc}
+        </p>
+      </div>
+
+      {/* Platform Switcher */}
+      <div className="mb-5">
+        <SegmentedControl
+          size="sm"
+          value={activePlatform}
+          onChange={(val) => setActivePlatform(val as 'ios' | 'android')}
+          options={[
+            {
+              value: 'ios',
+              label: 'Apple',
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.05 20.28c-.96 0-1.76-.43-2.6-.43-.88 0-1.76.43-2.72.43-1.56 0-3.01-1.2-3.71-2.48-1.42-2.54-.37-6.32 1.01-8.31.69-1 1.76-1.63 2.92-1.63 1.15 0 1.83.47 2.76.47s1.48-.47 2.75-.47c1.02 0 2.05.54 2.7 1.34-2.32 1.33-1.93 4.67.43 5.7-.56 1.46-1.32 2.9-2.64 4.02-.4.36-.93.91-1.4.91zm-3.03-14.77c0-1.26.8-2.61 2.02-3.51-1.12.06-2.39.78-3.12 1.88-.66.97-.66 2.27 0 3.51 1.25-.13 2.02-1.03 2.02-1.88z" />
+                </svg>
+              ),
+            },
+            {
+              value: 'android',
+              label: 'Android',
+              icon: <Smartphone size={14} />,
+            },
+          ]}
+        />
+      </div>
+
+      {deferredPrompt && activePlatform === 'android' ? (
+        <div className="w-full space-y-2.5">
+          <Button
+            variant="accent"
+            size="lg"
+            fullWidth
+            icon={<Download size={18} strokeWidth={2} />}
+            onClick={handleInstallClick}
           >
-            {/* Top Drag Handle for mobile */}
-            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-4 sm:hidden shrink-0" />
-
-            {/* Close Button */}
-            <button 
-              type="button"
-              onClick={handleClose}
-              aria-label="Stäng"
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors z-20 cursor-pointer border-none shadow-none"
-            >
-              <X size={17} strokeWidth={2} />
-            </button>
-
-            {/* Header: Title & Description */}
-            <div className="flex flex-col items-center text-center mb-5 pt-1">
-              <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
-                {localized.title}
-              </h3>
-              <p className="text-xs font-medium text-[var(--text-tertiary)] mt-1 max-w-[280px] mx-auto leading-relaxed">
-                {localized.desc}
-              </p>
-            </div>
-
-            {/* Platform Switcher */}
-            <div className="flex justify-center mb-5">
-              <div className="inline-flex p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[var(--radius-card-nested,10px)] border border-subtle">
-                <button
-                  type="button"
-                  onClick={() => setActivePlatform('ios')}
-                  className={`py-1.5 px-4 rounded-[var(--radius-button-sm,10px)] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
-                    activePlatform === 'ios'
-                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-subtle'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.05 20.28c-.96 0-1.76-.43-2.6-.43-.88 0-1.76.43-2.72.43-1.56 0-3.01-1.2-3.71-2.48-1.42-2.54-.37-6.32 1.01-8.31.69-1 1.76-1.63 2.92-1.63 1.15 0 1.83.47 2.76.47s1.48-.47 2.75-.47c1.02 0 2.05.54 2.7 1.34-2.32 1.33-1.93 4.67.43 5.7-.56 1.46-1.32 2.9-2.64 4.02-.4.36-.93.91-1.4.91zm-3.03-14.77c0-1.26.8-2.61 2.02-3.51-1.12.06-2.39.78-3.12 1.88-.66.97-.66 2.27 0 3.51 1.25-.13 2.02-1.03 2.02-1.88z" />
-                  </svg>
-                  <span>Apple</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActivePlatform('android')}
-                  className={`py-1.5 px-4 rounded-[var(--radius-button-sm,10px)] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
-                    activePlatform === 'android'
-                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-subtle'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <Smartphone size={14} />
-                  <span>Android</span>
-                </button>
+            {localized.installBtn}
+          </Button>
+          <Button
+            variant="ghost"
+            size="md"
+            fullWidth
+            onClick={handleClose}
+          >
+            {localized.maybeLater}
+          </Button>
+        </div>
+      ) : (
+        <div className="w-full space-y-4">
+          <div className="space-y-2.5">
+            {/* Step 1 */}
+            <Card variant="default" padding="sm" className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-icon-button bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] font-display font-bold text-secondary shrink-0">
+                1
               </div>
-            </div>
-
-            {deferredPrompt && activePlatform === 'android' ? (
-              <div className="w-full space-y-3">
-                <button
-                  type="button"
-                  onClick={handleInstallClick}
-                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[var(--radius-button,12px)] font-semibold text-sm shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Download size={18} strokeWidth={2} />
-                  <span>{localized.installBtn}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="w-full h-10 bg-transparent text-[var(--text-secondary)] rounded-[var(--radius-button,12px)] font-medium text-xs hover:text-[var(--text-primary)] transition-all cursor-pointer"
-                >
-                  {localized.maybeLater}
-                </button>
-              </div>
-            ) : (
-              <div className="w-full space-y-4">
-                <div className="space-y-2.5">
-                  {/* Step 1 */}
-                  <div className="flex items-center gap-3 group p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-                    <div className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] bg-white dark:bg-white/10 border border-subtle flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
-                      1
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                        {activePlatform === 'ios' ? <Share size={13} className="text-[var(--accent-color)]" /> : <MoreVertical size={13} className="text-[var(--accent-color)]" />}
-                        {activePlatform === 'ios' ? localized.iosStep1Title : localized.androidStep1Title}
-                      </div>
-                      <div className="text-label text-[var(--text-tertiary)] truncate">
-                        {activePlatform === 'ios' ? localized.iosStep1Desc : localized.androidStep1Desc}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="flex items-center gap-3 group p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-                    <div className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] bg-white dark:bg-white/10 border border-subtle flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
-                      2
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                        <PlusSquare size={13} className="text-[var(--text-primary)]" />
-                        {activePlatform === 'ios' ? localized.iosStep2Title : localized.androidStep2Title}
-                      </div>
-                      <div className="text-label text-[var(--text-tertiary)] truncate">
-                        {activePlatform === 'ios' ? localized.iosStep2Desc : localized.androidStep2Desc}
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-secondary font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  {activePlatform === 'ios' ? <Share size={13} className="text-[var(--accent-color)]" /> : <MoreVertical size={13} className="text-[var(--accent-color)]" />}
+                  {activePlatform === 'ios' ? localized.iosStep1Title : localized.androidStep1Title}
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[var(--radius-button,12px)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shadow-xs"
-                >
-                  {localized.gotIt}
-                </button>
+                <div className="text-label text-[var(--text-secondary)] truncate">
+                  {activePlatform === 'ios' ? localized.iosStep1Desc : localized.androidStep1Desc}
+                </div>
               </div>
-            )}
-          </motion.div>
-        </motion.div>
+            </Card>
+
+            {/* Step 2 */}
+            <Card variant="default" padding="sm" className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-icon-button bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] font-display font-bold text-secondary shrink-0">
+                2
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-secondary font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <PlusSquare size={13} className="text-[var(--text-primary)]" />
+                  {activePlatform === 'ios' ? localized.iosStep2Title : localized.androidStep2Title}
+                </div>
+                <div className="text-label text-[var(--text-secondary)] truncate">
+                  {activePlatform === 'ios' ? localized.iosStep2Desc : localized.androidStep2Desc}
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <Button
+            variant="accent"
+            size="lg"
+            fullWidth
+            onClick={handleClose}
+          >
+            {localized.gotIt}
+          </Button>
+        </div>
       )}
-    </AnimatePresence>
+    </Modal>
   );
 }
+

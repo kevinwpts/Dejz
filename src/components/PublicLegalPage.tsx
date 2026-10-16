@@ -174,7 +174,7 @@ export function PublicLegalPage({
         </div>
 
         {/* Footer info box */}
-        <div className="mt-8 text-center text-xs text-[var(--text-secondary)] space-y-2 pb-12">
+        <div className="mt-8 text-center text-label text-[var(--text-secondary)] space-y-2 pb-12">
           <p>© {new Date().getFullYear()} Dejz. Alla rättigheter förbehållna.</p>
           <p className="flex items-center justify-center gap-3 flex-wrap">
             <button onClick={() => handleSelectDoc('privacy')} className="hover:underline cursor-pointer">Integritetspolicy</button>
@@ -194,13 +194,13 @@ export function PublicLegalPage({
 ========================================================================= */
 function SwedishPrivacyPolicy() {
   return (
-    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
+    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-body">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
           <Lock size={12} />
           GDPR & Google OAuth
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-page-title font-bold tracking-tight text-[var(--text-primary)]">
           Integritetspolicy för Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
@@ -209,7 +209,7 @@ function SwedishPrivacyPolicy() {
       </header>
 
       {/* Summary highlight */}
-      <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
+      <div className="p-4 rounded-card-nested bg-[var(--surface-muted)] border-none text-secondary text-[var(--text-primary)] leading-relaxed space-y-2">
         <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
           <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
           Kort sammanfattning av din integritet:
@@ -223,7 +223,7 @@ function SwedishPrivacyPolicy() {
       </div>
 
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Personuppgiftsansvarig</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">1. Personuppgiftsansvarig</h2>
         <p className="leading-relaxed">
           Dejz ansvarar för behandlingen av dina personuppgifter. För frågor rörande dataskydd, kontakta oss via e-post på{' '}
           <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] font-medium underline">
@@ -233,7 +233,7 @@ function SwedishPrivacyPolicy() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Vilka personuppgifter vi samlar in</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">2. Vilka personuppgifter vi samlar in</h2>
         <div className="space-y-2 leading-relaxed">
           <p>Vi behandlar endast nödvändiga uppgifter:</p>
           <ul className="list-disc pl-4 space-y-1">
@@ -244,12 +244,12 @@ function SwedishPrivacyPolicy() {
         </div>
       </section>
 
-      <section className="space-y-2 p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none">
-        <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+      <section className="space-y-2 p-4 rounded-card-nested bg-[var(--surface-muted)] border-none">
+        <h2 className="text-section-title font-bold text-[var(--text-primary)] flex items-center gap-1.5">
           <Lock size={16} className="text-[var(--accent-color)] shrink-0" />
           3. Google API & Begränsad användning
         </h2>
-        <div className="space-y-2 leading-relaxed text-xs">
+        <div className="space-y-2 leading-relaxed text-secondary">
           <p>
             Vid inloggning via Google Sign-In begär vi endast grundläggande profilåtkomst.
           </p>
@@ -268,20 +268,20 @@ function SwedishPrivacyPolicy() {
 ========================================================================= */
 function EnglishPrivacyPolicy() {
   return (
-    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
+    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-body">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
           <Lock size={12} />
           GDPR & Google OAuth
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-page-title font-bold tracking-tight text-[var(--text-primary)]">
           Privacy Policy for Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
           Last updated: September 23, 2026
         </p>
       </header>
-      <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
+      <div className="p-4 rounded-card-nested bg-[var(--surface-muted)] border-none text-secondary text-[var(--text-primary)] leading-relaxed space-y-2">
         <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
           <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
           Summary:
@@ -301,9 +301,9 @@ function EnglishPrivacyPolicy() {
 ========================================================================= */
 function SwedishTermsOfService() {
   return (
-    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
+    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-body">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-page-title font-bold tracking-tight text-[var(--text-primary)]">
           Användarvillkor för Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
@@ -311,13 +311,13 @@ function SwedishTermsOfService() {
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Tjänstens omfattning</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">1. Tjänstens omfattning</h2>
         <p className="leading-relaxed">
           Dejz är en personlig budget- och ekonomiapp. Genom att använda tjänsten godkänner du dessa användarvillkor.
         </p>
       </section>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Användaransvar</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">2. Användaransvar</h2>
         <p className="leading-relaxed">
           Du ansvarar själv för att uppgifter du anger är korrekta och för att hålla dina inloggningsuppgifter säkra.
         </p>
@@ -331,9 +331,9 @@ function SwedishTermsOfService() {
 ========================================================================= */
 function EnglishTermsOfService() {
   return (
-    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
+    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-body">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-page-title font-bold tracking-tight text-[var(--text-primary)]">
           Terms of Service for Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
@@ -341,7 +341,7 @@ function EnglishTermsOfService() {
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Scope of Service</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">1. Scope of Service</h2>
         <p className="leading-relaxed">
           Dejz is a personal budgeting and finance app. By using the service, you agree to these terms.
         </p>
@@ -355,9 +355,9 @@ function EnglishTermsOfService() {
 ========================================================================= */
 function SwedishCookiePolicy() {
   return (
-    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
+    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-body">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-page-title font-bold tracking-tight text-[var(--text-primary)]">
           Cookiepolicy för Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
@@ -365,7 +365,7 @@ function SwedishCookiePolicy() {
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Vad är cookies?</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">1. Vad är cookies?</h2>
         <p className="leading-relaxed">
           Cookies är små textfiler som lagras på din enhet för att förbättra din upplevelse och hålla dig inloggad.
         </p>
@@ -379,9 +379,9 @@ function SwedishCookiePolicy() {
 ========================================================================= */
 function EnglishCookiePolicy() {
   return (
-    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
+    <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-body">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+        <h1 className="text-page-title font-bold tracking-tight text-[var(--text-primary)]">
           Cookie Policy for Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
@@ -389,7 +389,7 @@ function EnglishCookiePolicy() {
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. What cookies we use</h2>
+        <h2 className="text-section-title font-bold text-[var(--text-primary)]">1. What cookies we use</h2>
         <p className="leading-relaxed">
           Cookies are small text files stored on your device to keep you signed in and secure.
         </p>

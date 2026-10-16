@@ -188,7 +188,7 @@ export function CategoryBottomSheetModal({
                     {hasBudget ? (
                       <>
                         <span
-                          className={`text-xl sm:text-2xl font-bold font-amount tabular-nums tracking-tight ${
+                          className={`text-large-amount font-bold font-amount tabular-nums tracking-tight ${
                             remaining < 0
                               ? 'text-[var(--danger-color)] dark:text-[var(--danger-color)]'
                               : 'text-[var(--text-primary)]'
@@ -200,7 +200,7 @@ export function CategoryBottomSheetModal({
                             ? `0 ${curr} ${isEn ? 'left' : 'kvar'}`
                             : `${formatAmount(remaining, language)} ${curr} ${isEn ? 'left' : 'kvar'}`}
                         </span>
-                        <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] mt-0.5">
+                        <span className="text-secondary font-medium text-[var(--text-secondary)] mt-0.5">
                           {remaining < 0
                             ? `Budget: ${formatAmount(budget, language)} ${curr}`
                             : `${isEn ? 'of' : 'av'} ${formatAmount(budget, language)} ${curr}`}
@@ -208,10 +208,10 @@ export function CategoryBottomSheetModal({
                       </>
                     ) : (
                       <>
-                        <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                        <span className="text-large-amount font-bold text-[var(--text-primary)] tracking-tight">
                           {isEn ? 'No budget set' : 'Ingen budget satt'}
                         </span>
-                        <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] mt-0.5">
+                        <span className="text-secondary font-medium text-[var(--text-secondary)] mt-0.5">
                           {actualTotalSpent > 0
                             ? `${formatAmount(actualTotalSpent, language)} ${curr} ${isEn ? 'total spent' : 'totalt spenderat'}`
                             : (isEn ? 'No expenses recorded' : 'Inga utgifter registrerade')}
@@ -333,7 +333,7 @@ export function CategoryBottomSheetModal({
                     </div>
                   ) : matchingFixedExpenses.length > 0 ? (
                     <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.02] dark:bg-white/[0.02] border border-subtle text-center">
-                      <p className="text-xs text-[var(--text-tertiary)]">
+                      <p className="text-secondary text-[var(--text-tertiary)]">
                         {isEn ? 'No variable expenses recorded in this period' : 'Inga rörliga utgifter registrerade denna period'}
                       </p>
                     </div>

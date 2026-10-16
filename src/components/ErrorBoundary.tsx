@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { translations } from '../i18n';
+import { Button, Card } from './ui';
 
 interface Props {
   children: ReactNode;
@@ -31,22 +32,25 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center h-screen bg-[var(--bg-color)] text-[var(--text-primary)]">
-          <div className="text-center p-8 border border-danger/30 rounded-[var(--radius-modal,24px)] surface-card page-max w-full mx-4">
-            <h1 className="text-2xl font-semibold mb-2">{this.getTranslation('errorTitle')}</h1>
-            <p className="mb-4 text-sm opacity-80">{this.getTranslation('errorMessage')}</p>
+        <div className="flex items-center justify-center h-screen bg-[var(--bg-color)] text-[var(--text-primary)] p-4">
+          <Card variant="default" padding="lg" className="text-center border border-[var(--danger-color)]/30 page-max w-full space-y-4">
+            <h1 className="text-page-title font-bold">{this.getTranslation('errorTitle')}</h1>
+            <p className="text-body text-[var(--text-secondary)]">{this.getTranslation('errorMessage')}</p>
             {this.state.error && (
-              <pre className="text-left text-micro-label bg-danger/10 p-3 rounded-[var(--radius-card-nested,12px)] overflow-auto max-h-48 font-mono border border-danger/20">
+              <pre className="text-left text-micro-label bg-[var(--danger-container)] p-3 rounded-card-nested overflow-auto max-h-48 font-mono border border-[var(--danger-color)]/20">
                 {this.state.error.toString()}
               </pre>
             )}
-            <button 
-              onClick={() => window.location.reload()}
-              className="mt-6 px-6 py-2 bg-danger text-[var(--text-primary)] rounded-[var(--radius-button,12px)] font-semibold hover:opacity-90 transition-colors cursor-pointer"
-            >
-              Ladda om sidan
-            </button>
-          </div>
+            <div className="pt-2">
+              <Button
+                variant="danger"
+                size="md"
+                onClick={() => window.location.reload()}
+              >
+                Ladda om sidan
+              </Button>
+            </div>
+          </Card>
         </div>
       );
     }

@@ -130,14 +130,14 @@ export function IconSelector({
       {/* 1. Automated Suggestion / Current Selection */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <label className="text-xs font-medium text-[var(--text-secondary)]">
+          <label className="text-label font-medium text-[var(--text-secondary)]">
             {t('suggested')}
           </label>
           {onRestoreAuto && (currentLogo || hasManualIcon) && (
             <button 
               type="button"
               onClick={onRestoreAuto}
-              className="text-xs font-medium text-accent flex items-center gap-1 hover:opacity-70 transition-opacity cursor-pointer"
+              className="text-label font-medium text-accent flex items-center gap-1 hover:opacity-70 transition-opacity cursor-pointer"
             >
               <Sparkles size={12} strokeWidth={2} />
               {t('restoreToAuto')}
@@ -217,7 +217,7 @@ export function IconSelector({
                 fileInputRef.current?.click();
               }
             }}
-            className={`flex-1 h-16 rounded-[var(--radius-button,12px)] border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+            className={`flex-1 h-16 rounded-card-nested border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
               isCustomLogoSelected
                 ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-1 ring-[var(--accent-color)] text-[var(--accent-color)]'
                 : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--accent-color)]/30'
@@ -238,7 +238,7 @@ export function IconSelector({
             ) : (
               <>
                 <Upload size={18} strokeWidth={2} className="opacity-60" />
-                <span className="text-xs font-semibold">{t('uploadLogo')}</span>
+                <span className="text-label font-semibold">{t('uploadLogo')}</span>
               </>
             )}
           </button>
@@ -247,7 +247,7 @@ export function IconSelector({
 
       {/* 2. Snabbval Ikoner */}
       <div className="space-y-4">
-        <label className="text-xs font-medium text-[var(--text-secondary)] px-1">
+        <label className="text-label font-medium text-[var(--text-secondary)] px-1">
           Ikoner
         </label>
         <div className="grid grid-cols-4 gap-2.5">

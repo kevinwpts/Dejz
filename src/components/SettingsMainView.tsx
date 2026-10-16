@@ -128,12 +128,12 @@ export function SettingsMainView({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="space-y-[var(--card-gap)] max-w-md mx-auto"
+      className="space-y-[var(--card-gap)] page-max mx-auto w-full pt-1 pb-8"
     >
+      {/* Ekonomiska inställningar */}
       <Card variant="default" padding="none" className="divide-y divide-menu">
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
           icon={<Icon name="calendar" size={18} />}
           title={t('salary')}
@@ -147,7 +147,6 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
           icon={<Icon name="chart-pie" size={18} />}
           title={config.language === 'en' ? 'Budget' : 'Budget'}
@@ -157,7 +156,6 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
           icon={<Icon name="tag" size={18} />}
           title={config.language === 'en' ? 'Categories' : 'Kategorier'}
@@ -167,7 +165,6 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
           icon={<Icon name="credit-card" size={18} />}
           title={config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}
@@ -177,27 +174,18 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="coins" size={18} />}
-          title={config?.language === 'en' ? 'Currency' : 'Valuta'}
-          subtitle={config.currency || 'kr'}
-          onClick={() => handleSectionClick('currency')}
+          icon={<Icon name="ban" size={18} className="text-[var(--danger-color)]" />}
+          title={config?.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
+          subtitle={config?.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
+          onClick={onCancelledSubscriptionsClick}
         />
+      </Card>
 
+      {/* App & visning */}
+      <Card variant="default" padding="none" className="divide-y divide-menu">
         <ListRow
           variant="grouped"
-          density="compact"
-          showChevron
-          icon={<Icon name="globe" size={18} />}
-          title={t('language')}
-          subtitle={config.language === 'en' ? 'English' : 'Svenska'}
-          onClick={() => handleSectionClick('language')}
-        />
-
-        <ListRow
-          variant="grouped"
-          density="compact"
           showChevron
           icon={<Icon name="palette" size={18} />}
           title={config?.language === 'en' ? 'Appearance' : 'Utseende'}
@@ -207,22 +195,29 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
+          showChevron
+          icon={<Icon name="globe" size={18} />}
+          title={t('language')}
+          subtitle={config.language === 'en' ? 'English' : 'Svenska'}
+          onClick={() => handleSectionClick('language')}
+        />
+
+        <ListRow
+          variant="grouped"
+          showChevron
+          icon={<Icon name="coins" size={18} />}
+          title={config?.language === 'en' ? 'Currency' : 'Valuta'}
+          subtitle={config.currency || 'kr'}
+          onClick={() => handleSectionClick('currency')}
+        />
+
+        <ListRow
+          variant="grouped"
           showChevron
           icon={<Icon name="bell" size={18} />}
           title={config?.language === 'en' ? 'Notifications' : 'Notiser'}
           subtitle={config?.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
           onClick={() => handleSectionClick('notifications')}
-        />
-
-        <ListRow
-          variant="grouped"
-          density="compact"
-          showChevron
-          icon={<Icon name="ban" size={18} className="text-[var(--danger-color)]" />}
-          title={config?.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
-          subtitle={config?.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
-          onClick={onCancelledSubscriptionsClick}
         />
       </Card>
     </motion.div>

@@ -72,12 +72,6 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
-  console.log('[Receipt Scan] Starting image preparation:', {
-    name: file.name,
-    type: file.type,
-    size: file.size,
-  });
-
   try {
     const resized = await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
       const img = new Image();
@@ -122,20 +116,12 @@ const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeTy
       img.src = objectUrl;
     });
 
-    console.log('[Receipt Scan] Image successfully prepared via canvas resize:', {
-      mimeType: resized.mimeType,
-      base64Length: resized.base64.length,
-    });
     return resized;
   } catch (canvasError) {
     console.warn('[Receipt Scan] Canvas resize failed, falling back to direct FileReader:', canvasError);
     try {
       const base64 = await fileToBase64(file);
       const mimeType = file.type || 'image/jpeg';
-      console.log('[Receipt Scan] Image successfully prepared via FileReader fallback:', {
-        mimeType,
-        base64Length: base64.length,
-      });
       return { base64, mimeType };
     } catch (readErr) {
       console.error('[Receipt Scan] Both canvas and FileReader failed to prepare image:', readErr);
@@ -224,12 +210,6 @@ export function TransactionModal({
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
 
   const handleReceiptFile = async (file: File) => {
-    console.log('[Receipt Scan] File selected by user:', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    });
-
     // Immediately display preview image to give instant feedback
     const localUrl = URL.createObjectURL(file);
     setReceiptUrl(localUrl);
@@ -246,16 +226,13 @@ export function TransactionModal({
       }
 
       // 1. Process image to base64
-      console.log('[Receipt Scan] Step 1: Processing image with prepareReceiptImage...');
       const { base64, mimeType } = await prepareReceiptImage(file);
-      console.log('[Receipt Scan] Step 1 completed. Base64 length:', base64?.length, 'mimeType:', mimeType);
 
       if (!base64 || typeof base64 !== 'string' || base64.trim().length === 0) {
         throw new Error('Kunde inte extrahera bilddata (tom base64).');
       }
 
       const finalMimeType = mimeType || file.type || 'image/jpeg';
-      console.log('[Receipt Scan] Step 2: Calling supabase.functions.invoke("scan-receipt", ...) with mimeType:', finalMimeType);
 
       // 2. Invoke Supabase Edge Function 'scan-receipt' using existing Supabase client
       const scanPromise = supabase.functions.invoke('scan-receipt', {
@@ -296,7 +273,6 @@ export function TransactionModal({
           }
           setScanFeedback({ type: 'error', message: `Kunde inte läsa alla uppgifter automatiskt: ${errMsg}` });
         } else if (data) {
-          console.log('[Receipt Scan] scan-receipt data received successfully:', data);
           let hasPrefilled = false;
 
           // Företag / beskrivning = merchant
@@ -479,10 +455,6 @@ export function TransactionModal({
         if (!supabase) return;
 
         const categoryNames = categories.map(c => c.name);
-        console.log('[AI Categorize] Calling categorize-transaction with:', {
-          merchant: targetQuery,
-          categories: categoryNames,
-        });
 
         const { data, error } = await supabase.functions.invoke('categorize-transaction', {
           body: {
@@ -509,7 +481,6 @@ export function TransactionModal({
           );
 
           if (matchedCategory && !hasManuallySelectedCategoryRef.current) {
-            console.log('[AI Categorize] AI suggested category:', matchedCategory.name);
             setCategory(matchedCategory.name);
             return;
           }
@@ -691,7 +662,7 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   _onChangeType('expense');
                 }}
-                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-secondary font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
                     ? 'bg-white dark:bg-[var(--surface-high)] text-[var(--text-primary)] shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -705,7 +676,7 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   _onChangeType('income');
                 }}
-                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-secondary font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
                     ? 'bg-white dark:bg-[var(--surface-high)] text-[var(--success-color)] shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -749,7 +720,7 @@ export function TransactionModal({
                     }
                   }}
                   placeholder={currentLang === 'en' ? 'Name' : 'Namn'}
-                  className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-section-title font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
@@ -828,7 +799,7 @@ export function TransactionModal({
                         }
                         setSplits([]);
                       }}
-                      className="text-xs font-medium text-[var(--danger-color)] hover:underline cursor-pointer shrink-0"
+                      className="text-secondary font-medium text-[var(--danger-color)] hover:underline cursor-pointer shrink-0"
                     >
                       {currentLang === 'en' ? 'Remove split' : 'Ta bort uppdelning'}
                     </button>
@@ -841,7 +812,7 @@ export function TransactionModal({
                       const currentSum = splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
                       const isExact = Math.abs(currentSum - totalVal) < 0.01;
                       return (
-                        <span className={`text-[11px] font-medium flex items-center gap-1 font-amount ${
+                        <span className={`text-label font-medium flex items-center gap-1 font-amount ${
                           isExact ? 'text-[var(--text-tertiary)]' : 'text-[var(--warning-color)] font-medium'
                         }`}>
                           {currentSum} av {totalVal} {currency} fördelat
@@ -876,7 +847,7 @@ export function TransactionModal({
                             color={split.category ? (catData?.color || getCategoryColor(split.category, categories)) : '#716e68'} 
                             size="xs" 
                           />
-                          <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate max-w-[120px] sm:max-w-[180px]">
+                          <span className="text-body font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate max-w-[120px] sm:max-w-[180px]">
                             {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                           </span>
                           <ChevronRight size={14} strokeWidth={2} className="text-[var(--text-tertiary)] opacity-60 group-hover:opacity-100 shrink-0" />
@@ -932,10 +903,10 @@ export function TransactionModal({
                                   setSplits(newSplits);
                                 }
                               }}
-                              className="w-20 sm:w-24 bg-black/5 dark:bg-white/5 rounded-[var(--radius-button-sm,10px)] px-2.5 py-1 text-sm font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                              className="w-20 sm:w-24 bg-black/5 dark:bg-white/5 rounded-[var(--radius-button-sm,10px)] px-2.5 py-1 text-body font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
                               placeholder="0"
                             />
-                            <span className="text-xs font-semibold text-[var(--text-tertiary)] select-none font-amount">
+                            <span className="text-secondary font-semibold text-[var(--text-tertiary)] select-none font-amount">
                               {currency}
                             </span>
                           </div>
@@ -979,7 +950,7 @@ export function TransactionModal({
                   const isExact = Math.abs(currentSum - totalVal) < 0.01;
                   if (isExact) return null;
                   return (
-                    <div className="px-4 py-2 bg-[var(--warning-container)]/30 border-t border-[var(--warning-color)]/20 text-xs font-medium text-[var(--warning-color)] flex items-center justify-between">
+                    <div className="px-4 py-2 bg-[var(--warning-container)]/30 border-t border-[var(--warning-color)]/20 text-secondary font-medium text-[var(--warning-color)] flex items-center justify-between">
                       <span>
                         {currentLang === 'en'
                           ? `Sum (${currentSum} ${currency}) must equal total amount (${totalVal} ${currency}).`
@@ -997,7 +968,7 @@ export function TransactionModal({
                             return { ...s, amount: perSplit + add };
                           }));
                         }}
-                        className="text-xs font-bold underline cursor-pointer shrink-0 ml-2"
+                        className="text-secondary font-bold underline cursor-pointer shrink-0 ml-2"
                       >
                         {currentLang === 'en' ? 'Adjust automatically' : 'Justera automatiskt'}
                       </button>
@@ -1021,13 +992,13 @@ export function TransactionModal({
                           { id: Math.random().toString(), amount: 0, category: unusedCat, tags: [] }
                         ]);
                       }}
-                      className="flex items-center gap-1.5 text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer py-0.5"
+                      className="flex items-center gap-1.5 text-secondary font-medium text-[var(--accent-color)] hover:underline cursor-pointer py-0.5"
                     >
                       <Plus size={14} strokeWidth={2.5} />
                       <span>{currentLang === 'en' ? 'Add category' : 'Lägg till kategori'}</span>
                     </button>
                   ) : (
-                    <span className="text-xs text-[var(--text-tertiary)] italic">
+                    <span className="text-secondary text-[var(--text-tertiary)] italic">
                       {currentLang === 'en' ? 'All categories added' : 'Alla kategorier tillagda'}
                     </span>
                   )}
@@ -1046,7 +1017,7 @@ export function TransactionModal({
                         return { ...s, amount: perSplit + add };
                       }));
                     }}
-                    className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-0.5"
+                    className="text-secondary font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-0.5"
                   >
                     {currentLang === 'en' ? 'Equalize' : 'Fördela jämnt'}
                   </button>
@@ -1073,7 +1044,7 @@ export function TransactionModal({
                       size="xs" 
                       categoryName={category}
                     />
-                    <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[160px] sm:max-w-[220px]">
+                    <span className="text-body font-medium text-[var(--text-primary)] truncate max-w-[160px] sm:max-w-[220px]">
                       {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                     </span>
                     <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 shrink-0 ml-0.5" />
@@ -1094,7 +1065,7 @@ export function TransactionModal({
                           { id: Math.random().toString(), amount: 0, category: cat2, tags: [] }
                         ]);
                       }}
-                      className="flex items-center gap-1.5 text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer active:scale-98 transition-all"
+                      className="flex items-center gap-1.5 text-secondary font-medium text-[var(--accent-color)] hover:underline cursor-pointer active:scale-98 transition-all"
                     >
                       <GitFork size={13} strokeWidth={2} />
                       <span>{currentLang === 'en' ? 'Split into multiple categories' : 'Dela upp på flera kategorier'}</span>
@@ -1179,7 +1150,7 @@ export function TransactionModal({
                     }
                   }}
                   placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
-                  className={`text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
+                  className={`text-body font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
                     validationError === 'note' ? 'text-[var(--danger-color)]' : ''
                   }`}
                 />
@@ -1359,8 +1330,8 @@ export function TransactionModal({
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
-                    <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
-                    <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
+                    <h3 className="text-page-title font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
+                    <p className="text-secondary font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
                   <button
                     type="button"
@@ -1426,7 +1397,7 @@ export function TransactionModal({
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-subtle shrink-0">
                   <div>
-                    <h3 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
+                    <h3 className="text-section-title font-semibold text-[var(--text-primary)] tracking-tight">
                       {t('category')}
                     </h3>
                     <p className="text-label font-normal text-[var(--text-secondary)] mt-0.5">
@@ -1487,7 +1458,7 @@ export function TransactionModal({
                               variant="primary" 
                               categoryName={cat.name} 
                             />
-                            <span className={`text-sm truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
+                            <span className={`text-body truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                               {cat.name}
                             </span>
                           </div>
@@ -1497,7 +1468,7 @@ export function TransactionModal({
                             </div>
                           )}
                           {isAlreadyUsedInOtherSplit && (
-                            <span className="text-xs text-[var(--text-tertiary)] italic shrink-0">
+                            <span className="text-secondary text-[var(--text-tertiary)] italic shrink-0">
                               {currentLang === 'en' ? 'Already selected' : 'Redan vald'}
                             </span>
                           )}

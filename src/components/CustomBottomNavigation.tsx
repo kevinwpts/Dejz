@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 import { Language } from "../i18n";
 import { Icon, IconName } from "./ui/Icon";
 
@@ -26,79 +27,78 @@ export function CustomBottomNavigation({
   language,
   onPlusClick,
 }: CustomBottomNavigationProps) {
-  const isAllocateActive = activeTab === "budget" && (budgetSection === "allocate" || budgetSection === "category-budgets");
+  const isAllocateActive =
+    activeTab === "budget" &&
+    (budgetSection === "allocate" || budgetSection === "category-budgets");
   const isBudgetActive = activeTab === "budget" && !isAllocateActive;
 
-  const isEn = language === 'en';
+  const isEn = language === "en";
 
   return (
-    <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-[var(--bg-color)] select-none overflow-visible rounded-none m-0 p-0 border-t border-[var(--border-divider)] shadow-none pb-[min(14px,env(safe-area-inset-bottom,0px))]"
-    >
-      {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg som appen */}
-      <div 
-        className="absolute left-1/2 -top-[23px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-[var(--bg-color)] pointer-events-none z-0 border-t border-[var(--border-divider)] shadow-none"
-        aria-hidden="true"
-      />
+    <footer className="fixed bottom-0 left-0 right-0 z-40 w-full select-none pointer-events-none px-4 pt-2 pb-[max(14px,env(safe-area-inset-bottom,14px))]">
+      <div className="w-full max-w-[440px] mx-auto flex items-center gap-2.5 sm:gap-3 pointer-events-auto">
+        {/* Modern Floating Pill Dock (Left) */}
+        <nav
+          aria-label={isEn ? "Main navigation" : "Huvudnavigering"}
+          className="flex-1 h-[60px] rounded-full bg-[var(--surface-color)]/92 dark:bg-[var(--surface-raised)]/92 backdrop-blur-2xl border border-[var(--border-divider)] shadow-subtle p-1.5 grid grid-cols-4 items-center relative"
+        >
+          {/* 1. Hem */}
+          <NavItem
+            iconName="house"
+            label={isEn ? "Home" : "Hem"}
+            isActive={activeTab === "today"}
+            onClick={() => setActiveTab("today")}
+          />
 
-      {/* Upphöjd rund mittknapp på 56 × 56 px flyttad upp typ 2 mm */}
-      <div className="absolute left-1/2 -top-[13px] -translate-x-1/2 z-20">
+          {/* 2. Historik */}
+          <NavItem
+            iconName="clock-counter-clockwise"
+            label={isEn ? "History" : "Historik"}
+            isActive={activeTab === "transactions"}
+            onClick={() => setActiveTab("transactions")}
+          />
+
+          {/* 3. Analys */}
+          <NavItem
+            iconName="chart-bar"
+            label={isEn ? "Analysis" : "Analys"}
+            isActive={activeTab === "analysis"}
+            onClick={() => setActiveTab("analysis")}
+          />
+
+          {/* 4. Ekonomi */}
+          <NavItem
+            iconName="wallet"
+            label={isEn ? "Finances" : "Ekonomi"}
+            isActive={isBudgetActive}
+            onClick={() => {
+              if (onNavigateSection) {
+                onNavigateSection("budget");
+              } else {
+                setActiveTab("budget");
+              }
+            }}
+          />
+        </nav>
+
+        {/* Detached Circular Plus Button to the Right of the Footer */}
         <button
           type="button"
           onClick={() => {
             if (onPlusClick) onPlusClick();
           }}
-          className="w-[56px] h-[56px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press border-none outline-none shadow-none"
+          className="shrink-0 w-[60px] h-[60px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-all border border-white/12 shadow-subtle outline-none"
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
-          <Icon name="plus" size={26} weight="bold" className="text-[var(--on-accent)]" />
+          <Icon
+            name="plus"
+            size={25}
+            weight="bold"
+            className="text-[var(--on-accent)]"
+          />
         </button>
       </div>
-
-      {/* 5 lika breda kolumner indragna från sidokanterna med ca 2 mm mer luft i botten */}
-      <nav className="relative z-10 w-full max-w-[440px] mx-auto h-[62px] grid grid-cols-5 items-end pb-3.5 px-6 sm:px-8">
-        {/* 1. Hem */}
-        <NavItem
-          iconName="house"
-          label={isEn ? "Home" : "Hem"}
-          isActive={activeTab === "today"}
-          onClick={() => setActiveTab("today")}
-        />
-
-        {/* 2. Historik */}
-        <NavItem
-          iconName="clock-counter-clockwise"
-          label={isEn ? "History" : "Historik"}
-          isActive={activeTab === "transactions"}
-          onClick={() => setActiveTab("transactions")}
-        />
-
-        {/* 3. Mittkolumn spacer (mittknappen ligger absolut centrerad över denna) */}
-        <div className="w-full h-full pointer-events-none" aria-hidden="true" />
-
-        {/* 4. Analys */}
-        <NavItem
-          iconName="chart-bar"
-          label={isEn ? "Analysis" : "Analys"}
-          isActive={activeTab === "analysis"}
-          onClick={() => setActiveTab("analysis")}
-        />
-
-        {/* 5. Ekonomi */}
-        <NavItem
-          iconName="wallet"
-          label={isEn ? "Finances" : "Ekonomi"}
-          isActive={isBudgetActive}
-          onClick={() => {
-            if (onNavigateSection) {
-              onNavigateSection("budget");
-            } else {
-              setActiveTab("budget");
-            }
-          }}
-        />
-      </nav>
     </footer>
   );
 }
@@ -120,21 +120,30 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`w-full flex flex-col items-center justify-center transition-colors touch-press-subtle cursor-pointer select-none ${
+      className={`relative h-full w-full rounded-full flex flex-col items-center justify-center transition-colors touch-press-subtle cursor-pointer select-none z-10 ${
         isActive
-          ? 'text-[var(--accent-color)] font-semibold'
-          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
+          ? "text-[var(--accent-color)] font-semibold"
+          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium"
       }`}
     >
-      <Icon 
+      {isActive && (
+        <motion.div
+          layoutId="modern-footer-active-pill"
+          transition={{ type: "spring", stiffness: 420, damping: 32 }}
+          className="absolute inset-0 rounded-full bg-[var(--accent-color)]/[0.08] dark:bg-white/[0.09] -z-10"
+          aria-hidden="true"
+        />
+      )}
+      <Icon
         name={iconName}
-        size={22} 
+        size={21}
         weight={isActive ? "fill" : "regular"}
-        className="transition-colors"
+        className="transition-transform duration-150"
       />
-      <span className="text-micro-label leading-none mt-[3px]">
+      <span className="text-[10px] leading-none mt-[3px] tracking-[-0.01em]">
         {label}
       </span>
     </button>
   );
 }
+

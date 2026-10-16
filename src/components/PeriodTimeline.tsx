@@ -273,7 +273,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-0.5 w-[54px] sm:w-[58px] h-[56px] sm:h-[60px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border shadow-none ${
                 isSelected
-                  ? 'bg-black/5 dark:bg-white/10 border-transparent text-[var(--text-primary)] font-semibold z-10 opacity-100 shadow-none'
+                  ? 'bg-[var(--date-active-bg)] border-transparent text-[var(--date-active-color)] font-semibold z-10 opacity-100 shadow-xs'
                   : hasCategoryMatch
                   ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle opacity-100'
                   : isRealToday
@@ -287,7 +287,7 @@ export function PeriodTimeline({
               <span
                 className={`text-micro-label leading-none font-medium ${
                   isSelected
-                    ? 'text-[var(--text-primary)] font-semibold'
+                    ? 'text-[var(--date-active-color)] font-bold'
                     : hasCategoryMatch
                     ? 'text-[var(--text-primary)]'
                     : isRealToday
@@ -302,7 +302,7 @@ export function PeriodTimeline({
 
               {/* Day Number */}
               <span className={`text-card-title leading-none tabular-nums ${
-                isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-primary)] font-medium'
+                isSelected ? 'text-[var(--date-active-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
               }`}>
                 {dayNumber}
               </span>

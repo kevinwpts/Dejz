@@ -263,51 +263,51 @@ export function SettingsView({
               )}
 
               {/* Phone Mockup Frame - Light */}
-              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#F4F1EC] border-4 border-[#181715] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
+              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#F3ECE1] border-4 border-[#1E1814] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
                 {/* Speaker / Dynamic Island */}
-                <div className="w-10 h-2 bg-[#181715] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
+                <div className="w-10 h-2 bg-[#1E1814] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
                 
                 {/* Mini App Header */}
                 <div className="flex items-center justify-between mb-1.5 px-0.5">
-                  <span className="text-[10px] font-black tracking-tight text-[#181715]">dejz</span>
-                  <div className="w-3.5 h-3.5 rounded-full bg-black/5 flex items-center justify-center text-[#57534E]">
+                  <span className="text-[10px] font-black tracking-tight text-[#1E1814]">dejz</span>
+                  <div className="w-3.5 h-3.5 rounded-full bg-black/5 flex items-center justify-center text-[#5E5248]">
                     <Icon name="sun" size={9} />
                   </div>
                 </div>
 
                 {/* Mini Balance Card */}
-                <div className="bg-[#FCFBF9] rounded-lg p-2 shadow-2xs border border-black/5 space-y-1 mb-1.5">
-                  <div className="text-[6.5px] uppercase font-bold text-[#57534E] tracking-wider">
+                <div className="bg-[#FFFDF9] rounded-lg p-2 shadow-2xs border border-black/5 space-y-1 mb-1.5">
+                  <div className="text-[6.5px] uppercase font-bold text-[#5E5248] tracking-wider">
                     {isEn ? 'Remaining' : 'Kvar att spendera'}
                   </div>
-                  <div className="text-[11px] font-bold text-[#181715] leading-tight">
+                  <div className="text-[11px] font-bold text-[#1E1814] leading-tight">
                     12 450 kr
                   </div>
                   <div className="w-full bg-black/10 h-1 rounded-full overflow-hidden mt-0.5">
-                    <div className="bg-[var(--brand-signature,#9EC5E8)] h-full w-2/3 rounded-full" />
+                    <div className="bg-[var(--brand-signature,#E85D34)] h-full w-2/3 rounded-full" />
                   </div>
                 </div>
 
                 {/* Mini List Rows */}
-                <div className="bg-[#FCFBF9] rounded-lg p-1.5 shadow-2xs border border-black/5 space-y-1 mb-auto">
+                <div className="bg-[#FFFDF9] rounded-lg p-1.5 shadow-2xs border border-black/5 space-y-1 mb-auto">
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                      <span className="font-semibold text-[#181715]">{isEn ? 'Salary' : 'Lön'}</span>
+                      <span className="font-semibold text-[#1E1814]">{isEn ? 'Salary' : 'Lön'}</span>
                     </div>
                     <span className="font-bold text-emerald-700">+32 000 kr</span>
                   </div>
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#57534E]" />
-                      <span className="font-semibold text-[#181715]">ICA Maxi</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#5E5248]" />
+                      <span className="font-semibold text-[#1E1814]">ICA Maxi</span>
                     </div>
-                    <span className="font-bold text-[#181715]">-850 kr</span>
+                    <span className="font-bold text-[#1E1814]">-850 kr</span>
                   </div>
                 </div>
 
                 {/* Mini Bottom Nav Bar */}
-                <div className="pt-1 mt-1 border-t border-black/5 flex justify-around items-center text-slate-400">
+                <div className="pt-1 mt-1 border-t border-black/5 flex justify-around items-center text-stone-400">
                   <div className="w-2 h-2 rounded-full bg-[var(--accent-color)]" />
                   <div className="w-1.5 h-1.5 rounded-full bg-stone-300" />
                   <div className="w-1.5 h-1.5 rounded-full bg-stone-300" />
@@ -350,46 +350,46 @@ export function SettingsView({
               )}
 
               {/* Phone Mockup Frame - Dark */}
-              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#141312] border-4 border-[#292724] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
+              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#14100D] border-4 border-[#322923] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
                 {/* Speaker / Dynamic Island */}
-                <div className="w-10 h-2 bg-[#292724] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
+                <div className="w-10 h-2 bg-[#322923] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
                 
                 {/* Mini App Header */}
                 <div className="flex items-center justify-between mb-1.5 px-0.5">
-                  <span className="text-[10px] font-black tracking-tight text-[#F4F1EC]">dejz</span>
-                  <div className="w-3.5 h-3.5 rounded-full bg-white/10 flex items-center justify-center text-[#B3ADA5]">
+                  <span className="text-[10px] font-black tracking-tight text-[#F7F1E8]">dejz</span>
+                  <div className="w-3.5 h-3.5 rounded-full bg-white/10 flex items-center justify-center text-[#BFB1A2]">
                     <Icon name="moon" size={9} />
                   </div>
                 </div>
 
                 {/* Mini Balance Card */}
-                <div className="bg-[#1C1B19] rounded-lg p-2 shadow-2xs border border-white/5 space-y-1 mb-1.5">
-                  <div className="text-[6.5px] uppercase font-bold text-[#B3ADA5] tracking-wider">
+                <div className="bg-[#1E1814] rounded-lg p-2 shadow-2xs border border-white/5 space-y-1 mb-1.5">
+                  <div className="text-[6.5px] uppercase font-bold text-[#BFB1A2] tracking-wider">
                     {isEn ? 'Remaining' : 'Kvar att spendera'}
                   </div>
-                  <div className="text-[11px] font-bold text-[#F4F1EC] leading-tight">
+                  <div className="text-[11px] font-bold text-[#F7F1E8] leading-tight">
                     12 450 kr
                   </div>
                   <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden mt-0.5">
-                    <div className="bg-[var(--brand-signature,#9EC5E8)] h-full w-2/3 rounded-full" />
+                    <div className="bg-[var(--brand-signature,#F06A42)] h-full w-2/3 rounded-full" />
                   </div>
                 </div>
 
                 {/* Mini List Rows */}
-                <div className="bg-[#1C1B19] rounded-lg p-1.5 shadow-2xs border border-white/5 space-y-1 mb-auto">
+                <div className="bg-[#1E1814] rounded-lg p-1.5 shadow-2xs border border-white/5 space-y-1 mb-auto">
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span className="font-semibold text-zinc-200">{isEn ? 'Salary' : 'Lön'}</span>
+                      <span className="font-semibold text-[#F7F1E8]">{isEn ? 'Salary' : 'Lön'}</span>
                     </div>
                     <span className="font-bold text-emerald-400">+32 000 kr</span>
                   </div>
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#B3ADA5]" />
-                      <span className="font-semibold text-zinc-200">ICA Maxi</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#BFB1A2]" />
+                      <span className="font-semibold text-[#F7F1E8]">ICA Maxi</span>
                     </div>
-                    <span className="font-bold text-zinc-300">-850 kr</span>
+                    <span className="font-bold text-[#DFD5C8]">-850 kr</span>
                   </div>
                 </div>
 
@@ -424,13 +424,13 @@ export function SettingsView({
               const isSelected = theme.hex === 'neutral' ? isNeutralSelected : (!isNeutralSelected && currentHex === theme.hex.toLowerCase());
 
               const circleBg = theme.hex === 'neutral'
-                ? (config.darkMode ? '#9EC5E8' : '#181715')
+                ? '#E85D34'
                 : theme.hex;
 
               const isLightSwatch = theme.hex.toLowerCase() === '#9ec5e8' || theme.hex.toLowerCase() === '#e5a93b';
               const checkColor = theme.hex === 'neutral'
-                ? (config.darkMode ? '#141312' : '#9EC5E8')
-                : (isLightSwatch ? '#181715' : '#FCFBF9');
+                ? '#FFFDF9'
+                : (isLightSwatch ? '#1E1814' : '#FFFDF9');
 
               return (
                 <button

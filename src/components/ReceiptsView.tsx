@@ -86,7 +86,7 @@ export function ReceiptsView({
           placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
-          className="w-full h-[42px] sm:h-[44px] text-xs sm:text-sm"
+          className="w-full h-[42px] sm:h-[44px] text-secondary"
         />
       )}
 

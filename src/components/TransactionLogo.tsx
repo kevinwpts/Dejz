@@ -71,24 +71,24 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-16 h-16 rounded-full',
-      icon: 30,
+      container: 'w-14 h-14 rounded-lg',
+      icon: 28,
     },
     lg: {
-      container: 'w-14 h-14 rounded-full',
-      icon: 26,
+      container: 'w-12 h-12 rounded-card-nested',
+      icon: 24,
     },
     md: {
-      container: 'w-[42px] h-[42px] rounded-full',
-      icon: 20,
+      container: 'w-9 h-9 rounded-md',
+      icon: 18,
     },
     sm: {
-      container: 'w-8 h-8 rounded-full',
-      icon: 15,
+      container: 'w-7 h-7 rounded-xs',
+      icon: 14,
     },
   }[size] || {
-    container: 'w-[42px] h-[42px] rounded-full',
-    icon: 20,
+    container: 'w-9 h-9 rounded-md',
+    icon: 18,
   };
 
   // If this is an empty new transaction waiting for input, render a clean neutral placeholder
@@ -96,7 +96,7 @@ export function TransactionLogo({
     const IconComponent = visual.iconComponent || Receipt;
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] select-none`}
       >
         <IconComponent size={sizeConfig.icon} strokeWidth={2} />
       </div>
@@ -107,7 +107,7 @@ export function TransactionLogo({
   if (activeLogoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 select-none`}
       >
         <img
           src={activeLogoUrl}

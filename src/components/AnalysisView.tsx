@@ -497,7 +497,7 @@ export function AnalysisView({
         <button
           type="button"
           onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-secondary sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
         >
           <Calendar size={15} className="text-[var(--text-secondary)] shrink-0" />
           <span className="truncate max-w-[120px] sm:max-w-none">{periodDisplayName}</span>
@@ -740,9 +740,9 @@ export function AnalysisView({
                         <span className="text-secondary font-medium text-[var(--text-secondary)] truncate max-w-full">
                           {hoveredItem.name}
                         </span>
-                        <span className="text-xl sm:text-2xl font-bold font-amount text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                        <span className="text-large-amount font-bold font-amount text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
                           {formatAmount(Math.round(hoveredItem.value), config.language)}
-                          <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
+                          <span className="text-secondary font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                         </span>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-label font-semibold text-[var(--accent-color)] tabular-nums">
