@@ -1914,7 +1914,7 @@ export function LandingPage({
                     <button
                       type="button"
                       onClick={onGetStarted}
-                      className="w-full sm:w-auto inline-flex items-center justify-center text-center font-bold text-sm sm:text-[15px] text-[#0B0B0F] bg-[var(--landing-signature)] hover:brightness-95 px-6 sm:px-7 h-11 sm:h-12.5 rounded-full transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)] border-none shadow-none"
+                      className="w-full sm:w-auto inline-flex items-center justify-center text-center font-bold text-sm sm:text-[15px] text-white bg-[var(--landing-signature)] hover:brightness-105 px-6 sm:px-7 h-11 sm:h-12.5 rounded-full transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)] border-none shadow-none"
                     >
                       {tr('landing_hero_button')}
                     </button>
@@ -3149,7 +3149,7 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={onGetStarted}
-                  className="w-full max-w-sm sm:w-auto inline-flex items-center justify-center text-center font-bold text-sm px-8 h-12 rounded-full bg-[var(--landing-signature)] text-[#0B0B0F] hover:brightness-95 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]"
+                  className="w-full max-w-sm sm:w-auto inline-flex items-center justify-center text-center font-bold text-sm px-8 h-12 rounded-full bg-[var(--landing-signature)] text-white hover:brightness-105 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]"
                 >
                   {tr('landing_hero_button')}
                 </button>

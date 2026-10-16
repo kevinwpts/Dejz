@@ -53,7 +53,7 @@ export const Switch: React.FC<SwitchProps> = ({
       className={`relative inline-flex items-center shrink-0 cursor-pointer rounded-full transition-colors duration-[var(--duration-normal,150ms)] ease-out focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)] disabled:bg-[var(--surface-nested,#ECEEF2)] disabled:cursor-not-allowed select-none ${trackWidth} ${
         checked
           ? 'bg-[var(--accent-color)] border border-transparent'
-          : 'bg-[var(--surface-nested,#ECEEF2)] border border-[var(--border-control,#737B8C)]'
+          : 'bg-[var(--surface-nested,#ECEEF2)] border border-[var(--border-subtle)]'
       } ${className}`}
     >
       <span

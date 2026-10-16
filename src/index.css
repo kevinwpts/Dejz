@@ -689,7 +689,8 @@ h6 {
   /* Brand Signatur & Peach */
   --brand-signature: #F0485E;
   --brand-signature-text: #BE2943;
-  --brand-signature-btn-text: #0B0B0F;
+  --brand-signature-btn-text: #FFFFFF;
+  --text-on-coral: #FFFFFF;
   --brand-peach: #FFD8CE;
   --brand-peach-text: #0B0B0F;
   --brand-pink: #FFD8CE;
@@ -950,7 +951,8 @@ h6 {
 
   --brand-signature: #FB6074;
   --brand-signature-text: #FB6074;
-  --brand-signature-btn-text: #0B0B0F;
+  --brand-signature-btn-text: #FFFFFF;
+  --text-on-coral: #FFFFFF;
   --brand-peach: #FFD8CE;
   --brand-peach-text: #0B0B0F;
   --logo-color: #FFFFFF;
@@ -995,7 +997,8 @@ h6 {
   /* 100% Flat, Tonal Matte Surfaces (Dark Mode) */
   --brand-signature: #FB6074;
   --brand-signature-text: #FB6074;
-  --brand-signature-btn-text: #0B0B0F;
+  --brand-signature-btn-text: #FFFFFF;
+  --text-on-coral: #FFFFFF;
   --brand-peach: #FFD8CE;
   --brand-peach-text: #0B0B0F;
   --landing-signature: #FB6074;

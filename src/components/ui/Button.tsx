@@ -37,7 +37,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }[size];
 
     const surfaceButtonStyle =
-      'bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-control)] shadow-none hover:bg-[var(--bg-hover)] active:bg-black/[0.06] dark:active:bg-white/10';
+      'bg-[var(--surface-nested,#ECEEF2)] text-[var(--text-primary)] border border-transparent hover:bg-[var(--bg-hover)] active:bg-black/[0.06] dark:active:bg-white/10';
 
     const variantStyles = {
       primary:
@@ -47,9 +47,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] border-none',
       danger:
-        'bg-[var(--danger-container)] text-[var(--danger-color)] hover:opacity-90 active:opacity-80 border-none',
+        'bg-[var(--danger-color)] text-white font-semibold hover:opacity-95 active:opacity-90 border-none',
       destructive:
-        'bg-[var(--danger-container)] text-[var(--danger-color)] hover:opacity-90 active:opacity-80 border-none',
+        'bg-[var(--danger-color)] text-white font-semibold hover:opacity-95 active:opacity-90 border-none',
       ghost:
         'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5',
       outline:

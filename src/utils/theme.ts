@@ -31,8 +31,8 @@ export const DEJZ_ACCENTS: Record<string, AccentColorSpec> = {
     id: 'coral',
     nameSv: 'Dejz Signatur',
     nameEn: 'Dejz Signature',
-    light: { bg: '#F0485E', text: '#0B0B0F' },
-    dark: { bg: '#FB6074', text: '#0B0B0F' },
+    light: { bg: '#F0485E', text: '#FFFFFF' },
+    dark: { bg: '#FB6074', text: '#FFFFFF' },
   },
   cobalt: {
     id: 'cobalt',
@@ -144,8 +144,8 @@ export function applyThemeColor(
   const brandSignatureColor = isDark ? '#FB6074' : '#F0485E';
   // Små korallfärgade länkar eller texter på ljusa ytor: #BE2943. På mörka ytor: #FB6074.
   const brandSignatureTextColor = isDark ? '#FB6074' : '#BE2943';
-  // Text och ikoner på fyllda korallknappar: #0B0B0F i samtliga teman
-  const brandSignatureBtnText = '#0B0B0F';
+  // Text och ikoner på fyllda korallknappar: #FFFFFF i samtliga teman
+  const brandSignatureBtnText = '#FFFFFF';
 
   // Fokusfärg
   const focusColor = isDark ? '#F7F8FA' : '#0B0B0F';
@@ -158,6 +158,7 @@ export function applyThemeColor(
     target.style.setProperty('--brand-signature', brandSignatureColor);
     target.style.setProperty('--brand-signature-text', brandSignatureTextColor);
     target.style.setProperty('--brand-signature-btn-text', brandSignatureBtnText);
+    target.style.setProperty('--text-on-coral', '#FFFFFF');
     target.style.setProperty('--brand-peach', '#FFD8CE');
     target.style.setProperty('--brand-peach-text', '#0B0B0F');
     target.style.setProperty('--logo-color', isDark ? '#FFFFFF' : '#0B0B0F');
