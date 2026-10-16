@@ -86,7 +86,7 @@ export function ReceiptsView({
           placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
-          className="w-full h-[42px] sm:h-[44px] text-secondary"
+          className="w-full h-[42px] sm:h-[44px] text-xs sm:text-sm"
         />
       )}
 
@@ -128,7 +128,7 @@ export function ReceiptsView({
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
                         {/* Receipt Thumbnail Container */}
-                        <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] overflow-hidden relative shrink-0 bg-[var(--surface-muted)] border border-subtle flex items-center justify-center">
+                        <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] overflow-hidden relative shrink-0 bg-[var(--surface-muted)] border-none flex items-center justify-center">
                           {item.receiptUrl && !isPdf ? (
                             <img
                               src={item.receiptUrl}

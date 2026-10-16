@@ -230,7 +230,7 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className="relative flex items-center gap-2 overflow-x-auto py-1.5 px-1 no-scrollbar select-none active:cursor-grabbing"
+        className="relative flex items-center gap-2 overflow-x-auto py-2.5 px-2 -mx-1 -my-1 no-scrollbar select-none active:cursor-grabbing"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -271,16 +271,16 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[54px] sm:w-[58px] h-[56px] sm:h-[60px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border shadow-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[54px] sm:w-[58px] h-[56px] sm:h-[60px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border-none shadow-none ${
                 isSelected
-                  ? 'bg-[var(--date-active-bg)] border-transparent text-[var(--date-active-color)] font-semibold z-10 opacity-100 shadow-xs'
+                  ? 'bg-[var(--date-active-bg)] text-[var(--date-active-color)] font-semibold z-10 opacity-100 shadow-xs'
                   : hasCategoryMatch
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle opacity-100'
+                  ? 'bg-[var(--surface-color)] dark:bg-white/[0.08] text-[var(--text-primary)] opacity-100'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle font-semibold opacity-100'
+                  ? 'bg-[var(--surface-color)] dark:bg-white/[0.08] text-[var(--text-primary)] font-semibold opacity-100'
                   : categoryFilter
-                  ? 'bg-[var(--surface-color)]/50 text-[var(--text-tertiary)] border-transparent hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] opacity-60'
-                  : 'bg-[var(--surface-color)]/70 hover:bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent hover:border-subtle opacity-90'
+                  ? 'bg-[var(--surface-color)]/50 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] opacity-60'
+                  : 'bg-[var(--surface-color)]/70 dark:bg-[var(--surface-color)] hover:bg-[var(--surface-color)] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] opacity-90'
               }`}
             >
               {/* Day of Week / Today */}
@@ -291,7 +291,7 @@ export function PeriodTimeline({
                     : hasCategoryMatch
                     ? 'text-[var(--text-primary)]'
                     : isRealToday
-                    ? 'text-[var(--accent-color)] font-bold'
+                    ? 'text-[var(--brand-signature,var(--accent-color))] font-bold'
                     : isFirstDay
                     ? 'text-[var(--text-primary)] font-semibold'
                     : 'text-[var(--text-secondary)]'

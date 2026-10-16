@@ -6,22 +6,17 @@ import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../consta
  */
 
 export const DEFAULT_CATEGORY_PALETTE = [
-  '#6658E8', // Deep Indigo
-  '#A89BFF', // Soft Lila
-  '#79B8FF', // Blue
-  '#5BCBC6', // Turquoise
-  '#83C995', // Green
-  '#10B981', // Emerald
-  '#F59E0B', // Amber
-  '#E9A66C', // Orange
-  '#EF4444', // Red
-  '#E99BBD', // Pink
-  '#EC4899', // Hot Pink
-  '#A855F7', // Purple
-  '#3B82F6', // Royal Blue
-  '#06B6D4', // Cyan
-  '#84CC16', // Lime
-  '#64748B', // Slate
+  '#D66B42', // Mat & Dagligvaror
+  '#D69E36', // Restaurang & Café
+  '#3089B8', // Transport
+  '#BD6197', // Shopping
+  '#8B6AC8', // Nöje & Fritid
+  '#5B69B1', // Boende & Hushåll
+  '#568B65', // Hälsa & Träning
+  '#4D7778', // Försäkringar
+  '#8C755F', // Abonnemang
+  '#7C8392', // Övrigt
+  '#15804A', // Lön
 ] as const;
 
 /**

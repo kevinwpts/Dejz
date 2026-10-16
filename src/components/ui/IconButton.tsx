@@ -26,7 +26,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center transition-all duration-[var(--duration-fast,100ms)] active:scale-90 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30';
+      'inline-flex items-center justify-center transition-all duration-[var(--duration-fast,100ms)] active:scale-90 select-none cursor-pointer disabled:pointer-events-none disabled:bg-[var(--surface-nested,#ECEEF2)] disabled:text-[var(--text-disabled,#A8AEB9)] disabled:border-none disabled:shadow-none shrink-0 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]';
 
     const shapeStyles =
       shape === 'circle'

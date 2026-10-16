@@ -80,14 +80,14 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border border-subtle backdrop-blur-[16px] bg-[var(--surface-color)] text-[var(--text-primary)] shadow-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border-none bg-[var(--surface-color)] text-[var(--text-primary)] shadow-subtle">
         <button 
           type="button"
           onClick={handlePrevPeriod}
           disabled={!canGoPrev}
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoPrev 
-              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]' 
+              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' 
               : 'text-[var(--text-tertiary)]/40 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
@@ -103,13 +103,13 @@ export function UniversalPeriodSelector({
           <CalendarIcon 
             size={13} 
             strokeWidth={2} 
-            className="text-[var(--text-primary)] shrink-0" 
+            className="text-[var(--text-secondary)] shrink-0" 
           />
-          <span className="text-label font-bold truncate text-[var(--text-primary)]">
+          <span className="text-label font-semibold truncate text-[var(--text-primary)]">
             {month}
           </span>
           {actuallyIsCurrent && (
-            <span className="text-micro-label font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+            <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
               Nu
             </span>
           )}
@@ -136,7 +136,7 @@ export function UniversalPeriodSelector({
           disabled={!canGoNext}
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoNext 
-              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]' 
+              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]' 
               : 'text-[var(--text-tertiary)]/40 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
@@ -153,18 +153,18 @@ export function UniversalPeriodSelector({
       <button 
         type="button"
         onClick={handleCenterClick}
-        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-btn-sm bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-subtle transition-all cursor-pointer group select-none active:scale-95 shadow-none"
+        className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border-none transition-all cursor-pointer group select-none active:scale-95 shadow-subtle"
       >
-        <CalendarIcon size={13} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-        <span className="text-label font-bold text-[var(--text-primary)]">
+        <CalendarIcon size={14} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+        <span className="text-xs sm:text-[13px] font-medium text-[var(--text-primary)]">
           {month}
         </span>
         {actuallyIsCurrent && (
-          <span className="text-micro-label font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+          <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
             Nu
           </span>
         )}
-        <ChevronDown size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0" />
+        <ChevronDown size={13} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0" />
       </button>
     );
   }

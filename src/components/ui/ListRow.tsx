@@ -48,19 +48,19 @@ export const ListRow: React.FC<ListRowProps> = ({
   titleClassName = '',
   subtitleClassName = '',
   multiline = false,
-  isLast = false,
+  isLast: _isLast = false,
 }) => {
   const isClickable = Boolean(onClick && !disabled);
   const isCompact = density === 'compact' || (density !== 'default' && variant === 'grouped');
 
   const containerStyles = {
     card: isCompact
-      ? 'bg-[var(--surface-color)] border-none px-5 py-4 min-h-[62px] rounded-[var(--radius-card,22px)] shadow-subtle'
-      : 'bg-[var(--surface-color)] border-none card-p min-h-[68px] rounded-[var(--radius-card,22px)] shadow-subtle',
+      ? 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[54px] rounded-[var(--radius-card,20px)] shadow-subtle'
+      : 'bg-[var(--surface-color)] border-none card-p min-h-[60px] rounded-[var(--radius-card,20px)] shadow-subtle',
     grouped: isCompact
-      ? `bg-transparent px-5 py-3.5 sm:py-4 min-h-[60px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] ${isLast ? '' : 'border-b border-subtle'}`
-      : `bg-transparent px-5 py-4 sm:py-4.5 min-h-[66px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] ${isLast ? '' : 'border-b border-subtle'}`,
-    plain: isCompact ? 'bg-transparent px-4 py-3 min-h-[52px]' : 'bg-transparent px-4 py-3.5 min-h-[58px]',
+      ? 'bg-transparent px-4 py-2.5 min-h-[50px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+      : 'bg-transparent px-4 py-3 min-h-[56px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
+    plain: isCompact ? 'bg-transparent px-3 py-2 min-h-[46px]' : 'bg-transparent px-3.5 py-2.5 min-h-[50px]',
   }[variant];
 
   const clickableStyles = isClickable
@@ -75,10 +75,10 @@ export const ListRow: React.FC<ListRowProps> = ({
   };
 
   const iconContainerSize = isCompact
-    ? 'w-9 h-9 rounded-[var(--radius-icon-button,12px)]'
-    : 'w-10 h-10 rounded-[var(--radius-icon-button,12px)]';
+    ? 'w-8 h-8 rounded-[var(--radius-icon-button,10px)]'
+    : 'w-10 h-10 rounded-[var(--radius-icon-button,10px)]';
 
-  const gapSize = 'gap-4';
+  const gapSize = 'gap-3.5';
 
   return (
     <div
@@ -90,7 +90,7 @@ export const ListRow: React.FC<ListRowProps> = ({
         disabled ? 'opacity-40 pointer-events-none' : ''
       } ${className}`}
     >
-      <div className={`flex items-center ${gapSize} min-w-0 pr-3 flex-1`}>
+      <div className={`flex items-center ${gapSize} min-w-0 pr-2 flex-1`}>
         {icon && (
           <div
             className={`${iconContainerSize} flex items-center justify-center shrink-0 ${iconBg} ${iconColor} ${iconClassName}`}
@@ -113,7 +113,7 @@ export const ListRow: React.FC<ListRowProps> = ({
           </div>
           {subtitle && (
             <div
-              className={`text-secondary leading-relaxed text-[var(--text-secondary)] mt-1 ${
+              className={`text-secondary leading-relaxed text-[var(--text-secondary)] mt-0.5 ${
                 multiline ? 'leading-relaxed' : 'truncate'
               } ${subtitleClassName}`}
             >

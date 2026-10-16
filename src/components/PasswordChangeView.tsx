@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Lock } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { TranslationKey } from '../i18n';
-import { Button, Input, IconButton } from './ui';
+import { Button, IconButton, Card } from './ui';
 
 interface PasswordChangeViewProps {
   onBack: () => void;
@@ -83,45 +83,62 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Input
-          label={t('currentPassword' as any) || 'Nuvarande lösenord'}
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          placeholder="••••••••"
-          icon={<Lock size={16} />}
-        />
-
-        <Input
-          label={t('newPassword' as any) || 'Nytt lösenord'}
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="••••••••"
-          icon={<Lock size={16} />}
-        />
-
-        <Input
-          label={t('confirmNewPassword' as any) || 'Bekräfta nytt lösenord'}
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="••••••••"
-          icon={<Lock size={16} />}
-          error={error}
-        />
-
-        <div className="pt-2">
-          <Button 
-            onClick={handleUpdatePassword}
-            loading={isUpdating}
-            variant="primary"
-            fullWidth
-          >
-            {t('updatePassword' as any) || 'Uppdatera lösenord'}
-          </Button>
+      <Card variant="default" padding="none" className="divide-y divide-menu">
+        <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+          <span className="text-body font-medium text-[var(--text-primary)] shrink-0">
+            {t('currentPassword' as any) || 'Nuvarande lösenord'}
+          </span>
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="••••••••"
+            className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none flex-1 min-w-0 placeholder:text-[var(--text-tertiary)]"
+          />
         </div>
+
+        <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+          <span className="text-body font-medium text-[var(--text-primary)] shrink-0">
+            {t('newPassword' as any) || 'Nytt lösenord'}
+          </span>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="••••••••"
+            className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none flex-1 min-w-0 placeholder:text-[var(--text-tertiary)]"
+          />
+        </div>
+
+        <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+          <span className="text-body font-medium text-[var(--text-primary)] shrink-0">
+            {t('confirmNewPassword' as any) || 'Bekräfta lösenord'}
+          </span>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none flex-1 min-w-0 placeholder:text-[var(--text-tertiary)]"
+          />
+        </div>
+      </Card>
+
+      {error && (
+        <p className="text-label text-[var(--danger-color)] px-1">
+          {error}
+        </p>
+      )}
+
+      <div className="pt-1">
+        <Button 
+          onClick={handleUpdatePassword}
+          loading={isUpdating}
+          variant="primary"
+          fullWidth
+        >
+          {t('updatePassword' as any) || 'Uppdatera lösenord'}
+        </Button>
       </div>
     </div>
   );

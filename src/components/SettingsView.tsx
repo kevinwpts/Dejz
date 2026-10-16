@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Config } from '../types';
-import { Language, TranslationKey } from '../i18n';
+import { TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
+import { NORDIC_LANGUAGES } from '../utils/nordic';
 import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
@@ -12,7 +13,7 @@ import { CategoryIcon } from './CategoryIcon';
 
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 import { dataService } from '../services/dataService';
-import { applyThemeColor } from '../utils/theme';
+import { applyThemeColor, DEJZ_ACCENTS, resolveAccentKey } from '../utils/theme';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
@@ -167,18 +168,10 @@ export function SettingsView({
   };
 
   const renderLanguageSettings = () => {
-    const languages: { code: Language; label: string }[] = [
-      { code: 'sv', label: 'Svenska' },
-      { code: 'da', label: 'Dansk' },
-      { code: 'no', label: 'Norsk' },
-      { code: 'fi', label: 'Suomi' },
-      { code: 'en', label: 'English' },
-    ];
-
     return (
       <div className="w-full py-2">
         <Card variant="default" padding="none" className="divide-y divide-menu">
-          {languages.map((l) => {
+          {NORDIC_LANGUAGES.map((l) => {
             const isSelected = config.language === l.code;
             return (
               <ListRow
@@ -187,7 +180,7 @@ export function SettingsView({
                 density="compact"
                 icon={<LanguageFlag code={l.code} size="md" />}
                 iconBg="bg-transparent"
-                title={l.label}
+                title={l.nativeLabel}
                 titleClassName={isSelected ? 'font-medium text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}
                 showCheck={isSelected}
                 onClick={async () => {
@@ -214,18 +207,25 @@ export function SettingsView({
   const isEn = config.language === 'en';
 
   const THEME_COLOR_OPTIONS = [
-    { id: 'neutral', name: isEn ? 'Dejz Signature' : 'Dejz Signatur', hex: 'neutral' },
-    { id: 'sky', name: isEn ? 'Nordic Sky' : 'Himmelsblå', hex: '#9EC5E8' },
+    { id: 'neutral', name: isEn ? 'Monochrome' : 'Monokrom', hex: 'neutral' },
+    { id: 'coral', name: isEn ? 'Dejz Signature' : 'Dejz Signatur', hex: '#F0485E' },
     { id: 'cobalt', name: isEn ? 'Nordic Cobalt' : 'Koboltblå', hex: '#2B5CE6' },
     { id: 'fjord', name: isEn ? 'Fjord Blue' : 'Fjordblå', hex: '#2B5B84' },
+    { id: 'sky', name: isEn ? 'Nordic Sky' : 'Himmelsblå', hex: '#9EC5E8' },
     { id: 'sage', name: isEn ? 'Nordic Sage' : 'Salvia', hex: '#4B6B5A' },
+    { id: 'emerald', name: isEn ? 'Emerald' : 'Smaragd', hex: '#15804A' },
     { id: 'amber', name: isEn ? 'Warm Amber' : 'Bärnsten', hex: '#E5A93B' },
     { id: 'terracotta', name: isEn ? 'Terracotta' : 'Terrakotta', hex: '#B8543B' },
-    { id: 'emerald', name: isEn ? 'Emerald' : 'Smaragd', hex: '#15804A' },
   ];
 
   const renderAppearanceSettings = () => {
     const isDarkSelected = config.darkMode;
+    const currentAccentKey = resolveAccentKey(config.themeColor);
+    const currentAccentSpec = DEJZ_ACCENTS[currentAccentKey] || DEJZ_ACCENTS.neutral;
+    const lightPreviewAccent = currentAccentSpec.light.bg;
+    const darkPreviewAccent = currentAccentSpec.dark.bg;
+    const lightPreviewSignature = '#F0485E';
+    const darkPreviewSignature = '#FB6074';
 
     return (
       <div className="space-y-6 w-full py-2">
@@ -263,60 +263,66 @@ export function SettingsView({
               )}
 
               {/* Phone Mockup Frame - Light */}
-              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#F3ECE1] border-4 border-[#1E1814] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
+              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#F4F5F7] border-4 border-[#0B0B0F] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
                 {/* Speaker / Dynamic Island */}
-                <div className="w-10 h-2 bg-[#1E1814] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
+                <div className="w-10 h-2 bg-[#0B0B0F] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
                 
                 {/* Mini App Header */}
                 <div className="flex items-center justify-between mb-1.5 px-0.5">
-                  <span className="text-[10px] font-black tracking-tight text-[#1E1814]">dejz</span>
-                  <div className="w-3.5 h-3.5 rounded-full bg-black/5 flex items-center justify-center text-[#5E5248]">
+                  <span className="text-[10px] font-black tracking-tight text-[#0B0B0F]">dejz</span>
+                  <div className="w-3.5 h-3.5 rounded-full bg-black/5 flex items-center justify-center text-[#525665]">
                     <Icon name="sun" size={9} />
                   </div>
                 </div>
 
                 {/* Mini Balance Card */}
-                <div className="bg-[#FFFDF9] rounded-lg p-2 shadow-2xs border border-black/5 space-y-1 mb-1.5">
-                  <div className="text-[6.5px] uppercase font-bold text-[#5E5248] tracking-wider">
+                <div className="bg-[#FFFFFF] rounded-lg p-2 shadow-2xs border border-black/5 space-y-1 mb-1.5">
+                  <div className="text-[6.5px] uppercase font-bold text-[#525665] tracking-wider">
                     {isEn ? 'Remaining' : 'Kvar att spendera'}
                   </div>
-                  <div className="text-[11px] font-bold text-[#1E1814] leading-tight">
+                  <div className="text-[11px] font-bold text-[#0B0B0F] leading-tight">
                     12 450 kr
                   </div>
                   <div className="w-full bg-black/10 h-1 rounded-full overflow-hidden mt-0.5">
-                    <div className="bg-[var(--brand-signature,#E85D34)] h-full w-2/3 rounded-full" />
+                    <div
+                      className="h-full w-2/3 rounded-full transition-colors"
+                      style={{ backgroundColor: lightPreviewSignature }}
+                    />
                   </div>
                 </div>
 
                 {/* Mini List Rows */}
-                <div className="bg-[#FFFDF9] rounded-lg p-1.5 shadow-2xs border border-black/5 space-y-1 mb-auto">
+                <div className="bg-[#FFFFFF] rounded-lg p-1.5 shadow-2xs border border-black/5 space-y-1 mb-auto">
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                      <span className="font-semibold text-[#1E1814]">{isEn ? 'Salary' : 'Lön'}</span>
+                      <span className="font-semibold text-[#0B0B0F]">{isEn ? 'Salary' : 'Lön'}</span>
                     </div>
                     <span className="font-bold text-emerald-700">+32 000 kr</span>
                   </div>
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#5E5248]" />
-                      <span className="font-semibold text-[#1E1814]">ICA Maxi</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#525665]" />
+                      <span className="font-semibold text-[#0B0B0F]">ICA Maxi</span>
                     </div>
-                    <span className="font-bold text-[#1E1814]">-850 kr</span>
+                    <span className="font-bold text-[#0B0B0F]">-850 kr</span>
                   </div>
                 </div>
 
                 {/* Mini Bottom Nav Bar */}
-                <div className="pt-1 mt-1 border-t border-black/5 flex justify-around items-center text-stone-400">
-                  <div className="w-2 h-2 rounded-full bg-[var(--accent-color)]" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-stone-300" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-stone-300" />
+                <div className="pt-1 mt-1 border-t border-black/5 flex justify-around items-center text-zinc-400">
+                  <div
+                    className="w-2 h-2 rounded-full transition-colors"
+                    style={{ backgroundColor: lightPreviewAccent }}
+                  />
+                  <div className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
                 </div>
               </div>
 
               {/* Label */}
               <div className="flex items-center gap-1.5 pt-0.5">
-                <Icon name="sun" size={15} className={!isDarkSelected ? 'text-[var(--accent-color)]' : 'text-[var(--text-secondary)]'} />
+                <Icon name="sun" size={15} className={!isDarkSelected ? 'text-[var(--nav-active-color,var(--accent-color))]' : 'text-[var(--text-secondary)]'} />
                 <span className={`text-xs font-bold tracking-tight ${!isDarkSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                   {isEn ? 'Light' : 'Ljust'}
                 </span>
@@ -350,52 +356,58 @@ export function SettingsView({
               )}
 
               {/* Phone Mockup Frame - Dark */}
-              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#14100D] border-4 border-[#322923] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
+              <div className="w-full aspect-[9/16] rounded-[22px] bg-[#0B0C0E] border-4 border-[#1C1F26] shadow-sm p-2 flex flex-col justify-between overflow-hidden relative select-none">
                 {/* Speaker / Dynamic Island */}
-                <div className="w-10 h-2 bg-[#322923] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
+                <div className="w-10 h-2 bg-[#1C1F26] rounded-full mx-auto mb-1.5 shrink-0 opacity-90" />
                 
                 {/* Mini App Header */}
                 <div className="flex items-center justify-between mb-1.5 px-0.5">
-                  <span className="text-[10px] font-black tracking-tight text-[#F7F1E8]">dejz</span>
-                  <div className="w-3.5 h-3.5 rounded-full bg-white/10 flex items-center justify-center text-[#BFB1A2]">
+                  <span className="text-[10px] font-black tracking-tight text-[#FFFFFF]">dejz</span>
+                  <div className="w-3.5 h-3.5 rounded-full bg-white/10 flex items-center justify-center text-[#9CA3AF]">
                     <Icon name="moon" size={9} />
                   </div>
                 </div>
 
                 {/* Mini Balance Card */}
-                <div className="bg-[#1E1814] rounded-lg p-2 shadow-2xs border border-white/5 space-y-1 mb-1.5">
-                  <div className="text-[6.5px] uppercase font-bold text-[#BFB1A2] tracking-wider">
+                <div className="bg-[#13151A] rounded-lg p-2 shadow-2xs border border-white/5 space-y-1 mb-1.5">
+                  <div className="text-[6.5px] uppercase font-bold text-[#9CA3AF] tracking-wider">
                     {isEn ? 'Remaining' : 'Kvar att spendera'}
                   </div>
-                  <div className="text-[11px] font-bold text-[#F7F1E8] leading-tight">
+                  <div className="text-[11px] font-bold text-[#FFFFFF] leading-tight">
                     12 450 kr
                   </div>
                   <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden mt-0.5">
-                    <div className="bg-[var(--brand-signature,#F06A42)] h-full w-2/3 rounded-full" />
+                    <div
+                      className="h-full w-2/3 rounded-full transition-colors"
+                      style={{ backgroundColor: darkPreviewSignature }}
+                    />
                   </div>
                 </div>
 
                 {/* Mini List Rows */}
-                <div className="bg-[#1E1814] rounded-lg p-1.5 shadow-2xs border border-white/5 space-y-1 mb-auto">
+                <div className="bg-[#13151A] rounded-lg p-1.5 shadow-2xs border border-white/5 space-y-1 mb-auto">
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span className="font-semibold text-[#F7F1E8]">{isEn ? 'Salary' : 'Lön'}</span>
+                      <span className="font-semibold text-[#FFFFFF]">{isEn ? 'Salary' : 'Lön'}</span>
                     </div>
                     <span className="font-bold text-emerald-400">+32 000 kr</span>
                   </div>
                   <div className="flex items-center justify-between text-[7px]">
                     <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#BFB1A2]" />
-                      <span className="font-semibold text-[#F7F1E8]">ICA Maxi</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#9CA3AF]" />
+                      <span className="font-semibold text-[#FFFFFF]">ICA Maxi</span>
                     </div>
-                    <span className="font-bold text-[#DFD5C8]">-850 kr</span>
+                    <span className="font-bold text-[#D1D5DB]">-850 kr</span>
                   </div>
                 </div>
 
                 {/* Mini Bottom Nav Bar */}
                 <div className="pt-1 mt-1 border-t border-white/5 flex justify-around items-center text-zinc-500">
-                  <div className="w-2 h-2 rounded-full bg-[var(--accent-color)]" />
+                  <div
+                    className="w-2 h-2 rounded-full transition-colors"
+                    style={{ backgroundColor: darkPreviewAccent }}
+                  />
                   <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
                   <div className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
                 </div>
@@ -403,7 +415,7 @@ export function SettingsView({
 
               {/* Label */}
               <div className="flex items-center gap-1.5 pt-0.5">
-                <Icon name="moon" size={15} className={isDarkSelected ? 'text-[var(--accent-color)]' : 'text-[var(--text-secondary)]'} />
+                <Icon name="moon" size={15} className={isDarkSelected ? 'text-[var(--nav-active-color,var(--accent-color))]' : 'text-[var(--text-secondary)]'} />
                 <span className={`text-xs font-bold tracking-tight ${isDarkSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                   {isEn ? 'Dark' : 'Mörkt'}
                 </span>
@@ -417,49 +429,50 @@ export function SettingsView({
           <label className="text-sm font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
             {isEn ? 'Theme color' : 'Temafärg'}
           </label>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {THEME_COLOR_OPTIONS.map((theme) => {
-              const currentHex = (config.themeColor || 'neutral').toLowerCase();
-              const isNeutralSelected = currentHex === 'neutral' || currentHex === '#neutral' || currentHex === 'default' || !config.themeColor;
-              const isSelected = theme.hex === 'neutral' ? isNeutralSelected : (!isNeutralSelected && currentHex === theme.hex.toLowerCase());
-
-              const circleBg = theme.hex === 'neutral'
-                ? '#E85D34'
-                : theme.hex;
-
-              const isLightSwatch = theme.hex.toLowerCase() === '#9ec5e8' || theme.hex.toLowerCase() === '#e5a93b';
-              const checkColor = theme.hex === 'neutral'
-                ? '#FFFDF9'
-                : (isLightSwatch ? '#1E1814' : '#FFFDF9');
+              const selectedKey = resolveAccentKey(config.themeColor);
+              const isSelected = selectedKey === theme.id;
+              const spec = DEJZ_ACCENTS[theme.id] || DEJZ_ACCENTS.neutral;
+              const activePair = config.darkMode ? spec.dark : spec.light;
+              const swatchBg = activePair.bg;
+              const checkColor = activePair.text;
 
               return (
                 <button
                   key={theme.id}
                   type="button"
                   onClick={() => {
-                    const newConfig = { ...config, themeColor: theme.hex };
+                    const newConfig = { ...config, themeColor: theme.id };
                     setConfig(newConfig);
-                    applyThemeColor(theme.hex, config.darkMode);
+                    applyThemeColor(theme.id, config.darkMode);
                     if (userId) {
                       dataService.saveSettings(userId, newConfig).catch((err) => {
                         console.warn('Could not save theme color:', err);
                       });
                     }
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[var(--radius-card)] transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[var(--radius-card)] transition-all cursor-pointer active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)] ${
                     isSelected
                       ? 'bg-[var(--surface-color)] ring-2 ring-[var(--accent-color)] shadow-none'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <div
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform border border-subtle shadow-2xs"
-                    style={{ backgroundColor: circleBg, color: checkColor }}
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform border border-subtle shadow-none relative overflow-hidden"
+                    style={{ backgroundColor: swatchBg }}
                   >
-                    {isSelected && <Icon name="check" size={15} weight="bold" />}
+                    {isSelected && (
+                      <span
+                        className="w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ color: checkColor }}
+                      >
+                        <Icon name="check" size={12} weight="bold" />
+                      </span>
+                    )}
                   </div>
                   <span className={`text-label font-medium tracking-tight truncate w-full text-center ${
-                    isSelected ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)]'
+                    isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)]'
                   }`}>
                     {theme.name}
                   </span>
@@ -851,7 +864,7 @@ export function SettingsView({
         subtitle={config.language === 'en' ? 'Select the day of the month you receive your salary' : 'Välj vilken dag i månaden du får lön'}
         size="md"
       >
-        <div className="grid grid-cols-5 sm:grid-cols-7 gap-2.5 py-2">
+        <div className="grid grid-cols-5 sm:grid-cols-7 gap-2.5 py-2.5 px-1.5 -mx-1.5">
           {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
             const isSelected = config.payday === day;
             return (

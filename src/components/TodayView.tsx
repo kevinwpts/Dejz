@@ -404,7 +404,7 @@ export function TodayView({
             <button
               type="button"
               onClick={() => onNavigate("profile", "budget")}
-              className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
+              className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border-none text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
             >
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
@@ -443,7 +443,7 @@ export function TodayView({
 
             {/* Horisontell karusell av mini-kort för kategoribudgetar (utan mätare) */}
             <div
-              className="flex gap-3 overflow-x-auto py-1.5 px-0.5 no-scrollbar select-none snap-x snap-mandatory"
+              className="flex gap-3 overflow-x-auto py-3 px-3 -mx-3 -my-1.5 scroll-px-3 no-scrollbar select-none snap-x snap-mandatory"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -464,7 +464,7 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       handleCategoryClick(cat.name);
                     }}
-                    className="snap-start flex-shrink-0 min-w-[144px] sm:min-w-[160px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
+                    className="snap-start flex-shrink-0 min-w-[144px] sm:min-w-[160px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border-none hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
                   >
                     {/* Ikon */}
                     <div className="flex items-center justify-between gap-2">
@@ -549,12 +549,17 @@ export function TodayView({
         <div className="space-y-2.5 pt-0.5">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
-              <motion.div className="tx-group-card" key="transactions">
-                {displayedVariableTransactions.map((transaction: Transaction) => (
-                  <div key={transaction.id}>
+              <motion.div className="space-y-[var(--card-gap)]" key="transactions">
+                {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
+                  <motion.div
+                    key={transaction.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: index * 0.02 }}
+                  >
                     <TransactionItem
                       transaction={transaction}
-                      isGrouped={true}
                       onView={onViewTransaction}
                       onDelete={onDeleteTransaction}
                       onToggleStar={onToggleStar}
@@ -563,7 +568,7 @@ export function TodayView({
                         if (onViewTransaction) onViewTransaction(transaction);
                       }}
                     />
-                  </div>
+                  </motion.div>
                 ))}
               </motion.div>
             ) : displayedFixedTransactions.length === 0 ? (
@@ -578,7 +583,7 @@ export function TodayView({
 
           {/* Fixed transactions for the day */}
           {displayedFixedTransactions.length > 0 && (
-            <div className="tx-group-card">
+            <div className="space-y-[var(--card-gap)]">
               {displayedFixedTransactions.map((item) => {
                 const isItemVariable = Boolean(item.isVariable || item.originalItem?.isVariable || item.originalItem?.is_variable);
                 const tx: Transaction = {
@@ -598,7 +603,6 @@ export function TodayView({
                     <TransactionItem
                       transaction={tx}
                       isFixed={true}
-                      isGrouped={true}
                       isVariable={isItemVariable}
                       config={config}
                       onClick={() => {
@@ -633,8 +637,8 @@ export function TodayView({
       >
         <div className="space-y-[var(--card-gap)] pt-1">
           {/* Period */}
-          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
+          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border-none">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border-none">
               <Calendar size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
@@ -648,8 +652,8 @@ export function TodayView({
           </div>
 
           {/* Payday / Next Salary */}
-          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
+          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border-none">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border-none">
               <Clock size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">

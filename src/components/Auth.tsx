@@ -4,7 +4,7 @@ import { createFreshTestAccount } from '../utils/demoData';
 import { Mail, Lock, ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
-import { Button, Input, IconButton, Divider } from './ui';
+import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
 
 import { Language } from '../i18n';
 import { getRegionDefaults } from '../utils/nordic';
@@ -160,7 +160,9 @@ export function Auth({
               currency: regDefaults.defaultCurrencyCode,
               locale: regDefaults.locale,
               timezone: regDefaults.timezone,
-              dark_mode: true,
+              dark_mode: false,
+              theme_mode: 'light',
+              theme_color: 'neutral',
             },
           },
         });
@@ -247,13 +249,15 @@ export function Auth({
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--surface-color)] selection:bg-landing-signature selection:text-[var(--text-primary)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
-      {/* Subtle Top Light-Blue Wash matching LandingPage Hero */}
+    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+      {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
       <div
         aria-hidden="true"
-        className="absolute top-0 left-0 right-0 h-[380px] bg-landing-sky-soft pointer-events-none z-0"
+        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)',
+        }}
       />
-
       {/* Top Left Back Button */}
       {onBack && (
         <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-6 sm:left-8 z-30">
@@ -275,7 +279,7 @@ export function Auth({
             }}
             variant="surface"
             size="md"
-            className="w-9 h-9 bg-[var(--surface-color)] shadow-xs border-none"
+            className="w-9 h-9"
             aria-label="Tillbaka"
           />
         </div>
@@ -292,18 +296,18 @@ export function Auth({
         </div>
       )}
 
-      <div className="w-full max-w-[420px] mx-auto my-auto relative z-10 bg-[var(--surface-color)] rounded-modal shadow-subtle p-6 sm:p-8 space-y-6">
+      <div className="w-full max-w-[400px] mx-auto my-auto relative z-10 space-y-6">
         {isEmailSent ? (
-          <div className="text-center py-4 space-y-6">
-            <div className="w-16 h-16 bg-landing-sky-soft text-[var(--text-primary)] rounded-card-nested flex items-center justify-center mx-auto">
+          <div className="text-center py-6 space-y-6">
+            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[var(--radius-card-nested,12px)] flex items-center justify-center mx-auto shadow-xs">
               <Mail size={28} strokeWidth={2} />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-large-amount font-extrabold tracking-[-0.03em] text-[var(--text-primary)]">
+              <h2 className="text-page-title text-[var(--text-primary)]">
                 {t('checkEmailTitle' as any)}
               </h2>
-              <p className="text-body text-[var(--text-secondary)] leading-relaxed max-w-[320px] mx-auto">
+              <p className="text-secondary leading-relaxed max-w-[320px] mx-auto">
                 {t('checkEmailDesc' as any)}
               </p>
             </div>
@@ -323,16 +327,16 @@ export function Auth({
             </div>
           </div>
         ) : isResetSent ? (
-          <div className="text-center py-4 space-y-6">
-            <div className="w-16 h-16 bg-landing-sky-soft text-[var(--text-primary)] rounded-card-nested flex items-center justify-center mx-auto">
+          <div className="text-center py-6 space-y-6">
+            <div className="w-16 h-16 bg-[var(--surface-color)] border border-[var(--border-divider)] text-[var(--text-primary)] rounded-[var(--radius-card-nested,12px)] flex items-center justify-center mx-auto shadow-subtle">
               <CheckCircle2 size={30} strokeWidth={2} />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-large-amount font-extrabold tracking-[-0.03em] text-[var(--text-primary)]">
+              <h2 className="text-page-title text-[var(--text-primary)]">
                 {t('checkInboxTitle' as any)}
               </h2>
-              <p className="text-body text-[var(--text-secondary)] leading-relaxed max-w-[320px] mx-auto">
+              <p className="text-secondary leading-relaxed max-w-[320px] mx-auto">
                 {t('checkInboxDesc' as any, { email })}
               </p>
             </div>
@@ -354,15 +358,15 @@ export function Auth({
         ) : isForgotPassword ? (
           <div className="space-y-6">
             {/* Header with Logo */}
-            <div className="relative flex flex-col items-center text-center mb-2">
+            <div className="relative flex flex-col items-center mb-2">
               <div className="flex flex-col items-center pt-1 mb-4 select-none">
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <h1 className="text-large-amount font-extrabold tracking-[-0.03em] text-[var(--text-primary)] mb-1.5">
+              <h1 className="text-page-title mb-1.5 text-center">
                 {t('forgotPasswordTitle' as any)}
               </h1>
-              <p className="text-body text-[var(--text-secondary)] max-w-[320px] leading-relaxed">
+              <p className="text-secondary text-center max-w-[320px] leading-relaxed">
                 {t('forgotPasswordDesc' as any)}
               </p>
             </div>
@@ -380,7 +384,6 @@ export function Auth({
                 icon={<Mail size={16} />}
                 error={error}
                 variant="surface"
-                className="bg-landing-sky-soft/60 focus:bg-[var(--surface-color)] border-transparent focus:border-[var(--landing-signature-strong)] focus:ring-[var(--landing-signature)]/30 shadow-none"
               />
 
               <div className="pt-2">
@@ -399,44 +402,33 @@ export function Auth({
         ) : (
           <div className="space-y-6">
             {/* Header with Logo */}
-            <div className="relative flex flex-col items-center text-center mb-2">
+            <div className="relative flex flex-col items-center mb-2">
               <div className="flex flex-col items-center pt-1 mb-4 select-none">
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <h1 className="text-large-amount font-extrabold tracking-[-0.03em] text-[var(--text-primary)] mb-1">
+              <h1 className="text-page-title mb-1">
                 {isRegistering ? t('createAccount') : t('welcome')}
               </h1>
-              <p className="text-body text-[var(--text-secondary)]">
+              <p className="text-secondary">
                 {isRegistering ? t('createAccountSubtitle' as any) : t('loginSubtitle' as any)}
               </p>
             </div>
 
-            {/* Segmented Pill Switcher matching LandingPage palette */}
-            <div className="bg-landing-sky-soft p-1 rounded-full flex items-center">
-              {[
-                { value: 'login', label: t('login') },
-                { value: 'register', label: t('createAccount') },
-              ].map((option) => {
-                const active = (isRegistering ? 'register' : 'login') === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      setIsRegistering(option.value === 'register');
-                      setError(null);
-                    }}
-                    className={`flex-1 py-2 px-4 rounded-full text-secondary font-semibold transition-all cursor-pointer select-none ${
-                      active
-                        ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-transparent'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
+            {/* Segmented Pill Switcher */}
+            <div>
+              <SegmentedControl
+                variant="surface"
+                value={isRegistering ? 'register' : 'login'}
+                onChange={(val) => {
+                  setIsRegistering(val === 'register');
+                  setError(null);
+                }}
+                options={[
+                  { value: 'login', label: t('login') },
+                  { value: 'register', label: t('createAccount') },
+                ]}
+              />
             </div>
 
             <form onSubmit={handleAuth} className="space-y-4">
@@ -452,7 +444,6 @@ export function Auth({
                   placeholder={t('email')}
                   icon={<Mail size={16} />}
                   variant="surface"
-                  className="bg-landing-sky-soft/60 focus:bg-[var(--surface-color)] border-transparent focus:border-[var(--landing-signature-strong)] focus:ring-[var(--landing-signature)]/30 shadow-none"
                 />
 
                 <div className="space-y-1.5">
@@ -468,7 +459,6 @@ export function Auth({
                     icon={<Lock size={16} />}
                     error={error}
                     variant="surface"
-                    className="bg-landing-sky-soft/60 focus:bg-[var(--surface-color)] border-transparent focus:border-[var(--landing-signature-strong)] focus:ring-[var(--landing-signature)]/30 shadow-none"
                   />
 
                   {!isRegistering && (
@@ -510,7 +500,6 @@ export function Auth({
                 size="lg"
                 fullWidth
                 onClick={() => handleSocialLogin('google')}
-                className="!bg-landing-sky-soft hover:!bg-[var(--landing-signature)]/25 !border-none !shadow-none font-semibold"
                 icon={
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                     <path

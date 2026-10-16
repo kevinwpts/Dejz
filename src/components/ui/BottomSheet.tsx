@@ -96,7 +96,7 @@ export function BottomSheet({
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--surface-color))] text-[var(--text-primary)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] text-[var(--text-primary)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Handle */}
             {showDragHandle && (
@@ -105,7 +105,7 @@ export function BottomSheet({
 
             {/* Header */}
             {hasHeader && (
-              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-subtle)]">
+              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-subtle)] dark:border-transparent">
                 <div className="flex items-center gap-3 min-w-0 pr-3 flex-1">
                   {headerLeading && (
                     <div className="shrink-0">
@@ -135,7 +135,7 @@ export function BottomSheet({
                         if (typeof feedback?.light === 'function') feedback.light();
                         onClose();
                       }}
-                      className="w-8 h-8 rounded-full bg-[var(--surface-muted)] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border border-[var(--border-subtle)] shadow-none"
+                      className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border-none shadow-none"
                       aria-label="Stäng"
                     >
                       <Icon name="x" size={16} />
@@ -156,7 +156,7 @@ export function BottomSheet({
 
             {/* Footer */}
             {footer && (
-              <div className="page-px pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] shrink-0 bg-[var(--modal-bg,var(--surface-color))]">
+              <div className="page-px pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] dark:border-transparent shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
                 {footer}
               </div>
             )}

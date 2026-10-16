@@ -39,7 +39,7 @@ export function SegmentedControl<T extends string = string>({
   }[size];
 
   const containerVariantStyles =
-    'bg-[var(--surface-muted)]/90 dark:bg-[var(--surface-muted)] backdrop-blur-md border-none shadow-none';
+    'bg-[var(--surface-nested,#ECEEF2)] border-none shadow-none';
 
   return (
     <div
@@ -55,11 +55,11 @@ export function SegmentedControl<T extends string = string>({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`relative flex items-center justify-center gap-1.5 font-medium transition-all select-none cursor-pointer z-10 ${itemSizeStyles} ${
+            className={`relative flex items-center justify-center gap-1.5 font-medium transition-all select-none cursor-pointer z-10 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)] ${itemSizeStyles} ${
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[var(--text-primary)] text-[var(--surface-color)] dark:bg-[var(--text-primary)] dark:text-[var(--bg-color)] shadow-none font-medium'
+                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none font-medium'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
@@ -69,7 +69,7 @@ export function SegmentedControl<T extends string = string>({
               <span
                 className={`text-micro-label font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
-                    ? 'bg-white/20 dark:bg-black/15 text-[var(--surface-color)] dark:text-[var(--bg-color)]'
+                    ? 'bg-black/15 dark:bg-black/20 text-[var(--on-accent)]'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                 }`}
               >

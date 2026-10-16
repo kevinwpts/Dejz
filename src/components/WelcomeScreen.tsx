@@ -1,17 +1,19 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { TranslationKey } from '../i18n';
+import { ChevronRight } from 'lucide-react';
+import { Language, TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
-import { Button } from './ui';
+import { LanguagePicker } from './LanguagePicker';
 
 interface WelcomeScreenProps {
   onAction: (isRegistering: boolean) => void;
   onLegalClick: (type: 'privacy' | 'terms' | 'cookies' | 'contact') => void;
   t: (key: TranslationKey) => string;
   currentLanguage?: string;
+  onLanguageChange?: (lang: Language) => void;
 }
 
-export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv' }: WelcomeScreenProps) {
+export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv', onLanguageChange }: WelcomeScreenProps) {
   const norm = (currentLanguage || 'sv').toLowerCase();
   
   let headline = 'Hela din ekonomi. Svart på vitt.';
@@ -24,7 +26,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv
     ctaText = 'Kom i gang gratis';
   } else if (norm === 'no') {
     headline = 'Hele din økonomi. Svart på hvitt.';
-    subtitle = 'Samle inntekter, faste utgifter, sparing og budsjett på ett sted och se nøyaktig hva du har igjen å bruke mellom to lønninger.';
+    subtitle = 'Samle inntekter, faste utgifter, sparing og budsjett på ett sted og se nøyaktig hva du har igjen å bruke mellom to lønninger.';
     ctaText = 'Kom i gang gratis';
   } else if (norm === 'fi') {
     headline = 'Koko taloutesi. Mustaa valkoisella.';
@@ -37,12 +39,26 @@ export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv
   }
 
   return (
-    <div className="min-h-dvh relative flex flex-col bg-[var(--surface-color)] z-50 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] selection:bg-landing-signature selection:text-[var(--text-primary)]">
-      {/* Subtle Top Light-Blue Wash matching the LandingPage hero */}
+    <div className="min-h-dvh relative flex flex-col bg-[var(--bg-color)] z-50 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
+      {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
       <div
         aria-hidden="true"
-        className="absolute top-0 left-0 right-0 h-[380px] bg-landing-sky-soft pointer-events-none z-0"
+        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)',
+        }}
       />
+
+      {/* Top Right Language Picker */}
+      {onLanguageChange && (
+        <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-6 sm:right-8 z-30">
+          <LanguagePicker
+            currentLanguage={(norm as Language) || 'sv'}
+            onLanguageChange={onLanguageChange}
+            variant="compact"
+          />
+        </div>
+      )}
 
       {/* Center Content: Logo & Headline */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 relative z-10 max-w-md mx-auto w-full text-center">
@@ -52,7 +68,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex flex-col items-center space-y-6"
         >
-          <div className="p-4 px-6 rounded-card-nested bg-[var(--surface-color)] shadow-subtle flex items-center justify-center">
+          <div className="p-4 px-6 rounded-card-nested bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs flex items-center justify-center">
             <DejzLogo className="text-3xl sm:text-4xl font-black" textColor="var(--logo-color)" />
           </div>
           
@@ -74,31 +90,28 @@ export function WelcomeScreen({ onAction, onLegalClick, t, currentLanguage = 'sv
         transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
         className="p-6 pb-10 sm:pb-14 relative z-20 max-w-md mx-auto w-full space-y-4"
       >
-        <Button
-          variant="accent"
-          size="lg"
-          fullWidth
+        <button 
           onClick={() => onAction(false)}
+          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-btn text-body-medium active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
         >
-          {ctaText}
-        </Button>
+          <span>{ctaText}</span>
+          <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+        </button>
 
         <div className="flex items-center justify-center gap-4 text-label font-semibold text-[var(--text-secondary)]">
-          <Button
-            variant="ghost"
-            size="xs"
+          <button 
             onClick={() => onLegalClick('terms')}
+            className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
             {t('termsOfService')}
-          </Button>
+          </button>
           <span>•</span>
-          <Button
-            variant="ghost"
-            size="xs"
+          <button 
             onClick={() => onLegalClick('privacy')}
+            className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
             {t('privacyPolicy')}
-          </Button>
+          </button>
         </div>
       </motion.div>
     </div>

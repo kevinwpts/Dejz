@@ -926,14 +926,18 @@ async function startServer() {
   });
 
   app.get('/manifest.json', (req, res) => {
-    const theme = req.query.theme as string || 'emerald';
+    const theme = (req.query.theme as string) || 'accent';
     
     const themeColors: Record<string, string> = {
-      emerald: '#10b981',
-      midnight: '#161616',
-      sunset: '#f97316',
-      ocean: '#0ea5e9',
-      gold: '#eab308'
+      accent: '#0B0B0F',
+      neutral: '#0B0B0F',
+      coral: '#F0485E',
+      signature: '#F0485E',
+      emerald: '#15804A',
+      midnight: '#0B0B0F',
+      sunset: '#F0485E',
+      ocean: '#2B5CE6',
+      gold: '#E5A93B'
     };
 
     const manifest = {
@@ -942,8 +946,8 @@ async function startServer() {
       "description": "Ta kontroll över din ekonomi",
       "start_url": "/",
       "display": "standalone",
-      "background_color": "#ffffff",
-      "theme_color": themeColors[theme] || '#10b981',
+      "background_color": "#F4F5F7",
+      "theme_color": themeColors[theme] || '#0B0B0F',
       "icons": [
         {
           "src": `/api/icon.svg?theme=${theme}`,
@@ -957,21 +961,25 @@ async function startServer() {
   });
 
   app.get('/api/icon.svg', (req, res) => {
-    const theme = req.query.theme as string || 'emerald';
+    const theme = (req.query.theme as string) || 'accent';
     const themeColors: Record<string, string> = {
-      emerald: '#10b981',
-      midnight: '#161616',
-      sunset: '#f97316',
-      ocean: '#0ea5e9',
-      gold: '#eab308'
+      accent: '#0B0B0F',
+      neutral: '#0B0B0F',
+      coral: '#F0485E',
+      signature: '#F0485E',
+      emerald: '#15804A',
+      midnight: '#0B0B0F',
+      sunset: '#F0485E',
+      ocean: '#2B5CE6',
+      gold: '#E5A93B'
     };
-    const color = themeColors[theme] || '#10b981';
+    const color = themeColors[theme] || '#0B0B0F';
     
     // Use official dejz brand favicon SVG dynamically colored
     let svg: string;
     try {
       const template = fs.readFileSync(path.resolve(process.cwd(), "public", "favicon.svg"), "utf8");
-      svg = template.replace(/fill="#1A2456"/g, `fill="${color}"`);
+      svg = template.replace(/fill="(#1A2456|#5850EC|#0B0B0F)"/gi, `fill="${color}"`);
     } catch {
       svg = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="512" height="512" rx="128" fill="${color}"/></svg>`;
     }

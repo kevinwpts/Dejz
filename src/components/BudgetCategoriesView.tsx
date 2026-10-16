@@ -427,7 +427,7 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-[var(--surface-color)]/95 backdrop-blur-md rounded-card p-5 sm:p-6 shadow-subtle space-y-3.5"
+              className="sticky top-0 z-20 bg-[var(--surface-color)]/95 backdrop-blur-md rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-subtle border border-subtle space-y-3"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
@@ -456,7 +456,7 @@ export function BudgetCategoriesView({
               <div className="w-full h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden mb-2">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    isOverAllocated ? 'bg-[var(--danger-color)]' : 'bg-[var(--accent-color)]'
+                    isOverAllocated ? 'bg-[var(--danger-color)]' : 'bg-[var(--brand-signature,var(--accent-color))]'
                   }`}
                   style={{
                     width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
@@ -473,7 +473,7 @@ export function BudgetCategoriesView({
                   onClick={handleOpenAutoAllocate}
                   disabled={remainingToAllocate <= 0}
                   icon={<Sparkles size={14} className="text-[var(--accent-color)]" />}
-                  className="text-secondary font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isEn ? 'Auto-allocate' : config.language === 'da' ? 'Fordel automatisk' : config.language === 'no' ? 'Fordel automatisk' : config.language === 'fi' ? 'Jaa automaattisesti' : 'Fördela automatiskt'}
                 </Button>
@@ -518,10 +518,10 @@ export function BudgetCategoriesView({
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="w-full flex items-center justify-between px-5 py-4 min-h-[60px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
                   >
                     {/* Vänster: Tydlig rund ikon & kategorinamn */}
-                    <div className="flex items-center gap-4 min-w-0 pr-2">
+                    <div className="flex items-center gap-3.5 min-w-0 pr-2">
                       <CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} />
                       <div className="min-w-0 flex flex-col justify-center">
                         <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
@@ -634,6 +634,7 @@ export function BudgetCategoriesView({
                 <ListRow
                   key={cat.id || index}
                   variant="grouped"
+                  density="compact"
                   showChevron
                   icon={<CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} noBackground />}
                   title={cat.name}
@@ -837,7 +838,7 @@ export function BudgetCategoriesView({
         bodyClassName="p-5 sm:p-6 space-y-4"
       >
         <div className="space-y-4">
-          <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             {isEn
               ? 'We have allocated your budget based on your fixed expenses and available funds. Adjust the amounts before saving.'
               : config.language === 'da'
@@ -856,7 +857,7 @@ export function BudgetCategoriesView({
                 <div key={item.name} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <CategoryIcon icon={item.icon} color={catColor} size="xs" categoryName={item.name} />
-                    <span className="text-secondary font-semibold text-[var(--text-primary)] truncate">
+                    <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
                       {item.name}
                     </span>
                   </div>
@@ -870,9 +871,9 @@ export function BudgetCategoriesView({
                         const val = e.target.value;
                         setEditableProposedBudgets((prev) => ({ ...prev, [item.name]: val }));
                       }}
-                      className="w-24 text-right bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-input px-2.5 py-1 text-secondary font-bold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
+                      className="w-24 text-right bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-md px-2 py-1 text-xs font-bold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
                     />
-                    <span className="text-secondary text-[var(--text-secondary)]">{curr}</span>
+                    <span className="text-xs text-[var(--text-secondary)]">{curr}</span>
                   </div>
                 </div>
               );

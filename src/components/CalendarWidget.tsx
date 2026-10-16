@@ -21,6 +21,10 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
 
   const monthNames = currentLang === 'en' 
     ? ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    : currentLang === 'fi'
+    ? ['Tammikuu', 'Helmikuu', 'Maaliskuu', 'Huhtikuu', 'Toukokuu', 'Kesäkuu', 'Heinäkuu', 'Elokuu', 'Syyskuu', 'Lokakuu', 'Marraskuu', 'Joulukuu']
+    : currentLang === 'no' || currentLang === 'da'
+    ? ['Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Desember']
     : ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
 
   // Generate days for the viewed month
@@ -71,18 +75,18 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
         <span className="text-card-title font-bold text-[var(--text-primary)] capitalize tracking-tight">
           {monthNames[viewMonth]} {viewYear}
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="w-7 h-7 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] flex items-center justify-center hover:bg-black/[0.08] dark:hover:bg-white/[0.1] transition-colors cursor-pointer active:scale-90"
           >
             <ChevronLeft size={15} strokeWidth={2.5} />
           </button>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="w-7 h-7 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] flex items-center justify-center hover:bg-black/[0.08] dark:hover:bg-white/[0.1] transition-colors cursor-pointer active:scale-90"
           >
             <ChevronRight size={15} strokeWidth={2.5} />
           </button>
@@ -105,7 +109,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
         ))}
         {monthDays.map((day, i) => {
           const dayDate = day.date;
-          const isSelected = normalizedSelectedDate && dayDate.toDateString() === new Date(normalizedSelectedDate).toDateString();
+          const isSelected = Boolean(normalizedSelectedDate && dayDate.toDateString() === new Date(normalizedSelectedDate).toDateString());
           const isToday = dayDate.toDateString() === today.toDateString();
           const hasIncome = day.hasIncome;
           const hasSpend = day.hasSpend;
@@ -121,16 +125,16 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                 target.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
                 setSelectedDate(target);
               }}
-              className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-[0.94] cursor-pointer text-center ${
+              className={`aspect-square w-full rounded-[var(--radius-card-nested,12px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-[0.94] cursor-pointer text-center ${
                 isSelected 
-                  ? 'bg-black/5 dark:bg-white/10 text-[var(--text-primary)] font-semibold border-none z-10 shadow-none' 
+                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-bold border-none z-10 shadow-xs' 
                   : isToday
-                  ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-subtle'
-                  : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
+                  ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--accent-color)] font-bold border-none'
+                  : 'bg-transparent text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
               }`}
             >
-              <span className={`text-secondary font-semibold tabular-nums leading-none text-center ${
-                isSelected ? 'text-[var(--text-primary)] font-semibold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
+              <span className={`text-secondary tabular-nums leading-none text-center ${
+                isSelected ? 'text-[var(--surface-color)] font-bold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
               }`}>
                 {dayDate.getDate()}
               </span>
@@ -141,7 +145,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                   <span className="w-1 h-1 rounded-full bg-[var(--success-color)]" />
                 )}
                 {hasSpend && (
-                  <span className="w-1 h-1 rounded-full bg-[var(--accent-color)]" />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--surface-color)]/80' : 'bg-[var(--accent-color)]'}`} />
                 )}
                 {hasFixed && !hasIncome && !hasSpend && (
                   <span className="w-1 h-1 rounded-full bg-[var(--warning-color)]" />

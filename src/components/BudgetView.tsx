@@ -334,19 +334,15 @@ export function BudgetView({
       />
 
       {/* Overview Summary Card */}
-      <Card variant="default" padding="md" className="select-none space-y-1.5 relative overflow-hidden">
-        <div
-          className="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-[var(--brand-signature)]/10 blur-2xl pointer-events-none"
-          aria-hidden="true"
-        />
-        <div className="relative z-10">
+      <Card variant="default" padding="md" className="select-none space-y-1">
+        <div>
           <span className="text-metric-label font-medium text-[var(--text-secondary)]">
             {budgetFilter === 'income' && (config?.language === 'en' ? 'Total monthly income' : 'Totala månadsinkomster')}
             {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total monthly savings' : 'Totalt månadssparande')}
             {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Total monthly fixed expenses' : 'Totala fasta utgifter')}
           </span>
         </div>
-        <div className="relative z-10 flex items-baseline gap-1.5 pt-0.5">
+        <div className="flex items-baseline gap-1.5 pt-1">
           <AnimatedNumber
             value={Math.round(
               budgetFilter === 'income'
@@ -355,9 +351,11 @@ export function BudgetView({
                 ? totalSavingsSum
                 : totalMonthlyFixedAverage
             )}
-            className="text-large-amount text-[var(--text-primary)] font-bold font-amount tabular-nums"
+            className={`text-large-amount font-bold font-amount tabular-nums ${
+              budgetFilter === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-metric-label)]'
+            }`}
             formatter={(val) => {
-              const prefix = budgetFilter === 'income' ? '+' : budgetFilter === 'savings' ? '' : '−';
+              const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
@@ -368,13 +366,6 @@ export function BudgetView({
             </span>
           </span>
         </div>
-        {budgetFilter === 'savings' && totalSavingsSum > 0 && (
-          <p className="relative z-10 text-xs font-semibold text-[var(--brand-signature)] pt-1">
-            {config?.language === 'en'
-              ? `Builds +${formatAmount(Math.round(totalSavingsSum * 12), config?.language)} ${config?.currency || 'kr'} in buffer over 1 year`
-              : `Bygger +${formatAmount(Math.round(totalSavingsSum * 12), config?.language)} ${config?.currency || 'kr'} i trygg buffert på ett år`}
-          </p>
-        )}
       </Card>
 
       <AnimatePresence mode="wait">
@@ -425,21 +416,19 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="tx-group-card">
+                  <div className="space-y-[var(--card-gap)]">
                     {filteredActiveIncomes.map((income) => (
-                      <div key={income.id}>
-                        <BudgetItem 
-                          item={income} 
-                          onClick={() => onViewIncome(income)} 
-                          currency={config?.currency || 'kr'} 
-                          type="income"
-                          language={config.language as Language}
-                          t={t}
-                          config={config}
-                          currentPeriodId={currentPeriodId}
-                          isGrouped={true}
-                        />
-                      </div>
+                      <BudgetItem 
+                        key={income.id}
+                        item={income} 
+                        onClick={() => onViewIncome(income)} 
+                        currency={config?.currency || 'kr'} 
+                        type="income"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                      />
                     ))}
                   </div>
                 </>
@@ -495,21 +484,19 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="tx-group-card">
+                  <div className="space-y-[var(--card-gap)]">
                     {filteredActiveFixedExpenses.map((expense) => (
-                      <div key={expense.id}>
-                        <BudgetItem 
-                          item={expense} 
-                          onClick={() => onViewFixedExpense(expense)} 
-                          currency={config?.currency || 'kr'} 
-                          type="expense"
-                          language={config.language as Language}
-                          t={t}
-                          config={config}
-                          currentPeriodId={currentPeriodId}
-                          isGrouped={true}
-                        />
-                      </div>
+                      <BudgetItem 
+                        key={expense.id}
+                        item={expense} 
+                        onClick={() => onViewFixedExpense(expense)} 
+                        currency={config?.currency || 'kr'} 
+                        type="expense"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                      />
                     ))}
                   </div>
 
@@ -522,7 +509,7 @@ export function BudgetView({
                       >
                         <div className="flex items-center gap-2">
                           <Clock size={15} className="text-[var(--warning-color)] shrink-0" />
-                          <span className="text-secondary font-bold text-[var(--text-primary)]">
+                          <span className="text-xs font-bold text-[var(--text-primary)]">
                             {config.language === 'en' ? 'Cancelled / Ended Subscriptions' : 'Uppsagda & avslutade abonnemang'}
                           </span>
                           <span className="px-2 py-0.5 rounded-full bg-[var(--warning-color)]/12 text-[var(--warning-color)] font-semibold text-micro-label">
@@ -538,7 +525,7 @@ export function BudgetView({
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden space-y-[var(--card-gap)] pt-2"
+                            className="overflow-hidden space-y-[var(--card-gap)] pt-2 px-2 -mx-2 pb-2 -mb-2"
                           >
                             {expiredCancelledExpenses.map((expense) => (
                               <BudgetItem
@@ -613,21 +600,19 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="tx-group-card">
+                  <div className="space-y-[var(--card-gap)]">
                     {sortedSavings.map((saving) => (
-                      <div key={saving.id}>
-                        <BudgetItem 
-                          item={saving} 
-                          onClick={() => onViewMonthlySaving(saving)} 
-                          currency={config?.currency || 'kr'} 
-                          type="expense"
-                          language={config.language as Language}
-                          t={t}
-                          config={config}
-                          currentPeriodId={currentPeriodId}
-                          isGrouped={true}
-                        />
-                      </div>
+                      <BudgetItem 
+                        key={saving.id}
+                        item={saving} 
+                        onClick={() => onViewMonthlySaving(saving)} 
+                        currency={config?.currency || 'kr'} 
+                        type="expense"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                      />
                     ))}
                   </div>
                 </>

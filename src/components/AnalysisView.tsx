@@ -490,23 +490,23 @@ export function AnalysisView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-[var(--menu-content-gap)] font-sans">
+    <div className="flex flex-col gap-[var(--menu-content-gap)] font-sans">
       {/* 1. Top Controls: Inline Period Selector + Filter Options */}
-      <div className="flex items-center justify-between gap-2 py-0.5 px-0.5 overflow-x-auto no-scrollbar">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-3 py-1 px-2.5 -mx-2.5 overflow-x-auto no-scrollbar">
         {/* Period Button */}
         <button
           type="button"
           onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-secondary sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+          className="flex-shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border-none shadow-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
         >
-          <Calendar size={15} className="text-[var(--text-secondary)] shrink-0" />
+          <Calendar size={14} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
           <span className="truncate max-w-[120px] sm:max-w-none">{periodDisplayName}</span>
           {currentPeriod?.isCurrent && (
-            <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+            <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
               {isEn ? 'Current' : 'Nu'}
             </span>
           )}
-          <ChevronDown size={14} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
+          <ChevronDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
         </button>
 
         {/* Inline Filter Options ("Alla", "Rörliga", "Fasta") */}
@@ -558,7 +558,7 @@ export function AnalysisView({
       />
 
       {/* 2. Sammanfattningskort med samma stil och proportioner som övriga appen */}
-      <div className="grid grid-cols-2 gap-2.5 select-none">
+      <div className="grid grid-cols-2 gap-3 select-none">
         {/* Kvar att spendera / Kvar vid periodens slut */}
         <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
           <div className="flex items-center justify-between gap-1">
@@ -740,9 +740,9 @@ export function AnalysisView({
                         <span className="text-secondary font-medium text-[var(--text-secondary)] truncate max-w-full">
                           {hoveredItem.name}
                         </span>
-                        <span className="text-large-amount font-bold font-amount text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                        <span className="text-xl sm:text-2xl font-bold font-amount text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
                           {formatAmount(Math.round(hoveredItem.value), config.language)}
-                          <span className="text-secondary font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
+                          <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                         </span>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-label font-semibold text-[var(--accent-color)] tabular-nums">

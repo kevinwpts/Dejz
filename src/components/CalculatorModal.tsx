@@ -94,28 +94,28 @@ export function CalculatorModal({ isOpen, onClose }: CalculatorModalProps) {
       showCloseButton={true}
       bodyClassName="p-5 space-y-4"
     >
-      <div className="bg-black/[0.04] dark:bg-white/[0.06] p-4 rounded-[var(--radius-card-nested,12px)] border border-subtle text-right space-y-1">
-        <div className="text-label font-medium text-[var(--text-tertiary)] h-4 overflow-hidden tabular-nums">
+      <div className="bg-[var(--surface-color)] px-5 py-4 rounded-[var(--radius-card,20px)] border-none text-right space-y-1">
+        <div className="text-xs font-medium text-[var(--text-tertiary)] h-4 overflow-hidden font-amount tabular-nums">
           {equation}
         </div>
-        <div className="text-large-amount font-bold text-[var(--text-primary)] tabular-nums truncate">
+        <div className="text-[36px] sm:text-[40px] leading-none font-amount font-bold tracking-tight text-[var(--text-primary)] tabular-nums truncate">
           {display}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-2.5">
         {buttons.map((btn, i) => (
           <button
             key={i}
             type="button"
             onClick={btn.action}
             className={`
-              h-12 flex items-center justify-center rounded-[var(--radius-icon-button,10px)] font-semibold text-card-title transition-all active:scale-[0.95] cursor-pointer
+              h-14 flex items-center justify-center rounded-[var(--radius-button,12px)] font-amount font-semibold text-lg transition-all active:scale-[0.95] cursor-pointer border-none
               ${btn.wide ? 'col-span-2' : ''}
-              ${btn.type === 'number' ? 'bg-white dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 border border-subtle shadow-xs' : ''}
-              ${btn.type === 'operator' ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/20 border border-[var(--accent-color)]/20' : ''}
-              ${btn.type === 'special' ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-subtle' : ''}
-              ${btn.type === 'equal' ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs' : ''}
+              ${btn.type === 'number' ? 'bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] text-[var(--text-primary)]' : ''}
+              ${btn.type === 'operator' ? 'bg-[var(--accent-color)]/12 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/20' : ''}
+              ${btn.type === 'special' ? 'bg-black/[0.05] dark:bg-white/[0.07] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-sans text-base' : ''}
+              ${btn.type === 'equal' ? 'bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-95' : ''}
             `}
           >
             {btn.label}

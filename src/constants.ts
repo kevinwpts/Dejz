@@ -2,24 +2,24 @@ export const SUPPORT_EMAIL = '';
 export const LOGO_URL = '/favicon.svg';
 
 export const DEFAULT_EXPENSE_CATEGORIES = [
-  { id: 'mat-dagligvaror', name: "Mat & Dagligvaror", icon: "ingredients-list", color: "#ef4444" },
-  { id: 'restaurang', name: "Restaurang & Café", icon: "restaurant", color: "#f97316" },
-  { id: 'transport', name: "Transport", icon: "car", color: "#0ea5e9" },
-  { id: 'shopping', name: "Shopping", icon: "shopping-bag", color: "#ec4899" },
-  { id: 'nojen', name: "Nöje & Fritid", icon: "theatre-mask", color: "#8b5cf6" },
-  { id: 'boende', name: "Boende & Hushåll", icon: "home", color: "#6366f1" },
-  { id: 'halsa', name: "Hälsa & Träning", icon: "heart-with-pulse", color: "#f43f5e" },
-  { id: 'forsakringar', name: "Försäkringar", icon: "shield", color: "#0284c7" },
-  { id: 'abonnemang', name: "Abonnemang", icon: "smartphone", color: "#3b82f6" },
-  { id: 'ovrigt', name: "Övrigt", icon: "box", color: "#0d9488" }
+  { id: 'mat-dagligvaror', name: "Mat & Dagligvaror", icon: "ingredients-list", color: "#D66B42" },
+  { id: 'restaurang', name: "Restaurang & Café", icon: "restaurant", color: "#D69E36" },
+  { id: 'transport', name: "Transport", icon: "car", color: "#3089B8" },
+  { id: 'shopping', name: "Shopping", icon: "shopping-bag", color: "#BD6197" },
+  { id: 'nojen', name: "Nöje & Fritid", icon: "theatre-mask", color: "#8B6AC8" },
+  { id: 'boende', name: "Boende & Hushåll", icon: "home", color: "#5B69B1" },
+  { id: 'halsa', name: "Hälsa & Träning", icon: "heart-with-pulse", color: "#568B65" },
+  { id: 'forsakringar', name: "Försäkringar", icon: "shield", color: "#4D7778" },
+  { id: 'abonnemang', name: "Abonnemang", icon: "smartphone", color: "#8C755F" },
+  { id: 'ovrigt', name: "Övrigt", icon: "box", color: "#7C8392" }
 ];
 
 export const DEFAULT_INCOME_CATEGORIES = [
-  { id: 'lon', name: "Lön", icon: "money-bag", color: "#10b981" },
-  { id: 'extra-frilans', name: "Extra / Frilans", icon: "briefcase", color: "#3b82f6" },
-  { id: 'bidrag', name: "Bidrag & Ersättning", icon: "gift", color: "#f59e0b" },
-  { id: 'swish-in', name: "Swish / Överföring", icon: "bank-cards", color: "#ec4899" },
-  { id: 'ovrigt-in', name: "Övrigt", icon: "wallet", color: "#6366f1" }
+  { id: 'lon', name: "Lön", icon: "money-bag", color: "#15804A" },
+  { id: 'extra-frilans', name: "Extra / Frilans", icon: "briefcase", color: "#3089B8" },
+  { id: 'bidrag', name: "Bidrag & Ersättning", icon: "gift", color: "#D69E36" },
+  { id: 'swish-in', name: "Swish / Överföring", icon: "bank-cards", color: "#BD6197" },
+  { id: 'ovrigt-in', name: "Övrigt", icon: "wallet", color: "#5B69B1" }
 ];
 
 export const DEFAULT_PAYMENT_METHODS = [

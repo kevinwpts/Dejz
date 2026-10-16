@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar as CalendarIcon, RotateCcw } from 'lucide-react';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { TranslationKey, Language } from '../i18n';
-import { BottomSheet, BottomSheetOption } from './ui';
+import { BottomSheet, BottomSheetOption, Card } from './ui';
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -41,11 +41,6 @@ export function CalendarModal({
       onClose={onClose}
       title={language === 'en' ? 'Select period' : 'Välj period'}
       subtitle={periodName || (language === 'en' ? 'Choose period for analysis' : 'Välj period för analys')}
-      headerLeading={
-        <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-          <CalendarIcon size={16} strokeWidth={2} />
-        </div>
-      }
       headerRight={
         !isSelectedCurrent ? (
           <button
@@ -55,7 +50,7 @@ export function CalendarModal({
               onSelectDate(today);
               if (onPeriodChange) onPeriodChange(today);
             }}
-            className="flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer border-none shadow-none"
+            className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer border-none shadow-none"
           >
             <RotateCcw size={12} strokeWidth={2.2} />
             <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -81,7 +76,7 @@ export function CalendarModal({
 
       {/* Quick list of periods/months */}
       {periods && onPeriodChange && (
-        <div className="mt-1 space-y-1">
+        <Card variant="default" padding="none" className="divide-y divide-menu overflow-hidden mt-1">
           {periods
             .filter(p => !p.isFuture || p.isCurrent)
             .slice()
@@ -102,7 +97,7 @@ export function CalendarModal({
                   key={p.name || idx}
                   label={mPart}
                   subtitle={dRange}
-                  badge={p.isCurrent ? (language === 'en' ? 'Current' : 'Nuvarande') : undefined}
+                  badge={p.isCurrent ? (language === 'en' ? 'Current' : 'Nu') : undefined}
                   icon={<CalendarIcon size={16} strokeWidth={2} />}
                   isSelected={isSelected}
                   onClick={() => {
@@ -110,10 +105,11 @@ export function CalendarModal({
                     onSelectDate(p.date);
                     onClose();
                   }}
+                  className="rounded-none"
                 />
               );
             })}
-        </div>
+        </Card>
       )}
     </BottomSheet>
   );

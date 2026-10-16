@@ -40,7 +40,7 @@ export function CustomBottomNavigation({
         {/* Modern Floating Pill Dock (Left) */}
         <nav
           aria-label={isEn ? "Main navigation" : "Huvudnavigering"}
-          className="flex-1 h-[60px] rounded-full bg-[var(--surface-color)]/92 dark:bg-[var(--surface-raised)]/92 backdrop-blur-2xl border border-[var(--border-divider)] shadow-subtle p-1.5 grid grid-cols-4 items-center relative"
+          className="flex-1 h-[60px] rounded-full bg-[var(--surface-color)]/92 dark:bg-[var(--surface-raised)]/95 backdrop-blur-2xl border border-black/[0.05] dark:border-none shadow-subtle dark:shadow-[0_12px_32px_rgba(0,0,0,0.45)] p-1.5 grid grid-cols-4 items-center relative"
         >
           {/* 1. Hem */}
           <NavItem
@@ -87,7 +87,7 @@ export function CustomBottomNavigation({
           onClick={() => {
             if (onPlusClick) onPlusClick();
           }}
-          className="shrink-0 w-[60px] h-[60px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-all border border-white/12 shadow-subtle outline-none"
+          className="shrink-0 w-[60px] h-[60px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-all border-none shadow-subtle outline-none"
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
@@ -122,7 +122,7 @@ function NavItem({
       title={label}
       className={`relative h-full w-full rounded-full flex flex-col items-center justify-center transition-colors touch-press-subtle cursor-pointer select-none z-10 ${
         isActive
-          ? "text-[var(--accent-color)] font-semibold"
+          ? "text-[var(--nav-active-color,var(--accent-color))] font-semibold"
           : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium"
       }`}
     >
@@ -130,7 +130,7 @@ function NavItem({
         <motion.div
           layoutId="modern-footer-active-pill"
           transition={{ type: "spring", stiffness: 420, damping: 32 }}
-          className="absolute inset-0 rounded-full bg-[var(--accent-color)]/[0.08] dark:bg-white/[0.09] -z-10"
+          className="absolute inset-0 rounded-full bg-[var(--accent-color)]/[0.10] dark:bg-[var(--accent-color)]/[0.15] -z-10"
           aria-hidden="true"
         />
       )}

@@ -821,6 +821,8 @@ export default function App() {
             locale: session.user.user_metadata?.locale || regDefaults.locale,
             timezone: session.user.user_metadata?.timezone || regDefaults.timezone,
             dark_mode: false,
+            theme_mode: "light",
+            theme_color: "neutral",
           })
           .select()
           .single();
@@ -985,8 +987,8 @@ export default function App() {
           notifications: dbSettings.notifications,
           securityLock: dbSettings.securityLock,
           darkMode:
-            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
-          themeMode: dbSettings.themeMode || 'system',
+            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? Boolean(dbSettings.darkMode) : false,
+          themeMode: dbSettings.themeMode || (dbSettings.darkMode ? 'dark' : 'light'),
           themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
@@ -1349,12 +1351,7 @@ export default function App() {
     }
   }, [config?.appIconTheme]);
 
-  useEffect(() => {
-    if (!config) return;
-    const isDark = !!config.darkMode;
-    const themeHex = config.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
-    applyThemeColor(themeHex, isDark);
-  }, [config?.themeColor, config?.darkMode, session]);
+  // Theme and accent colors are centrally managed in the main theme useEffect below.
 
   const handleFeedbackSubmit = async (message: string) => {
     const activeUserId = session?.user?.id || 'demo-user';
@@ -1581,24 +1578,30 @@ export default function App() {
     });
   };
 
-  // --- Theme Logic: System (default) / Light / Dark ---
+  // --- Theme Logic: Light (default) / Dark + Dynamic Theme Color ---
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
-      
-      // Pre-login screens (LandingPage, Auth, Welcome, PublicLegalPage) are ALWAYS locked to light mode
-      if (session && !publicLegalDoc) {
-        const themeMode = config?.themeMode || 'system';
+      const isAuthenticatedApp = Boolean(session && !publicLegalDoc);
+
+      // Pre-login screens (LandingPage, Auth, Welcome, PublicLegalPage) are ALWAYS locked to light mode + Dejz brand palette
+      if (isAuthenticatedApp) {
+        const themeMode = config?.themeMode;
 
         if (themeMode === 'dark') {
           isDark = true;
         } else if (themeMode === 'light') {
           isDark = false;
+        } else if (config?.darkMode !== undefined && config?.darkMode !== null) {
+          isDark = Boolean(config.darkMode);
         } else {
-          // System preference
-          if (typeof window !== 'undefined' && window.matchMedia) {
-            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          }
+          isDark = false;
+        }
+
+        try {
+          localStorage.setItem('dejz_dark_mode', isDark ? 'dark' : 'light');
+        } catch {
+          // ignore storage errors
         }
       } else {
         isDark = false;
@@ -1615,10 +1618,15 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
-      applyThemeColor(userThemeHex, isDark);
+      if (isAuthenticatedApp) {
+        const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
+        applyThemeColor(userThemeHex, isDark, true);
+      } else {
+        // On LandingPage / Auth / PublicLegalPage, always render pure Dejz brand colors without overwriting saved user preferences
+        applyThemeColor('neutral', false, false);
+      }
 
-      const themeColor = isDark ? "#14100D" : "#F3ECE1";
+      const themeColor = isDark ? "#0B0C0E" : "#F4F5F7";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -1708,7 +1716,7 @@ export default function App() {
       try {
         const demoSession = JSON.parse(demoSessionStr);
         const demoVersion = localStorage.getItem('demo_data_version');
-        if (demoVersion !== 'v6_historical_rich' && demoVersion !== 'v_fresh_test_account') {
+        if (demoVersion !== 'v7_unified_warm' && demoVersion !== 'v_fresh_test_account') {
           seedDemoData();
         }
         setSession(demoSession);
@@ -1823,7 +1831,8 @@ export default function App() {
     document.body.classList.remove("dark");
     document.body.classList.add("light");
     localStorage.removeItem('dejz_theme_color');
-    applyThemeColor('neutral', false);
+    localStorage.removeItem('dejz_dark_mode');
+    applyThemeColor('neutral', false, false);
     
     window.scrollTo({ top: 0, behavior: 'instant' });
     localStorage.removeItem('app_language');
@@ -2006,8 +2015,8 @@ export default function App() {
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
       darkMode: false,
-      themeMode: 'system',
-      themeColor: localStorage.getItem('dejz_theme_color') || 'neutral',
+      themeMode: 'light',
+      themeColor: 'neutral',
       quickChoices: [],
       savingsPot: 0,
       savingsGoals: [],
@@ -2109,7 +2118,9 @@ export default function App() {
           initial_spent: defaultConfig.initialSpent,
           notifications: defaultConfig.notifications,
           security_lock: defaultConfig.securityLock,
-          dark_mode: true,
+          dark_mode: false,
+          theme_mode: "light",
+          theme_color: "neutral",
           quick_choices: defaultConfig.quickChoices,
           monthly_savings: defaultConfig.monthlySavings,
           include_fixed_expenses_in_analysis:
@@ -2298,7 +2309,9 @@ export default function App() {
             initialSpent: Number(dbProfile.initial_spent || 0),
             notifications: dbProfile.notifications,
             securityLock: dbProfile.security_lock,
-            darkMode: dbProfile.dark_mode !== false,
+            darkMode: Boolean(dbProfile.dark_mode),
+            themeMode: dbProfile.theme_mode || (dbProfile.dark_mode ? 'dark' : 'light'),
+            themeColor: dbProfile.theme_color || 'neutral',
             savingsPot: dbProfile.savings_pot || 0,
             savingsGoals: dbProfile.savings_goals || [],
             totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
@@ -2368,9 +2381,21 @@ export default function App() {
           initialSpent: Number(dbProfile.initial_spent || 0),
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
-          darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
-          themeMode: dbProfile.theme_mode || 'system',
-          themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || 'neutral',
+          darkMode:
+            localSavedConfig?.darkMode !== undefined
+              ? Boolean(localSavedConfig.darkMode)
+              : (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null)
+                ? Boolean(dbProfile.dark_mode)
+                : false,
+          themeMode:
+            localSavedConfig?.themeMode ||
+            dbProfile.theme_mode ||
+            ((localSavedConfig?.darkMode ?? dbProfile.dark_mode) === true ? 'dark' : 'light'),
+          themeColor:
+            localSavedConfig?.themeColor ||
+            dbProfile.theme_color ||
+            localStorage.getItem('dejz_theme_color') ||
+            'neutral',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
@@ -4517,6 +4542,10 @@ export default function App() {
             onLegalClick={handleLegalClick}
             t={t}
             currentLanguage={landingLanguage}
+            onLanguageChange={(lang) => {
+              setLandingLanguage(lang);
+              localStorage.setItem('app_language', lang);
+            }}
           />
         ) : (
           <Auth
@@ -5918,7 +5947,8 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs px-3 pt-4 pb-[max(14px,env(safe-area-inset-bottom,14px))] sm:p-4"
             onClick={() => {
               feedback.tap();
               setIsPlusMenuOpen(false);
@@ -5934,18 +5964,18 @@ export default function App() {
                   setIsPlusMenuOpen(false);
                 }
               }}
-              initial={{ y: "100%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "100%", opacity: 0 }}
-              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,24px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-modal font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y border-none"
+              initial={{ y: 40, opacity: 0, scale: 0.97 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 40, opacity: 0, scale: 0.97 }}
+              transition={{ type: "spring", damping: 28, stiffness: 320 }}
+              className="bg-[var(--surface-color)] w-full max-w-[440px] rounded-[28px] relative flex flex-col overflow-hidden shadow-[0_20px_50px_-12px_rgba(11,11,15,0.28)] font-sans p-4 sm:p-5 space-y-3 touch-pan-y border-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-1 mb-2 shrink-0 cursor-grab active:cursor-grabbing" />
+              <div className="w-9 h-1 bg-black/15 dark:bg-white/20 rounded-full mx-auto mb-0.5 shrink-0 cursor-grab active:cursor-grabbing" />
 
-              {/* The 3 Action Buttons */}
-              <div className="grid grid-cols-3 gap-2.5 justify-items-center py-1">
+              {/* The 3 Clean Bento Tiles: Utgift, Inkomst, Kvitto */}
+              <div className="grid grid-cols-3 gap-2.5">
                 {/* Utgift */}
                 <button
                   type="button"
@@ -5956,12 +5986,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
+                  className="flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] bg-[var(--bg-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer active:scale-[0.97] select-none"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
+                  <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shadow-2xs">
+                    <ArrowDownLeft size={19} strokeWidth={2.1} />
                   </div>
-                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-none">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -5976,12 +6006,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
+                  className="flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] bg-[var(--bg-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer active:scale-[0.97] select-none"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
+                  <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shadow-2xs">
+                    <ArrowUpRight size={19} strokeWidth={2.1} />
                   </div>
-                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-none">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -5991,17 +6021,23 @@ export default function App() {
                   type="button"
                   onClick={handlePlusKvittoClick}
                   disabled={isScanningReceipt}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
+                  className="flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] bg-[var(--bg-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer active:scale-[0.97] select-none disabled:opacity-60"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shadow-2xs">
                     {isScanningReceipt ? (
-                      <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
+                      <Loader2 size={18} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
-                      <Camera size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
+                      <Camera size={18} strokeWidth={2.1} />
                     )}
                   </div>
-                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
-                    {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-none">
+                    {isScanningReceipt
+                      ? config?.language === "en"
+                        ? "Scanning..."
+                        : "Scannar..."
+                      : config?.language === "en"
+                        ? "Receipt"
+                        : "Kvitto"}
                   </span>
                 </button>
 
@@ -6015,8 +6051,8 @@ export default function App() {
                 />
               </div>
 
-              {/* Snabbutgift Form with Mic using Reusable SmartInput */}
-              <div className="pt-2">
+              {/* Clean Pill Quick-Input & Voice Bar */}
+              <div>
                 <SmartInput
                   hideLabel
                   value={plusQuickText}
@@ -6024,10 +6060,16 @@ export default function App() {
                   onSubmit={handlePlusQuickExpenseSubmit}
                   placeholder={
                     isRecording
-                      ? (config?.language === "en" ? "Listening... Press the stop button to the right when done" : "Lyssnar... Tryck på knappen till höger när du är klar")
+                      ? config?.language === "en"
+                        ? "Listening... Tap right button when done"
+                        : "Lyssnar... Tryck till höger när du är klar"
                       : isAudioTranscribing
-                        ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
-                        : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
+                        ? config?.language === "en"
+                          ? "Processing speech..."
+                          : "Tolkar röstinlägg..."
+                        : config?.language === "en"
+                          ? "Quick expense: e.g. 45 Coop..."
+                          : "Snabbutgift: t.ex. 45 ICA..."
                   }
                   isProcessing={isSubmittingQuick || isAudioTranscribing}
                   disabled={false}
@@ -6040,54 +6082,74 @@ export default function App() {
                       disabled={isSubmittingQuick || isAudioTranscribing}
                       aria-label={
                         isRecording
-                          ? (config?.language === "en" ? "Recording in progress (press right button when done)" : "Inspelning pågår (tryck på knappen till höger när du är klar)")
-                          : (config?.language === "en" ? "Speak expense" : "Tala in utgift")
+                          ? config?.language === "en"
+                            ? "Stop recording and save"
+                            : "Stoppa inspelning och spara"
+                          : config?.language === "en"
+                            ? "Speak expense"
+                            : "Tala in utgift"
                       }
-                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer select-none shrink-0 ${
                         isRecording
-                          ? "bg-[var(--accent-color)]/15 text-[var(--accent-color)] border-[var(--accent-color)]/30"
+                          ? "bg-[#F0485E] text-white shadow-xs"
                           : isAudioTranscribing
-                            ? "bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--accent-color)] border-subtle"
-                            : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
+                            ? "bg-[var(--surface-color)] text-[#F0485E]"
+                            : "bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] text-[var(--text-primary)] shadow-2xs active:scale-95"
                       }`}
                     >
                       {isAudioTranscribing ? (
-                        <Loader2 size={15} className="animate-spin text-[var(--accent-color)]" />
+                        <Loader2 size={16} className="animate-spin text-[#F0485E]" />
                       ) : (
-                        <Mic size={17} strokeWidth={2} className={isRecording ? "text-[var(--accent-color)] animate-pulse" : ""} />
+                        <Mic
+                          size={17}
+                          strokeWidth={2.1}
+                          className={isRecording ? "animate-pulse" : ""}
+                        />
                       )}
                     </button>
                   }
                   submitVariant="inside"
                   submitTitle={
                     isRecording
-                      ? (config?.language === "en" ? "Done – Stop & Save" : "Klar – Stoppa och spara")
-                      : (config?.language === "en" ? "Add expense" : "Lägg till utgift")
+                      ? config?.language === "en"
+                        ? "Done – Stop & Save"
+                        : "Klar – Stoppa och spara"
+                      : config?.language === "en"
+                        ? "Add expense"
+                        : "Lägg till utgift"
                   }
                   submitAriaLabel={
                     isRecording
-                      ? (config?.language === "en" ? "Done – Stop & Save" : "Klar – Stoppa och spara")
-                      : (config?.language === "en" ? "Add expense" : "Lägg till utgift")
+                      ? config?.language === "en"
+                        ? "Done – Stop & Save"
+                        : "Klar – Stoppa och spara"
+                      : config?.language === "en"
+                        ? "Add expense"
+                        : "Lägg till utgift"
                   }
                   submitIcon={
                     isRecording ? (
                       <Square size={13} className="fill-current" />
                     ) : (
-                      <Plus size={18} strokeWidth={2} />
+                      <Plus size={18} strokeWidth={2.3} />
                     )
                   }
                   submitButtonClassName={
-                    isRecording ? "bg-[var(--accent-color)] text-[var(--on-accent)] border border-[var(--accent-color)] shadow-xs" : ""
+                    isRecording
+                      ? "!w-10 !h-10 !rounded-full bg-[#F0485E] text-white border-none shadow-xs"
+                      : "!w-10 !h-10 !rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] border-none"
                   }
                   feedback={
                     plusSuccessMsg
-                      ? { type: 'success', message: plusSuccessMsg.text }
+                      ? { type: "success", message: plusSuccessMsg.text }
                       : plusVoiceError
-                        ? { type: 'error', message: plusVoiceError }
+                        ? { type: "error", message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
-                    isRecording ? "border-[var(--accent-color)]/60 ring-2 ring-[var(--accent-color)]/15" : "border-subtle"
+                  inputClassName={`h-14 text-[15px] rounded-full bg-[var(--bg-color)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border-none shadow-none ${
+                    isRecording
+                      ? "ring-2 ring-[#F0485E]/35 bg-[#FFF0ED] dark:bg-[#F0485E]/10"
+                      : ""
                   }`}
                 />
               </div>

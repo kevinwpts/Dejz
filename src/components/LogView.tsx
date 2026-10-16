@@ -14,7 +14,7 @@ import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { Input, BottomSheet, Button, FilterButtonGroup } from './ui';
+import { Input, BottomSheet, Button, FilterButtonGroup, Card } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -549,12 +549,12 @@ export function LogView({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onClear={() => setSearchQuery('')}
-          className="h-[42px] sm:h-[44px] text-secondary"
+          className="h-[42px] sm:h-[44px] text-xs sm:text-sm"
         />
       </div>
 
       {/* 2. Top Controls: Compact Inline Row (Period button + Transaction type filters + Icon-only Filter button) - Samma upplägg som Analysfliken */}
-      <div className="flex items-center justify-between gap-2 py-0.5 px-0.5 overflow-x-auto no-scrollbar">
+      <div className="flex items-center justify-between gap-2 py-2.5 px-2.5 -mx-2.5 -my-2 overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-2 shrink-0">
           {/* Period Button */}
           <button
@@ -564,16 +564,16 @@ export function LogView({
               setModalPeriod(initial);
               setIsPeriodPickerOpen(true);
             }}
-            className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-secondary sm:text-body font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+            className="flex-shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border-none shadow-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
           >
-            <CalendarIcon size={15} className="text-[var(--text-secondary)] shrink-0" />
+            <CalendarIcon size={14} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
             <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
-            {selectedPeriod?.isCurrent && (
-              <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+            {selectedPeriod?.isCurrent && !selectedDate && (
+              <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
                 {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
               </span>
             )}
-            <ChevronDown size={14} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
+            <ChevronDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
           </button>
 
           {/* Inline Transaction Type Filters */}
@@ -614,10 +614,10 @@ export function LogView({
             if (typeof feedback?.light === 'function') feedback.light();
             setIsFilterBottomSheetOpen(true);
           }}
-          className={`flex-shrink-0 w-[38px] sm:w-[40px] h-[38px] sm:h-[40px] rounded-full inline-flex items-center justify-center relative transition-all cursor-pointer active:scale-95 shrink-0 ${
+          className={`flex-shrink-0 w-[36px] sm:w-[38px] h-[36px] sm:h-[38px] rounded-full inline-flex items-center justify-center relative transition-all cursor-pointer active:scale-95 shrink-0 ${
             activeFiltersCount > 0
               ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
-              : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+              : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-none shadow-subtle'
           }`}
           title={getL10n('Filter', 'Filter')}
           aria-label={getL10n('Filter', 'Filter')}
@@ -633,7 +633,7 @@ export function LogView({
 
       {/* 3. Discrete Results & Clear Row */}
       {(hasActiveSearch || hasActiveFilters) && (
-        <div className="flex items-center justify-between px-1 py-0.5 text-secondary text-[var(--text-secondary)]">
+        <div className="flex items-center justify-between px-1 py-0.5 text-xs text-[var(--text-secondary)]">
           <div className="flex items-center gap-1.5 overflow-hidden">
             <span className="text-label truncate">
               {filteredExpenses.length === 0 ? (
@@ -695,49 +695,47 @@ export function LogView({
 
       {/* 6. Transactions List Grouped by Day */}
       <div className="space-y-[var(--card-gap)]">
-        <div className="space-y-5 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-4.5">
           {groupedExpenses.map(([date, dayData], index) => (
             <motion.div 
               key={date} 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03 }}
-              className="space-y-2.5"
+              className="space-y-1.5"
             >
               {/* Day Header with Date */}
-              <div className="px-1.5 pb-0.5">
+              <div className="px-1 pb-0.5">
                 <span className="text-label font-medium text-[var(--text-secondary)]">
                   {formatFullDate(date, currentLang)}
                 </span>
               </div>
 
               {/* Transactions for this Day */}
-              <div className="tx-group-card">
+              <div className="space-y-1.5">
                 {dayData.items.map((transaction: any) => (
-                  <div key={transaction.id}>
-                    <TransactionItem 
-                      transaction={transaction}
-                      isFixed={Boolean(transaction.isFixed)}
-                      isGrouped={true}
-                      config={config}
-                      onView={transaction.isFixed ? undefined : onViewTransaction}
-                      onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
-                      onToggleStar={transaction.isFixed ? undefined : onToggleStar}
-                      onClick={() => {
-                        if (transaction.isFixed) {
-                          if (transaction.type === 'income' && onViewIncome) {
-                            onViewIncome(transaction.originalItem);
-                          } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
-                            onViewMonthlySaving(transaction.originalItem);
-                          } else if (onViewFixedExpense) {
-                            onViewFixedExpense(transaction.originalItem);
-                          }
-                        } else if (onViewTransaction) {
-                          onViewTransaction(transaction);
+                  <TransactionItem 
+                    key={transaction.id}
+                    transaction={transaction}
+                    isFixed={Boolean(transaction.isFixed)}
+                    config={config}
+                    onView={transaction.isFixed ? undefined : onViewTransaction}
+                    onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
+                    onToggleStar={transaction.isFixed ? undefined : onToggleStar}
+                    onClick={() => {
+                      if (transaction.isFixed) {
+                        if (transaction.type === 'income' && onViewIncome) {
+                          onViewIncome(transaction.originalItem);
+                        } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
+                          onViewMonthlySaving(transaction.originalItem);
+                        } else if (onViewFixedExpense) {
+                          onViewFixedExpense(transaction.originalItem);
                         }
-                      }}
-                    />
-                  </div>
+                      } else if (onViewTransaction) {
+                        onViewTransaction(transaction);
+                      }
+                    }}
+                  />
                 ))}
               </div>
             </motion.div>
@@ -854,37 +852,37 @@ export function LogView({
         showCalendarOption={true}
         currentLang={currentLang}
         calendarContent={
-          <div className="space-y-[var(--card-gap)]">
+          <Card variant="default" padding="sm" className="space-y-3.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-card p-1.5">
+            <div className="flex items-center justify-between px-1 pt-0.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
                 disabled={!canModalGoPrev}
-                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoPrev
-                    ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
+                    ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
                 }`}
                 aria-label="Föregående period"
                 title="Föregående period"
               >
-                <ChevronLeft size={17} strokeWidth={2} />
+                <ChevronLeft size={17} strokeWidth={2.2} />
               </button>
 
               <div className="flex flex-col items-center text-center px-2 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight truncate capitalize">
+                  <span className="text-card-title font-bold text-[var(--text-primary)] tracking-tight truncate capitalize">
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] border-none">
+                    <span className="text-micro-label font-semibold px-2 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
                 </div>
                 {modalPeriod?.name?.includes('(') && (
-                  <span className="text-secondary text-[var(--text-tertiary)] font-normal truncate mt-0.5">
+                  <span className="text-secondary text-[var(--text-tertiary)] font-normal truncate mt-0.5 tabular-nums">
                     {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
                   </span>
                 )}
@@ -894,15 +892,15 @@ export function LogView({
                 type="button"
                 onClick={handleModalNext}
                 disabled={!canModalGoNext}
-                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoNext
-                    ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
+                    ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
                 }`}
                 aria-label="Nästa period"
                 title="Nästa period"
               >
-                <ChevronRight size={17} strokeWidth={2} />
+                <ChevronRight size={17} strokeWidth={2.2} />
               </button>
             </div>
 
@@ -917,10 +915,10 @@ export function LogView({
                   setSelectedDate(null);
                   setIsPeriodPickerOpen(false);
                 }}
-                className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-secondary font-semibold transition-all cursor-pointer border-none active:scale-95 ${
+                className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-none active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs'
-                    : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10'
+                    ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-2xs'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.07] dark:hover:bg-white/[0.1]'
                 }`}
               >
                 <Layers size={13} strokeWidth={2} />
@@ -929,9 +927,9 @@ export function LogView({
             </div>
 
             {/* Interactive Calendar Days Grid */}
-            <div className="select-none pt-1">
+            <div className="select-none pt-0.5">
               {/* Weekday headers */}
-              <div className="grid grid-cols-7 gap-1 mb-1 text-center">
+              <div className="grid grid-cols-7 gap-1 mb-1.5 text-center">
                 {weekdayNames.map((d, i) => (
                   <div key={i} className="text-center text-micro-label font-semibold text-[var(--text-tertiary)] tracking-wider py-0.5">
                     {d}
@@ -948,7 +946,7 @@ export function LogView({
                 {Array.from({ length: calendarMonthData.daysInMonth }).map((_, i) => {
                   const dayNum = i + 1;
                   const dayDate = new Date(calendarMonthData.year, calendarMonthData.month, dayNum);
-                  const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
+                  const isSelected = Boolean(selectedDate && dayDate.toDateString() === selectedDate.toDateString());
                   const isToday = dayDate.toDateString() === today.toDateString();
                   const dayTx = calendarMonthData.txByDay[dayNum];
 
@@ -963,16 +961,16 @@ export function LogView({
                         setSelectedPeriod(modalPeriod);
                         setIsPeriodPickerOpen(false);
                       }}
-                      className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
+                      className={`aspect-square w-full rounded-[var(--radius-card-nested,12px)] flex flex-col items-center justify-center gap-1 transition-all relative active:scale-95 cursor-pointer text-center ${
                         isSelected 
-                          ? 'bg-black/5 dark:bg-white/10 text-[var(--text-primary)] font-semibold border-none z-10 shadow-none' 
+                          ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-bold z-10 shadow-xs' 
                           : isToday
-                          ? 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none font-bold'
-                          : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] font-medium'
+                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--accent-color)] font-bold'
+                          : 'bg-transparent text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] font-medium'
                       }`}
                     >
-                      <span className={`text-secondary sm:text-body leading-none tabular-nums ${
-                        isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-primary)]'
+                      <span className={`text-xs sm:text-body leading-none tabular-nums ${
+                        isSelected ? 'text-[var(--surface-color)] font-bold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)]'
                       }`}>
                         {dayNum}
                       </span>
@@ -991,7 +989,7 @@ export function LogView({
                 })}
               </div>
             </div>
-          </div>
+          </Card>
         }
       />
 
@@ -1045,7 +1043,7 @@ export function LogView({
               <button
                 type="button"
                 onClick={() => setCategoryFilter(null)}
-                className="text-secondary font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
+                className="text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
               >
                 {getL10n('Återställ', 'Reset')}
               </button>
@@ -1059,7 +1057,7 @@ export function LogView({
                 if (typeof feedback?.selection === 'function') feedback.selection();
                 setCategoryFilter(null);
               }}
-              className={`px-3 py-2 rounded-full text-secondary font-semibold transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+              className={`px-3 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
                 categoryFilter === null
                   ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-transparent shadow-xs'
                   : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
@@ -1084,7 +1082,7 @@ export function LogView({
                     if (typeof feedback?.selection === 'function') feedback.selection();
                     setCategoryFilter(isSelected ? null : cat.name);
                   }}
-                  className={`px-3 py-2 rounded-full text-secondary font-medium transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+                  className={`px-3 py-2 rounded-full text-xs font-medium transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
                     isSelected
                       ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold border-transparent shadow-xs'
                       : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'

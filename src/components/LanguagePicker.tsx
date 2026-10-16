@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 import { Language } from '../i18n';
 import { NORDIC_LANGUAGES } from '../utils/nordic';
+import { LanguageFlag } from './LanguageFlag';
 
 interface LanguagePickerProps {
   currentLanguage: Language;
@@ -59,7 +60,7 @@ export function LanguagePicker({
             : 'px-2 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
         }`}
       >
-        <span className="text-base select-none leading-none shrink-0" aria-hidden="true">{currentOption.flag}</span>
+        <LanguageFlag code={currentOption.code} size="md" />
         {variant === 'compact' && (
           <span className="text-xs font-semibold text-[var(--text-primary)] shrink-0">
             {currentOption.nativeLabel}
@@ -74,8 +75,8 @@ export function LanguagePicker({
       {isOpen && (
         <div
           role="listbox"
-          className={`absolute z-50 w-48 rounded-[var(--radius-card-nested,12px)] bg-white dark:bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-modal overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0 ${
-            variant === 'footer' ? 'bottom-full mb-1.5' : 'mt-1.5'
+          className={`absolute z-50 w-48 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-modal overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0 ${
+            variant === 'footer' || variant === 'pill-hero' ? 'bottom-full mb-1.5' : 'mt-1.5'
           }`}
         >
           <div className="py-0.5">
@@ -90,12 +91,12 @@ export function LanguagePicker({
                   onClick={() => handleSelect(lang.code)}
                   className={`w-full px-3 py-2 text-left text-xs sm:text-sm flex items-center justify-between gap-2.5 transition-colors cursor-pointer border-none ${
                     isSelected
-                      ? 'text-[var(--text-primary)] font-semibold bg-black/[0.03] dark:bg-white/[0.06]'
+                      ? 'text-[var(--text-primary)] font-semibold bg-black/[0.04] dark:bg-white/[0.08]'
                       : 'text-[var(--text-primary)] font-medium hover:bg-black/[0.02] dark:hover:bg-white/[0.04]'
                   }`}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-sm sm:text-base leading-none select-none" aria-hidden="true">{lang.flag}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <LanguageFlag code={lang.code} size="md" />
                     <span className="truncate">{lang.nativeLabel}</span>
                   </div>
                   {isSelected && (

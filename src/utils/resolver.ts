@@ -85,7 +85,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       iconComponent: PiggyBank,
       source: 'fallback',
       backgroundColor: category?.color || '#05B862',
-      textColor: '#ffffff'
+      textColor: '#0B0B0F'
     };
   }
 
@@ -121,7 +121,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
         categoryIcon: explicitLogo,
         iconComponent: ICON_MAP[resolvedKey] || Receipt,
         backgroundColor: category?.color || getEmojiSolidColor(explicitLogo),
-        textColor: '#ffffff',
+        textColor: '#0B0B0F',
         source: 'manual'
       };
     }
@@ -136,7 +136,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       categoryName: category?.name || categoryText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(explicitIcon),
-      textColor: '#ffffff',
+      textColor: '#0B0B0F',
       source: 'manual'
     };
   }
@@ -178,7 +178,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       categoryName: category?.name || categoryText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(categoryIconName),
-      textColor: '#ffffff',
+      textColor: '#0B0B0F',
       source: 'category'
     };
   }
@@ -194,7 +194,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       categoryName: category?.name || categoryText || merchantText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(suggested),
-      textColor: '#ffffff',
+      textColor: '#0B0B0F',
       source: 'category'
     };
   }
@@ -205,7 +205,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     type: 'fallback',
     iconComponent: DefaultIcon,
     backgroundColor: category?.color || '#6E6961',
-    textColor: '#ffffff',
+    textColor: '#0B0B0F',
     source: 'fallback'
   };
 }

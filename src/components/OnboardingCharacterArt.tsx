@@ -52,8 +52,8 @@ function CharacterWelcome() {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowWelcome" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowWelcome" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -65,7 +65,7 @@ function CharacterWelcome() {
           width="88"
           height="92"
           rx="22"
-          fill="var(--brand-signature, #E85D34)"
+          fill="var(--brand-signature, #F0485E)"
         />
       </g>
 
@@ -88,7 +88,7 @@ function CharacterWelcome() {
         cx="70"
         cy="58"
         r="23"
-        fill="var(--accent-soft, rgba(255, 82, 38, 0.12))"
+        fill="var(--accent-soft, rgba(11, 11, 15, 0.08))"
       />
 
       {/* Avatar Circle in Accent Color */}
@@ -96,7 +96,7 @@ function CharacterWelcome() {
         cx="70"
         cy="58"
         r="19"
-        fill="var(--accent-color, #E85D34)"
+        fill="var(--accent-color, #0B0B0F)"
       />
 
       {/* Minimalist User Silhouette */}
@@ -121,7 +121,7 @@ function CharacterWelcome() {
         width="50"
         height="6"
         rx="3"
-        fill="var(--text-primary, #141312)"
+        fill="var(--text-primary, #0B0B0F)"
         opacity="0.85"
       />
       <rect
@@ -140,7 +140,7 @@ function CharacterWelcome() {
           cx="12"
           cy="12"
           r="13"
-          fill="var(--text-primary, #141312)"
+          fill="var(--text-primary, #0B0B0F)"
           stroke="var(--surface-color, #FFFFFF)"
           strokeWidth="2.5"
         />
@@ -162,8 +162,8 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowPayday" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowPayday" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -175,7 +175,7 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
           width="88"
           height="92"
           rx="22"
-          fill="var(--brand-signature, #E85D34)"
+          fill="var(--brand-signature, #F0485E)"
         />
       </g>
 
@@ -200,11 +200,11 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
         width="68"
         height="16"
         rx="8"
-        fill="var(--accent-soft, rgba(255, 82, 38, 0.12))"
+        fill="var(--accent-soft, rgba(11, 11, 15, 0.08))"
       />
-      <circle cx="48" cy="42" r="2.5" fill="var(--accent-color, #E85D34)" />
-      <circle cx="92" cy="42" r="2.5" fill="var(--accent-color, #E85D34)" />
-      <rect x="57" y="40" width="26" height="4" rx="2" fill="var(--accent-color, #E85D34)" opacity="0.7" />
+      <circle cx="48" cy="42" r="2.5" fill="var(--accent-color, #0B0B0F)" />
+      <circle cx="92" cy="42" r="2.5" fill="var(--accent-color, #0B0B0F)" />
+      <rect x="57" y="40" width="26" height="4" rx="2" fill="var(--accent-color, #0B0B0F)" opacity="0.7" />
 
       {/* Dynamic Payday Number */}
       <text
@@ -212,7 +212,7 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
         y="83"
         fontSize="34"
         fontWeight="800"
-        fill="var(--text-primary, #141312)"
+        fill="var(--text-primary, #0B0B0F)"
         textAnchor="middle"
         style={{ fontFamily: 'var(--font-amount, Sora, sans-serif)', fontVariantNumeric: 'tabular-nums' }}
         letterSpacing="-1"
@@ -237,7 +237,7 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
           cx="12"
           cy="12"
           r="13"
-          fill="var(--accent-color, #E85D34)"
+          fill="var(--accent-color, #0B0B0F)"
           stroke="var(--surface-color, #FFFFFF)"
           strokeWidth="2.5"
         />
@@ -259,8 +259,8 @@ function CharacterIncome() {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowIncome" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowIncome" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -272,7 +272,7 @@ function CharacterIncome() {
           width="88"
           height="92"
           rx="22"
-          fill="var(--text-primary, #141312)"
+          fill="var(--text-primary, #0B0B0F)"
         />
       </g>
 
@@ -320,7 +320,7 @@ function CharacterIncome() {
         width="54"
         height="6.5"
         rx="3.25"
-        fill="var(--text-primary, #141312)"
+        fill="var(--text-primary, #0B0B0F)"
         opacity="0.88"
       />
       <rect
@@ -360,8 +360,8 @@ function CharacterExpenses() {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowExpenses" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowExpenses" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -373,7 +373,7 @@ function CharacterExpenses() {
           width="88"
           height="92"
           rx="22"
-          fill="var(--brand-signature, #E85D34)"
+          fill="var(--brand-signature, #F0485E)"
         />
       </g>
 
@@ -392,21 +392,21 @@ function CharacterExpenses() {
       </g>
 
       {/* Row 1 */}
-      <rect x="36" y="38" width="68" height="18" rx="7" fill="var(--card-nested-bg, #F0EDE6)" />
-      <circle cx="45" cy="47" r="4.5" fill="var(--accent-color, #E85D34)" />
-      <rect x="54" y="44.5" width="28" height="5" rx="2.5" fill="var(--text-primary, #141312)" opacity="0.85" />
+      <rect x="36" y="38" width="68" height="18" rx="7" fill="var(--card-nested-bg, #F4F5F7)" />
+      <circle cx="45" cy="47" r="4.5" fill="var(--accent-color, #0B0B0F)" />
+      <rect x="54" y="44.5" width="28" height="5" rx="2.5" fill="var(--text-primary, #0B0B0F)" opacity="0.85" />
       <rect x="88" y="44.5" width="10" height="5" rx="2.5" fill="var(--text-secondary, #57534E)" opacity="0.45" />
 
       {/* Row 2 */}
-      <rect x="36" y="61" width="68" height="18" rx="7" fill="var(--card-nested-bg, #F0EDE6)" />
-      <circle cx="45" cy="70" r="4.5" fill="var(--text-primary, #141312)" opacity="0.75" />
-      <rect x="54" y="67.5" width="22" height="5" rx="2.5" fill="var(--text-primary, #141312)" opacity="0.85" />
+      <rect x="36" y="61" width="68" height="18" rx="7" fill="var(--card-nested-bg, #F4F5F7)" />
+      <circle cx="45" cy="70" r="4.5" fill="var(--text-primary, #0B0B0F)" opacity="0.75" />
+      <rect x="54" y="67.5" width="22" height="5" rx="2.5" fill="var(--text-primary, #0B0B0F)" opacity="0.85" />
       <rect x="88" y="67.5" width="10" height="5" rx="2.5" fill="var(--text-secondary, #57534E)" opacity="0.45" />
 
       {/* Row 3 */}
-      <rect x="36" y="84" width="68" height="18" rx="7" fill="var(--card-nested-bg, #F0EDE6)" />
+      <rect x="36" y="84" width="68" height="18" rx="7" fill="var(--card-nested-bg, #F4F5F7)" />
       <circle cx="45" cy="93" r="4.5" fill="var(--text-secondary, #57534E)" opacity="0.45" />
-      <rect x="54" y="90.5" width="25" height="5" rx="2.5" fill="var(--text-primary, #141312)" opacity="0.85" />
+      <rect x="54" y="90.5" width="25" height="5" rx="2.5" fill="var(--text-primary, #0B0B0F)" opacity="0.85" />
       <rect x="88" y="90.5" width="10" height="5" rx="2.5" fill="var(--text-secondary, #57534E)" opacity="0.45" />
 
       {/* Corner Badge */}
@@ -415,7 +415,7 @@ function CharacterExpenses() {
           cx="12"
           cy="12"
           r="13"
-          fill="var(--text-primary, #141312)"
+          fill="var(--text-primary, #0B0B0F)"
           stroke="var(--surface-color, #FFFFFF)"
           strokeWidth="2.5"
         />
@@ -437,8 +437,8 @@ function CharacterGoals() {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowGoals" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowGoals" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -450,7 +450,7 @@ function CharacterGoals() {
           width="88"
           height="92"
           rx="22"
-          fill="var(--brand-signature, #E85D34)"
+          fill="var(--brand-signature, #F0485E)"
         />
       </g>
 
@@ -474,7 +474,7 @@ function CharacterGoals() {
         cy="57"
         r="20"
         fill="none"
-        stroke="var(--card-nested-bg, #F0EDE6)"
+        stroke="var(--card-nested-bg, #F4F5F7)"
         strokeWidth="6"
       />
       {/* Progress Ring Value (75%) */}
@@ -483,14 +483,14 @@ function CharacterGoals() {
         cy="57"
         r="20"
         fill="none"
-        stroke="var(--accent-color, #E85D34)"
+        stroke="var(--accent-color, #0B0B0F)"
         strokeWidth="6"
         strokeDasharray="94 126"
         strokeLinecap="round"
         transform="rotate(-90 70 57)"
       />
       {/* Center Dot */}
-      <circle cx="70" cy="57" r="6" fill="var(--text-primary, #141312)" />
+      <circle cx="70" cy="57" r="6" fill="var(--text-primary, #0B0B0F)" />
 
       {/* Label Lines */}
       <rect
@@ -499,7 +499,7 @@ function CharacterGoals() {
         width="48"
         height="6"
         rx="3"
-        fill="var(--text-primary, #141312)"
+        fill="var(--text-primary, #0B0B0F)"
         opacity="0.85"
       />
       <rect
@@ -518,7 +518,7 @@ function CharacterGoals() {
           cx="12"
           cy="12"
           r="13"
-          fill="var(--accent-color, #E85D34)"
+          fill="var(--accent-color, #0B0B0F)"
           stroke="var(--surface-color, #FFFFFF)"
           strokeWidth="2.5"
         />
@@ -540,8 +540,8 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowMid" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowMid" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -553,7 +553,7 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
           width="88"
           height="92"
           rx="22"
-          fill="var(--text-primary, #141312)"
+          fill="var(--text-primary, #0B0B0F)"
         />
       </g>
 
@@ -572,9 +572,9 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
       </g>
 
       {/* 3 Mini Day Pills Representing the Period Timeline */}
-      <rect x="35" y="38" width="20" height="26" rx="7" fill="var(--card-nested-bg, #F0EDE6)" />
-      <rect x="60" y="36" width="20" height="30" rx="7" fill="var(--accent-color, #E85D34)" />
-      <rect x="85" y="38" width="20" height="26" rx="7" fill="var(--card-nested-bg, #F0EDE6)" />
+      <rect x="35" y="38" width="20" height="26" rx="7" fill="var(--card-nested-bg, #F4F5F7)" />
+      <rect x="60" y="36" width="20" height="30" rx="7" fill="var(--accent-color, #0B0B0F)" />
+      <rect x="85" y="38" width="20" height="26" rx="7" fill="var(--card-nested-bg, #F4F5F7)" />
 
       {/* Active Day Indicator Lines */}
       <rect x="65" y="44" width="10" height="3" rx="1.5" fill="#FFFFFF" opacity="0.8" />
@@ -587,14 +587,14 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
         width="64"
         height="24"
         rx="12"
-        fill="var(--accent-soft, rgba(255, 82, 38, 0.12))"
+        fill="var(--accent-soft, rgba(11, 11, 15, 0.08))"
       />
       <text
         x="70"
         y="92"
         fontSize="12.5"
         fontWeight="800"
-        fill="var(--accent-color, #E85D34)"
+        fill="var(--accent-color, #0B0B0F)"
         textAnchor="middle"
         style={{ fontFamily: 'var(--font-amount, Sora, sans-serif)', fontVariantNumeric: 'tabular-nums' }}
       >
@@ -609,8 +609,8 @@ function CharacterCelebration() {
   return (
     <svg viewBox="0 0 140 140" className="w-full h-full overflow-visible">
       <defs>
-        <filter id="dejzCardShadowSummary" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#141312" floodOpacity="0.10" />
+        <filter id="dejzCardShadowSummary" x="-35%" y="-35%" width="170%" height="175%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#0B0B0F" floodOpacity="0.10" />
         </filter>
       </defs>
 
@@ -622,7 +622,7 @@ function CharacterCelebration() {
           width="88"
           height="92"
           rx="22"
-          fill="var(--brand-signature, #E85D34)"
+          fill="var(--brand-signature, #F0485E)"
         />
       </g>
 
@@ -669,7 +669,7 @@ function CharacterCelebration() {
         width="64"
         height="7"
         rx="3.5"
-        fill="var(--card-nested-bg, #F0EDE6)"
+        fill="var(--card-nested-bg, #F4F5F7)"
       />
       <rect
         x="38"
@@ -677,7 +677,7 @@ function CharacterCelebration() {
         width="48"
         height="7"
         rx="3.5"
-        fill="var(--brand-signature, #E85D34)"
+        fill="var(--brand-signature, #F0485E)"
       />
 
       {/* Bottom Metric Line */}
@@ -687,7 +687,7 @@ function CharacterCelebration() {
         width="44"
         height="4.5"
         rx="2.25"
-        fill="var(--text-primary, #141312)"
+        fill="var(--text-primary, #0B0B0F)"
         opacity="0.7"
       />
     </svg>

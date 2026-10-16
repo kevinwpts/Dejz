@@ -379,7 +379,7 @@ export function TransactionViewModal({
                 <span className="text-body font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
                   {t('ownNote')}
                 </span>
-                <span className="text-body font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {transaction.note}
                 </span>
               </div>
@@ -439,7 +439,7 @@ export function TransactionViewModal({
                       />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <span className="bg-white/95 dark:bg-[var(--surface-color)]/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-secondary font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-modal">
+                      <span className="bg-white/95 dark:bg-[var(--surface-color)]/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-modal">
                         {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
                       </span>
                     </div>
@@ -458,7 +458,7 @@ export function TransactionViewModal({
                     <div className="w-full flex items-center justify-between max-w-5xl py-3 px-2 sm:px-0" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2 text-white">
                         <Paperclip size={18} />
-                        <span className="text-body font-medium">
+                        <span className="text-sm font-medium">
                           {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
                         </span>
                       </div>
@@ -467,7 +467,7 @@ export function TransactionViewModal({
                           href={transaction.receiptUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-btn-sm text-secondary font-medium transition-colors"
+                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-btn-sm text-xs font-medium transition-colors"
                         >
                           {config.language === 'en' ? 'Open original' : 'Öppna original'}
                         </a>
@@ -486,14 +486,14 @@ export function TransactionViewModal({
                       onClick={(e) => e.stopPropagation()}
                     >
                       {transaction.receiptUrl.includes('.pdf') ? (
-                        <div className="bg-white dark:bg-[var(--surface-color)] p-8 rounded-modal text-center space-y-4 shadow-modal">
+                        <div className="bg-[var(--surface-color)] p-8 rounded-modal text-center space-y-4 shadow-modal">
                           <FileText size={64} className="mx-auto text-[var(--accent-color)]" />
-                          <p className="text-body font-medium text-[var(--text-primary)] dark:text-white">PDF-dokument</p>
+                          <p className="text-sm font-medium text-[var(--text-primary)] dark:text-white">PDF-dokument</p>
                           <a 
                             href={transaction.receiptUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-block bg-[var(--accent-color)] hover:bg-[var(--accent-color)] text-white px-5 py-2.5 rounded-btn text-body font-semibold transition-colors shadow-modal"
+                            className="inline-block bg-[var(--accent-color)] hover:opacity-90 text-[var(--on-accent)] px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-modal"
                           >
                             {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
                           </a>
@@ -569,7 +569,7 @@ export function TransactionViewModal({
         </div>
 
         {/* Action Buttons Footer: Bred Redigera-knapp, Duplicera och Radera */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle dark:border-transparent bg-transparent flex items-center gap-2.5 relative z-10">
           <Button 
             type="button"
             variant="secondary"

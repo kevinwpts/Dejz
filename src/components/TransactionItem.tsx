@@ -40,7 +40,7 @@ export function TransactionItem({
   onClick, 
   displayAmount,
   showAllCategories,
-  isGrouped,
+  isGrouped: _isGrouped,
   variant,
   hideCategoryBadge,
   hideFixedBadge,
@@ -103,21 +103,19 @@ export function TransactionItem({
     ? 'text-[var(--success-color)]' 
     : 'text-[var(--text-metric-label)]';
 
-  // Determine layout style classes (airy 62px architectural rows + grouped card support)
+  // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";
-  let paddingClasses = "px-4 sm:px-5 py-3.5 sm:py-4 min-h-[62px]";
+  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[56px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3.5 sm:py-4 px-4 sm:px-5";
+    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-4 px-3";
     paddingClasses = "";
-  } else if (isGrouped) {
-    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] rounded-none shadow-none border-none transition-colors";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
-    paddingClasses = "px-4 sm:px-5 py-3.5 sm:py-4 min-h-[62px]";
+    paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[60px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] shadow-none border-none rounded-[var(--radius-card-nested,12px)]";
+    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] shadow-none border-none rounded-[var(--radius-card,12px)]";
   } else {
-    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[var(--radius-card,18px)] border-none shadow-subtle";
+    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[var(--radius-card,12px)] shadow-none border-none";
   }
 
   // Neutral discreet category display
@@ -189,7 +187,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared || isGrouped ? '' : 'rounded-[var(--radius-card,18px)]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[var(--radius-card,20px)]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
@@ -282,7 +280,7 @@ export function TransactionItem({
                         transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
                         transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
                       )}
-                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-subtle shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
+                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border-none shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
                     >
                       <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
                     </span>
@@ -330,7 +328,7 @@ export function TransactionItem({
           
           {/* Primary Amount */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-1">
-            <p className={`text-list-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
+            <p className={`text-list-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-metric-label)]'}`}>
               <span className="opacity-80 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-secondary opacity-80 font-normal ml-1">
@@ -378,7 +376,7 @@ export function TransactionItem({
                   <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label">·</span>
                 ) : null}
                 {methodStr ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-subtle)] select-none leading-none tracking-tight">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-[var(--surface-muted)] text-[var(--text-secondary)] border-none select-none leading-none tracking-tight">
                     {methodStr}
                   </span>
                 ) : (transaction.timestamp || transaction.date) ? (

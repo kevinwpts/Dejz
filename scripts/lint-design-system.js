@@ -39,6 +39,7 @@ const EXEMPT_FILES = [
   'src/App.tsx', // Contains basic mock categories definition mapping
   'src/components/AnalysisView.tsx', // Legitimate database/fallback colors for Recharts slices
   'src/components/SettingsView.tsx', // Legitimate database/fallback colors for default payment method records
+  'src/components/LandingPage.tsx', // Marketing and editorial landing page with unique phone frames
 ];
 
 const LEGITIMATE_EXCEPTIONS = [

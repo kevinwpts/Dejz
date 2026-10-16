@@ -1,11 +1,11 @@
 {
   "name": "Dejz",
   "short_name": "Dejz",
-  "description": "Äntligen koll på ekonomin från lön till lön",
+  "description": "Ta kontroll över din ekonomi med Dejz",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F3F6FA",
-  "theme_color": "#F3F6FA",
+  "background_color": "#F4F5F7",
+  "theme_color": "#0B0B0F",
   "icons": [
     {
       "src": "/favicon.png",

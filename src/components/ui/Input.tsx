@@ -41,14 +41,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const defaultLeftIcon = isSearch && !icon ? <Icon name="magnifying-glass" size={16} /> : icon;
 
+    const bgClass = isSurface ? 'bg-[var(--surface-color)]' : 'bg-[var(--surface-input,#ECEEF2)]';
+
     const baseInputStyles =
-      'w-full h-[var(--height-input,46px)] bg-[var(--surface-color)] dark:bg-[var(--surface-muted)] rounded-[var(--radius-input,12px)] border shadow-subtle transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-inactive)] disabled:opacity-50 disabled:cursor-not-allowed';
+      `w-full h-[var(--height-input,46px)] ${bgClass} text-[var(--text-primary)] rounded-[var(--radius-input,16px)] border border-[var(--border-control,#737B8C)] transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-tertiary)] disabled:bg-[var(--surface-nested,#ECEEF2)] disabled:text-[var(--text-disabled,#A8AEB9)] disabled:border-[var(--border-subtle)] disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]`;
 
     const borderAndFocusStyles = error
-      ? 'border-[var(--danger-color)] focus:border-[var(--danger-color)] focus:ring-2 focus:ring-[var(--danger-color)]/20'
-      : isSurface
-        ? 'border-[var(--border-divider)] focus:border-[var(--text-primary)] focus:ring-2 focus:ring-[var(--text-primary)]/10'
-        : 'border-[var(--border-divider)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20';
+      ? 'border-[var(--danger-color)] focus:border-[var(--danger-color)] focus-visible:outline-[var(--danger-color)]'
+      : 'border-[var(--border-control)]';
 
     const typographyStyles = isAmount
       ? 'text-section-title font-amount tabular-nums'
@@ -59,7 +59,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-label flex items-center justify-between"
+            className="text-label font-medium text-[var(--text-secondary)] flex items-center justify-between"
           >
             <span>{label}</span>
           </label>

@@ -7,7 +7,7 @@ import { PasswordChangeView } from './PasswordChangeView';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { Button, Input, IconButton, ListRow, Card } from './ui';
+import { Button, IconButton, ListRow, Card } from './ui';
 
 interface ManageAccountViewProps {
   onBack: () => void;
@@ -152,7 +152,7 @@ export function ManageAccountView({
           </div>
 
           {/* Profile Avatar Card */}
-          <Card padding="md" className="flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden bg-[var(--surface-color)] border border-subtle shadow-2xs">
+          <Card padding="md" className="flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden">
             <label htmlFor="avatar-manage" className="relative cursor-pointer group">
               <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,12px)] overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
                 {avatarUrl ? (
@@ -195,24 +195,34 @@ export function ManageAccountView({
               <h4 className="text-section-title px-1.5">
                 {t('personalInfo' as any) || 'Personuppgifter'}
               </h4>
-              <Card padding="md" className="space-y-3.5 bg-[var(--surface-color)] border border-subtle shadow-2xs">
-                <Input
-                  label={t('fullName')}
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Förnamn Efternamn"
-                  icon={<User size={16} />}
-                />
+              <Card variant="default" padding="none" className="divide-y divide-menu">
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <User size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
+                    <span className="text-body font-medium text-[var(--text-primary)]">
+                      {t('fullName')}
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Förnamn Efternamn"
+                    className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none flex-1 min-w-0 placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  />
+                </div>
 
-                <Input
-                  label={t('email')}
-                  type="text"
-                  readOnly
-                  disabled
-                  value={user.email || ''}
-                  icon={<Mail size={16} />}
-                />
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Mail size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
+                    <span className="text-body font-medium text-[var(--text-primary)]">
+                      {t('email')}
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium text-[var(--text-secondary)] truncate max-w-[200px] sm:max-w-[260px]">
+                    {user.email || ''}
+                  </span>
+                </div>
               </Card>
             </div>
 
@@ -221,7 +231,7 @@ export function ManageAccountView({
               <h4 className="text-section-title px-1.5">
                 {t('security' as any) || 'Säkerhet'}
               </h4>
-              <Card variant="default" padding="none" className="divide-y divide-menu bg-[var(--surface-color)] border border-subtle shadow-2xs">
+              <Card variant="default" padding="none" className="divide-y divide-menu">
                 <ListRow
                   variant="grouped"
                   density="compact"
@@ -240,7 +250,7 @@ export function ManageAccountView({
                 <h4 className="text-section-title px-1.5">
                   {t('connectedAccounts' as any) || 'Inloggningsmetoder'}
                 </h4>
-                <Card variant="default" padding="none" className="divide-y divide-menu bg-[var(--surface-color)] border border-subtle shadow-2xs">
+                <Card variant="default" padding="none" className="divide-y divide-menu">
                   {identities.map((identity) => (
                     <ListRow
                       key={identity.id}

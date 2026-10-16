@@ -98,7 +98,7 @@ export function CategoryModal({
                 variant="primary"
                 categoryName={name}
               />
-              <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-[var(--surface-color)] border border-subtle text-micro-label font-semibold text-[var(--text-secondary)] shadow-2xs group-hover:text-[var(--text-primary)]">
+              <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-[var(--surface-color)] border-none text-micro-label font-semibold text-[var(--text-secondary)] shadow-xs group-hover:text-[var(--text-primary)]">
                 Byt
               </div>
             </div>

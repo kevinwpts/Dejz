@@ -50,13 +50,17 @@ export const Switch: React.FC<SwitchProps> = ({
       disabled={disabled}
       onClick={() => handleChange(!checked)}
       onKeyDown={handleKeyDown}
-      className={`relative inline-flex items-center shrink-0 cursor-pointer rounded-full transition-colors duration-[var(--duration-normal,150ms)] ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 disabled:opacity-40 disabled:cursor-not-allowed select-none ${trackWidth} ${
-        checked ? 'bg-[var(--accent-color)]' : 'bg-[var(--surface-muted)] border border-[var(--border-subtle)]'
+      className={`relative inline-flex items-center shrink-0 cursor-pointer rounded-full transition-colors duration-[var(--duration-normal,150ms)] ease-out focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)] disabled:bg-[var(--surface-nested,#ECEEF2)] disabled:cursor-not-allowed select-none ${trackWidth} ${
+        checked
+          ? 'bg-[var(--accent-color)] border border-transparent'
+          : 'bg-[var(--surface-nested,#ECEEF2)] border border-[var(--border-control,#737B8C)]'
       } ${className}`}
     >
       <span
-        className={`pointer-events-none inline-block rounded-full bg-white shadow-xs transform transition-transform duration-[var(--duration-normal,150ms)] ease-out ${thumbSize} ${
-          checked ? `${translateChecked} ml-1` : 'translate-x-1'
+        className={`pointer-events-none inline-block rounded-full shadow-xs transform transition-transform duration-[var(--duration-normal,150ms)] ease-out ${thumbSize} ${
+          checked
+            ? `${translateChecked} ml-1 bg-[var(--on-accent)]`
+            : 'translate-x-1 bg-[var(--surface-color,#FFFFFF)] dark:bg-[var(--text-secondary)] border border-[var(--border-subtle)]'
         }`}
       />
     </button>
