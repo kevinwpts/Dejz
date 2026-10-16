@@ -52,11 +52,11 @@ export function LanguagePicker({
           variant === 'footer'
             ? 'px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
             : variant === 'compact'
-            ? 'px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-color)]/90 backdrop-blur-md hover:bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-subtle active:scale-[0.98]'
+            ? 'px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-control,#737B8C)] hover:border-[var(--text-primary)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]'
             : variant === 'pill-hero'
             ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-[#FFFDF9] bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] active:scale-[0.97]'
             : variant === 'pill'
-            ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-transparent active:scale-[0.97]'
+            ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-control,#737B8C)] hover:border-[var(--text-primary)] transition-all duration-200 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]'
             : 'px-2 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
         }`}
       >

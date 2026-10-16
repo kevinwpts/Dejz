@@ -1668,7 +1668,7 @@ export function LandingPage({
               <button
                 type="button"
                 onClick={onLogin}
-                className="inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border border-black/[0.06] dark:border-white/[0.10] transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]"
+                className="inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-control,#737B8C)] hover:border-[var(--text-primary)] transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]"
               >
                 <User
                   size={13.5}
@@ -1704,7 +1704,7 @@ export function LandingPage({
                   setIsMobileLangOpen(false);
                   onLogin();
                 }}
-                className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.08] hover:bg-black/[0.08] border border-black/[0.06] dark:border-white/[0.10] transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] focus-visible:outline-none"
+                className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-control,#737B8C)] hover:border-[var(--text-primary)] transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]"
               >
                 <User
                   size={13}
