@@ -88,19 +88,20 @@ export function AppHeader({
     >
       <div className="page-max mx-auto page-px h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
         {/* Left: Back button with title for subpages OR Dejz brand logo for main tabs */}
-        <div className="flex items-center gap-2.5 shrink-0 z-10 min-w-0">
+        <div className="flex items-center gap-2 shrink-0 z-10 min-w-0">
           {onBack ? (
             <>
               <IconButton
                 onClick={onBack}
-                icon={<ChevronLeft size={18} strokeWidth={2} />}
+                icon={<ChevronLeft size={20} strokeWidth={2} />}
                 variant="surface"
                 size="md"
-                className="w-9 h-9 text-[var(--text-primary)]"
+                shape="circle"
+                className="text-[var(--text-primary)] -ml-1"
                 aria-label="Tillbaka"
               />
               {title && (
-                <h1 className="text-section-title truncate select-none text-[var(--text-primary)]">
+                <h1 className="text-page-title truncate select-none text-[var(--text-primary)]">
                   {title}
                 </h1>
               )}
@@ -108,7 +109,7 @@ export function AppHeader({
           ) : (
             <button
               onClick={() => onNavigate("today")}
-              className="flex items-center gap-2 transition-transform touch-press-subtle cursor-pointer py-1 select-none"
+              className="flex items-center gap-2 transition-transform touch-press-subtle cursor-pointer py-1 select-none min-h-[44px]"
               aria-label="dejz"
               title="dejz"
             >
@@ -118,18 +119,18 @@ export function AppHeader({
         </div>
 
         {/* Right Actions: Notifications + Search + Profile Avatar */}
-        <div className="flex items-center gap-1 shrink-0 z-10">
+        <div className="flex items-center gap-0.5 shrink-0 z-10 -mr-1">
           {/* 1. Notifications */}
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-[var(--surface-color)]/80 dark:hover:bg-white/[0.08]"
+              className="min-w-[44px] min-h-[44px] w-[44px] h-[44px] rounded-full flex items-center justify-center transition-colors relative cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
               aria-label="Notiser"
               title="Notiser"
             >
               <Bell size={20} strokeWidth={2} />
               {notificationCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-[var(--danger-color)] text-white text-micro-label font-semibold flex items-center justify-center leading-none">
+                <span className="absolute top-2 right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--danger-color)] text-white text-label font-semibold flex items-center justify-center leading-none">
                   {notificationCount}
                 </span>
               )}
@@ -146,21 +147,21 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-[var(--surface-color)]/80 dark:hover:bg-white/[0.08]"
+            className="min-w-[44px] min-h-[44px] w-[44px] h-[44px] rounded-full flex items-center justify-center transition-colors cursor-pointer touch-press-subtle text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
             <Search size={20} strokeWidth={2} />
           </button>
 
-          {/* 3. Profile Avatar Button (Far Right) */}
+          {/* 3. Profile Avatar Button (Far Right, min 44x44px touch target) */}
           <button
             onClick={() => onNavigate("profile")}
-            className="flex items-center justify-center transition-transform touch-press-subtle cursor-pointer p-0.5 select-none ml-1"
+            className="min-w-[44px] min-h-[44px] w-[44px] h-[44px] rounded-full flex items-center justify-center transition-transform touch-press-subtle cursor-pointer select-none"
             aria-label="Profil"
             title="Profil"
           >
-            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] border-none shadow-subtle flex items-center justify-center ${
+            <div className={`w-9 h-9 rounded-full overflow-hidden bg-[var(--surface-color)] border-none shadow-none flex items-center justify-center ${
               activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
             }`}>
               {avatarUrl ? (
@@ -171,7 +172,7 @@ export function AppHeader({
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <User size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
+                <User size={19} strokeWidth={2} className="text-[var(--text-secondary)]" />
               )}
             </div>
           </button>

@@ -14,7 +14,7 @@ import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { Input, BottomSheet, Button, FilterButtonGroup, Card } from './ui';
+import { Input, BottomSheet, Button, FilterButtonGroup } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -59,7 +59,7 @@ export function LogView({
   currentLang, 
   periods 
 }: LogViewProps) {
-  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'starred'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -382,10 +382,7 @@ export function LogView({
         }
 
         // 5. Type filter
-        if (typeFilter === 'starred') {
-          const isStarred = Boolean((e as any).isStarred || (e.tags && e.tags.includes('starred')));
-          if (!isStarred) return false;
-        } else if (typeFilter !== 'all') {
+        if (typeFilter !== 'all') {
           if (e.type !== typeFilter) return false;
         }
         
@@ -549,86 +546,84 @@ export function LogView({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onClear={() => setSearchQuery('')}
-          className="h-[42px] sm:h-[44px] text-xs sm:text-sm"
+          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none"
         />
       </div>
 
       {/* 2. Top Controls: Compact Inline Row (Period button + Transaction type filters + Icon-only Filter button) - Samma upplägg som Analysfliken */}
-      <div className="flex items-center justify-between gap-2 py-2.5 px-2.5 -mx-2.5 -my-2 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Period Button */}
+      <div>
+        <div className="flex items-center justify-between gap-2 py-1.5 px-1.5 -my-1.5 -mx-1.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Period Button */}
+            <button
+              type="button"
+              onClick={() => {
+                const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
+                setModalPeriod(initial);
+                setIsPeriodPickerOpen(true);
+              }}
+              className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-subtle shadow-2xs hover:bg-black/[0.02] dark:hover:bg-white/[0.04] cursor-pointer active:scale-[0.98] transition-all select-none"
+            >
+              <CalendarIcon size={14} className="text-[var(--text-secondary)] shrink-0" />
+              <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
+              {selectedPeriod?.isCurrent && (
+                <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
+                  {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
+                </span>
+              )}
+              <ChevronDown size={13} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
+            </button>
+
+            {/* Inline Transaction Type Filters */}
+            <div className="flex-shrink-0">
+              <FilterButtonGroup
+                options={[
+                  {
+                    id: 'all',
+                    label: getL10n('Alla', 'All', 'Alle', 'Alle', 'Kaikki'),
+                  },
+                  {
+                    id: 'expense',
+                    label: getL10n('Utgifter', 'Expenses', 'Utgifter', 'Udgifter', 'Menot'),
+                  },
+                  {
+                    id: 'income',
+                    label: getL10n('Inkomster', 'Income', 'Inntekt', 'Indkomst', 'Tulot'),
+                  },
+                ]}
+                selectedId={typeFilter}
+                onSelect={(id) => {
+                  if (typeof feedback?.selection === 'function') feedback.selection();
+                  setTypeFilter(id as 'all' | 'income' | 'expense');
+                }}
+                ariaLabel={getL10n('Filtrera typ', 'Filter type')}
+              />
+            </div>
+          </div>
+
+          {/* Filter Toggle Button (Icon only) */}
           <button
             type="button"
             onClick={() => {
-              const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
-              setModalPeriod(initial);
-              setIsPeriodPickerOpen(true);
+              if (typeof feedback?.light === 'function') feedback.light();
+              setIsFilterBottomSheetOpen(true);
             }}
-            className="flex-shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border-none shadow-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+            className={`flex-shrink-0 w-[38px] sm:w-[40px] h-[38px] sm:h-[40px] rounded-full inline-flex items-center justify-center relative transition-all cursor-pointer active:scale-95 shrink-0 ${
+              activeFiltersCount > 0
+                ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
+                : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+            }`}
+            title={getL10n('Filter', 'Filter')}
+            aria-label={getL10n('Filter', 'Filter')}
           >
-            <CalendarIcon size={14} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-            <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
-            {selectedPeriod?.isCurrent && !selectedDate && (
-              <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
-                {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
+            <SlidersHorizontal size={15} strokeWidth={2} />
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-[10px] font-bold inline-flex items-center justify-center border-2 border-[var(--bg-color)]">
+                {activeFiltersCount}
               </span>
             )}
-            <ChevronDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
           </button>
-
-          {/* Inline Transaction Type Filters */}
-          <div className="flex-shrink-0">
-            <FilterButtonGroup
-              options={[
-                {
-                  id: 'all',
-                  label: getL10n('Alla', 'All', 'Alle', 'Alle', 'Kaikki'),
-                },
-                {
-                  id: 'expense',
-                  label: getL10n('Utgifter', 'Expenses', 'Utgifter', 'Udgifter', 'Menot'),
-                },
-                {
-                  id: 'income',
-                  label: getL10n('Inkomster', 'Income', 'Inntekt', 'Indkomst', 'Tulot'),
-                },
-                {
-                  id: 'starred',
-                  label: getL10n('Hjärtan', 'Starred', 'Favoritter', 'Favoritter', 'Suosikit'),
-                },
-              ]}
-              selectedId={typeFilter}
-              onSelect={(id) => {
-                if (typeof feedback?.selection === 'function') feedback.selection();
-                setTypeFilter(id as 'all' | 'income' | 'expense' | 'starred');
-              }}
-              ariaLabel={getL10n('Filtrera typ', 'Filter type')}
-            />
-          </div>
         </div>
-
-        {/* Filter Toggle Button (Icon only) */}
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof feedback?.light === 'function') feedback.light();
-            setIsFilterBottomSheetOpen(true);
-          }}
-          className={`flex-shrink-0 w-[36px] sm:w-[38px] h-[36px] sm:h-[38px] rounded-full inline-flex items-center justify-center relative transition-all cursor-pointer active:scale-95 shrink-0 ${
-            activeFiltersCount > 0
-              ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
-              : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-none shadow-subtle'
-          }`}
-          title={getL10n('Filter', 'Filter')}
-          aria-label={getL10n('Filter', 'Filter')}
-        >
-          <SlidersHorizontal size={15} strokeWidth={2} />
-          {activeFiltersCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-label font-bold inline-flex items-center justify-center shrink-0 ml-0.5">
-              {activeFiltersCount}
-            </span>
-          )}
-        </button>
       </div>
 
       {/* 3. Discrete Results & Clear Row */}
@@ -712,12 +707,13 @@ export function LogView({
               </div>
 
               {/* Transactions for this Day */}
-              <div className="space-y-1.5">
+              <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
                 {dayData.items.map((transaction: any) => (
                   <TransactionItem 
                     key={transaction.id}
                     transaction={transaction}
                     isFixed={Boolean(transaction.isFixed)}
+                    isGrouped={true}
                     config={config}
                     onView={transaction.isFixed ? undefined : onViewTransaction}
                     onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
@@ -852,37 +848,37 @@ export function LogView({
         showCalendarOption={true}
         currentLang={currentLang}
         calendarContent={
-          <Card variant="default" padding="sm" className="space-y-3.5">
+          <div className="bg-[var(--surface-color)] border border-subtle shadow-subtle rounded-card p-3.5 sm:p-4 space-y-3.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between px-1 pt-0.5">
+            <div className="flex items-center justify-between pb-3 border-b border-subtle">
               <button
                 type="button"
                 onClick={handleModalPrev}
                 disabled={!canModalGoPrev}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoPrev
-                    ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-90'
+                    ? 'text-[var(--text-primary)] bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
                 }`}
                 aria-label="Föregående period"
                 title="Föregående period"
               >
-                <ChevronLeft size={17} strokeWidth={2.2} />
+                <ChevronLeft size={16} strokeWidth={2} />
               </button>
 
               <div className="flex flex-col items-center text-center px-2 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-card-title font-bold text-[var(--text-primary)] tracking-tight truncate capitalize">
+                  <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate capitalize">
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-micro-label font-semibold px-2 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
+                    <span className="text-micro-label font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
                 </div>
                 {modalPeriod?.name?.includes('(') && (
-                  <span className="text-secondary text-[var(--text-tertiary)] font-normal truncate mt-0.5 tabular-nums">
+                  <span className="text-secondary text-[var(--text-tertiary)] font-normal truncate mt-0.5">
                     {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
                   </span>
                 )}
@@ -892,42 +888,20 @@ export function LogView({
                 type="button"
                 onClick={handleModalNext}
                 disabled={!canModalGoNext}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoNext
-                    ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-90'
+                    ? 'text-[var(--text-primary)] bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
                 }`}
                 aria-label="Nästa period"
                 title="Nästa period"
               >
-                <ChevronRight size={17} strokeWidth={2.2} />
-              </button>
-            </div>
-
-            {/* Quick Action: View whole period */}
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback?.selection === 'function') feedback.selection();
-                  else if (typeof feedback?.tap === 'function') feedback.tap();
-                  setSelectedPeriod(modalPeriod);
-                  setSelectedDate(null);
-                  setIsPeriodPickerOpen(false);
-                }}
-                className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-none active:scale-95 ${
-                  selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                    ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-2xs'
-                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.07] dark:hover:bg-white/[0.1]'
-                }`}
-              >
-                <Layers size={13} strokeWidth={2} />
-                <span>{getL10n('Visa hela perioden', 'View full period', 'Vis hele perioden', 'Vis hele perioden', 'Koko jakso')}</span>
+                <ChevronRight size={16} strokeWidth={2} />
               </button>
             </div>
 
             {/* Interactive Calendar Days Grid */}
-            <div className="select-none pt-0.5">
+            <div className="select-none">
               {/* Weekday headers */}
               <div className="grid grid-cols-7 gap-1 mb-1.5 text-center">
                 {weekdayNames.map((d, i) => (
@@ -946,7 +920,7 @@ export function LogView({
                 {Array.from({ length: calendarMonthData.daysInMonth }).map((_, i) => {
                   const dayNum = i + 1;
                   const dayDate = new Date(calendarMonthData.year, calendarMonthData.month, dayNum);
-                  const isSelected = Boolean(selectedDate && dayDate.toDateString() === selectedDate.toDateString());
+                  const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
                   const isToday = dayDate.toDateString() === today.toDateString();
                   const dayTx = calendarMonthData.txByDay[dayNum];
 
@@ -961,16 +935,16 @@ export function LogView({
                         setSelectedPeriod(modalPeriod);
                         setIsPeriodPickerOpen(false);
                       }}
-                      className={`aspect-square w-full rounded-[var(--radius-card-nested,12px)] flex flex-col items-center justify-center gap-1 transition-all relative active:scale-95 cursor-pointer text-center ${
+                      className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                         isSelected 
-                          ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-bold z-10 shadow-xs' 
+                          ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
                           : isToday
-                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--accent-color)] font-bold'
+                          ? 'bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold'
                           : 'bg-transparent text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] font-medium'
                       }`}
                     >
                       <span className={`text-xs sm:text-body leading-none tabular-nums ${
-                        isSelected ? 'text-[var(--surface-color)] font-bold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)]'
+                        isSelected ? 'text-[var(--on-accent)]' : 'text-[var(--text-primary)]'
                       }`}>
                         {dayNum}
                       </span>
@@ -978,10 +952,10 @@ export function LogView({
                       {/* Transaction Dots */}
                       <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                         {dayTx?.hasIncome && (
-                          <span className="w-1 h-1 rounded-full bg-[var(--success-color)]" />
+                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--success-color)]'}`} />
                         )}
                         {dayTx?.hasExpense && (
-                          <span className="w-1 h-1 rounded-full bg-[var(--danger-color)]" />
+                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--danger-color)]'}`} />
                         )}
                       </div>
                     </button>
@@ -989,7 +963,29 @@ export function LogView({
                 })}
               </div>
             </div>
-          </Card>
+
+            {/* Quick Action: View whole period */}
+            <div className="pt-2 border-t border-subtle flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.selection === 'function') feedback.selection();
+                  else if (typeof feedback?.tap === 'function') feedback.tap();
+                  setSelectedPeriod(modalPeriod);
+                  setSelectedDate(null);
+                  setIsPeriodPickerOpen(false);
+                }}
+                className={`inline-flex items-center justify-center gap-1.5 w-full h-9 px-3.5 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all cursor-pointer border-none active:scale-[0.98] ${
+                  selectedPeriod?.name === modalPeriod?.name && !selectedDate
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent-color)]'
+                    : 'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
+                }`}
+              >
+                <Layers size={13} strokeWidth={2} />
+                <span>{getL10n('Visa hela perioden', 'View full period', 'Vis hele perioden', 'Vis hele perioden', 'Koko jakso')}</span>
+              </button>
+            </div>
+          </div>
         }
       />
 

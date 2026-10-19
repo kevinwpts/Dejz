@@ -88,9 +88,7 @@ export function CancelledSubscriptionsModal({
         {/* Total Savings Banner */}
         <div className="p-4 rounded-[var(--radius-card,20px)] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-[var(--success-color)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--success-container)] text-[var(--success-color)] flex items-center justify-center shrink-0">
-              <Sparkles size={20} strokeWidth={2} />
-            </div>
+            <Sparkles size={20} strokeWidth={2} className="text-[var(--success-color)] shrink-0" />
             <div>
               <p className="text-secondary font-semibold text-[var(--text-secondary)]">
                 {isEn ? 'Total monthly savings' : 'Total besparing per månad'}
@@ -136,9 +134,7 @@ export function CancelledSubscriptionsModal({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-[var(--bg-color)] flex items-center justify-center shrink-0 border-none overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
-                        <BudgetItemLogo item={item} type="expense" config={config} />
-                      </div>
+                      <BudgetItemLogo item={item} type="expense" config={config} />
                       <div className="min-w-0">
                         <h4 className="text-section-title font-bold text-[var(--text-primary)] truncate">
                           {item.name}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock, ChevronLeft } from 'lucide-react';
+import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock } from 'lucide-react';
 
 import { ConfirmModal } from './ConfirmModal';
 import { PasswordChangeView } from './PasswordChangeView';
@@ -22,6 +22,7 @@ interface ManageAccountViewProps {
   trialEnd?: string | null;
   nextBillingDate?: string | null;
   onPaymentSuccess?: () => void;
+  onChangePassword?: () => void;
 }
 
 export function ManageAccountView({ 
@@ -33,6 +34,7 @@ export function ManageAccountView({
   addToast,
   onUploadAvatar,
   avatarUrl,
+  onChangePassword,
 }: ManageAccountViewProps) {
   const [fullName, setFullName] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -121,7 +123,7 @@ export function ManageAccountView({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-[var(--card-gap)] w-full font-sans pb-12"
+      className="flex flex-col gap-section w-full font-sans"
     >
       {showPasswordChange ? (
         <PasswordChangeView
@@ -132,29 +134,10 @@ export function ManageAccountView({
         />
       ) : (
         <>
-          {/* Top Header with Back Navigation */}
-          <div className="flex items-center gap-3.5 py-1">
-            <IconButton
-              icon={<ChevronLeft size={20} strokeWidth={2} />}
-              onClick={onBack}
-              aria-label={t('back') || 'Tillbaka'}
-              variant="secondary"
-              size="sm"
-            />
-            <div className="min-w-0">
-              <h1 className="text-page-title font-bold text-[var(--text-primary)] truncate">
-                {t('manageAccount') || 'Hantera konto'}
-              </h1>
-              <p className="text-secondary text-[var(--text-secondary)] opacity-70 truncate">
-                {user.email}
-              </p>
-            </div>
-          </div>
-
           {/* Profile Avatar Card */}
           <Card padding="md" className="flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden">
             <label htmlFor="avatar-manage" className="relative cursor-pointer group">
-              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,12px)] overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
+              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-card-nested overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -189,17 +172,17 @@ export function ManageAccountView({
             </div>
           </Card>
 
-          <div className="space-y-5">
+          <div className="flex flex-col gap-section">
             {/* Personal Details */}
-            <div className="space-y-2.5">
-              <h4 className="text-section-title px-1.5">
+            <div className="flex flex-col gap-2.5">
+              <h4 className="text-section-title px-0.5">
                 {t('personalInfo' as any) || 'Personuppgifter'}
               </h4>
               <Card variant="default" padding="none" className="divide-y divide-menu">
                 <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
                   <div className="flex items-center gap-3 shrink-0">
                     <User size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                    <span className="text-body font-medium text-[var(--text-primary)]">
+                    <span className="text-body-medium font-medium text-[var(--text-primary)]">
                       {t('fullName')}
                     </span>
                   </div>
@@ -208,18 +191,18 @@ export function ManageAccountView({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Förnamn Efternamn"
-                    className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none flex-1 min-w-0 placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                    className="text-body-medium font-medium text-[var(--text-primary)] text-right bg-transparent outline-none flex-1 min-w-0 placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                   />
                 </div>
 
                 <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
                   <div className="flex items-center gap-3 shrink-0">
                     <Mail size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                    <span className="text-body font-medium text-[var(--text-primary)]">
+                    <span className="text-body-medium font-medium text-[var(--text-primary)]">
                       {t('email')}
                     </span>
                   </div>
-                  <span className="text-sm font-medium text-[var(--text-secondary)] truncate max-w-[200px] sm:max-w-[260px]">
+                  <span className="text-body-medium font-medium text-[var(--text-secondary)] truncate max-w-[200px] sm:max-w-[260px]">
                     {user.email || ''}
                   </span>
                 </div>
@@ -227,8 +210,8 @@ export function ManageAccountView({
             </div>
 
             {/* Security Section */}
-            <div className="space-y-2.5">
-              <h4 className="text-section-title px-1.5">
+            <div className="flex flex-col gap-2.5">
+              <h4 className="text-section-title px-0.5">
                 {t('security' as any) || 'Säkerhet'}
               </h4>
               <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -239,15 +222,21 @@ export function ManageAccountView({
                   icon={<Lock size={18} strokeWidth={2} />}
                   iconColor="text-[var(--text-secondary)]"
                   title={t('changePassword' as any) || 'Ändra lösenord'}
-                  onClick={() => setShowPasswordChange(true)}
+                  onClick={() => {
+                    if (onChangePassword) {
+                      onChangePassword();
+                    } else {
+                      setShowPasswordChange(true);
+                    }
+                  }}
                 />
               </Card>
             </div>
 
             {/* Connected Accounts / Inloggningsmetoder */}
             {identities.length > 0 && (
-              <div className="space-y-2.5">
-                <h4 className="text-section-title px-1.5">
+              <div className="flex flex-col gap-2.5">
+                <h4 className="text-section-title px-0.5">
                   {t('connectedAccounts' as any) || 'Inloggningsmetoder'}
                 </h4>
                 <Card variant="default" padding="none" className="divide-y divide-menu">

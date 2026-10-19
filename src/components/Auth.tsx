@@ -383,7 +383,6 @@ export function Auth({
                 placeholder={t('email')}
                 icon={<Mail size={16} />}
                 error={error}
-                variant="surface"
               />
 
               <div className="pt-2">
@@ -443,7 +442,6 @@ export function Auth({
                   }}
                   placeholder={t('email')}
                   icon={<Mail size={16} />}
-                  variant="surface"
                 />
 
                 <div className="space-y-1.5">
@@ -458,7 +456,6 @@ export function Auth({
                     placeholder={t('passwordPlaceholder' as any)}
                     icon={<Lock size={16} />}
                     error={error}
-                    variant="surface"
                   />
 
                   {!isRegistering && (

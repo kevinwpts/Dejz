@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, Clock, ChevronDown } from 'lucide-react';
+import { Plus, ArrowUpDown, Clock, ChevronDown } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
-import { Language, TranslationKey } from '../i18n';
+import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { Button, Card, FilterButtonGroup } from './ui';
@@ -315,17 +315,14 @@ export function BudgetView({
           {
             id: 'fixed',
             label: config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter',
-            icon: <Calendar size={14} strokeWidth={2} />,
           },
           {
             id: 'income',
             label: config?.language === 'en' ? 'Income' : 'Inkomster',
-            icon: <ArrowDownLeft size={14} strokeWidth={2.5} />,
           },
           {
             id: 'savings',
-            label: config?.language === 'en' ? 'Monthly savings' : 'Månadssparande',
-            icon: <PiggyBank size={14} strokeWidth={2} />,
+            label: config?.language === 'en' ? 'Savings' : 'Sparande',
           },
         ]}
         selectedId={budgetFilter}
@@ -351,17 +348,15 @@ export function BudgetView({
                 ? totalSavingsSum
                 : totalMonthlyFixedAverage
             )}
-            className={`text-large-amount font-bold font-amount tabular-nums ${
-              budgetFilter === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-metric-label)]'
-            }`}
+            className="text-large-amount text-[var(--text-primary)] font-bold font-amount tabular-nums"
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-secondary font-normal opacity-80 select-none">
+          <span className="text-label font-medium text-[var(--text-secondary)] select-none">
             {config?.currency || 'kr'}
-            <span className="text-micro-label opacity-70 ml-0.5">
+            <span className="text-micro-label text-[var(--text-tertiary)] ml-0.5">
               {config?.language === 'en' ? '/mo' : '/mån'}
             </span>
           </span>
@@ -394,9 +389,6 @@ export function BudgetView({
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="font-normal">
-                        {config.language === 'en' ? 'Sort:' : 'Sortera:'}
-                      </span>
                       <span className="font-medium text-[var(--text-primary)]">
                         {incomeSortBy === 'day' 
                           ? (config.language === 'en' ? 'Day' : 'Ankomstdag')
@@ -416,7 +408,7 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="space-y-[var(--card-gap)]">
+                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
                     {filteredActiveIncomes.map((income) => (
                       <BudgetItem 
                         key={income.id}
@@ -428,6 +420,7 @@ export function BudgetView({
                         t={t}
                         config={config}
                         currentPeriodId={currentPeriodId}
+                        isGrouped={true}
                       />
                     ))}
                   </div>
@@ -462,9 +455,6 @@ export function BudgetView({
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="font-normal truncate">
-                        {config.language === 'en' ? 'Sort:' : 'Sortera:'}
-                      </span>
                       <span className="font-medium text-[var(--text-primary)] truncate">
                         {fixedSortBy === 'day' 
                           ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
@@ -484,7 +474,7 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="space-y-[var(--card-gap)]">
+                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
                     {filteredActiveFixedExpenses.map((expense) => (
                       <BudgetItem 
                         key={expense.id}
@@ -496,6 +486,8 @@ export function BudgetView({
                         t={t}
                         config={config}
                         currentPeriodId={currentPeriodId}
+                        isGrouped={true}
+                        isFixedExpenseList={true}
                       />
                     ))}
                   </div>
@@ -505,14 +497,14 @@ export function BudgetView({
                       <button
                         type="button"
                         onClick={() => setShowCancelledList(!showCancelledList)}
-                        className="w-full p-3 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] flex items-center justify-between transition-colors cursor-pointer text-left border-none shadow-none"
+                        className="w-full p-3 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-subtle shadow-subtle hover:bg-black/[0.02] dark:hover:bg-white/[0.04] flex items-center justify-between transition-colors cursor-pointer text-left"
                       >
                         <div className="flex items-center gap-2">
-                          <Clock size={15} className="text-[var(--warning-color)] shrink-0" />
+                          <Clock size={15} className="text-amber-500 shrink-0" />
                           <span className="text-xs font-bold text-[var(--text-primary)]">
                             {config.language === 'en' ? 'Cancelled / Ended Subscriptions' : 'Uppsagda & avslutade abonnemang'}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full bg-[var(--warning-color)]/12 text-[var(--warning-color)] font-semibold text-micro-label">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-[11px]">
                             {expiredCancelledExpenses.length}
                           </span>
                         </div>
@@ -525,21 +517,25 @@ export function BudgetView({
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden space-y-[var(--card-gap)] pt-2 px-2 -mx-2 pb-2 -mb-2"
+                            className="overflow-hidden pt-2"
                           >
-                            {expiredCancelledExpenses.map((expense) => (
-                              <BudgetItem
-                                key={expense.id}
-                                item={expense}
-                                onClick={() => onViewFixedExpense(expense)}
-                                currency={config?.currency || 'kr'}
-                                type="expense"
-                                language={config.language as Language}
-                                t={t}
-                                config={config}
-                                currentPeriodId={currentPeriodId}
-                              />
-                            ))}
+                            <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+                              {expiredCancelledExpenses.map((expense) => (
+                                <BudgetItem
+                                  key={expense.id}
+                                  item={expense}
+                                  onClick={() => onViewFixedExpense(expense)}
+                                  currency={config?.currency || 'kr'}
+                                  type="expense"
+                                  language={config.language as Language}
+                                  t={t}
+                                  config={config}
+                                  currentPeriodId={currentPeriodId}
+                                  isGrouped={true}
+                                  isFixedExpenseList={true}
+                                />
+                              ))}
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -578,9 +574,6 @@ export function BudgetView({
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="font-normal truncate">
-                        {config.language === 'en' ? 'Sort:' : 'Sortera:'}
-                      </span>
                       <span className="font-medium text-[var(--text-primary)] truncate">
                         {savingSortBy === 'day' 
                           ? (config.language === 'en' ? 'Day' : 'Dragningsdag') 
@@ -600,7 +593,7 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="space-y-[var(--card-gap)]">
+                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
                     {sortedSavings.map((saving) => (
                       <BudgetItem 
                         key={saving.id}
@@ -612,6 +605,7 @@ export function BudgetView({
                         t={t}
                         config={config}
                         currentPeriodId={currentPeriodId}
+                        isGrouped={true}
                       />
                     ))}
                   </div>

@@ -199,7 +199,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-input,12px)] text-body text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/15 outline-none transition-all shadow-none ${
+            className={`w-full min-h-[48px] bg-[var(--surface-input)] border border-transparent focus:border-[var(--accent-color)] rounded-[10px] text-body text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] outline-none transition-colors shadow-none ${
               leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')
@@ -212,11 +212,11 @@ export const SmartInput: React.FC<SmartInputProps> = ({
               type="button"
               onClick={handleClear}
               aria-label="Rensa"
-              className={`absolute top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] dark:hover:text-white p-1 cursor-pointer transition-colors z-10 ${
+              className={`absolute top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-2 cursor-pointer transition-colors z-10 ${
                 hasInsideSubmit ? 'right-12 sm:right-13.5' : 'right-2.5'
               }`}
             >
-              <Icon name="x" size={14} />
+              <Icon name="x" size={16} />
             </button>
           )}
 
@@ -227,14 +227,14 @@ export const SmartInput: React.FC<SmartInputProps> = ({
               title={submitTitle || (isProcessing ? 'Bearbetar...' : submitText)}
               aria-label={submitAriaLabel || (isProcessing ? 'Bearbetar...' : submitText)}
               disabled={(!value.trim() && !allowSubmitWhenEmpty) || isProcessing || disabled}
-              className={`absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-button-sm,12px)] ${
+              className={`absolute right-2 z-10 w-10 h-10 rounded-[8px] ${
                 submitButtonClassName || 'bg-[var(--accent-color)] text-[var(--on-accent)] border border-[var(--accent-color)]'
-              } hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed`}
+              } hover:opacity-90 disabled:opacity-30 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed shadow-none`}
             >
               {isProcessing ? (
-                <Icon name="spinner" size={14} className="animate-spin" />
+                <Icon name="spinner" size={16} className="animate-spin" />
               ) : (
-                submitIcon || <Icon name="check" size={14} />
+                submitIcon || <Icon name="check" size={16} />
               )}
             </button>
           )}
@@ -245,10 +245,10 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           <button
             type="submit"
             disabled={!value.trim() || isProcessing || disabled}
-            className="h-[46px] px-4 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-body-medium flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+            className="min-h-[48px] px-4 rounded-[10px] bg-[var(--accent-color)] text-[var(--on-accent)] text-button flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-none active:scale-95 shrink-0"
           >
             {isProcessing ? (
-              <Icon name="spinner" size={15} className="animate-spin" />
+              <Icon name="spinner" size={16} className="animate-spin" />
             ) : (
               <span>{submitText}</span>
             )}

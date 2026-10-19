@@ -56,9 +56,7 @@ export function VariableAmountUpdateModal({
       onClose={onClose}
       title={item.name}
       headerLeading={
-        <div className="w-9 h-9 bg-[var(--surface-color)] rounded-full flex items-center justify-center shadow-none shrink-0 overflow-hidden border-none">
-          <BudgetItemLogo item={item} type={item.budgetType === 'income' ? 'income' : 'expense'} config={config} />
-        </div>
+        <BudgetItemLogo item={item} type={item.budgetType === 'income' ? 'income' : 'expense'} config={config} />
       }
       size="sm"
       zIndex={110}

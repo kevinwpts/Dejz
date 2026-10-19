@@ -194,7 +194,7 @@ export function ManageAccountModal({
               <h4 className="text-section-title px-1">
                 {t('connectedAccounts' as any) || 'Inloggningsmetoder'}
               </h4>
-              <Card variant="default" padding="none" className="divide-y divide-menu bg-[var(--surface-color)] border border-subtle shadow-2xs">
+              <Card variant="default" padding="none" className="divide-y divide-menu">
                 {identities.map((identity) => (
                   <ListRow
                     key={identity.id}

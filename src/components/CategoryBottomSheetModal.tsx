@@ -181,7 +181,7 @@ export function CategoryBottomSheetModal({
       bodyClassName="px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0"
     >
               {/* Category Budget Status Card */}
-              <div className="p-4 rounded-[var(--radius-card,20px)] bg-[var(--surface-color)] border border-subtle shrink-0 space-y-3">
+              <div className="p-4 rounded-[var(--radius-card,24px)] bg-[var(--surface-color)] border-none shrink-0 space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   {/* Left: Main text + Subtext */}
                   <div className="flex flex-col min-w-0 flex-1">
@@ -223,14 +223,14 @@ export function CategoryBottomSheetModal({
                   {/* Right: Percentage pill (only when hasBudget) */}
                   {hasBudget && (
                     <span
-                      className={`text-label font-semibold px-2.5 py-1 rounded-full border tabular-nums shrink-0 whitespace-nowrap mt-0.5 ${
+                      className={`text-label font-semibold px-2.5 py-1 rounded-full border-none tabular-nums shrink-0 whitespace-nowrap mt-0.5 ${
                         remaining < 0
-                          ? 'bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]'
+                          ? 'bg-[var(--danger-container)] text-[var(--danger-color)]'
                           : remaining === 0
-                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-subtle'
+                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)]'
                           : actualTotalSpent === 0
-                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-subtle'
-                          : 'bg-[var(--success-container)] text-[var(--success-color)] border-[var(--success-color)]'
+                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)]'
+                          : 'bg-[var(--success-container)] text-[var(--success-color)]'
                       }`}
                     >
                       {usedPercentage} % {isEn ? 'used' : 'använt'}
@@ -252,7 +252,7 @@ export function CategoryBottomSheetModal({
                         remaining < 0
                           ? 'bg-[var(--danger-color)] dark:bg-[var(--danger-color)]'
                           : remaining === 0
-                          ? 'bg-neutral-400 dark:bg-neutral-500'
+                          ? 'bg-[var(--text-tertiary)]'
                           : 'bg-[var(--success-color)] dark:bg-[var(--success-color)]'
                       }`}
                       style={{
@@ -277,7 +277,7 @@ export function CategoryBottomSheetModal({
                       </span>
                     </div>
 
-                    <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,20px)] border border-subtle overflow-hidden divide-y divide-subtle">
+                    <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,24px)] border-none shadow-none overflow-hidden divide-subtle">
                       {matchingFixedExpenses.map((fe) => (
                         <BudgetItem
                           key={fe.id}
@@ -318,21 +318,24 @@ export function CategoryBottomSheetModal({
                   )}
 
                   {displayTransactions.length > 0 ? (
-                    <div className="space-y-2.5 overflow-y-auto no-scrollbar pr-0.5 flex-1">
-                      {displayTransactions.map((tx) => (
-                        <TransactionItem
-                          key={tx.id}
-                          transaction={tx}
-                          config={config}
-                          onView={onViewTransaction}
-                          onDelete={onDeleteTransaction}
-                          onToggleStar={onToggleStar}
-                          showDate={true}
-                        />
-                      ))}
+                    <div className="overflow-y-auto no-scrollbar pr-0.5 flex-1">
+                      <div className="rounded-card bg-[var(--surface-color)] shadow-none border-none divide-subtle overflow-hidden">
+                        {displayTransactions.map((tx) => (
+                          <TransactionItem
+                            key={tx.id}
+                            transaction={tx}
+                            isGrouped={true}
+                            config={config}
+                            onView={onViewTransaction}
+                            onDelete={onDeleteTransaction}
+                            onToggleStar={onToggleStar}
+                            showDate={true}
+                          />
+                        ))}
+                      </div>
                     </div>
                   ) : matchingFixedExpenses.length > 0 ? (
-                    <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.02] dark:bg-white/[0.02] border border-subtle text-center">
+                    <div className="p-4 rounded-[var(--radius-card-nested,16px)] bg-black/[0.02] dark:bg-white/[0.02] border-none text-center">
                       <p className="text-secondary text-[var(--text-tertiary)]">
                         {isEn ? 'No variable expenses recorded in this period' : 'Inga rörliga utgifter registrerade denna period'}
                       </p>

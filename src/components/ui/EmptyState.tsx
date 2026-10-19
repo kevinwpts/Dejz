@@ -36,10 +36,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <div
-      className={`bg-[var(--surface-color)] rounded-[var(--radius-card,16px)] p-6 sm:p-7 flex flex-col items-center justify-center text-center border border-subtle shadow-none ${className}`}
+      className={`bg-[var(--surface-color)] rounded-card p-6 sm:p-7 flex flex-col items-center justify-center text-center border-none shadow-subtle ${className}`}
     >
       {icon && (
-        <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] mb-3 shrink-0">
+        <div className="flex items-center justify-center text-[var(--text-tertiary)] mb-2.5 shrink-0">
           {renderIcon()}
         </div>
       )}

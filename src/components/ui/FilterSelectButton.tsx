@@ -34,7 +34,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
           onClick();
         }
       }}
-      className={`h-11 px-4 rounded-full transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans border border-[var(--border-divider)]/60 shadow-subtle bg-[var(--surface-color)] dark:bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60 dark:hover:bg-white/[0.05] ${className}`}
+      className={`min-h-[44px] px-3.5 rounded-[8px] transition-colors duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans border-none shadow-none bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] ${className}`}
     >
       <div className="flex items-center gap-2.5 min-w-0 flex-1">
         {icon && <span className="text-[var(--text-secondary)] shrink-0">{icon}</span>}

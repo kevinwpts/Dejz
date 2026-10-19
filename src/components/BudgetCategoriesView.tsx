@@ -405,7 +405,7 @@ export function BudgetCategoriesView({
   const incomeCategoriesList = (config.incomeCategories as Category[]) || DEFAULT_INCOME_CATEGORIES;
 
   return (
-    <div className="space-y-[var(--menu-content-gap)] font-sans pb-10 page-max mx-auto w-full">
+    <div className="flex flex-col gap-section font-sans w-full">
       {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
         <SegmentedControl
@@ -420,26 +420,24 @@ export function BudgetCategoriesView({
       )}
 
       {activeCategoryType === 'expense' ? (
-        <div className="space-y-[var(--menu-content-gap)]">
+        <div className="flex flex-col gap-section">
           {/* 1. Toppmodul (visas endast vid budgetfördelning) */}
           {effectiveMode !== 'categories' && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-[var(--surface-color)]/95 backdrop-blur-md rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-subtle border border-subtle space-y-3"
+              className="sticky top-0 z-20 bg-[var(--surface-color)]/95 backdrop-blur-md rounded-card card-p-md shadow-none border-none space-y-3"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-body-medium font-semibold text-[var(--text-secondary)]">
+                  <span className="text-metric-label font-medium text-[var(--text-secondary)]">
                     {isEn ? 'Left to allocate' : 'Kvar att fördela'}
                   </span>
                   <div
-                    className={`text-large-amount font-amount tabular-nums ${
+                    className={`text-large-amount font-semibold font-amount tabular-nums ${
                       isOverAllocated
                         ? 'text-[var(--danger-color)]'
-                        : remainingToAllocate === 0
-                        ? 'text-[var(--text-primary)]'
                         : 'text-[var(--text-primary)]'
                     }`}
                   >
@@ -447,7 +445,7 @@ export function BudgetCategoriesView({
                   </div>
                 </div>
 
-                <div className="text-right text-body-medium font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                <div className="text-right text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
@@ -518,17 +516,17 @@ export function BudgetCategoriesView({
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
+                    className="w-full flex items-center justify-between px-4 py-3.5 min-h-[64px] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer text-left group"
                   >
                     {/* Vänster: Tydlig rund ikon & kategorinamn */}
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
                       <CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} />
                       <div className="min-w-0 flex flex-col justify-center">
-                        <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                        <span className="text-card-title text-[var(--text-primary)] truncate">
                           {cat.name}
                         </span>
                         {fixedSpent > 0 && effectiveMode === 'budget' && (
-                          <span className="text-micro-label font-normal text-[var(--text-tertiary)] truncate mt-0.5">
+                          <span className="text-secondary text-[var(--text-tertiary)] truncate mt-0.5">
                             {isEn ? 'Fixed: ' : 'Fasta: '}
                             {formatAmount(fixedSpent, config.language)} {curr}
                           </span>
@@ -542,7 +540,7 @@ export function BudgetCategoriesView({
                         {isEditingThis ? (
                           <div
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center bg-white dark:bg-black/40 rounded-[var(--radius-sm,6px)] px-2.5 py-1 border border-[var(--accent-color)] shadow-xs"
+                            className="flex items-center bg-[var(--surface-input)] rounded-[var(--radius-button-sm,10px)] px-3 py-1.5 min-h-[40px] border border-[var(--accent-color)] shadow-none"
                           >
                             <input
                               type="text"
@@ -575,10 +573,10 @@ export function BudgetCategoriesView({
                                   e.currentTarget.blur();
                                 }
                               }}
-                              className="w-16 bg-transparent border-none text-right text-body-medium font-semibold text-[var(--text-primary)] font-amount tabular-nums outline-none"
+                              className="w-20 bg-transparent border-none text-right text-list-amount text-[var(--text-primary)] font-amount tabular-nums outline-none"
                               placeholder="0"
                             />
-                            <span className="text-micro-label font-semibold text-[var(--text-secondary)] pl-1 select-none">
+                            <span className="text-secondary text-[var(--text-secondary)] pl-1 select-none">
                               {curr}
                             </span>
                           </div>
@@ -590,12 +588,12 @@ export function BudgetCategoriesView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                             }}
-                            className="px-3 py-1.5 rounded-[var(--radius-sm,6px)] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-subtle cursor-pointer flex items-center gap-1 active:scale-95"
+                            className="px-3 py-1.5 min-h-[40px] rounded-[var(--radius-button-sm,10px)] bg-[var(--surface-input)] hover:bg-[var(--surface-hover)] transition-colors border-none cursor-pointer flex items-center gap-1 active:scale-95"
                           >
-                            <span className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)]">
+                            <span className="text-list-amount font-amount tabular-nums text-[var(--text-primary)]">
                               {catBudget > 0 ? formatAmount(catBudget, config.language) : '0'}
                             </span>
-                            <span className="text-micro-label font-semibold text-[var(--text-secondary)]">
+                            <span className="text-secondary text-[var(--text-secondary)]">
                               {curr}
                             </span>
                           </button>
@@ -603,7 +601,7 @@ export function BudgetCategoriesView({
                       </div>
                     ) : (
                       <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
-                        <ChevronRight size={16} strokeWidth={2} />
+                        <ChevronRight size={18} strokeWidth={2} />
                       </div>
                     )}
                   </div>
@@ -634,10 +632,10 @@ export function BudgetCategoriesView({
                 <ListRow
                   key={cat.id || index}
                   variant="grouped"
-                  density="compact"
                   showChevron
                   icon={<CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} noBackground />}
                   title={cat.name}
+                  titleWeight="semibold"
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
                 />
               );
@@ -654,9 +652,9 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => setShowResetBudgetConfirm(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-label font-semibold text-[var(--text-tertiary)] hover:text-[var(--danger-color)] dark:hover:text-[var(--danger-color)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-[var(--radius-button-sm,10px)] text-secondary font-medium text-[var(--text-tertiary)] hover:text-[var(--danger-color)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer active:scale-95"
             >
-              <RotateCcw size={13} strokeWidth={2} />
+              <RotateCcw size={15} strokeWidth={2} />
               <span>{isEn ? 'Reset budget to 0' : 'Nollställ budget'}</span>
             </button>
           )}
@@ -664,9 +662,9 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => setIsResetCategoriesModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-label font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-[var(--radius-button-sm,10px)] text-secondary font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer active:scale-95"
             >
-              <RotateCcw size={13} strokeWidth={2} />
+              <RotateCcw size={15} strokeWidth={2} />
               <span>{isEn ? 'Reset categories to default' : 'Återställ kategorier'}</span>
             </button>
           )}

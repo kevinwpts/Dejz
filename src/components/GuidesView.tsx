@@ -7,6 +7,8 @@ import { Card } from './ui';
 interface GuidesViewProps {
   onBack: () => void;
   config: Config;
+  selectedGuideId?: string | null;
+  onSelectGuide?: (id: string | null) => void;
 }
 
 interface GuideItem {
@@ -23,9 +25,17 @@ interface GuideItem {
   }[];
 }
 
-export function GuidesView({ config }: GuidesViewProps) {
+export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectGuide }: GuidesViewProps) {
   const isEn = config.language === 'en';
-  const [selectedGuideId, setSelectedGuideId] = useState<string | null>(null);
+  const [internalGuideId, setInternalGuideId] = useState<string | null>(null);
+  const selectedGuideId = externalGuideId !== undefined ? externalGuideId : internalGuideId;
+  const handleSelectGuide = (id: string | null) => {
+    if (onSelectGuide) {
+      onSelectGuide(id);
+    } else {
+      setInternalGuideId(id);
+    }
+  };
 
   const guides: GuideItem[] = [
     {
@@ -140,32 +150,20 @@ export function GuidesView({ config }: GuidesViewProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-[var(--menu-content-gap)] pb-20 page-max mx-auto w-full font-sans"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="flex flex-col gap-section w-full font-sans"
     >
       {/* If a specific guide is opened */}
       {selectedGuide ? (
-        <div className="space-y-[var(--card-gap)]">
-          {/* Top Back / Breadcrumb */}
-          <button
-            type="button"
-            onClick={() => setSelectedGuideId(null)}
-            className="text-secondary font-semibold text-[var(--accent-color)] hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            ← {isEn ? 'Back to all guides' : 'Tillbaka till alla guider'}
-          </button>
-
-          {/* Guide Header */}
-          <Card variant="default" padding="lg" className="space-y-2">
-            <div className="flex items-center gap-2 text-secondary font-bold text-[var(--accent-color)]">
-              <selectedGuide.icon size={16} strokeWidth={2.5} />
+        <div className="flex flex-col gap-element">
+          {/* Guide Intro Card */}
+          <Card variant="default" padding="lg" className="space-y-1.5">
+            <div className="flex items-center gap-2 text-secondary font-semibold text-[var(--accent-color)]">
+              <selectedGuide.icon size={15} strokeWidth={2.2} />
               <span>{selectedGuide.readTime} {isEn ? 'read' : 'lästid'}</span>
             </div>
-            <h2 className="text-page-title font-extrabold text-[var(--text-primary)] tracking-tight">
-              {selectedGuide.title}
-            </h2>
             <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
               {selectedGuide.subtitle}
             </p>
@@ -214,55 +212,39 @@ export function GuidesView({ config }: GuidesViewProps) {
         </div>
       ) : (
         /* Guides Index List */
-        <div className="space-y-[var(--card-gap)]">
-          <Card variant="default" padding="lg" className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center mx-auto">
-              <BookOpen size={22} strokeWidth={2} />
-            </div>
-            <h2 className="text-page-title font-bold text-[var(--text-primary)]">
-              {isEn ? 'Guides & Instructions' : 'Guider & Instruktioner'}
-            </h2>
-            <p className="text-secondary text-[var(--text-secondary)] leading-relaxed max-w-xs mx-auto">
-              {isEn
-                ? 'Learn how to get the most out of Dejz with our step-by-step guides.'
-                : 'Lär dig hur du får ut det mesta av Dejz med våra enkla steg-för-steg-guider.'}
-            </p>
-          </Card>
-
-          <div className="space-y-[var(--card-gap)]">
-            {guides.map((g) => {
-              const Icon = g.icon;
-              return (
-                <Card
-                  key={g.id}
-                  variant="default"
-                  padding="md"
-                  isInteractive
-                  onClick={() => setSelectedGuideId(g.id)}
-                  className="w-full flex items-center justify-between gap-3 text-left cursor-pointer"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <Icon size={18} strokeWidth={2} />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-body font-bold text-[var(--text-primary)] block truncate">
-                        {g.title}
-                      </span>
-                      <span className="text-secondary text-[var(--text-secondary)] truncate block mt-0.5">
-                        {g.subtitle}
-                      </span>
-                    </div>
+        <div className="flex flex-col gap-element">
+          {guides.map((g) => {
+            const Icon = g.icon;
+            return (
+              <Card
+                key={g.id}
+                variant="default"
+                padding="md"
+                interactive
+                onClick={() => handleSelectGuide(g.id)}
+                className="w-full flex items-center justify-between gap-3 text-left cursor-pointer group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Icon size={18} strokeWidth={2} />
                   </div>
-
-                  <div className="flex items-center gap-1 text-secondary font-semibold text-[var(--text-secondary)] shrink-0">
-                    <span className="text-label opacity-75">{g.readTime}</span>
-                    <ChevronRight size={16} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
+                  <div className="min-w-0">
+                    <span className="text-body-medium font-semibold text-[var(--text-primary)] block truncate">
+                      {g.title}
+                    </span>
+                    <span className="text-secondary text-[var(--text-secondary)] truncate block mt-0.5">
+                      {g.subtitle}
+                    </span>
                   </div>
-                </Card>
-              );
-            })}
-          </div>
+                </div>
+
+                <div className="flex items-center gap-1 text-secondary font-medium text-[var(--text-secondary)] shrink-0">
+                  <span className="text-label opacity-75">{g.readTime}</span>
+                  <ChevronRight size={16} strokeWidth={2.2} className="group-hover:translate-x-0.5 transition-transform opacity-60" />
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </motion.div>

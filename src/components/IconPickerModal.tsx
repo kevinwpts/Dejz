@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BottomSheet, Input } from './ui';
-import { Search, Sparkles, Check } from 'lucide-react';
+import { Search, Check } from 'lucide-react';
 import { 
   ICONS8_CATEGORY_ICONS, 
   ICONS8_CATEGORY_GROUPS, 
@@ -66,11 +66,6 @@ export function IconPickerModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Välj kategoriikon"
-      headerLeading={
-        <div className="w-9 h-9 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center shrink-0">
-          <Sparkles size={18} />
-        </div>
-      }
       size="xl"
       zIndex={150}
     >
@@ -141,17 +136,17 @@ export function IconPickerModal({
                   onClick={() => handleSelect(item.key)}
                   className={`relative aspect-square rounded-[var(--radius-card,20px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                     isSelected
-                      ? 'bg-[var(--accent-color)]/10 border-2 border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/20 shadow-xs scale-[1.02]'
-                      : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-color)] hover:border-[var(--accent-color)]/40'
+                      ? 'bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)] scale-[1.02]'
+                      : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border-none'
                   }`}
                 >
-                  <div className="w-10 h-10 flex items-center justify-center p-1 rounded-full bg-black/[0.02] dark:bg-white/[0.04]">
+                  <div className="w-9 h-9 flex items-center justify-center">
                     <img 
                       src={iconUrl} 
                       alt={item.name} 
                       width={34} 
                       height={34} 
-                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs transition-transform group-hover:scale-110" 
+                      className="w-full h-full object-contain pointer-events-none transition-transform group-hover:scale-110" 
                       loading="lazy" 
                     />
                   </div>
@@ -159,7 +154,7 @@ export function IconPickerModal({
                     {item.name.split('/')[0].trim()}
                   </span>
                   {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center shadow-xs">
+                    <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center">
                       <Check size={10} strokeWidth={2.5} />
                     </div>
                   )}

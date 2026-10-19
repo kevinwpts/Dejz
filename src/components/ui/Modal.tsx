@@ -85,11 +85,11 @@ export const Modal: React.FC<ModalProps> = ({
 
           {/* Modal / Bottom Sheet Card */}
           <motion.div
-            initial={{ opacity: 0, y: center ? 20 : 40, scale: center ? 0.95 : 0.98 }}
+            initial={{ opacity: 0, y: center ? 16 : '100%', scale: center ? 0.96 : 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: center ? 20 : 30, scale: center ? 0.95 : 0.98 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--surface-color))] ${
+            exit={{ opacity: 0, y: center ? 16 : '100%', scale: center ? 0.96 : 1 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] ${
               center ? 'rounded-[var(--radius-modal,24px)]' : 'rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)]'
             } border-none shadow-modal max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >

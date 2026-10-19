@@ -62,7 +62,7 @@ export function AnalysisView({
 
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('variable');
+  const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
   const [_showAllCategories, setShowAllCategories] = useState(false);
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
   const [isRemainingInfoOpen, setIsRemainingInfoOpen] = useState(false);
@@ -490,23 +490,23 @@ export function AnalysisView({
   if (!stats) return null;
 
   return (
-    <div className="flex flex-col gap-[var(--menu-content-gap)] font-sans">
+    <div className="space-y-[var(--menu-content-gap)] font-sans">
       {/* 1. Top Controls: Inline Period Selector + Filter Options */}
-      <div className="flex items-center justify-between gap-2.5 sm:gap-3 py-1 px-2.5 -mx-2.5 overflow-x-auto no-scrollbar">
+      <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         {/* Period Button */}
         <button
           type="button"
           onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-shrink-0 h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border-none shadow-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
+          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-subtle shadow-2xs hover:bg-black/[0.02] dark:hover:bg-white/[0.04] cursor-pointer active:scale-[0.98] transition-all select-none"
         >
-          <Calendar size={14} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
+          <Calendar size={14} className="text-[var(--text-secondary)] shrink-0" />
           <span className="truncate max-w-[120px] sm:max-w-none">{periodDisplayName}</span>
           {currentPeriod?.isCurrent && (
-            <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08] text-[var(--text-primary)]">
+            <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
               {isEn ? 'Current' : 'Nu'}
             </span>
           )}
-          <ChevronDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
+          <ChevronDown size={13} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
         </button>
 
         {/* Inline Filter Options ("Alla", "Rörliga", "Fasta") */}
@@ -558,7 +558,7 @@ export function AnalysisView({
       />
 
       {/* 2. Sammanfattningskort med samma stil och proportioner som övriga appen */}
-      <div className="grid grid-cols-2 gap-3 select-none">
+      <div className="grid grid-cols-2 gap-2.5 select-none">
         {/* Kvar att spendera / Kvar vid periodens slut */}
         <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
           <div className="flex items-center justify-between gap-1">
@@ -740,7 +740,7 @@ export function AnalysisView({
                         <span className="text-secondary font-medium text-[var(--text-secondary)] truncate max-w-full">
                           {hoveredItem.name}
                         </span>
-                        <span className="text-xl sm:text-2xl font-bold font-amount text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                        <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
                           {formatAmount(Math.round(hoveredItem.value), config.language)}
                           <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                         </span>
@@ -776,7 +776,7 @@ export function AnalysisView({
                     </span>
                     <span className="text-large-amount font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-0.5">
                       {formatAmount(Math.round(totalSpent), config.language)}
-                      <span className="text-secondary font-normal opacity-80 ml-1 select-none">{config.currency || "kr"}</span>
+                      <span className="text-label font-medium text-[var(--text-secondary)] ml-1 select-none">{config.currency || "kr"}</span>
                     </span>
                   </div>
                 )}
@@ -793,9 +793,6 @@ export function AnalysisView({
             <h3 className="text-section-title">
               {t('categories')}
             </h3>
-            <span className="text-micro-label text-[var(--text-tertiary)] font-medium">
-              {categoryData.length} {isEn ? (categoryData.length === 1 ? 'category' : 'categories') : (categoryData.length === 1 ? 'kategori' : 'kategorier')}
-            </span>
           </div>
 
           <Card variant="default" padding="none" className="divide-y divide-subtle overflow-hidden">
@@ -869,23 +866,21 @@ export function AnalysisView({
                         <p className="text-body-medium font-medium leading-tight truncate text-[var(--text-primary)]">
                           {item.name}
                         </p>
-                        <p className={`text-secondary leading-tight mt-1 truncate ${
-                          hasBudget && isOverBudget
-                            ? 'text-[var(--danger-color)] font-medium'
-                            : 'text-[var(--text-tertiary)]'
-                        }`}>
-                          {hasBudget ? (
+                        {hasBudget && (
+                          <p className={`text-secondary leading-tight mt-1 truncate ${
                             isOverBudget
+                              ? 'text-[var(--danger-color)] font-medium'
+                              : 'text-[var(--text-tertiary)]'
+                          }`}>
+                            {isOverBudget
                               ? (isEn 
                                   ? `${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'} over budget` 
                                   : `${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'} över budget`)
                               : (isEn 
                                   ? `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} left of budget` 
-                                  : `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} kvar av budget`)
-                          ) : (
-                            isEn ? 'No budget set' : 'Ingen budget satt'
-                          )}
-                        </p>
+                                  : `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} kvar av budget`)}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -916,62 +911,46 @@ export function AnalysisView({
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden bg-[var(--card-nested-bg)] border-t border-subtle"
                       >
-                        <div className="p-3.5 sm:p-4 space-y-3.5">
-                          {/* Transaktioner */}
+                        <div className="divide-subtle">
+                          {displayTransactions.map((t) => (
+                            <TransactionItem 
+                              key={t.id}
+                              transaction={t}
+                              config={config}
+                              onView={onViewTransaction}
+                              onDelete={onDeleteTransaction}
+                              variant="transparent"
+                              showDate
+                            />
+                          ))}
 
-                          {/* Sektion 3: Transaktioner */}
-                          <div className="space-y-2">
+                          {displayFixedExpenses.map((fe) => {
+                            const feTransaction: Transaction = {
+                              id: fe.id,
+                              merchant: fe.name,
+                              category: fe.category,
+                              amount: fe.amount,
+                              type: 'expense',
+                              date: new Date().toISOString(),
+                            };
+                            return (
+                              <TransactionItem
+                                key={fe.id}
+                                transaction={feTransaction}
+                                isFixed={true}
+                                config={config}
+                                onClick={() => onViewFixedExpense?.(fe)}
+                                onView={() => onViewFixedExpense?.(fe)}
+                                variant="transparent"
+                              />
+                            );
+                          })}
 
-
-                            {displayTransactions.length > 0 && (
-                              <div className="space-y-1.5">
-                                {displayTransactions.map((t) => (
-                                  <TransactionItem 
-                                    key={t.id}
-                                    transaction={t}
-                                    config={config}
-                                    onView={onViewTransaction}
-                                    onDelete={onDeleteTransaction}
-                                    variant="nested"
-                                    showDate
-                                  />
-                                ))}
-                              </div>
-                            )}
-
-                            {displayFixedExpenses.length > 0 && (
-                              <div className="space-y-1.5">
-                                {displayFixedExpenses.map((fe) => {
-                                  const feTransaction: Transaction = {
-                                    id: fe.id,
-                                    merchant: fe.name,
-                                    category: fe.category,
-                                    amount: fe.amount,
-                                    type: 'expense',
-                                    date: new Date().toISOString(),
-                                  };
-                                  return (
-                                    <div key={fe.id}>
-                                      <TransactionItem
-                                        transaction={feTransaction}
-                                        isFixed={true}
-                                        config={config}
-                                        onClick={() => onViewFixedExpense?.(fe)}
-                                        onView={() => onViewFixedExpense?.(fe)}
-                                        variant="nested"
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                            {totalItemCount === 0 && (
-                              <div className="py-3 text-center text-[var(--text-tertiary)] text-secondary">
-                                {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
-                              </div>
-                            )}
-                          </div>
+                          {totalItemCount === 0 && (
+                            <div className="py-4 px-4 text-center text-[var(--text-tertiary)] text-secondary">
+                              {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}

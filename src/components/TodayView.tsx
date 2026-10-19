@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   RotateCcw,
   SlidersHorizontal,
@@ -82,12 +81,12 @@ export function TodayView({
   onNavigate,
   attentionItems: _attentionItems = [],
   onEditAttentionItem: _onEditAttentionItem,
-  transactions: _transactions,
+  _transactions,
   allTransactions = [],
   t,
   currentPeriodDate,
-  currentPeriodStart: _currentPeriodStart,
-  currentPeriodEnd: _currentPeriodEnd,
+  _currentPeriodStart,
+  _currentPeriodEnd,
   isCurrentPeriod,
   periods,
   setCurrentPeriodDate,
@@ -351,7 +350,7 @@ export function TodayView({
       : (selectedDayData?.transactions || []);
   }, [stats?.isPastPeriod, stats?.periodTransactions, selectedDayData?.transactions]);
 
-  const displayedFixedTransactions = (config?.showFixedExpensesInCalendar ?? true) ? fixedTransactions : [];
+  const displayedFixedTransactions = config?.showFixedExpensesInCalendar ? fixedTransactions : [];
 
   if (!stats) return null;
 
@@ -404,7 +403,7 @@ export function TodayView({
             <button
               type="button"
               onClick={() => onNavigate("profile", "budget")}
-              className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border-none text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
+              className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
             >
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
@@ -443,7 +442,7 @@ export function TodayView({
 
             {/* Horisontell karusell av mini-kort för kategoribudgetar (utan mätare) */}
             <div
-              className="flex gap-3 overflow-x-auto py-3 px-3 -mx-3 -my-1.5 scroll-px-3 no-scrollbar select-none snap-x snap-mandatory"
+              className="flex gap-3 overflow-x-auto py-1.5 px-0.5 no-scrollbar select-none snap-x snap-mandatory"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -464,7 +463,7 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       handleCategoryClick(cat.name);
                     }}
-                    className="snap-start flex-shrink-0 min-w-[144px] sm:min-w-[160px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border-none hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
+                    className="snap-start flex-shrink-0 min-w-[144px] sm:min-w-[160px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
                   >
                     {/* Ikon */}
                     <div className="flex items-center justify-between gap-2">
@@ -546,44 +545,24 @@ export function TodayView({
         </div>
 
         {/* Selected Day's Transactions List */}
-        <div className="space-y-2.5 pt-0.5">
-          <AnimatePresence mode="popLayout">
-            {displayedVariableTransactions.length > 0 ? (
-              <motion.div className="space-y-[var(--card-gap)]" key="transactions">
-                {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
-                  <motion.div
-                    key={transaction.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.02 }}
-                  >
-                    <TransactionItem
-                      transaction={transaction}
-                      onView={onViewTransaction}
-                      onDelete={onDeleteTransaction}
-                      onToggleStar={onToggleStar}
-                      config={config}
-                      onClick={() => {
-                        if (onViewTransaction) onViewTransaction(transaction);
-                      }}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : displayedFixedTransactions.length === 0 ? (
-              <EmptyState
-                title={isTodaySelected ? (lang === "en" ? "No transactions today" : "Inga transaktioner idag") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                description={isTodaySelected ? (lang === "en" ? "Log an expense or income with +." : "Registrera en utgift eller inkomst med +.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
-                onAction={() => onAddTransaction(selectedDate)}
-                actionLabel={`+ ${t("addExpense")}`}
-              />
-            ) : null}
-          </AnimatePresence>
+        <div className="pt-0.5">
+          {displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0 ? (
+            <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+              {displayedVariableTransactions.map((transaction: Transaction) => (
+                <TransactionItem
+                  key={transaction.id}
+                  transaction={transaction}
+                  isGrouped={true}
+                  onView={onViewTransaction}
+                  onDelete={onDeleteTransaction}
+                  onToggleStar={onToggleStar}
+                  config={config}
+                  onClick={() => {
+                    if (onViewTransaction) onViewTransaction(transaction);
+                  }}
+                />
+              ))}
 
-          {/* Fixed transactions for the day */}
-          {displayedFixedTransactions.length > 0 && (
-            <div className="space-y-[var(--card-gap)]">
               {displayedFixedTransactions.map((item) => {
                 const isItemVariable = Boolean(item.isVariable || item.originalItem?.isVariable || item.originalItem?.is_variable);
                 const tx: Transaction = {
@@ -599,26 +578,33 @@ export function TodayView({
                 };
 
                 return (
-                  <div key={item.id}>
-                    <TransactionItem
-                      transaction={tx}
-                      isFixed={true}
-                      isVariable={isItemVariable}
-                      config={config}
-                      onClick={() => {
-                        if (item.type === "income" && onViewIncome) {
-                          onViewIncome(item.originalItem);
-                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
-                          onViewMonthlySaving(item.originalItem);
-                        } else if (onViewFixedExpense) {
-                          onViewFixedExpense(item.originalItem);
-                        }
-                      }}
-                    />
-                  </div>
+                  <TransactionItem
+                    key={item.id}
+                    transaction={tx}
+                    isFixed={true}
+                    isGrouped={true}
+                    isVariable={isItemVariable}
+                    config={config}
+                    onClick={() => {
+                      if (item.type === "income" && onViewIncome) {
+                        onViewIncome(item.originalItem);
+                      } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
+                        onViewMonthlySaving(item.originalItem);
+                      } else if (onViewFixedExpense) {
+                        onViewFixedExpense(item.originalItem);
+                      }
+                    }}
+                  />
                 );
               })}
             </div>
+          ) : (
+            <EmptyState
+              title={isTodaySelected ? (lang === "en" ? "No transactions today" : "Inga transaktioner idag") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+              description={isTodaySelected ? (lang === "en" ? "Log an expense or income with +." : "Registrera en utgift eller inkomst med +.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+              onAction={() => onAddTransaction(selectedDate)}
+              actionLabel={`+ ${t("addExpense")}`}
+            />
           )}
         </div>
       </div>
@@ -637,8 +623,8 @@ export function TodayView({
       >
         <div className="space-y-[var(--card-gap)] pt-1">
           {/* Period */}
-          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border-none">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border-none">
+          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-[var(--surface-muted)]">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
               <Calendar size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
@@ -652,8 +638,8 @@ export function TodayView({
           </div>
 
           {/* Payday / Next Salary */}
-          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border-none">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border-none">
+          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-[var(--surface-muted)]">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
               <Clock size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">

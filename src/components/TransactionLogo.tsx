@@ -71,24 +71,24 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-14 h-14 rounded-lg',
-      icon: 28,
+      container: 'w-16 h-16 rounded-full',
+      icon: 30,
     },
     lg: {
-      container: 'w-12 h-12 rounded-card-nested',
-      icon: 24,
+      container: 'w-14 h-14 rounded-full',
+      icon: 26,
     },
     md: {
-      container: 'w-9 h-9 rounded-md',
-      icon: 18,
+      container: 'w-[42px] h-[42px] rounded-full',
+      icon: 20,
     },
     sm: {
-      container: 'w-7 h-7 rounded-xs',
-      icon: 14,
+      container: 'w-8 h-8 rounded-full',
+      icon: 15,
     },
   }[size] || {
-    container: 'w-9 h-9 rounded-md',
-    icon: 18,
+    container: 'w-[42px] h-[42px] rounded-full',
+    icon: 20,
   };
 
   // If this is an empty new transaction waiting for input, render a clean neutral placeholder
@@ -143,7 +143,7 @@ export function TransactionLogo({
 
   return (
     <div
-      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs select-none ${!bgColor ? "bg-[var(--surface-muted)] text-[var(--text-primary)]" : ""}`}
+      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 select-none ${!bgColor ? "bg-[var(--surface-muted)] text-[var(--text-primary)]" : ""}`}
       style={bgColor ? { backgroundColor: bgColor, color: textColor } : undefined}
     >
       <IconComponent size={sizeConfig.icon} strokeWidth={2} />

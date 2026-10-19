@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar as CalendarIcon, RotateCcw } from 'lucide-react';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { TranslationKey, Language } from '../i18n';
-import { BottomSheet, BottomSheetOption, Card } from './ui';
+import { BottomSheet, Card, ListRow } from './ui';
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -34,6 +34,9 @@ export function CalendarModal({
   language,
 }: CalendarModalProps) {
   const isSelectedCurrent = isCurrentPeriod;
+  const filteredPeriods = periods
+    ? periods.filter(p => !p.isFuture || p.isCurrent).slice().reverse()
+    : [];
 
   return (
     <BottomSheet
@@ -50,7 +53,7 @@ export function CalendarModal({
               onSelectDate(today);
               if (onPeriodChange) onPeriodChange(today);
             }}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer border-none shadow-none"
+            className="flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer border border-subtle shadow-none"
           >
             <RotateCcw size={12} strokeWidth={2.2} />
             <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -75,42 +78,47 @@ export function CalendarModal({
       )}
 
       {/* Quick list of periods/months */}
-      {periods && onPeriodChange && (
+      {filteredPeriods.length > 0 && onPeriodChange && (
         <Card variant="default" padding="none" className="divide-y divide-menu overflow-hidden mt-1">
-          {periods
-            .filter(p => !p.isFuture || p.isCurrent)
-            .slice()
-            .reverse()
-            .map((p, idx) => {
-              const [mPart, dRange] = p.name?.includes('(')
-                ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
-                : [p.name, ''];
+          {filteredPeriods.map((p, idx) => {
+            const [mPart, dRange] = p.name?.includes('(')
+              ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
+              : [p.name, ''];
 
-              const isSelected = Boolean(
-                currentPeriodDate && p.start && p.end &&
-                currentPeriodDate.getTime() >= p.start.getTime() &&
-                currentPeriodDate.getTime() <= p.end.getTime()
-              );
+            const isSelected = Boolean(
+              currentPeriodDate && p.start && p.end &&
+              currentPeriodDate.getTime() >= p.start.getTime() &&
+              currentPeriodDate.getTime() <= p.end.getTime()
+            );
 
-              return (
-                <BottomSheetOption
-                  key={p.name || idx}
-                  label={mPart}
-                  subtitle={dRange}
-                  badge={p.isCurrent ? (language === 'en' ? 'Current' : 'Nu') : undefined}
-                  icon={<CalendarIcon size={16} strokeWidth={2} />}
-                  isSelected={isSelected}
-                  onClick={() => {
-                    onPeriodChange(p.date);
-                    onSelectDate(p.date);
-                    onClose();
-                  }}
-                  className="rounded-none"
-                />
-              );
-            })}
+            return (
+              <ListRow
+                key={p.name || idx}
+                variant="grouped"
+                isLast={idx === filteredPeriods.length - 1}
+                icon={<CalendarIcon size={18} strokeWidth={2} />}
+                iconColor={isSelected ? 'text-[var(--accent-color)]' : 'text-[var(--text-secondary)]'}
+                title={mPart}
+                subtitle={dRange || undefined}
+                badge={
+                  p.isCurrent ? (
+                    <span className="text-micro-label font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
+                      {language === 'en' ? 'Current' : 'Nu'}
+                    </span>
+                  ) : undefined
+                }
+                showCheck={isSelected}
+                onClick={() => {
+                  onPeriodChange(p.date);
+                  onSelectDate(p.date);
+                  onClose();
+                }}
+              />
+            );
+          })}
         </Card>
       )}
     </BottomSheet>
   );
 }
+

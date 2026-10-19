@@ -4,8 +4,8 @@ import { Transaction, Config, FixedExpense, Income } from '../types';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
+import { Input } from './ui';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { Button, Input } from './ui';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -162,41 +162,40 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal flex flex-col overflow-hidden font-sans"
+            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal flex flex-col overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}
             <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 shrink-0">
-              <div className="flex-1">
-                <Input
-                  ref={inputRef}
-                  variant="search"
-                  autoFocus
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onClear={() => {
-                    setQuery('');
-                    inputRef.current?.focus();
-                  }}
-                  autoComplete="off"
-                  placeholder={getL10n(
-                    "Sök transaktion, fast utgift, butik...",
-                    "Search transactions, fixed expenses, stores...",
-                    "Søk transaksjon, fast utgift, butikk...",
-                    "Søg transaktion, fast udgift, butik...",
-                    "Etsi tapahtumaa, kiinteää kulua, kauppaa..."
-                  )}
-                />
-              </div>
+              <Input
+                ref={inputRef}
+                variant="search"
+                autoFocus
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onClear={() => {
+                  setQuery('');
+                  inputRef.current?.focus();
+                }}
+                autoComplete="off"
+                placeholder={getL10n(
+                  "Sök transaktion, fast utgift, butik...",
+                  "Search transactions, fixed expenses, stores...",
+                  "Søk transaksjon, fast utgift, butikk...",
+                  "Søg transaktion, fast udgift, butik...",
+                  "Etsi tapahtumaa, kiinteää kulua, kauppaa..."
+                )}
+                wrapperClassName="flex-1"
+              />
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
+              <button 
+                type="button"
+                onClick={onClose} 
+                className="h-10 px-3 rounded-full text-secondary font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0 active:scale-95"
               >
                 {getL10n("Avbryt", "Cancel", "Avbryt", "Annuller", "Peruuta")}
-              </Button>
+              </button>
             </div>
 
             {/* Results Scroll Container */}

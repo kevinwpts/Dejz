@@ -37,29 +37,33 @@ export function SelectionRow<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-4 rounded-[var(--radius-card-nested,12px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[50px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
+      className={`w-full flex items-center justify-between py-3 px-4 rounded-[12px] transition-colors cursor-pointer text-left min-h-[56px] border-2 ${
+        isSelected
+          ? 'bg-[var(--surface-color)] border-[var(--accent-color)] shadow-none'
+          : 'bg-transparent border-transparent hover:bg-[var(--bg-hover)]'
+      } disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] ${className}`}
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="flex items-center gap-3.5 min-w-0 flex-1">
         {icon && (
           <div
-            className="w-8 h-8 flex items-center justify-center shrink-0 bg-transparent text-[var(--text-primary)]"
+            className="w-8 h-8 flex items-center justify-center shrink-0 bg-transparent text-[var(--text-primary)] [&_svg]:w-[22px] [&_svg]:h-[22px]"
           >
             {icon}
           </div>
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className={`text-secondary truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium'}`}>
+            <span className={`text-body truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-normal text-[var(--text-primary)]'}`}>
               {label}
             </span>
             {badge && (
-              <span className="text-micro-label font-medium px-1.5 py-0.5 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
+              <span className="text-label font-medium px-1.5 py-0.5 rounded-[6px] bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
                 {badge}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-micro-label truncate mt-0.5 font-normal">
+            <p className="text-secondary truncate mt-0.5 font-normal">
               {subtitle}
             </p>
           )}
@@ -70,7 +74,7 @@ export function SelectionRow<T = string>({
         {rightElement}
         {isSelected && (
           <div className="text-[var(--accent-color)] shrink-0 pl-1">
-            <Icon name="check" size={18} />
+            <Icon name="check" size={20} />
           </div>
         )}
       </div>

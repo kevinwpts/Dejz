@@ -99,7 +99,7 @@ export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: Floa
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         className="fixed bottom-[5.5rem] right-4 sm:right-5 z-20 select-none pointer-events-auto"
       >
-        <div className="flex items-center bg-[var(--surface-color)]/95 backdrop-blur-md border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-full shadow-subtle overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
+        <div className="flex items-center bg-[var(--surface-color)]/95 backdrop-blur-md border-none text-[var(--text-primary)] rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.4)] overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
           <button
             type="button"
             onClick={handleOpen}
@@ -115,7 +115,7 @@ export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: Floa
             type="button"
             onClick={handleDismiss}
             aria-label="Stäng feedback-knapp"
-            className="p-1 pr-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-l border-[var(--border-subtle)]"
+            className="p-1 pr-2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none"
           >
             <X size={10} strokeWidth={2.2} />
           </button>

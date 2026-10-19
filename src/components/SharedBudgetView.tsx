@@ -49,34 +49,28 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-[var(--menu-content-gap)] pb-20 page-max mx-auto w-full font-sans"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="flex flex-col gap-section w-full font-sans"
     >
-      {/* 1. Header Hero - Compact */}
-      <Card variant="default" padding="md" className="text-center space-y-2 relative overflow-hidden">
-        <div className="w-11 h-11 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] flex items-center justify-center mx-auto shrink-0">
-          <Users2 size={20} strokeWidth={2} />
+      {/* 1. Compact Intro Description */}
+      <Card variant="default" padding="md" className="flex items-center gap-3.5">
+        <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+          <Users2 size={18} strokeWidth={2} />
         </div>
-
-        <div className="space-y-1">
-          <h2 className="text-body-large font-bold text-[var(--text-primary)] tracking-tight">
-            {isEn ? 'Shared Budget with Partner' : 'Delad budget med partner'}
-          </h2>
-          <p className="text-secondary text-[var(--text-secondary)] opacity-80 leading-relaxed max-w-xs mx-auto">
-            {isEn
-              ? 'Share grocery budgets, see who paid what, and stay in sync in real time.'
-              : 'Dela matbudget, se vem som betalade vad och håll koll på hushållsekonomin tillsammans.'}
-          </p>
-        </div>
+        <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
+          {isEn
+            ? 'Share grocery budgets, see who paid what, and stay in sync in real time.'
+            : 'Dela matbudget, se vem som betalade vad och håll koll på hushållsekonomin tillsammans.'}
+        </p>
       </Card>
 
       {/* 2. Connection Status */}
       {isConnected ? (
         <div className="space-y-[var(--card-gap)]">
           {/* Connected Card */}
-          <Card variant="default" padding="lg" className="bg-[var(--success-container)] border border-[var(--success-color)]/20 space-y-3">
+          <Card variant="default" padding="lg" className="bg-[var(--success-container)] border-none space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[var(--success-color)] text-white flex items-center justify-center font-bold text-body shadow-xs">
@@ -130,7 +124,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
               {isEn ? '1. Your invite code' : '1. Din inbjudningskod'}
             </span>
 
-            <div className="flex items-center justify-between p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.03] dark:bg-white/[0.04] border border-subtle">
+            <div className="flex items-center justify-between p-2.5 rounded-[var(--radius-card-nested,16px)] bg-black/[0.03] dark:bg-white/[0.04] border-none">
               <span className="text-body font-bold font-mono tracking-widest text-[var(--text-primary)]">
                 {myInviteCode}
               </span>

@@ -5,7 +5,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { formatAmount, capitalize, formatDeductionDayDisplay } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
-import { Paperclip, Trash2, RotateCw, Heart, Clock } from 'lucide-react';
+import { Paperclip, Trash2, RotateCw, Clock } from 'lucide-react';
 import { getCancellationBadgeText } from '../utils/cancellation';
 import { feedback } from '../utils/feedback';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -40,7 +40,7 @@ export function TransactionItem({
   onClick, 
   displayAmount,
   showAllCategories,
-  isGrouped: _isGrouped,
+  isGrouped,
   variant,
   hideCategoryBadge,
   hideFixedBadge,
@@ -49,7 +49,6 @@ export function TransactionItem({
   onToggleStar: _onToggleStar,
 }: TransactionItemProps) {
   const transaction = originalTransaction as any;
-  const isStarred = Boolean(transaction.isStarred || (transaction.tags && Array.isArray(transaction.tags) && transaction.tags.includes('starred')));
   const isFixedItem = Boolean(
     isFixed || 
     transaction?.isFixed || 
@@ -109,6 +108,8 @@ export function TransactionItem({
   if (squared) {
     containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-4 px-3";
     paddingClasses = "";
+  } else if (isGrouped) {
+    containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
     paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[60px]";
@@ -179,15 +180,12 @@ export function TransactionItem({
     ? formatDeductionDayDisplay(transaction.deductionDay, config?.language || 'sv', true)
     : '';
 
-  const isEnLanguage = config?.language === 'en';
-  let formattedDayText = dayFormatted;
-  if (dayFormatted && !isEnLanguage && !dayFormatted.toLowerCase().startsWith('sista')) {
-    formattedDayText = `Den ${dayFormatted}`;
-  }
+  const formattedDayText = dayFormatted ? dayFormatted.replace(':', '') : '';
+  const fixedSubtitleRight = [methodStr, formattedDayText].filter(Boolean).join(', ');
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[var(--radius-card,20px)]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared || isGrouped ? '' : 'rounded-[var(--radius-card,14px)]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
@@ -266,11 +264,6 @@ export function TransactionItem({
               <div className="flex items-center min-w-0">
                 <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate flex-1 min-w-0 flex items-center">
                   <span className="truncate">{merchantName}</span>
-                  {isStarred && (
-                    <span title={getL10n('Hjärtmarkerad', 'Starred')} className="inline-flex items-center ml-1.5 shrink-0 text-rose-500">
-                      <Heart size={13} className="fill-rose-500 text-rose-500" />
-                    </span>
-                  )}
                   {isFixedItem && !hideFixedBadge && (
                     <span 
                       title={getL10n(
@@ -280,7 +273,7 @@ export function TransactionItem({
                         transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
                         transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
                       )}
-                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border-none shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
+                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-subtle shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
                     >
                       <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
                     </span>
@@ -298,14 +291,18 @@ export function TransactionItem({
                 )}
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date || transaction.createdAt) ? (
-                    <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
-                      {(() => {
-                        const ts = transaction.timestamp || transaction.createdAt || transaction.date;
-                        const d = new Date(ts);
-                        if (isNaN(d.getTime())) return null;
-                        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                      })()}
-                    </span>
+                    (() => {
+                      const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+                      const d = new Date(ts);
+                      if (isNaN(d.getTime())) return null;
+                      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                      if (timeStr === '00:00') return null;
+                      return (
+                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
+                          {timeStr}
+                        </span>
+                      );
+                    })()
                   ) : null
                 ) : showAllCategories && isSplit ? (
                   splitsArray.map((split: any, idx: number) => (
@@ -328,7 +325,7 @@ export function TransactionItem({
           
           {/* Primary Amount */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-1">
-            <p className={`text-list-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-metric-label)]'}`}>
+            <p className={`text-list-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-secondary opacity-80 font-normal ml-1">
@@ -345,20 +342,29 @@ export function TransactionItem({
               </span>
             </p>
             {(transaction.timestamp || transaction.date || transaction.createdAt) && !isFixedItem ? (
-              <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                {showDate 
-                  ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
-                  : (() => {
-                      const ts = transaction.timestamp || transaction.createdAt || transaction.date;
-                      const d = new Date(ts);
-                      if (isNaN(d.getTime())) return null;
-                      const hrs = d.getHours().toString().padStart(2, '0');
-                      const mins = d.getMinutes().toString().padStart(2, '0');
-                      return `${hrs}:${mins}`;
-                    })()}
-              </p>
+              (() => {
+                const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+                const d = new Date(ts);
+                if (isNaN(d.getTime())) return null;
+                if (showDate) {
+                  return (
+                    <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                      {d.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
+                    </p>
+                  );
+                }
+                const hrs = d.getHours().toString().padStart(2, '0');
+                const mins = d.getMinutes().toString().padStart(2, '0');
+                const timeStr = `${hrs}:${mins}`;
+                if (timeStr === '00:00') return null;
+                return (
+                  <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                    {timeStr}
+                  </p>
+                );
+              })()
             ) : isFixedItem && (
-              <div className="mt-1 flex items-center justify-end gap-1.5 flex-wrap">
+              <div className="mt-0.5 flex items-center justify-end gap-1.5 flex-wrap">
                 {transaction.originalAmount ? (
                   <span className="text-secondary text-[var(--text-tertiary)] font-normal mr-0.5 tabular-nums">
                     {formatAmount(transaction.originalAmount, config?.language || "sv")} {config?.currency || "kr"}
@@ -367,27 +373,26 @@ export function TransactionItem({
                      (config?.language === "en" ? "/yr" : "/år")}
                   </span>
                 ) : null}
-                {formattedDayText ? (
-                  <span className="text-secondary text-[var(--text-tertiary)] font-medium tabular-nums">
-                    {formattedDayText}
-                  </span>
+                {transaction.originalAmount && fixedSubtitleRight ? (
+                  <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label select-none">·</span>
                 ) : null}
-                {formattedDayText && methodStr ? (
-                  <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label">·</span>
-                ) : null}
-                {methodStr ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-micro-label font-medium bg-[var(--surface-muted)] text-[var(--text-secondary)] border-none select-none leading-none tracking-tight">
-                    {methodStr}
+                {fixedSubtitleRight ? (
+                  <span className="text-secondary text-[var(--text-tertiary)] font-normal tabular-nums select-none">
+                    {fixedSubtitleRight}
                   </span>
                 ) : (transaction.timestamp || transaction.date) ? (
-                  <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
-                    {(() => {
-                      const ts = transaction.timestamp || transaction.createdAt || transaction.date;
-                      const d = new Date(ts);
-                      if (isNaN(d.getTime())) return null;
-                      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                    })()}
-                  </span>
+                  (() => {
+                    const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+                    const d = new Date(ts);
+                    if (isNaN(d.getTime())) return null;
+                    const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                    if (timeStr === '00:00') return null;
+                    return (
+                      <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
+                        {timeStr}
+                      </span>
+                    );
+                  })()
                 ) : null}
               </div>
             )}

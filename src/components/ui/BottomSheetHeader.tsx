@@ -21,13 +21,13 @@ export function BottomSheetHeader({
 }: BottomSheetHeaderProps) {
   if (variant === 'centered') {
     return (
-      <div className={`page-px pt-3 sm:pt-4 pb-3 grid grid-cols-[40px_1fr_40px] items-center shrink-0 border-b border-subtle dark:border-transparent ${className}`}>
+      <div className={`page-px pt-3 sm:pt-4 pb-3 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-none ${className}`}>
         <div className="flex justify-start">
           {leading}
         </div>
         <div className="flex flex-col items-center justify-center text-center overflow-hidden px-2">
           {title && (
-            <h2 className="text-section-title truncate">
+            <h2 className="text-page-title truncate">
               {title}
             </h2>
           )}
@@ -39,7 +39,7 @@ export function BottomSheetHeader({
         </div>
         <div className="flex justify-end">
           <IconButton
-            icon={<Icon name="x" size={16} />}
+            icon={<Icon name="x" size={18} />}
             onClick={onClose}
             variant="muted"
             size="sm"
@@ -52,13 +52,13 @@ export function BottomSheetHeader({
 
   if (variant === 'actions') {
     return (
-      <div className={`page-px pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-subtle dark:border-transparent ${className}`}>
+      <div className={`page-px pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-none ${className}`}>
         <div className="flex items-center gap-2.5 min-w-0">
           {leading}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <IconButton
-            icon={<Icon name="x" size={16} />}
+            icon={<Icon name="x" size={18} />}
             onClick={onClose}
             variant="muted"
             size="sm"
@@ -71,12 +71,12 @@ export function BottomSheetHeader({
 
   // Standard variant
   return (
-    <div className={`page-px pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-subtle dark:border-transparent ${className}`}>
+    <div className={`page-px pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-none ${className}`}>
       <div className="flex items-center gap-3 min-w-0 pr-2">
         {leading}
         <div className="flex flex-col min-w-0">
           {title && (
-            <h2 className="text-section-title truncate">
+            <h2 className="text-page-title truncate">
               {title}
             </h2>
           )}
@@ -89,7 +89,7 @@ export function BottomSheetHeader({
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         <IconButton
-          icon={<Icon name="x" size={16} />}
+          icon={<Icon name="x" size={18} />}
           onClick={onClose}
           variant="muted"
           size="sm"

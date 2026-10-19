@@ -86,7 +86,7 @@ export function SettingsMainView({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="space-y-[var(--card-gap)]"
+        className="flex flex-col gap-section w-full font-sans"
       >
         <SettingsView
           activeSection={activeSection as any}
@@ -130,15 +130,15 @@ export function SettingsMainView({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="space-y-[var(--card-gap)] max-w-md mx-auto"
+      className="flex flex-col gap-section w-full font-sans"
     >
       <Card variant="default" padding="none" className="divide-y divide-menu">
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="calendar" size={18} />}
+          icon={<Icon name="calendar" size={22} />}
           title={t('salary')}
+          titleWeight="semibold"
           subtitle={
             config.payday 
               ? formatPaydaySummary(config.payday, config.language)
@@ -149,50 +149,50 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="chart-pie" size={18} />}
+          icon={<Icon name="chart-pie" size={22} />}
           title={config.language === 'en' ? 'Budget' : 'Budget'}
+          titleWeight="semibold"
           subtitle={config.language === 'en' ? 'Allocate monthly budget per category' : 'Fördela budget per kategori'}
           onClick={() => handleSectionClick('budget')}
         />
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="tag" size={18} />}
+          icon={<Icon name="tag" size={22} />}
           title={config.language === 'en' ? 'Categories' : 'Kategorier'}
+          titleWeight="semibold"
           subtitle={config.language === 'en' ? 'Manage expense and income categories' : 'Hantera utgifts- och inkomstkategorier'}
           onClick={() => handleSectionClick('categories')}
         />
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="credit-card" size={18} />}
+          icon={<Icon name="credit-card" size={22} />}
           title={config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}
+          titleWeight="semibold"
           subtitle={`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
           onClick={() => handleSectionClick('paymentMethods')}
         />
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="coins" size={18} />}
+          icon={<Icon name="coins" size={22} />}
           title={config?.language === 'en' ? 'Currency' : 'Valuta'}
+          titleWeight="semibold"
           subtitle={config.currency || 'kr'}
           onClick={() => handleSectionClick('currency')}
         />
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="globe" size={18} />}
+          icon={<Icon name="globe" size={22} />}
           title={t('language')}
+          titleWeight="semibold"
           subtitle={languageInfo[(config.language as Language) || 'sv']?.label || 'Svenska'}
           value={<LanguageFlag code={(config.language as Language) || 'sv'} size="md" />}
           onClick={() => handleSectionClick('language')}
@@ -200,32 +200,42 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="palette" size={18} />}
+          icon={<Icon name="palette" size={22} />}
           title={config?.language === 'en' ? 'Appearance' : 'Utseende'}
+          titleWeight="semibold"
           subtitle={`${config.darkMode ? (config?.language === 'en' ? 'Dark' : 'Mörkt') : (config?.language === 'en' ? 'Light' : 'Ljust')} · ${getThemeColorLabel(config.themeColor, config?.language === 'en')}`}
           onClick={() => handleSectionClick('appearance')}
         />
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="bell" size={18} />}
+          icon={<Icon name="bell" size={22} />}
           title={config?.language === 'en' ? 'Notifications' : 'Notiser'}
+          titleWeight="semibold"
           subtitle={config?.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
           onClick={() => handleSectionClick('notifications')}
         />
 
         <ListRow
           variant="grouped"
-          density="compact"
           showChevron
-          icon={<Icon name="ban" size={18} className="text-[var(--danger-color)]" />}
+          icon={<Icon name="ban" size={22} className="text-[var(--danger-color)]" />}
           title={config?.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
+          titleWeight="semibold"
           subtitle={config?.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
           onClick={onCancelledSubscriptionsClick}
+        />
+
+        <ListRow
+          variant="grouped"
+          showChevron
+          icon={<Icon name="envelope" size={22} />}
+          title={t('feedback')}
+          titleWeight="semibold"
+          subtitle={config?.language === 'en' ? 'Share thoughts or report an issue' : 'Skicka synpunkter eller rapportera fel'}
+          onClick={onFeedbackClick}
         />
       </Card>
     </motion.div>

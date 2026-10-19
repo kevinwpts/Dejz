@@ -29,7 +29,7 @@ export interface ListRowProps {
 export const ListRow: React.FC<ListRowProps> = ({
   icon,
   iconBg = 'bg-transparent',
-  iconColor = 'text-[var(--text-primary)]',
+  iconColor = 'text-[var(--text-secondary)]',
   iconClassName = '',
   title,
   subtitle,
@@ -51,20 +51,22 @@ export const ListRow: React.FC<ListRowProps> = ({
   isLast: _isLast = false,
 }) => {
   const isClickable = Boolean(onClick && !disabled);
-  const isCompact = density === 'compact' || (density !== 'default' && variant === 'grouped');
+  const isCompact = density === 'compact';
 
   const containerStyles = {
     card: isCompact
-      ? 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[54px] rounded-[var(--radius-card,20px)] shadow-subtle'
-      : 'bg-[var(--surface-color)] border-none card-p min-h-[60px] rounded-[var(--radius-card,20px)] shadow-subtle',
+      ? 'bg-[var(--surface-color)] border-none px-3.5 py-2.5 min-h-[44px] rounded-card shadow-none'
+      : 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[52px] rounded-card shadow-none',
     grouped: isCompact
-      ? 'bg-transparent px-4 py-2.5 min-h-[50px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
-      : 'bg-transparent px-4 py-3 min-h-[56px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
-    plain: isCompact ? 'bg-transparent px-3 py-2 min-h-[46px]' : 'bg-transparent px-3.5 py-2.5 min-h-[50px]',
+      ? 'bg-transparent px-3.5 py-2.5 min-h-[44px] hover:bg-[var(--bg-hover)]'
+      : 'bg-transparent px-4 py-3 min-h-[52px] hover:bg-[var(--bg-hover)]',
+    plain: isCompact
+      ? 'bg-transparent px-3.5 py-2.5 min-h-[42px]'
+      : 'bg-transparent px-4 py-3 min-h-[48px]',
   }[variant];
 
   const clickableStyles = isClickable
-    ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30'
+    ? 'cursor-pointer hover:bg-[var(--bg-hover)] active:bg-[var(--bg-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]'
     : '';
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -74,11 +76,16 @@ export const ListRow: React.FC<ListRowProps> = ({
     }
   };
 
-  const iconContainerSize = isCompact
-    ? 'w-8 h-8 rounded-[var(--radius-icon-button,10px)]'
-    : 'w-10 h-10 rounded-[var(--radius-icon-button,10px)]';
+  const hasIconBg = iconBg && iconBg !== 'bg-transparent';
+  const iconContainerSize = hasIconBg
+    ? isCompact
+      ? 'w-8 h-8 rounded-[8px]'
+      : 'w-9 h-9 rounded-[10px]'
+    : isCompact
+      ? 'w-5 h-5'
+      : 'w-6 h-6';
 
-  const gapSize = 'gap-3.5';
+  const gapSize = isCompact ? 'gap-2.5' : 'gap-3';
 
   return (
     <div
@@ -86,8 +93,8 @@ export const ListRow: React.FC<ListRowProps> = ({
       onKeyDown={isClickable ? handleKeyDown : undefined}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      className={`w-full flex items-center justify-between transition-all select-none ${containerStyles} ${clickableStyles} ${
-        disabled ? 'opacity-40 pointer-events-none' : ''
+      className={`w-full flex items-center justify-between transition-colors select-none ${containerStyles} ${clickableStyles} ${
+        disabled ? 'opacity-50 pointer-events-none text-[var(--text-disabled)]' : ''
       } ${className}`}
     >
       <div className={`flex items-center ${gapSize} min-w-0 pr-2 flex-1`}>
@@ -101,7 +108,7 @@ export const ListRow: React.FC<ListRowProps> = ({
         <div className="min-w-0 flex flex-col justify-center flex-1">
           <div className="flex items-center gap-2">
             <span
-              className={`text-body-medium font-medium leading-snug ${
+              className={`text-card-title ${
                 multiline ? '' : 'truncate'
               } ${
                 destructive ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
@@ -113,8 +120,8 @@ export const ListRow: React.FC<ListRowProps> = ({
           </div>
           {subtitle && (
             <div
-              className={`text-secondary leading-relaxed text-[var(--text-secondary)] mt-0.5 ${
-                multiline ? 'leading-relaxed' : 'truncate'
+              className={`text-secondary text-[var(--text-secondary)] mt-0.5 ${
+                multiline ? 'leading-[20px]' : 'truncate'
               } ${subtitleClassName}`}
             >
               {subtitle}
@@ -125,7 +132,7 @@ export const ListRow: React.FC<ListRowProps> = ({
 
       <div className="flex items-center gap-2.5 shrink-0 ml-2">
         {value && (
-          <div className="text-body-medium tabular-nums text-[var(--text-primary)]">
+          <div className="text-secondary tabular-nums text-[var(--text-secondary)]">
             {value}
           </div>
         )}
@@ -133,14 +140,14 @@ export const ListRow: React.FC<ListRowProps> = ({
         {rightElement}
         {showCheck && (
           <div className="text-[var(--accent-color)] shrink-0">
-            <Icon name="check" size={18} />
+            <Icon name="check" size={20} />
           </div>
         )}
         {showChevron && (
           <Icon
             name="caret-right"
             size={18}
-            className="text-[var(--text-secondary)] shrink-0 opacity-60"
+            className="text-[var(--text-tertiary)] shrink-0"
           />
         )}
       </div>

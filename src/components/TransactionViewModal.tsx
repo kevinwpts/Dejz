@@ -2,11 +2,12 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown , Heart} from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown } from 'lucide-react';
 import { Button, IconButton } from './ui';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
+import { formatShortDate } from '../utils/date';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -17,6 +18,7 @@ import { resolveEntityVisual } from '../utils/resolver';
 import { ConfirmModal } from './ConfirmModal';
 import { findKnownBrandDomain } from '../utils/logo';
 import { TransactionItem } from './TransactionItem';
+import { getCategoryColor } from '../utils/categoryColors';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -31,22 +33,6 @@ interface TransactionViewModalProps {
   onUpdateTransaction?: (transaction: Transaction) => void;
 }
 
-function _hexToRgba(hex: string, alpha: number): string {
-  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
-  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
-  let clean = hex.replace('#', '');
-  if (clean.length === 3) {
-    clean = clean.split('').map(c => c + c).join('');
-  }
-  if (clean.length === 6) {
-    const r = parseInt(clean.substring(0, 2), 16) || 0;
-    const g = parseInt(clean.substring(2, 4), 16) || 0;
-    const b = parseInt(clean.substring(4, 6), 16) || 0;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-  return `rgba(124, 58, 237, ${alpha})`;
-}
-
 export function TransactionViewModal({ 
   transaction, 
   transactions = [],
@@ -57,31 +43,13 @@ export function TransactionViewModal({
   onDuplicate, 
   t, 
   config,
-  onUpdateTransaction
+  onUpdateTransaction: _onUpdateTransaction
 }: TransactionViewModalProps) {
   const [currentTx, setCurrentTx] = useState<Transaction>(transaction);
 
   useEffect(() => {
     setCurrentTx(transaction);
   }, [transaction]);
-
-  const isStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
-
-  const handleToggleStar = () => {
-    if (typeof feedback?.light === 'function') feedback.light();
-    const newStarred = !isStarred;
-    const updated = {
-      ...currentTx,
-      isStarred: newStarred,
-      tags: newStarred
-        ? Array.from(new Set([...(currentTx.tags || []), 'starred']))
-        : (currentTx.tags || []).filter((tag: string) => tag !== 'starred')
-    };
-    setCurrentTx(updated);
-    if (onUpdateTransaction) {
-      onUpdateTransaction(updated);
-    }
-  };
 
   useScrollLock(true);
   const dragControls = useDragControls();
@@ -174,26 +142,25 @@ export function TransactionViewModal({
     return mapping[lang] || 'sv-SE';
   };
 
-  const date = new Date(transaction.timestamp);
-  const formatDateLike1Nov2026 = (timestamp: number, lang: string) => {
-    const d = new Date(timestamp);
-    const day = d.getDate();
-    const monthsSv = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
-    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const months = lang === 'en' ? monthsEn : monthsSv;
-    const monthStr = months[d.getMonth()];
-    const year = d.getFullYear();
-    return `${day}. ${monthStr} ${year}`;
-  };
-  const formattedDate = formatDateLike1Nov2026(transaction.timestamp, config.language);
-  const formattedTime = date.toLocaleTimeString(getLocale(), {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const date = new Date(currentTx.timestamp || transaction.timestamp);
+  const formattedDate = formatShortDate(date, config.language || 'sv');
+  const hasSpecificTime = !isNaN(date.getTime()) && !(date.getHours() === 0 && date.getMinutes() === 0);
+  const formattedTime = hasSpecificTime
+    ? date.toLocaleTimeString(getLocale(), {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : '';
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
-  const merchantName = typeof transaction.merchant === 'object' ? (transaction.merchant as any)?.name : (transaction.merchant || (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category));
+  const merchantName = typeof currentTx.merchant === 'object'
+    ? (currentTx.merchant as any)?.name
+    : (currentTx.merchant || (typeof currentTx.category === 'object' ? (currentTx.category as any)?.name : currentTx.category));
+
+  const hasNote = Boolean(currentTx.note && currentTx.note.trim().length > 0);
+  const hasReceipt = Boolean(currentTx.receiptUrl && currentTx.receiptUrl.trim().length > 0);
+  const hasTags = Boolean(currentTx.tags && currentTx.tags.length > 0);
 
   if (typeof document === 'undefined' || !document.body) return null;
 
@@ -216,7 +183,7 @@ export function TransactionViewModal({
         initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
-        transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 320 }}
         drag="y"
         dragListener={false}
         dragControls={dragControls}
@@ -227,7 +194,7 @@ export function TransactionViewModal({
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] h-auto flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -240,78 +207,77 @@ export function TransactionViewModal({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Centered Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-1">
-            {/* Close Button top-right */}
-            <div className="absolute top-0 right-0 z-10 flex items-center gap-1.5">
-              <IconButton
-                icon={
-                  <Heart
-                    size={18}
-                    strokeWidth={2}
-                    className={
-                      isStarred
-                        ? 'fill-rose-500 text-rose-500 transition-all scale-105'
-                        : 'text-[var(--text-primary)] hover:text-rose-500 transition-colors'
-                    }
-                  />
-                }
-                onClick={handleToggleStar}
-                variant="muted"
-                size="md"
-                className={
-                  isStarred
-                    ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                    : 'bg-black/5 dark:bg-white/10'
-                }
-                title={isStarred ? (config.language === 'en' ? 'Remove star' : 'Ta bort hjärta') : (config.language === 'en' ? 'Star transaction' : 'Hjärtmarkera')}
-                aria-label={isStarred ? 'Remove star' : 'Star transaction'}
-              />
-              <IconButton 
-                icon={<X size={15} strokeWidth={2.5} />}
-                onClick={() => {
-                  if (typeof feedback?.light === 'function') feedback.light();
-                  onClose();
-                }} 
-                variant="muted"
-                size="md"
-                title={t('close')}
-                aria-label={t('close')}
-              />
-            </div>
-
-            {/* Centered Logo (56px) */}
-            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 mb-2.5 mt-1">
-              <TransactionLogo transaction={currentTx} config={config} size="lg" />
-            </div>
-
-            {/* Title */}
-            <h2 className="text-page-title text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
-              {merchantName}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {config.language === 'en' ? 'Transaction' : 'Transaktion'}
             </h2>
-
-            {/* Price */}
-            <p className={`text-large-amount font-amount tabular-nums mt-1 flex items-baseline justify-center ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
-              <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
-              <span>{formatAmount(currentTx.amount, config.language)}</span>
-              <span className="text-secondary font-medium text-[var(--text-secondary)] ml-1.5 self-end pb-0.5">{config?.currency || 'kr'}</span>
-            </p>
+            <IconButton 
+              icon={<X size={15} strokeWidth={2.5} />}
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onClose();
+              }} 
+              variant="muted"
+              size="md"
+              title={t('close')}
+              aria-label={t('close')}
+            />
           </div>
 
-          {/* Details Section: Clean list with discrete subtle divider lines without background */}
-          <div className="divide-y divide-subtle text-left">
-            {/* Category */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+          {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
+          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border border-subtle space-y-2.5">
+            <div className="flex items-center gap-3">
+              <div className="relative rounded-full overflow-hidden shrink-0">
+                <TransactionLogo 
+                  size="lg"
+                  config={config}
+                  transaction={currentTx} 
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
+                  {config.language === 'en' ? 'Name' : 'Namn'}
+                </span>
+                <div className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug py-0.5 truncate">
+                  {merchantName}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2.5 border-t border-subtle flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
+                  {config.language === 'en' ? 'Amount' : 'Belopp'}
+                </span>
+                <div className={`flex items-baseline gap-1.5 font-amount w-full ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
+                  <span className="font-amount font-bold tabular-nums tracking-tight text-[30px] sm:text-[36px] leading-none">
+                    {isIncome ? '+' : isSavings ? '→' : '−'}{formatAmount(currentTx.amount, config.language)}
+                  </span>
+                  <span className="text-secondary font-medium text-[var(--text-tertiary)] tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
+                    {config?.currency || 'kr'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Second Group: Category, Date, Time (when present), Note (when non-empty), Attachment (when non-empty) */}
+          <div className="rounded-card bg-[var(--surface-color)] overflow-hidden border border-subtle divide-y divide-subtle text-left">
+            {/* Row 1: Category */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
-              <div className="text-right">
+              <div className="text-right min-w-0">
                 {(() => {
                   const rawSplits = currentTx.splits || transaction.splits;
                   const splitsArray = Array.isArray(rawSplits)
                     ? rawSplits
                     : (typeof rawSplits === 'string' ? (() => { try { const p = JSON.parse(rawSplits); return Array.isArray(p) ? p : []; } catch { return []; } })() : []);
+
+                  const allCats = [...(config.categories || []), ...(config.incomeCategories || [])];
 
                   if (splitsArray.length > 0) {
                     return (
@@ -319,15 +285,24 @@ export function TransactionViewModal({
                         {splitsArray.map((split: any, idx: number) => {
                           const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
                           const searchCat = splitCatName.trim().toLowerCase();
-                          const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                          const cat = allCats.find(
                             c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
                           );
                           const iconKey = cat?.icon || getCategoryIconName(splitCatName);
+                          const catColor = cat?.color || getCategoryColor(splitCatName, allCats);
                           return (
                             <div key={split.id || idx} className="flex items-center justify-end gap-2">
-                              {iconKey && <CategoryIcon icon={iconKey} categoryName={splitCatName} variant="minimal" size="sm" />}
-                              <span className="text-body-medium font-medium text-[var(--text-primary)]">{splitCatName}</span>
-                              <span className="text-label text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                              <CategoryIcon 
+                                icon={iconKey} 
+                                color={catColor}
+                                categoryName={splitCatName} 
+                                variant="primary" 
+                                size="xs" 
+                              />
+                              <span className="text-sm font-medium text-[var(--text-primary)] truncate">{splitCatName}</span>
+                              <span className="text-label text-[var(--text-secondary)] font-amount tabular-nums shrink-0">
+                                ({formatAmount(split.amount, config.language)} {config.currency})
+                              </span>
                             </div>
                           );
                         })}
@@ -337,276 +312,289 @@ export function TransactionViewModal({
 
                   const catName = typeof currentTx.category === 'object' ? (currentTx.category as any)?.name : (currentTx.category || transaction.category || '');
                   const searchCat = catName.trim().toLowerCase();
-                  const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                  const cat = allCats.find(
                     c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
                   );
                   const iconKey = cat?.icon || getCategoryIconName(catName);
+                  const catColor = cat?.color || 'var(--accent-color)';
                   return (
-                    <div className="flex items-center justify-end gap-2">
-                      {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="sm" />}
-                      <span className="text-body-medium font-medium text-[var(--text-primary)]">{catName}</span>
+                    <div className="flex items-center justify-end gap-2 min-w-0">
+                      <CategoryIcon 
+                        icon={iconKey} 
+                        color={catColor}
+                        categoryName={catName} 
+                        variant="primary" 
+                        size="xs" 
+                      />
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
+                        {catName}
+                      </span>
                     </div>
                   );
                 })()}
               </div>
             </div>
 
-            {/* Date Field */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            {/* Row 2: Date */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
-              <span className="text-body-medium font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formattedDate}
               </span>
             </div>
 
-            {/* Time Field */}
+            {/* Row 3: Time (when present) */}
             {formattedTime && (
-              <div className="py-3 flex items-center justify-between gap-4">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
                 </span>
-                <span className="text-body-medium font-medium text-[var(--text-primary)] text-right tabular-nums">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                   {formattedTime}
                 </span>
               </div>
             )}
 
-            {/* Note if exists */}
-            {transaction.note && (
-              <div className="py-3 flex items-start justify-between gap-4">
-                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+            {/* Row 4: Note (only if non-empty) */}
+            {hasNote && (
+              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('ownNote')}
                 </span>
                 <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
-                  {transaction.note}
+                  {currentTx.note}
                 </span>
               </div>
             )}
 
-            {/* Tags Section if exists */}
-            {transaction.tags && transaction.tags.length > 0 && (
-              <div className="py-3 flex items-start justify-between gap-4">
-                <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0 pt-0.5">
+            {/* Row 5: Attachment / Receipt (only if non-empty) */}
+            {hasReceipt && currentTx.receiptUrl && (
+              <div className="p-4 space-y-2.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
+                    {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowReceiptLightbox(true)}
+                    className="flex items-center gap-2 text-sm font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-icon-button overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+                      {currentTx.receiptUrl.includes('.pdf') ? (
+                        <FileText size={13} className="text-[var(--text-secondary)]" />
+                      ) : (
+                        <img src={currentTx.receiptUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      )}
+                    </div>
+                    <span>{config.language === 'en' ? 'View full screen' : 'Visa i helskärm'}</span>
+                  </button>
+                </div>
+
+                <div 
+                  onClick={() => setShowReceiptLightbox(true)}
+                  className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card-nested overflow-hidden bg-black/5 dark:bg-black/20 flex items-center justify-center cursor-pointer group transition-all"
+                >
+                  {currentTx.receiptUrl.includes('.pdf') ? (
+                    <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
+                      <FileText size={36} className="text-[var(--text-secondary)]" />
+                      <span className="text-sm font-medium text-[var(--text-primary)]">
+                        {config.language === 'en' ? 'PDF document (Click to open)' : 'PDF-dokument (Klicka för att öppna)'}
+                      </span>
+                    </div>
+                  ) : (
+                    <img 
+                      src={currentTx.receiptUrl} 
+                      alt={config.language === 'en' ? 'Attachment' : 'Bilaga'} 
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Optional Tags Row (only if non-empty) */}
+            {hasTags && (
+              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
+                <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0">
                   <Tag size={13} strokeWidth={2} />
                   <span className="text-body font-normal">{t('tags')}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
-                  {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-[var(--surface-color)] text-[var(--text-primary)] px-2.5 py-1 rounded-full text-label font-medium border-none shadow-none">
-                      {tag}
+                  {(currentTx.tags || []).map((tag, index) => (
+                    <span key={index} className="text-sm font-medium text-[var(--text-primary)]">
+                      {tag}{index < (currentTx.tags?.length || 0) - 1 ? ' · ' : ''}
                     </span>
                   ))}
                 </div>
               </div>
             )}
+          </div>
 
-            {/* Attached file / Receipt Section if exists (Option 2: Full-width card with Lightbox preview) */}
-            {transaction.receiptUrl && (
-              <>
-                <div className="py-3.5 space-y-2">
-                  <div className="flex items-center justify-between text-[var(--text-secondary)]">
-                    <div className="flex items-center gap-1.5">
-                      <Paperclip size={13} strokeWidth={2} />
-                      <span className="text-body font-normal">
-                        {config.language === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowReceiptLightbox(true)}
-                      className="text-secondary font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
-                    >
-                      {config.language === 'en' ? 'View full screen' : 'Visa i helskärm'}
-                    </button>
-                  </div>
-                  <div 
-                    onClick={() => setShowReceiptLightbox(true)}
-                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card overflow-hidden bg-black/5 dark:bg-black/20 border border-subtle flex items-center justify-center cursor-pointer group shadow-subtle hover:shadow-subtle transition-all"
-                  >
-                    {transaction.receiptUrl.includes('.pdf') ? (
-                      <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
-                        <FileText size={40} className="text-[var(--text-secondary)]" />
-                        <span className="text-body font-medium text-[var(--text-primary)]">PDF-dokument (Klicka för att öppna)</span>
-                      </div>
-                    ) : (
-                      <img 
-                        src={transaction.receiptUrl} 
-                        alt="Attachment" 
-                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                        referrerPolicy="no-referrer"
-                      />
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <span className="bg-white/95 dark:bg-[var(--surface-color)]/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-modal">
-                        {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
-                      </span>
-                    </div>
-                  </div>
+          {/* Lightbox Modal Portal */}
+          {showReceiptLightbox && currentTx.receiptUrl && createPortal(
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-8 pt-[max(2.5rem,env(safe-area-inset-top,3rem))] pb-[max(2rem,env(safe-area-inset-bottom,2rem))]"
+              onClick={() => setShowReceiptLightbox(false)}
+            >
+              <div className="w-full flex items-center justify-between max-w-5xl py-3 px-2 sm:px-0" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-2 text-white">
+                  <Paperclip size={18} />
+                  <span className="text-sm font-medium">
+                    {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
+                  </span>
                 </div>
-
-                {/* Lightbox Modal Portal */}
-                {showReceiptLightbox && createPortal(
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-8 pt-[max(2.5rem,env(safe-area-inset-top,3rem))] pb-[max(2rem,env(safe-area-inset-bottom,2rem))]"
-                    onClick={() => setShowReceiptLightbox(false)}
+                <div className="flex items-center gap-3">
+                  <a 
+                    href={currentTx.receiptUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-btn-sm text-xs font-medium transition-colors"
                   >
-                    <div className="w-full flex items-center justify-between max-w-5xl py-3 px-2 sm:px-0" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center gap-2 text-white">
-                        <Paperclip size={18} />
-                        <span className="text-sm font-medium">
-                          {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <a 
-                          href={transaction.receiptUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-btn-sm text-xs font-medium transition-colors"
-                        >
-                          {config.language === 'en' ? 'Open original' : 'Öppna original'}
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => setShowReceiptLightbox(false)}
-                          className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    </div>
+                    {config.language === 'en' ? 'Open original' : 'Öppna original'}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setShowReceiptLightbox(false)}
+                    className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                    aria-label={t('close')}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
 
-                    <div 
-                      className="flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2 sm:p-4 my-auto"
-                      onClick={(e) => e.stopPropagation()}
+              <div 
+                className="flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2 sm:p-4 my-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {currentTx.receiptUrl.includes('.pdf') ? (
+                  <div className="bg-white dark:bg-[var(--surface-color)] p-8 rounded-modal text-center space-y-4">
+                    <FileText size={64} className="mx-auto text-[var(--accent-color)]" />
+                    <p className="text-sm font-medium text-[var(--text-primary)] dark:text-white">PDF-dokument</p>
+                    <a 
+                      href={currentTx.receiptUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block bg-[var(--accent-color)] hover:bg-[var(--accent-color)] text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors"
                     >
-                      {transaction.receiptUrl.includes('.pdf') ? (
-                        <div className="bg-[var(--surface-color)] p-8 rounded-modal text-center space-y-4 shadow-modal">
-                          <FileText size={64} className="mx-auto text-[var(--accent-color)]" />
-                          <p className="text-sm font-medium text-[var(--text-primary)] dark:text-white">PDF-dokument</p>
-                          <a 
-                            href={transaction.receiptUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-block bg-[var(--accent-color)] hover:opacity-90 text-[var(--on-accent)] px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-modal"
-                          >
-                            {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
-                          </a>
-                        </div>
-                      ) : (
-                        <img 
-                          src={transaction.receiptUrl} 
-                          alt="Receipt Fullscreen" 
-                          className="max-h-[80vh] max-w-full object-contain rounded-card shadow-modal"
-                          referrerPolicy="no-referrer"
-                        />
-                      )}
-                    </div>
-                  </motion.div>,
-                  document.body
-                )}
-              </>
-            )}
-
-            {/* Similar Transactions Section */}
-            {similarTransactions.length > 0 && (
-              <div className="pt-3 pb-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback?.light === 'function') feedback.light();
-                    setShowSimilar(prev => !prev);
-                  }}
-                  className="w-full py-3 px-4 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-subtle shadow-2xs text-left touch-press"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-body font-semibold text-[var(--text-primary)] tracking-tight">
-                        {config.language === 'en' ? 'Similar transactions' : 'Liknande transaktioner'}
-                      </span>
-                      <span className="text-micro-label font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
-                        {similarTransactions.length}
-                      </span>
-                    </div>
-                    <span className="text-label text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
-                      {config.language === 'en' 
-                        ? `${similarTransactions.length} other ${similarTransactions.length === 1 ? 'transaction' : 'transactions'} with similar name`
-                        : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'andra transaktioner' : 'andra transaktioner'} med liknande namn`}
-                    </span>
+                      {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
+                    </a>
                   </div>
-                  <ChevronDown 
-                    size={16} 
-                    className={`text-[var(--text-secondary)] transition-transform duration-200 shrink-0 ml-2 ${showSimilar ? 'rotate-180' : ''}`} 
+                ) : (
+                  <img 
+                    src={currentTx.receiptUrl} 
+                    alt="Receipt Fullscreen" 
+                    className="max-h-[80vh] max-w-full object-contain rounded-card"
+                    referrerPolicy="no-referrer"
                   />
-                </button>
-
-                {showSimilar && (
-                  <div className="mt-2 space-y-2">
-                    {similarTransactions.map((similarTx) => (
-                      <TransactionItem
-                        key={similarTx.id}
-                        transaction={similarTx}
-                        config={config}
-                        showDate={true}
-                        onClick={() => {
-                          if (typeof feedback?.selection === 'function') feedback.selection();
-                          if (onSelectTransaction) {
-                            onSelectTransaction(similarTx);
-                          }
-                        }}
-                      />
-                    ))}
-                  </div>
                 )}
               </div>
-            )}
-          </div>
+            </motion.div>,
+            document.body
+          )}
+
+          {/* Similar Transactions Section */}
+          {similarTransactions.length > 0 && (
+            <div className="pt-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  setShowSimilar(prev => !prev);
+                }}
+                className="w-full py-3 px-4 rounded-card bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between cursor-pointer border border-subtle text-left touch-press"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-body font-semibold text-[var(--text-primary)] tracking-tight">
+                      {config.language === 'en' ? 'Similar transactions' : 'Liknande transaktioner'}
+                    </span>
+                    <span className="text-label font-medium text-[var(--text-secondary)] tabular-nums">
+                      ({similarTransactions.length})
+                    </span>
+                  </div>
+                  <span className="text-label text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
+                    {config.language === 'en' 
+                      ? `${similarTransactions.length} other ${similarTransactions.length === 1 ? 'transaction' : 'transactions'} with similar name`
+                      : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'annan transaktion' : 'andra transaktioner'} med liknande namn`}
+                  </span>
+                </div>
+                <ChevronDown 
+                  size={16} 
+                  className={`text-[var(--text-secondary)] transition-transform duration-200 shrink-0 ml-2 ${showSimilar ? 'rotate-180' : ''}`} 
+                />
+              </button>
+
+              {showSimilar && (
+                <div className="mt-2 space-y-2">
+                  {similarTransactions.map((similarTx) => (
+                    <TransactionItem
+                      key={similarTx.id}
+                      transaction={similarTx}
+                      config={config}
+                      showDate={true}
+                      onClick={() => {
+                        if (typeof feedback?.selection === 'function') feedback.selection();
+                        if (onSelectTransaction) {
+                          onSelectTransaction(similarTx);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Action Buttons Footer: Bred Redigera-knapp, Duplicera och Radera */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle dark:border-transparent bg-transparent flex items-center gap-2.5 relative z-10">
+        {/* Action Buttons Footer: Primary 'Redigera', Secondary 'Duplicera' with visible label, and Global Delete IconButton */}
+        <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
             variant="secondary"
-            size="md"
-            className="flex-1 text-body-medium font-medium"
+            size="lg"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(currentTx);
             }} 
-            icon={<Pencil size={14.5} strokeWidth={2} className="dark:text-white" />}
+            icon={<Pencil size={15} strokeWidth={2} />}
           >
             {t('edit')}
           </Button>
 
-          <IconButton 
-            icon={<Repeat size={16} strokeWidth={2} className="text-[var(--text-primary)]" />}
+          <Button 
+            type="button"
+            variant="outline"
+            size="lg"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onDuplicate(transaction);
             }} 
-            variant="default"
-            size="lg"
-            className="rounded-[var(--radius-button,12px)] bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
-            title={t('duplicate')}
-            aria-label={t('duplicate')}
-          />
+            icon={<Repeat size={15} strokeWidth={2} />}
+            className="rounded-[var(--radius-button,12px)] px-4 text-label font-semibold shrink-0"
+            title={config.language === 'en' ? 'Create a copy of this transaction' : 'Skapa en kopia av transaktionen'}
+            aria-label={config.language === 'en' ? 'Duplicate transaction' : 'Duplicera transaktion'}
+          >
+            {t('duplicate')}
+          </Button>
 
           {onDelete && (
             <IconButton 
-              icon={<Trash2 size={16} strokeWidth={2} className="text-[var(--text-primary)]" />}
+              icon={<Trash2 size={16} strokeWidth={2} />}
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }} 
-              variant="default"
-              size="lg"
-              className="rounded-[var(--radius-button,12px)] bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
+              variant="danger"
+              size="xl"
+              shape="button"
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
             />
@@ -639,3 +627,4 @@ export function TransactionViewModal({
     document.body
   );
 }
+

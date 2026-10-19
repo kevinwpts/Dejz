@@ -32,19 +32,19 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       shape === 'circle'
         ? 'rounded-full'
         : shape === 'button' || size === 'xl'
-        ? 'rounded-[var(--radius-button,12px)]'
-        : 'rounded-[var(--radius-icon-button,8px)]';
+        ? 'rounded-[10px]'
+        : 'rounded-full';
 
     const sizeStyles = {
-      xs: 'w-[var(--size-icon-button-xs,24px)] h-[var(--size-icon-button-xs,24px)] text-xs',
-      sm: 'w-[var(--size-icon-button-sm,28px)] h-[var(--size-icon-button-sm,28px)] text-xs',
-      md: 'w-[var(--size-icon-button-md,32px)] h-[var(--size-icon-button-md,32px)] text-sm',
-      lg: 'w-[var(--size-icon-button-lg,40px)] h-[var(--size-icon-button-lg,40px)] text-base',
-      xl: 'w-[var(--height-button-lg,48px)] h-[var(--height-button-lg,48px)] text-base',
+      xs: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-xs',
+      sm: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-sm',
+      md: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-sm',
+      lg: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-base',
+      xl: 'min-w-[48px] min-h-[48px] w-[48px] h-[48px] text-base',
     }[size];
 
     const surfaceStyle =
-      'bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] backdrop-blur-md text-[var(--text-primary)] hover:bg-[var(--surface-color)] dark:hover:bg-white/10 border border-[var(--border-divider)] shadow-subtle';
+      'bg-[var(--surface-color)] dark:bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border-none shadow-none';
 
     const variantStyles = {
       muted: surfaceStyle,
@@ -52,7 +52,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       secondary: surfaceStyle,
       surface: surfaceStyle,
       ghost:
-        'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 border-none',
+        'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border-none shadow-none',
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] shadow-none border-none',
       primary:

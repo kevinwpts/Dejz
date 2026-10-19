@@ -22,17 +22,17 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     },
     ref
   ) => {
-    const baseStyles = 'overflow-hidden transition-all duration-[var(--duration-normal,150ms)] ease-out';
+    const baseStyles = 'overflow-hidden transition-colors duration-[var(--duration-normal,150ms)] ease-out';
 
     const variantStyles = {
-      default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
-      accent: 'bg-[var(--accent-color)] text-[var(--on-accent)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
-      hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
-      nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
-      flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-none',
-      elevated: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,18px)] shadow-subtle',
-      outlined: 'bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[var(--radius-card,18px)] shadow-none',
-      muted: 'bg-[var(--surface-muted)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
+      default: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
+      accent: 'bg-[var(--surface-color)] border-2 border-[var(--accent-color)] text-[var(--text-primary)] rounded-card shadow-none',
+      hero: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
+      nested: 'bg-[var(--card-nested-bg)] border-none rounded-card-nested shadow-none',
+      flat: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
+      elevated: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
+      outlined: 'bg-[var(--surface-color)] border border-[var(--border-control)] rounded-card shadow-none',
+      muted: 'bg-[var(--surface-muted)] border-none rounded-card-nested shadow-none',
     }[variant];
 
     const paddingStyles = {
@@ -43,7 +43,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     }[padding];
 
     const interactiveStyles = interactive
-      ? 'cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30'
+      ? 'cursor-pointer hover:bg-[var(--bg-hover)] active:bg-[var(--bg-hover)] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]'
       : '';
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

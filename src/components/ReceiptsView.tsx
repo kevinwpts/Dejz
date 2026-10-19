@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Receipt, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
-import { EmptyState } from './EmptyState';
 import { formatAmount, capitalize } from '../utils/format';
-import { Card, Input } from './ui';
+import { formatShortDate } from '../utils/date';
+import { Card, Input, EmptyState } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
 
@@ -26,9 +26,9 @@ export function ReceiptsView({
   const curr = config.currency || 'kr';
 
   // Filter transactions that have a receiptUrl
-  const receiptTransactions = (transactions || []).filter(
-    (t) => t.receiptUrl && typeof t.receiptUrl === 'string' && t.receiptUrl.trim() !== ''
-  );
+  const receiptTransactions = (transactions || [])
+    .filter((t) => t.receiptUrl && typeof t.receiptUrl === 'string' && t.receiptUrl.trim() !== '')
+    .sort((a, b) => b.timestamp - a.timestamp);
 
   // Filter by search query
   const filteredTransactions = receiptTransactions.filter((item) => {
@@ -50,24 +50,8 @@ export function ReceiptsView({
     return `${count} kvitton`;
   };
 
-  const getLocale = () => {
-    const lang = config?.language || 'sv';
-    const mapping: Record<string, string> = {
-      sv: 'sv-SE',
-      en: 'en-US',
-      no: 'no-NO',
-      da: 'da-DK',
-      fi: 'fi-FI'
-    };
-    return mapping[lang] || 'sv-SE';
-  };
-
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString(getLocale(), {
-      day: 'numeric',
-      month: 'short',
-      year: new Date(timestamp).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
-    });
+    return formatShortDate(timestamp, config.language || 'sv');
   };
 
   return (
@@ -75,10 +59,10 @@ export function ReceiptsView({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0"
+      className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0 font-sans"
     >
-      {/* 1. Search Input adhering to standard Input search variant */}
-      {receiptTransactions.length > 0 && (
+      {/* 1. Standalone Search Bar matching Historik */}
+      <div className="w-full">
         <Input
           variant="search"
           value={searchQuery}
@@ -86,9 +70,8 @@ export function ReceiptsView({
           placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
-          className="w-full h-[42px] sm:h-[44px] text-xs sm:text-sm"
         />
-      )}
+      </div>
 
       {/* 2. Receipts List matching Dejz Card and TransactionItem hierarchy */}
       <div className="space-y-[var(--card-gap)] min-w-0 w-full">
@@ -128,7 +111,7 @@ export function ReceiptsView({
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
                         {/* Receipt Thumbnail Container */}
-                        <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] overflow-hidden relative shrink-0 bg-[var(--surface-muted)] border-none flex items-center justify-center">
+                        <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] overflow-hidden relative shrink-0 bg-[var(--surface-muted)] border border-subtle flex items-center justify-center">
                           {item.receiptUrl && !isPdf ? (
                             <img
                               src={item.receiptUrl}

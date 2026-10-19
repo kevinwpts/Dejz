@@ -30,13 +30,13 @@ export interface CategoryIconProps {
  */
 export function CategoryIcon({
   icon,
-  color,
+  color: _color,
   variant = 'primary',
   size = 'md',
   className = '',
   isActive = false,
   categoryName,
-  solidBackground,
+  solidBackground: _solidBackground,
   whiteIcon: _whiteIcon,
   noBackground = false,
 }: CategoryIconProps) {
@@ -128,7 +128,7 @@ export function CategoryIcon({
             alt={categoryName || icon || 'icon'}
             width={currentPx}
             height={currentPx}
-            className="w-full h-full object-contain pointer-events-none select-none drop-shadow-2xs"
+            className="w-full h-full object-contain pointer-events-none select-none"
             loading="lazy"
             onError={handleImgError}
           />
@@ -139,7 +139,7 @@ export function CategoryIcon({
     return (
       <div
         className={`rounded-full flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.06] ${containerSizes[size]} ${
-          isActive ? 'ring-2 ring-[var(--accent-color)] shadow-subtle scale-105' : ''
+          isActive ? 'ring-2 ring-[var(--accent-color)] scale-105' : ''
         } ${className}`}
         aria-hidden="true"
       >
@@ -148,7 +148,7 @@ export function CategoryIcon({
           alt={categoryName || icon || 'icon'}
           width={currentPx}
           height={currentPx}
-          className="object-contain pointer-events-none select-none drop-shadow-2xs"
+          className="object-contain pointer-events-none select-none"
           style={{
             width: `${Math.round(currentPx * 0.88)}px`,
             height: `${Math.round(currentPx * 0.88)}px`
@@ -176,20 +176,17 @@ export function CategoryIcon({
     );
   }
 
-  const isFilled = Boolean(solidBackground && color);
-
   return (
     <div
-      className={`rounded-full flex items-center justify-center shrink-0 select-none transition-transform ${containerSizes[size]} ${
-        isActive ? 'ring-2 ring-[var(--accent-color)] shadow-subtle scale-105' : ''
-      } ${isFilled ? '' : 'text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.06]'} ${className}`}
-      style={isFilled ? { backgroundColor: color, color: '#0B0B0F' } : undefined}
+      className={`rounded-full flex items-center justify-center shrink-0 text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.06] select-none transition-transform ${containerSizes[size]} ${
+        isActive ? 'ring-2 ring-[var(--accent-color)] scale-105' : ''
+      } ${className}`}
       aria-hidden="true"
     >
       <IconComp 
         size={currentPx * 0.7} 
         strokeWidth={strokeWidth}
-        className={isFilled ? "text-[#0B0B0F]" : "text-[var(--text-primary)]"}
+        className="text-[var(--text-primary)]"
       />
     </div>
   );

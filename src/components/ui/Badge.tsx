@@ -14,10 +14,10 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium tracking-wide select-none rounded-[var(--radius-badge,9999px)]';
+  const baseStyles = 'inline-flex items-center justify-center font-medium select-none rounded-[6px]';
 
   const sizeStyles = {
-    sm: 'text-micro-label py-0.5 px-2 gap-1',
+    sm: 'text-label py-0.5 px-2 gap-1',
     md: 'text-label py-1 px-2.5 gap-1.5',
   }[size];
 

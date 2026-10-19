@@ -118,6 +118,23 @@ export const formatFullDate = (
   return raw.charAt(0).toUpperCase() + raw.slice(1);
 };
 
+/**
+ * Formats a date in compact localized form, e.g. "18 okt. 2026" in Swedish.
+ */
+export const formatShortDate = (
+  date: Date | string | number,
+  language: string = 'sv'
+): string => {
+  const d = typeof date === 'object' && date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return '';
+  const locale = getLocaleFromLanguage(language);
+  return d.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
 export const isVariableItemDue = (
   deductionDay: number = 1,
   periodStart?: Date,

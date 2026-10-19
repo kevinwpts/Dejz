@@ -162,9 +162,7 @@ export function CancelSubscriptionModal({
         {/* Target Item Card */}
         <div className="flex items-center justify-between p-3.5 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border-none shadow-none">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-[var(--bg-color)] flex items-center justify-center shrink-0 border-none overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
-              <BudgetItemLogo item={expense} type="expense" config={config} />
-            </div>
+            <BudgetItemLogo item={expense} type="expense" config={config} />
             <div className="min-w-0">
               <h4 className="text-section-title font-bold text-[var(--text-primary)] truncate">
                 {expense.name}
@@ -373,8 +371,8 @@ export function CancelSubscriptionModal({
                 </div>
 
                 {/* Budget impact explanation banner */}
-                <div className="p-3 rounded-card-nested bg-amber-500/10 border border-amber-500/20 text-secondary text-[var(--text-primary)] space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400">
+                <div className="p-3 rounded-card-nested bg-[var(--warning-container)] border-none text-secondary text-[var(--text-primary)] space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-[var(--warning-color)]">
                     <CheckCircle2 size={13} />
                     <span>{isEn ? 'Budget Impact' : 'Påverkan på budgeten'}</span>
                   </div>

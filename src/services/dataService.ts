@@ -65,8 +65,8 @@ export const dataService = {
       initialSpent: profileData.initial_spent,
       notifications: profileData.notifications,
       securityLock: profileData.security_lock,
-      darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? Boolean(profileData.dark_mode) : false,
-      themeMode: profileData.theme_mode || localSavedConfig?.themeMode || (profileData.dark_mode ? 'dark' : 'light'),
+      darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
+      themeMode: profileData.theme_mode || localSavedConfig?.themeMode || 'system',
       themeColor: profileData.theme_color || localSavedConfig?.themeColor || 'neutral',
       quickChoices: profileData.quick_choices || [],
       savingsGoals: (profileData.savings_goals && Array.isArray(profileData.savings_goals) && profileData.savings_goals.length > 0)
@@ -83,17 +83,17 @@ export const dataService = {
       includeFixedExpensesInAnalysis: profileData.include_fixed_expenses_in_analysis !== undefined 
         ? profileData.include_fixed_expenses_in_analysis 
         : (localSavedConfig?.includeFixedExpensesInAnalysis !== undefined ? localSavedConfig.includeFixedExpensesInAnalysis : true),
-      showFixedExpensesInTodayView: profileData.show_fixed_expenses_in_today_view !== undefined 
-        ? profileData.show_fixed_expenses_in_today_view 
-        : (localSavedConfig?.showFixedExpensesInTodayView !== undefined ? localSavedConfig.showFixedExpensesInTodayView : true),
-      showFixedExpensesInCalendar: profileData.show_fixed_expenses_in_calendar !== undefined 
-        ? profileData.show_fixed_expenses_in_calendar 
+      showFixedExpensesInTodayView: (profileData.show_fixed_expenses_in_today_view !== undefined && profileData.show_fixed_expenses_in_today_view !== null)
+        ? Boolean(profileData.show_fixed_expenses_in_today_view)
+        : (localSavedConfig?.showFixedExpensesInTodayView !== undefined ? Boolean(localSavedConfig.showFixedExpensesInTodayView) : false),
+      showFixedExpensesInCalendar: (profileData.show_fixed_expenses_in_calendar !== undefined && profileData.show_fixed_expenses_in_calendar !== null)
+        ? Boolean(profileData.show_fixed_expenses_in_calendar)
         : (localSavedConfig?.showFixedExpensesInCalendar !== undefined 
-            ? localSavedConfig.showFixedExpensesInCalendar 
-            : (profileData.show_fixed_expenses_in_today_view !== undefined ? profileData.show_fixed_expenses_in_today_view : false)),
-      showFixedExpensesInHistory: profileData.show_fixed_expenses_in_history !== undefined
-        ? profileData.show_fixed_expenses_in_history
-        : (localSavedConfig?.showFixedExpensesInHistory !== undefined ? localSavedConfig.showFixedExpensesInHistory : false),
+            ? Boolean(localSavedConfig.showFixedExpensesInCalendar) 
+            : false),
+      showFixedExpensesInHistory: (profileData.show_fixed_expenses_in_history !== undefined && profileData.show_fixed_expenses_in_history !== null)
+        ? Boolean(profileData.show_fixed_expenses_in_history)
+        : (localSavedConfig?.showFixedExpensesInHistory !== undefined ? Boolean(localSavedConfig.showFixedExpensesInHistory) : false),
       homeWidgets: profileData.home_widgets || localSavedConfig?.homeWidgets || undefined,
       hideEmptyCategories: profileData.hide_empty_categories !== undefined
         ? profileData.hide_empty_categories
@@ -123,35 +123,12 @@ export const dataService = {
       }
       return {
         ...profile,
-        currency: settings?.currency || profile.currency || 'kr',
-        language: settings?.language || profile.language || 'sv',
-        payday: settings?.payday ?? profile.payday ?? 25,
-        payday_type: settings?.paydayType || profile.payday_type || 'TWENTY_FIFTH',
-        payday_before_weekend: settings?.paydayBeforeWeekend ?? profile.payday_before_weekend ?? true,
-        categories: (settings?.categories && settings.categories.length > 0)
-          ? settings.categories
-          : (profile.categories || null),
-        income_categories: (settings?.incomeCategories && settings.incomeCategories.length > 0)
-          ? settings.incomeCategories
-          : (profile.income_categories || null),
-        payment_methods: settings?.paymentMethods || profile.payment_methods,
-        initial_spent: settings?.initialSpent ?? profile.initial_spent ?? 0,
-        notifications: settings?.notifications || profile.notifications,
-        security_lock: settings?.securityLock ?? profile.security_lock ?? false,
-        dark_mode: settings?.darkMode !== undefined ? settings.darkMode : (profile.dark_mode ?? false),
-        theme_mode: settings?.themeMode || profile.theme_mode || (settings?.darkMode ? 'dark' : 'light'),
-        theme_color: settings?.themeColor || profile.theme_color || 'neutral',
-        quick_choices: settings?.quickChoices || profile.quick_choices || [],
-        savings_pot: settings?.savingsPot ?? profile.savings_pot ?? 0,
-        savings_goals: settings?.savingsGoals || profile.savings_goals || [],
-        total_saved_lifetime: settings?.totalSavedLifetime ?? profile.total_saved_lifetime ?? 0,
-        surplus_income: settings?.surplusIncome ?? profile.surplus_income ?? 0,
-        monthly_savings: settings?.monthlySavings ?? profile.monthly_savings ?? 0,
-        monthly_savings_items: settings?.monthlySavingsItems || profile.monthly_savings_items || [],
-        include_fixed_expenses_in_analysis: settings?.includeFixedExpensesInAnalysis ?? true,
-        show_fixed_expenses_in_today_view: settings?.showFixedExpensesInTodayView ?? true,
-        show_fixed_expenses_in_calendar: settings?.showFixedExpensesInCalendar ?? false,
-        has_saved_initial_budget: settings?.hasSavedInitialBudget ?? true,
+        categories: (profile.categories && profile.categories.length > 0)
+          ? profile.categories
+          : (settings?.categories || null),
+        income_categories: (profile.income_categories && profile.income_categories.length > 0)
+          ? profile.income_categories
+          : (settings?.incomeCategories || null),
       };
     }
     const { data: profileData, error: profileError } = await supabase
@@ -247,8 +224,8 @@ export const dataService = {
       initial_spent: config.initialSpent,
       notifications: config.notifications,
       security_lock: config.securityLock,
-      dark_mode: Boolean(config.darkMode),
-      theme_mode: config.themeMode || (config.darkMode ? 'dark' : 'light'),
+      dark_mode: config.darkMode,
+      theme_mode: config.themeMode || 'system',
       theme_color: config.themeColor || 'neutral',
       quick_choices: config.quickChoices,
       savings_pot: config.savingsPot,

@@ -82,7 +82,7 @@ export const LanguageFlag: React.FC<LanguageFlagProps> = ({
       <span
         role="img"
         aria-label={info.label}
-        className={`${sizeClasses} inline-flex overflow-hidden rounded-[3px] shadow-2xs shrink-0 ring-1 ring-black/10 dark:ring-white/15`}
+        className={`${sizeClasses} inline-flex overflow-hidden rounded-xs shadow-2xs shrink-0 ring-1 ring-black/10 dark:ring-white/15`}
       >
         {renderSvgFlag(langKey)}
       </span>

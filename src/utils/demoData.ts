@@ -15,16 +15,16 @@ export function seedDemoData() {
     paydayType: PaydayType.TWENTY_FIFTH,
     paydayBeforeWeekend: true,
     categories: [
-      { name: 'Mat & Dagligvaror', icon: 'ShoppingCart', color: '#ef4444', budget: 4500 },
-      { name: 'Restaurang', icon: 'Utensils', color: '#f97316', budget: 1800 },
-      { name: 'Fika', icon: 'Coffee', color: '#d97706', budget: 500 },
-      { name: 'Shopping', icon: 'ShoppingBag', color: '#ec4899', budget: 1500 },
+      { name: 'Mat & Dagligvaror', icon: 'ShoppingCart', color: '#ef4444' },
+      { name: 'Restaurang', icon: 'Utensils', color: '#f97316' },
+      { name: 'Fika', icon: 'Coffee', color: '#d97706' },
+      { name: 'Shopping', icon: 'ShoppingBag', color: '#ec4899' },
       { name: 'Boende', icon: 'Home', color: '#6366f1' },
-      { name: 'Transport', icon: 'Car', color: '#0ea5e9', budget: 1200 },
+      { name: 'Transport', icon: 'Car', color: '#0ea5e9' },
       { name: 'Abonnemang', icon: 'Smartphone', color: '#3b82f6' },
       { name: 'Streaming', icon: 'Tv', color: '#8b5cf6' },
-      { name: 'Nöjen', icon: 'Gamepad2', color: '#a855f7', budget: 1000 },
-      { name: 'Hälsa', icon: 'Dumbbell', color: '#10b981', budget: 800 },
+      { name: 'Nöjen', icon: 'Gamepad2', color: '#a855f7' },
+      { name: 'Hälsa', icon: 'Dumbbell', color: '#10b981' },
       { name: 'Räkningar', icon: 'Receipt', color: '#e11d48' },
       { name: 'Försäkringar', icon: 'ShieldCheck', color: '#0284c7' },
       { name: 'Resor', icon: 'Plane', color: '#06b6d4' },
@@ -43,15 +43,12 @@ export function seedDemoData() {
       weeklySummary: true,
     },
     securityLock: false,
-    darkMode: false,
-    themeMode: 'light',
-    themeColor: 'neutral',
-    hasSavedInitialBudget: true,
+    darkMode: true,
     quickChoices: [
-      { id: 'demo-qc-1', merchant: 'ICA Kvantum', note: 'Middagshandel', amount: 385, category: 'Mat & Dagligvaror', icon: 'ShoppingCart' },
-      { id: 'demo-qc-2', merchant: 'Espresso House', note: 'Kaffe & Smörgås', amount: 79, category: 'Restaurang', icon: 'Coffee' },
-      { id: 'demo-qc-3', merchant: 'SL', note: 'Enkelbiljett SL', amount: 42, category: 'Transport', icon: 'Car' },
-      { id: 'demo-qc-4', merchant: 'Lunchrestaurang', note: 'Dagens lunch', amount: 145, category: 'Restaurang', icon: 'Utensils' },
+      { id: 'demo-qc-1', merchant: 'ICA Kvantum', note: 'Middagshandel', amount: 385, category: 'Mat & Livsmedel', icon: 'ShoppingCart' },
+      { id: 'demo-qc-2', merchant: 'Espresso House', note: 'Kaffe & Smörgås', amount: 79, category: 'Restaurang & Fika', icon: 'Coffee' },
+      { id: 'demo-qc-3', merchant: 'SL', note: 'Enkelbiljett SL', amount: 42, category: 'Transport & Bensin', icon: 'Car' },
+      { id: 'demo-qc-4', merchant: 'Lunchrestaurang', note: 'Dagens lunch', amount: 145, category: 'Restaurang & Fika', icon: 'Utensils' },
     ],
     savingsPot: 5400,
     savingsGoals: [
@@ -94,8 +91,9 @@ export function seedDemoData() {
     ],
     appIconTheme: 'accent',
     includeFixedExpensesInAnalysis: true,
-    showFixedExpensesInTodayView: true,
+    showFixedExpensesInTodayView: false,
     showFixedExpensesInCalendar: false,
+    showFixedExpensesInHistory: false,
   };
 
   const demoIncomes: Income[] = [
@@ -827,23 +825,10 @@ export function seedDemoData() {
     full_name: 'Elin Lindqvist',
     currency: 'kr',
     language: 'sv',
-    payday: 25,
-    payday_type: PaydayType.TWENTY_FIFTH,
-    payday_before_weekend: true,
-    dark_mode: false,
-    theme_mode: 'light',
-    theme_color: 'neutral',
     onboarding_completed: true,
-    has_saved_initial_budget: true,
     categories: demoConfig.categories,
     income_categories: demoConfig.incomeCategories,
     payment_methods: demoConfig.paymentMethods,
-    quick_choices: demoConfig.quickChoices,
-    savings_pot: demoConfig.savingsPot,
-    savings_goals: demoConfig.savingsGoals,
-    total_saved_lifetime: demoConfig.totalSavedLifetime,
-    monthly_savings: demoConfig.monthlySavings,
-    monthly_savings_items: demoConfig.monthlySavingsItems,
   };
 
   localStorage.setItem('demo_settings', JSON.stringify(demoConfig));
@@ -852,7 +837,7 @@ export function seedDemoData() {
   localStorage.setItem('demo_transactions', JSON.stringify(demoTransactions));
   localStorage.setItem('demo_accounts', JSON.stringify(demoAccounts));
   localStorage.setItem('demo_profile', JSON.stringify(demoProfile));
-  localStorage.setItem('demo_data_version', 'v7_unified_warm');
+  localStorage.setItem('demo_data_version', 'v6_historical_rich');
 
   const mockSession = {
     access_token: 'demo-token',
@@ -915,9 +900,7 @@ export function createFreshTestAccount() {
       weeklySummary: true,
     },
     securityLock: false,
-    darkMode: false,
-    themeMode: 'light',
-    themeColor: 'neutral',
+    darkMode: true,
     quickChoices: [],
     savingsPot: 0,
     savingsGoals: [],
@@ -927,8 +910,9 @@ export function createFreshTestAccount() {
     monthlySavingsItems: [],
     appIconTheme: 'accent',
     includeFixedExpensesInAnalysis: true,
-    showFixedExpensesInTodayView: true,
+    showFixedExpensesInTodayView: false,
     showFixedExpensesInCalendar: false,
+    showFixedExpensesInHistory: false,
   };
 
   const freshProfile = {
@@ -937,9 +921,6 @@ export function createFreshTestAccount() {
     full_name: '',
     currency: 'kr',
     language: lang,
-    dark_mode: false,
-    theme_mode: 'light',
-    theme_color: 'neutral',
     onboarding_completed: false,
     categories: defaultFreshConfig.categories,
     income_categories: defaultFreshConfig.incomeCategories,

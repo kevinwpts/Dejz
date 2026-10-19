@@ -503,53 +503,8 @@ export default function App() {
 
   const handlePlusQuickExpenseSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (isSubmittingQuick || isAudioTranscribing) return;
-
-    if (isRecording) {
-      const res = await stopRecordingAndProcess(plusQuickText);
-      if (res && !res.handled && plusQuickText.trim()) {
-        const clean = plusQuickText.trim();
-        setIsSubmittingQuick(true);
-        try {
-          const defaultCategory = config?.language === "en" ? "Uncategorized" : "Okategoriserat";
-          const parsed = await parseQuickExpense(
-            clean,
-            config?.categories || [],
-            transactions,
-            defaultCategory
-          );
-
-          if (parsed.amount && parsed.amount > 0) {
-            await addTransaction({
-              amount: parsed.amount,
-              type: "expense",
-              category: parsed.category || defaultCategory,
-              merchant: parsed.merchant || (config?.language === "en" ? "Quick Add" : "Snabbköp"),
-              timestamp: Date.now(),
-              tags: []
-            });
-
-            feedback.success();
-            setPlusSuccessMsg({
-              text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
-            });
-            setPlusQuickText("");
-            setTimeout(() => {
-              setPlusSuccessMsg(null);
-              setIsPlusMenuOpen(false);
-            }, 1500);
-          }
-        } catch (_err) {
-          console.error("Quick expense failed", _err);
-        } finally {
-          setIsSubmittingQuick(false);
-        }
-      }
-      return;
-    }
-
     const clean = plusQuickText.trim();
-    if (!clean) return;
+    if (!clean || isSubmittingQuick) return;
 
     setIsSubmittingQuick(true);
     try {
@@ -589,10 +544,13 @@ export default function App() {
   };
 
   const handlePlusMicClick = async () => {
-    if (!isRecording) {
-      toggleRecording(plusQuickText);
+    if (isRecording) {
+      const res = await stopRecordingAndProcess(plusQuickText);
+      if (res && !res.handled && plusQuickText.trim()) {
+        handlePlusQuickExpenseSubmit();
+      }
     } else {
-      await handlePlusQuickExpenseSubmit();
+      toggleRecording(plusQuickText);
     }
   };
   const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
@@ -821,8 +779,6 @@ export default function App() {
             locale: session.user.user_metadata?.locale || regDefaults.locale,
             timezone: session.user.user_metadata?.timezone || regDefaults.timezone,
             dark_mode: false,
-            theme_mode: "light",
-            theme_color: "neutral",
           })
           .select()
           .single();
@@ -987,8 +943,8 @@ export default function App() {
           notifications: dbSettings.notifications,
           securityLock: dbSettings.securityLock,
           darkMode:
-            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? Boolean(dbSettings.darkMode) : false,
-          themeMode: dbSettings.themeMode || (dbSettings.darkMode ? 'dark' : 'light'),
+            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
+          themeMode: dbSettings.themeMode || 'system',
           themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
@@ -1004,16 +960,16 @@ export default function App() {
               ? dbSettings.includeFixedExpensesInAnalysis
               : true,
           showFixedExpensesInTodayView:
-            dbSettings.showFixedExpensesInTodayView !== undefined
-              ? dbSettings.showFixedExpensesInTodayView
-              : true,
+            dbSettings.showFixedExpensesInTodayView !== undefined && dbSettings.showFixedExpensesInTodayView !== null
+              ? Boolean(dbSettings.showFixedExpensesInTodayView)
+              : false,
           showFixedExpensesInCalendar:
-            dbSettings.showFixedExpensesInCalendar !== undefined
-              ? dbSettings.showFixedExpensesInCalendar
-              : true,
+            dbSettings.showFixedExpensesInCalendar !== undefined && dbSettings.showFixedExpensesInCalendar !== null
+              ? Boolean(dbSettings.showFixedExpensesInCalendar)
+              : false,
           showFixedExpensesInHistory:
-            dbSettings.showFixedExpensesInHistory !== undefined
-              ? dbSettings.showFixedExpensesInHistory
+            dbSettings.showFixedExpensesInHistory !== undefined && dbSettings.showFixedExpensesInHistory !== null
+              ? Boolean(dbSettings.showFixedExpensesInHistory)
               : (localStorage.getItem('dejz_show_fixed_in_history') === 'true'),
           hideEmptyCategories:
             dbSettings.hideEmptyCategories !== undefined && dbSettings.hideEmptyCategories !== null
@@ -1236,7 +1192,7 @@ export default function App() {
       const newConfig = { ...config, savingsGoals: redistributedGoals };
       setConfig(newConfig);
       await dataService.saveSettings(session.user.id, newConfig);
-    } catch (error) {
+    } catch (_error) {
       console.error('Reorder error:', error);
       addToast(t("errorSaving"), "error");
     }
@@ -1351,7 +1307,12 @@ export default function App() {
     }
   }, [config?.appIconTheme]);
 
-  // Theme and accent colors are centrally managed in the main theme useEffect below.
+  useEffect(() => {
+    if (!config) return;
+    const isDark = !!config.darkMode;
+    const themeHex = config.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
+    applyThemeColor(themeHex, isDark);
+  }, [config?.themeColor, config?.darkMode, session]);
 
   const handleFeedbackSubmit = async (message: string) => {
     const activeUserId = session?.user?.id || 'demo-user';
@@ -1395,7 +1356,7 @@ export default function App() {
               mode: "no-cors", // Google's revoke endpoint doesn't support CORS but still works with no-cors
             },
           );
-        } catch (e) {
+        } catch (_e) {
           console.warn("Could not revoke Google token automatically:", e);
         }
       }
@@ -1578,30 +1539,24 @@ export default function App() {
     });
   };
 
-  // --- Theme Logic: Light (default) / Dark + Dynamic Theme Color ---
+  // --- Theme Logic: System (default) / Light / Dark ---
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
-      const isAuthenticatedApp = Boolean(session && !publicLegalDoc);
-
-      // Pre-login screens (LandingPage, Auth, Welcome, PublicLegalPage) are ALWAYS locked to light mode + Dejz brand palette
-      if (isAuthenticatedApp) {
-        const themeMode = config?.themeMode;
+      
+      // Pre-login screens (LandingPage, Auth, Welcome) are ALWAYS locked to light mode
+      if (session) {
+        const themeMode = config?.themeMode || 'system';
 
         if (themeMode === 'dark') {
           isDark = true;
         } else if (themeMode === 'light') {
           isDark = false;
-        } else if (config?.darkMode !== undefined && config?.darkMode !== null) {
-          isDark = Boolean(config.darkMode);
         } else {
-          isDark = false;
-        }
-
-        try {
-          localStorage.setItem('dejz_dark_mode', isDark ? 'dark' : 'light');
-        } catch {
-          // ignore storage errors
+          // System preference
+          if (typeof window !== 'undefined' && window.matchMedia) {
+            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
         }
       } else {
         isDark = false;
@@ -1618,15 +1573,10 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      if (isAuthenticatedApp) {
-        const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
-        applyThemeColor(userThemeHex, isDark, true);
-      } else {
-        // On LandingPage / Auth / PublicLegalPage, always render pure Dejz brand colors without overwriting saved user preferences
-        applyThemeColor('neutral', false, false);
-      }
+      const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
+      applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#0B0C0E" : "#F4F5F7";
+      const themeColor = isDark ? "#191919" : "#FFFFFF";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -1659,7 +1609,7 @@ export default function App() {
         return () => mediaQuery.removeListener(handleSystemThemeChange);
       }
     }
-  }, [config?.themeMode, config?.darkMode, config?.themeColor, session, publicLegalDoc]);
+  }, [config?.themeMode, config?.darkMode, config?.themeColor, session]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
@@ -1695,7 +1645,7 @@ export default function App() {
       newPath = buildLanguageUrl(currentLang, '/');
       // If visiting root '/' without prefix, replaceState seamlessly
       if (window.location.pathname === '/' || window.location.pathname === '') {
-        window.history.replaceState(null, '', newPath);
+        window.history.replaceState(null, '', `${newPath}${window.location.search}${window.location.hash}`);
         return;
       }
     } else {
@@ -1705,7 +1655,7 @@ export default function App() {
     }
     
     if (window.location.pathname !== newPath) {
-      window.history.pushState(null, '', newPath);
+      window.history.pushState(null, '', `${newPath}${window.location.search}${window.location.hash}`);
     }
   }, [config?.language, landingLanguage, activeTab, showLanding]);
 
@@ -1716,7 +1666,7 @@ export default function App() {
       try {
         const demoSession = JSON.parse(demoSessionStr);
         const demoVersion = localStorage.getItem('demo_data_version');
-        if (demoVersion !== 'v7_unified_warm' && demoVersion !== 'v_fresh_test_account') {
+        if (demoVersion !== 'v6_historical_rich' && demoVersion !== 'v_fresh_test_account') {
           seedDemoData();
         }
         setSession(demoSession);
@@ -1831,8 +1781,7 @@ export default function App() {
     document.body.classList.remove("dark");
     document.body.classList.add("light");
     localStorage.removeItem('dejz_theme_color');
-    localStorage.removeItem('dejz_dark_mode');
-    applyThemeColor('neutral', false, false);
+    applyThemeColor('neutral', false);
     
     window.scrollTo({ top: 0, behavior: 'instant' });
     localStorage.removeItem('app_language');
@@ -1972,7 +1921,7 @@ export default function App() {
       }
       setAvatarUrl(publicUrl);
       addToast("Bild uppdaterad!", "success");
-    } catch (error: any) {
+    } catch (_error) {
       console.error("Error uploading avatar:", error.message);
       addToast(`Kunde inte ladda upp bild: ${error.message}`, "error");
     }
@@ -2015,8 +1964,8 @@ export default function App() {
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
       darkMode: false,
-      themeMode: 'light',
-      themeColor: 'neutral',
+      themeMode: 'system',
+      themeColor: localStorage.getItem('dejz_theme_color') || 'neutral',
       quickChoices: [],
       savingsPot: 0,
       savingsGoals: [],
@@ -2025,8 +1974,8 @@ export default function App() {
       monthlySavings: 0,
       monthlySavingsItems: [],
       includeFixedExpensesInAnalysis: true,
-      showFixedExpensesInTodayView: true,
-      showFixedExpensesInCalendar: true,
+      showFixedExpensesInTodayView: false,
+      showFixedExpensesInCalendar: false,
       showFixedExpensesInHistory: localStorage.getItem('dejz_show_fixed_in_history') === 'true',
       hideEmptyCategories: localStorage.getItem('dejz_hide_empty_categories') === 'true',
       hasSavedInitialBudget: false,
@@ -2118,9 +2067,7 @@ export default function App() {
           initial_spent: defaultConfig.initialSpent,
           notifications: defaultConfig.notifications,
           security_lock: defaultConfig.securityLock,
-          dark_mode: false,
-          theme_mode: "light",
-          theme_color: "neutral",
+          dark_mode: true,
           quick_choices: defaultConfig.quickChoices,
           monthly_savings: defaultConfig.monthlySavings,
           include_fixed_expenses_in_analysis:
@@ -2309,9 +2256,7 @@ export default function App() {
             initialSpent: Number(dbProfile.initial_spent || 0),
             notifications: dbProfile.notifications,
             securityLock: dbProfile.security_lock,
-            darkMode: Boolean(dbProfile.dark_mode),
-            themeMode: dbProfile.theme_mode || (dbProfile.dark_mode ? 'dark' : 'light'),
-            themeColor: dbProfile.theme_color || 'neutral',
+            darkMode: dbProfile.dark_mode !== false,
             savingsPot: dbProfile.savings_pot || 0,
             savingsGoals: dbProfile.savings_goals || [],
             totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
@@ -2319,8 +2264,8 @@ export default function App() {
             monthlySavings: dbProfile.monthly_savings || 0,
             monthlySavingsItems: dbProfile.monthly_savings_items || [],
             includeFixedExpensesInAnalysis: dbProfile.include_fixed_expenses_in_analysis !== false,
-            showFixedExpensesInTodayView: dbProfile.show_fixed_expenses_in_today_view !== false,
-            showFixedExpensesInCalendar: dbProfile.show_fixed_expenses_in_calendar !== false,
+            showFixedExpensesInTodayView: dbProfile.show_fixed_expenses_in_today_view === true,
+            showFixedExpensesInCalendar: dbProfile.show_fixed_expenses_in_calendar === true,
             hideEmptyCategories: dbProfile.hide_empty_categories !== undefined ? dbProfile.hide_empty_categories : false,
             appIconTheme: dbProfile.app_icon_theme,
           }).catch((err) => {
@@ -2381,21 +2326,9 @@ export default function App() {
           initialSpent: Number(dbProfile.initial_spent || 0),
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
-          darkMode:
-            localSavedConfig?.darkMode !== undefined
-              ? Boolean(localSavedConfig.darkMode)
-              : (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null)
-                ? Boolean(dbProfile.dark_mode)
-                : false,
-          themeMode:
-            localSavedConfig?.themeMode ||
-            dbProfile.theme_mode ||
-            ((localSavedConfig?.darkMode ?? dbProfile.dark_mode) === true ? 'dark' : 'light'),
-          themeColor:
-            localSavedConfig?.themeColor ||
-            dbProfile.theme_color ||
-            localStorage.getItem('dejz_theme_color') ||
-            'neutral',
+          darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
+          themeMode: dbProfile.theme_mode || 'system',
+          themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
@@ -2431,16 +2364,16 @@ export default function App() {
               ? dbProfile.include_fixed_expenses_in_analysis
               : true,
           showFixedExpensesInTodayView:
-            dbProfile.show_fixed_expenses_in_today_view !== undefined
-              ? dbProfile.show_fixed_expenses_in_today_view
-              : true,
+            dbProfile.show_fixed_expenses_in_today_view !== undefined && dbProfile.show_fixed_expenses_in_today_view !== null
+              ? Boolean(dbProfile.show_fixed_expenses_in_today_view)
+              : (localSavedConfig?.showFixedExpensesInTodayView === true),
           showFixedExpensesInCalendar:
-            dbProfile.show_fixed_expenses_in_calendar !== undefined
-              ? dbProfile.show_fixed_expenses_in_calendar
-              : true,
+            dbProfile.show_fixed_expenses_in_calendar !== undefined && dbProfile.show_fixed_expenses_in_calendar !== null
+              ? Boolean(dbProfile.show_fixed_expenses_in_calendar)
+              : (localSavedConfig?.showFixedExpensesInCalendar === true),
           showFixedExpensesInHistory:
-            dbProfile.show_fixed_expenses_in_history !== undefined
-              ? dbProfile.show_fixed_expenses_in_history
+            dbProfile.show_fixed_expenses_in_history !== undefined && dbProfile.show_fixed_expenses_in_history !== null
+              ? Boolean(dbProfile.show_fixed_expenses_in_history)
               : (localStorage.getItem('dejz_show_fixed_in_history') === 'true' || localSavedConfig?.showFixedExpensesInHistory === true),
           hideEmptyCategories:
             dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
@@ -2616,6 +2549,7 @@ export default function App() {
     const endOffset = 12;
 
     const newLockedPeriods = { ...(config?.lockedPeriods || {}) };
+    let hasNewLocks = false;
 
     for (let i = startOffset; i <= endOffset; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
@@ -2646,6 +2580,13 @@ export default function App() {
         start = new Date(newLockedPeriods[pId].start);
         end = new Date(newLockedPeriods[pId].end);
         name = newLockedPeriods[pId].name;
+      } else if (end < actualToday) {
+        newLockedPeriods[pId] = {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          name,
+        };
+        hasNewLocks = true;
       }
 
       p.push({
@@ -2659,35 +2600,14 @@ export default function App() {
       });
     }
 
-    return p;
-  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions, config?.lockedPeriods]);
-
-  // Persist any newly locked past periods outside of render
-  useEffect(() => {
-    if (!config || !session?.user?.id) return;
-    const actualToday = new Date();
-    actualToday.setHours(0, 0, 0, 0);
-    const currentLocks = config.lockedPeriods || {};
-    const nextLocks = { ...currentLocks };
-    let changed = false;
-
-    for (const period of periods) {
-      if (period.end < actualToday && !nextLocks[period.periodId]) {
-        nextLocks[period.periodId] = {
-          start: period.start.toISOString(),
-          end: period.end.toISOString(),
-          name: period.name,
-        };
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      const updatedConfig = { ...config, lockedPeriods: nextLocks };
+    if (hasNewLocks && config && session?.user?.id) {
+      const updatedConfig = { ...config, lockedPeriods: newLockedPeriods };
       setConfig(updatedConfig);
       dataService.saveSettings(session.user.id, updatedConfig).catch(() => {});
     }
-  }, [periods, config, session?.user?.id]);
+
+    return p;
+  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions, config?.lockedPeriods, session?.user?.id]);
 
   const calculateStats = useCallback(
     (targetDate: Date) => {
@@ -4464,12 +4384,6 @@ export default function App() {
       <div className="light">
         <PublicLegalPage
           initialDoc={publicLegalDoc}
-          currentLanguage={landingLanguage}
-          onLanguageChange={(lang) => {
-            setLandingLanguage(lang);
-            localStorage.setItem('app_language', lang);
-            localStorage.setItem('app_language_manual', 'true');
-          }}
           onNavigateHome={() => {
             try {
               window.history.pushState({}, '', '/');
@@ -4542,10 +4456,6 @@ export default function App() {
             onLegalClick={handleLegalClick}
             t={t}
             currentLanguage={landingLanguage}
-            onLanguageChange={(lang) => {
-              setLandingLanguage(lang);
-              localStorage.setItem('app_language', lang);
-            }}
           />
         ) : (
           <Auth
@@ -4692,16 +4602,16 @@ export default function App() {
           <div className="page-max mx-auto w-full flex items-center justify-between px-2 sm:px-4">
             <div className="flex items-center gap-2.5">
               <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-color)]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
               </span>
-              <span className="text-xs font-bold text-[var(--accent-color)]">Demoläge aktivt</span>
+              <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
               <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-label">— Du utforskar appen med exempeldata</span>
             </div>
             <button
               type="button"
               onClick={handleExitDemo}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:bg-[var(--accent-hover)] active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-subtle"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-subtle"
             >
               <span>{t('exitDemo')}</span>
               <LogOut size={12} strokeWidth={2} />
@@ -4999,6 +4909,7 @@ export default function App() {
                 onResetCompletedGoals={handleResetCompletedGoals}
                 onClearTransactions={handleClearTransactions}
                 onResetAll={resetAll}
+                onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
                 onRenameCategory={handleRenameCategory}
                 transactions={transactions}
                 onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
@@ -5947,8 +5858,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs px-3 pt-4 pb-[max(14px,env(safe-area-inset-bottom,14px))] sm:p-4"
+            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
             onClick={() => {
               feedback.tap();
               setIsPlusMenuOpen(false);
@@ -5964,18 +5874,18 @@ export default function App() {
                   setIsPlusMenuOpen(false);
                 }
               }}
-              initial={{ y: 40, opacity: 0, scale: 0.97 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 40, opacity: 0, scale: 0.97 }}
-              transition={{ type: "spring", damping: 28, stiffness: 320 }}
-              className="bg-[var(--surface-color)] w-full max-w-[440px] rounded-[28px] relative flex flex-col overflow-hidden shadow-[0_20px_50px_-12px_rgba(11,11,15,0.28)] font-sans p-4 sm:p-5 space-y-3 touch-pan-y border-none"
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+              className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-modal font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y border-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
-              <div className="w-9 h-1 bg-black/15 dark:bg-white/20 rounded-full mx-auto mb-0.5 shrink-0 cursor-grab active:cursor-grabbing" />
+              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-1 mb-2 shrink-0 cursor-grab active:cursor-grabbing" />
 
-              {/* The 3 Clean Bento Tiles: Utgift, Inkomst, Kvitto */}
-              <div className="grid grid-cols-3 gap-2.5">
+              {/* The 3 Action Buttons */}
+              <div className="grid grid-cols-3 gap-2.5 justify-items-center py-1">
                 {/* Utgift */}
                 <button
                   type="button"
@@ -5986,12 +5896,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] bg-[var(--bg-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer active:scale-[0.97] select-none"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shadow-2xs">
-                    <ArrowDownLeft size={19} strokeWidth={2.1} />
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
-                  <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-none">
+                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -6006,12 +5916,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] bg-[var(--bg-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer active:scale-[0.97] select-none"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shadow-2xs">
-                    <ArrowUpRight size={19} strokeWidth={2.1} />
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
-                  <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-none">
+                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -6021,23 +5931,17 @@ export default function App() {
                   type="button"
                   onClick={handlePlusKvittoClick}
                   disabled={isScanningReceipt}
-                  className="flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] bg-[var(--bg-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer active:scale-[0.97] select-none disabled:opacity-60"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shadow-2xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
-                      <Loader2 size={18} className="animate-spin text-[var(--text-primary)]" />
+                      <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
-                      <Camera size={18} strokeWidth={2.1} />
+                      <Camera size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                     )}
                   </div>
-                  <span className="text-[13px] font-semibold text-[var(--text-primary)] leading-none">
-                    {isScanningReceipt
-                      ? config?.language === "en"
-                        ? "Scanning..."
-                        : "Scannar..."
-                      : config?.language === "en"
-                        ? "Receipt"
-                        : "Kvitto"}
+                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
+                    {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
                   </span>
                 </button>
 
@@ -6051,8 +5955,8 @@ export default function App() {
                 />
               </div>
 
-              {/* Clean Pill Quick-Input & Voice Bar */}
-              <div>
+              {/* Snabbutgift Form with Mic using Reusable SmartInput */}
+              <div className="pt-2">
                 <SmartInput
                   hideLabel
                   value={plusQuickText}
@@ -6060,96 +5964,47 @@ export default function App() {
                   onSubmit={handlePlusQuickExpenseSubmit}
                   placeholder={
                     isRecording
-                      ? config?.language === "en"
-                        ? "Listening... Tap right button when done"
-                        : "Lyssnar... Tryck till höger när du är klar"
+                      ? (config?.language === "en" ? "Listening... Speak purchase" : "Lyssnar... Prata in köpet")
                       : isAudioTranscribing
-                        ? config?.language === "en"
-                          ? "Processing speech..."
-                          : "Tolkar röstinlägg..."
-                        : config?.language === "en"
-                          ? "Quick expense: e.g. 45 Coop..."
-                          : "Snabbutgift: t.ex. 45 ICA..."
+                        ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
+                        : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
                   }
                   isProcessing={isSubmittingQuick || isAudioTranscribing}
-                  disabled={false}
-                  allowSubmitWhenEmpty={isRecording}
+                  disabled={isRecording}
                   inputRef={plusQuickInputRef}
                   leftElement={
                     <button
                       type="button"
                       onClick={handlePlusMicClick}
                       disabled={isSubmittingQuick || isAudioTranscribing}
-                      aria-label={
+                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
                         isRecording
-                          ? config?.language === "en"
-                            ? "Stop recording and save"
-                            : "Stoppa inspelning och spara"
-                          : config?.language === "en"
-                            ? "Speak expense"
-                            : "Tala in utgift"
-                      }
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer select-none shrink-0 ${
-                        isRecording
-                          ? "bg-[#F0485E] text-white shadow-xs"
+                          ? "bg-[var(--danger-color)] text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
-                            ? "bg-[var(--surface-color)] text-[#F0485E]"
-                            : "bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] text-[var(--text-primary)] shadow-2xs active:scale-95"
+                            ? "bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]"
+                            : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
-                        <Loader2 size={16} className="animate-spin text-[#F0485E]" />
+                        <Loader2 size={15} className="animate-spin text-[var(--danger-color)]" />
+                      ) : isRecording ? (
+                        <Square size={13} className="fill-current" />
                       ) : (
-                        <Mic
-                          size={17}
-                          strokeWidth={2.1}
-                          className={isRecording ? "animate-pulse" : ""}
-                        />
+                        <Mic size={17} strokeWidth={2} />
                       )}
                     </button>
                   }
                   submitVariant="inside"
-                  submitTitle={
-                    isRecording
-                      ? config?.language === "en"
-                        ? "Done – Stop & Save"
-                        : "Klar – Stoppa och spara"
-                      : config?.language === "en"
-                        ? "Add expense"
-                        : "Lägg till utgift"
-                  }
-                  submitAriaLabel={
-                    isRecording
-                      ? config?.language === "en"
-                        ? "Done – Stop & Save"
-                        : "Klar – Stoppa och spara"
-                      : config?.language === "en"
-                        ? "Add expense"
-                        : "Lägg till utgift"
-                  }
-                  submitIcon={
-                    isRecording ? (
-                      <Square size={13} className="fill-current" />
-                    ) : (
-                      <Plus size={18} strokeWidth={2.3} />
-                    )
-                  }
-                  submitButtonClassName={
-                    isRecording
-                      ? "!w-10 !h-10 !rounded-full bg-[#F0485E] text-white border-none shadow-xs"
-                      : "!w-10 !h-10 !rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] border-none"
-                  }
+                  submitIcon={<Plus size={18} strokeWidth={2} />}
                   feedback={
                     plusSuccessMsg
-                      ? { type: "success", message: plusSuccessMsg.text }
+                      ? { type: 'success', message: plusSuccessMsg.text }
                       : plusVoiceError
-                        ? { type: "error", message: plusVoiceError }
+                        ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 text-[15px] rounded-full bg-[var(--bg-color)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] border-none shadow-none ${
-                    isRecording
-                      ? "ring-2 ring-[#F0485E]/35 bg-[#FFF0ED] dark:bg-[#F0485E]/10"
-                      : ""
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
+                    isRecording ? "border-[var(--danger-color)]/80 ring-2 ring-rose-500/30" : "border-subtle"
                   }`}
                 />
               </div>

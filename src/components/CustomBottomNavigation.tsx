@@ -37,10 +37,10 @@ export function CustomBottomNavigation({
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-40 w-full select-none pointer-events-none px-4 pt-2 pb-[max(14px,env(safe-area-inset-bottom,14px))]">
       <div className="w-full max-w-[440px] mx-auto flex items-center gap-2.5 sm:gap-3 pointer-events-auto">
-        {/* Modern Floating Pill Dock (Left) */}
+        {/* Modern Floating Navigation Dock (Left) - keeps capsule shape */}
         <nav
           aria-label={isEn ? "Main navigation" : "Huvudnavigering"}
-          className="flex-1 h-[60px] rounded-full bg-[var(--surface-color)]/92 dark:bg-[var(--surface-raised)]/95 backdrop-blur-2xl border border-black/[0.05] dark:border-none shadow-subtle dark:shadow-[0_12px_32px_rgba(0,0,0,0.45)] p-1.5 grid grid-cols-4 items-center relative"
+          className="flex-1 h-[60px] rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-none p-1.5 grid grid-cols-4 items-center relative"
         >
           {/* 1. Hem */}
           <NavItem
@@ -81,19 +81,19 @@ export function CustomBottomNavigation({
           />
         </nav>
 
-        {/* Detached Circular Plus Button to the Right of the Footer */}
+        {/* Detached Circular Plus Button to the Right of the Footer - 50% radius, no accent shadow/glow */}
         <button
           type="button"
           onClick={() => {
             if (onPlusClick) onPlusClick();
           }}
-          className="shrink-0 w-[60px] h-[60px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-all border-none shadow-subtle outline-none"
+          className="shrink-0 w-[52px] h-[52px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-colors border-none shadow-none outline-none"
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
           <Icon
             name="plus"
-            size={25}
+            size={22}
             weight="bold"
             className="text-[var(--on-accent)]"
           />
@@ -122,25 +122,25 @@ function NavItem({
       title={label}
       className={`relative h-full w-full rounded-full flex flex-col items-center justify-center transition-colors touch-press-subtle cursor-pointer select-none z-10 ${
         isActive
-          ? "text-[var(--nav-active-color,var(--accent-color))] font-semibold"
-          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium"
+          ? "text-[var(--nav-active-color,var(--accent-color))]"
+          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
       }`}
     >
       {isActive && (
         <motion.div
           layoutId="modern-footer-active-pill"
           transition={{ type: "spring", stiffness: 420, damping: 32 }}
-          className="absolute inset-0 rounded-full bg-[var(--accent-color)]/[0.10] dark:bg-[var(--accent-color)]/[0.15] -z-10"
+          className="absolute inset-0 rounded-full bg-[var(--accent-color)]/[0.12] dark:bg-[var(--accent-color)]/[0.16] -z-10"
           aria-hidden="true"
         />
       )}
       <Icon
         name={iconName}
-        size={21}
+        size={22}
         weight={isActive ? "fill" : "regular"}
         className="transition-transform duration-150"
       />
-      <span className="text-[10px] leading-none mt-[3px] tracking-[-0.01em]">
+      <span className="text-nav-label mt-[2px]">
         {label}
       </span>
     </button>

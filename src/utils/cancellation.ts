@@ -144,15 +144,118 @@ export function getCancelledFixedExpenses(
 }
 
 /**
- * Formats ISO date string (YYYY-MM-DD) into short localized string (e.g. '28 nov').
+ * Formats ISO date string (YYYY-MM-DD) or Date into short localized string without trailing dot (e.g. '28 nov', '1 dec').
  */
-export function formatShortDate(isoDate?: string, lang: string = 'sv'): string {
+export function formatShortDate(isoDate?: string | Date, lang: string = 'sv'): string {
   if (!isoDate) return '';
-  const parts = isoDate.split('-').map(Number);
-  if (parts.length !== 3 || parts.some(isNaN)) return isoDate;
-  const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-  const locale = lang === 'en' ? 'en-US' : 'sv-SE';
-  return dateObj.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  let dateObj: Date;
+  if (isoDate instanceof Date) {
+    if (isNaN(isoDate.getTime())) return '';
+    dateObj = isoDate;
+  } else {
+    const parts = isoDate.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return isoDate;
+    dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+  const locale =
+    lang === 'en'
+      ? 'en-US'
+      : lang === 'no'
+      ? 'nb-NO'
+      : lang === 'da'
+      ? 'da-DK'
+      : lang === 'fi'
+      ? 'fi-FI'
+      : 'sv-SE';
+  return dateObj
+    .toLocaleDateString(locale, { day: 'numeric', month: 'short' })
+    .replace(/\.$/, '');
+}
+
+/**
+ * Calculates the next actual payment date (including month) for a fixed expense
+ * using existing frequency, startMonth, deductionDay, and cancellation/end logic.
+ */
+export function getNextFixedExpensePaymentDate(
+  expense: FixedExpense,
+  referenceDate: Date = new Date()
+): Date | null {
+  if (!expense) return null;
+  if (!expense.deductionDay || expense.deductionDay <= 0) return null;
+
+  const freq = expense.frequency || Frequency.MONTHLY;
+  const isQuarterly =
+    freq === Frequency.QUARTERLY ||
+    (freq as string) === 'Kvartalsvis' ||
+    (freq as string) === 'QUARTERLY';
+  const isSemiAnnual =
+    freq === Frequency.SEMI_ANNUALLY ||
+    (freq as string) === 'Halvårsvis' ||
+    (freq as string) === 'SEMI_ANNUALLY';
+  const isAnnual =
+    freq === Frequency.ANNUALLY ||
+    (freq as string) === 'Årsvis' ||
+    (freq as string) === 'ANNUALLY';
+  const isNonMonthly = isQuarterly || isSemiAnnual || isAnnual;
+
+  const rawStartMonth =
+    expense.startMonth !== undefined && expense.startMonth !== null
+      ? expense.startMonth
+      : (expense.periodOverrides as any)?._start_month;
+
+  if (
+    isNonMonthly &&
+    (rawStartMonth === undefined || rawStartMonth === null || isNaN(Number(rawStartMonth)))
+  ) {
+    return null;
+  }
+
+  const day = expense.deductionDay;
+  const startM = rawStartMonth !== undefined && rawStartMonth !== null ? Number(rawStartMonth) : 0;
+
+  let months: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  if (isQuarterly) {
+    months = [startM, (startM + 3) % 12, (startM + 6) % 12, (startM + 9) % 12];
+  } else if (isSemiAnnual) {
+    months = [startM, (startM + 6) % 12];
+  } else if (isAnnual) {
+    months = [startM];
+  }
+
+  const today = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth(),
+    referenceDate.getDate()
+  );
+
+  const yearsToCheck = [today.getFullYear(), today.getFullYear() + 1];
+  const candidates: Date[] = [];
+
+  for (const year of yearsToCheck) {
+    for (const month of months) {
+      const maxDaysInMonth = new Date(year, month + 1, 0).getDate();
+      const actualDay = Math.min(day, maxDaysInMonth);
+      candidates.push(new Date(year, month, actualDay));
+    }
+  }
+
+  candidates.sort((a, b) => a.getTime() - b.getTime());
+
+  let nextDate = candidates.find((d) => d.getTime() >= today.getTime()) || candidates[0] || null;
+
+  // Respect end/cancellation logic if present
+  const lastPayIso = getLastPaymentDate(expense) || expense.cancellationDate;
+  if (lastPayIso && nextDate) {
+    const parts = lastPayIso.split('-').map(Number);
+    if (parts.length === 3 && !parts.some(isNaN)) {
+      const endLimit = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+      if (nextDate.getTime() > endLimit.getTime()) {
+        nextDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+    }
+  }
+
+  return nextDate;
 }
 
 /**
@@ -166,7 +269,7 @@ export function getCancellationBadgeText(
   const isEn = lang === 'en';
 
   if (isExpenseCancelledAndExpired(expense)) {
-    return isEn ? 'Ended' : 'Uppsagt (Avslutat)';
+    return isEn ? 'Ended' : 'Uppsagd (Avslutat)';
   }
 
   const lastPay = getLastPaymentDate(expense);
@@ -174,13 +277,14 @@ export function getCancellationBadgeText(
 
   if (lastPay && cancelDate && lastPay !== cancelDate) {
     const formattedLast = formatShortDate(lastPay, lang);
-    return isEn ? `Cancelled · Last payment ${formattedLast}` : `Uppsagt · Sista betalning ${formattedLast}`;
+    return isEn ? `Cancelled · Last payment ${formattedLast}` : `Uppsagd · Sista betalning ${formattedLast}`;
   }
 
   if (cancelDate) {
     const formattedEnd = formatShortDate(cancelDate, lang);
-    return isEn ? `Cancelled · Ends ${formattedEnd}` : `Uppsagt · Slutar ${formattedEnd}`;
+    return isEn ? `Cancelled · Ends ${formattedEnd}` : `Uppsagd · Slutar ${formattedEnd}`;
   }
 
-  return isEn ? 'Cancelled' : 'Uppsagt';
+  return isEn ? 'Cancelled' : 'Uppsagd';
 }
+

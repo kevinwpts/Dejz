@@ -122,13 +122,11 @@ export function NotificationsView({
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-full bg-[var(--surface-muted)] flex items-center justify-center flex-shrink-0 shadow-xs [&_div]:w-9 [&_div]:h-9 [&_div]:rounded-full [&_img]:rounded-full [&_span]:text-xl">
-                  <BudgetItemLogo
-                    item={n.item}
-                    type={n.item.budgetType === 'income' ? 'income' : 'expense'}
-                    config={config}
-                  />
-                </div>
+                <BudgetItemLogo
+                  item={n.item}
+                  type={n.item.budgetType === 'income' ? 'income' : 'expense'}
+                  config={config}
+                />
                 <div className="min-w-0">
                   {n.item.budgetType === 'income' && (
                     <span className="text-micro-label font-semibold text-success block">
@@ -238,7 +236,7 @@ export function NotificationsView({
                     variant="secondary"
                     size="md"
                     fullWidth
-                    icon={<Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />}
+                    icon={<Check size={15} className="text-[var(--text-primary)]" strokeWidth={2.5} />}
                     onClick={() => {
                       if (typeof feedback?.success === 'function') feedback.success();
                       onConfirmStandard(n.item);

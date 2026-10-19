@@ -12,7 +12,6 @@ import {
   XCircle, 
   Copy, 
   Check, 
-  ChevronLeft, 
   FileCode,
   Users,
   Play
@@ -38,7 +37,7 @@ interface AdminDashboardViewProps {
 }
 
 export function AdminDashboardView({
-  onBack,
+  onBack: _onBack,
   user,
   config,
   setConfig: _setConfig,
@@ -146,44 +145,31 @@ export function AdminDashboardView({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -14 }}
-      transition={{ duration: 0.25 }}
-      className="space-y-[var(--card-gap)] pb-16 font-sans"
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col gap-section pb-16 font-sans w-full"
     >
-      {/* Header & Back Button */}
-      <div className="flex items-center justify-between pt-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-2 text-body font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group"
-        >
-          <div className="w-8 h-8 rounded-full bg-[var(--surface-color)]/95 dark:bg-[var(--surface-muted)] border border-[var(--border-divider)] shadow-subtle flex items-center justify-center group-hover:bg-[var(--surface-color)] dark:group-hover:bg-white/10 transition-colors">
-            <ChevronLeft size={16} strokeWidth={2.5} />
-          </div>
-          <span>{isEn ? 'Back to profile' : 'Tillbaka till profilen'}</span>
-        </button>
-
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-secondary font-bold border border-[var(--warning-color)]/20">
-          <Crown size={14} strokeWidth={2} />
-          <span>{isEn ? 'App Owner' : 'Appägare'}</span>
-        </div>
-      </div>
-
       {/* Admin Hero Card */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
-        <div className="flex items-start justify-between">
+      <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-none space-y-[var(--card-gap)]">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-[var(--radius-xs,8px)] bg-gradient-to-tr from-[var(--accent-color)] to-[var(--warning-color)] text-white flex items-center justify-center shadow-subtle shadow-[var(--accent-color)]/20">
-              <ShieldCheck size={26} strokeWidth={2} />
+            <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] bg-gradient-to-tr from-[var(--accent-color)] to-[var(--warning-color)] text-white flex items-center justify-center">
+              <ShieldCheck size={22} strokeWidth={2} />
             </div>
             <div>
-              <h2 className="text-page-title font-bold font-display text-[var(--text-primary)] tracking-tight">
-                {isEn ? 'Admin Dashboard' : 'Adminpanel'}
-              </h2>
-              <p className="text-secondary font-medium text-[var(--text-secondary)] mt-0.5">
-                {user?.email || 'kevinwpts@gmail.com'}
+              <div className="flex items-center gap-2">
+                <span className="text-body-medium font-semibold text-[var(--text-primary)]">
+                  {user?.email || 'kevinwpts@gmail.com'}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-micro-label font-bold">
+                  <Crown size={11} strokeWidth={2} />
+                  <span>{isEn ? 'App Owner' : 'Appägare'}</span>
+                </span>
+              </div>
+              <p className="text-secondary text-[var(--text-secondary)] mt-0.5">
+                {isEn ? 'System overview & diagnostics' : 'Systemöversikt & diagnostik'}
               </p>
             </div>
           </div>

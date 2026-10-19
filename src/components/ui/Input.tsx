@@ -7,7 +7,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   helperText?: string;
   icon?: React.ReactNode;
   iconRight?: React.ReactNode;
-  variant?: 'default' | 'amount' | 'search' | 'surface';
+  variant?: 'default' | 'amount' | 'search';
   onClear?: () => void;
   currency?: string;
   wrapperClassName?: string;
@@ -37,23 +37,23 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const isSearch = variant === 'search';
     const isAmount = variant === 'amount';
-    const isSurface = variant === 'surface';
 
     const defaultLeftIcon = isSearch && !icon ? <Icon name="magnifying-glass" size={16} /> : icon;
 
-    const bgClass = isSurface
-      ? 'bg-[var(--surface-color,#FFFFFF)] shadow-subtle border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.08] dark:hover:border-white/[0.12]'
-      : 'bg-[var(--surface-input,#ECEEF2)] border border-transparent hover:border-black/[0.05] dark:hover:border-white/[0.08]';
-
-    const baseInputStyles =
-      `w-full h-[var(--height-input,46px)] ${bgClass} text-[var(--text-primary)] rounded-[var(--radius-input,16px)] transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-tertiary)] disabled:bg-[var(--surface-nested,#ECEEF2)] disabled:text-[var(--text-disabled,#A8AEB9)] disabled:border-transparent disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-[2px] focus-visible:outline-[var(--focus-color,#0B0B0F)]`;
+    const baseInputStyles = isSearch
+      ? 'w-full h-[42px] sm:h-[44px] bg-[var(--surface-color)] rounded-[var(--radius-input,12px)] border-none shadow-subtle transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-inactive)] disabled:opacity-50 disabled:cursor-not-allowed'
+      : 'w-full h-[var(--height-input,46px)] bg-[var(--input-bg,rgba(0,0,0,0.05))] rounded-[var(--radius-input,12px)] border transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-inactive)] disabled:opacity-50 disabled:cursor-not-allowed';
 
     const borderAndFocusStyles = error
-      ? '!border-[var(--danger-color)] focus:!border-[var(--danger-color)] focus-visible:!outline-[var(--danger-color)]'
-      : '';
+      ? 'border-[var(--danger-color)] focus:border-[var(--danger-color)] focus:ring-2 focus:ring-[var(--danger-color)]/20'
+      : isSearch
+      ? 'focus:ring-2 focus:ring-[var(--accent-color)]/20'
+      : 'border-transparent focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20';
 
     const typographyStyles = isAmount
-      ? 'text-section-title font-amount tabular-nums'
+      ? 'text-section-title tabular-nums'
+      : isSearch
+      ? 'text-xs sm:text-sm text-[var(--text-primary)]'
       : 'text-body';
 
     return (
@@ -61,7 +61,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-label font-medium text-[var(--text-secondary)] flex items-center justify-between"
+            className="text-label flex items-center justify-between"
           >
             <span>{label}</span>
           </label>

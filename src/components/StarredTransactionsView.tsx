@@ -1,9 +1,9 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TransactionItem } from './TransactionItem';
-import { Card } from './ui';
+import { EmptyState, Input } from './ui';
 
 interface StarredTransactionsViewProps {
   onBack: () => void;
@@ -22,47 +22,98 @@ export function StarredTransactionsView({
   onDeleteTransaction,
   onToggleStar,
 }: StarredTransactionsViewProps) {
-  const starredTransactions = transactions.filter(
-    (t) => Boolean(t.isStarred || (t.tags && t.tags.includes('starred')))
-  );
+  const [searchQuery, setSearchQuery] = useState('');
+  const isEn = config.language === 'en';
+
+  const starredTransactions = (transactions || [])
+    .filter((t) => Boolean(t.isStarred || (t.tags && t.tags.includes('starred'))))
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  const filteredTransactions = starredTransactions.filter((item) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    const merchantStr = typeof item.merchant === 'object' ? (item.merchant as any)?.name : (item.merchant || '');
+    const categoryStr = typeof item.category === 'object' ? (item.category as any)?.name : (item.category || '');
+    const merchantMatch = String(merchantStr).toLowerCase().includes(query);
+    const categoryMatch = String(categoryStr).toLowerCase().includes(query);
+    const noteMatch = item.note?.toLowerCase().includes(query) || false;
+    const amountMatch = item.amount.toString().includes(query);
+    return merchantMatch || categoryMatch || noteMatch || amountMatch;
+  });
+
+  const getCountText = (count: number) => {
+    if (isEn) {
+      return count === 1 ? '1 saved transaction' : `${count} saved transactions`;
+    }
+    return count === 1 ? '1 hjärtmarkerad transaktion' : `${count} hjärtmarkerade transaktioner`;
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-6 pb-12 font-sans"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0 font-sans"
     >
-      {starredTransactions.length === 0 ? (
-        <Card variant="default" padding="lg" className="text-center py-12 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
-            <Heart size={28} strokeWidth={2} />
+      <div className="w-full">
+        <Input
+          variant="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
+          onClear={() => setSearchQuery('')}
+          id="starred_search_input"
+        />
+      </div>
+
+      <div className="space-y-[var(--card-gap)] min-w-0 w-full">
+        {starredTransactions.length > 0 && (
+          <p className="text-secondary text-[var(--text-secondary)] font-medium px-0.5 select-none">
+            {getCountText(filteredTransactions.length)}
+          </p>
+        )}
+
+        {filteredTransactions.length > 0 ? (
+          <div className="space-y-[var(--card-gap)] min-w-0 w-full">
+            <AnimatePresence mode="popLayout">
+              {filteredTransactions.map((tx) => (
+                <TransactionItem
+                  key={tx.id}
+                  transaction={tx}
+                  config={config}
+                  showDate={true}
+                  onView={() => onViewTransaction(tx)}
+                  onDelete={onDeleteTransaction ? () => onDeleteTransaction(tx.id) : undefined}
+                  onToggleStar={onToggleStar}
+                />
+              ))}
+            </AnimatePresence>
           </div>
-          <div className="space-y-1 max-w-sm mx-auto">
-            <h3 className="text-section-title font-bold text-[var(--text-primary)]">
-              {config.language === 'en' ? 'No starred transactions' : 'Inga hjärtmarkerade transaktioner'}
-            </h3>
-            <p className="text-body text-[var(--text-secondary)] leading-relaxed">
-              {config.language === 'en'
-                ? 'Tap the heart icon on any transaction to save it here for quick access.'
-                : 'Tryck på hjärtikonen på en transaktion för att spara den här för snabb åtkomst.'}
-            </p>
-          </div>
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {starredTransactions.map((tx) => (
-            <TransactionItem
-              key={tx.id}
-              transaction={tx}
-              config={config}
-              onView={() => onViewTransaction(tx)}
-              onDelete={onDeleteTransaction ? () => onDeleteTransaction(tx.id) : undefined}
-              onToggleStar={onToggleStar}
-            />
-          ))}
-        </div>
-      )}
+        ) : (
+          <EmptyState
+            icon={Heart}
+            title={
+              starredTransactions.length === 0
+                ? isEn
+                  ? 'No saved transactions'
+                  : 'Inga hjärtmarkerade transaktioner'
+                : isEn
+                ? 'No matches found'
+                : 'Inga träffar'
+            }
+            description={
+              starredTransactions.length === 0
+                ? isEn
+                  ? 'Tap the heart icon on any transaction to save it here for quick access.'
+                  : 'Tryck på hjärtikonen på en transaktion för att spara den här för snabb åtkomst.'
+                : isEn
+                ? 'Your search did not match any saved transactions.'
+                : 'Din sökning matchade inga hjärtmarkerade transaktioner.'
+            }
+          />
+        )}
+      </div>
     </motion.div>
   );
 }
+
