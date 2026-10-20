@@ -67,7 +67,18 @@ export const TransactionItemSkeleton: React.FC = () => {
 export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _language = 'sv' }) => {
   return (
     <div className="min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)]">
-      <div className="max-w-md mx-auto px-4 sm:px-6 pt-3 pb-28 space-y-6">
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 pointer-events-none dark:hidden z-0"
+        style={{
+          background: 'var(--bg-gradient)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
+      />
+      <div className="max-w-md mx-auto px-4 sm:px-6 pt-3 pb-28 space-y-6 relative z-10">
         
         {/* 1. App Header Skeleton */}
         <div className="flex items-center justify-between h-12">

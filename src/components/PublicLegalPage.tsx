@@ -75,10 +75,14 @@ export function PublicLegalPage({
     <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-x-hidden">
       <div
         aria-hidden="true"
-        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        className="fixed inset-0 pointer-events-none dark:hidden z-0"
         style={{
           background: 'var(--bg-gradient)',
         }}
+      />
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
       />
       {/* Sticky Public Header */}
       <header className="sticky top-0 z-50 bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-divider)] px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">

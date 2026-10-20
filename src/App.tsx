@@ -1571,24 +1571,25 @@ export default function App() {
       applyThemeColor(userThemeHex, isDark);
 
       const isShowingLandingOnly = !session && showLanding && !publicLegalDoc;
-      const themeColor = isDark
+      const topColor = isDark
         ? "#141414"
         : isShowingLandingOnly
           ? "#F2F0F0"
           : "#FFD9E2";
+      const bottomThemeColor = isDark ? "#141414" : "#F2F0F0";
 
-      document.documentElement.style.setProperty("--bg-top-color", themeColor);
-      document.body.style.setProperty("--bg-top-color", themeColor);
-      document.documentElement.style.backgroundColor = themeColor;
-      document.body.style.backgroundColor = themeColor;
+      document.documentElement.style.setProperty("--bg-top-color", topColor);
+      document.body.style.setProperty("--bg-top-color", topColor);
+      document.documentElement.style.backgroundColor = topColor;
+      document.body.style.backgroundColor = topColor;
 
       const metaTags = document.querySelectorAll('meta[name="theme-color"]');
       if (metaTags.length > 0) {
-        metaTags.forEach((tag) => tag.setAttribute("content", themeColor));
+        metaTags.forEach((tag) => tag.setAttribute("content", bottomThemeColor));
       } else {
         const meta = document.createElement("meta");
         meta.setAttribute("name", "theme-color");
-        meta.setAttribute("content", themeColor);
+        meta.setAttribute("content", bottomThemeColor);
         document.head.appendChild(meta);
       }
     };
@@ -4347,6 +4348,17 @@ export default function App() {
   if (isAuthLoading) {
     return (
       <div className="min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] light">
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none dark:hidden z-0"
+          style={{
+            background: 'var(--bg-gradient)',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
+        />
         <div className="min-h-dvh flex items-center justify-center relative z-10">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
@@ -4466,6 +4478,11 @@ export default function App() {
         style={{
           background: 'var(--bg-gradient)'
         }}
+        aria-hidden="true"
+      />
+      {/* Shared Fixed Lower Viewport & Overscroll Base Layer */}
+      <div
+        className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
         aria-hidden="true"
       />
 

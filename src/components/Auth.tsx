@@ -249,13 +249,21 @@ export function Auth({
 
   return (
     <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-x-clip pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
-      {/* Seamless Top Ambient Brand Gradient matching the in-app header gradient */}
+      {/* Seamless Fixed Full-Viewport Brand Gradient & Bottom Base Layer */}
       <div
         aria-hidden="true"
-        className="absolute top-0 left-0 right-0 h-[420px] pointer-events-none dark:hidden z-0"
+        className="fixed inset-0 pointer-events-none dark:hidden z-0"
         style={{
           background: 'var(--bg-gradient)',
         }}
+      />
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
+      />
+      <div
+        aria-hidden="true"
+        className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/80 to-transparent pointer-events-none z-0"
       />
       {/* Top Left Back Button */}
       {onBack && (
