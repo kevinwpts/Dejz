@@ -11,6 +11,7 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { BudgetItem } from './BudgetItem';
 import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
+import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput, Modal, Button, Input } from './ui';
 import { Switch } from './ui/Switch';
@@ -779,7 +780,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-          className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col h-[100dvh] max-h-[100dvh] w-full overflow-hidden overscroll-contain selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]"
+          className="light fixed inset-0 z-[100] bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col h-[100dvh] max-h-[100dvh] w-full overflow-hidden overscroll-contain selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]"
         >
           {/* Top Notch / Handle */}
           <div className="pt-[calc(0.5rem+env(safe-area-inset-top))] pb-1 flex justify-center shrink-0">
@@ -855,9 +856,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
                       <div className="text-center pb-2 sm:pb-2.5">
-                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                          {s.nameQuestion}
-                        </h3>
+                        <OnboardingCharacterArt step="name" />
+                        <div className="mt-5 sm:mt-6 text-center">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                            {s.nameQuestion}
+                          </h3>
+                        </div>
                       </div>
 
                       <Input
@@ -898,13 +902,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5 space-y-1">
-                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                          {s.paydayQuestion}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                          {s.paydayDesc}
-                        </p>
+                      <div className="text-center pb-2 sm:pb-2.5">
+                        <OnboardingCharacterArt step="payday" payday={payday} />
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                            {s.paydayQuestion}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                            {s.paydayDesc}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Quick Choices: 25:e, 27:e, 30:e, 1:e & Annan dag */}
@@ -1008,9 +1015,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
                       <div className="text-center pb-2 sm:pb-2.5">
-                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                          {s.incomeQuestion}
-                        </h3>
+                        <OnboardingCharacterArt step="income" />
+                        <div className="mt-5 sm:mt-6 text-center">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                            {s.incomeQuestion}
+                          </h3>
+                        </div>
                       </div>
 
                       <div className="space-y-3 max-h-[36vh] overflow-y-auto px-2 -mx-2 py-2 -my-2 no-scrollbar">
@@ -1082,13 +1092,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-0 sm:my-auto flex flex-col flex-1 pb-0"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5 space-y-1">
-                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                          {s.expensesQuestion}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                          {s.expensesDesc}
-                        </p>
+                      <div className="text-center pb-2 sm:pb-2.5">
+                        <OnboardingCharacterArt step="expenses" />
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                            {s.expensesQuestion}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                            {s.expensesDesc}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Search Bar */}
@@ -1229,9 +1242,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
                       <div className="text-center pb-2 sm:pb-2.5">
-                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                          {s.savingsQuestion}
-                        </h3>
+                        <OnboardingCharacterArt step="goals" />
+                        <div className="mt-5 sm:mt-6 text-center">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                            {s.savingsQuestion}
+                          </h3>
+                        </div>
                       </div>
 
                       {/* Main Amount Input for Monthly Savings */}
@@ -1298,8 +1314,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         return (
                           <>
                             <div className="text-center pb-2 sm:pb-2.5">
+                              <OnboardingCharacterArt step="midMonth" days={daysSincePayday} payday={payday} />
+
                               {/* Kombinerad huvudrubrik */}
-                              <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
+                              <h3 className="mt-4 sm:mt-5 text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
                                 {content.headline}
                               </h3>
                             </div>
@@ -1348,13 +1366,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.25 }}
                       className="space-y-6 sm:space-y-7 my-auto text-center"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5 space-y-1">
-                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                          {s.summaryQuestion}
-                        </h3>
-                        <p className="text-xs font-medium text-[var(--text-secondary)]">
-                          {s.untilPayday(nextPaydayFormatted)}
-                        </p>
+                      <div className="text-center pb-2 sm:pb-2.5">
+                        <OnboardingCharacterArt step="summary" />
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                            {s.summaryQuestion}
+                          </h3>
+                          <p className="text-xs font-medium text-[var(--text-secondary)]">
+                            {s.untilPayday(nextPaydayFormatted)}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Clean Breakdown Card: Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda */}

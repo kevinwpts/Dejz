@@ -601,9 +601,9 @@ export function TodayView({
           ) : (
             <EmptyState
               title={isTodaySelected ? (lang === "en" ? "No transactions today" : "Inga transaktioner idag") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-              description={isTodaySelected ? (lang === "en" ? "Log an expense or income with +." : "Registrera en utgift eller inkomst med +.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+              description={isTodaySelected ? (lang === "en" ? "No expenses or income recorded for today yet." : "Inga utgifter eller inkomster registrerade för idag ännu.") : (lang === "en" ? "No expenses or income recorded on this date." : "Inga utgifter eller inkomster registrerade på detta datum.")}
               onAction={() => onAddTransaction(selectedDate)}
-              actionLabel={`+ ${t("addExpense")}`}
+              actionLabel={t("addExpense")}
             />
           )}
         </div>

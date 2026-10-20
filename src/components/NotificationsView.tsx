@@ -53,10 +53,9 @@ export function NotificationsView({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.2 }}
-        className="py-12 px-2"
+        className="pb-12"
       >
         <EmptyState
-          icon="check-circle"
           title={t('noNotifications')}
           description={
             config.language === 'en'

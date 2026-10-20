@@ -6,7 +6,7 @@ import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
-import { Button, Modal, Select, Card, SegmentedControl, ListRow } from './ui';
+import { Button, Modal, Select, Card, FilterButtonGroup, ListRow } from './ui';
 import { formatAmount, formatCurrency } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
@@ -406,17 +406,32 @@ export function BudgetCategoriesView({
 
   return (
     <div className="flex flex-col gap-section font-sans w-full">
-      {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
+      {/* 0. Flikväljare + Ny kategori-knapp (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
-        <SegmentedControl
-          options={[
-            { value: 'expense', label: isEn ? 'Expenses' : 'Utgifter' },
-            { value: 'income', label: isEn ? 'Income' : 'Inkomster' }
-          ]}
-          value={activeCategoryType}
-          onChange={setActiveCategoryType}
-          fullWidth
-        />
+        <div className="flex items-center justify-between gap-2.5 min-w-0 w-full">
+          <div className="flex-1 min-w-0">
+            <FilterButtonGroup
+              options={[
+                { id: 'expense', label: isEn ? 'Expenses' : 'Utgifter' },
+                { id: 'income', label: isEn ? 'Income' : 'Inkomster' },
+              ]}
+              selectedId={activeCategoryType}
+              onSelect={(id) => setActiveCategoryType(id as 'expense' | 'income')}
+              ariaLabel={isEn ? 'Category type' : 'Kategorityp'}
+            />
+          </div>
+
+          <Button
+            type="button"
+            variant="tonal"
+            size="sm"
+            onClick={() => handleAddCategory(activeCategoryType)}
+            icon={<Plus size={13} strokeWidth={2.5} />}
+            className="shrink-0"
+          >
+            {t('newCategory')}
+          </Button>
+        </div>
       )}
 
       {activeCategoryType === 'expense' ? (
@@ -427,15 +442,15 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-[var(--surface-color)]/95 backdrop-blur-md rounded-card card-p-md shadow-none border-none space-y-3"
+              className="sticky top-0 z-20 bg-[var(--surface-color)] rounded-card card-p shadow-subtle border border-subtle space-y-3"
             >
-              <div className="flex items-baseline justify-between">
-                <div className="space-y-0.5">
-                  <span className="text-metric-label font-medium text-[var(--text-secondary)]">
+              <div className="flex items-end justify-between gap-3">
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-metric-label font-medium text-[var(--text-secondary)] block">
                     {isEn ? 'Left to allocate' : 'Kvar att fördela'}
                   </span>
                   <div
-                    className={`text-large-amount font-semibold font-amount tabular-nums ${
+                    className={`text-large-amount font-bold font-amount tabular-nums leading-tight ${
                       isOverAllocated
                         ? 'text-[var(--danger-color)]'
                         : 'text-[var(--text-primary)]'
@@ -445,13 +460,13 @@ export function BudgetCategoriesView({
                   </div>
                 </div>
 
-                <div className="text-right text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums">
+                <div className="text-right text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums shrink-0 pb-0.5">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
 
               {/* Diskret förloppslinje */}
-              <div className="w-full h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden mb-2">
+              <div className="w-full h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
                     isOverAllocated ? 'bg-[var(--danger-color)]' : 'bg-[var(--brand-signature,var(--accent-color))]'
@@ -463,15 +478,14 @@ export function BudgetCategoriesView({
               </div>
 
               {/* Auto Allocate Button */}
-              <div className="flex justify-end pt-1">
+              <div className="flex justify-end pt-0.5">
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="tonal"
                   size="sm"
                   onClick={handleOpenAutoAllocate}
                   disabled={remainingToAllocate <= 0}
-                  icon={<Sparkles size={14} className="text-[var(--accent-color)]" />}
-                  className="text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                  icon={<Sparkles size={13} />}
                 >
                   {isEn ? 'Auto-allocate' : config.language === 'da' ? 'Fordel automatisk' : config.language === 'no' ? 'Fordel automatisk' : config.language === 'fi' ? 'Jaa automaattisesti' : 'Fördela automatiskt'}
                 </Button>
@@ -481,19 +495,6 @@ export function BudgetCategoriesView({
 
           {/* 2. Utgiftskategorier */}
           <div className="space-y-[var(--card-gap)]">
-            {effectiveMode !== 'budget' && (
-              <div className="flex items-center justify-end px-1">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleAddCategory('expense')}
-                  icon={<Plus size={14} strokeWidth={2.5} />}
-                >
-                  {t('newCategory')}
-                </Button>
-              </div>
-            )}
 
             {/* Sammanhängande modul med avdelare precis som inställningslistor */}
             <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -613,18 +614,6 @@ export function BudgetCategoriesView({
       ) : (
         /* Inkomstkategorier i samma layout med sammanhängande kort */
         <div className="space-y-[var(--card-gap)]">
-          <div className="flex items-center justify-end px-1">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => handleAddCategory('income')}
-              icon={<Plus size={14} strokeWidth={2.5} />}
-            >
-              {t('newCategory')}
-            </Button>
-          </div>
-
           <Card variant="default" padding="none" className="divide-y divide-menu">
             {incomeCategoriesList.map((cat, index) => {
               const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
@@ -647,26 +636,30 @@ export function BudgetCategoriesView({
       {/* 3. Minimal footer */}
       <div className="pt-2 space-y-[var(--card-gap)]">
         {/* Återställ-knappar */}
-        <div className="flex flex-col items-center gap-2 pt-1">
+        <div className="flex flex-col items-center gap-1.5 pt-1">
           {effectiveMode !== 'categories' && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowResetBudgetConfirm(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-[var(--radius-button-sm,10px)] text-secondary font-medium text-[var(--text-tertiary)] hover:text-[var(--danger-color)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer active:scale-95"
+              icon={<RotateCcw size={13} strokeWidth={2} />}
+              className="text-xs text-[var(--text-tertiary)] hover:text-[var(--danger-color)]"
             >
-              <RotateCcw size={15} strokeWidth={2} />
-              <span>{isEn ? 'Reset budget to 0' : 'Nollställ budget'}</span>
-            </button>
+              {isEn ? 'Reset budget to 0' : 'Nollställ budget'}
+            </Button>
           )}
           {effectiveMode !== 'budget' && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setIsResetCategoriesModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-[var(--radius-button-sm,10px)] text-secondary font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer active:scale-95"
+              icon={<RotateCcw size={13} strokeWidth={2} />}
+              className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
             >
-              <RotateCcw size={15} strokeWidth={2} />
-              <span>{isEn ? 'Reset categories to default' : 'Återställ kategorier'}</span>
-            </button>
+              {isEn ? 'Reset categories to default' : 'Återställ kategorier'}
+            </Button>
           )}
         </div>
       </div>

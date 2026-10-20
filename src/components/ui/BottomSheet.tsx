@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { Icon } from './Icon';
+import { IconButton } from './IconButton';
 import { feedback } from '../../utils/feedback';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
@@ -42,6 +43,7 @@ export function BottomSheet({
 }: BottomSheetProps) {
   useScrollLock(isOpen);
   const [mounted, setMounted] = useState(false);
+  const dragControls = useDragControls();
 
   useEffect(() => {
     setMounted(true);
@@ -84,7 +86,7 @@ export function BottomSheet({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: 0.16 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           />
@@ -95,17 +97,33 @@ export function BottomSheet({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            drag="y"
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.75 }}
+            onDragEnd={(_e, info) => {
+              if (info.offset.y > 70 || info.velocity.y > 350) {
+                onClose();
+              }
+            }}
             onClick={(e) => e.stopPropagation()}
             className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] text-[var(--text-primary)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Handle */}
             {showDragHandle && (
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+              <div
+                onPointerDown={(e) => dragControls.start(e)}
+                onClick={onClose}
+                className="w-full pt-2.5 pb-1 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+              >
+                <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full" />
+              </div>
             )}
 
             {/* Header */}
             {hasHeader && (
-              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-subtle)]">
+              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-subtle">
                 <div className="flex items-center gap-3 min-w-0 pr-3 flex-1">
                   {headerLeading && (
                     <div className="shrink-0">
@@ -129,17 +147,16 @@ export function BottomSheet({
                 <div className="flex items-center gap-2 shrink-0">
                   {headerRight}
                   {showCloseButton && (
-                    <button
-                      type="button"
+                    <IconButton
+                      icon={<Icon name="x" size={16} />}
                       onClick={() => {
                         if (typeof feedback?.light === 'function') feedback.light();
                         onClose();
                       }}
-                      className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border-none shadow-none"
+                      variant="muted"
+                      size="sm"
                       aria-label="Stäng"
-                    >
-                      <Icon name="x" size={16} />
-                    </button>
+                    />
                   )}
                 </div>
               </div>
@@ -148,7 +165,7 @@ export function BottomSheet({
             {/* Scrollable Body */}
             <div
               className={`flex-1 overflow-y-auto ${
-                bodyClassName ?? 'page-px py-4 space-y-3.5 custom-scrollbar'
+                bodyClassName ?? 'px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar'
               } min-h-0`}
             >
               {children}
@@ -156,7 +173,7 @@ export function BottomSheet({
 
             {/* Footer */}
             {footer && (
-              <div className="page-px pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
                 {footer}
               </div>
             )}

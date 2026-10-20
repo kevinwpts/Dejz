@@ -179,7 +179,7 @@ export function ManageAccountView({
                 {t('personalInfo' as any) || 'Personuppgifter'}
               </h4>
               <Card variant="default" padding="none" className="divide-y divide-menu">
-                <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+                <div className="px-4 py-3 flex items-center justify-between gap-3 min-h-[52px]">
                   <div className="flex items-center gap-3 shrink-0">
                     <User size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
                     <span className="text-body-medium font-medium text-[var(--text-primary)]">
@@ -195,7 +195,7 @@ export function ManageAccountView({
                   />
                 </div>
 
-                <div className="px-4 py-3.5 flex items-center justify-between gap-3 min-h-[54px]">
+                <div className="px-4 py-3 flex items-center justify-between gap-3 min-h-[52px]">
                   <div className="flex items-center gap-3 shrink-0">
                     <Mail size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
                     <span className="text-body-medium font-medium text-[var(--text-primary)]">

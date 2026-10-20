@@ -1,12 +1,12 @@
-# Dayspend
+# Dejz
 
-Dayspend är en minimalistisk app för utgiftskontroll med dynamisk dagsbudget.
+Dejz hjälper dig att få full koll på pengarna från lön till lön – utan bankkoppling.
 
 ## Funktioner
-- Håll koll på dina utgifter.
-- Sätt upp sparmål.
-- Hantera fasta utgifter.
-- Få en tydlig överblick över din ekonomi.
+- Samla lön, fasta räkningar och sparande på ett ställe.
+- Se direkt vad du har kvar att röra dig med fram till nästa lön.
+- Logga köp på sekunder (manuellt eller med röstinmatning).
+- Följ utgiftskategorier, kvitton och sparmål.
 
 ## Installation för utvecklare
 1. Klona projektet.
@@ -16,5 +16,3 @@ Dayspend är en minimalistisk app för utgiftskontroll med dynamisk dagsbudget.
 
 ## Licens
 Apache-2.0
-
-Deployment test

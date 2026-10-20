@@ -65,8 +65,8 @@ export const dataService = {
       initialSpent: profileData.initial_spent,
       notifications: profileData.notifications,
       securityLock: profileData.security_lock,
-      darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
-      themeMode: profileData.theme_mode || localSavedConfig?.themeMode || 'system',
+      darkMode: (profileData.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark') ? true : false,
+      themeMode: (profileData.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark') ? 'dark' : 'light',
       themeColor: profileData.theme_color || localSavedConfig?.themeColor || 'neutral',
       quickChoices: profileData.quick_choices || [],
       savingsGoals: (profileData.savings_goals && Array.isArray(profileData.savings_goals) && profileData.savings_goals.length > 0)
@@ -224,8 +224,8 @@ export const dataService = {
       initial_spent: config.initialSpent,
       notifications: config.notifications,
       security_lock: config.securityLock,
-      dark_mode: config.darkMode,
-      theme_mode: config.themeMode || 'system',
+      dark_mode: Boolean(config.darkMode),
+      theme_mode: config.darkMode ? 'dark' : 'light',
       theme_color: config.themeColor || 'neutral',
       quick_choices: config.quickChoices,
       savings_pot: config.savingsPot,
@@ -341,8 +341,8 @@ export const dataService = {
     
     if (!profile) {
       console.warn('[Data] Profile missing during transaction add, attempting repair...');
-      // Minimal profile insert with default dark mode
-      await supabase.from('profiles').upsert({ id: userId, dark_mode: true });
+      // Minimal profile insert with default light mode
+      await supabase.from('profiles').upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
     }
 
     const tagsWithStar = transaction.isStarred

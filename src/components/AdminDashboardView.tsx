@@ -13,7 +13,6 @@ import {
   Copy, 
   Check, 
   FileCode,
-  Users,
   Play
 } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
@@ -27,7 +26,7 @@ interface AdminDashboardViewProps {
   user: any;
   config: Config;
   setConfig: (config: Config) => void;
-  subscriptionStatus: string | null;
+  subscriptionStatus?: string | null;
   onSetSubscriptionStatus?: (status: string | null) => void;
   transactions: Transaction[];
   incomes: Income[];
@@ -41,8 +40,6 @@ export function AdminDashboardView({
   user,
   config,
   setConfig: _setConfig,
-  subscriptionStatus,
-  onSetSubscriptionStatus,
   transactions,
   incomes,
   fixedExpenses,
@@ -106,7 +103,6 @@ export function AdminDashboardView({
       environment: 'production',
       userEmail: user?.email,
       userId: user?.id,
-      subscriptionStatus: subscriptionStatus || 'free',
       currency: config.currency,
       language: config.language,
       themeMode: config.themeMode,
@@ -123,24 +119,6 @@ export function AdminDashboardView({
     feedback.success();
     addToast(isEn ? 'System diagnostic copied to clipboard!' : 'Systemrapport kopierad till urklipp!', 'success');
     setTimeout(() => setCopiedDebug(false), 2000);
-  };
-
-  const handleSimulateSubscription = (status: 'pro' | 'trial' | 'free') => {
-    feedback.light();
-    try {
-      localStorage.setItem('dejz_simulated_sub_status', status);
-      if (onSetSubscriptionStatus) {
-        onSetSubscriptionStatus(status === 'free' ? null : status);
-      }
-      addToast(
-        isEn 
-          ? `Subscription set to ${status.toUpperCase()}` 
-          : `Prenumerationsläge ändrat till ${status.toUpperCase()}`,
-        'success'
-      );
-    } catch {
-      addToast('Kunde inte uppdatera läge', 'error');
-    }
   };
 
   return (
@@ -188,7 +166,7 @@ export function AdminDashboardView({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+        <div className="grid grid-cols-3 gap-2.5 pt-2">
           <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-xs,8px)] border border-subtle">
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Database' : 'Databas'}
@@ -210,15 +188,6 @@ export function AdminDashboardView({
 
           <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-xs,8px)] border border-subtle">
             <span className="text-label font-medium text-[var(--text-secondary)] block">
-              {isEn ? 'Subscription' : 'Status'}
-            </span>
-            <span className="text-secondary font-bold text-[var(--text-primary)] block mt-1 tracking-tight">
-              {subscriptionStatus || 'Free'}
-            </span>
-          </div>
-
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-xs,8px)] border border-subtle">
-            <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Transactions' : 'Transaktioner'}
             </span>
             <span className="text-secondary font-bold font-amount tabular-nums text-[var(--text-primary)] block mt-1">
@@ -234,62 +203,6 @@ export function AdminDashboardView({
               {config.categories?.length || 0} st
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* Subscription Simulator */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
-        <div className="flex items-center gap-2">
-          <Sparkles size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
-          <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
-            {isEn ? 'Subscription Simulator (Testing)' : 'Prenumerationssimulator (Testa vyer)'}
-          </h3>
-        </div>
-        <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
-          {isEn
-            ? 'Instantly switch your account mode to test how the app behaves for Free, Trial, or Pro subscribers without billing.'
-            : 'Växla direkt mellan olika kontolägen för att testa hur appen och funktioner ser ut för gratis-, prov- eller Pro-användare.'}
-        </p>
-
-        <div className="grid grid-cols-3 gap-2.5 pt-1">
-          <button
-            type="button"
-            onClick={() => handleSimulateSubscription('pro')}
-            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-secondary font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
-              subscriptionStatus === 'pro'
-                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-subtle'
-                : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
-            }`}
-          >
-            <Crown size={16} strokeWidth={2} />
-            <span>Dejz Pro</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSimulateSubscription('trial')}
-            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-secondary font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
-              subscriptionStatus === 'trial'
-                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-subtle'
-                : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
-            }`}
-          >
-            <Sparkles size={16} strokeWidth={2} />
-            <span>{isEn ? '14-Day Trial' : '14 dagars prov'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleSimulateSubscription('free')}
-            className={`py-3 px-3 rounded-[var(--radius-xs,8px)] text-secondary font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
-              !subscriptionStatus || subscriptionStatus === 'free'
-                ? 'bg-black/80 dark:bg-white/80 text-white dark:text-black shadow-subtle'
-                : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
-            }`}
-          >
-            <Users size={16} strokeWidth={2} />
-            <span>{isEn ? 'Free user' : 'Gratiskonto'}</span>
-          </button>
         </div>
       </div>
 

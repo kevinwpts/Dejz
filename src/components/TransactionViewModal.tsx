@@ -557,7 +557,7 @@ export function TransactionViewModal({
         <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
-            variant="secondary"
+            variant="primary"
             size="lg"
             className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
@@ -571,7 +571,7 @@ export function TransactionViewModal({
 
           <Button 
             type="button"
-            variant="outline"
+            variant="secondary"
             size="lg"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();

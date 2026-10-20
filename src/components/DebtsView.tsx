@@ -1,12 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, useDragControls } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, CheckCircle2, HandCoins, X, User } from 'lucide-react';
 import { Config, Debt } from '../types';
 import { formatAmount, parseAmount } from '../utils/format';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { formatShortDate } from '../utils/date';
-import { Card, Button, IconButton, FilterButtonGroup, EmptyState } from './ui';
+import { Card, Button, IconButton, FilterButtonGroup, EmptyState, BottomSheet } from './ui';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
 
@@ -19,7 +18,6 @@ interface DebtsViewProps {
 export function DebtsView({ config, setConfig }: DebtsViewProps) {
   const curr = config.currency || 'kr';
   const isEn = config.language === 'en';
-  const dragControls = useDragControls();
 
   const [activeTab, setActiveTab] = useState<'all' | 'owe_me' | 'i_owe' | 'settled'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +31,6 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
   const [description, setDescription] = useState('');
 
   const amountInputRef = useRef<HTMLInputElement>(null);
-  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   const debts: Debt[] = config.debts || [];
 
@@ -183,13 +180,13 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         </div>
 
         <Button
-          variant="primary"
+          variant="tonal"
           size="sm"
           onClick={openAddModal}
-          icon={<Plus size={14} strokeWidth={2.5} />}
-          className="shrink-0 rounded-full"
+          icon={<Plus size={13} strokeWidth={2.5} />}
+          className="shrink-0"
         >
-          {isEn ? 'Add' : 'Lägg till'}
+          {isEn ? 'New debt' : 'Ny skuld'}
         </Button>
       </div>
 
@@ -313,217 +310,163 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         </AnimatePresence>
       </div>
 
-      {/* Add / Edit Debt Modal (Unified Dejz Modal Structure) */}
-      {isModalOpen && typeof document !== 'undefined' && document.body && createPortal(
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
-          onMouseDown={(e) => {
-            backdropMouseDownTarget.current = e.target;
-          }}
-          onClick={(e) => {
-            if (backdropMouseDownTarget.current === e.target && e.target === e.currentTarget) {
-              setIsModalOpen(false);
-            }
-          }}
-        >
-          <motion.div
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            drag="y"
-            dragListener={false}
-            dragControls={dragControls}
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.75 }}
-            onDragEnd={(_e, info) => {
-              if (info.offset.y > 70 || info.velocity.y > 350) {
-                setIsModalOpen(false);
-              }
-            }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans border-none"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Drawer Handle on Mobile */}
-            <div
-              onPointerDown={(e) => dragControls.start(e)}
-              onClick={() => setIsModalOpen(false)}
-              className="w-full pt-3 pb-1.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
+      {/* Add / Edit Debt BottomSheet */}
+      <BottomSheet
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        size="md"
+        zIndex={150}
+        title={
+          editingDebt
+            ? (isEn ? 'Edit debt / expense' : 'Redigera skuld / utlägg')
+            : (isEn ? 'New debt / expense' : 'Ny skuld / utlägg')
+        }
+        footer={
+          <div className="flex items-center gap-2.5 w-full">
+            <Button
+              type="button"
+              variant="accent"
+              size="lg"
+              disabled={!personName.trim() || parseAmount(amount) <= 0}
+              className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+              onClick={handleSaveDebt}
+              icon={<Check size={16} strokeWidth={2.5} />}
             >
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
+              {editingDebt
+                ? (isEn ? 'Save changes' : 'Spara ändringar')
+                : (isEn ? 'Save' : 'Spara')}
+            </Button>
+
+            {editingDebt && (
+              <IconButton
+                icon={<Trash2 size={16} strokeWidth={2} />}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setDebtToDelete(editingDebt);
+                }}
+                variant="danger"
+                size="xl"
+                shape="button"
+                title={isEn ? 'Delete' : 'Ta bort'}
+                aria-label={isEn ? 'Delete' : 'Ta bort'}
+              />
+            )}
+          </div>
+        }
+      >
+        {/* Type Selector */}
+        <div className="grid grid-cols-2 gap-1.5 p-1 bg-[var(--surface-muted)] rounded-card-nested">
+          <button
+            type="button"
+            onClick={() => setDebtType('owe_me')}
+            className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              debtType === 'owe_me'
+                ? 'bg-[var(--surface-color)] text-[var(--success-color)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            <ArrowDownLeft size={14} strokeWidth={2.5} />
+            <span>{isEn ? 'Owes me' : 'Skyldig mig'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDebtType('i_owe')}
+            className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              debtType === 'i_owe'
+                ? 'bg-[var(--surface-color)] text-[var(--danger-color)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            <ArrowUpRight size={14} strokeWidth={2.5} />
+            <span>{isEn ? 'I owe' : 'Jag är skyldig'}</span>
+          </button>
+        </div>
+
+        {/* 1. First Group: Person Name & Amount */}
+        <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border border-subtle space-y-2.5">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${
+                debtType === 'owe_me'
+                  ? 'bg-[var(--success-container)] text-[var(--success-color)]'
+                  : 'bg-[var(--danger-container)] text-[var(--danger-color)]'
+              }`}
+            >
+              {personName.trim() ? personName.trim().charAt(0).toUpperCase() : <User size={22} strokeWidth={2} />}
             </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
-              {/* Top Bar with Title & Close */}
-              <div className="flex items-center justify-between pb-1 px-1">
-                <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-                  {editingDebt
-                    ? (isEn ? 'Edit debt / expense' : 'Redigera skuld / utlägg')
-                    : (isEn ? 'New debt / expense' : 'Ny skuld / utlägg')}
-                </h2>
-                <IconButton
-                  icon={<X size={15} strokeWidth={2.5} />}
-                  onClick={() => setIsModalOpen(false)}
-                  variant="muted"
-                  size="md"
-                  title={isEn ? 'Close' : 'Stäng'}
-                  aria-label={isEn ? 'Close' : 'Stäng'}
-                />
-              </div>
-
-              {/* Type Segmented Control */}
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-[var(--surface-muted)] rounded-card-nested">
-                <button
-                  type="button"
-                  onClick={() => setDebtType('owe_me')}
-                  className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    debtType === 'owe_me'
-                      ? 'bg-[var(--surface-color)] text-[var(--success-color)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <ArrowDownLeft size={14} strokeWidth={2.5} />
-                  <span>{isEn ? 'Owes me' : 'Skyldig mig'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDebtType('i_owe')}
-                  className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    debtType === 'i_owe'
-                      ? 'bg-[var(--surface-color)] text-[var(--danger-color)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <ArrowUpRight size={14} strokeWidth={2.5} />
-                  <span>{isEn ? 'I owe' : 'Jag är skyldig'}</span>
-                </button>
-              </div>
-
-              {/* 1. First Group: Person Name & Amount */}
-              <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border border-subtle space-y-2.5">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${
-                      debtType === 'owe_me'
-                        ? 'bg-[var(--success-container)] text-[var(--success-color)]'
-                        : 'bg-[var(--danger-container)] text-[var(--danger-color)]'
-                    }`}
-                  >
-                    {personName.trim() ? personName.trim().charAt(0).toUpperCase() : <User size={22} strokeWidth={2} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <label className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
-                      {isEn ? 'Name' : 'Namn'}
-                    </label>
-                    <input
-                      type="text"
-                      value={personName}
-                      onChange={(e) => setPersonName(e.target.value)}
-                      placeholder={isEn ? 'e.g. Rasmus' : 'Personens namn'}
-                      className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2.5 border-t border-subtle flex items-center justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <label className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
-                      {isEn ? 'Amount' : 'Belopp'}
-                    </label>
-                    <div
-                      onClick={() => amountInputRef.current?.focus()}
-                      className="flex items-baseline gap-1.5 font-amount cursor-text w-full"
-                    >
-                      <input
-                        ref={amountInputRef}
-                        type="text"
-                        inputMode="decimal"
-                        value={amount}
-                        onChange={(e) => setAmount(formatAmount(e.target.value))}
-                        onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            setAmount(evaluateAndFormatAmount(amount));
-                          }
-                        }}
-                        placeholder="0"
-                        className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
-                      />
-                      <span className="text-secondary font-medium text-[var(--text-tertiary)] tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
-                        {curr}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. Second Group: Note / Description */}
-              <div className="rounded-card bg-[var(--surface-color)] overflow-hidden border border-subtle divide-y divide-subtle">
-                <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
-                  <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
-                    {isEn ? 'Note' : 'Egen notering'}
-                  </span>
-                  <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
-                    <input
-                      type="text"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder={isEn ? 'e.g. Dinner, tickets...' : 'Vad gäller det? (valfritt)'}
-                      className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
-                    />
-                    {description && (
-                      <button
-                        type="button"
-                        onClick={() => setDescription('')}
-                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
-                      >
-                        <X size={13} strokeWidth={2.5} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+            <div className="flex-1 min-w-0">
+              <label className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
+                {isEn ? 'Name' : 'Namn'}
+              </label>
+              <input
+                type="text"
+                value={personName}
+                onChange={(e) => setPersonName(e.target.value)}
+                placeholder={isEn ? 'e.g. Rasmus' : 'Personens namn'}
+                className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+              />
             </div>
+          </div>
 
-            {/* Footer Actions */}
-            <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
-              <Button
-                type="button"
-                variant="accent"
-                size="lg"
-                disabled={!personName.trim() || parseAmount(amount) <= 0}
-                className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
-                onClick={handleSaveDebt}
-                icon={<Check size={16} strokeWidth={2.5} />}
+          <div className="pt-2.5 border-t border-subtle flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <label className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
+                {isEn ? 'Amount' : 'Belopp'}
+              </label>
+              <div
+                onClick={() => amountInputRef.current?.focus()}
+                className="flex items-baseline gap-1.5 font-amount cursor-text w-full"
               >
-                {editingDebt
-                  ? (isEn ? 'Save changes' : 'Spara ändringar')
-                  : (isEn ? 'Save' : 'Spara')}
-              </Button>
-
-              {editingDebt && (
-                <IconButton
-                  icon={<Trash2 size={16} strokeWidth={2} />}
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setDebtToDelete(editingDebt);
+                <input
+                  ref={amountInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(formatAmount(e.target.value))}
+                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAmount(evaluateAndFormatAmount(amount));
+                    }
                   }}
-                  variant="danger"
-                  size="xl"
-                  shape="button"
-                  title={isEn ? 'Delete' : 'Ta bort'}
-                  aria-label={isEn ? 'Delete' : 'Ta bort'}
+                  placeholder="0"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
                 />
+                <span className="text-secondary font-medium text-[var(--text-tertiary)] tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
+                  {curr}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Second Group: Note / Description */}
+        <div className="rounded-card bg-[var(--surface-color)] overflow-hidden border border-subtle divide-y divide-subtle">
+          <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
+            <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
+              {isEn ? 'Note' : 'Egen notering'}
+            </span>
+            <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={isEn ? 'e.g. Dinner, tickets...' : 'Vad gäller det? (valfritt)'}
+                className="text-sm font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+              />
+              {description && (
+                <button
+                  type="button"
+                  onClick={() => setDescription('')}
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                >
+                  <X size={13} strokeWidth={2.5} />
+                </button>
               )}
             </div>
-          </motion.div>
-        </motion.div>,
-        document.body
-      )}
+          </div>
+        </div>
+      </BottomSheet>
 
       {/* Delete Confirmation Modal */}
       {debtToDelete && (

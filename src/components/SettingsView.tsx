@@ -9,7 +9,6 @@ import { Button, Modal, Card, ListRow, Switch, Icon } from './ui';
 import { formatPaydaySummary, formatOrdinalDay } from '../utils/format';
 import { getPaymentMethodIcon } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
-import { applyThemeColor } from '../utils/theme';
 
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 import { dataService } from '../services/dataService';
@@ -108,7 +107,7 @@ export function SettingsView({
       <div className="space-y-4 w-full py-2">
         <div className="flex items-center justify-end mb-2 px-1">
           <Button
-            variant="secondary"
+            variant="tonal"
             size="sm"
             icon={<Icon name="plus" size={14} />}
             onClick={() => {
@@ -226,6 +225,11 @@ export function SettingsView({
               type="button"
               onClick={() => {
                 const newConfig = { ...config, themeMode: 'light' as const, darkMode: false };
+                try {
+                  localStorage.setItem('dejz_dark_mode', 'light');
+                } catch (_e) {
+                  // ignore
+                }
                 setConfig(newConfig);
                 applyThemeColor(config.themeColor || 'neutral', false);
                 if (userId) {
@@ -313,6 +317,11 @@ export function SettingsView({
               type="button"
               onClick={() => {
                 const newConfig = { ...config, themeMode: 'dark' as const, darkMode: true };
+                try {
+                  localStorage.setItem('dejz_dark_mode', 'dark');
+                } catch (_e) {
+                  // ignore
+                }
                 setConfig(newConfig);
                 applyThemeColor(config.themeColor || 'neutral', true);
                 if (userId) {

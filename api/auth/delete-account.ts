@@ -22,6 +22,20 @@ export default async function handler(req: any, res: any) {
 
     const supabaseAdmin = createClient(supabaseUrl as string, supabaseKey);
 
+    const authHeader = req.headers?.authorization || req.headers?.Authorization;
+    const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7).trim()
+      : null;
+
+    if (!token) {
+      return res.status(401).json({ error: 'Saknar autentisering för att radera kontot' });
+    }
+
+    const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
+    if (authErr || !authData?.user || authData.user.id !== userId) {
+      return res.status(403).json({ error: 'Du har endast behörighet att radera ditt eget konto' });
+    }
+
     console.log(`Starting full account deletion for user: ${userId}`);
 
     // 1. Delete all user data from public tables

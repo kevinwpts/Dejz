@@ -35,12 +35,12 @@ export function CustomBottomNavigation({
   const isEn = language === "en";
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 w-full select-none pointer-events-none px-4 pt-2 pb-[max(14px,env(safe-area-inset-bottom,14px))]">
-      <div className="w-full max-w-[440px] mx-auto flex items-center gap-2.5 sm:gap-3 pointer-events-auto">
+    <footer className="fixed bottom-0 left-0 right-0 z-40 w-full select-none pointer-events-none px-4 pt-1 pb-[max(10px,calc(env(safe-area-inset-bottom,0px)*0.55))]">
+      <div className="w-full max-w-[356px] sm:max-w-[376px] mx-auto flex items-center gap-2 pointer-events-auto">
         {/* Modern Floating Navigation Dock (Left) - keeps capsule shape */}
         <nav
           aria-label={isEn ? "Main navigation" : "Huvudnavigering"}
-          className="flex-1 h-[60px] rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-none p-1.5 grid grid-cols-4 items-center relative"
+          className="flex-1 h-[54px] rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle p-1 px-1.5 grid grid-cols-4 items-center relative"
         >
           {/* 1. Hem */}
           <NavItem
@@ -87,13 +87,13 @@ export function CustomBottomNavigation({
           onClick={() => {
             if (onPlusClick) onPlusClick();
           }}
-          className="shrink-0 w-[52px] h-[52px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-colors border-none shadow-none outline-none"
+          className="shrink-0 w-[48px] h-[48px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer touch-press active:scale-95 transition-colors border-none shadow-none outline-none"
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
           <Icon
             name="plus"
-            size={22}
+            size={21}
             weight="bold"
             className="text-[var(--on-accent)]"
           />
@@ -136,11 +136,11 @@ function NavItem({
       )}
       <Icon
         name={iconName}
-        size={22}
+        size={20}
         weight={isActive ? "fill" : "regular"}
         className="transition-transform duration-150"
       />
-      <span className="text-nav-label mt-[2px]">
+      <span className="text-nav-label mt-[1px] leading-none">
         {label}
       </span>
     </button>

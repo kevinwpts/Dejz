@@ -12,43 +12,43 @@ export interface SeoMetadata {
 
 export const REGIONAL_SEO: Record<Language, SeoMetadata> = {
   sv: {
-    title: 'Dejz – Enkel budget för hela månaden och mellan löner',
-    description: 'Få full koll på din personliga ekonomi med Dejz. Samla inkomster, fasta utgifter, sparande och budget på ett ställe och se vad du har kvar att spendera mellan två löner.',
-    ogTitle: 'Dejz – Hela din ekonomi. Svart på vitt.',
-    ogDescription: 'Samla inkomster, fasta utgifter, sparande och budget på ett ställe och se vad som finns kvar att spendera mellan två löner.',
-    keywords: 'budget, privatekonomi, sparande, fasta utgifter, inkomst, lönedag, budgetapp, sverige',
+    title: 'Dejz – Full koll på pengarna från lön till lön',
+    description: 'Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön.',
+    ogTitle: 'Dejz – Full koll på pengarna från lön till lön',
+    ogDescription: 'Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön.',
+    keywords: 'budgetapp, privatekonomi, lön till lön, fasta utgifter, sparande, utgiftskoll, budget, sverige, dejz',
     htmlLang: 'sv',
   },
   da: {
-    title: 'Dejz – Enkelt budget for hele måneden og mellem lønninger',
-    description: 'Få fuld kontrol over din personlige økonomi med Dejz. Saml indtægter, faste udgifter, opsparing og budget ét sted og se hvad du har tilbage at bruge mellem to lønninger.',
-    ogTitle: 'Dejz – Hele din økonomi. Sort på hvidt.',
-    ogDescription: 'Saml indtægter, faste udgifter, opsparing og budget ét sted og se hvad du har tilbage at bruge mellem to lønninger.',
-    keywords: 'budget, privatøkonomi, opsparing, faste udgifter, lønningsdag, budgetapp, danmark',
+    title: 'Dejz – Fuld kontrol over pengene fra løn til løn',
+    description: 'Saml løn, faste regninger og opsparing ét sted. Log dine køb på sekunder og se præcis, hvad du har tilbage at bruge frem til næste løn.',
+    ogTitle: 'Dejz – Fuld kontrol over pengene fra løn til løn',
+    ogDescription: 'Saml løn, faste regninger og opsparing ét sted. Log dine køb på sekunder og se præcis, hvad du har tilbage at bruge frem til næste løn.',
+    keywords: 'budgetapp, privatøkonomi, løn til løn, faste udgifter, opsparing, budget, danmark, dejz',
     htmlLang: 'da',
   },
   no: {
-    title: 'Dejz – Enkelt budsjett for hele måneden og mellom lønninger',
-    description: 'Få full kontroll over privatøkonomien med Dejz. Samle inntekter, faste utgifter, sparing og budsjett på ett sted og se hva du har igjen å bruke mellom to lønninger.',
-    ogTitle: 'Dejz – Hele din økonomi. Svart på hvitt.',
-    ogDescription: 'Samle inntekter, faste utgifter, sparing og budsjett på ett sted og se hva du har igjen å bruke mellom to lønninger.',
-    keywords: 'budsjett, privatøkonomi, sparing, faste utgifter, inntekt, lønningsdag, budsjettapp, norge',
+    title: 'Dejz – Full kontroll på pengene fra lønn til lønn',
+    description: 'Samle lønn, faste regninger og sparing på ett sted. Logg kjøpene dine på sekunder og se nøyaktig hva du har igjen å bruke frem til neste lønn.',
+    ogTitle: 'Dejz – Full kontroll på pengene fra lønn til lønn',
+    ogDescription: 'Samle lønn, faste regninger og sparing på ett sted. Logg kjøpene dine på sekunder og se nøyaktig hva du har igjen å bruke frem til neste lønn.',
+    keywords: 'budsjettapp, privatøkonomi, lønn til lønn, faste utgifter, sparing, budsjett, norge, dejz',
     htmlLang: 'nb',
   },
   fi: {
-    title: 'Dejz – Yksinkertainen budjetti koko kuukaudelle ja palkkakaudelle',
-    description: 'Ota taloutesi hallintaan Dejz-sovelluksella. Kokoa tulot, kiinteät kulut, säästöt ja budjetti yhteen paikkaan ja näe mitä sinulla on jäljellä käytettäväksi kahden palkan välillä.',
-    ogTitle: 'Dejz – Koko taloutesi. Mustaa valkoisella.',
-    ogDescription: 'Kokoa tulot, kiinteät kulut, säästöt ja budjetti yhteen paikkaan ja näe mitä sinulla on jäljellä käytettäväksi kahden palkan välillä.',
-    keywords: 'budjetti, henkilökohtainen talous, säästäminen, kiinteät kulut, palkkapäivä, budjettisovellus, suomi',
+    title: 'Dejz – Täysi hallinta rahoistasi palkasta palkkaan',
+    description: 'Kokoa palkka, kiinteät laskut ja säästöt yhteen paikkaan. Kirjaa ostoksesi sekunneissa ja näe tarkalleen, mitä sinulla on käytettävissä seuraavaan palkkapäivään asti.',
+    ogTitle: 'Dejz – Täysi hallinta rahoistasi palkasta palkkaan',
+    ogDescription: 'Kokoa palkka, kiinteät laskut ja säästöt yhteen paikkaan. Kirjaa ostoksesi sekunneissa ja näe tarkalleen, mitä sinulla on käytettävissä seuraavaan palkkapäivään asti.',
+    keywords: 'budjettisovellus, oma talous, palkasta palkkaan, kiinteät kulut, säästäminen, budjetti, suomi, dejz',
     htmlLang: 'fi',
   },
   en: {
-    title: 'Dejz – Simple budget for your pay period',
-    description: 'Take full control of your personal finances with Dejz. Bring income, fixed expenses, savings, and budget together in one place and see what you have left to spend between two paydays.',
-    ogTitle: 'Dejz – Your whole budget in black and white.',
-    ogDescription: 'Bring income, fixed expenses, savings, and budget together in one place and see what is left to spend between two paydays.',
-    keywords: 'budget, personal finance, savings, fixed expenses, income, payday, budget app',
+    title: 'Dejz – Know what you have left from payday to payday',
+    description: 'Bring your salary, fixed bills, and savings together in one place. Log purchases in seconds and see exactly what you have left to spend until next payday.',
+    ogTitle: 'Dejz – Know what you have left from payday to payday',
+    ogDescription: 'Bring your salary, fixed bills, and savings together in one place. Log purchases in seconds and see exactly what you have left to spend until next payday.',
+    keywords: 'budget app, personal finance, payday to payday, fixed bills, savings, expense tracker, dejz',
     htmlLang: 'en',
   },
 };
@@ -56,14 +56,28 @@ export const REGIONAL_SEO: Record<Language, SeoMetadata> = {
 /**
  * Updates head metadata, open graph tags, canonical tag, and hreflang links dynamically.
  */
-export function updateDocumentSeo(lang: Language, _currentPath: string = '/'): void {
+export function updateDocumentSeo(lang: Language, currentPath: string = '/'): void {
   if (typeof document === 'undefined') return;
 
   const normLang = normalizeLanguage(lang);
   const metadata = REGIONAL_SEO[normLang] || REGIONAL_SEO.sv;
+  const lowerPath = (currentPath || '/').toLowerCase();
+
+  const isPrivacyPage = lowerPath.includes('privacy') || lowerPath.includes('integritet');
+  const isTermsPage = lowerPath.includes('terms') || lowerPath.includes('villkor');
+  const isCookiesPage = lowerPath.includes('cookie');
+
+  let pageTitle = metadata.title;
+  if (isPrivacyPage) {
+    pageTitle = normLang === 'en' ? 'Privacy Policy – Dejz' : 'Integritetspolicy – Dejz';
+  } else if (isTermsPage) {
+    pageTitle = normLang === 'en' ? 'Terms of Use – Dejz' : 'Användarvillkor – Dejz';
+  } else if (isCookiesPage) {
+    pageTitle = normLang === 'en' ? 'Cookie Policy – Dejz' : 'Cookiepolicy – Dejz';
+  }
 
   // 1. Title & HTML Lang
-  document.title = metadata.title;
+  document.title = pageTitle;
   document.documentElement.lang = metadata.htmlLang;
 
   // Helper to update or create meta tags
@@ -82,17 +96,38 @@ export function updateDocumentSeo(lang: Language, _currentPath: string = '/'): v
   setMeta('name', 'keywords', metadata.keywords);
 
   // 3. OpenGraph Tags
-  setMeta('property', 'og:title', metadata.ogTitle);
+  const origin = window.location.origin || 'https://dejz.se';
+  const ogImageUrl = `${origin}/dejz_02.png`;
+  const ogLocale =
+    metadata.htmlLang === 'nb'
+      ? 'nb_NO'
+      : metadata.htmlLang === 'da'
+      ? 'da_DK'
+      : metadata.htmlLang === 'fi'
+      ? 'fi_FI'
+      : metadata.htmlLang === 'en'
+      ? 'en_US'
+      : 'sv_SE';
+
+  setMeta('property', 'og:title', pageTitle);
   setMeta('property', 'og:description', metadata.ogDescription);
-  setMeta('property', 'og:locale', metadata.htmlLang === 'nb' ? 'nb_NO' : metadata.htmlLang === 'da' ? 'da_DK' : metadata.htmlLang === 'fi' ? 'fi_FI' : 'sv_SE');
+  setMeta('property', 'og:locale', ogLocale);
+  setMeta('property', 'og:image', ogImageUrl);
 
   // 4. Twitter Tags
-  setMeta('name', 'twitter:title', metadata.ogTitle);
+  setMeta('name', 'twitter:title', pageTitle);
   setMeta('name', 'twitter:description', metadata.ogDescription);
+  setMeta('name', 'twitter:image', ogImageUrl);
 
-  // 5. Canonical URL (Self-referencing canonical for the current language version)
-  const origin = window.location.origin || 'https://dejz.se';
-  const canonicalUrl = `${origin}/${normLang}/`;
+  // 5. Canonical URL
+  let canonicalUrl = `${origin}/${normLang}/`;
+  if (isPrivacyPage) {
+    canonicalUrl = `${origin}/privacy`;
+  } else if (isTermsPage) {
+    canonicalUrl = `${origin}/terms`;
+  } else if (isCookiesPage) {
+    canonicalUrl = `${origin}/cookies`;
+  }
 
   let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
   if (!canonicalLink) {
@@ -106,6 +141,7 @@ export function updateDocumentSeo(lang: Language, _currentPath: string = '/'): v
   // 6. Alternate Hreflang Links
   const hreflangs: { lang: string; url: string }[] = [
     { lang: 'sv', url: `${origin}/sv/` },
+    { lang: 'en', url: `${origin}/en/` },
     { lang: 'da', url: `${origin}/da/` },
     { lang: 'no', url: `${origin}/no/` },
     { lang: 'nb', url: `${origin}/no/` },

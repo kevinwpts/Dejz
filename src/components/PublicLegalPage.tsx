@@ -251,13 +251,27 @@ function SwedishPrivacyPolicy() {
         </h2>
         <div className="space-y-2 leading-relaxed text-xs">
           <p>
-            Vid inloggning via Google Sign-In begär vi endast grundläggande profilåtkomst.
+            Vid inloggning via Google Sign-In begär vi endast grundläggande profilåtkomst (namn och e-postadress).
           </p>
           <ul className="list-disc pl-4 space-y-1">
             <li>Vi överför eller säljer aldrig data till tredje part.</li>
             <li>Vi använder inte Google-data för annonser eller AI-träning.</li>
           </ul>
         </div>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">4. Lagring och säkerhet</h2>
+        <p className="leading-relaxed">
+          Dina uppgifter lagras krypterat på säkra servrar inom EU/EES. Endast du har åtkomst till din personliga budgetdata.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">5. Dina rättigheter enligt GDPR</h2>
+        <p className="leading-relaxed">
+          Enligt dataskyddsförordningen (GDPR) har du rätt att begära registerutdrag, rättelse eller permanent radering av dina personuppgifter. Du kan när som helst radera ditt konto och all tillhörande data direkt under <strong>Profil &rarr; Radera konto</strong> i appen.
+        </p>
       </section>
     </article>
   );
@@ -278,7 +292,7 @@ function EnglishPrivacyPolicy() {
           Privacy Policy for Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
-          Last updated: September 23, 2026
+          Last updated: October 2026
         </p>
       </header>
       <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
@@ -290,8 +304,33 @@ function EnglishPrivacyPolicy() {
           <li>Dejz never collects sensitive bank credentials.</li>
           <li>We never sell your personal data to third parties.</li>
           <li>Google user data is used exclusively for account identification.</li>
+          <li>You can permanently delete your account and all data at any time inside the app.</li>
         </ul>
       </div>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Data Controller</h2>
+        <p className="leading-relaxed">
+          Dejz is responsible for processing your personal data. For privacy inquiries, contact us at{' '}
+          <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] font-medium underline">
+            hej@dejz.se
+          </a>.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Data We Collect</h2>
+        <p className="leading-relaxed">
+          We only process data necessary to provide the service: your email address, profile name, and the budget entries (incomes, fixed costs, savings goals, and expenses) you choose to enter.
+        </p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">3. Your GDPR Rights & Account Deletion</h2>
+        <p className="leading-relaxed">
+          Under GDPR, you have the right to access, rectify, or erase your personal data. You can permanently delete your account and all associated records at any time directly inside the app under <strong>Profile &rarr; Delete Account</strong>.
+        </p>
+      </section>
     </article>
   );
 }
@@ -307,19 +346,37 @@ function SwedishTermsOfService() {
           Användarvillkor för Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
-          Gäller från 23 september 2026
+          Senast uppdaterad: oktober 2026
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Tjänstens omfattning</h2>
+        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Godkännande av villkor</h2>
         <p className="leading-relaxed">
-          Dejz är en personlig budget- och ekonomiapp. Genom att använda tjänsten godkänner du dessa användarvillkor.
+          Genom att skapa ett konto eller använda Dejz godkänner du dessa användarvillkor.
         </p>
       </section>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Användaransvar</h2>
+        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Tjänstens omfattning & Ingen finansiell rådgivning</h2>
         <p className="leading-relaxed">
-          Du ansvarar själv för att uppgifter du anger är korrekta och för att hålla dina inloggningsuppgifter säkra.
+          Dejz är ett digitalt verktyg för personlig budgetering och ekonomisk överblick i vardagen. Alla beräkningar, budgetöversikter och prognoser är vägledande hjälpmedel baserade på dina egna inmatade siffror och utgör <strong>inte</strong> finansiell, juridisk eller skattemässig rådgivning.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">3. Ansvarsbegränsning</h2>
+        <p className="leading-relaxed">
+          Du ansvarar själv för dina ekonomiska beslut och för att dina angivna uppgifter stämmer. Dejz ansvarar inte för eventuella direkta eller indirekta ekonomiska förluster eller uteblivna betalningar till följd av hur tjänsten används.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">4. Konton, säkerhet och avslut</h2>
+        <p className="leading-relaxed">
+          Du ansvarar för att hålla dina inloggningsuppgifter säkra. Du kan när som helst avsluta och permanent radera ditt konto direkt i appens inställningar.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">5. Ändringar av villkor</h2>
+        <p className="leading-relaxed">
+          Vi förbehåller oss rätten att uppdatera dessa villkor vid behov. Vid väsentliga ändringar informeras användare i appen eller via e-post.
         </p>
       </section>
     </article>
@@ -337,13 +394,31 @@ function EnglishTermsOfService() {
           Terms of Service for Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
-          Effective from September 23, 2026
+          Last updated: October 2026
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Scope of Service</h2>
+        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Acceptance of Terms</h2>
         <p className="leading-relaxed">
-          Dejz is a personal budgeting and finance app. By using the service, you agree to these terms.
+          By registering an account or using Dejz, you agree to these Terms of Service.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Scope of Service & No Financial Advice</h2>
+        <p className="leading-relaxed">
+          Dejz is a digital tool for personal budgeting and financial overview. All calculations, budget summaries, and projections are indicative aids based on your own inputs and do <strong>not</strong> constitute professional financial, legal, or tax advice.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">3. Limitation of Liability</h2>
+        <p className="leading-relaxed">
+          You are solely responsible for your financial decisions. Dejz shall not be liable for any direct or indirect financial losses resulting from the use of the app.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">4. Account Security & Termination</h2>
+        <p className="leading-relaxed">
+          You are responsible for safeguarding your login credentials. You may terminate and permanently delete your account at any time inside the app.
         </p>
       </section>
     </article>
@@ -361,13 +436,19 @@ function SwedishCookiePolicy() {
           Cookiepolicy för Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
-          Senast uppdaterad: 23 september 2026
+          Senast uppdaterad: oktober 2026
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Vad är cookies?</h2>
+        <h2 className="text-base font-bold text-[var(--text-primary)]">1. Hur vi använder cookies och lokal lagring</h2>
         <p className="leading-relaxed">
-          Cookies är små textfiler som lagras på din enhet för att förbättra din upplevelse och hålla dig inloggad.
+          Enligt lagen om elektronisk kommunikation ska besökare informeras om användningen av cookies. Dejz använder endast tekniskt nödvändiga cookies och lokal lagring (<code>localStorage</code>) för att hålla dig säkert inloggad samt spara dina språk- och temainställningar.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">2. Ingen tredjepartsspårning</h2>
+        <p className="leading-relaxed">
+          Vi använder inga annons- eller marknadsföringscookies från tredje part och spårar inte ditt surfbeteende utanför Dejz.
         </p>
       </section>
     </article>
@@ -385,13 +466,19 @@ function EnglishCookiePolicy() {
           Cookie Policy for Dejz
         </h1>
         <p className="text-label text-[var(--text-secondary)]">
-          Last updated: September 23, 2026
+          Last updated: October 2026
         </p>
       </header>
       <section className="space-y-2">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">1. What cookies we use</h2>
+        <h2 className="text-base font-bold text-[var(--text-primary)]">1. How We Use Cookies & Local Storage</h2>
         <p className="leading-relaxed">
-          Cookies are small text files stored on your device to keep you signed in and secure.
+          Dejz uses strictly necessary cookies and browser local storage (<code>localStorage</code>) exclusively to maintain your authenticated session and remember your language and display preferences.
+        </p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-base font-bold text-[var(--text-primary)]">2. No Third-Party Advertising Cookies</h2>
+        <p className="leading-relaxed">
+          We do not use third-party advertising or cross-site tracking cookies.
         </p>
       </section>
     </article>

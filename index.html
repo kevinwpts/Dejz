@@ -6,56 +6,72 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Dejz" />
-    <meta name="theme-color" content="#F2F4F8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#090D16" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F2F0F0" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <script>
       (function() {
         try {
           var saved = localStorage.getItem('dejz_dark_mode');
-          var isDark = saved === 'dark';
+          var onboardingDone = localStorage.getItem('dejz_onboarding_completed') === 'true';
+          var isDark = saved === 'dark' && onboardingDone;
           var root = document.documentElement;
           if (isDark) {
             root.classList.add('dark');
             root.classList.remove('light');
-            root.style.backgroundColor = '#090D16';
+            root.style.backgroundColor = '#191919';
           } else {
             root.classList.add('light');
             root.classList.remove('dark');
-            root.style.backgroundColor = '#F2F4F8';
+            root.style.backgroundColor = '#F2F0F0';
           }
         } catch (e) {}
       })();
     </script>
 
     <!-- SEO Meta Tags -->
-    <title>Dejz – Äntligen koll på ekonomin från lön till lön</title>
-    <meta name="description" content="Samla dina inkomster, fasta utgifter och sparande. Registrera dina köp och se vad du har kvar att spendera fram till nästa lön." />
-    <meta name="keywords" content="budget, ekonomi, pengar, utgifter, sparande, lönedag, finanser, budgetapp" />
+    <title>Dejz – Full koll på pengarna från lön till lön</title>
+    <meta name="description" content="Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön." />
+    <meta name="keywords" content="budgetapp, privatekonomi, lön till lön, fasta utgifter, sparande, utgiftskoll, budget, sverige, dejz" />
+    <link rel="canonical" href="https://dejz.se/sv/" />
+    <link rel="alternate" hreflang="sv" href="https://dejz.se/sv/" />
+    <link rel="alternate" hreflang="en" href="https://dejz.se/en/" />
+    <link rel="alternate" hreflang="da" href="https://dejz.se/da/" />
+    <link rel="alternate" hreflang="no" href="https://dejz.se/no/" />
+    <link rel="alternate" hreflang="nb" href="https://dejz.se/no/" />
+    <link rel="alternate" hreflang="fi" href="https://dejz.se/fi/" />
+    <link rel="alternate" hreflang="x-default" href="https://dejz.se/sv/" />
 
     <!-- OpenGraph / Social Share Cards -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Dejz – Äntligen koll på ekonomin från lön till lön" />
-    <meta property="og:description" content="Samla dina inkomster, fasta utgifter och sparande. Registrera dina köp och se vad du har kvar att spendera fram till nästa lön." />
-    <meta property="og:image" content="/favicon.png" />
+    <meta property="og:locale" content="sv_SE" />
     <meta property="og:site_name" content="Dejz" />
+    <meta property="og:title" content="Dejz – Full koll på pengarna från lön till lön" />
+    <meta property="og:description" content="Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön." />
+    <meta property="og:url" content="https://dejz.se/sv/" />
+    <meta property="og:image" content="https://dejz.se/dejz_02.png" />
+    <meta property="og:image:alt" content="Dejz – Personlig ekonomi och budget från lön till lön" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Dejz – Äntligen koll på ekonomin från lön till lön" />
-    <meta name="twitter:description" content="Samla dina inkomster, fasta utgifter och sparande. Registrera dina köp och se vad du har kvar att spendera fram till nästa lön." />
-    <meta name="twitter:image" content="/favicon.png" />
+    <meta name="twitter:title" content="Dejz – Full koll på pengarna från lön till lön" />
+    <meta name="twitter:description" content="Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön." />
+    <meta name="twitter:image" content="https://dejz.se/dejz_02.png" />
+    <meta name="twitter:image:alt" content="Dejz – Personlig ekonomi och budget från lön till lön" />
 
-    <!-- Fonts - Plus Jakarta Sans & JetBrains Mono -->
+    <!-- Preload Hero Image for Core Web Vitals (LCP) -->
+    <link rel="preload" as="image" href="/dejz_02.png" fetchpriority="high" />
+
+    <!-- Fonts - Manrope, Outfit & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -63,9 +79,18 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Dejz",
+      "url": "https://dejz.se",
+      "image": "https://dejz.se/dejz_02.png",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "All",
-      "description": "Samla dina inkomster, fasta utgifter och sparande. Registrera dina köp och se vad du har kvar att spendera fram till nästa lön.",
+      "inLanguage": ["sv", "en", "no", "da", "fi"],
+      "description": "Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön.",
+      "featureList": [
+        "Budget från lön till lön med automatisk helganpassning av lönedag",
+        "Automatisk reservering av fasta räkningar och sparande",
+        "Logga utgifter via röst, text eller kvittoskanning",
+        "Visuell utgiftsanalys och kategoribudget med ett tryck"
+      ],
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -76,7 +101,10 @@
 
     <style>
       :root {
-        color-scheme: light dark;
+        color-scheme: light;
+      }
+      html.dark {
+        color-scheme: dark;
       }
       html, body {
         min-height: 100%;
@@ -84,12 +112,12 @@
         padding: 0;
       }
       html.dark, body.dark {
-        background-color: #090D16 !important;
-        background: #090D16;
+        background-color: #191919 !important;
+        background: #191919;
       }
       html.light, body.light, html:not(.dark), body:not(.dark) {
-        background-color: #F2F4F8 !important;
-        background: #F2F4F8;
+        background-color: #F2F0F0 !important;
+        background: #F2F0F0;
       }
     </style>
   </head>

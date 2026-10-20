@@ -54,18 +54,18 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
           imagePlaceholder: isEn ? 'Screenshot: Add Expense Screen' : 'Skärmdump: Lägg till utgift',
         },
         {
-          title: isEn ? '2. Check your daily budget' : '2. Håll koll på dagsbudgeten',
+          title: isEn ? '2. See what is left until payday' : '2. Se vad som finns kvar till lön',
           description: isEn
-            ? 'On the Today screen, the main number shows how much you can spend today without exceeding your budget for the rest of the period.'
-            : 'På hemfliken visar det stora talet hur mycket du kan spendera idag för att pengarna ska räcka jämnt fram till nästa lön.',
-          imagePlaceholder: isEn ? 'Screenshot: Today Screen & Daily Pot' : 'Skärmdump: Hemfliken med dagsbudget',
+            ? 'On the Home screen, the main number shows how much you have left to spend after all fixed bills, savings, and logged purchases are deducted.'
+            : 'På hemfliken visar det stora beloppet exakt hur mycket du har kvar att röra dig med fram till nästa lön efter att räkningar, sparande och gjorda köp dragits av.',
+          imagePlaceholder: isEn ? 'Screenshot: Home Screen & Balance' : 'Skärmdump: Hemfliken med kvar till lön',
         },
       ],
     },
     {
       id: 'payday-cycle',
-      title: isEn ? 'Payday Cycle & Daily Budget' : 'Löneperiod & Dagsbudget',
-      subtitle: isEn ? 'How the 25th-to-24th cycle works' : 'Så fungerar lönedag till lönedag och din disponibla pott',
+      title: isEn ? 'Payday Cycle & Disposable Balance' : 'Löneperiod & Fritt utrymme',
+      subtitle: isEn ? 'How the 25th-to-24th cycle works' : 'Så fungerar lönedag till lönedag och ditt fria utrymme',
       icon: Calendar,
       readTime: '2 min',
       steps: [
@@ -77,11 +77,11 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
           imagePlaceholder: isEn ? 'Screenshot: Salary Settings' : 'Skärmdump: Löneinställningar',
         },
         {
-          title: isEn ? '2. How the daily pot is calculated' : '2. Så räknas dagsbudgeten ut',
+          title: isEn ? '2. How your available balance is calculated' : '2. Så räknas ditt fria utrymme ut',
           description: isEn
-            ? 'Total Income − Fixed Expenses − Monthly Savings = Disposable Pot. This pot is divided by the days remaining until your next salary.'
-            : 'Total inkomst minus fasta utgifter och månadssparande ger din disponibla pott. Potten delas jämnt på antalet dagar kvar till nästa lön.',
-          tip: isEn ? 'If you spend less today, your daily budget for future days automatically increases!' : 'Om du spenderar mindre idag ökar automatiskt din dagsbudget för kommande dagar!',
+            ? 'Total Income − Fixed Expenses − Monthly Savings = Disposable Balance for the period. Every purchase you log is deducted in real time.'
+            : 'Total inkomst minus fasta utgifter och månadssparande ger ditt fria utrymme för perioden. Varje köp du registrerar dras av direkt.',
+          tip: isEn ? 'Anything left unspent when your next payday arrives can be transferred to your piggy bank!' : 'Det som finns kvar när nästa lön kommer kan du föra över direkt till spargrisen!',
         },
       ],
     },

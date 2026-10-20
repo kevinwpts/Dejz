@@ -344,7 +344,6 @@ export function CategoryBottomSheetModal({
                     <EmptyState
                       title={isEn ? 'No expenses in this category' : 'Inga utgifter i denna kategori'}
                       description={isEn ? 'No expenses recorded in this category during the selected period.' : 'Inga utgifter registrerade i denna kategori under den valda perioden.'}
-                      className="py-6"
                     />
                   )}
                 </div>

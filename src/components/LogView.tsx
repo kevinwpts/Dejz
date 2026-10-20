@@ -743,16 +743,8 @@ export function LogView({
           <motion.div 
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="py-2 sm:py-3"
           >
             <EmptyState
-              icon={
-                hasActiveSearch
-                  ? 'search'
-                  : hasActiveFilters
-                  ? 'filter'
-                  : 'wallet'
-              }
               title={
                 hasActiveSearch
                   ? getL10n(
@@ -813,15 +805,29 @@ export function LogView({
                       'Prøv at ændre dine filtre.',
                       'Kokeile muuttaa suodattimiasi.'
                     )
-                  : undefined
+                  : selectedDate
+                  ? getL10n(
+                      'Inga utgifter eller inkomster registrerade på detta datum.',
+                      'No expenses or income recorded on this date.',
+                      'Ingen utgifter eller inntekter registrert på denne datoen.',
+                      'Ingen udgifter eller indtægter registreret på denne dato.',
+                      'Ei kuluja tai tuloja kirjattu tälle päivälle.'
+                    )
+                  : getL10n(
+                      'Inga utgifter eller inkomster registrerade under den här perioden.',
+                      'No expenses or income recorded during this period.',
+                      'Ingen utgifter eller inntekter registrert i denne perioden.',
+                      'Ingen udgifter eller indtægter registreret i denne periode.',
+                      'Ei kuluja tai tuloja kirjattu tälle kaudelle.'
+                    )
               }
               actionLabel={
-                !hasActiveSearch && !hasActiveFilters && (transactions?.length || 0) === 0
+                !hasActiveSearch && !hasActiveFilters
                   ? t('addExpense')
                   : undefined
               }
               onAction={
-                !hasActiveSearch && !hasActiveFilters && (transactions?.length || 0) === 0
+                !hasActiveSearch && !hasActiveFilters
                   ? onAddTransaction
                   : undefined
               }

@@ -86,16 +86,10 @@ export function DejziSummaryModal({
   userName,
   stats,
   calendarDays = [],
-  availableForToday = 0,
   currency = 'kr',
   language = 'sv'
 }: DejziSummaryModalProps) {
   const isEn = language === 'en';
-
-  const todayDayData = useMemo(() => {
-    if (!calendarDays || calendarDays.length === 0) return null;
-    return calendarDays.find((d: any) => d.isToday) || null;
-  }, [calendarDays]);
 
   const effectiveRemainingDays = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return stats?.remainingDays || 1;
@@ -115,101 +109,57 @@ export function DejziSummaryModal({
   const dejziInfo = useMemo(() => {
     if (!stats) return null;
 
-    const spentTodayRound = todayDayData ? Math.round(todayDayData.daySpent || 0) : 0;
-    const remainingToday = Math.round(availableForToday || 0);
+    const spentInPeriod = Math.round(stats.totalSpentInPeriod || 0);
+    const remainingPeriod = Math.round(stats.remainingPeriodCents || 0);
     const remainingDaysTotal = effectiveRemainingDays || stats.remainingDays || 1;
-    const futureDaysLeft = Math.max(0, remainingDaysTotal - 1);
 
-    if (remainingToday < 0) {
-      const overAmount = Math.abs(remainingToday);
-      
-      let detailStr = null;
-      let actionTip = null;
-      if (futureDaysLeft === 0) {
-        detailStr = isEn
-          ? `Payday tomorrow! Hold tight.`
-          : `Lön imorgon! Håll ut sista biten.`;
-        actionTip = isEn ? 'Final stretch before payday!' : 'Sista spurten innan lön!';
-      } else if (futureDaysLeft === 1) {
-        const perDayDecrease = Math.round(overAmount / 1);
-        detailStr = isEn
-          ? `Reduces tomorrow's allowance by ${formatAmount(perDayDecrease, language)} ${currency}.`
-          : `Minskar morgondagen med ${formatAmount(perDayDecrease, language)} ${currency}.`;
-        actionTip = isEn ? 'Tomorrow adjusts automatically.' : 'Morgondagen anpassas automatiskt.';
-      } else {
-        const perDayDecrease = Math.round(overAmount / futureDaysLeft);
-        detailStr = isEn
-          ? `Reduces daily allowance by ${formatAmount(perDayDecrease, language)} ${currency}/day ahead.`
-          : `Dras av med ${formatAmount(perDayDecrease, language)} ${currency}/dag framöver.`;
-        actionTip = isEn
-          ? `Try keeping daily spending under ${formatAmount(Math.max(0, Math.round((stats.remainingPeriodCents || 0) / futureDaysLeft)), language)} ${currency}/day.`
-          : `Försök hålla köpen under ${formatAmount(Math.max(0, Math.round((stats.remainingPeriodCents || 0) / futureDaysLeft)), language)} ${currency}/dag.`;
-      }
+    if (remainingPeriod < 0) {
+      const overAmount = Math.abs(remainingPeriod);
+      const detailStr = isEn
+        ? `${remainingDaysTotal} ${remainingDaysTotal === 1 ? 'day' : 'days'} left until your next payday.`
+        : `${remainingDaysTotal} ${remainingDaysTotal === 1 ? 'dag' : 'dagar'} kvar till nästa lön.`;
+      const actionTip = isEn
+        ? 'You can cover the deficit by adjusting category budgets or borrowing from your piggy bank.'
+        : 'Du kan täcka underskottet genom att se över dina utgifter eller låna från spargrisen.';
 
       return {
-        pillBadge: isEn ? `${formatAmount(overAmount, language)} ${currency} over` : `${formatAmount(overAmount, language)} ${currency} över`,
         message: isEn
-          ? `You have exceeded today's budget by ${formatAmount(overAmount, language)} ${currency}.`
-          : `Du har överskridit dagens budget med ${formatAmount(overAmount, language)} ${currency}.`,
+          ? `You have exceeded your period budget by ${formatAmount(overAmount, language)} ${currency}.`
+          : `Du har överskridit ditt utrymme för perioden med ${formatAmount(overAmount, language)} ${currency}.`,
         detail: detailStr,
         actionTip,
         type: 'warning',
-        spentToday: spentTodayRound,
-        remainingToday,
-        remainingDays: remainingDaysTotal,
       };
     }
 
-    let pillBadge = '';
-    let msg = '';
-    if (spentTodayRound === 0) {
-      pillBadge = isEn ? 'No spending yet' : 'Inget köpt än';
-      msg = isEn
-        ? `No spending yet! You have ${formatAmount(remainingToday, language)} ${currency} left for today.`
-        : `Inga köp gjorda än idag! Du har ${formatAmount(remainingToday, language)} ${currency} kvar att röra dig med.`;
-    } else {
-      pillBadge = isEn ? `${formatAmount(remainingToday, language)} ${currency} left today` : `${formatAmount(remainingToday, language)} ${currency} kvar idag`;
-      msg = isEn
-        ? `You've spent ${formatAmount(spentTodayRound, language)} ${currency} today. You still have ${formatAmount(remainingToday, language)} ${currency} left.`
-        : `Du har spenderat ${formatAmount(spentTodayRound, language)} ${currency} idag. Du har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
-    }
+    const msg =
+      spentInPeriod === 0
+        ? isEn
+          ? `No purchases logged yet this period! You have ${formatAmount(remainingPeriod, language)} ${currency} available until payday.`
+          : `Inga köp loggade i perioden än! Du har ${formatAmount(remainingPeriod, language)} ${currency} kvar att röra dig med fram till lön.`
+        : isEn
+          ? `You have ${formatAmount(remainingPeriod, language)} ${currency} left to spend across the remaining ${remainingDaysTotal} ${remainingDaysTotal === 1 ? 'day' : 'days'} until payday.`
+          : `Du har ${formatAmount(remainingPeriod, language)} ${currency} kvar att röra dig med under periodens sista ${remainingDaysTotal} ${remainingDaysTotal === 1 ? 'dag' : 'dagar'}.`;
 
-    let detail = null;
-    let actionTip = null;
-    if (remainingToday > 0) {
-      if (futureDaysLeft === 0) {
-        detail = isEn
-          ? `Make it through today to secure a +${formatAmount(remainingToday, language)} ${currency} surplus!`
-          : `Klarar du dagen får du ett överskott på +${formatAmount(remainingToday, language)} ${currency}!`;
-        actionTip = isEn ? 'Surplus will be celebrated on payday!' : 'Överskottet firas på lönedagen!';
-      } else if (futureDaysLeft === 1) {
-        const perDayBonus = Math.round(remainingToday / 1);
-        detail = isEn
-          ? `Saving the rest rolls over +${formatAmount(perDayBonus, language)} ${currency} directly to tomorrow!`
-          : `Sparar du resten flyttas +${formatAmount(perDayBonus, language)} ${currency} direkt till morgondagen!`;
-        actionTip = isEn ? 'Keep going to boost tomorrow!' : 'Håll i för att boosta morgondagen!';
-      } else {
-        const perDayBonus = Math.round(remainingToday / futureDaysLeft);
-        detail = isEn
-          ? `Saving the rest adds +${formatAmount(perDayBonus, language)} ${currency}/day to all remaining days.`
-          : `Sparar du resten fördelas +${formatAmount(perDayBonus, language)} ${currency}/dag ut på alla kommande dagar.`;
-        actionTip = isEn
-          ? `Every saved coin strengthens your daily budget ahead!`
-          : `Varje sparad krona idag stärker din dagsbudget framöver!`;
-      }
-    }
+    const detail = isEn
+      ? `So far this period you have logged ${formatAmount(spentInPeriod, language)} ${currency} in variable purchases.`
+      : `Hittills under löneperioden har du registrerat köp för ${formatAmount(spentInPeriod, language)} ${currency}.`;
+
+    const actionTip = isEn
+      ? 'Anything left unspent when payday arrives can be saved straight into your piggy bank!'
+      : 'Allt som finns kvar när nästa lön kommer kan du spara direkt i spargrisen!';
 
     return {
-      pillBadge,
       message: msg,
-      detail: detail,
+      detail,
       actionTip,
       type: 'success',
-      spentToday: spentTodayRound,
-      remainingToday,
-      remainingDays: remainingDaysTotal,
     };
-  }, [stats, todayDayData, availableForToday, effectiveRemainingDays, language, currency, isEn]);
+  }, [stats, effectiveRemainingDays, language, currency, isEn]);
+
+  const remainingPeriodVal = Math.round(stats?.remainingPeriodCents || 0);
+  const spentInPeriodVal = Math.round(stats?.totalSpentInPeriod || 0);
+  const fixedAndSavingsVal = Math.round((stats?.totalFixed || 0) + (stats?.totalSavings || 0));
 
   return (
     <Modal
@@ -229,7 +179,7 @@ export function DejziSummaryModal({
               {userName ? `${isEn ? 'Hi' : 'Hej'} ${userName}!` : 'Dejz'}
             </h3>
             <p className="text-secondary font-semibold text-[var(--text-secondary)] mt-0.5">
-              {isEn ? 'Daily budget overview' : 'Översikt av din dagsbudget'}
+              {isEn ? 'Payday period overview' : 'Översikt av din löneperiod'}
             </p>
           </div>
         </div>
@@ -260,14 +210,14 @@ export function DejziSummaryModal({
 
       {/* Status Grid Cards (4 Metrics) */}
       <div className="grid grid-cols-2 gap-2.5">
-        {/* Dagsbudget kvar */}
+        {/* Kvar att spendera */}
         <Card variant="default" padding="sm" className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-label text-[var(--text-secondary)] font-medium">
-            <Coins size={13} className="text-[var(--accent-color)]" />
-            <span>{isEn ? "Today's balance" : 'Dagens saldo'}</span>
+            <Wallet size={13} className="text-[var(--accent-color)]" />
+            <span>{isEn ? 'Left to spend' : 'Kvar till lön'}</span>
           </div>
-          <span className={`text-list-amount font-extrabold font-amount tabular-nums ${availableForToday < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'}`}>
-            {formatAmount(Math.round(availableForToday), language)} {currency}
+          <span className={`text-list-amount font-extrabold font-amount tabular-nums ${remainingPeriodVal < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'}`}>
+            {formatAmount(remainingPeriodVal, language)} {currency}
           </span>
         </Card>
 
@@ -282,25 +232,25 @@ export function DejziSummaryModal({
           </span>
         </Card>
 
-        {/* Totalt kvar i perioden */}
+        {/* Spenderat i perioden */}
         <Card variant="default" padding="sm" className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-label text-[var(--text-secondary)] font-medium">
-            <Wallet size={13} className="text-[var(--text-secondary)]" />
-            <span>{isEn ? 'Total left' : 'Totalt kvar'}</span>
+            <Coins size={13} className="text-[var(--text-secondary)]" />
+            <span>{isEn ? 'Spent in period' : 'Spenderat'}</span>
           </div>
-          <span className={`text-list-amount font-extrabold font-amount tabular-nums ${(stats?.remainingPeriodCents || 0) < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'}`}>
-            {formatAmount(Math.round(stats?.remainingPeriodCents || 0), language)} {currency}
+          <span className="text-list-amount font-extrabold font-amount tabular-nums text-[var(--text-primary)]">
+            {formatAmount(spentInPeriodVal, language)} {currency}
           </span>
         </Card>
 
-        {/* Grundbudget per dag */}
+        {/* Fasta utgifter & sparande */}
         <Card variant="default" padding="sm" className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-label text-[var(--text-secondary)] font-medium">
             <TrendingUp size={13} className="text-[var(--text-secondary)]" />
-            <span>{isEn ? 'Daily budget' : 'Budget / dag'}</span>
+            <span>{isEn ? 'Fixed & savings' : 'Fasta & spar'}</span>
           </div>
           <span className="text-list-amount font-extrabold font-amount tabular-nums text-[var(--text-primary)]">
-            +{formatAmount(Math.round(stats?.baseDailyBudgetCents || 0), language)} {currency}
+            {formatAmount(fixedAndSavingsVal, language)} {currency}
           </span>
         </Card>
       </div>

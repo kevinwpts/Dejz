@@ -76,7 +76,6 @@ import {
   supabaseAnonKey,
 } from "./supabaseClient";
 import { Auth } from "./components/Auth";
-import { WelcomeScreen } from "./components/WelcomeScreen";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { SearchModal } from "./components/SearchModal";
 import { ResetPasswordModal } from "./components/ResetPasswordModal";
@@ -114,7 +113,6 @@ import {
   parseReceiptDate,
 } from "./utils/date";
 import { uploadLogo } from "./services/storageService";
-import { verifyPayment, isPro } from "./utils/subscription";
 
 import {
   DEFAULT_EXPENSE_CATEGORIES,
@@ -701,6 +699,10 @@ export default function App() {
     useState(false);
   const [itemToUpdateVariable, setItemToUpdateVariable] = useState<any>(null);
   const [navHistory, setNavHistory] = useState<{ tab: Tab; section?: string }[]>([]);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [showLanding, setShowLanding] = useState(true);
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const hasDismissedOnboardingSession = useRef(false);
 
   const tabScrollPositions = useRef<Record<string, number>>({});
 
@@ -779,6 +781,7 @@ export default function App() {
             locale: session.user.user_metadata?.locale || regDefaults.locale,
             timezone: session.user.user_metadata?.timezone || regDefaults.timezone,
             dark_mode: false,
+            theme_mode: 'light',
           })
           .select()
           .single();
@@ -943,8 +946,8 @@ export default function App() {
           notifications: dbSettings.notifications,
           securityLock: dbSettings.securityLock,
           darkMode:
-            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
-          themeMode: dbSettings.themeMode || 'system',
+            dbSettings.themeMode === 'dark' ? true : false,
+          themeMode: dbSettings.themeMode === 'dark' ? 'dark' : 'light',
           themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
@@ -1274,12 +1277,6 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (subscriptionStatus !== null && !isPro(subscriptionStatus, trialEnd)) {
-      setIsLocked(false);
-    }
-  }, [subscriptionStatus, trialEnd]);
-
   // Update manifest and favicon when theme changes
   useEffect(() => {
     if (!config) return;
@@ -1309,10 +1306,10 @@ export default function App() {
 
   useEffect(() => {
     if (!config) return;
-    const isDark = !!config.darkMode;
+    const isDark = Boolean(session && !isOnboarding && (config.themeMode === 'dark' || (config.themeMode !== 'light' && config.darkMode === true)));
     const themeHex = config.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
     applyThemeColor(themeHex, isDark);
-  }, [config?.themeColor, config?.darkMode, session]);
+  }, [config?.themeColor, config?.darkMode, config?.themeMode, session, isOnboarding]);
 
   const handleFeedbackSubmit = async (message: string) => {
     const activeUserId = session?.user?.id || 'demo-user';
@@ -1325,26 +1322,18 @@ export default function App() {
     }
   };
 
-  /*
-  const handleDeleteSavingsPotTransaction = async (id: string) => {
-    if (!session) return;
-    try {
-      await dataService.deleteSavingsPotTransaction(id);
-      addToast(t('savingsPotTransactionDeleted'), 'success');
-      // Also need to update savingsPot in config
-      if (config) {
-        // ...
-      }
-    } catch (_error) {
-      addToast(t('error'), 'error');
-    }
-  };
-  */
-
   const handleConfirmDeleteAccount = async () => {
     if (!session) return;
 
     try {
+      if (session.user.id === "demo-user" || checkDemoMode(session)) {
+        clearDemoData();
+        localStorage.removeItem("mock_session");
+        addToast(t("accountDeleted"), "success");
+        setSession(null);
+        setIsDeleteAccountModalOpen(false);
+        return;
+      }
 
       // Try to revoke Google OAuth token if available
       if (providerToken && session.user.app_metadata.provider === "google") {
@@ -1357,14 +1346,19 @@ export default function App() {
             },
           );
         } catch (_e) {
-          console.warn("Could not revoke Google token automatically:", e);
+          console.warn("Could not revoke Google token automatically:", _e);
         }
       }
 
       // Call server-side endpoint to delete account completely
       const response = await fetch("/api/auth/delete-account", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session.access_token
+            ? { Authorization: `Bearer ${session.access_token}` }
+            : {}),
+        },
         body: JSON.stringify({ userId: session.user.id }),
       });
 
@@ -1440,12 +1434,6 @@ export default function App() {
       addToast("Kunde inte exportera data", "error");
     }
   };
-
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [showLanding, setShowLanding] = useState(true);
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [isOnboarding, setIsOnboarding] = useState(false);
-  const hasDismissedOnboardingSession = useRef(false);
 
   // Continuously record scroll position for current active tab (ignore while onboarding)
   useEffect(() => {
@@ -1539,24 +1527,20 @@ export default function App() {
     });
   };
 
-  // --- Theme Logic: System (default) / Light / Dark ---
+  // --- Theme Logic: Light by default; Dark ONLY when explicitly selected by the user ---
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
       
-      // Pre-login screens (LandingPage, Auth, Welcome) are ALWAYS locked to light mode
-      if (session) {
-        const themeMode = config?.themeMode || 'system';
-
-        if (themeMode === 'dark') {
+      // Pre-login screens (LandingPage, Auth, Welcome) and Onboarding are ALWAYS locked to light mode.
+      // After onboarding, Dark mode is ONLY active if the user explicitly chose dark mode in Settings.
+      if (session && !isOnboarding && config) {
+        if (config.themeMode === 'dark') {
           isDark = true;
-        } else if (themeMode === 'light') {
+        } else if (config.themeMode === 'light') {
           isDark = false;
         } else {
-          // System preference
-          if (typeof window !== 'undefined' && window.matchMedia) {
-            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          }
+          isDark = config.darkMode === true && localStorage.getItem('dejz_dark_mode') === 'dark';
         }
       } else {
         isDark = false;
@@ -1573,10 +1557,20 @@ export default function App() {
         document.body.classList.add("light");
       }
 
+      try {
+        if (session && !isOnboarding && config) {
+          localStorage.setItem('dejz_dark_mode', isDark ? 'dark' : 'light');
+        } else if (!session || isOnboarding) {
+          localStorage.setItem('dejz_dark_mode', 'light');
+        }
+      } catch (_e) {
+        // ignore storage errors
+      }
+
       const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#191919" : "#FFFFFF";
+      const themeColor = isDark ? "#191919" : "#F2F0F0";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -1592,24 +1586,7 @@ export default function App() {
     };
 
     applyTheme();
-
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleSystemThemeChange = () => {
-        if (!config?.themeMode || config.themeMode === 'system') {
-          applyTheme();
-        }
-      };
-
-      if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener('change', handleSystemThemeChange);
-        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
-      } else if (mediaQuery.addListener) {
-        mediaQuery.addListener(handleSystemThemeChange);
-        return () => mediaQuery.removeListener(handleSystemThemeChange);
-      }
-    }
-  }, [config?.themeMode, config?.darkMode, config?.themeColor, session]);
+  }, [config?.themeMode, config?.darkMode, config?.themeColor, session, isOnboarding]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
@@ -1638,14 +1615,19 @@ export default function App() {
     const currentLang = normalizeLanguage(config?.language || landingLanguage);
     
     // Always keep SEO, canonical, and hreflang synchronized
-    updateDocumentSeo(currentLang, window.location.pathname);
+    updateDocumentSeo(currentLang, publicLegalDoc ? `/${publicLegalDoc}` : window.location.pathname);
+
+    // Do not overwrite public legal document URLs (/privacy, /terms, /cookies)
+    if (publicLegalDoc) {
+      return;
+    }
 
     let newPath = '';
     if (showLanding) {
       newPath = buildLanguageUrl(currentLang, '/');
       // If visiting root '/' without prefix, replaceState seamlessly
       if (window.location.pathname === '/' || window.location.pathname === '') {
-        window.history.replaceState(null, '', `${newPath}${window.location.search}${window.location.hash}`);
+        window.history.replaceState(null, '', newPath);
         return;
       }
     } else {
@@ -1655,9 +1637,9 @@ export default function App() {
     }
     
     if (window.location.pathname !== newPath) {
-      window.history.pushState(null, '', `${newPath}${window.location.search}${window.location.hash}`);
+      window.history.pushState(null, '', newPath);
     }
-  }, [config?.language, landingLanguage, activeTab, showLanding]);
+  }, [config?.language, landingLanguage, activeTab, showLanding, publicLegalDoc]);
 
   // --- Auth Logic ---
   useEffect(() => {
@@ -1780,6 +1762,7 @@ export default function App() {
     document.documentElement.classList.add("light");
     document.body.classList.remove("dark");
     document.body.classList.add("light");
+    localStorage.setItem('dejz_dark_mode', 'light');
     localStorage.removeItem('dejz_theme_color');
     applyThemeColor('neutral', false);
     
@@ -1921,9 +1904,10 @@ export default function App() {
       }
       setAvatarUrl(publicUrl);
       addToast("Bild uppdaterad!", "success");
-    } catch (_error) {
-      console.error("Error uploading avatar:", error.message);
-      addToast(`Kunde inte ladda upp bild: ${error.message}`, "error");
+    } catch (_error: any) {
+      const errMsg = _error?.message || "Okänt fel";
+      console.error("Error uploading avatar:", errMsg);
+      addToast(`Kunde inte ladda upp bild: ${errMsg}`, "error");
     }
   };
 
@@ -1964,7 +1948,7 @@ export default function App() {
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
       darkMode: false,
-      themeMode: 'system',
+      themeMode: 'light',
       themeColor: localStorage.getItem('dejz_theme_color') || 'neutral',
       quickChoices: [],
       savingsPot: 0,
@@ -1982,51 +1966,6 @@ export default function App() {
     };
 
     try {
-      // Check for payment success
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentSuccess = urlParams.get("payment_success") === "true";
-      const redirectStatus = urlParams.get("redirect_status");
-
-      if (
-        paymentSuccess ||
-        redirectStatus === "succeeded" ||
-        redirectStatus === "processing"
-      ) {
-        try {
-          console.log(
-            "[Payment] Verifying payment for user:",
-            session.user.id,
-          );
-          const result = await verifyPayment(session.user.id);
-          if (result.success) {
-            setSubscriptionStatus(result.status);
-            addToast("Betalning genomförd! Du är nu Pro.", "success");
-          } else {
-            console.warn("[Payment] Verification returned success=false");
-            addToast(
-              "Kunde inte verifiera betalningen automatiskt. Prova att uppdatera sidan om en stund.",
-              "info",
-            );
-          }
-        } catch (_e) {
-          console.error("[Payment] Failed to verify payment:", _e);
-          // Show a more helpful message
-          const errorMsg = _e.message?.includes("string did not match")
-            ? "Verifieringen misslyckades pga ett tekniskt fel i webbläsaren. Prova att ladda om sidan eller rensa cache."
-            : `Verifiering misslyckades: ${_e.message}`;
-          addToast(errorMsg, "error");
-        } finally {
-          // Clean up URL safely
-          try {
-            const cleanUrl =
-              window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-          } catch (historyError) {
-            console.warn("[Payment] Failed to clean up URL:", historyError);
-          }
-        }
-      }
-
       // Fetch everything in ONE optimized batch parallel call to minimize latencies!
       const [dbProfileResult, dbTransactions, dbIncomes, dbFixed] =
         await Promise.all([
@@ -2067,7 +2006,8 @@ export default function App() {
           initial_spent: defaultConfig.initialSpent,
           notifications: defaultConfig.notifications,
           security_lock: defaultConfig.securityLock,
-          dark_mode: true,
+          dark_mode: false,
+          theme_mode: 'light',
           quick_choices: defaultConfig.quickChoices,
           monthly_savings: defaultConfig.monthlySavings,
           include_fixed_expenses_in_analysis:
@@ -2096,11 +2036,7 @@ export default function App() {
 
       if (dbProfile && Object.keys(dbProfile).length > 0) {
         setProfile(dbProfile);
-        // Only set status if it's not already set by verifyPayment (which is more up-to-date)
-        setSubscriptionStatus((prev) => {
-          if (isPro(prev)) return prev;
-          return dbProfile.subscription_status || "free";
-        });
+        setSubscriptionStatus(dbProfile.subscription_status || "free");
         setTrialEnd(dbProfile.trial_end);
         setNextBillingDate(dbProfile.next_billing_date);
 
@@ -2256,7 +2192,8 @@ export default function App() {
             initialSpent: Number(dbProfile.initial_spent || 0),
             notifications: dbProfile.notifications,
             securityLock: dbProfile.security_lock,
-            darkMode: dbProfile.dark_mode !== false,
+            darkMode: dbProfile.theme_mode === 'dark',
+            themeMode: dbProfile.theme_mode === 'dark' ? 'dark' : 'light',
             savingsPot: dbProfile.savings_pot || 0,
             savingsGoals: dbProfile.savings_goals || [],
             totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
@@ -2326,8 +2263,8 @@ export default function App() {
           initialSpent: Number(dbProfile.initial_spent || 0),
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
-          darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
-          themeMode: dbProfile.theme_mode || 'system',
+          darkMode: (dbProfile.onboarding_completed === true && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? true : false,
+          themeMode: (dbProfile.onboarding_completed === true && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? 'dark' : 'light',
           themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
@@ -2422,7 +2359,8 @@ export default function App() {
       } else {
         const newConfig = {
           ...defaultConfig,
-          darkMode: true,
+          darkMode: false,
+          themeMode: 'light' as const,
         };
         setConfig(newConfig);
         // Save default settings for new user
@@ -4081,7 +4019,8 @@ export default function App() {
           initialSpent: 0,
           notifications: { dailySpend: true, overLimit: true },
           securityLock: false,
-          darkMode: true,
+          darkMode: false,
+          themeMode: 'light',
           quickChoices: [],
           savingsPot: 0,
           surplusIncome: 0,
@@ -4415,24 +4354,22 @@ export default function App() {
   if (!session) {
     return (
       <div className="min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip light">
+        <ToastContainer toasts={toasts} onDismiss={removeToast} />
         {showLanding ? (
           <>
             <LandingPage
               onGetStarted={() => {
                 setShowLanding(false);
-                setShowWelcome(false);
                 setInitialIsRegistering(true);
               }}
               onLogin={() => {
                 setShowLanding(false);
-                setShowWelcome(false);
                 setInitialIsRegistering(false);
               }}
               onStartDemo={() => {
                 const mock = seedDemoData();
                 setSession(mock as any);
                 setShowLanding(false);
-                setShowWelcome(false);
                 addToast("Välkommen till demoläget!", "success");
               }}
               onGoogleLogin={handleGoogleLogin}
@@ -4447,16 +4384,6 @@ export default function App() {
             />
             <CookieConsentModal t={t} onOpenPrivacyPolicy={() => handleLegalClick('privacy')} />
           </>
-        ) : showWelcome ? (
-          <WelcomeScreen
-            onAction={(isReg) => {
-              setInitialIsRegistering(isReg);
-              setShowWelcome(false);
-            }}
-            onLegalClick={handleLegalClick}
-            t={t}
-            currentLanguage={landingLanguage}
-          />
         ) : (
           <Auth
             onShowToast={(msg, type) => addToast(msg, type as ToastType)}
@@ -4966,49 +4893,7 @@ export default function App() {
                 subscriptionStatus={subscriptionStatus}
                 trialEnd={trialEnd}
                 nextBillingDate={nextBillingDate}
-                onPaymentSuccess={async () => {
-                  try {
-                    const result = await verifyPayment(session.user.id);
-                    if (result.success) {
-                      setSubscriptionStatus(result.status);
-                      if (result.status === "canceling") {
-                        addToast("Abonnemanget är nu uppsagt.", "info");
-                      } else if (
-                        result.status === "active" ||
-                        result.status === "trialing" ||
-                        result.status === "lifetime"
-                      ) {
-                        addToast(
-                          "Betalning genomförd! Du är nu Pro.",
-                          "success",
-                        );
-                      }
-                    } else {
-                      addToast(
-                        "Betalningen behandlas fortfarande. Det kan ta en liten stund.",
-                        "info",
-                      );
-                    }
-
-                    const dbProfile = await dataService.getProfile(
-                      session.user.id,
-                    );
-                    if (dbProfile) {
-                      setSubscriptionStatus((prev) => {
-                        if (isPro(prev)) return prev;
-                        return dbProfile.subscription_status || "free";
-                      });
-                      setTrialEnd(dbProfile.trial_end);
-                      setNextBillingDate(dbProfile.next_billing_date);
-                    }
-                  } catch (e: any) {
-                    console.error("Payment verification failed:", e);
-                    addToast(
-                      `Ett fel uppstod vid verifiering av betalningen: ${e?.message || "Okänt fel"}`,
-                      "error",
-                    );
-                  }
-                }}
+                onPaymentSuccess={() => {}}
                 onShowToast={addToast}
                 onSecurityClick={() => setIsSecurityModalOpen(true)}
                 onSetSubscriptionStatus={setSubscriptionStatus}
@@ -5067,7 +4952,7 @@ export default function App() {
       {/* Bottom Navigation */}
       {!isAddTransactionOpen && (
         <>
-          <div className="fixed bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/80 to-transparent pointer-events-none z-30" />
+          <div className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/80 to-transparent pointer-events-none z-30" />
           <CustomBottomNavigation
             activeTab={activeTab}
             budgetSection={budgetSection}
@@ -5150,7 +5035,7 @@ export default function App() {
           config={config}
           userId={session?.user.id}
           currentPeriodId={currentPeriodId}
-          isPro={isPro(subscriptionStatus)}
+          isPro={true}
           onClose={() => {
             setIsOnboarding(false);
             hasDismissedOnboardingSession.current = true;
@@ -5270,7 +5155,8 @@ export default function App() {
               const newConfig: Config = {
                 ...config,
                 hasSavedInitialBudget: false,
-                darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : true,
+                darkMode: false,
+                themeMode: 'light',
                 payday: data.payday || 25,
                 paydayBeforeWeekend: data.paydayBeforeWeekend !== undefined ? data.paydayBeforeWeekend : (config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true),
                 initialSpent: data.initialSpent,
@@ -5510,7 +5396,7 @@ export default function App() {
         {isAddTransactionOpen && (
           <TransactionModal
             transactions={transactions}
-            isPro={isPro(subscriptionStatus)}
+            isPro={true}
             transaction={editingTransaction}
             type={transactionType}
             date={targetDate || undefined}
@@ -5609,7 +5495,7 @@ export default function App() {
             t={t}
             currency={config?.currency || "kr"}
             userId={session?.user.id}
-            isPro={isPro(subscriptionStatus)}
+            isPro={true}
             categories={config.incomeCategories}
             paymentMethods={config?.paymentMethods || []}
             config={config}
@@ -5683,7 +5569,7 @@ export default function App() {
             currency={config?.currency || "kr"}
             categories={config?.categories || []}
             userId={session?.user.id}
-            isPro={isPro(subscriptionStatus)}
+            isPro={true}
             paymentMethods={config?.paymentMethods || []}
             config={config}
           />
@@ -5727,7 +5613,7 @@ export default function App() {
             t={t}
             currency={config?.currency || "kr"}
             userId={session?.user.id}
-            isPro={isPro(subscriptionStatus)}
+            isPro={true}
             paymentMethods={config?.paymentMethods || []}
             config={config}
           />
@@ -5898,7 +5784,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] border border-[var(--border-divider)] shadow-subtle hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
                     <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
@@ -5918,7 +5804,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] border border-[var(--border-divider)] shadow-subtle hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
                     <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
@@ -5933,7 +5819,7 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] border border-[var(--border-divider)] shadow-subtle hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
                     {isScanningReceipt ? (
                       <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
@@ -6020,7 +5906,6 @@ export default function App() {
         isProcessing={isScanningReceipt}
         language={config?.language}
       />
-      <ToastContainer toasts={toasts} onDismiss={removeToast} />
     </div>
   );
 }

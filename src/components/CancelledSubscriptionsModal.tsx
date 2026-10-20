@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BottomSheet, Card, Button, IconButton, Input } from './ui';
+import { BottomSheet, Card, Button, IconButton, Input, EmptyState } from './ui';
 import { RotateCcw, Trash2, CheckCircle2, Clock, Sparkles, Pencil } from 'lucide-react';
 
 import { FixedExpense, Config } from '../types';
@@ -105,17 +105,14 @@ export function CancelledSubscriptionsModal({
 
         {/* List of Cancelled Items */}
         {cancelledItems.length === 0 ? (
-          <div className="py-12 text-center space-y-2">
-            <CheckCircle2 size={36} className="mx-auto text-[var(--text-tertiary)] opacity-60" />
-            <p className="text-body font-semibold text-[var(--text-primary)]">
-              {isEn ? 'No cancelled subscriptions' : 'Inga uppsagda abonnemang ännu'}
-            </p>
-            <p className="text-secondary text-[var(--text-secondary)] max-w-xs mx-auto">
-              {isEn
+          <EmptyState
+            title={isEn ? 'No cancelled subscriptions' : 'Inga uppsagda abonnemang ännu'}
+            description={
+              isEn
                 ? 'When you cancel a subscription, mark it with a cancellation date to track your savings.'
-                : 'När du säger upp ett abonnemang kan du ange uppsägnings- och slutdatum så att det automatiskt slutar räknas när sista betalningen genomförts.'}
-            </p>
-          </div>
+                : 'När du säger upp ett abonnemang kan du ange uppsägnings- och slutdatum så att det automatiskt slutar räknas när sista betalningen genomförts.'
+            }
+          />
         ) : (
           <div className="space-y-3">
             {cancelledItems.map((item) => {

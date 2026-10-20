@@ -203,7 +203,7 @@ export function BudgetItem({
         className={`px-4 py-3 sm:py-3.5 min-h-[56px] relative z-10 flex items-center gap-3 group transition-colors duration-150 ${
           isGrouped
             ? "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none"
-            : "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[var(--radius-card,12px)] shadow-none border-none"
+            : "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-card shadow-subtle border border-subtle"
         } cursor-pointer select-none`}
       >
         <BudgetItemLogo item={item} type={type} config={config || ({ currency, language } as any)} />

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -40,6 +40,7 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   useScrollLock(isOpen);
   const [mounted, setMounted] = useState(false);
+  const dragControls = useDragControls();
 
   useEffect(() => {
     setMounted(true);
@@ -58,10 +59,10 @@ export const Modal: React.FC<ModalProps> = ({
 
   const sizeStyles = {
     xs: 'sm:max-w-[380px]',
-    sm: 'sm:max-w-[480px]',
-    md: 'sm:max-w-[576px]',
-    lg: 'sm:max-w-[672px]',
-    xl: 'sm:max-w-[768px]',
+    sm: 'sm:max-w-md',
+    md: 'sm:max-w-lg',
+    lg: 'sm:max-w-xl',
+    xl: 'sm:max-w-2xl',
   }[size];
 
   const modalNode = (
@@ -78,9 +79,9 @@ export const Modal: React.FC<ModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.16 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           />
 
           {/* Modal / Bottom Sheet Card */}
@@ -89,18 +90,35 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: center ? 16 : '100%', scale: center ? 0.96 : 1 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] ${
+            drag={center ? false : 'y'}
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.75 }}
+            onDragEnd={(_e, info) => {
+              if (!center && (info.offset.y > 70 || info.velocity.y > 350)) {
+                onClose();
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] text-[var(--text-primary)] ${
               center ? 'rounded-[var(--radius-modal,24px)]' : 'rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)]'
-            } border-none shadow-modal max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            } border-none shadow-modal max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
             {!center && (
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-2 shrink-0 sm:hidden" />
+              <div
+                onPointerDown={(e) => dragControls.start(e)}
+                onClick={onClose}
+                className="w-full pt-2.5 pb-1 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+              >
+                <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full" />
+              </div>
             )}
 
             {/* Header */}
             {(title || showCloseButton || headerRight) && (
-              <div className={`flex items-center justify-between page-px pt-4 pb-3 shrink-0 ${headerClassName}`}>
+              <div className={`flex items-center justify-between px-5 sm:px-6 pt-3 sm:pt-4 pb-3 border-b border-subtle shrink-0 ${headerClassName}`}>
                 <div className="flex flex-col pr-4 min-w-0">
                   {title && (
                     <h2 className="text-section-title truncate">
@@ -130,13 +148,13 @@ export const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Content Body */}
-            <div className={`flex-1 overflow-y-auto ${bodyClassName ?? 'page-px py-4 space-y-4'} text-[var(--text-primary)]`}>
+            <div className={`flex-1 overflow-y-auto min-h-0 ${bodyClassName ?? 'px-5 sm:px-6 py-4 space-y-4 custom-scrollbar'} text-[var(--text-primary)]`}>
               {children}
             </div>
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="page-px pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-[var(--modal-bg,var(--bg-color))] shrink-0">
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--modal-bg,var(--bg-color))] shrink-0">
                 {footer}
               </div>
             )}

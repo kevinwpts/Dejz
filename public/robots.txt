@@ -1,9 +1,12 @@
 User-agent: *
 Allow: /
 Allow: /sv/
+Allow: /en/
 Allow: /da/
 Allow: /no/
 Allow: /fi/
+Allow: /privacy
+Allow: /terms
 Disallow: /api/
 
 Sitemap: https://dejz.se/sitemap.xml

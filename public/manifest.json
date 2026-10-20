@@ -1,11 +1,11 @@
 {
-  "name": "Dejz",
+  "name": "Dejz – Full koll på pengarna från lön till lön",
   "short_name": "Dejz",
-  "description": "Ta kontroll över din ekonomi med Dejz",
+  "description": "Samla lön, fasta räkningar och sparande på ett ställe. Se vad du har kvar att röra dig med fram till nästa lön.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4F5F7",
-  "theme_color": "#0B0B0F",
+  "background_color": "#F2F0F0",
+  "theme_color": "#F2F0F0",
   "icons": [
     {
       "src": "/favicon.png",

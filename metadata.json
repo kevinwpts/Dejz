@@ -1,6 +1,6 @@
 {
   "name": "Dejz",
-  "description": "Dejz hjälper dig se hur mycket du faktiskt har att spendera efter räkningar och sparande – och få pengarna att räcka hela vägen till nästa lön.",
+  "description": "Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

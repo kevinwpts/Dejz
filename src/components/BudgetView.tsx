@@ -399,7 +399,7 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button 
-                      variant="secondary"
+                      variant="tonal"
                       size="sm"
                       icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddIncome}
@@ -408,7 +408,7 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+                  <div className="space-y-2">
                     {filteredActiveIncomes.map((income) => (
                       <BudgetItem 
                         key={income.id}
@@ -420,7 +420,7 @@ export function BudgetView({
                         t={t}
                         config={config}
                         currentPeriodId={currentPeriodId}
-                        isGrouped={true}
+                        isGrouped={false}
                       />
                     ))}
                   </div>
@@ -428,10 +428,10 @@ export function BudgetView({
               ) : (
                 <EmptyState 
                   title={
-                    config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än'
+                    config.language === 'en' ? 'No income added yet' : 'Inga inkomster inlagda än'
                   } 
-                  description={config.language === 'en' ? 'Add your salary or other regular income to calculate your daily budget.' : 'Lägg in din lön eller andra inkomster för att räkna ut din dagsbudget.'}
-                  actionLabel={`+ ${t('newIncome')}`}
+                  description={config.language === 'en' ? 'Add your salary or other regular income to see what you have left to spend.' : 'Lägg in din lön eller andra inkomster för att se vad du har kvar att röra dig med.'}
+                  actionLabel={config.language === 'en' ? 'Add income' : 'Lägg till inkomst'}
                   onAction={onAddIncome}
                 />
               )}
@@ -465,7 +465,7 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button
-                      variant="secondary"
+                      variant="tonal"
                       size="sm"
                       icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddFixedExpense}
@@ -474,7 +474,7 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+                  <div className="space-y-2">
                     {filteredActiveFixedExpenses.map((expense) => (
                       <BudgetItem 
                         key={expense.id}
@@ -486,7 +486,7 @@ export function BudgetView({
                         t={t}
                         config={config}
                         currentPeriodId={currentPeriodId}
-                        isGrouped={true}
+                        isGrouped={false}
                         isFixedExpenseList={true}
                       />
                     ))}
@@ -519,7 +519,7 @@ export function BudgetView({
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden pt-2"
                           >
-                            <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+                            <div className="space-y-2">
                               {expiredCancelledExpenses.map((expense) => (
                                 <BudgetItem
                                   key={expense.id}
@@ -531,7 +531,7 @@ export function BudgetView({
                                   t={t}
                                   config={config}
                                   currentPeriodId={currentPeriodId}
-                                  isGrouped={true}
+                                  isGrouped={false}
                                   isFixedExpenseList={true}
                                 />
                               ))}
@@ -550,7 +550,7 @@ export function BudgetView({
                   description={
                     config.language === 'en' ? 'Add subscriptions or bills to track upcoming payments.' : 'Lägg in abonnemang eller räkningar för att få full koll.'
                   }
-                  actionLabel={`+ ${t('newFixedExpense')}`}
+                  actionLabel={config.language === 'en' ? 'Add fixed expense' : 'Lägg till fast utgift'}
                   onAction={onAddFixedExpense}
                 />
               )}
@@ -584,7 +584,7 @@ export function BudgetView({
                     </button>
 
                     <Button
-                      variant="secondary"
+                      variant="tonal"
                       size="sm"
                       icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddMonthlySaving}
@@ -593,7 +593,7 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+                  <div className="space-y-2">
                     {sortedSavings.map((saving) => (
                       <BudgetItem 
                         key={saving.id}
@@ -605,7 +605,7 @@ export function BudgetView({
                         t={t}
                         config={config}
                         currentPeriodId={currentPeriodId}
-                        isGrouped={true}
+                        isGrouped={false}
                       />
                     ))}
                   </div>
@@ -614,7 +614,7 @@ export function BudgetView({
                 <EmptyState 
                   title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 
                   description={config.language === 'en' ? 'Add recurring monthly savings to reserve money automatically each month.' : 'Lägg in fast månadssparande för att automatiskt avsätta pengar varje månad.'}
-                  actionLabel={`+ ${t('newMonthlySaving')}`}
+                  actionLabel={config.language === 'en' ? 'Add monthly saving' : 'Lägg till månadssparande'}
                   onAction={onAddMonthlySaving}
                 />
               )}

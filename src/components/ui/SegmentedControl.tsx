@@ -39,7 +39,7 @@ export function SegmentedControl<T extends string = string>({
   }[size];
 
   const containerVariantStyles =
-    'bg-[var(--surface-nested)] border-none shadow-none';
+    'bg-[var(--card-nested-bg)] border-none shadow-none';
 
   return (
     <div
@@ -59,7 +59,7 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-none font-semibold'
+                ? 'bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] text-[var(--text-primary)] shadow-subtle font-semibold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
@@ -69,7 +69,7 @@ export function SegmentedControl<T extends string = string>({
               <span
                 className={`text-label font-medium px-1.5 py-0.5 rounded-[6px] ${
                   isSelected
-                    ? 'bg-[var(--surface-nested)] text-[var(--text-primary)]'
+                    ? 'bg-[var(--card-nested-bg)] text-[var(--text-primary)]'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                 }`}
               >

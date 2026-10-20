@@ -55,14 +55,14 @@ export const ListRow: React.FC<ListRowProps> = ({
 
   const containerStyles = {
     card: isCompact
-      ? 'bg-[var(--surface-color)] border-none px-3.5 py-2.5 min-h-[44px] rounded-card shadow-none'
-      : 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[52px] rounded-card shadow-none',
+      ? 'bg-[var(--surface-color)] border-none px-4 py-3 min-h-[52px] rounded-card shadow-none'
+      : 'bg-[var(--surface-color)] border-none px-4 py-3.5 min-h-[56px] rounded-card shadow-none',
     grouped: isCompact
-      ? 'bg-transparent px-3.5 py-2.5 min-h-[44px] hover:bg-[var(--bg-hover)]'
-      : 'bg-transparent px-4 py-3 min-h-[52px] hover:bg-[var(--bg-hover)]',
+      ? 'bg-transparent px-4 py-3 min-h-[52px] hover:bg-[var(--bg-hover)]'
+      : 'bg-transparent px-4 py-3.5 min-h-[56px] hover:bg-[var(--bg-hover)]',
     plain: isCompact
-      ? 'bg-transparent px-3.5 py-2.5 min-h-[42px]'
-      : 'bg-transparent px-4 py-3 min-h-[48px]',
+      ? 'bg-transparent px-4 py-3 min-h-[48px]'
+      : 'bg-transparent px-4 py-3.5 min-h-[54px]',
   }[variant];
 
   const clickableStyles = isClickable
@@ -77,15 +77,15 @@ export const ListRow: React.FC<ListRowProps> = ({
   };
 
   const hasIconBg = iconBg && iconBg !== 'bg-transparent';
-  const iconContainerSize = hasIconBg
-    ? isCompact
-      ? 'w-8 h-8 rounded-[8px]'
-      : 'w-9 h-9 rounded-[10px]'
-    : isCompact
-      ? 'w-5 h-5'
-      : 'w-6 h-6';
+  const iconContainerSize = isCompact
+    ? hasIconBg
+      ? 'w-8 h-8 rounded-[9px] [&_svg]:w-[19px] [&_svg]:h-[19px]'
+      : 'w-7 h-7 [&_svg]:w-[19px] [&_svg]:h-[19px]'
+    : hasIconBg
+      ? 'w-9 h-9 rounded-[10px] [&_svg]:w-[20px] [&_svg]:h-[20px]'
+      : 'w-8 h-8 [&_svg]:w-[20px] [&_svg]:h-[20px]';
 
-  const gapSize = isCompact ? 'gap-2.5' : 'gap-3';
+  const gapSize = 'gap-3.5';
 
   return (
     <div
@@ -121,7 +121,7 @@ export const ListRow: React.FC<ListRowProps> = ({
           {subtitle && (
             <div
               className={`text-secondary text-[var(--text-secondary)] mt-0.5 ${
-                multiline ? 'leading-[20px]' : 'truncate'
+                multiline ? 'leading-[19px]' : 'truncate'
               } ${subtitleClassName}`}
             >
               {subtitle}

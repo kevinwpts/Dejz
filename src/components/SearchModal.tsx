@@ -201,28 +201,24 @@ export function SearchModal({
             {/* Results Scroll Container */}
             <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-4 custom-scrollbar touch-pan-y overscroll-contain bg-canvas">
               {!trimmedQuery ? (
-                <div className="py-8 px-2">
-                  <EmptyState
-                    icon="search"
-                    title={getL10n(
-                      'Sök i din ekonomi',
-                      'Search your finances',
-                      'Søk i økonomien din',
-                      'Søg i din økonomi',
-                      'Hae taloudestasi'
-                    )}
-                    description={getL10n(
-                      'Skriv in fast utgift, butik, anteckning, kategori eller belopp för att söka.',
-                      'Type a fixed expense, store, note, category or amount to search.',
-                      'Skriv inn fast utgift, butikk, notat, kategori eller beløp for å søke.',
-                      'Indtast fast udgift, butik, note, kategori eller beløb for at søge.',
-                      'Kirjoita kiinteä kulu, kauppa, muistiinpano, kategoria tai summa hakeaksesi.'
-                    )}
-                  />
-                </div>
+                <EmptyState
+                  title={getL10n(
+                    'Sök i din ekonomi',
+                    'Search your finances',
+                    'Søk i økonomien din',
+                    'Søg i din økonomi',
+                    'Hae taloudestasi'
+                  )}
+                  description={getL10n(
+                    'Skriv in fast utgift, butik, anteckning, kategori eller belopp för att söka.',
+                    'Type a fixed expense, store, note, category or amount to search.',
+                    'Skriv inn fast utgift, butikk, notat, kategori eller beløp for å søke.',
+                    'Indtast fast udgift, butik, note, kategori eller beløb for at søge.',
+                    'Kirjoita kiinteä kulu, kauppa, muistiinpano, kategoria tai summa hakeaksesi.'
+                  )}
+                />
               ) : totalMatches === 0 ? (
                 <EmptyState
-                  icon="search"
                   title={getL10n(
                     'Inga sökresultat',
                     'No search results',

@@ -120,11 +120,10 @@ export function Auth({
     setError(null);
 
     const lowerEmail = email.toLowerCase().trim();
-    const isMockEmail = lowerEmail.includes('demo') || 
-                        lowerEmail.includes('test') || 
-                        lowerEmail.includes('fake') || 
-                        lowerEmail.includes('fejk') || 
-                        lowerEmail.endsWith('@example.com');
+    const isMockEmail =
+      lowerEmail === 'demo@dejz.se' ||
+      lowerEmail === 'test@dejz.se' ||
+      lowerEmail.endsWith('@example.com');
 
     if (isMockEmail) {
       setTimeout(() => {
@@ -279,7 +278,7 @@ export function Auth({
             }}
             variant="surface"
             size="md"
-            className="w-9 h-9"
+            className="w-10 h-10 rounded-full shadow-subtle"
             aria-label="Tillbaka"
           />
         </div>
@@ -321,6 +320,7 @@ export function Auth({
                 variant="primary"
                 fullWidth
                 size="lg"
+                className="rounded-full"
               >
                 {t('backToLogin' as any)}
               </Button>
@@ -350,6 +350,7 @@ export function Auth({
                 variant="primary"
                 fullWidth
                 size="lg"
+                className="rounded-full"
               >
                 {t('backToLogin' as any)}
               </Button>
@@ -392,6 +393,7 @@ export function Auth({
                   variant="primary"
                   fullWidth
                   size="lg"
+                  className="rounded-full"
                 >
                   {t('sendResetLink' as any)}
                 </Button>
@@ -482,6 +484,7 @@ export function Auth({
                   variant="primary"
                   fullWidth
                   size="lg"
+                  className="rounded-full"
                 >
                   {isRegistering ? t('createAccount') : t('login')}
                 </Button>
@@ -496,6 +499,7 @@ export function Auth({
                 variant="surface"
                 size="lg"
                 fullWidth
+                className="rounded-full"
                 onClick={() => handleSocialLogin('google')}
                 icon={
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">

@@ -144,7 +144,7 @@ const KNOWN_SERVICES: Record<string, CancellationInfo> = {
       'Öppna chatgpt.com och logga in',
       'Klicka på din profil i nedre vänstra hörnet och välj "Settings"',
       'Välj "Subscription" och klicka "Manage my subscription"',
-      'Klicka "Cancel plan" i Stripe-portalen',
+      'Klicka "Cancel plan" i betalningsportalen',
     ],
     noticePeriod: 'Gäller månaden ut.',
   },

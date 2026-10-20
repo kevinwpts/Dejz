@@ -214,7 +214,7 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
         fontWeight="800"
         fill="var(--text-primary, #0B0B0F)"
         textAnchor="middle"
-        style={{ fontFamily: 'var(--font-amount, Sora, sans-serif)', fontVariantNumeric: 'tabular-nums' }}
+        style={{ fontFamily: 'var(--font-amount, Outfit, sans-serif)', fontVariantNumeric: 'tabular-nums' }}
         letterSpacing="-1"
       >
         {payday}
@@ -596,7 +596,7 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
         fontWeight="800"
         fill="var(--accent-color, #0B0B0F)"
         textAnchor="middle"
-        style={{ fontFamily: 'var(--font-amount, Sora, sans-serif)', fontVariantNumeric: 'tabular-nums' }}
+        style={{ fontFamily: 'var(--font-amount, Outfit, sans-serif)', fontVariantNumeric: 'tabular-nums' }}
       >
         {days} {days === 1 ? 'dag' : 'dagar'}
       </text>

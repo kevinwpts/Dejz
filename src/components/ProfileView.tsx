@@ -309,20 +309,20 @@ export function ProfileView({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="space-y-4 w-full pb-12 font-sans"
+      className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-4 border border-subtle shadow-2xs flex items-center gap-3.5">
+      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-4 sm:p-4.5 border border-subtle shadow-2xs flex items-center gap-4">
         <div 
           onClick={() => handleSectionClick('manageAccount')}
           className="relative shrink-0 cursor-pointer group"
           title={t('manageAccount')}
         >
-          <div className="w-16 h-16 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
             {avatarUrl ? (
               <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xl font-bold">
+              <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
                 {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
               </div>
             )}
@@ -345,7 +345,7 @@ export function ProfileView({
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-[var(--radius-sm,6px)] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
+            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-[var(--radius-sm,6px)] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />
@@ -354,12 +354,12 @@ export function ProfileView({
       </div>
 
       {/* Quick Access Priority Modules */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2.5">
         <button
           onClick={() => handleSectionClick('receipts')}
           className="flex flex-col items-center justify-center p-3 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
-          <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent-color)] transition-colors">
+          <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1.5 group-hover:text-[var(--accent-color)] transition-colors">
             <Receipt size={19} strokeWidth={2} />
           </div>
           <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
@@ -371,7 +371,7 @@ export function ProfileView({
           onClick={() => handleSectionClick('debts')}
           className="flex flex-col items-center justify-center p-3 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
-          <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent-color)] transition-colors">
+          <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1.5 group-hover:text-[var(--accent-color)] transition-colors">
             <HandCoins size={19} strokeWidth={2} />
           </div>
           <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
@@ -383,7 +383,7 @@ export function ProfileView({
           onClick={() => handleSectionClick('starred')}
           className="flex flex-col items-center justify-center p-3 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
         >
-          <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1 group-hover:text-[var(--accent-color)] transition-colors">
+          <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1.5 group-hover:text-[var(--accent-color)] transition-colors">
             <Heart size={19} strokeWidth={2} />
           </div>
           <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
@@ -392,10 +392,10 @@ export function ProfileView({
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5 sm:space-y-6">
         {/* Admin Tools for App Owner */}
         {isAdmin && (
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <h4 className="text-section-title px-1.5 flex items-center gap-1.5">
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
               <Crown size={14} strokeWidth={2} className="text-[var(--warning-color)] shrink-0" />
@@ -409,7 +409,7 @@ export function ProfileView({
                 icon={<ShieldCheck size={18} strokeWidth={2} />}
                 iconColor="text-[var(--warning-color)]"
                 title={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'}
-                subtitle={config.language === 'en' ? 'Owner tools, subscription simulator & feedback' : 'Ägarverktyg, prenumerationssimulator & feedback'}
+                subtitle={config.language === 'en' ? 'Owner tools, system overview & feedback' : 'Ägarverktyg, systemöversikt & feedback'}
                 onClick={() => handleSectionClick('admin')}
               />
             </Card>
@@ -417,7 +417,7 @@ export function ProfileView({
         )}
 
         {/* Ekonomi & Budget */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <h4 className="text-section-title px-1.5">
             {t('economy')}
           </h4>
@@ -471,7 +471,7 @@ export function ProfileView({
         </div>
 
         {/* Verktyg & Delning */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <h4 className="text-section-title px-1.5">
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
@@ -498,7 +498,7 @@ export function ProfileView({
         </div>
 
         {/* App Settings */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <h4 className="text-section-title px-1.5">
             {t('appSettings')}
           </h4>
@@ -618,7 +618,7 @@ export function ProfileView({
         </div>
 
         {/* Support & Legal */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <h4 className="text-section-title px-1.5">
             {t('support')}
           </h4>
@@ -659,7 +659,7 @@ export function ProfileView({
         </div>
 
         {/* Account Actions */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <h4 className="text-section-title text-[var(--danger-color)] px-1.5">
             {t('dangerZone')}
           </h4>

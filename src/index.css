@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap");
 
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -6,31 +6,31 @@
 @theme {
   --color-black: #141414;
   --font-sans:
-    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
-    "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-unbounded:
-    "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-editorial:
-    "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-ui:
-    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-amount:
-    "Space Grotesk", "Sora", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-shoulders:
-    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-barlow:
-    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-barlow-standard:
-    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-exo:
-    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-logo:
-    "Sora", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-serif:
-    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-canvas: var(--bg-color);
   --color-surface: var(--surface-color);
@@ -305,6 +305,13 @@ h6 {
   }
 }
 
+@utility card-p-md {
+  padding: 1rem;
+  @media (min-width: 640px) {
+    padding: 1.25rem;
+  }
+}
+
 @utility card-p-sm {
   padding: 0.75rem 0.875rem;
 }
@@ -350,25 +357,29 @@ h6 {
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
   font-size: 36px;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
   font-family: var(--font-amount);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 @utility text-large-amount {
   font-size: 24px;
   font-weight: 700;
   line-height: 1.15;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   font-family: var(--font-amount);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 @utility text-list-amount {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.25;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   font-family: var(--font-amount);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
@@ -378,7 +389,7 @@ h6 {
   font-size: 18px;
   font-weight: 700;
   line-height: 1.25;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   font-family: var(--font-display);
   color: var(--text-primary);
 }
@@ -393,26 +404,26 @@ h6 {
 }
 
 @utility text-card-title {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
-  letter-spacing: 0em;
+  letter-spacing: -0.005em;
   font-family: var(--font-sans);
   color: var(--text-primary);
 }
 
 @utility text-body {
-  font-size: 13px;
-  font-weight: 450;
+  font-size: 13.5px;
+  font-weight: 500;
   line-height: 1.5;
-  letter-spacing: 0em;
+  letter-spacing: -0.005em;
   font-family: var(--font-sans);
   color: var(--text-primary);
 }
 
 @utility text-body-medium {
-  font-size: 13px;
-  font-weight: 550;
+  font-size: 13.5px;
+  font-weight: 600;
   line-height: 1.45;
   letter-spacing: -0.01em;
   font-family: var(--font-sans);
@@ -420,8 +431,8 @@ h6 {
 }
 
 @utility text-secondary {
-  font-size: 11.5px;
-  font-weight: 450;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1.45;
   letter-spacing: 0em;
   font-family: var(--font-sans);
@@ -429,42 +440,42 @@ h6 {
 }
 
 @utility text-label {
-  font-size: 11px;
-  font-weight: 550;
+  font-size: 11.5px;
+  font-weight: 600;
   line-height: 1.35;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
   font-family: var(--font-sans);
   color: var(--text-secondary);
 }
 
 @utility text-metric-label {
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
   line-height: 1.35;
-  letter-spacing: normal;
+  letter-spacing: -0.005em;
   font-family: var(--font-sans);
   color: var(--text-metric-label);
 }
 
 @utility text-micro-label {
-  font-size: 10px;
-  font-weight: 450;
+  font-size: 10.5px;
+  font-weight: 500;
   line-height: 1.35;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
   font-family: var(--font-sans);
   color: var(--text-secondary);
 }
 
 @utility text-nav-label {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
   font-family: var(--font-sans);
 }
 
 @utility text-button {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -642,13 +653,13 @@ h6 {
 }
 
 :root {
-  /* Global Font System: Plus Jakarta Sans + Sora + Space Grotesk */
-  --font-display: 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-editorial: 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-amount: 'Space Grotesk', 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-unbounded: 'Sora', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Global Font System: Manrope (UI/Body) + Outfit (Display/Amounts) */
+  --font-display: 'Outfit', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-editorial: 'Outfit', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-ui: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-amount: 'Outfit', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-unbounded: 'Outfit', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
@@ -696,6 +707,8 @@ h6 {
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
   --surface-muted: #ECEAEA;
+  --surface-input: #ECEAEA;
+  --surface-hover: #E8E6E6;
   --surface-tint: rgba(0, 0, 0, 0.01);
 
   --text-primary: #151718;
@@ -720,6 +733,7 @@ h6 {
   --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
   --card-nested-bg: #ECEAEA;
+  --surface-nested: #ECEAEA;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -742,11 +756,12 @@ h6 {
   --accent-glow: none;
   --accent-secondary-color: var(--accent-container);
 
-  /* Primary button states (Light mode) */
+  /* Primary & Secondary button states (Light mode) */
   --btn-primary-bg: #FF385C;
   --btn-primary-text: #FFFFFF;
   --btn-primary-hover: #E0294A;
   --btn-primary-pressed: #C41E3D;
+  --btn-secondary-bg: #FFFFFF;
 
   --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
@@ -759,11 +774,11 @@ h6 {
   --card-inner-stroke: none;
 
   --success-color: #05B862;
-  --success-container: var(--surface-muted);
+  --success-container: rgba(5, 184, 98, 0.10);
   --danger-color: #EF4444;
-  --danger-container: var(--surface-muted);
+  --danger-container: rgba(239, 68, 68, 0.10);
   --warning-color: #F59E0B;
-  --warning-container: var(--surface-muted);
+  --warning-container: rgba(245, 158, 11, 0.12);
   --info-color: #1C1917;
   --info-container: var(--surface-muted);
   --scrim-color: rgba(0, 0, 0, 0.60);
@@ -878,9 +893,12 @@ h6 {
   --shadow-subtle: none;
   --surface-high: #1A1A1A;
   --surface-muted: #1A1A1A;
+  --surface-input: #1A1A1A;
+  --surface-hover: #222222;
   --bg-hover: #222222;
   --transaction-bg: #121212;
   --card-nested-bg: #1A1A1A;
+  --surface-nested: #1A1A1A;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
   --chip-bg: #181818;
@@ -894,16 +912,17 @@ h6 {
   --input-bg: #181818;
   --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
   --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
-  --on-accent-container: #FFFFFF;
+  --on-accent-container: #FF6B85;
   --accent-secondary-color: var(--accent-container);
   --btn-primary-bg: #FF385C;
   --btn-primary-text: #FFFFFF;
   --btn-primary-hover: #FF5976;
   --btn-primary-pressed: #E0294A;
+  --btn-secondary-bg: #1A1A1A;
 
-  --success-container: var(--surface-muted);
-  --warning-container: var(--surface-muted);
-  --danger-container: var(--surface-muted);
+  --success-container: rgba(74, 222, 128, 0.15);
+  --warning-container: rgba(251, 191, 36, 0.15);
+  --danger-container: rgba(239, 68, 68, 0.16);
   --info-container: var(--surface-muted);
 }
 
@@ -928,6 +947,8 @@ h6 {
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
   --surface-high: #252525;
   --surface-muted: #252525;
+  --surface-input: #252525;
+  --surface-hover: #2E2E2E;
   --bg-hover: #2E2E2E;
   --surface-tint: transparent;
 
@@ -951,12 +972,13 @@ h6 {
   --input-bg: rgba(255, 255, 255, 0.05);
   --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
   --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
-  --on-accent-container: #FFFFFF;
+  --on-accent-container: #FF6B85;
   --accent-secondary-color: var(--accent-container);
   --btn-primary-bg: #FF385C;
   --btn-primary-text: #FFFFFF;
   --btn-primary-hover: #FF5976;
   --btn-primary-pressed: #E0294A;
+  --btn-secondary-bg: #242424;
 
   --chip-bg: rgba(255, 255, 255, 0.05);
   --chip-text: #B8B8B8;
@@ -965,6 +987,7 @@ h6 {
 
   --transaction-bg: #1C1C1C;
   --card-nested-bg: #252525;
+  --surface-nested: #252525;
   --remaining-today-gradient: #1C1C1C;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
@@ -983,11 +1006,11 @@ h6 {
 
   /* Status Colors */
   --success-color: #4ADE80;
-  --success-container: var(--surface-muted);
+  --success-container: rgba(74, 222, 128, 0.15);
   --warning-color: #FBBF24;
-  --warning-container: var(--surface-muted);
+  --warning-container: rgba(251, 191, 36, 0.15);
   --danger-color: #FF8080;
-  --danger-container: var(--surface-muted);
+  --danger-container: rgba(239, 68, 68, 0.16);
   --info-color: #FFFFFF;
   --info-container: var(--surface-muted);
   --scrim-color: rgba(0, 0, 0, 0.60);

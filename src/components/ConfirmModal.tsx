@@ -31,7 +31,7 @@ export function ConfirmModal({
 
   const isDanger = _variant === 'danger';
   const iconColor = isDanger ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]';
-  const iconBg = 'bg-[var(--surface-muted)] border-transparent';
+  const iconBg = isDanger ? 'bg-[var(--danger-container)] border-transparent' : 'bg-[var(--accent-container)] border-transparent';
 
   return (
     <Modal
