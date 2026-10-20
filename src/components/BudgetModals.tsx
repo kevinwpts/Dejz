@@ -401,10 +401,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
     if (manualSelectionThisSession) return;
 
     const trimmedName = name.trim();
-    const knownDomain = findKnownBrandDomain(trimmedName);
-    const instantLogo = knownDomain 
-      ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` 
-      : getLogoUrl(trimmedName);
+    const instantLogo = getLogoUrl(trimmedName, category);
 
     if (instantLogo) {
       setLogo(instantLogo);
@@ -414,19 +411,22 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
     }
 
     const timer = setTimeout(async () => {
-      const url = await fetchLogoForName(trimmedName);
+      const url = await fetchLogoForName(trimmedName, category);
       setAutoLogo(url);
       
       if (url && !manualSelectionThisSession) {
         setLogo(url);
         setIcon('none');
+      } else if (!url && !manualSelectionThisSession && trimmedName.toLowerCase() !== (income?.name || '').trim().toLowerCase()) {
+        setLogo(undefined);
       }
-    }, 200);
+    }, 220);
     return () => clearTimeout(timer);
-  }, [name, manualSelectionThisSession]);
+  }, [name, category, manualSelectionThisSession, income?.name]);
 
   const handleSave = () => {
     const parsedAmount = parseAmount(amount);
+    const resolvedLogo = logo || (!manualSelectionThisSession ? getLogoUrl(name.trim(), category) : undefined);
 
     onSave({ 
       name, 
@@ -434,7 +434,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
       amount: parsedAmount, 
       category, 
       icon, 
-      logo, 
+      logo: resolvedLogo, 
       deductionDay, 
       startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
       frequency,
@@ -447,6 +447,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const incomeCompatible = {
     ...income,
     name,
+    merchant: name,
     amount: parseAmount(amount),
     note,
     category,
@@ -1453,39 +1454,32 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
     if (manualSelectionThisSession) return;
 
     const trimmedName = name.trim();
-    const isBrand = Boolean(findKnownBrandDomain(trimmedName, category));
+    const instantLogo = getLogoUrl(trimmedName, category);
 
-    if (isBrand) {
-      const instantLogo = getLogoUrl(trimmedName, category);
-      if (instantLogo) {
-        setLogo(instantLogo);
+    if (instantLogo) {
+      setLogo(instantLogo);
+      setIcon('none');
+      setAutoLogo(instantLogo);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const url = await fetchLogoForName(trimmedName, category);
+      setAutoLogo(url);
+      
+      if (url && !manualSelectionThisSession) {
+        setLogo(url);
         setIcon('none');
-        setAutoLogo(instantLogo);
-        if (!instantLogo.includes('google.com/s2/favicons')) {
-          return;
-        }
-      }
-
-      const timer = setTimeout(async () => {
-        const url = await fetchLogoForName(trimmedName, category);
-        setAutoLogo(url);
-        
-        if (url && !manualSelectionThisSession) {
-          setLogo(url);
-          setIcon('none');
-        }
-      }, 200);
-      return () => clearTimeout(timer);
-    } else {
-      setAutoLogo(undefined);
-      if (!expense?.logo && !manualSelectionThisSession) {
+      } else if (!url && !manualSelectionThisSession && (!expense?.logo || trimmedName.toLowerCase() !== (expense?.name || '').trim().toLowerCase())) {
         setLogo(undefined);
       }
-    }
-  }, [name, category, manualSelectionThisSession, expense?.logo]);
+    }, 220);
+    return () => clearTimeout(timer);
+  }, [name, category, manualSelectionThisSession, expense?.logo, expense?.name]);
 
   const handleSave = () => {
     const parsedAmount = parseAmount(amount);
+    const resolvedLogo = logo || (!manualSelectionThisSession ? getLogoUrl(name.trim(), category) : undefined);
 
     onSave({ 
       name, 
@@ -1495,7 +1489,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       paymentMethod, 
       category, 
       icon, 
-      logo, 
+      logo: resolvedLogo, 
       deductionDay, 
       startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
       isVariable, 
@@ -1509,6 +1503,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const expenseCompatible = {
     ...expense,
     name,
+    merchant: name,
     amount: parseAmount(amount),
     note,
     category,
@@ -2423,10 +2418,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
     if (manualSelectionThisSession) return;
 
     const trimmedName = name.trim();
-    const knownDomain = findKnownBrandDomain(trimmedName);
-    const instantLogo = knownDomain 
-      ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` 
-      : getLogoUrl(trimmedName);
+    const instantLogo = getLogoUrl(trimmedName, 'Sparande');
 
     if (instantLogo) {
       setLogo(instantLogo);
@@ -2436,16 +2428,18 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
     }
 
     const timer = setTimeout(async () => {
-      const url = await fetchLogoForName(trimmedName);
+      const url = await fetchLogoForName(trimmedName, 'Sparande');
       setAutoLogo(url);
       
       if (url && !manualSelectionThisSession) {
         setLogo(url);
         setIcon('none');
+      } else if (!url && !manualSelectionThisSession && trimmedName.toLowerCase() !== (saving?.name || '').trim().toLowerCase()) {
+        setLogo(undefined);
       }
-    }, 200);
+    }, 220);
     return () => clearTimeout(timer);
-  }, [name, manualSelectionThisSession]);
+  }, [name, manualSelectionThisSession, saving?.name]);
 
   const handleSave = () => {
     const parsedAmount = parseAmount(amount);
@@ -2455,12 +2449,13 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
     }
 
     const finalName = name.trim() || t('monthlySavings') || 'Månadssparande';
+    const resolvedLogo = logo || (!manualSelectionThisSession ? getLogoUrl(finalName, 'Sparande') : undefined);
 
     onSave({ 
       name: finalName, 
       amount: parsedAmount, 
       icon, 
-      logo, 
+      logo: resolvedLogo, 
       deductionDay, 
       startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
       frequency,
@@ -2473,6 +2468,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const savingCompatible = {
     ...saving,
     name,
+    merchant: name,
     amount: parseAmount(amount),
     note: name,
     category: t('savings'),

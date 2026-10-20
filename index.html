@@ -6,13 +6,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Dejz" />
-    <meta name="theme-color" content="#F2F0F0" />
+    <meta name="theme-color" content="#FFD9E2" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <script>
@@ -25,11 +25,11 @@
           if (isDark) {
             root.classList.add('dark');
             root.classList.remove('light');
-            root.style.backgroundColor = '#191919';
+            root.style.backgroundColor = '#141414';
           } else {
             root.classList.add('light');
             root.classList.remove('dark');
-            root.style.backgroundColor = '#F2F0F0';
+            root.style.backgroundColor = '#FFD9E2';
           }
         } catch (e) {}
       })();
@@ -112,12 +112,10 @@
         padding: 0;
       }
       html.dark, body.dark {
-        background-color: #191919 !important;
-        background: #191919;
+        background-color: #141414;
       }
       html.light, body.light, html:not(.dark), body:not(.dark) {
-        background-color: #F2F0F0 !important;
-        background: #F2F0F0;
+        background-color: var(--bg-top-color, #FFD9E2);
       }
     </style>
   </head>

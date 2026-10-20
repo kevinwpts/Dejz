@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Sparkles, Upload, Check, Plus } from 'lucide-react';
-import { fetchLogoForName, getLogoUrl } from '../utils/logo';
+import { fetchLogoForName, getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
 import { getAutomaticMerchantLogo, isAutomaticMerchantLogo } from '../utils/resolver';
 import { uploadLogo } from '../services/storageService';
 import { TranslationKey } from '../i18n';
@@ -35,6 +35,7 @@ export function IconSelector({
   userId 
 }: IconSelectorProps) {
   const [fetchedLogo, setFetchedLogo] = useState<string | undefined>(undefined);
+  const [fallbackLogo, setFallbackLogo] = useState<string | undefined>(undefined);
   const [isUploading, setIsUploading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +47,7 @@ export function IconSelector({
 
   useEffect(() => {
     let isCancelled = false;
+    setFallbackLogo(undefined);
     const resolveLogo = async () => {
       if (instantAuto) {
         setFetchedLogo(instantAuto);
@@ -66,7 +68,8 @@ export function IconSelector({
     };
   }, [name, instantAuto]);
 
-  const autoMerchantLogo = instantAuto || fetchedLogo || autoLogo;
+  const rawAutoMerchantLogo = fallbackLogo || instantAuto || fetchedLogo || autoLogo;
+  const autoMerchantLogo = rawAutoMerchantLogo ? sanitizeLogoUrl(rawAutoMerchantLogo, name) : undefined;
 
   // 2. Custom User Logo: strictly separated from automatic merchant logos.
   // A corporate logo (McDonald's, Lidl, etc.) is NEVER a custom user logo.
@@ -165,7 +168,13 @@ export function IconSelector({
                 src={autoMerchantLogo} 
                 alt={name} 
                 className="w-full h-full object-contain p-2 rounded-full" 
-                referrerPolicy="no-referrer" 
+                referrerPolicy="no-referrer"
+                onError={() => {
+                  const fb = getFallbackLogoUrl(autoMerchantLogo, name);
+                  if (fb && fb !== autoMerchantLogo && fb !== fallbackLogo) {
+                    setFallbackLogo(fb);
+                  }
+                }}
               />
               {isAutoLogoSelected && (
                 <div className="absolute inset-0 bg-black/10 dark:bg-black/30 flex items-center justify-center">

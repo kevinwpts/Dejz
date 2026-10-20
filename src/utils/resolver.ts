@@ -1,6 +1,6 @@
 import React from 'react';
 import { Transaction, Config } from '../types';
-import { findKnownBrandDomain, getLogoUrl } from './logo';
+import { findKnownBrandDomain, getLogoUrl, sanitizeLogoUrl, getDomainPrimaryLogoUrl } from './logo';
 import { resolveLucideIcon, ICON_MAP, getCategoryIconName, suggestIcon, isEmojiString } from './icons';
 import { getEmojiSolidColor } from './ui';
 import { ArrowUp, Receipt, PiggyBank } from 'lucide-react';
@@ -9,10 +9,12 @@ export interface EntityVisualResult {
   type: 'custom' | 'merchant' | 'category' | 'fallback';
   logoUrl?: string;
   iconKey?: string;
+  categoryIcon?: string;
+  categoryName?: string;
   iconComponent?: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
   backgroundColor?: string;
   textColor?: string;
-  source: 'manual' | 'user_preference' | 'brand_auto' | 'category' | 'fallback';
+  source: 'manual' | 'user_preference' | 'brand_auto' | 'category' | 'fallback' | 'neutral_placeholder';
   merchantNormalized?: string;
 }
 
@@ -59,14 +61,13 @@ export function saveMerchantPreference(merchant: string, preference: { icon?: st
 /**
  * Central Resolver for Transaction / Entity Visual Representation (Logo, Icon, Colors)
  * Priority order:
- * 1. Manual item override (explicit transaction.logo or transaction.icon)
- * 2. Saved user preference for normalized merchant
- * 3. Secure automated company logo (high-confidence brand dictionary)
- * 4. Category icon from category source of truth
- * 5. General fallback icon
+ * 1. Manual item override (explicit transaction.logo URL or manual icon override)
+ * 2. Automated company logo (high-confidence Swedish & international brand dictionary)
+ * 3. Explicit / Category icon from category source of truth
+ * 4. General fallback icon
  */
 export function resolveEntityVisual(transaction: Transaction, config?: Config): EntityVisualResult {
-  const merchantText = transaction.merchant || transaction.note || '';
+  const merchantText = transaction.merchant || (transaction as any).name || transaction.note || '';
   const categoryText = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
   
   // Find category in config for color/icon source of truth
@@ -89,14 +90,14 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     };
   }
 
-  // 1. Manual override for the specific item
-  const explicitLogo = transaction.logo && transaction.logo !== 'none' ? transaction.logo : null;
+  const rawLogo = transaction.logo && transaction.logo !== 'none' && transaction.logo !== 'none-manual' ? transaction.logo : null;
   const explicitIcon = transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt' && transaction.icon !== '🧾' ? transaction.icon : null;
 
-  if (explicitLogo) {
-    if (explicitLogo.startsWith('http') || explicitLogo.startsWith('data:image') || explicitLogo.startsWith('/')) {
-      // If explicit logo is a legacy low-res google favicon, upgrade to crisp instant SVG or Clearbit if available
-      if (explicitLogo.includes('google.com/s2/favicons')) {
+  // 1. Explicit logo URL or manual emoji/icon in transaction.logo
+  if (rawLogo) {
+    if (rawLogo.startsWith('http') || rawLogo.startsWith('data:image') || rawLogo.startsWith('/')) {
+      const sanitized = sanitizeLogoUrl(rawLogo, merchantText, categoryText) || rawLogo;
+      if (sanitized.includes('google.com/s2/favicons')) {
         const upgraded = getLogoUrl(merchantText, categoryText);
         if (upgraded && !upgraded.includes('google.com/s2/favicons')) {
           return {
@@ -109,24 +110,40 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       }
       return {
         type: 'custom',
-        logoUrl: explicitLogo,
+        logoUrl: sanitized,
         source: 'manual'
       };
     }
-    if (isEmojiString(explicitLogo) || ICON_MAP[resolveLucideIcon(explicitLogo)]) {
-      const resolvedKey = resolveLucideIcon(explicitLogo);
+    if (isEmojiString(rawLogo) || ICON_MAP[resolveLucideIcon(rawLogo)]) {
+      const resolvedKey = resolveLucideIcon(rawLogo);
       return {
         type: 'custom',
-        iconKey: explicitLogo,
-        categoryIcon: explicitLogo,
+        iconKey: rawLogo,
+        categoryIcon: rawLogo,
         iconComponent: ICON_MAP[resolvedKey] || Receipt,
-        backgroundColor: category?.color || getEmojiSolidColor(explicitLogo),
+        backgroundColor: category?.color || getEmojiSolidColor(rawLogo),
         textColor: '#0B0B0F',
         source: 'manual'
       };
     }
   }
 
+  // 2. Automated company logo (Verified high-confidence brand lookup via curated dictionary)
+  // Runs unless user explicitly chose 'none-manual' to hide brand logo
+  if (transaction.logo !== 'none-manual' && merchantText && merchantText.trim().length >= 2) {
+    const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
+    if (brandDomain) {
+      const brandLogoUrl = getLogoUrl(merchantText, categoryText) || getDomainPrimaryLogoUrl(brandDomain);
+      return {
+        type: 'merchant',
+        logoUrl: brandLogoUrl,
+        source: 'brand_auto',
+        merchantNormalized: normalizeMerchant(merchantText)
+      };
+    }
+  }
+
+  // 3. Explicit icon on transaction
   if (explicitIcon) {
     const resolvedKey = resolveLucideIcon(explicitIcon);
     return {
@@ -141,8 +158,8 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     };
   }
 
-  // If this is a new transaction preview inside TransactionModal, visual resolution is handled onBlur/Enter
-  if (transaction.id === 'preview' && !explicitLogo && (!explicitIcon || explicitIcon === 'receipt' || explicitIcon === 'none')) {
+  // If this is an empty/unmatched new transaction preview inside TransactionModal
+  if (transaction.id === 'preview') {
     return {
       type: 'fallback',
       iconKey: 'receipt',
@@ -151,20 +168,6 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       textColor: 'var(--text-secondary)',
       source: 'neutral_placeholder'
     };
-  }
-
-  // 2. Secure automated company logo (Verified high-confidence brand lookup via curated dictionary)
-  if (merchantText && merchantText.length >= 2) {
-    const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
-    if (brandDomain) {
-      const brandLogoUrl = getLogoUrl(merchantText, categoryText) || `https://logo.clearbit.com/${brandDomain}`;
-      return {
-        type: 'merchant',
-        logoUrl: brandLogoUrl,
-        source: 'brand_auto',
-        merchantNormalized: normalizeMerchant(merchantText)
-      };
-    }
   }
 
   // 4. Category icon from category source of truth
@@ -238,7 +241,7 @@ export function getAutomaticMerchantLogo(merchantName?: string, categoryName?: s
  * rather than a user's uploaded custom image.
  */
 export function isAutomaticMerchantLogo(url?: string, merchantName?: string): boolean {
-  if (!url || url === 'none') return false;
+  if (!url || url === 'none' || url === 'none-manual') return false;
 
   // Instant brand vector SVG data URI
   if (url.startsWith('data:image/svg+xml')) return true;
@@ -268,4 +271,3 @@ export function isAutomaticMerchantLogo(url?: string, merchantName?: string): bo
 
   return false;
 }
-

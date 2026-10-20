@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
-import { fetchLogoForName, findKnownBrandDomain } from '../utils/logo';
+import { fetchLogoForName, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
 import { Receipt } from 'lucide-react';
 import { CategoryIcon } from './CategoryIcon';
 
@@ -16,54 +16,66 @@ export function TransactionLogo({
 }) {
   const [imgError, setImgError] = useState(false);
   const [asyncLogoUrl, setAsyncLogoUrl] = useState<string | null>(null);
+  const [fallbackOverrideUrl, setFallbackOverrideUrl] = useState<string | null>(null);
 
   const merchantName =
     typeof transaction.merchant === 'object'
       ? (transaction.merchant as any)?.name
-      : (transaction.merchant || transaction.note || '');
+      : (transaction.merchant || (transaction as any).name || transaction.note || '');
+
+  const rawCatName = transaction.category;
+  const categoryName = typeof rawCatName === 'object' ? (rawCatName as any)?.name : (rawCatName || '');
 
   const visual = resolveEntityVisual(transaction, config);
-  const rawExplicitLogo = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : undefined;
-  const directLogoUrl = (rawExplicitLogo && !rawExplicitLogo.includes('google.com/s2/favicons')) 
-    ? rawExplicitLogo 
-    : (visual.logoUrl || rawExplicitLogo);
+  const rawExplicitLogo =
+    transaction.logo && transaction.logo !== 'none' && transaction.logo !== 'none-manual'
+      ? sanitizeLogoUrl(transaction.logo, merchantName, categoryName)
+      : undefined;
+
+  const directLogoUrl =
+    rawExplicitLogo && !rawExplicitLogo.includes('google.com/s2/favicons')
+      ? rawExplicitLogo
+      : visual.logoUrl || rawExplicitLogo;
 
   useEffect(() => {
     setImgError(false);
+    setFallbackOverrideUrl(null);
     let active = true;
 
-    if (transaction.id === 'preview') {
+    if (transaction.logo === 'none-manual') {
       setAsyncLogoUrl(null);
       return;
     }
 
-    const hasExplicitIcon = Boolean(transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt' && transaction.icon !== '🧾');
-    const isBrand = Boolean(findKnownBrandDomain(merchantName));
-
-    if (!directLogoUrl && !hasExplicitIcon && isBrand && merchantName && merchantName.trim().length >= 2) {
-      fetchLogoForName(merchantName).then(url => {
-        if (active && url) {
-          setAsyncLogoUrl(url);
-        }
-      });
+    if (!directLogoUrl && merchantName && merchantName.trim().length >= 2) {
+      const timer = setTimeout(() => {
+        fetchLogoForName(merchantName, categoryName).then((url) => {
+          if (active && url) {
+            setAsyncLogoUrl(url);
+          }
+        });
+      }, transaction.id === 'preview' ? 220 : 0);
+      return () => {
+        active = false;
+        clearTimeout(timer);
+      };
     } else {
       setAsyncLogoUrl(null);
     }
 
-    return () => { active = false; };
-  }, [directLogoUrl, merchantName, transaction.id, transaction.icon]);
+    return () => {
+      active = false;
+    };
+  }, [directLogoUrl, merchantName, categoryName, transaction.id, transaction.logo]);
 
-  const activeLogoUrl = directLogoUrl || asyncLogoUrl;
+  const activeLogoUrl = fallbackOverrideUrl || directLogoUrl || asyncLogoUrl;
 
   const handleImageError = () => {
-    if (activeLogoUrl && !activeLogoUrl.includes('google.com/s2/favicons')) {
-      const knownDomain = merchantName ? findKnownBrandDomain(merchantName) : undefined;
-      if (knownDomain) {
-        const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128`;
-        if (activeLogoUrl !== fallbackFavicon) {
-          setAsyncLogoUrl(fallbackFavicon);
-          return;
-        }
+    if (activeLogoUrl) {
+      const fallback = getFallbackLogoUrl(activeLogoUrl, merchantName, categoryName);
+      if (fallback && fallback !== activeLogoUrl && fallback !== fallbackOverrideUrl) {
+        setFallbackOverrideUrl(fallback);
+        return;
       }
     }
     setImgError(true);
@@ -91,19 +103,7 @@ export function TransactionLogo({
     icon: 20,
   };
 
-  // If this is an empty new transaction waiting for input, render a clean neutral placeholder
-  if (visual.source === 'neutral_placeholder') {
-    const IconComponent = visual.iconComponent || Receipt;
-    return (
-      <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] select-none`}
-      >
-        <IconComponent size={sizeConfig.icon} strokeWidth={2} />
-      </div>
-    );
-  }
-
-  // If there's an official logo and no load error (Klarna / Apple Pay squircle app icon style)
+  // If there's an official logo and no load error (Klarna / Apple Pay circular icon style)
   if (activeLogoUrl && !imgError) {
     return (
       <div
@@ -121,17 +121,28 @@ export function TransactionLogo({
     );
   }
 
-  // Fallback Category / Default Icon (with Icons8 Color support)
-  const categoryIconKey = (visual as any).categoryIcon || (visual as any).iconKey;
-  const rawCatName = (visual as any).categoryName || transaction.category;
-  const categoryName = typeof rawCatName === 'object' ? (rawCatName as any)?.name : (rawCatName || '');
+  // If this is an empty new transaction waiting for input, render a clean neutral placeholder
+  if (visual.source === 'neutral_placeholder') {
+    const IconComponent = visual.iconComponent || Receipt;
+    return (
+      <div
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] select-none`}
+      >
+        <IconComponent size={sizeConfig.icon} strokeWidth={2} />
+      </div>
+    );
+  }
 
-  if (categoryIconKey || categoryName) {
+  // Fallback Category / Default Icon (with Icons8 Color support)
+  const categoryIconKey = visual.categoryIcon || visual.iconKey;
+  const resolvedCategoryName = visual.categoryName || categoryName;
+
+  if (categoryIconKey || resolvedCategoryName) {
     return (
       <CategoryIcon
         icon={categoryIconKey}
         color={visual.backgroundColor}
-        categoryName={categoryName}
+        categoryName={resolvedCategoryName}
         size={size}
       />
     );

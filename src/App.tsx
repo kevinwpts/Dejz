@@ -1570,7 +1570,15 @@ export default function App() {
       const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#191919" : "#F2F0F0";
+      const isShowingLandingOnly = !session && showLanding && !publicLegalDoc;
+      const themeColor = isDark
+        ? "#141414"
+        : isShowingLandingOnly
+          ? "#F2F0F0"
+          : "#FFD9E2";
+
+      document.documentElement.style.setProperty("--bg-top-color", themeColor);
+      document.body.style.setProperty("--bg-top-color", themeColor);
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -1586,7 +1594,7 @@ export default function App() {
     };
 
     applyTheme();
-  }, [config?.themeMode, config?.darkMode, config?.themeColor, session, isOnboarding]);
+  }, [config?.themeMode, config?.darkMode, config?.themeColor, session, isOnboarding, showLanding, publicLegalDoc]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {

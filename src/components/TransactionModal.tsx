@@ -555,8 +555,7 @@ export function TransactionModal({
       return;
     }
 
-    const knownDomain = findKnownBrandDomain(query);
-    const instantLogo = knownDomain ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` : getLogoUrl(query);
+    const instantLogo = getLogoUrl(query, category);
     const suggestedIcon = suggestIcon(query);
 
     if (instantLogo) {
@@ -566,7 +565,7 @@ export function TransactionModal({
       return;
     }
 
-    const url = await fetchLogoForName(query);
+    const url = await fetchLogoForName(query, category);
     setLogoError(false);
     if (url) {
       setLogo(url);
@@ -578,7 +577,7 @@ export function TransactionModal({
       setLogo(undefined);
       setIcon('receipt');
     }
-  }, [merchant, note, manualSelectionThisSession]);
+  }, [merchant, note, category, manualSelectionThisSession]);
 
   // Synchronize state only when switching to a different transaction ID so unsaved edits are preserved
   const syncedTxIdRef = useRef<string | null>(transaction?.id || null);
@@ -599,14 +598,42 @@ export function TransactionModal({
     }
   }, [transaction]);
 
-  // Only resolve initial prefill brand visual on mount if not editing existing transaction
+  // Live brand logo resolution as the user types merchant/name
   useEffect(() => {
-    if (prefill?.name && !transaction && !logo) {
-      resolveBrandVisuals(prefill.name);
+    if (manualSelectionThisSession) return;
+    const query = merchant.trim() || prefill?.name?.trim() || '';
+    if (!query) {
+      if (!transaction) {
+        setLogo(undefined);
+      }
+      return;
     }
-  }, []);
 
+    // If editing an existing transaction and merchant hasn't changed and it already has a valid logo, keep it
+    if (
+      transaction &&
+      query.toLowerCase() === (transaction.merchant || '').trim().toLowerCase() &&
+      transaction.logo &&
+      transaction.logo !== 'none'
+    ) {
+      return;
+    }
 
+    // Instant synchronous resolution for known brands
+    const instant = getLogoUrl(query, category);
+    if (instant) {
+      setLogo(instant);
+      setLogoError(false);
+      return;
+    }
+
+    // Debounced async resolution for online company lookup
+    const timer = setTimeout(() => {
+      resolveBrandVisuals(query, note);
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [merchant, category, manualSelectionThisSession]);
 
   const previewTransaction = useMemo(() => ({
     ...transaction,
@@ -616,7 +643,7 @@ export function TransactionModal({
     category: category,
     amount: parseAmount(amount),
     type: type as any,
-    logo: logo || 'none',
+    logo: logo || getLogoUrl(merchant.trim(), category) || undefined,
     icon: icon || 'receipt',
     timestamp: selectedDate?.getTime() || Date.now(),
     tags: [],
@@ -1313,7 +1340,7 @@ export function TransactionModal({
                   category: splits.length > 0 ? (splits[0]?.category || category) : category,
                   amount: parseAmount(amount),
                   type: type as any,
-                  logo: logo || 'none',
+                  logo: logo || getLogoUrl(merchant.trim(), category) || 'none',
                   icon: icon || 'receipt',
                   paymentMethod: transaction?.paymentMethod,
                   receiptUrl,

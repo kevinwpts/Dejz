@@ -680,11 +680,11 @@ h6 {
   --orange-900: #713800;
 
   /* Brand Gradient & Scale (Peach - Pink - Lavender) */
-  --brand-peach: #FFE0CE;
-  --brand-pink: #F8C4DF;
-  --brand-lavender: #CEB9EF;
+  --brand-peach: #FFE4DC;
+  --brand-pink: #FFD9E2;
+  --brand-lavender: #F8E2F0;
   --brand-cream: #FDF7F2;
-  --brand-gradient: linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%);
+  --brand-gradient: linear-gradient(180deg, #FFD9E2 0px, #FFD9E2 28px, #FFE4DC 160px, #F2F0F0 400px);
 
   /* Dejz Official Brand Logo Color */
   --logo-color: #151718;
@@ -694,10 +694,10 @@ h6 {
   --menu-content-gap: 1.5rem;
 
   /* Seamless Light Theme Background & Surfaces */
-  --bg-top-color: #F8C4DF;
+  --bg-top-color: #FFD9E2;
   --bg-color: #F2F0F0;
   --bg-secondary: #F2F0F0;
-  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(242, 240, 240, 0) 0%, #F2F0F0 400px), linear-gradient(120deg, var(--brand-peach) 0%, var(--brand-pink) 50%, var(--brand-lavender) 100%));
+  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, #FFD9E2 0px, #FFD9E2 28px, #FFE4DC 160px, #F2F0F0 400px));
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
@@ -1094,8 +1094,9 @@ h6 {
     margin: 0;
     padding: 0;
     overflow-y: auto;                
-    background-color: var(--bg-top-color, var(--bg-color)) !important;
-    background: var(--bg-gradient);     
+    background-color: var(--bg-top-color, var(--bg-color));
+    background-image: var(--bg-gradient);
+    background-repeat: no-repeat;
     min-height: 100%;
     touch-action: pan-x pan-y;
     text-rendering: optimizeLegibility;
@@ -1126,9 +1127,9 @@ h6 {
   }
 
   .app-header-scrolled {
-    background-color: var(--bg-color);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background-color: color-mix(in srgb, var(--bg-top-color, var(--bg-color)) 88%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   }
@@ -1155,7 +1156,26 @@ h6 {
     font-size: 16px;
     color: var(--text-primary);
   }
+}
 
+@media screen and (max-width: 767px) {
+  input.text-body,
+  input.text-body-medium,
+  input.text-xs,
+  input.text-sm,
+  input.text-label,
+  input.text-secondary,
+  textarea.text-body,
+  textarea.text-xs,
+  textarea.text-sm,
+  select.text-body,
+  select.text-xs,
+  select.text-sm {
+    font-size: 16px !important;
+  }
+}
+
+@layer base {
   button {
     -webkit-tap-highlight-color: transparent;
     font-weight: 500;
@@ -1416,7 +1436,7 @@ h6 {
 
 /* Hide native scrollbars and scroll indicators on iOS PWA / mobile / desktop */
 html, body {
-  background-color: var(--bg-color);
+  background-color: var(--bg-top-color, var(--bg-color));
   color: var(--text-primary);
   scrollbar-width: none;
   -ms-overflow-style: none;

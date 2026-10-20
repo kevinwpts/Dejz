@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Language } from '../i18n';
 import { NORDIC_LANGUAGES } from '../utils/nordic';
 import { LanguageFlag } from './LanguageFlag';
@@ -41,42 +41,24 @@ export function LanguagePicker({
   };
 
   return (
-    <div className={`relative inline-block text-left ${className}`} ref={containerRef}>
+    <div className={`relative inline-flex items-center text-left ${className}`} ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label="Välj språk / Choose language"
-        className={`inline-flex items-center gap-1.5 transition-all duration-300 cursor-pointer select-none whitespace-nowrap shrink-0 ${
-          variant === 'footer'
-            ? 'px-2.5 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
-            : variant === 'compact'
-            ? 'px-3 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border-[1.5px] border-[var(--border-control,#737B8C)] hover:border-[var(--text-primary)] transition-all duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]'
-            : variant === 'pill-hero'
-            ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-white bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] active:scale-[0.97]'
-            : variant === 'pill'
-            ? 'px-2.5 h-9 rounded-full text-xs font-semibold text-[var(--text-primary)] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border-[1.5px] border-[var(--border-control,#737B8C)] hover:border-[var(--text-primary)] transition-all duration-200 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]'
-            : 'px-2 h-8 sm:h-9 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-sm text-[var(--text-secondary)] bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-divider)] hover:border-[var(--text-primary)]/30 shadow-subtle'
-        }`}
+        aria-label={`Språk: ${currentOption.nativeLabel}`}
+        title={currentOption.nativeLabel}
+        className="w-9 h-9 rounded-full inline-flex items-center justify-center bg-transparent hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-all duration-200 cursor-pointer select-none shrink-0 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-color,#0B0B0F)] border-none"
       >
         <LanguageFlag code={currentOption.code} size="md" />
-        {variant === 'compact' && (
-          <span className="text-xs font-semibold text-[var(--text-primary)] shrink-0">
-            {currentOption.nativeLabel}
-          </span>
-        )}
-        <ChevronDown
-          size={13}
-          className={`shrink-0 opacity-70 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        />
       </button>
 
       {isOpen && (
         <div
           role="listbox"
-          className={`absolute z-50 w-48 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-modal overflow-hidden py-1 backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 right-0 ${
-            variant === 'footer' || variant === 'pill-hero' ? 'bottom-full mb-1.5' : 'mt-1.5'
+          className={`absolute z-50 w-44 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-modal overflow-hidden py-1 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 right-0 ${
+            variant === 'footer' || variant === 'pill-hero' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
           }`}
         >
           <div className="py-0.5">

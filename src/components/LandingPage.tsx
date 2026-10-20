@@ -57,6 +57,7 @@ export function LandingPage({
   onLanguageChange,
 }: LandingPageProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   // Interactive & auto-animated states for identical app elements
   const [activeDonutIndex, setActiveDonutIndex] = useState<number>(0);
@@ -100,13 +101,48 @@ export function LandingPage({
   };
 
   useEffect(() => {
-    const onScroll = () => {
-      setIsScrolled(window.scrollY > 12);
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateHeader = () => {
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 12);
+
+      if (currentScrollY <= 64) {
+        setIsHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY + 8) {
+        setIsHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY - 4) {
+        setIsHeaderVisible(true);
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
     };
-    onScroll();
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
+    };
+
+    updateHeader();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    if (id === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Gentle auto-cycle for Analysis Donut segments
   useEffect(() => {
@@ -346,38 +382,46 @@ export function LandingPage({
   const leftToAllocate = totalPool - allocatedSum;
 
   return (
-    <div className="min-h-dvh flex flex-col justify-between bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased relative overflow-x-hidden selection:bg-[var(--accent-color)] selection:text-[var(--on-accent)]">
-      {/* 1. MODERN FLOATING ROUNDED HEADER */}
-      <header className="sticky top-0 z-40 pt-[calc(env(safe-area-inset-top,0px)+10px)] sm:pt-4 pb-2 px-3 sm:px-6 lg:px-8">
-        <div
-          className={`max-w-6xl mx-auto h-14 sm:h-[60px] px-4 sm:px-5 rounded-full bg-[var(--surface-color)]/90 backdrop-blur-xl border border-[var(--border-subtle)] flex items-center justify-between gap-3 sm:gap-6 transition-all duration-200 ${
-            isScrolled ? 'shadow-modal' : 'shadow-subtle'
-          }`}
-        >
+    <div className="min-h-dvh flex flex-col justify-between bg-[var(--bg-color)] text-[var(--text-primary)] font-sans antialiased relative overflow-x-clip selection:bg-[var(--accent-color)] selection:text-[var(--on-accent)]">
+      {/* 1. MODERN APP HEADER (FIXED FROSTED GLASS, HIDE ON SCROLL DOWN / REVEAL ON SCROLL UP) */}
+      <header
+        className={`fixed top-0 inset-x-0 z-50 pt-[env(safe-area-inset-top,0px)] transition-all duration-300 ease-out ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${
+          isScrolled
+            ? 'bg-[var(--bg-color)]/88 backdrop-blur-xl border-b border-[var(--border-divider)] shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)]'
+            : 'bg-[var(--bg-color)]/75 backdrop-blur-md border-b border-transparent'
+        }`}
+      >
+        <div className="max-w-6xl mx-auto h-15 sm:h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           <a
             href="#top"
-            className="flex items-center shrink-0 whitespace-nowrap focus-visible:outline-none pl-1"
+            onClick={(e) => scrollToSection(e, 'top')}
+            className="flex items-center shrink-0 whitespace-nowrap focus-visible:outline-none"
             aria-label="Dejz"
           >
             <DejzLogo className="h-5 sm:h-6 w-auto" textColor="var(--logo-color)" />
           </a>
 
-          <nav className="hidden md:flex items-center gap-1 p-1 rounded-full bg-[var(--bg-color)]/75 border border-[var(--border-subtle)] text-[13.5px] font-semibold text-[var(--text-secondary)]">
+          <nav className="hidden md:flex items-center gap-7 text-[14px] font-medium text-[var(--text-secondary)]">
             <a
               href="#oversikt"
-              className="px-3.5 py-1.5 rounded-full hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all whitespace-nowrap shrink-0"
+              onClick={(e) => scrollToSection(e, 'oversikt')}
+              className="py-1 hover:text-[var(--text-primary)] transition-colors whitespace-nowrap shrink-0"
             >
               {isEn ? 'Overview' : 'Översikt'}
             </a>
             <a
               href="#funktioner"
-              className="px-3.5 py-1.5 rounded-full hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all whitespace-nowrap shrink-0"
+              onClick={(e) => scrollToSection(e, 'funktioner')}
+              className="py-1 hover:text-[var(--text-primary)] transition-colors whitespace-nowrap shrink-0"
             >
               {isEn ? 'Features' : 'Funktioner'}
             </a>
             <a
               href="#hur-det-funkar"
-              className="px-3.5 py-1.5 rounded-full hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all whitespace-nowrap shrink-0"
+              onClick={(e) => scrollToSection(e, 'hur-det-funkar')}
+              className="py-1 hover:text-[var(--text-primary)] transition-colors whitespace-nowrap shrink-0"
             >
               {isEn ? 'How it works' : 'Så funkar det'}
             </a>
@@ -385,7 +429,7 @@ export function LandingPage({
               <button
                 type="button"
                 onClick={onStartDemo}
-                className="px-3.5 py-1.5 rounded-full hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all whitespace-nowrap shrink-0 cursor-pointer bg-transparent border-none font-semibold text-[13.5px] text-[var(--text-secondary)]"
+                className="py-1 hover:text-[var(--text-primary)] transition-colors whitespace-nowrap shrink-0 cursor-pointer bg-transparent border-none font-medium text-[14px] text-[var(--text-secondary)]"
               >
                 {isEn ? 'Live demo' : 'Interaktiv demo'}
               </button>
@@ -403,7 +447,7 @@ export function LandingPage({
               <button
                 type="button"
                 onClick={onLogin}
-                className="px-3 py-1.5 rounded-full text-[13.5px] font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-color)] transition-colors whitespace-nowrap shrink-0 cursor-pointer bg-transparent border-none"
+                className="px-2.5 sm:px-3.5 h-9 rounded-full text-[13.5px] sm:text-[14px] font-semibold text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors whitespace-nowrap shrink-0 cursor-pointer bg-transparent border-none"
               >
                 {isEn ? 'Log in' : 'Logga in'}
               </button>
@@ -420,6 +464,9 @@ export function LandingPage({
           </div>
         </div>
       </header>
+
+      {/* Spacer for fixed header */}
+      <div className="h-[calc(env(safe-area-inset-top,0px)+60px)] sm:h-[calc(env(safe-area-inset-top,0px)+64px)] shrink-0" aria-hidden="true" />
 
       <main id="top" className="relative z-10 flex-1">
         {/* 2. HERO SECTION — KLARNA-STYLE INSET ROUNDED CARD WITH UNCROPPED HEAD & NO FADE */}

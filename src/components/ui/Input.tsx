@@ -53,8 +53,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const typographyStyles = isAmount
       ? 'text-section-title tabular-nums'
       : isSearch
-      ? 'text-xs sm:text-sm text-[var(--text-primary)]'
-      : 'text-body';
+      ? 'text-base sm:text-sm text-[var(--text-primary)]'
+      : 'text-base sm:text-body text-[var(--text-primary)]';
 
     return (
       <div className={`w-full flex flex-col gap-1.5 ${wrapperClassName}`}>
