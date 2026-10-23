@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  ArrowRight,
-  Sparkles,
   Mic,
   Plus,
 } from 'lucide-react';
@@ -484,7 +482,7 @@ export function LandingPage({
                     ? 'Dejz personal finance app – full control over your money from payday to payday'
                     : 'Dejz budgetapp – full koll på pengarna från lön till lön'
                 }
-                fetchPriority="high"
+                {...({ fetchpriority: 'high' } as React.ImgHTMLAttributes<HTMLImageElement>)}
                 decoding="async"
                 className="absolute inset-0 w-full h-full object-cover object-[64%_top] sm:object-[center_top] select-none pointer-events-none"
               />
@@ -527,7 +525,6 @@ export function LandingPage({
                         className="rounded-full h-12 sm:h-13 px-7 text-[15px] font-bold justify-center whitespace-nowrap shrink-0"
                       >
                         <span>{isEn ? 'Get started free' : 'Kom igång gratis'}</span>
-                        <ArrowRight size={17} strokeWidth={2.4} className="ml-2 shrink-0" />
                       </Button>
 
                       {onStartDemo && (
@@ -785,17 +782,17 @@ export function LandingPage({
                     onSubmit={() => {
                       setVoiceDemoIndex((prev) => (prev + 1) % voiceExamples.length);
                     }}
-                    leftElement={
+                      leftElement={
                       <button
                         type="button"
                         onClick={() =>
                           setVoiceDemoIndex((prev) => (prev + 1) % voiceExamples.length)
                         }
                         aria-label={isEn ? 'Switch voice example' : 'Byt röstexempel'}
-                        className={`w-10 h-10 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
+                        className={`w-10 h-10 rounded-icon-button flex items-center justify-center transition-all cursor-pointer select-none ${
                           voicePhase === 'listening'
-                            ? 'bg-[var(--danger-color)] text-white border-transparent scale-105'
-                            : 'bg-[var(--surface-color)] text-[var(--accent-color)] border-subtle'
+                            ? 'bg-[var(--danger-color)] text-white scale-105'
+                            : 'bg-[var(--surface-color)] text-[var(--accent-color)]'
                         }`}
                       >
                         <Mic size={16} strokeWidth={2.2} />
@@ -807,11 +804,11 @@ export function LandingPage({
                       type: 'success',
                       message: activeVoiceExample.feedbackText,
                     }}
-                    inputClassName="h-13 text-[14.5px] font-medium rounded-input bg-[var(--bg-color)] text-[var(--text-primary)] border-subtle"
+                    inputClassName="h-13 text-[14.5px] font-medium rounded-input bg-[var(--bg-color)] text-[var(--text-primary)]"
                   />
 
                   {/* Real TransactionItem Component animating on each voice match */}
-                  <div className="rounded-card bg-[var(--bg-color)] overflow-hidden border border-subtle">
+                  <div className="rounded-card bg-[var(--bg-color)] overflow-hidden">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={activeVoiceExample.tx.id}
@@ -860,7 +857,7 @@ export function LandingPage({
                   />
 
                   {/* 1:1 BudgetItem List from BudgetView.tsx */}
-                  <div className="rounded-card bg-[var(--bg-color)] divide-y divide-menu overflow-hidden border border-subtle min-h-[186px]">
+                  <div className="rounded-card bg-[var(--bg-color)] divide-y divide-menu overflow-hidden min-h-[186px]">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={budgetFilter}
@@ -934,7 +931,7 @@ export function LandingPage({
 
                 <div className="space-y-3">
                   {/* 1:1 Top Allocation Bar from BudgetCategoriesView.tsx */}
-                  <div className="rounded-card bg-[var(--bg-color)] p-4 border border-subtle space-y-2.5">
+                  <div className="rounded-card bg-[var(--bg-color)] p-4 space-y-2.5">
                     <div className="flex items-end justify-between gap-3">
                       <div className="space-y-0.5 min-w-0 text-left">
                         <span className="text-metric-label font-medium text-[var(--text-secondary)] block">
@@ -956,7 +953,6 @@ export function LandingPage({
                           setUserTouchedAllocate(true);
                           setIsAutoAllocated((prev) => !prev);
                         }}
-                        icon={<Sparkles size={13} />}
                       >
                         {isEn ? 'Auto-allocate' : 'Fördela automatiskt'}
                       </Button>
@@ -1119,7 +1115,6 @@ export function LandingPage({
                   className="rounded-full h-12 px-7 text-[15px] font-bold justify-center whitespace-nowrap"
                 >
                   <span>{isEn ? 'Get started free' : 'Kom igång gratis'}</span>
-                  <ArrowRight size={17} strokeWidth={2.4} className="ml-2 shrink-0" />
                 </Button>
               </div>
             </div>

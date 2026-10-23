@@ -20,7 +20,7 @@ export function PeriodTimeline({
   language = 'sv',
   _stats,
   categoryFilter = null,
-  _showFixedInCalendar = true,
+  showFixedInCalendar = true,
 }: PeriodTimelineProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
@@ -256,6 +256,10 @@ export function PeriodTimeline({
             ? day.transactions.some((t: any) => (t.category || '').trim().toLowerCase() === (categoryFilter || '').trim().toLowerCase())
             : false;
 
+          const hasActivity =
+            (Array.isArray(day.transactions) && day.transactions.length > 0) ||
+            (showFixedInCalendar && (Number(day.fixedExpenses) > 0 || Number(day.income) > 0));
+
           return (
             <button
               key={`${day.date}-${index}`}
@@ -271,7 +275,7 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[54px] sm:w-[58px] h-[56px] sm:h-[60px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border shadow-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[50px] sm:w-[54px] h-[48px] sm:h-[52px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border shadow-none ${
                 isSelected
                   ? 'bg-[var(--accent-color)] border-transparent text-[var(--on-accent)] scale-[1.03] font-semibold z-10 opacity-100 shadow-xs'
                   : hasCategoryMatch
@@ -306,6 +310,17 @@ export function PeriodTimeline({
               }`}>
                 {dayNumber}
               </span>
+
+              {/* Activity Indicator Dot */}
+              <span
+                className={`w-1 h-1 rounded-full mt-0.5 transition-opacity ${
+                  hasActivity
+                    ? isSelected
+                      ? 'bg-[var(--on-accent)]/85 opacity-100'
+                      : 'bg-[var(--text-secondary)]/65 opacity-100'
+                    : 'opacity-0'
+                }`}
+              />
             </button>
           );
         })}

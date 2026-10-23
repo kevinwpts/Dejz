@@ -30,8 +30,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       hero: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
       nested: 'bg-[var(--card-nested-bg)] border-none rounded-card-nested shadow-none',
       flat: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
-      elevated: 'bg-[var(--surface-color)] border-none rounded-card shadow-none',
-      outlined: 'bg-[var(--surface-color)] border border-[var(--border-control)] rounded-card shadow-none',
+      elevated: 'bg-[var(--surface-raised)] border-none rounded-card shadow-none',
+      outlined: 'bg-[var(--surface-color)] border border-[var(--border-divider)] rounded-card shadow-none',
       muted: 'bg-[var(--surface-muted)] border-none rounded-card-nested shadow-none',
     }[variant];
 

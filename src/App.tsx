@@ -21,7 +21,6 @@ import {
 import {
   AlertCircle,
   Loader2,
-  LogOut,
   ArrowDownLeft,
   ArrowUpRight,
   Camera,
@@ -29,7 +28,7 @@ import {
   Square,
   Plus,
 } from "lucide-react";
-import { getActiveFixedExpenses } from './utils/cancellation';
+import { getActiveFixedExpenses, isExpenseActiveForPeriod, isFixedPaymentScheduledOnDate } from './utils/cancellation';
 import { useVoiceExpense } from "./hooks/useVoiceExpense";
 import { parseQuickExpense } from "./utils/expenseAiParser";
 import { SmartInput } from "./components/ui";
@@ -55,13 +54,11 @@ import { TodayView } from "./components/TodayView";
 import { AppHeader } from "./components/AppHeader";
 import { DejziSummaryModal } from "./components/DejziSummaryModal";
 import { ProfileView } from "./components/ProfileView";
-import { SettingsMainView } from "./components/SettingsMainView";
 import { CancelledSubscriptionsModal } from "./components/CancelledSubscriptionsModal";
 import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
 import { CookieConsentModal } from "./components/CookieConsentModal";
 import { getLogoUrl } from "./utils/logo";
 import { FeedbackModal } from "./components/FeedbackModal";
-import { FloatingFeedbackWidget } from "./components/FloatingFeedbackWidget";
 import { DeleteAccountModal } from "./components/DeleteAccountModal";
 import { SecurityModal } from "./components/SecurityModal";
 import { ManageAccountModal } from "./components/ManageAccountModal";
@@ -93,7 +90,7 @@ import { LandingPage } from "./components/LandingPage";
 import { seedDemoData } from "./utils/demoData";
 import { clearDemoData, isDemoMode as checkDemoMode } from "./utils/demoUtils";
 
-import { dataService } from "./services/dataService";
+import { dataService, hasValidSavedCategoryBudgets } from "./services/dataService";
 import { Language, translations, TranslationKey } from "./i18n";
 import {
   parseLanguageFromPath,
@@ -108,8 +105,10 @@ import {
   getPeriodBoundaries,
   getPeriodName,
   getPeriodId,
+  getPaydayTypeFromDay,
   isVariableItemDue,
   isFixedItemDueInPeriod,
+  isFixedItemScheduledOnDay,
   parseReceiptDate,
 } from "./utils/date";
 import { uploadLogo } from "./services/storageService";
@@ -307,7 +306,7 @@ export default function App() {
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [plusQuickText, setPlusQuickText] = useState("");
   const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
-  const [plusSuccessMsg, setPlusSuccessMsg] = useState<{ text: string; transcript?: string } | null>(null);
+  const [plusSuccessMsg, setPlusSuccessMsg] = useState<{ text: string; transcript?: string; type?: "success" | "error" } | null>(null);
   const plusQuickInputRef = useRef<HTMLInputElement>(null);
   const plusCameraInputRef = useRef<HTMLInputElement>(null);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
@@ -526,13 +525,23 @@ export default function App() {
 
         feedback.success();
         setPlusSuccessMsg({
-          text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
+          text: config?.language === "en" ? "Expense added" : "Utgift tillagd",
+          type: "success"
         });
         setPlusQuickText("");
         setTimeout(() => {
           setPlusSuccessMsg(null);
           setIsPlusMenuOpen(false);
         }, 1500);
+      } else {
+        feedback.error();
+        setPlusSuccessMsg({
+          text:
+            config?.language === "en"
+              ? "Please include an amount, e.g. '45 ICA'"
+              : "Ange ett belopp, t.ex. '45 ICA'",
+          type: "error"
+        });
       }
     } catch (_err) {
       console.error("Quick expense failed", _err);
@@ -583,10 +592,33 @@ export default function App() {
     setCurrentPeriodDate(now);
   }, []);
 
+  const prevPaydayRef = useRef<number | undefined>(config?.payday);
+  const prevPaydayAdjustmentRef = useRef<boolean | undefined>(config?.paydayBeforeWeekend);
+
+  useEffect(() => {
+    if (!config) return;
+    const paydayChanged = prevPaydayRef.current !== undefined && prevPaydayRef.current !== config.payday;
+    const adjustmentChanged = prevPaydayAdjustmentRef.current !== undefined && prevPaydayAdjustmentRef.current !== config.paydayBeforeWeekend;
+
+    if (paydayChanged || adjustmentChanged) {
+      prevPaydayRef.current = config.payday;
+      prevPaydayAdjustmentRef.current = config.paydayBeforeWeekend;
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      setCurrentPeriodDate(now);
+      setTargetDate(now);
+    } else {
+      prevPaydayRef.current = config.payday;
+      prevPaydayAdjustmentRef.current = config.paydayBeforeWeekend;
+    }
+  }, [config?.payday, config?.paydayBeforeWeekend]);
+
   useEffect(() => {
     if (!config) return;
     const paydaySetting = config.payday || 25;
-    const paydayType = config.paydayType || PaydayType.TWENTY_FIFTH;
+    const paydayType = config.payday
+      ? getPaydayTypeFromDay(config.payday)
+      : (config.paydayType || PaydayType.TWENTY_FIFTH);
     const paydayBeforeWeekend = config.paydayBeforeWeekend
       ? WeekendAdjustment.BEFORE
       : WeekendAdjustment.NONE;
@@ -978,6 +1010,10 @@ export default function App() {
             dbSettings.hideEmptyCategories !== undefined && dbSettings.hideEmptyCategories !== null
               ? Boolean(dbSettings.hideEmptyCategories)
               : (localStorage.getItem('dejz_hide_empty_categories') === 'true'),
+          hasSavedInitialBudget: Boolean(
+            dbSettings.hasSavedInitialBudget ||
+            hasValidSavedCategoryBudgets(dbSettings.categories)
+          ),
         });
       }
 
@@ -1484,9 +1520,6 @@ export default function App() {
   });
 
   const addToast = (message: string, type: ToastType = "info") => {
-    if (type === "success" || type === "info") {
-      return; // Quietly ignore success and info toasts to keep the app clean, quiet, and modern
-    }
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, type, message }]);
   };
@@ -1527,15 +1560,18 @@ export default function App() {
     });
   };
 
-  // --- Theme Logic: Light by default; Dark ONLY when explicitly selected by the user ---
+  // --- Theme Logic: Light, Dark, or System ---
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
       
       // Pre-login screens (LandingPage, Auth, Welcome) and Onboarding are ALWAYS locked to light mode.
-      // After onboarding, Dark mode is ONLY active if the user explicitly chose dark mode in Settings.
       if (session && !isOnboarding && config) {
-        if (config.themeMode === 'dark') {
+        if (config.themeMode === 'system') {
+          isDark = typeof window !== 'undefined' && window.matchMedia
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+            : false;
+        } else if (config.themeMode === 'dark') {
           isDark = true;
         } else if (config.themeMode === 'light') {
           isDark = false;
@@ -1559,7 +1595,8 @@ export default function App() {
 
       try {
         if (session && !isOnboarding && config) {
-          localStorage.setItem('dejz_dark_mode', isDark ? 'dark' : 'light');
+          const modeToSave = config.themeMode || (isDark ? 'dark' : 'light');
+          localStorage.setItem('dejz_dark_mode', modeToSave);
         } else if (!session || isOnboarding) {
           localStorage.setItem('dejz_dark_mode', 'light');
         }
@@ -1595,6 +1632,13 @@ export default function App() {
     };
 
     applyTheme();
+
+    if (session && !isOnboarding && config?.themeMode === 'system' && typeof window !== 'undefined' && window.matchMedia) {
+      const mql = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = () => applyTheme();
+      mql.addEventListener('change', handler);
+      return () => mql.removeEventListener('change', handler);
+    }
   }, [config?.themeMode, config?.darkMode, config?.themeColor, session, isOnboarding, showLanding, publicLegalDoc]);
 
   // --- URL Routing & Language Subpath Sync ---
@@ -1608,8 +1652,9 @@ export default function App() {
       
       const tabSegment = parsed.subpath.replace(/^\//, '').split('/')[0] || 'today';
       if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(tabSegment)) {
-        if (tabSegment !== activeTab) {
-          setActiveTab(tabSegment as Tab);
+        const resolvedTab = tabSegment === "settings" ? "profile" : (tabSegment as Tab);
+        if (resolvedTab !== activeTab) {
+          setActiveTab(resolvedTab);
         }
       } else if (activeTab !== 'today') {
         setActiveTab('today');
@@ -1778,6 +1823,8 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
     localStorage.removeItem('app_language');
     localStorage.removeItem('app_language_manual');
+    localStorage.removeItem('dejz_has_saved_initial_budget');
+    localStorage.removeItem('dejz_has_saved_budget');
     if (isSupabaseConfigured) {
       await supabase.auth.signOut().catch(() => {});
     }
@@ -2043,6 +2090,8 @@ export default function App() {
         }
       }
 
+      let shouldSkipOnboarding = false;
+
       if (dbProfile && Object.keys(dbProfile).length > 0) {
         setProfile(dbProfile);
         setSubscriptionStatus(dbProfile.subscription_status || "free");
@@ -2060,9 +2109,14 @@ export default function App() {
           session.user.user_metadata?.onboarding_completed === true ||
           session.user.user_metadata?.onboarding_skipped === true;
 
-        const isDbDone = dbProfile.onboarding_completed === true;
+        const isDbDone =
+          dbProfile.onboarding_completed === true ||
+          dbProfile.notifications?._onboardingCompleted === true ||
+          (Array.isArray(dbTransactions) && dbTransactions.length > 0) ||
+          (Array.isArray(dbIncomes) && dbIncomes.length > 0) ||
+          (Array.isArray(dbFixed) && dbFixed.length > 0);
 
-        const shouldSkipOnboarding =
+        shouldSkipOnboarding =
           isLocallyDone ||
           isMetaDone ||
           isDbDone ||
@@ -2162,24 +2216,84 @@ export default function App() {
             }
           }
 
+          // Strip legacy percentage defaults (<= 100) from database column defaults
+          const budgetVals = migrated.map((c: any) => Number(c.budget) || 0);
+          const totalSum = budgetVals.reduce((a: number, b: number) => a + b, 0);
+          const maxVal = Math.max(...budgetVals, 0);
+          const isLegacyPercentDefault = maxVal <= 100 && totalSum <= 100 && totalSum > 0;
+
+          if (isLegacyPercentDefault) {
+            for (let i = 0; i < migrated.length; i++) {
+              if (migrated[i].budget !== null && migrated[i].budget !== undefined) {
+                migrated[i] = { ...migrated[i], budget: null };
+                hasChanged = true;
+              }
+            }
+          }
+
           return { migrated, hasChanged, renamedPairs };
         };
 
-        const rawCategories = dbProfile.categories && dbProfile.categories.length > 0
+        let localSavedConfig: any = null;
+        try {
+          const cached = localStorage.getItem(`user_settings_${session.user.id}`);
+          if (cached) localSavedConfig = JSON.parse(cached);
+        } catch {
+          // ignore
+        }
+
+        const hasDbSavedBudgets = hasValidSavedCategoryBudgets(dbProfile.categories);
+        const hasLocalSavedBudgets =
+          localSavedConfig?.hasSavedInitialBudget !== false &&
+          hasValidSavedCategoryBudgets(localSavedConfig?.categories);
+
+        const isExplicitlyUnbudgetedNewAccount =
+          !shouldSkipOnboarding &&
+          !hasDbSavedBudgets &&
+          !hasLocalSavedBudgets;
+
+        const sourceCategories = hasDbSavedBudgets
           ? dbProfile.categories
-          : DEFAULT_EXPENSE_CATEGORIES;
+          : hasLocalSavedBudgets
+            ? localSavedConfig.categories
+            : (dbProfile.categories && dbProfile.categories.length > 0
+                ? dbProfile.categories
+                : DEFAULT_EXPENSE_CATEGORIES);
+
+        const shouldKeepCategoryBudgets =
+          !isExplicitlyUnbudgetedNewAccount &&
+          (hasDbSavedBudgets || hasLocalSavedBudgets);
+
+        const rawCategories = shouldKeepCategoryBudgets
+          ? sourceCategories
+          : sourceCategories.map((c: any) => ({ ...c, budget: null }));
 
         const rawIncomeCategories = dbProfile.income_categories && dbProfile.income_categories.length > 0
           ? dbProfile.income_categories
-          : DEFAULT_INCOME_CATEGORIES;
+          : (localSavedConfig?.incomeCategories && localSavedConfig.incomeCategories.length > 0
+              ? localSavedConfig.incomeCategories
+              : DEFAULT_INCOME_CATEGORIES);
 
         const { migrated: migratedExpense, hasChanged: expenseChanged, renamedPairs: fetchRenamedPairs } =
           migrateExpenseCategories(rawCategories);
         const { migrated: migratedIncome, hasChanged: incomeChanged } =
           migrateCategories(rawIncomeCategories);
 
-        if (expenseChanged || incomeChanged) {
-          console.log("[Migration fetchData] Migrated categories back to clean standards");
+        const hadPreFilledBudgetsStripped =
+          !shouldKeepCategoryBudgets &&
+          Array.isArray(dbProfile.categories) &&
+          dbProfile.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0);
+
+        const restoredFromLocalCache = !hasDbSavedBudgets && hasLocalSavedBudgets;
+
+        if (hadPreFilledBudgetsStripped || restoredFromLocalCache) {
+          dbProfile.categories = migratedExpense;
+        }
+
+        const resolvedHasSavedInitialBudget = hasValidSavedCategoryBudgets(migratedExpense);
+
+        if (expenseChanged || incomeChanged || hadPreFilledBudgetsStripped || restoredFromLocalCache) {
+          console.log("[Migration fetchData] Syncing migrated/restored categories to profile");
           dbProfile.categories = migratedExpense;
           dbProfile.income_categories = migratedIncome;
 
@@ -2213,18 +2327,14 @@ export default function App() {
             showFixedExpensesInTodayView: dbProfile.show_fixed_expenses_in_today_view === true,
             showFixedExpensesInCalendar: dbProfile.show_fixed_expenses_in_calendar === true,
             hideEmptyCategories: dbProfile.hide_empty_categories !== undefined ? dbProfile.hide_empty_categories : false,
+            hasSavedInitialBudget: resolvedHasSavedInitialBudget,
             appIconTheme: dbProfile.app_icon_theme,
           }).catch((err) => {
             console.error("[Migration fetchData] Failed to save migrated settings:", err);
           });
-        }
-
-        let localSavedConfig: any = null;
-        try {
-          const cached = localStorage.getItem(`user_settings_${session.user.id}`);
-          if (cached) localSavedConfig = JSON.parse(cached);
-        } catch {
-          // ignore
+        } else {
+          dbProfile.categories = migratedExpense;
+          dbProfile.income_categories = migratedIncome;
         }
 
         const isManualOverride = localStorage.getItem('app_language_manual') === 'true';
@@ -2257,6 +2367,26 @@ export default function App() {
           }).catch(err => console.warn("Could not sync profile language:", err));
         }
 
+        // resolvedHasSavedInitialBudget is already computed above from migratedExpense
+
+        if (!resolvedHasSavedInitialBudget) {
+          try {
+            localStorage.removeItem('dejz_has_saved_initial_budget');
+            localStorage.removeItem('dejz_has_saved_budget');
+            if (session?.user?.id) {
+              localStorage.removeItem(`dejz_has_saved_initial_budget_${session.user.id}`);
+            }
+          } catch (_e) {
+            // ignore
+          }
+        } else if (session?.user?.id) {
+          try {
+            localStorage.setItem(`dejz_has_saved_initial_budget_${session.user.id}`, 'true');
+          } catch (_e) {
+            // ignore
+          }
+        }
+
         const mappedConfig = {
           currency: dbProfile.currency === "SEK" ? "kr" : (dbProfile.currency || resolvedReg.currencySymbol),
           currencyCode: dbProfile.currency_code || localSavedConfig?.currencyCode || resolvedReg.defaultCurrencyCode,
@@ -2272,8 +2402,8 @@ export default function App() {
           initialSpent: Number(dbProfile.initial_spent || 0),
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
-          darkMode: (dbProfile.onboarding_completed === true && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? true : false,
-          themeMode: (dbProfile.onboarding_completed === true && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? 'dark' : 'light',
+          darkMode: (shouldSkipOnboarding && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? true : false,
+          themeMode: (shouldSkipOnboarding && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? 'dark' : 'light',
           themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || 'neutral',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
@@ -2325,26 +2455,8 @@ export default function App() {
             dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
               ? Boolean(dbProfile.hide_empty_categories)
               : (localStorage.getItem('dejz_hide_empty_categories') === 'true' || localSavedConfig?.hideEmptyCategories === true),
-          hasSavedInitialBudget:
-            dbProfile.has_saved_initial_budget === true ||
-            dbProfile.hasSavedInitialBudget === true ||
-            localSavedConfig?.hasSavedInitialBudget === true ||
-            localStorage.getItem('dejz_has_saved_initial_budget') === 'true' ||
-            (session?.user?.id ? localStorage.getItem(`dejz_has_saved_initial_budget_${session.user.id}`) === 'true' : false) ||
-            (Array.isArray(dbProfile.categories) && dbProfile.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)) ||
-            (Array.isArray(localSavedConfig?.categories) && localSavedConfig.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)),
+          hasSavedInitialBudget: resolvedHasSavedInitialBudget,
         };
-
-        if (mappedConfig.hasSavedInitialBudget) {
-          try {
-            localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-            if (session?.user?.id) {
-              localStorage.setItem(`dejz_has_saved_initial_budget_${session.user.id}`, 'true');
-            }
-          } catch (_e) {
-            // ignore localStorage write errors
-          }
-        }
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
         if (Array.isArray(mappedConfig.monthlySavingsItems)) {
@@ -2376,17 +2488,113 @@ export default function App() {
         await dataService.saveSettings(session.user.id, newConfig);
       }
 
-      setTransactions(dbTransactions || []);
-      setIncomes(dbIncomes || []);
-      const upgradedFixed = (dbFixed || []).map((fe) => {
-        if (!fe.logo || fe.logo.includes("google.com/s2/favicons")) {
-          const autoLogo = getLogoUrl(fe.name, fe.category);
-          if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
-            return { ...fe, logo: autoLogo };
+      const activeExpCats = (dbProfile?.categories && dbProfile.categories.length > 0)
+        ? dbProfile.categories
+        : defaultConfig.categories;
+      const activeIncCats = (dbProfile?.income_categories && dbProfile.income_categories.length > 0)
+        ? dbProfile.income_categories
+        : defaultConfig.incomeCategories;
+
+      const validExpNames = new Set(
+        (activeExpCats || []).map((c: any) => (c.name || "").trim().toLowerCase())
+      );
+      const validIncNames = new Set(
+        (activeIncCats || []).map((c: any) => (c.name || "").trim().toLowerCase())
+      );
+
+      const fallbackExpCat =
+        (activeExpCats || []).find(
+          (c: any) => c.id === "ovrigt" || (c.name || "").trim().toLowerCase() === "övrigt"
+        )?.name || "Övrigt";
+      const fallbackIncCat =
+        (activeIncCats || []).find(
+          (c: any) => c.id === "inc_other" || (c.name || "").trim().toLowerCase() === "övrig inkomst"
+        )?.name || "Övrig inkomst";
+
+      const orphanedExpenseCategories = new Set<string>();
+      const orphanedIncomeCategories = new Set<string>();
+
+      const healedTransactions = (dbTransactions || []).map((tx: any) => {
+        let updatedTx = tx;
+        if (tx.category) {
+          const catTrimmed = tx.category.trim();
+          if (catTrimmed) {
+            if (tx.type === "income") {
+              if (!validIncNames.has(catTrimmed.toLowerCase())) {
+                orphanedIncomeCategories.add(catTrimmed);
+                updatedTx = { ...updatedTx, category: fallbackIncCat };
+              }
+            } else {
+              if (!validExpNames.has(catTrimmed.toLowerCase())) {
+                orphanedExpenseCategories.add(catTrimmed);
+                updatedTx = { ...updatedTx, category: fallbackExpCat };
+              }
+            }
           }
         }
-        return fe;
+        if (Array.isArray(tx.splits) && tx.splits.length > 0) {
+          let splitsChanged = false;
+          const nextSplits = tx.splits.map((s: any) => {
+            const sCat = (s.category || "").trim();
+            if (!sCat) return s;
+            if (tx.type === "income") {
+              if (!validIncNames.has(sCat.toLowerCase())) {
+                orphanedIncomeCategories.add(sCat);
+                splitsChanged = true;
+                return { ...s, category: fallbackIncCat };
+              }
+            } else {
+              if (!validExpNames.has(sCat.toLowerCase())) {
+                orphanedExpenseCategories.add(sCat);
+                splitsChanged = true;
+                return { ...s, category: fallbackExpCat };
+              }
+            }
+            return s;
+          });
+          if (splitsChanged) {
+            updatedTx = { ...updatedTx, splits: nextSplits };
+          }
+        }
+        return updatedTx;
       });
+
+      const healedIncomes = (dbIncomes || []).map((inc: any) => {
+        const catTrimmed = (inc.category || "").trim();
+        if (catTrimmed && !validIncNames.has(catTrimmed.toLowerCase())) {
+          orphanedIncomeCategories.add(catTrimmed);
+          return { ...inc, category: fallbackIncCat };
+        }
+        return inc;
+      });
+
+      const upgradedFixed = (dbFixed || []).map((fe) => {
+        let updatedFe = fe;
+        const catTrimmed = (fe.category || "").trim();
+        if (catTrimmed && !validExpNames.has(catTrimmed.toLowerCase())) {
+          orphanedExpenseCategories.add(catTrimmed);
+          updatedFe = { ...updatedFe, category: fallbackExpCat };
+        }
+        if (!updatedFe.logo || updatedFe.logo.includes("google.com/s2/favicons")) {
+          const autoLogo = getLogoUrl(updatedFe.name, updatedFe.category);
+          if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
+            updatedFe = { ...updatedFe, logo: autoLogo };
+          }
+        }
+        return updatedFe;
+      });
+
+      if (session?.user?.id) {
+        orphanedExpenseCategories.forEach((oldCat) => {
+          dataService.renameCategory(session.user.id, "expense", oldCat, fallbackExpCat).catch(() => {});
+        });
+        orphanedIncomeCategories.forEach((oldCat) => {
+          dataService.renameCategory(session.user.id, "income", oldCat, fallbackIncCat).catch(() => {});
+        });
+      }
+
+      setTransactions(healedTransactions);
+      setIncomes(healedIncomes);
       setFixedExpenses(upgradedFixed);
     } catch (_error) {
       console.error("Failed to fetch initial data:", _error);
@@ -2405,7 +2613,9 @@ export default function App() {
   // --- Calculations ---
 
   const paydaySetting = config?.payday || 25;
-  const paydayType = config?.paydayType || PaydayType.TWENTY_FIFTH;
+  const paydayType = config?.payday
+    ? getPaydayTypeFromDay(config.payday)
+    : (config?.paydayType || PaydayType.TWENTY_FIFTH);
   const adjustment = config?.paydayBeforeWeekend
     ? WeekendAdjustment.BEFORE
     : WeekendAdjustment.NONE;
@@ -2477,8 +2687,19 @@ export default function App() {
       localStorage.setItem('dejz_account_created_at', registrationDate.toISOString());
     }
 
-    // Earliest boundary is strictly the registration date's period
-    const earliest = registrationDate;
+    // Allow browsing at least 12 months back (and earlier if registration or older transactions exist)
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+    const oldestTxTimestamp =
+      transactions.length > 0
+        ? Math.min(...transactions.map((tx) => tx.timestamp || now.getTime()))
+        : now.getTime();
+    const earliest = new Date(
+      Math.min(
+        registrationDate.getTime(),
+        oneYearAgo.getTime(),
+        oldestTxTimestamp,
+      ),
+    );
     const earliestBounds = getPeriodBoundaries(
       earliest,
       paydayType,
@@ -2491,7 +2712,7 @@ export default function App() {
     const earliestYear = earliest.getFullYear();
     const earliestMonth = earliest.getMonth();
 
-    const monthDiff = Math.max(0, (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth));
+    const monthDiff = Math.max(12, (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth));
     const startOffset = -monthDiff - 1;
     const endOffset = 12;
 
@@ -2511,7 +2732,6 @@ export default function App() {
       let start = tempBounds.start;
       let end = tempBounds.end;
 
-      // Do not include periods from before account registration
       if (end < earliestBounds.start) {
         continue;
       }
@@ -2573,7 +2793,9 @@ export default function App() {
         referenceDate.setHours(0, 0, 0, 0);
 
         const paydaySetting = config.payday || 25;
-        const paydayType = config.paydayType || PaydayType.TWENTY_FIFTH;
+        const paydayType = config.payday
+          ? getPaydayTypeFromDay(config.payday)
+          : (config.paydayType || PaydayType.TWENTY_FIFTH);
         const adjustment = config.paydayBeforeWeekend
           ? WeekendAdjustment.BEFORE
           : WeekendAdjustment.NONE;
@@ -2615,20 +2837,16 @@ export default function App() {
         };
 
         // 1. Calculate Total Disposable Pot for the Period
+        const checkFixedDue = (fe: any) => isFixedItemDueInPeriod(fe, periodStart, periodEnd);
+
         const totalIncome = incomes.reduce(
           (sum, i) => {
             const amount = getAmountForPeriod(i);
-            const isDue = isVariableItemDue(
-              i.deductionDay || 1,
-              periodStart,
-              periodEnd,
-              referenceDate
-            );
+            const isDue = checkFixedDue(i);
             return isDue ? sum + amount : sum;
           },
           0,
         );
-        const checkFixedDue = (fe: any) => isFixedItemDueInPeriod(fe, periodStart, periodEnd);
 
         const activeFixed = getActiveFixedExpenses(fixedExpenses, referenceDate, periodStart, periodEnd);
         const totalFixed = activeFixed.reduce((sum, e) => {
@@ -2637,6 +2855,7 @@ export default function App() {
           return isDue ? sum + amount : sum;
         }, 0);
         const hasExplicitSavingsList = Array.isArray(config.monthlySavingsItems);
+        const hasExplicitSavingsItems = hasExplicitSavingsList && (config.monthlySavingsItems?.length || 0) > 0;
         const savingsFromItems = config.monthlySavingsItems?.reduce(
           (sum, item) => {
             const amount = getAmountForPeriod(item);
@@ -2646,8 +2865,8 @@ export default function App() {
           0,
         ) || 0;
 
-        const explicitMonthlySavings = savingsFromItems > 0 
-          ? savingsFromItems 
+        const explicitMonthlySavings = hasExplicitSavingsItems
+          ? savingsFromItems
           : (Number(config.monthlySavings) || 0);
 
         const fallbackSavingsGoals =
@@ -2800,39 +3019,12 @@ export default function App() {
             (e) => e.timestamp >= start && e.timestamp < end,
           );
 
-          const dayNum = d.getDate();
-          const currentMonth = d.getMonth();
-          const hasFixedItems = 
-            fixedExpenses.some((e) => {
-              if (e.deductionDay !== dayNum) return false;
-              if (e.frequency && e.startMonth !== undefined && e.frequency !== Frequency.MONTHLY) {
-                const startM = e.startMonth;
-                if (e.frequency === Frequency.QUARTERLY) return (currentMonth - startM) % 3 === 0;
-                if (e.frequency === Frequency.SEMI_ANNUALLY) return (currentMonth - startM) % 6 === 0;
-                if (e.frequency === Frequency.ANNUALLY) return currentMonth === startM;
-              }
-              return true;
-            }) ||
-            incomes.some((i) => {
-              if (i.deductionDay !== dayNum) return false;
-              if (i.frequency && i.startMonth !== undefined && i.frequency !== Frequency.MONTHLY) {
-                const startM = i.startMonth;
-                if (i.frequency === Frequency.QUARTERLY) return (currentMonth - startM) % 3 === 0;
-                if (i.frequency === Frequency.SEMI_ANNUALLY) return (currentMonth - startM) % 6 === 0;
-                if (i.frequency === Frequency.ANNUALLY) return currentMonth === startM;
-              }
-              return true;
-            }) ||
-            (config.monthlySavingsItems || []).some((s) => {
-              if (s.deductionDay !== dayNum) return false;
-              if (s.frequency && s.startMonth !== undefined && s.frequency !== Frequency.MONTHLY) {
-                const startM = s.startMonth;
-                if (s.frequency === Frequency.QUARTERLY) return (currentMonth - startM) % 3 === 0;
-                if (s.frequency === Frequency.SEMI_ANNUALLY) return (currentMonth - startM) % 6 === 0;
-                if (s.frequency === Frequency.ANNUALLY) return currentMonth === startM;
-              }
-              return true;
-            });
+          const hasFixedItems =
+            activeFixed.some(
+              (e) => isFixedPaymentScheduledOnDate(e, d) && isFixedItemScheduledOnDay(e, d)
+            ) ||
+            incomes.some((i) => isFixedItemScheduledOnDay(i, d)) ||
+            (config.monthlySavingsItems || []).some((s) => isFixedItemScheduledOnDay(s, d));
 
           dayInfos.push({
             date: d,
@@ -2840,6 +3032,11 @@ export default function App() {
             spend: Math.round(
               dayExps
                 .filter((e) => e.category !== "Spargris")
+                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+            ),
+            savedInPot: Math.round(
+              dayExps
+                .filter((e) => e.category === "Spargris")
                 .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
             ),
             spendForCarry: Math.round(
@@ -2961,30 +3158,50 @@ export default function App() {
         }
 
         // 7. Calendar Data & Status
-        // To keep past days stable, we calculate a "stable" recommendation for each day
-        // that only considers transactions up to that day.
+        // To keep past days stable and consistent with what the user saw on that day,
+        // we compute each past day's dynamic daily budget from the rolling pot at the start of that day.
+        let cumulativeSpendBeforeDay = 0;
+        let cumulativeSavedBeforeDay = 0;
+        let cumulativeIncomeBeforeDay = 0;
+
         const days = dayInfos.map((d, i) => {
           const isToday = i === todayIndex;
           const isPast = i < todayIndex;
           const isFuture = i > todayIndex;
 
-          // baseDailyBudgetCents is fixed, but we add any distributed surplus
-          const dayBase = baseDailyBudgetCents + surplusAdditions[i];
+          const incomeThroughDayI = cumulativeIncomeBeforeDay + d.income;
+          const potAtStartOfDayI =
+            periodBudgetCents -
+            cumulativeSpendBeforeDay -
+            cumulativeSavedBeforeDay +
+            incomeThroughDayI;
+          const remDaysFromDayI = Math.max(1, totalDays - i);
+          const dynamicDayBudget =
+            potAtStartOfDayI <= 0
+              ? potAtStartOfDayI
+              : Math.max(0, Math.floor(potAtStartOfDayI / remDaysFromDayI));
 
-          // For past days, we want to show the result AFTER the day's transactions
-          // relative to the fixed daily budget of that time.
+          cumulativeSpendBeforeDay += d.spend;
+          cumulativeSavedBeforeDay += (d as any).savedInPot || 0;
+          cumulativeIncomeBeforeDay += d.income;
+
+          const dayBase = isPast
+            ? dynamicDayBudget + surplusAdditions[i]
+            : baseDailyBudgetCents + surplusAdditions[i];
+
+          // For past days, compare the day's spending against the rolling dynamic daily budget available that day.
           // For today, we show availableTodayCents (does NOT include future unreceived incomes).
           // For future days, we show availableFutureBaseCents plus any future income scheduled on/before that day.
           const availableForD =
             isPast
-              ? dayBase - d.spend + d.income
+              ? dayBase - d.spend
               : isToday
                 ? availableTodayCents
                 : Math.round(availableFutureBaseCents + futureIncomeAdditions[i]);
 
           let status: "green" | "warning" | "red" | "neutral" = "neutral";
           if (isPast) {
-            if (d.spend > dayBase) {
+            if (availableForD < 0) {
               status = "red";
             } else {
               status = "green";
@@ -3010,33 +3227,45 @@ export default function App() {
         });
 
         const fixedExpenseCategoryMap: Record<string, number> = {};
-        if (fixedExpenses) {
-          fixedExpenses.forEach((fe) => {
-            const amount = getAmountForPeriod(fe);
-            const isDue = checkFixedDue(fe);
-            const periodAmount = isDue ? amount : 0;
+        if (activeFixed) {
+          activeFixed.forEach((fe) => {
+            if (!checkFixedDue(fe)) return;
+            const rawAmount = getAmountForPeriod(fe);
             const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
-            fixedExpenseCategoryMap[catName] = (fixedExpenseCategoryMap[catName] || 0) + periodAmount;
+            fixedExpenseCategoryMap[catName] =
+              (fixedExpenseCategoryMap[catName] || 0) + rawAmount;
           });
         }
 
         const categoryVariableSpending: Record<string, number> = {};
         pTransactions.forEach((tx) => {
-          if (tx.type === 'expense' && tx.category) {
-            categoryVariableSpending[tx.category] = (categoryVariableSpending[tx.category] || 0) + (Number(tx.amount) || 0);
+          if (tx.type === "expense") {
+            if (tx.splits && Array.isArray(tx.splits) && tx.splits.length > 0) {
+              tx.splits.forEach((s: any) => {
+                if (s.category) {
+                  const cat = s.category.trim();
+                  categoryVariableSpending[cat] =
+                    (categoryVariableSpending[cat] || 0) + (Number(s.amount) || 0);
+                }
+              });
+            } else if (tx.category) {
+              const cat = tx.category.trim();
+              categoryVariableSpending[cat] =
+                (categoryVariableSpending[cat] || 0) + (Number(tx.amount) || 0);
+            }
           }
         });
 
         const categorySpending: Record<string, number> = { ...categoryVariableSpending };
         Object.entries(fixedExpenseCategoryMap).forEach(([catName, amount]) => {
-          categorySpending[catName] = (categorySpending[catName] || 0) + amount;
+          categorySpending[catName] = (categorySpending[catName] || 0) + Math.round(amount);
         });
 
         const categoriesMap: Record<string, any> = {};
         (config.categories || []).forEach((c) => {
-          const spent = categorySpending[c.name] || 0;
-          const variableSpent = categoryVariableSpending[c.name] || 0;
-          const fixedSpent = fixedExpenseCategoryMap[c.name] || 0;
+          const variableSpent = Math.round(categoryVariableSpending[c.name] || 0);
+          const fixedSpent = Math.round(fixedExpenseCategoryMap[c.name] || 0);
+          const spent = variableSpent + fixedSpent;
           const budgetVal = c.budget !== undefined && c.budget !== null 
             ? Number(String(c.budget).replace(/[^0-9.]/g, "")) 
             : 0;
@@ -3117,6 +3346,7 @@ export default function App() {
     const currentPeriodId = actualPeriodId;
 
     incomes.forEach((i) => {
+      if (!isFixedItemDueInPeriod(i, actualPeriodStart, actualPeriodEnd)) return;
       if (
         i.isVariable &&
         (!i.periodOverrides || i.periodOverrides[currentPeriodId] === undefined)
@@ -3126,6 +3356,8 @@ export default function App() {
     });
 
     fixedExpenses.forEach((e) => {
+      if (!isExpenseActiveForPeriod(e, actualPeriodStart, actualPeriodEnd)) return;
+      if (!isFixedItemDueInPeriod(e, actualPeriodStart, actualPeriodEnd)) return;
       if (
         e.isVariable &&
         (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
@@ -3135,6 +3367,7 @@ export default function App() {
     });
 
     config.monthlySavingsItems?.forEach((s) => {
+      if (!isFixedItemDueInPeriod(s, actualPeriodStart, actualPeriodEnd)) return;
       if (
         s.isVariable &&
         (!s.periodOverrides || s.periodOverrides[currentPeriodId] === undefined)
@@ -3144,7 +3377,7 @@ export default function App() {
     });
 
     return items;
-  }, [config, incomes, fixedExpenses, actualPeriodId]);
+  }, [config, incomes, fixedExpenses, actualPeriodId, actualPeriodStart, actualPeriodEnd]);
 
   const notifications = useMemo<AppNotification[]>(() => {
     if (!config) return [];
@@ -3158,6 +3391,8 @@ export default function App() {
     // 1. Variable fixed expenses
     if (allowVariable) {
       fixedExpenses.forEach((e) => {
+        if (!isExpenseActiveForPeriod(e, periodStart, periodEnd)) return;
+        if (!isFixedItemDueInPeriod(e, periodStart, periodEnd)) return;
         if (
           e.isVariable &&
           (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
@@ -3193,6 +3428,7 @@ export default function App() {
 
       // 2. Variable incomes
       incomes.forEach((i) => {
+        if (!isFixedItemDueInPeriod(i, periodStart, periodEnd)) return;
         if (
           i.isVariable &&
           (!i.periodOverrides || i.periodOverrides[currentPeriodId] === undefined)
@@ -3223,6 +3459,7 @@ export default function App() {
 
       // 3. Variable savings items
       config.monthlySavingsItems?.forEach((s) => {
+        if (!isFixedItemDueInPeriod(s, periodStart, periodEnd)) return;
         if (
           s.isVariable &&
           (!s.periodOverrides || s.periodOverrides[currentPeriodId] === undefined)
@@ -3387,15 +3624,18 @@ export default function App() {
         });
       }
 
+      const wasEditing = Boolean(editingTransaction);
       setIsAddTransactionOpen(false);
 
-      // Direct user to Home tab ('today') and select the transaction's date on the timeline
-      const txTimestamp = customTimestamp || (transaction as any).timestamp || Date.now();
-      const txDate = new Date(txTimestamp);
-      txDate.setHours(0, 0, 0, 0);
-      setTargetDate(txDate);
-      setCurrentPeriodDate(txDate);
-      setActiveTab("today");
+      if (!wasEditing) {
+        // Direct user to Home tab ('today') and select the transaction's date on the timeline when creating new
+        const txTimestamp = customTimestamp || (transaction as any).timestamp || Date.now();
+        const txDate = new Date(txTimestamp);
+        txDate.setHours(0, 0, 0, 0);
+        setTargetDate(txDate);
+        setCurrentPeriodDate(txDate);
+        setActiveTab("today");
+      }
     } catch (err: any) {
       console.error("[App] Error adding transaction:", err);
       const detail = err?.details ? ` (${err.details})` : "";
@@ -3426,15 +3666,18 @@ export default function App() {
       } else {
         setIncomes((prev) => [...prev, newIncome]);
       }
+      const wasEditingIncome = Boolean(editingIncome);
       setIsIncomeModalOpen(false);
       setEditingIncome(null);
 
-      // Direct user to Home tab ('today') and select today's date on the timeline
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      setTargetDate(now);
-      setCurrentPeriodDate(now);
-      setActiveTab("today");
+      if (!wasEditingIncome) {
+        // Direct user to Home tab ('today') and select today's date on the timeline when adding new income
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        setTargetDate(now);
+        setCurrentPeriodDate(now);
+        setActiveTab("today");
+      }
     } catch (err: any) {
       console.error("[App] Error saving income:", err);
       addToast(
@@ -3535,6 +3778,9 @@ export default function App() {
       setTransactions((prev) => prev.map((e) => (e.id === res.id ? res : e)));
       if (viewingTransaction && viewingTransaction.id === res.id) {
         setViewingTransaction(res);
+      }
+      if (editingTransaction && editingTransaction.id === res.id) {
+        setEditingTransaction(res);
       }
       const isStarred = Boolean(res.isStarred || (res.tags && res.tags.includes('starred')));
       addToast(
@@ -3690,8 +3936,8 @@ export default function App() {
       targetTab = section === "log" || section === "transactions" ? "transactions" : "analysis";
     }
 
-    // Map budget allocate and category-budgets to unified profile budget
-    if (targetTab === "budget" && (targetSection === "allocate" || targetSection === "category-budgets" || targetSection === "budget")) {
+    // Map budget category settings calls to profile budget section
+    if (targetTab === "budget" && (targetSection === "budget" || targetSection === "category-budgets")) {
       targetTab = "profile";
       targetSection = "budget";
     }
@@ -4023,7 +4269,7 @@ export default function App() {
           paydayBeforeWeekend: true,
           savingsGoals: [],
           totalSavedLifetime: 0,
-          categories: DEFAULT_EXPENSE_CATEGORIES,
+          categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: null })),
           incomeCategories: DEFAULT_INCOME_CATEGORIES,
           initialSpent: 0,
           notifications: { dailySpend: true, overLimit: true },
@@ -4043,6 +4289,14 @@ export default function App() {
           paymentMethods: DEFAULT_PAYMENT_METHODS,
           hasSavedInitialBudget: false,
         };
+
+        try {
+          localStorage.removeItem('dejz_has_saved_initial_budget');
+          localStorage.removeItem('dejz_has_saved_budget');
+          localStorage.removeItem(`dejz_has_saved_initial_budget_${session.user.id}`);
+        } catch (_e) {
+          // ignore
+        }
 
         await dataService.saveSettings(session.user.id, defaultConfig);
 
@@ -4183,23 +4437,9 @@ export default function App() {
         ) || categories.find((c: any) => c.id !== deleteCatId);
     }
 
-    setTransactions((prev) =>
-      prev.map((t) => {
-        const isMatch =
-          t.categoryId === deleteCatId ||
-          (t.category &&
-            deleteCat?.name &&
-            (t.category || '').trim().toLowerCase() === (deleteCat.name || '').trim().toLowerCase());
-        if (isMatch && targetCat) {
-          return {
-            ...t,
-            categoryId: targetCat.id,
-            category: targetCat.name,
-          };
-        }
-        return t;
-      }),
-    );
+    if (targetCat && deleteCat.name) {
+      await handleRenameCategory(type, deleteCat.name, targetCat.name);
+    }
 
     const newCategories = categories.filter((c: any) => c.id !== deleteCatId);
     const newConfig = {
@@ -4271,6 +4511,8 @@ export default function App() {
         case "sharedBudget": return config?.language === 'en' ? 'Shared budget' : 'Delad budget';
         case "guides": return config?.language === 'en' ? 'Guides & Instructions' : 'Guider & Instruktioner';
         case "notifications": return t("notifications");
+        case "admin": return config?.language === 'en' ? 'Admin Dashboard' : 'Adminpanel';
+        case "designLibrary": return "Designbibliotek";
         default: return t("profile");
       }
     }
@@ -4550,30 +4792,25 @@ export default function App() {
       )}
 
       {isDemoMode && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border-b border-[var(--border-color)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold shadow-xs">
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--surface-color)]/95 backdrop-blur-xl border-b border-[var(--border-divider)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold">
           <div className="page-max mx-auto w-full flex items-center justify-between px-2 sm:px-4">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-              </span>
-              <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[var(--text-primary)]">Demoläge</span>
               <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-label">— Du utforskar appen med exempeldata</span>
             </div>
             <button
               type="button"
               onClick={handleExitDemo}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-subtle"
+              className="flex items-center px-3 py-1 rounded-btn-sm bg-[var(--surface-muted)] text-[var(--text-primary)] hover:opacity-80 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer"
             >
               <span>{t('exitDemo')}</span>
-              <LogOut size={12} strokeWidth={2} />
             </button>
           </div>
         </div>
       )}
 
-            <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`page-max mx-auto page-px relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <main className={`page-max mx-auto page-px relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-[calc(10rem+env(safe-area-inset-bottom,0px))] sm:pb-44'}`}>
           {stats && (
             <div style={{ display: activeTab === "today" ? "block" : "none" }}>
               <TodayView
@@ -4823,56 +5060,7 @@ export default function App() {
             </div>
           )}
 
-          {config && (
-            <div style={{ display: activeTab === "settings" ? "block" : "none" }}>
-              <SettingsMainView
-                onBack={() => setActiveTab("today")}
-                config={config}
-                initialSection={settingsSection as any}
-                setConfig={async (newConfig) => {
-                  try {
-                    setConfig(newConfig);
-                    if (newConfig.hideEmptyCategories !== undefined) {
-                      localStorage.setItem('dejz_hide_empty_categories', newConfig.hideEmptyCategories ? 'true' : 'false');
-                    }
-                    if (newConfig.language) {
-                      setLandingLanguage(newConfig.language as Language);
-                    }
-                    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "local-user");
-                    if (activeUserId) {
-                      await dataService.saveSettings(activeUserId, newConfig);
-                    }
-                  } catch (err) {
-                    console.error("Error saving config:", err);
-                  }
-                }}
-                t={t}
-                onNavigate={handleNavigate}
-                onSecurityClick={() => setIsSecurityModalOpen(true)}
-                subscriptionStatus={subscriptionStatus}
-                onFeedbackClick={() => setIsFeedbackModalOpen(true)}
-                onExportData={handleExportData}
-                onLegalClick={(type) => setLegalModal({ isOpen: true, type })}
-                profile={profile}
-                userId={session?.user?.id}
-                session={session}
-                onRefresh={fetchData}
-                onResetSavingsPot={handleResetSavingsPot}
-                onResetCompletedGoals={handleResetCompletedGoals}
-                onClearTransactions={handleClearTransactions}
-                onResetAll={resetAll}
-                onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
-                onRenameCategory={handleRenameCategory}
-                transactions={transactions}
-                onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
-                onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
-                incomes={incomes}
-                fixedExpenses={fixedExpenses}
-                stats={stats}
-                currentPeriodId={currentPeriodId}
-              />
-            </div>
-          )}
+
 
           {config && (
             <div style={{ display: activeTab === "profile" ? "block" : "none" }}>
@@ -4890,6 +5078,9 @@ export default function App() {
                     setConfig(newConfig);
                     if (newConfig.hideEmptyCategories !== undefined) {
                       localStorage.setItem('dejz_hide_empty_categories', newConfig.hideEmptyCategories ? 'true' : 'false');
+                    }
+                    if (newConfig.hideBudgetOnHome !== undefined) {
+                      localStorage.setItem('dejz_hide_budget_on_home', newConfig.hideBudgetOnHome ? 'true' : 'false');
                     }
                     if (newConfig.language) {
                       setLandingLanguage(newConfig.language as Language);
@@ -4940,6 +5131,33 @@ export default function App() {
                 onViewTransaction={setViewingTransaction}
                 onToggleStar={handleToggleStar}
                 onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
+                onSettleDebtAsTransaction={async (debt) => {
+                  const isEn = config?.language === "en";
+                  const isOweMe = debt.type === "owe_me";
+                  const defaultCat = isOweMe
+                    ? isEn
+                      ? "Other Income"
+                      : "Övrig inkomst"
+                    : config?.categories?.[0]?.name || (isEn ? "Other" : "Övrigt");
+                  const descSuffix = debt.description ? ` (${debt.description})` : "";
+                  await addTransaction({
+                    amount: Number(debt.amount) || 0,
+                    type: isOweMe ? "income" : "expense",
+                    category: defaultCat,
+                    merchant: `${debt.personName}${descSuffix}`,
+                    tags: ["debt-settled"],
+                  });
+                  addToast(
+                    isOweMe
+                      ? isEn
+                        ? "Repayment added as income"
+                        : "Återbetalning tillagd som inkomst"
+                      : isEn
+                        ? "Payment registered as expense"
+                        : "Betalning registrerad som utgift",
+                    "success",
+                  );
+                }}
               />
             </div>
           )}
@@ -4965,14 +5183,6 @@ export default function App() {
           )}
         </main>
       </PullToRefresh>
-
-      {/* Floating Feedback Widget */}
-      {!(isAddTransactionOpen || isFeedbackModalOpen || isSearchModalOpen || isAddIncomeOpen || editingTransaction || viewingTransaction || isCalculatorOpen || isDeleteAccountModalOpen || isSecurityModalOpen || isManageAccountModalOpen || isVariableUpdateModalOpen || legalModal.isOpen || isFixedExpenseModalOpen || isMonthlySavingModalOpen || viewingFixedExpense || viewingMonthlySaving || editingMonthlySaving || isPlusMenuOpen || isReceiptCameraOpen) && (
-        <FloatingFeedbackWidget 
-          onOpenFeedback={() => setIsFeedbackModalOpen(true)}
-          language={config?.language || 'sv'}
-        />
-      )}
 
       {/* Bottom Navigation */}
       {!isAddTransactionOpen && (
@@ -5071,8 +5281,26 @@ export default function App() {
               localStorage.setItem(`dejz_onboarding_completed_${activeUserId}`, 'true');
               localStorage.setItem('dejz_onboarding_completed', 'true');
               localStorage.setItem('dejz_onboarding_skipped', 'true');
+              localStorage.removeItem('dejz_has_saved_initial_budget');
+              localStorage.removeItem('dejz_has_saved_budget');
+              localStorage.removeItem(`dejz_has_saved_initial_budget_${activeUserId}`);
             } catch (storageErr) {
               console.warn("Could not save onboarding skip to localStorage:", storageErr);
+            }
+
+            const cleanCategories = ((config?.categories && config.categories.length > 0)
+              ? config.categories
+              : DEFAULT_EXPENSE_CATEGORIES
+            ).map((c: any) => ({ ...c, budget: null }));
+
+            if (config) {
+              const skippedConfig: Config = {
+                ...config,
+                hasSavedInitialBudget: false,
+                categories: cleanCategories,
+              };
+              setConfig(skippedConfig);
+              dataService.saveSettings(activeUserId, skippedConfig).catch(() => {});
             }
 
             if (session?.user) {
@@ -5084,7 +5312,7 @@ export default function App() {
             }
 
             try {
-              dataService.updateProfile(activeUserId, { onboarding_completed: true });
+              dataService.updateProfile(activeUserId, { onboarding_completed: true, has_saved_initial_budget: false });
             } catch (err) {
               console.warn("Could not mark onboarding completed on exit in profile:", err);
             }
@@ -5100,6 +5328,9 @@ export default function App() {
             try {
               localStorage.setItem(`dejz_onboarding_completed_${activeUserId}`, 'true');
               localStorage.setItem('dejz_onboarding_completed', 'true');
+              localStorage.removeItem('dejz_has_saved_initial_budget');
+              localStorage.removeItem('dejz_has_saved_budget');
+              localStorage.removeItem(`dejz_has_saved_initial_budget_${activeUserId}`);
             } catch (storageErr) {
               console.warn("Could not save onboarding completion to localStorage:", storageErr);
             }
@@ -5176,6 +5407,12 @@ export default function App() {
                     frequency: Frequency.MONTHLY,
                   }] : (config?.monthlySavingsItems || []));
 
+              const cleanOnboardingCategories = (
+                (data.categories && data.categories.length > 0)
+                  ? data.categories
+                  : (config?.categories && config.categories.length > 0 ? config.categories : DEFAULT_EXPENSE_CATEGORIES)
+              ).map((c: any) => ({ ...c, budget: null }));
+
               // 3. Update config with income, initialSpent, payday, savings goals, monthlySavings, monthlySavingsItems, age, gender, and categories
               const newConfig: Config = {
                 ...config,
@@ -5190,7 +5427,7 @@ export default function App() {
                 monthlySavingsItems: finalMonthlySavingsItems,
                 userAgeGroup: data.userAgeGroup || config?.userAgeGroup,
                 userGender: data.userGender || config?.userGender,
-                categories: (data.categories && data.categories.length > 0) ? data.categories : config.categories,
+                categories: cleanOnboardingCategories,
                 country: data.country || config?.country,
                 currency: data.currency || config?.currency,
                 currencyCode: data.currencyCode || config?.currencyCode,
@@ -5359,11 +5596,13 @@ export default function App() {
             }}
           />
         )}
+      </AnimatePresence>
 
-        {viewingTransaction && (
-          <TransactionViewModal
-            transaction={viewingTransaction}
-            onUpdateTransaction={async (updatedTx) => {
+      {viewingTransaction && (
+        <TransactionViewModal
+          transaction={viewingTransaction}
+          onToggleStar={handleToggleStar}
+          onUpdateTransaction={async (updatedTx) => {
               try {
                 const res = await dataService.updateTransaction(updatedTx.id, updatedTx);
                 setTransactions((prev) => prev.map((e) => (e.id === res.id ? res : e)));
@@ -5393,6 +5632,7 @@ export default function App() {
                   {
                     amount: expense.amount,
                     category: expense.category,
+                    merchant: expense.merchant,
                     note: expense.note,
                     timestamp: expense.timestamp,
                     type: expense.type,
@@ -5401,10 +5641,21 @@ export default function App() {
                     icon: expense.icon,
                     paymentMethod: expense.paymentMethod,
                     receiptUrl: expense.receiptUrl,
+                    receiptUrls: expense.receiptUrls,
                     tags: expense.tags || [],
-                  },
+                    splits: (expense as any).splits,
+                  } as any,
                 );
                 setTransactions((prev) => [newExpense, ...prev]);
+                if (expense.category === "Spargris" || expense.type === "savings") {
+                  const amt = Number(expense.amount) || 0;
+                  setConfig((prev) => {
+                    if (!prev) return prev;
+                    const newConfig = { ...prev, savingsPot: Math.max(0, (prev.savingsPot || 0) + amt) };
+                    dataService.saveSettings(session.user.id, newConfig).catch(() => {});
+                    return newConfig;
+                  });
+                }
                 handleCloseTransactionView();
                 addToast(t("transactionDuplicated"), "success");
               } catch (_error) {
@@ -5420,6 +5671,7 @@ export default function App() {
 
         {isAddTransactionOpen && (
           <TransactionModal
+            key={editingTransaction?.id || "new-transaction"}
             transactions={transactions}
             isPro={true}
             transaction={editingTransaction}
@@ -5438,6 +5690,10 @@ export default function App() {
               setIsAddTransactionOpen(false);
               setEditingTransaction(null);
               setTransactionPrefill(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
             }}
             onSave={(e) => {
               const now = new Date();
@@ -5500,9 +5756,60 @@ export default function App() {
               deleteTransaction(id);
               setIsAddTransactionOpen(false);
               setEditingTransaction(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
+            }}
+            onToggleStar={handleToggleStar}
+            onDuplicate={async (expense) => {
+              if (!session) return;
+              try {
+                const newExpense = await dataService.addTransaction(
+                  session.user.id,
+                  {
+                    amount: expense.amount,
+                    category: expense.category,
+                    merchant: expense.merchant,
+                    note: expense.note,
+                    timestamp: expense.timestamp,
+                    type: expense.type,
+                    isBackdated: expense.isBackdated,
+                    logo: expense.logo,
+                    icon: expense.icon,
+                    paymentMethod: expense.paymentMethod,
+                    receiptUrl: expense.receiptUrl,
+                    receiptUrls: expense.receiptUrls,
+                    tags: expense.tags || [],
+                    splits: (expense as any).splits,
+                  } as any,
+                );
+                setTransactions((prev) => [newExpense, ...prev]);
+                if (expense.category === "Spargris" || expense.type === "savings") {
+                  const amt = Number(expense.amount) || 0;
+                  setConfig((prev) => {
+                    if (!prev) return prev;
+                    const newConfig = { ...prev, savingsPot: Math.max(0, (prev.savingsPot || 0) + amt) };
+                    dataService.saveSettings(session.user.id, newConfig).catch(() => {});
+                    return newConfig;
+                  });
+                }
+                setIsAddTransactionOpen(false);
+                setEditingTransaction(null);
+                addToast(t("transactionDuplicated"), "success");
+              } catch (_error) {
+                addToast(t("error"), "error");
+              }
+            }}
+            onSelectTransaction={(simTx) => {
+              setEditingTransaction(simTx);
+              setTransactionType(simTx.type || "expense");
+              setTargetDate(new Date(simTx.timestamp));
             }}
           />
         )}
+
+      <AnimatePresence>
         {isIncomeModalOpen && (
           <IncomeModal
             income={editingIncome}
@@ -5510,6 +5817,10 @@ export default function App() {
             onClose={() => {
               setIsIncomeModalOpen(false);
               setEditingIncome(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
             }}
             onSave={handleSaveIncome}
             onDelete={
@@ -5541,6 +5852,18 @@ export default function App() {
               setViewingFixedExpense(null);
               setEditingFixedExpense(expense);
               setIsFixedExpenseModalOpen(true);
+            }}
+            onUpdateExpense={async (updatedExpense) => {
+              try {
+                const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "local-user");
+                await dataService.saveFixedExpense(activeUserId, updatedExpense);
+                setFixedExpenses((prev) =>
+                  prev.map((e) => (e.id === updatedExpense.id ? updatedExpense : e))
+                );
+                setViewingFixedExpense(updatedExpense);
+              } catch (err) {
+                console.error("[App] Error updating fixed expense cancellation:", err);
+              }
             }}
             onDelete={(id) => {
               handleDeleteFixedExpense(id);
@@ -5583,6 +5906,10 @@ export default function App() {
             onClose={() => {
               setIsFixedExpenseModalOpen(false);
               setEditingFixedExpense(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
             }}
             onSave={handleSaveFixedExpense}
             onDelete={
@@ -5602,7 +5929,13 @@ export default function App() {
         {viewingMonthlySaving && (
           <MonthlySavingViewModal
             saving={viewingMonthlySaving}
-            onClose={() => setViewingMonthlySaving(null)}
+            onClose={() => {
+              setViewingMonthlySaving(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
+            }}
             onEdit={(saving) => {
               const cleanId = saving.id?.startsWith('saving-') ? saving.id.replace('saving-', '') : saving.id;
               const cleanSaving = { ...saving, id: cleanId };
@@ -5628,6 +5961,10 @@ export default function App() {
             onClose={() => {
               setIsMonthlySavingModalOpen(false);
               setEditingMonthlySaving(null);
+              if (searchModalOpenBeforeViewing) {
+                setIsSearchModalOpen(true);
+                setSearchModalOpenBeforeViewing(false);
+              }
             }}
             onSave={handleSaveMonthlySaving}
             onDelete={
@@ -5711,6 +6048,11 @@ export default function App() {
               setSearchModalOpenBeforeViewing(true);
               setIsSearchModalOpen(false);
               setViewingIncome(income);
+            }}
+            onViewMonthlySaving={(saving) => {
+              setSearchModalOpenBeforeViewing(true);
+              setIsSearchModalOpen(false);
+              setViewingMonthlySaving(saving);
             }}
           />
         )}
@@ -5809,7 +6151,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] border border-[var(--border-divider)] shadow-subtle hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
                     <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
@@ -5829,7 +6171,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] border border-[var(--border-divider)] shadow-subtle hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
                     <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
@@ -5844,7 +6186,7 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] border border-[var(--border-divider)] shadow-subtle hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
+                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
                     {isScanningReceipt ? (
                       <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
@@ -5871,7 +6213,12 @@ export default function App() {
                 <SmartInput
                   hideLabel
                   value={plusQuickText}
-                  onChange={setPlusQuickText}
+                  onChange={(val) => {
+                    setPlusQuickText(val);
+                    if (plusSuccessMsg?.type === "error") {
+                      setPlusSuccessMsg(null);
+                    }
+                  }}
                   onSubmit={handlePlusQuickExpenseSubmit}
                   placeholder={
                     isRecording
@@ -5888,12 +6235,12 @@ export default function App() {
                       type="button"
                       onClick={handlePlusMicClick}
                       disabled={isSubmittingQuick || isAudioTranscribing}
-                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
+                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer select-none ${
                         isRecording
-                          ? "bg-[var(--danger-color)] text-white border-rose-400 animate-pulse scale-105"
+                          ? "bg-[var(--danger-color)] text-white animate-pulse scale-105"
                           : isAudioTranscribing
-                            ? "bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]"
-                            : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
+                            ? "bg-[var(--danger-container)] text-[var(--danger-color)]"
+                            : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] active:scale-95"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5909,13 +6256,13 @@ export default function App() {
                   submitIcon={<Plus size={18} strokeWidth={2} />}
                   feedback={
                     plusSuccessMsg
-                      ? { type: 'success', message: plusSuccessMsg.text }
+                      ? { type: plusSuccessMsg.type || "success", message: plusSuccessMsg.text }
                       : plusVoiceError
-                        ? { type: 'error', message: plusVoiceError }
+                        ? { type: "error", message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
-                    isRecording ? "border-[var(--danger-color)]/80 ring-2 ring-rose-500/30" : "border-subtle"
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
+                    isRecording ? "ring-2 ring-rose-500/30" : ""
                   }`}
                 />
               </div>

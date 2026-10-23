@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, FileText, ArrowLeft, Copy, Check, Globe, Lock } from 'lucide-react';
 import { DejzLogo } from './DejzLogo';
 import { Button, SegmentedControl } from './ui';
 import { LanguagePicker } from './LanguagePicker';
@@ -109,7 +108,6 @@ export function PublicLegalPage({
               onClick={handleBackToApp}
               variant="primary"
               size="sm"
-              icon={<ArrowLeft size={14} />}
             >
               <span>{language === 'sv' ? 'Tillbaka' : 'Back'}</span>
             </Button>
@@ -129,17 +127,14 @@ export function PublicLegalPage({
               {
                 value: 'privacy',
                 label: language === 'sv' ? 'Integritet' : 'Privacy',
-                icon: <Shield size={14} />,
               },
               {
                 value: 'terms',
                 label: language === 'sv' ? 'Villkor' : 'Terms',
-                icon: <FileText size={14} />,
               },
               {
                 value: 'cookies',
                 label: 'Cookies',
-                icon: <Globe size={14} />,
               },
             ]}
           />
@@ -150,7 +145,6 @@ export function PublicLegalPage({
               onClick={handleCopyLink}
               variant="secondary"
               size="sm"
-              icon={copied ? <Check size={14} className="text-[var(--success-color)]" /> : <Copy size={14} />}
               title="Kopiera länk till detta dokument"
             >
               <span>
@@ -163,7 +157,7 @@ export function PublicLegalPage({
         </div>
 
         {/* Document Card Container */}
-        <div className="bg-[var(--surface-color)] border border-[var(--border-divider)] rounded-container p-5 sm:p-6 shadow-subtle space-y-6">
+        <div className="bg-[var(--surface-color)] rounded-container p-5 sm:p-6 space-y-6">
           {currentDoc === 'privacy' && (
             language === 'sv' ? <SwedishPrivacyPolicy /> : <EnglishPrivacyPolicy />
           )}
@@ -200,8 +194,7 @@ function SwedishPrivacyPolicy() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
-          <Lock size={12} />
+        <div className="inline-flex items-center px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
           GDPR & Google OAuth
         </div>
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
@@ -214,8 +207,7 @@ function SwedishPrivacyPolicy() {
 
       {/* Summary highlight */}
       <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
-        <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-          <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
+        <p className="font-semibold text-[var(--text-primary)]">
           Kort sammanfattning av din integritet:
         </p>
         <ul className="list-disc pl-4 space-y-1 text-[var(--text-secondary)]">
@@ -249,8 +241,7 @@ function SwedishPrivacyPolicy() {
       </section>
 
       <section className="space-y-2 p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none">
-        <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-          <Lock size={16} className="text-[var(--accent-color)] shrink-0" />
+        <h2 className="text-base font-bold text-[var(--text-primary)]">
           3. Google API & Begränsad användning
         </h2>
         <div className="space-y-2 leading-relaxed text-xs">
@@ -288,8 +279,7 @@ function EnglishPrivacyPolicy() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6 text-sm">
       <header className="border-b border-[var(--border-color)] pb-4 space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
-          <Lock size={12} />
+        <div className="inline-flex items-center px-2.5 py-1 rounded-full text-label font-semibold bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none mb-1">
           GDPR & Google OAuth
         </div>
         <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
@@ -300,8 +290,7 @@ function EnglishPrivacyPolicy() {
         </p>
       </header>
       <div className="p-4 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
-        <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-          <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
+        <p className="font-semibold text-[var(--text-primary)]">
           Summary:
         </p>
         <ul className="list-disc pl-4 space-y-1 text-[var(--text-secondary)]">

@@ -140,9 +140,8 @@ export function IconSelector({
             <button 
               type="button"
               onClick={onRestoreAuto}
-              className="text-label font-medium text-accent flex items-center gap-1 hover:opacity-70 transition-opacity cursor-pointer"
+              className="text-label font-medium text-accent hover:opacity-70 transition-opacity cursor-pointer"
             >
-              <Sparkles size={12} strokeWidth={2} />
               {t('restoreToAuto')}
             </button>
           )}
@@ -157,10 +156,10 @@ export function IconSelector({
                 onLogoChange(autoMerchantLogo);
                 onIconChange('none');
               }}
-              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center overflow-hidden transition-all border cursor-pointer ${
+              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                 isAutoLogoSelected
-                  ? 'border-subtle dark:border-white ring-2 ring-control bg-white shadow-xs'
-                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-subtle dark:hover:border-subtle'
+                  ? 'ring-2 ring-[var(--accent-color)] bg-white'
+                  : 'bg-[var(--surface-muted)] hover:opacity-80'
               }`}
               title={name}
             >
@@ -178,7 +177,7 @@ export function IconSelector({
               />
               {isAutoLogoSelected && (
                 <div className="absolute inset-0 bg-black/10 dark:bg-black/30 flex items-center justify-center">
-                  <div className="w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
+                  <div className="w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110">
                     <Check size={12} strokeWidth={2.5} />
                   </div>
                 </div>
@@ -194,10 +193,10 @@ export function IconSelector({
                 onIconChange(suggestedEmoji);
                 onLogoChange(undefined);
               }}
-              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all border cursor-pointer ${
+              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all cursor-pointer ${
                 isIconSelected(suggestedEmoji)
-                  ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
-                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40 text-[var(--text-primary)]'
+                  ? 'bg-[var(--accent-color)]/12 ring-2 ring-[var(--accent-color)] text-[var(--accent-color)]'
+                  : 'bg-[var(--surface-muted)] hover:opacity-80 text-[var(--text-primary)]'
               }`}
             >
               {(() => {
@@ -206,7 +205,7 @@ export function IconSelector({
                 return <Icon size={26} strokeWidth={2} />;
               })()}
               {isIconSelected(suggestedEmoji) && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110">
                   <Check size={12} strokeWidth={2.5} />
                 </div>
               )}
@@ -226,10 +225,10 @@ export function IconSelector({
                 fileInputRef.current?.click();
               }
             }}
-            className={`flex-1 h-16 rounded-card-nested border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+            className={`flex-1 h-16 rounded-card-nested flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
               isCustomLogoSelected
-                ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-1 ring-[var(--accent-color)] text-[var(--accent-color)]'
-                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--accent-color)]/30'
+                ? 'bg-[var(--accent-color)]/12 ring-2 ring-[var(--accent-color)] text-[var(--accent-color)]'
+                : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:opacity-80'
             }`}
           >
             {isUploading ? (
@@ -239,7 +238,7 @@ export function IconSelector({
                 <img src={customUserLogo} alt="Custom" className="w-8 h-8 object-contain rounded-full" />
                 <span className="text-micro-label font-semibold mt-0.5">{t('customLogo')}</span>
                 {isCustomLogoSelected && (
-                  <div className="absolute top-1.5 right-2 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-90 shadow-xs">
+                  <div className="absolute top-1.5 right-2 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-90">
                     <Check size={10} strokeWidth={2.5} />
                   </div>
                 )}
@@ -272,15 +271,15 @@ export function IconSelector({
                   onIconChange(resolvedKey);
                   onLogoChange(undefined);
                 }}
-                className={`relative aspect-square rounded-[var(--radius-button,12px)] flex items-center justify-center text-[var(--text-primary)] transition-all border cursor-pointer ${
+                className={`relative aspect-square rounded-[var(--radius-button,12px)] flex items-center justify-center text-[var(--text-primary)] transition-all cursor-pointer ${
                   selected
-                    ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
-                    : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[var(--accent-color)]/30'
+                    ? 'bg-[var(--accent-color)]/12 ring-2 ring-[var(--accent-color)] text-[var(--accent-color)]'
+                    : 'bg-[var(--surface-muted)] hover:opacity-80'
                 }`}
               >
                 <Icon size={22} strokeWidth={2} />
                 {selected && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110">
                     <Check size={10} strokeWidth={2.5} />
                   </div>
                 )}
@@ -291,10 +290,10 @@ export function IconSelector({
           <button
             type="button"
             onClick={() => setShowEmojiPicker(true)}
-            className={`relative aspect-square rounded-[var(--radius-button,12px)] flex items-center justify-center transition-all border border-solid cursor-pointer ${
+            className={`relative aspect-square rounded-[var(--radius-button,12px)] flex items-center justify-center transition-all cursor-pointer ${
               hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected
-                ? 'border-[var(--accent-color)] bg-[var(--accent-light)] ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
-                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-subtle dark:hover:border-subtle'
+                ? 'bg-[var(--accent-color)]/12 ring-2 ring-[var(--accent-color)] text-[var(--accent-color)]'
+                : 'bg-[var(--surface-muted)] text-[var(--text-tertiary)] hover:opacity-80'
             }`}
           >
             {hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected ? (

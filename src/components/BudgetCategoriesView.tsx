@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, RotateCcw, ChevronRight, Sparkles } from 'lucide-react';
-import { Config, Income, FixedExpense, Frequency, Category } from '../types';
+import { Plus, RotateCcw, ChevronRight, Sparkles, Check, PieChart } from 'lucide-react';
+import { Config, Income, FixedExpense, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
-import { Button, Modal, Select, Card, FilterButtonGroup, ListRow } from './ui';
+import { Button, Modal, Select, Card, FilterButtonGroup, ListRow, Switch } from './ui';
 import { formatAmount, formatCurrency } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { getActiveFixedExpenses } from '../utils/cancellation';
+import { isFixedItemDueInPeriod } from '../utils/date';
 import { dataService } from '../services/dataService';
 
 export interface BudgetCategoriesViewProps {
@@ -84,18 +85,20 @@ export function BudgetCategoriesView({
   } | null>(null);
   const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
 
-  // --- Auto Allocate Modal State ---
-  const [isAutoAllocateModalOpen, setIsAutoAllocateModalOpen] = useState(false);
-  const [autoAllocateData, setAutoAllocateData] = useState<{
-    proposed: { name: string; budget: number; icon: string; color?: string; id?: string }[];
-    unallocatedPool: number;
-  } | null>(null);
-  const [editableProposedBudgets, setEditableProposedBudgets] = useState<Record<string, string>>({});
+  // --- Inline Auto Allocate Undo State ---
+  const [previousBudgetsSnapshot, setPreviousBudgetsSnapshot] = useState<Record<string, number | null | undefined> | null>(null);
 
-  const handleOpenAutoAllocate = () => {
+  const handleAutoAllocateInline = async () => {
     const categories = config.categories || DEFAULT_EXPENSE_CATEGORIES;
-    const pool = totalPoolToAllocate;
-    
+    const pool = Math.round(totalPoolToAllocate);
+
+    // Save snapshot of current budgets before auto-allocating so the user can undo with 1 tap
+    const snapshot: Record<string, number | null | undefined> = {};
+    categories.forEach((c) => {
+      snapshot[c.name] = c.budget;
+    });
+    setPreviousBudgetsSnapshot(snapshot);
+
     const catData = categories.map((cat) => {
       const fixed = Math.round(getFixedSpentForCategory(cat.name));
       const manual = Number(cat.budget) || 0;
@@ -108,13 +111,6 @@ export function BudgetCategoriesView({
       };
     });
 
-    const lockedSum = catData.reduce((sum, c) => {
-      return sum + Math.max(c.fixedSpent, c.hasManual ? c.manualBudget : c.fixedSpent);
-    }, 0);
-
-    const unallocatedPool = Math.max(0, pool - lockedSum);
-    const eligibleCats = catData.filter((c) => !c.hasManual && c.fixedSpent <= 2000);
-
     const getVariableWeight = (name: string) => {
       const lower = name.toLowerCase();
       if (lower.includes('mat') || lower.includes('dagligvaror') || lower.includes('livsmedel') || lower.includes('mad') || lower.includes('ruoka') || lower.includes('groceries')) return 0.50;
@@ -124,50 +120,81 @@ export function BudgetCategoriesView({
       return 0.05;
     };
 
-    const totalWeight = eligibleCats.reduce((sum, c) => sum + getVariableWeight(c.name), 0) || 1;
+    const unallocatedWithManuals = pool - catData.reduce((sum, c) => sum + Math.max(c.fixedSpent, c.hasManual ? c.manualBudget : c.fixedSpent), 0);
+    const openEligibleCats = catData.filter((c) => !c.hasManual && c.fixedSpent <= 2000);
+    const shouldRedistributeAllVariable = unallocatedWithManuals <= 0 || openEligibleCats.length === 0;
+
+    const lockedSum = catData.reduce((sum, c) => {
+      if (shouldRedistributeAllVariable) return sum + c.fixedSpent;
+      return sum + Math.max(c.fixedSpent, c.hasManual ? c.manualBudget : c.fixedSpent);
+    }, 0);
+
+    const unallocatedPool = Math.max(0, pool - lockedSum);
+    const eligibleCats = shouldRedistributeAllVariable
+      ? catData.filter((c) => c.fixedSpent <= 2000)
+      : openEligibleCats;
+    const finalEligibleCats = eligibleCats.length > 0 ? eligibleCats : catData;
+
+    const totalWeight = finalEligibleCats.reduce((sum, c) => sum + getVariableWeight(c.name), 0) || 1;
 
     const proposed = catData.map((c) => {
-      if (c.hasManual) {
-        return { name: c.name, budget: c.manualBudget, icon: c.icon, color: c.color, id: c.id };
-      }
-      if (c.fixedSpent > 2000) {
-        // Heavy fixed cost category (e.g. Rent/Boende), set budget equal to fixed expenses
-        return { name: c.name, budget: c.fixedSpent, icon: c.icon, color: c.color, id: c.id };
+      const isEligible = finalEligibleCats.some((ec) => ec.name === c.name);
+      if (!isEligible) {
+        const baseVal = shouldRedistributeAllVariable ? c.fixedSpent : Math.max(c.fixedSpent, c.manualBudget);
+        return { name: c.name, budget: baseVal, fixedSpent: c.fixedSpent };
       }
       const weight = getVariableWeight(c.name);
       const rawShare = (weight / totalWeight) * unallocatedPool;
-      // Round to nearest 100 kr for natural rounded numbers
       const roundedShare = Math.round(rawShare / 100) * 100;
       const finalVal = Math.max(c.fixedSpent, c.fixedSpent + roundedShare);
-      return { name: c.name, budget: finalVal, icon: c.icon, color: c.color, id: c.id };
+      return { name: c.name, budget: finalVal, fixedSpent: c.fixedSpent };
     });
 
-    const initialEditable: Record<string, string> = {};
-    proposed.forEach(p => {
-      initialEditable[p.name] = String(p.budget);
+    // Adjust rounding remainder onto the highest-weighted eligible category so the proposal sums to 100% of pool
+    if (unallocatedPool > 0 && proposed.length > 0) {
+      const currentProposedSum = proposed.reduce((sum, p) => sum + p.budget, 0);
+      const remainder = pool - currentProposedSum;
+      if (remainder !== 0) {
+        let bestIdx = -1;
+        let bestWeight = -1;
+        proposed.forEach((p, idx) => {
+          const isEligible = finalEligibleCats.some((ec) => ec.name === p.name);
+          if (isEligible) {
+            const w = getVariableWeight(p.name);
+            if (w > bestWeight && p.budget + remainder >= p.fixedSpent) {
+              bestWeight = w;
+              bestIdx = idx;
+            }
+          }
+        });
+        if (bestIdx !== -1) {
+          proposed[bestIdx] = {
+            ...proposed[bestIdx],
+            budget: Math.max(proposed[bestIdx].fixedSpent, proposed[bestIdx].budget + remainder),
+          };
+        }
+      }
+    }
+
+    const proposedMap: Record<string, number> = {};
+    proposed.forEach((p) => {
+      proposedMap[p.name] = p.budget;
     });
 
-    setAutoAllocateData({ proposed, unallocatedPool });
-    setEditableProposedBudgets(initialEditable);
-    setIsAutoAllocateModalOpen(true);
-  };
-
-  const handleApplyAutoAllocate = async () => {
-    if (!autoAllocateData) return;
-    const updatedCategories = (config.categories || DEFAULT_EXPENSE_CATEGORIES).map((c) => {
-      const newBudgetValue = Number(editableProposedBudgets[c.name]);
-      const fixed = Math.round(getFixedSpentForCategory(c.name));
-      const finalVal = Math.max(fixed, !isNaN(newBudgetValue) ? newBudgetValue : 0);
+    const updatedCategories = categories.map((c) => {
+      const val = proposedMap[c.name] ?? (Number(c.budget) || 0);
       return {
         ...c,
-        budget: finalVal > 0 ? finalVal : null,
+        budget: val > 0 ? val : null,
       };
     });
 
-    try {
-      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-    } catch (_e) {
-      // ignore
+    if (userId) {
+      try {
+        localStorage.setItem(`dejz_has_saved_initial_budget_${userId}`, 'true');
+      } catch (_e) {
+        // ignore
+      }
     }
 
     const updatedConfig = {
@@ -183,7 +210,31 @@ export function BudgetCategoriesView({
         console.warn('Could not save auto-allocated budget:', err);
       }
     }
-    setIsAutoAllocateModalOpen(false);
+  };
+
+  const handleUndoAutoAllocate = async () => {
+    if (!previousBudgetsSnapshot) return;
+    const categories = config.categories || DEFAULT_EXPENSE_CATEGORIES;
+    const restoredCategories = categories.map((c) => ({
+      ...c,
+      budget: previousBudgetsSnapshot[c.name] !== undefined ? previousBudgetsSnapshot[c.name] : c.budget,
+    }));
+    const hasAnyBudget = restoredCategories.some((c) => typeof c.budget === 'number' && c.budget > 0);
+
+    const updatedConfig = {
+      ...config,
+      categories: restoredCategories,
+      hasSavedInitialBudget: hasAnyBudget,
+    };
+    setPreviousBudgetsSnapshot(null);
+    setConfig(updatedConfig);
+    if (userId) {
+      try {
+        await dataService.saveSettings(userId, updatedConfig);
+      } catch (err) {
+        console.warn('Could not undo auto-allocated budget:', err);
+      }
+    }
   };
   const activeExpenses = getActiveFixedExpenses(fixedExpenses, new Date(), stats?.periodStart, stats?.periodEnd);
 
@@ -191,47 +242,44 @@ export function BudgetCategoriesView({
     return (activeExpenses || [])
       .filter((e) => (e.category || '').trim().toLowerCase() === (catName || '').trim().toLowerCase())
       .reduce((sum, e) => {
+        if (stats?.periodStart && stats?.periodEnd && !isFixedItemDueInPeriod(e, stats.periodStart, stats.periodEnd)) {
+          return sum;
+        }
         const amount =
           e.isVariable && e.periodOverrides && currentPeriodId && e.periodOverrides[currentPeriodId] !== undefined
             ? e.periodOverrides[currentPeriodId]
             : Number(e.amount) || 0;
-        switch (e.frequency) {
-          case Frequency.QUARTERLY:
-            return sum + amount / 3;
-          case Frequency.SEMI_ANNUALLY:
-            return sum + amount / 6;
-          case Frequency.ANNUALLY:
-            return sum + amount / 12;
-          default:
-            return sum + amount;
-        }
+        return sum + amount;
       }, 0);
   };
 
-  const totalIncomeSum = (incomes || []).reduce((sum, i) => {
-    const amount =
-      i.isVariable && i.periodOverrides && currentPeriodId && i.periodOverrides[currentPeriodId] !== undefined
-        ? i.periodOverrides[currentPeriodId]
-        : Number(i.amount) || 0;
-    return sum + amount;
-  }, 0);
+  const totalIncomeSum =
+    stats?.totalIncome !== undefined
+      ? stats.totalIncome
+      : (incomes || []).reduce((sum, i) => {
+          if (stats?.periodStart && stats?.periodEnd && !isFixedItemDueInPeriod(i, stats.periodStart, stats.periodEnd)) {
+            return sum;
+          }
+          const amount =
+            i.isVariable && i.periodOverrides && currentPeriodId && i.periodOverrides[currentPeriodId] !== undefined
+              ? i.periodOverrides[currentPeriodId]
+              : Number(i.amount) || 0;
+          return sum + amount;
+        }, 0);
 
-  const totalFixedSum = (activeExpenses || []).reduce((sum, e) => {
-    const amount =
-      e.isVariable && e.periodOverrides && currentPeriodId && e.periodOverrides[currentPeriodId] !== undefined
-        ? e.periodOverrides[currentPeriodId]
-        : Number(e.amount) || 0;
-    switch (e.frequency) {
-      case Frequency.QUARTERLY:
-        return sum + amount / 3;
-      case Frequency.SEMI_ANNUALLY:
-        return sum + amount / 6;
-      case Frequency.ANNUALLY:
-        return sum + amount / 12;
-      default:
-        return sum + amount;
-    }
-  }, 0);
+  const totalFixedSum =
+    stats?.totalFixed !== undefined
+      ? stats.totalFixed
+      : (activeExpenses || []).reduce((sum, e) => {
+          if (stats?.periodStart && stats?.periodEnd && !isFixedItemDueInPeriod(e, stats.periodStart, stats.periodEnd)) {
+            return sum;
+          }
+          const amount =
+            e.isVariable && e.periodOverrides && currentPeriodId && e.periodOverrides[currentPeriodId] !== undefined
+              ? e.periodOverrides[currentPeriodId]
+              : Number(e.amount) || 0;
+          return sum + amount;
+        }, 0);
 
   const totalSavingsSum =
     stats?.totalSavings !== undefined
@@ -247,25 +295,22 @@ export function BudgetCategoriesView({
       : Number(config.monthlySavings) || 0;
 
   const calculatedEverydayBudget = Math.max(0, Math.round(totalIncomeSum - totalFixedSum - totalSavingsSum));
-  const everydayBudget = stats?.disposablePot !== undefined ? Math.round(stats.disposablePot) : calculatedEverydayBudget;
+  const _everydayBudget = stats?.disposablePot !== undefined ? Math.round(stats.disposablePot) : calculatedEverydayBudget;
 
   // Legacy Percentage Normalization on Open
+  // Strip legacy percentage defaults (<= 100) from categories if present so they never turn into pre-made budgets
   useEffect(() => {
     if (config.categories && config.categories.length > 0) {
       const budgetValues = config.categories.map((c) => Number(c.budget) || 0);
       const totalSum = budgetValues.reduce((a, b) => a + b, 0);
       const maxVal = Math.max(...budgetValues, 0);
 
-      if (maxVal <= 100 && totalSum <= 100 && totalSum > 0 && everydayBudget > 500) {
-        const normalized = config.categories.map((c) => {
-          if (!c.budget || Number(c.budget) <= 0) return { ...c, budget: null };
-          const converted = Math.round((everydayBudget * Number(c.budget)) / 100);
-          return { ...c, budget: converted > 0 ? converted : undefined };
-        });
-        setConfig({ ...config, categories: normalized });
+      if (maxVal <= 100 && totalSum <= 100 && totalSum > 0) {
+        const cleaned = config.categories.map((c) => ({ ...c, budget: null }));
+        setConfig({ ...config, categories: cleaned, hasSavedInitialBudget: false });
       }
     }
-  }, [everydayBudget]);
+  }, []);
 
   const totalPoolToAllocate = Math.max(0, totalIncomeSum - totalSavingsSum);
 
@@ -278,26 +323,44 @@ export function BudgetCategoriesView({
   const remainingToAllocate = totalPoolToAllocate - totalCategoryAllocated;
   const isOverAllocated = remainingToAllocate < 0;
 
-  const handleResetCategoryBudgets = () => {
+  const handleResetCategoryBudgets = async () => {
     const resetCategories = (config.categories || []).map((c) => ({
       ...c,
       budget: null,
     }));
-    setConfig({ ...config, categories: resetCategories });
+    if (userId && userId !== 'sandbox') {
+      try {
+        localStorage.removeItem('dejz_has_saved_initial_budget');
+        localStorage.removeItem('dejz_has_saved_budget');
+        localStorage.removeItem(`dejz_has_saved_initial_budget_${userId}`);
+      } catch (_e) {
+        // ignore
+      }
+    }
+    setPreviousBudgetsSnapshot(null);
+    const updatedConfig = { ...config, categories: resetCategories, hasSavedInitialBudget: false };
+    setConfig(updatedConfig);
+    if (userId) {
+      try {
+        await dataService.saveSettings(userId, updatedConfig);
+      } catch (err) {
+        console.warn('Could not save reset category budgets:', err);
+      }
+    }
     setShowResetBudgetConfirm(false);
   };
 
   const _handleSaveBudgetDone = () => {
-    try {
-      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-    } catch (_e) {
-      // ignore
+    const hasAnyBudget = Boolean(
+      config.categories && config.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)
+    );
+    if (hasAnyBudget) {
+      const updatedConfig = {
+        ...config,
+        hasSavedInitialBudget: true,
+      };
+      setConfig(updatedConfig);
     }
-    const updatedConfig = {
-      ...config,
-      hasSavedInitialBudget: true,
-    };
-    setConfig(updatedConfig);
     if (onDone) {
       onDone();
     }
@@ -366,13 +429,17 @@ export function BudgetCategoriesView({
       });
     }
 
-    try {
-      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-    } catch (_e) {
-      // ignore
+    const nextExpenseCats = field === 'categories' ? currentCategories : (config.categories || []);
+    const hasAnyBudget = nextExpenseCats.some((c: any) => typeof c.budget === 'number' && c.budget > 0);
+    if (hasAnyBudget && userId) {
+      try {
+        localStorage.setItem(`dejz_has_saved_initial_budget_${userId}`, 'true');
+      } catch (_e) {
+        // ignore
+      }
     }
 
-    setConfig({ ...config, [field]: currentCategories, hasSavedInitialBudget: true });
+    setConfig({ ...config, [field]: currentCategories, hasSavedInitialBudget: hasAnyBudget });
     setIsCategoryModalOpen(false);
 
     if (oldName && newName && oldName.trim().toLowerCase() !== newName.toLowerCase()) {
@@ -386,16 +453,43 @@ export function BudgetCategoriesView({
     const cat = currentCategories[index];
     if (!cat) return;
 
-    const affected = transactions.filter(
-      (t) =>
-        t.categoryId === cat.id ||
-        (t.category && cat.name && t.category.trim().toLowerCase() === cat.name.trim().toLowerCase())
-    );
-    if (affected.length > 0) {
+    const catNameLower = (cat.name || '').trim().toLowerCase();
+
+    const affectedTxCount = transactions.filter((t) => {
+      const isMatchingType = type === 'income' ? t.type === 'income' : t.type !== 'income';
+      if (!isMatchingType) return false;
+      if (t.categoryId === cat.id) return true;
+      if (t.category && t.category.trim().toLowerCase() === catNameLower) return true;
+      if (Array.isArray(t.splits) && t.splits.some((s: any) => (s.category || '').trim().toLowerCase() === catNameLower)) {
+        return true;
+      }
+      return false;
+    }).length;
+
+    const affectedFixedCount =
+      type === 'expense'
+        ? (fixedExpenses || []).filter((fe) => (fe.category || '').trim().toLowerCase() === catNameLower).length
+        : 0;
+
+    const affectedIncomeCount =
+      type === 'income'
+        ? (incomes || []).filter((inc) => (inc.category || '').trim().toLowerCase() === catNameLower).length
+        : 0;
+
+    const totalAffected = affectedTxCount + affectedFixedCount + affectedIncomeCount;
+
+    if (totalAffected > 0) {
       const otherCats = currentCategories.filter((c) => c.id !== cat.id);
-      const ovrigt = otherCats.find((c) => c.id === 'ovrigt' || c.name.toLowerCase() === 'övrigt') || otherCats[0];
+      const ovrigt =
+        otherCats.find(
+          (c) =>
+            c.id === 'ovrigt' ||
+            c.name.toLowerCase() === 'övrigt' ||
+            c.id === 'inc_other' ||
+            c.name.toLowerCase() === 'övrig inkomst'
+        ) || otherCats[0];
       setTargetMigrationId(ovrigt?.id || otherCats[0]?.id || '');
-      setDeleteMigrationData({ type, category: cat, count: affected.length });
+      setDeleteMigrationData({ type, category: cat, count: totalAffected });
     } else {
       setDeleteConfirmIndex({ type, index, category: cat });
     }
@@ -426,7 +520,6 @@ export function BudgetCategoriesView({
             variant="tonal"
             size="sm"
             onClick={() => handleAddCategory(activeCategoryType)}
-            icon={<Plus size={13} strokeWidth={2.5} />}
             className="shrink-0"
           >
             {t('newCategory')}
@@ -442,13 +535,18 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-[var(--surface-color)] rounded-card card-p shadow-subtle border border-subtle space-y-3"
+              className="sticky top-0 z-20 bg-[var(--surface-color)] rounded-card card-p shadow-subtle space-y-3"
             >
               <div className="flex items-end justify-between gap-3">
-                <div className="space-y-0.5 min-w-0">
-                  <span className="text-metric-label font-medium text-[var(--text-secondary)] block">
-                    {isEn ? 'Left to allocate' : 'Kvar att fördela'}
-                  </span>
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-metric-label font-medium text-[var(--text-secondary)]">
+                      {isEn ? 'Left to allocate' : 'Kvar att fördela'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[var(--surface-muted)] text-micro-label font-medium text-[var(--text-secondary)]">
+                      {isEn ? 'Optional' : 'Valfritt'}
+                    </span>
+                  </div>
                   <div
                     className={`text-large-amount font-bold font-amount tabular-nums leading-tight ${
                       isOverAllocated
@@ -460,7 +558,7 @@ export function BudgetCategoriesView({
                   </div>
                 </div>
 
-                <div className="text-right text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums shrink-0 pb-0.5">
+                <div className="px-2.5 py-1 rounded-full bg-[var(--surface-muted)] text-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums shrink-0 mb-0.5">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
@@ -477,20 +575,85 @@ export function BudgetCategoriesView({
                 />
               </div>
 
-              {/* Auto Allocate Button */}
-              <div className="flex justify-end pt-0.5">
-                <Button
-                  type="button"
-                  variant="tonal"
-                  size="sm"
-                  onClick={handleOpenAutoAllocate}
-                  disabled={remainingToAllocate <= 0}
-                  icon={<Sparkles size={13} />}
-                >
-                  {isEn ? 'Auto-allocate' : config.language === 'da' ? 'Fordel automatisk' : config.language === 'no' ? 'Fordel automatisk' : config.language === 'fi' ? 'Jaa automaattisesti' : 'Fördela automatiskt'}
-                </Button>
+              <p className="text-micro-label text-[var(--text-secondary)] leading-relaxed">
+                {isEn
+                  ? 'You do not need to allocate everything. Any unassigned amount stays safely in your general "Available to spend" pot.'
+                  : 'Du behöver inte fördela allt. Allt du inte låser till en kategori ingår automatiskt i din allmänna pott "Kvar att spendera".'}
+              </p>
+
+              {/* Auto Allocate / Undo + Confirm Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-0.5">
+                {previousBudgetsSnapshot ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleUndoAutoAllocate}
+                    >
+                      {isEn ? 'Undo' : config.language === 'da' ? 'Fortryd' : config.language === 'no' ? 'Angre' : config.language === 'fi' ? 'Kumoa' : 'Ångra'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setPreviousBudgetsSnapshot(null)}
+                    >
+                      {isEn ? 'Approve' : config.language === 'da' ? 'Godkend' : config.language === 'no' ? 'Godkjenn' : config.language === 'fi' ? 'Hyväksy' : 'Godkänn'}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="tonal"
+                    size="sm"
+                    onClick={handleAutoAllocateInline}
+                    disabled={totalPoolToAllocate <= 0}
+                  >
+                    {isEn ? 'Auto-allocate' : config.language === 'da' ? 'Fordel automatisk' : config.language === 'no' ? 'Fordel automatisk' : config.language === 'fi' ? 'Jaa automaattisesti' : 'Fördela automatiskt'}
+                  </Button>
+                )}
               </div>
             </motion.div>
+          )}
+
+          {/* Inställning för att visa/dölja budget på hemfliken */}
+          {effectiveMode !== 'categories' && (
+            <div className="flex items-center justify-between p-3.5 bg-[var(--surface-color)] rounded-card">
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] flex items-center justify-center shrink-0 text-[var(--text-secondary)]">
+                  <PieChart size={17} strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-label font-semibold text-[var(--text-primary)] truncate">
+                    {isEn ? 'Show budget on Home' : 'Visa budget på hemfliken'}
+                  </p>
+                  <p className="text-micro-label text-[var(--text-secondary)] truncate">
+                    {isEn ? 'Display category budgets under Available to spend' : 'Visas under Kvar att spendera på hemskärmen'}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={!(
+                  config.hideBudgetOnHome ??
+                    (typeof window !== 'undefined' && localStorage.getItem('dejz_hide_budget_on_home') === 'true')
+                )}
+                onChange={() => {
+                  const currentHide = Boolean(
+                    config.hideBudgetOnHome ??
+                      (typeof window !== 'undefined' && localStorage.getItem('dejz_hide_budget_on_home') === 'true')
+                  );
+                  const nextHide = !currentHide;
+                  try {
+                    localStorage.setItem('dejz_hide_budget_on_home', nextHide ? 'true' : 'false');
+                  } catch (err) {
+                    void err;
+                  }
+                  setConfig({ ...config, hideBudgetOnHome: nextHide });
+                }}
+                aria-label={isEn ? 'Show budget on Home' : 'Visa budget på hemfliken'}
+              />
+            </div>
           )}
 
           {/* 2. Utgiftskategorier */}
@@ -527,9 +690,10 @@ export function BudgetCategoriesView({
                           {cat.name}
                         </span>
                         {fixedSpent > 0 && effectiveMode === 'budget' && (
-                          <span className="text-secondary text-[var(--text-tertiary)] truncate mt-0.5">
-                            {isEn ? 'Fixed: ' : 'Fasta: '}
-                            {formatAmount(fixedSpent, config.language)} {curr}
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[var(--surface-muted)] text-micro-label font-medium text-[var(--text-secondary)] truncate mt-1 font-amount tabular-nums w-fit">
+                            {isEn
+                              ? `Fixed: ${formatAmount(fixedSpent, config.language)} ${curr}`
+                              : `Fast: ${formatAmount(fixedSpent, config.language)} ${curr}`}
                           </span>
                         )}
                       </div>
@@ -550,24 +714,48 @@ export function BudgetCategoriesView({
                               pattern="[0-9]*"
                               value={inlineInputValue}
                               onBlur={() => {
-                                const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                                const enteredVal = Number(inlineInputValue) || 0;
+                                const finalVal = enteredVal > 0 ? Math.max(fixedSpent, enteredVal) : 0;
                                 const updatedCategories = (config.categories || []).map((c) => {
                                   if (c.name === cat.name) {
                                     return { ...c, budget: finalVal > 0 ? finalVal : null };
                                   }
                                   return c;
                                 });
-                                try {
-                                  localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-                                } catch (_e) {
-                                  // ignore
+                                const hasAnyBudget = updatedCategories.some(
+                                  (c) => typeof c.budget === 'number' && c.budget > 0
+                                );
+                                if (hasAnyBudget && userId) {
+                                  try {
+                                    localStorage.setItem(`dejz_has_saved_initial_budget_${userId}`, 'true');
+                                  } catch (_e) {
+                                    // ignore
+                                  }
                                 }
-                                setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
+                                setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: hasAnyBudget });
                                 setEditingCategoryName(null);
                               }}
                               onChange={(e) => {
                                 const val = e.target.value.replace(/\D/g, '');
                                 setInlineInputValue(val);
+                                const enteredVal = Number(val) || 0;
+                                const updatedCategories = (config.categories || []).map((c) => {
+                                  if (c.name === cat.name) {
+                                    return { ...c, budget: enteredVal > 0 ? enteredVal : null };
+                                  }
+                                  return c;
+                                });
+                                const hasAnyBudget = updatedCategories.some(
+                                  (c) => typeof c.budget === 'number' && c.budget > 0
+                                );
+                                if (hasAnyBudget && userId) {
+                                  try {
+                                    localStorage.setItem(`dejz_has_saved_initial_budget_${userId}`, 'true');
+                                  } catch (_e) {
+                                    // ignore
+                                  }
+                                }
+                                setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: hasAnyBudget });
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -643,7 +831,6 @@ export function BudgetCategoriesView({
               variant="ghost"
               size="sm"
               onClick={() => setShowResetBudgetConfirm(true)}
-              icon={<RotateCcw size={13} strokeWidth={2} />}
               className="text-xs text-[var(--text-tertiary)] hover:text-[var(--danger-color)]"
             >
               {isEn ? 'Reset budget to 0' : 'Nollställ budget'}
@@ -655,7 +842,6 @@ export function BudgetCategoriesView({
               variant="ghost"
               size="sm"
               onClick={() => setIsResetCategoriesModalOpen(true)}
-              icon={<RotateCcw size={13} strokeWidth={2} />}
               className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
             >
               {isEn ? 'Reset categories to default' : 'Återställ kategorier'}
@@ -714,8 +900,8 @@ export function BudgetCategoriesView({
         >
           <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
             {isEn
-              ? `This category is used by ${deleteMigrationData.count} transactions. Choose which category to move them to.`
-              : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till.`}
+              ? `This category is used by ${deleteMigrationData.count} items. Choose which category to move them to.`
+              : `Kategorin används av ${deleteMigrationData.count} poster. Välj vilken kategori de ska flyttas till.`}
           </p>
           <div className="space-y-1.5">
             <Select
@@ -795,17 +981,72 @@ export function BudgetCategoriesView({
           title={isEn ? 'Reset categories?' : 'Återställ kategorier?'}
           message={
             isEn
-              ? 'Restore standard categories?'
-              : 'Vill du återställa till standardkategorierna?'
+              ? 'Restore standard categories? Items using custom categories will be moved to Other.'
+              : 'Vill du återställa till standardkategorierna? Utgifter och fasta kostnader med egna kategorier flyttas automatiskt till Övrigt.'
           }
           confirmText={isEn ? 'Reset' : 'Återställ'}
           cancelText={isEn ? 'Cancel' : 'Avbryt'}
           variant="danger"
           onConfirm={async () => {
+            const defaultExpenseNames = new Set(
+              DEFAULT_EXPENSE_CATEGORIES.map((c) => c.name.trim().toLowerCase())
+            );
+            const defaultIncomeNames = new Set(
+              DEFAULT_INCOME_CATEGORIES.map((c) => c.name.trim().toLowerCase())
+            );
+
+            // Find all custom / orphaned expense category names across categories, fixedExpenses, and transactions
+            const customExpenseNames = new Set<string>();
+            (config.categories || []).forEach((c) => {
+              const n = (c.name || '').trim();
+              if (n && !defaultExpenseNames.has(n.toLowerCase())) customExpenseNames.add(n);
+            });
+            (fixedExpenses || []).forEach((fe) => {
+              const n = (fe.category || '').trim();
+              if (n && !defaultExpenseNames.has(n.toLowerCase())) customExpenseNames.add(n);
+            });
+            (transactions || []).forEach((tx) => {
+              if (tx.type !== 'income') {
+                const n = (tx.category || '').trim();
+                if (n && !defaultExpenseNames.has(n.toLowerCase())) customExpenseNames.add(n);
+              }
+              if (Array.isArray(tx.splits)) {
+                tx.splits.forEach((s: any) => {
+                  const sn = (s.category || '').trim();
+                  if (sn && !defaultExpenseNames.has(sn.toLowerCase())) customExpenseNames.add(sn);
+                });
+              }
+            });
+
+            // Find all custom / orphaned income category names
+            const customIncomeNames = new Set<string>();
+            (config.incomeCategories || []).forEach((c) => {
+              const n = (c.name || '').trim();
+              if (n && !defaultIncomeNames.has(n.toLowerCase())) customIncomeNames.add(n);
+            });
+            (incomes || []).forEach((inc) => {
+              const n = (inc.category || '').trim();
+              if (n && !defaultIncomeNames.has(n.toLowerCase())) customIncomeNames.add(n);
+            });
+            (transactions || []).forEach((tx) => {
+              if (tx.type === 'income') {
+                const n = (tx.category || '').trim();
+                if (n && !defaultIncomeNames.has(n.toLowerCase())) customIncomeNames.add(n);
+              }
+            });
+
+            for (const oldExpName of customExpenseNames) {
+              await onRenameCategory?.('expense', oldExpName, 'Övrigt');
+            }
+            for (const oldIncName of customIncomeNames) {
+              await onRenameCategory?.('income', oldIncName, 'Övrig inkomst');
+            }
+
             const updatedConfig = {
               ...config,
-              categories: DEFAULT_EXPENSE_CATEGORIES,
+              categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: null })),
               incomeCategories: DEFAULT_INCOME_CATEGORIES,
+              hasSavedInitialBudget: false,
             };
             setConfig(updatedConfig);
             if (userId) {
@@ -818,79 +1059,6 @@ export function BudgetCategoriesView({
         />
       )}
 
-      {/* Auto Allocate Modal / Bottom Sheet */}
-      <Modal
-        isOpen={isAutoAllocateModalOpen}
-        onClose={() => setIsAutoAllocateModalOpen(false)}
-        size="md"
-        title={isEn ? 'Automatic budget proposal' : config.language === 'da' ? 'Automatisk budgetforslag' : config.language === 'no' ? 'Automatisk budsjettforslag' : config.language === 'fi' ? 'Automaattinen budjettiehdotus' : 'Automatiskt budgetförslag'}
-        subtitle={isEn ? 'Based on your income, fixed expenses, and recommended weights.' : config.language === 'da' ? 'Baseret på dine indtægter, faste udgifter og anbefalede vægte.' : config.language === 'no' ? 'Basert på inntekter, faste utgifter og anbefalte vekter.' : config.language === 'fi' ? 'Perustuu tuloihin, kiinteisiin kuluihin ja suositeltuihin painotuksiin.' : 'Baserat på dina inkomster, fasta kostnader och rekommenderade vikter.'}
-        showCloseButton={true}
-        bodyClassName="p-5 sm:p-6 space-y-4"
-      >
-        <div className="space-y-4">
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            {isEn
-              ? 'We have allocated your budget based on your fixed expenses and available funds. Adjust the amounts before saving.'
-              : config.language === 'da'
-              ? 'Vi har fordelt dit budget ud fra dine faste udgifter og tilgængelige penge. Juster beløbene, før du gemmer.'
-              : config.language === 'no'
-              ? 'Vi har fordelt budsjettet ditt basert på faste utgifter og tilgjengelige penger. Juster beløpene før du lagrer.'
-              : config.language === 'fi'
-              ? 'Olemme jaanut budjettisi kiinteiden kulujen ja käytettävissä olevien varojen perusteella. Säädä summia ennen tallennusta.'
-              : 'Vi har fördelat din budget utifrån dina fasta utgifter och tillgängliga pengar. Justera beloppen innan du sparar.'}
-          </p>
-
-          <div className="max-h-60 overflow-y-auto space-y-2 pr-1 divide-y divide-[var(--border-subtle)]">
-            {(autoAllocateData?.proposed || []).map((item) => {
-              const catColor = item.color || getCategoryColor(item.name, config?.categories);
-              return (
-                <div key={item.name} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <CategoryIcon icon={item.icon} color={catColor} size="xs" categoryName={item.name} />
-                    <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                      {item.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={editableProposedBudgets[item.name] !== undefined ? editableProposedBudgets[item.name] : item.budget}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditableProposedBudgets((prev) => ({ ...prev, [item.name]: val }));
-                      }}
-                      className="w-24 text-right bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-md px-2 py-1 text-xs font-bold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
-                    />
-                    <span className="text-xs text-[var(--text-secondary)]">{curr}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="pt-2 flex items-center gap-3">
-            <Button
-              variant="secondary"
-              fullWidth
-              size="md"
-              onClick={() => setIsAutoAllocateModalOpen(false)}
-            >
-              {isEn ? 'Cancel' : config.language === 'da' ? 'Annuller' : config.language === 'no' ? 'Avbryt' : config.language === 'fi' ? 'Peruuta' : 'Avbryt'}
-            </Button>
-            <Button
-              variant="primary"
-              fullWidth
-              size="md"
-              onClick={handleApplyAutoAllocate}
-            >
-              {isEn ? 'Apply proposal' : config.language === 'da' ? 'Brug forslag' : config.language === 'no' ? 'Bruk forslag' : config.language === 'fi' ? 'Käytä ehdotusta' : 'Använd förslag'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

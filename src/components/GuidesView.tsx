@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { BookOpen, Calendar, PieChart, Receipt, Sparkles, ChevronRight, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, Calendar, PieChart, Receipt, Sparkles, ChevronRight, CheckCircle } from 'lucide-react';
 import { Config } from '../types';
 import { Card } from './ui';
 
@@ -21,7 +21,6 @@ interface GuideItem {
     title: string;
     description: string;
     tip?: string;
-    imagePlaceholder?: string;
   }[];
 }
 
@@ -51,14 +50,12 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
             ? 'Tap the large green plus button at the bottom of the screen. Enter the amount, choose a category, and optionally attach a receipt.'
             : 'Tryck på den stora plusknappen längst ner i mitten. Skriv in beloppet, välj kategori och lägg till ett kvitto om du vill.',
           tip: isEn ? 'Tip: Use Quick Choices for your most common daily purchases.' : 'Tips: Använd snabbvalen för dina vanligaste återkommande köp som kaffe eller lunch.',
-          imagePlaceholder: isEn ? 'Screenshot: Add Expense Screen' : 'Skärmdump: Lägg till utgift',
         },
         {
           title: isEn ? '2. See what is left until payday' : '2. Se vad som finns kvar till lön',
           description: isEn
             ? 'On the Home screen, the main number shows how much you have left to spend after all fixed bills, savings, and logged purchases are deducted.'
             : 'På hemfliken visar det stora beloppet exakt hur mycket du har kvar att röra dig med fram till nästa lön efter att räkningar, sparande och gjorda köp dragits av.',
-          imagePlaceholder: isEn ? 'Screenshot: Home Screen & Balance' : 'Skärmdump: Hemfliken med kvar till lön',
         },
       ],
     },
@@ -74,7 +71,6 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
           description: isEn
             ? 'Dejz calculates everything based on your salary cycle (e.g. the 25th) instead of standard calendar months.'
             : 'Dejz räknar allt från din faktiska lönedag (t.ex. den 25:e) istället för stela kalendermånader. Du kan även slå på justering för helgdagar.',
-          imagePlaceholder: isEn ? 'Screenshot: Salary Settings' : 'Skärmdump: Löneinställningar',
         },
         {
           title: isEn ? '2. How your available balance is calculated' : '2. Så räknas ditt fria utrymme ut',
@@ -97,7 +93,6 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
           description: isEn
             ? 'Under the Budget tab, add rent, insurance, phone bills, and streaming services. You can choose monthly, quarterly, or annual frequency.'
             : 'Under Budget-fliken lägger du in hyra, försäkringar, el, mobilabonnemang och streaming. Du kan välja månadsvis, kvartalsvis eller årsvis fördelning.',
-          imagePlaceholder: isEn ? 'Screenshot: Fixed Expenses List' : 'Skärmdump: Fasta utgifter',
         },
         {
           title: isEn ? '2. Set up monthly savings' : '2. Automatiskt månadssparande',
@@ -119,7 +114,6 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
           description: isEn
             ? 'Go to Settings → Budget & Categories. Tap any category card to set the target budget or change its icon and color.'
             : 'Gå till Profil → Budget & kategorier. Klicka på ett kort för att sätta ett budgetbelopp eller ändra namn, ikon och färg.',
-          imagePlaceholder: isEn ? 'Screenshot: Category Budget Cards' : 'Skärmdump: Kategorikort & budget',
         },
       ],
     },
@@ -170,34 +164,19 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
           </Card>
 
           {/* Guide Steps */}
-          <div className="space-y-[var(--card-gap)]">
+          <Card variant="default" padding="none" className="divide-y divide-subtle overflow-hidden">
             {selectedGuide.steps.map((step, idx) => (
-              <Card
+              <div
                 key={idx}
-                variant="default"
-                padding="lg"
-                className="space-y-[var(--card-gap)]"
+                className="p-5 space-y-2.5"
               >
-                <h3 className="text-body font-bold text-[var(--text-primary)]">
+                <h3 className="text-body font-semibold text-[var(--text-primary)]">
                   {step.title}
                 </h3>
 
                 <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
                   {step.description}
                 </p>
-
-                {/* Screenshot Placeholder */}
-                {step.imagePlaceholder && (
-                  <div className="rounded-[var(--radius-card,16px)] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-subtle p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
-                    <ImageIcon size={24} strokeWidth={1.5} className="opacity-50" />
-                    <span className="text-label font-medium">
-                      {step.imagePlaceholder}
-                    </span>
-                    <span className="text-micro-label opacity-60">
-                      {isEn ? '(Drop your screenshot here)' : '(Plats för skärmdump)'}
-                    </span>
-                  </div>
-                )}
 
                 {/* Tip box if any */}
                 {step.tip && (
@@ -206,28 +185,24 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
                     <span className="leading-snug">{step.tip}</span>
                   </div>
                 )}
-              </Card>
+              </div>
             ))}
-          </div>
+          </Card>
         </div>
       ) : (
         /* Guides Index List */
-        <div className="flex flex-col gap-element">
+        <Card variant="default" padding="none" className="divide-y divide-menu overflow-hidden">
           {guides.map((g) => {
             const Icon = g.icon;
             return (
-              <Card
+              <button
                 key={g.id}
-                variant="default"
-                padding="md"
-                interactive
+                type="button"
                 onClick={() => handleSelectGuide(g.id)}
-                className="w-full flex items-center justify-between gap-3 text-left cursor-pointer group"
+                className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer group hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <Icon size={18} strokeWidth={2} />
-                  </div>
+                  <Icon size={18} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
                   <div className="min-w-0">
                     <span className="text-body-medium font-semibold text-[var(--text-primary)] block truncate">
                       {g.title}
@@ -238,14 +213,14 @@ export function GuidesView({ config, selectedGuideId: externalGuideId, onSelectG
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 text-secondary font-medium text-[var(--text-secondary)] shrink-0">
+                <div className="flex items-center gap-1.5 text-secondary font-medium text-[var(--text-secondary)] shrink-0">
                   <span className="text-label opacity-75">{g.readTime}</span>
                   <ChevronRight size={16} strokeWidth={2.2} className="group-hover:translate-x-0.5 transition-transform opacity-60" />
                 </div>
-              </Card>
+              </button>
             );
           })}
-        </div>
+        </Card>
       )}
     </motion.div>
   );

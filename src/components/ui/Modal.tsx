@@ -118,7 +118,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Header */}
             {(title || showCloseButton || headerRight) && (
-              <div className={`flex items-center justify-between px-5 sm:px-6 pt-3 sm:pt-4 pb-3 border-b border-subtle shrink-0 ${headerClassName}`}>
+              <div className={`flex items-center justify-between px-5 sm:px-6 pt-3 sm:pt-4 pb-3 border-b border-divider shrink-0 ${headerClassName}`}>
                 <div className="flex flex-col pr-4 min-w-0">
                   {title && (
                     <h2 className="text-section-title truncate">
@@ -154,7 +154,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--modal-bg,var(--bg-color))] shrink-0">
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-divider bg-[var(--modal-bg,var(--bg-color))] shrink-0">
                 {footer}
               </div>
             )}

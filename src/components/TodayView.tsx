@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useCallback } from "react";
 import {
   RotateCcw,
-  SlidersHorizontal,
   ChevronRight,
   Calendar,
   Clock,
@@ -12,17 +11,18 @@ import {
   Config,
   Income,
   FixedExpense,
-  Frequency,
 } from "../types";
 import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
+import { TransactionLogo } from "./TransactionLogo";
 import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
 import { Button, Modal } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
-import { isExpenseCancelledAndExpired } from "../utils/cancellation";
+import { isFixedPaymentScheduledOnDate } from "../utils/cancellation";
+import { isFixedItemScheduledOnDay } from "../utils/date";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
@@ -79,8 +79,8 @@ export function TodayView({
   onDeleteTransaction,
   onToggleStar,
   onNavigate,
-  attentionItems: _attentionItems = [],
-  onEditAttentionItem: _onEditAttentionItem,
+  attentionItems = [],
+  onEditAttentionItem,
   _transactions,
   allTransactions = [],
   t,
@@ -191,75 +191,50 @@ export function TodayView({
   }, [calendarDays, normalizedSelectedDate]);
 
   const fixedTransactions = useMemo(() => {
-    const day = normalizedSelectedDate.getDate();
     const transactions: any[] = [];
     const periodId = stats?.periodId;
 
     incomes.forEach((i) => {
-      if (i.deductionDay === day) {
-        let isActiveThisMonth = true;
-        const currentMonth = normalizedSelectedDate.getMonth();
-        
-        if (i.frequency && i.startMonth !== undefined && i.frequency !== Frequency.MONTHLY) {
-          const startM = i.startMonth;
-          if (i.frequency === Frequency.QUARTERLY) isActiveThisMonth = (currentMonth - startM) % 3 === 0;
-          else if (i.frequency === Frequency.SEMI_ANNUALLY) isActiveThisMonth = (currentMonth - startM) % 6 === 0;
-          else if (i.frequency === Frequency.ANNUALLY) isActiveThisMonth = currentMonth === startM;
-        }
+      if (isFixedItemScheduledOnDay(i, normalizedSelectedDate)) {
+        const amount =
+          i.isVariable &&
+          periodId &&
+          i.periodOverrides &&
+          i.periodOverrides[periodId] !== undefined
+            ? i.periodOverrides[periodId]
+            : i.amount;
 
-        if (isActiveThisMonth) {
-          const amount =
-            i.isVariable &&
-            periodId &&
-            i.periodOverrides &&
-            i.periodOverrides[periodId] !== undefined
-              ? i.periodOverrides[periodId]
-              : i.amount;
-
-          transactions.push({
-            id: `income-${i.id}`,
-            merchant: i.name,
-            category: i.category || (lang === "en" ? "Income" : "Inkomst"),
-            amount: amount,
-            type: "income",
-            originalItem: i,
-          });
-        }
+        transactions.push({
+          id: `income-${i.id}`,
+          merchant: i.name,
+          category: i.category || (lang === "en" ? "Income" : "Inkomst"),
+          amount: amount,
+          type: "income",
+          originalItem: i,
+        });
       }
     });
 
     fixedExpenses.forEach((fe) => {
-      if (isExpenseCancelledAndExpired(fe, normalizedSelectedDate)) return;
+      if (!isFixedPaymentScheduledOnDate(fe, normalizedSelectedDate)) return;
 
-      if (fe.deductionDay === day) {
-        let isActiveThisMonth = true;
-        const currentMonth = normalizedSelectedDate.getMonth();
-        
-        if (fe.frequency && fe.startMonth !== undefined && fe.frequency !== Frequency.MONTHLY) {
-          const startM = fe.startMonth;
-          if (fe.frequency === Frequency.QUARTERLY) isActiveThisMonth = (currentMonth - startM) % 3 === 0;
-          else if (fe.frequency === Frequency.SEMI_ANNUALLY) isActiveThisMonth = (currentMonth - startM) % 6 === 0;
-          else if (fe.frequency === Frequency.ANNUALLY) isActiveThisMonth = currentMonth === startM;
-        }
+      if (isFixedItemScheduledOnDay(fe, normalizedSelectedDate)) {
+        const amount =
+          fe.isVariable &&
+          periodId &&
+          fe.periodOverrides &&
+          fe.periodOverrides[periodId] !== undefined
+            ? fe.periodOverrides[periodId]
+            : fe.amount;
 
-        if (isActiveThisMonth) {
-          const amount =
-            fe.isVariable &&
-            periodId &&
-            fe.periodOverrides &&
-            fe.periodOverrides[periodId] !== undefined
-              ? fe.periodOverrides[periodId]
-              : fe.amount;
-
-          transactions.push({
-            id: `fixed-${fe.id}`,
-            merchant: fe.name,
-            category: fe.category || (lang === "en" ? "Fixed Expense" : "Fast utgift"),
-            amount: amount,
-            type: "expense",
-            originalItem: fe,
-          });
-        }
+        transactions.push({
+          id: `fixed-${fe.id}`,
+          merchant: fe.name,
+          category: fe.category || (lang === "en" ? "Fixed Expense" : "Fast utgift"),
+          amount: amount,
+          type: "expense",
+          originalItem: fe,
+        });
       }
     });
 
@@ -268,7 +243,7 @@ export function TodayView({
       : (stats?.savingsGoals || []);
 
     savingsList.forEach((goal: any) => {
-      if (goal.deductionDay === day) {
+      if (isFixedItemScheduledOnDay(goal, normalizedSelectedDate)) {
         const itemAmount = goal.amount !== undefined && goal.amount !== null ? goal.amount : goal.targetAmount;
         transactions.push({
           id: goal.id ? (goal.id.startsWith('saving-') ? goal.id : `saving-${goal.id}`) : `saving-${Math.random()}`,
@@ -288,15 +263,14 @@ export function TodayView({
   }, [normalizedSelectedDate, incomes, fixedExpenses, config?.monthlySavingsItems, stats?.savingsGoals, stats?.periodId, lang]);
 
   const hasSavedBudget = useMemo(() => {
-    return Boolean(
-      config?.hasSavedInitialBudget ||
+    if (config?.hasSavedInitialBudget === false) {
+      return false;
+    }
+    const hasCategoryWithBudget = Boolean(
       (config?.categories && config.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)) ||
-      (stats?.categories && Object.values(stats.categories).some((c: any) => typeof c.userBudget === 'number' && c.userBudget > 0)) ||
-      (typeof window !== 'undefined' && (
-        localStorage.getItem('dejz_has_saved_initial_budget') === 'true' ||
-        localStorage.getItem('dejz_has_saved_budget') === 'true'
-      ))
+      (stats?.categories && Object.values(stats.categories).some((c: any) => typeof c.userBudget === 'number' && c.userBudget > 0))
     );
+    return hasCategoryWithBudget;
   }, [config?.hasSavedInitialBudget, config?.categories, stats?.categories]);
 
   const categoryBudgetData = useMemo(() => {
@@ -334,15 +308,32 @@ export function TodayView({
         return cat.variableSpent > 0 || cat.remaining > 0;
       })
       .sort((a: any, b: any) => {
-        const aOver = a.hasBudget && a.isOverBudget;
-        const bOver = b.hasBudget && b.isOverBudget;
-        if (aOver && !bOver) return -1;
-        if (!aOver && bOver) return 1;
-        const aPct = a.hasBudget ? a.percentage : 0;
-        const bPct = b.hasBudget ? b.percentage : 0;
-        return bPct - aPct;
+        const getTier = (c: any) => {
+          if (c.hasBudget && c.isOverBudget) return 0; // 1. Överskridna först
+          if (c.hasBudget && c.remaining > 0) return 1; // 2. Kategorier med pengar kvar att handla för
+          if (c.hasBudget && c.remaining === 0) return 2; // 3. Förbrukade / rena fasta utgifter (0 kr kvar)
+          return 3; // 4. Utan satt budget
+        };
+        const tierA = getTier(a);
+        const tierB = getTier(b);
+        if (tierA !== tierB) return tierA - tierB;
+
+        if (tierA === 0) {
+          return a.remaining - b.remaining; // Störst underskott först
+        }
+        if (tierA === 1) {
+          // Bland kategorier med pengar kvar: de med rörliga utgifter eller störst rörlig pott först
+          const aVarBudget = Math.max(0, a.budget - a.fixedSpent);
+          const bVarBudget = Math.max(0, b.budget - b.fixedSpent);
+          if (bVarBudget !== aVarBudget) return bVarBudget - aVarBudget;
+          return b.remaining - a.remaining;
+        }
+        if (tierA === 2) {
+          return b.variableSpent - a.variableSpent;
+        }
+        return b.spent - a.spent;
       });
-  }, [stats?.categories, config?.hideEmptyCategories]);
+  }, [stats?.categories, config?.hideEmptyCategories, config?.categories]);
 
   const displayedVariableTransactions = useMemo(() => {
     return stats?.isPastPeriod
@@ -352,11 +343,28 @@ export function TodayView({
 
   const displayedFixedTransactions = config?.showFixedExpensesInCalendar ? fixedTransactions : [];
 
+  const recentPeriodTransactions = useMemo(() => {
+    if (!stats?.periodTransactions || !Array.isArray(stats.periodTransactions)) return [];
+    return stats.periodTransactions.slice(0, 5);
+  }, [stats?.periodTransactions]);
+
+  const selectedDayNetTotal = useMemo(() => {
+    const varSum = displayedVariableTransactions.reduce((acc: number, tx: Transaction) => {
+      const amt = Number(tx.amount) || 0;
+      return tx.type === 'income' ? acc + amt : acc - amt;
+    }, 0);
+    const fixSum = displayedFixedTransactions.reduce((acc: number, tx: any) => {
+      const amt = Number(tx.amount) || 0;
+      return tx.type === 'income' ? acc + amt : acc - amt;
+    }, 0);
+    return Math.round(varSum + fixSum);
+  }, [displayedVariableTransactions, displayedFixedTransactions]);
+
   if (!stats) return null;
 
   return (
     <div className="space-y-[var(--menu-content-gap)] font-sans">
-      {/* 1. Unified Main Summary Module (Kvar att spendera + Period & Payday) */}
+      {/* 1. Unified Main Summary Module (Kvar att spendera + Hela ekonomin) */}
       <GreetingModule
         userName={userName}
         availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -391,42 +399,58 @@ export function TodayView({
         allTransactions={allTransactions}
       />
 
-      {/* 2. Category Budgets */}
-      <div className="animate-fade-in space-y-2.5 sm:space-y-3">
-        {!hasSavedBudget ? (
-          <div className="space-y-2.5 sm:space-y-3">
-            <div className="flex items-center justify-between px-0.5">
-              <h2 className="text-section-title">
-                {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
-              </h2>
-            </div>
+      {/* 1b. Variable Amounts Awaiting Confirmation (endast om det finns poster att bekräfta) */}
+      {isCurrentPeriod && attentionItems.length > 0 && onEditAttentionItem && (
+        <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle divide-y divide-menu overflow-hidden">
+          {attentionItems.slice(0, 3).map((item: any) => (
             <button
+              key={`${item.budgetType}-${item.id}`}
               type="button"
-              onClick={() => onNavigate("profile", "budget")}
-              className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
+              onClick={() => {
+                if (typeof feedback.light === 'function') feedback.light();
+                onEditAttentionItem(item);
+              }}
+              className="w-full px-3.5 py-2.5 flex items-center justify-between gap-3 text-left hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors cursor-pointer bg-transparent border-none"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
-                  <SlidersHorizontal size={18} strokeWidth={2} />
-                </div>
-                <div>
-                  <p className="text-card-title text-[var(--text-primary)] leading-snug">
-                    {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
-                  </p>
-                  <p className="text-micro-label text-[var(--text-secondary)] mt-0.5">
-                    {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
-                  </p>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <TransactionLogo
+                  transaction={{
+                    ...item,
+                    merchant: item.name,
+                    type: item.budgetType === 'income' ? 'income' : 'expense',
+                  } as any}
+                  config={config}
+                  size="sm"
+                />
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-body-medium font-medium text-[var(--text-primary)] truncate">
+                    {item.name}
+                  </span>
+                  <span className="text-micro-label text-[var(--text-secondary)] shrink-0">
+                    · {lang === 'en' ? 'Enter actual amount' : 'Ange faktiskt belopp'}
+                  </span>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+              <div
+                className={`flex items-center gap-1 shrink-0 text-micro-label font-semibold font-amount tabular-nums ${
+                  item.budgetType === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
+                }`}
+              >
+                <span>~{formatAmount(Math.abs(Math.round(Number(item.amount) || 0)), lang)} {config?.currency || 'kr'}</span>
+                <ChevronRight size={13} strokeWidth={2} className="text-[var(--text-tertiary)]" />
+              </div>
             </button>
-          </div>
-        ) : categoryBudgetData.length > 0 ? (
-          <div className="space-y-2.5 sm:space-y-3">
-            <div className="flex items-center justify-between px-0.5">
-              <h2 className="text-section-title">
-                {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
-              </h2>
+          ))}
+        </div>
+      )}
+
+      {/* 2. Category Budgets (visas endast när användaren har sparat kategoribudgetar) */}
+      {!(config?.hideBudgetOnHome ?? (typeof window !== 'undefined' && localStorage.getItem('dejz_hide_budget_on_home') === 'true')) && hasSavedBudget && categoryBudgetData.length > 0 && (
+        <div className="animate-fade-in space-y-2.5 sm:space-y-3">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-section-title">
+              {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
+            </h2>
               <button
                 type="button"
                 onClick={() => {
@@ -454,6 +478,10 @@ export function TodayView({
                 const currency = config?.currency || 'kr';
                 const isOverBudget = cat.hasBudget && (cat.isOverBudget || cat.remaining < 0);
                 const rem = Math.round(cat.remaining);
+                const isFixedOnlyExhausted = cat.hasBudget && rem === 0 && cat.variableSpent === 0 && cat.fixedSpent > 0;
+                const remainingRatio = cat.hasBudget && cat.budget > 0
+                  ? Math.max(0, Math.min(100, Math.round((cat.remaining / cat.budget) * 100)))
+                  : 0;
 
                 return (
                   <button
@@ -463,36 +491,72 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       handleCategoryClick(cat.name);
                     }}
-                    className="snap-start flex-shrink-0 min-w-[144px] sm:min-w-[160px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
+                    className="snap-start flex-shrink-0 min-w-[156px] sm:min-w-[172px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
                   >
-                    {/* Ikon */}
-                    <div className="flex items-center justify-between gap-2">
+                    {/* Ikon + Totalbudget */}
+                    <div className="flex items-center justify-between gap-2 w-full">
                       <CategoryIcon icon={cat.iconName} color={catColor} size="sm" categoryName={cat.name} />
+                      {cat.hasBudget && cat.budget > 0 && (
+                        <span className="text-micro-label text-[var(--text-tertiary)] font-amount tabular-nums truncate">
+                          Budget {formatAmount(Math.round(cat.budget), lang)} {currency}
+                        </span>
+                      )}
                     </div>
 
-                    {/* Kategorinamn och Belopp */}
-                    <div className="min-w-0 pt-0.5">
-                      <span className="text-card-title text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
-                        {cat.name}
-                      </span>
-                      <span
-                        className={`text-list-amount font-amount tabular-nums block ${
-                          isOverBudget ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
-                        }`}
-                      >
-                        {!cat.hasBudget
-                          ? `${formatAmount(Math.round(cat.spent), lang)}`
-                          : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)}`}
-                        <span className="text-[11.5px] font-normal text-[var(--text-secondary)] ml-1 inline-flex items-baseline align-baseline">{currency}</span>
-                      </span>
+                    {/* Kategorinamn, Belopp + Tunn progress-linje */}
+                    <div className="min-w-0 pt-0.5 space-y-1.5 w-full">
+                      <div>
+                        <span className="text-list-name text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
+                          {cat.name}
+                        </span>
+                        <span
+                          className={`text-list-amount font-amount tabular-nums block truncate ${
+                            isOverBudget ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
+                          }`}
+                        >
+                          {!cat.hasBudget
+                            ? `${formatAmount(Math.round(cat.spent), lang)}`
+                            : `${formatAmount(Math.abs(rem), lang)}`}
+                          <span
+                            className={`text-unit ml-1 inline-flex items-baseline align-baseline ${
+                              isOverBudget ? 'text-[var(--danger-color)] font-medium' : 'text-[var(--text-secondary)]'
+                            }`}
+                          >
+                            {currency}{' '}
+                            {!cat.hasBudget
+                              ? (lang === 'en' ? 'spent' : 'spenderat')
+                              : rem < 0
+                              ? (lang === 'en' ? 'over budget' : 'över budget')
+                              : (lang === 'en' ? 'left' : 'kvar')}
+                          </span>
+                        </span>
+                      </div>
+
+                      {cat.hasBudget && (
+                        <div className="w-full h-[3px] bg-[var(--surface-muted)] rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              isOverBudget
+                                ? 'bg-[var(--danger-color)]'
+                                : isFixedOnlyExhausted || rem === 0
+                                ? 'bg-[var(--text-tertiary)]/50'
+                                : remainingRatio <= 20
+                                ? 'bg-[var(--warning-color)]'
+                                : 'bg-[var(--success-color)]'
+                            }`}
+                            style={{
+                              width: `${isOverBudget ? 100 : remainingRatio}%`,
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </button>
                 );
               })}
             </div>
           </div>
-        ) : null}
-      </div>
+      )}
 
       {/* Monthly Deductions Timeline (Betalningar) - Sparad kod */}
 
@@ -517,7 +581,13 @@ export function TodayView({
           {/* Date Header directly connected with timeline */}
           <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
             <div className="flex items-center gap-2 min-w-0">
-              <h2 className="text-section-title truncate">
+              <h2
+                className={`text-date-header truncate ${
+                  !stats.isPastPeriod && isTodaySelected
+                    ? 'text-[var(--text-primary)] font-semibold'
+                    : 'text-[var(--text-secondary)]'
+                }`}
+              >
                 {stats.isPastPeriod
                   ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
                   : selectedDate.toDateString() === new Date().toDateString()
@@ -529,7 +599,17 @@ export function TodayView({
               </h2>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0">
+              {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && selectedDayNetTotal !== 0 && (
+                <span
+                  className={`text-label font-semibold font-amount tabular-nums ${
+                    selectedDayNetTotal > 0 ? 'text-[var(--success-color)]' : 'text-[var(--text-secondary)]'
+                  }`}
+                >
+                  {selectedDayNetTotal > 0 ? '+' : '−'}
+                  {formatAmount(Math.abs(selectedDayNetTotal), lang)} {config?.currency || 'kr'}
+                </span>
+              )}
               {!isTodaySelected && (
                 <button
                   type="button"
@@ -547,7 +627,7 @@ export function TodayView({
         {/* Selected Day's Transactions List */}
         <div className="pt-0.5">
           {displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0 ? (
-            <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+            <div className="rounded-card bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-subtle">
               {displayedVariableTransactions.map((transaction: Transaction) => (
                 <TransactionItem
                   key={transaction.id}
@@ -598,6 +678,58 @@ export function TodayView({
                 );
               })}
             </div>
+          ) : isTodaySelected && recentPeriodTransactions.length > 0 ? (
+            <div className="space-y-4">
+              <div className="rounded-card bg-[var(--surface-color)] px-4 py-3 flex items-center justify-between gap-2 shadow-subtle">
+                <span className="text-label text-[var(--text-secondary)]">
+                  {lang === "en" ? "No purchases today yet" : "Inga köp registrerade idag"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onAddTransaction(selectedDate)}
+                  className="text-micro-label font-semibold text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none p-0 shrink-0"
+                >
+                  + {t("addExpense")}
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between px-0.5">
+                  <h3 className="text-section-title">
+                    {lang === "en" ? "Recent in period" : "Senaste i perioden"}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback.light === 'function') feedback.light();
+                      onNavigate("transactions");
+                    }}
+                    className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5 bg-transparent border-none p-0"
+                  >
+                    <span>{lang === "en" ? "See all" : "Visa alla"}</span>
+                    <ChevronRight size={12} strokeWidth={2} />
+                  </button>
+                </div>
+
+                <div className="rounded-card bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-subtle">
+                  {recentPeriodTransactions.map((transaction: Transaction) => (
+                    <TransactionItem
+                      key={transaction.id}
+                      transaction={transaction}
+                      isGrouped={true}
+                      showDate={true}
+                      onView={onViewTransaction}
+                      onDelete={onDeleteTransaction}
+                      onToggleStar={onToggleStar}
+                      config={config}
+                      onClick={() => {
+                        if (onViewTransaction) onViewTransaction(transaction);
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <EmptyState
               title={isTodaySelected ? (lang === "en" ? "No transactions today" : "Inga transaktioner idag") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
@@ -616,39 +748,41 @@ export function TodayView({
         size="xs"
         title={
           <div className="flex items-center gap-2">
-            <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
+            <Info size={16} className="text-[var(--text-secondary)]" strokeWidth={2} />
             <span>{lang === 'en' ? 'Period & Payday' : 'Period & nästa lön'}</span>
           </div>
         }
       >
-        <div className="space-y-[var(--card-gap)] pt-1">
-          {/* Period */}
-          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-[var(--surface-muted)]">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
-              <Calendar size={16} strokeWidth={2} />
+        <div className="space-y-3 pt-1">
+          <div className="rounded-card bg-[var(--surface-color)] divide-y divide-menu overflow-hidden">
+            {/* Period */}
+            <div className="flex items-center gap-3 p-3.5">
+              <div className="w-8 h-8 rounded-btn-sm bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                <Calendar size={16} strokeWidth={2} />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-label text-[var(--text-secondary)]">
+                  {lang === 'en' ? 'Current period' : 'Aktuell period'}
+                </span>
+                <span className="text-card-title text-[var(--text-primary)] truncate mt-0.5">
+                  {periodIntervalText}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-label text-[var(--text-secondary)]">
-                {lang === 'en' ? 'Current period' : 'Aktuell period'}
-              </span>
-              <span className="text-card-title text-[var(--text-primary)] truncate mt-0.5">
-                {periodIntervalText}
-              </span>
-            </div>
-          </div>
 
-          {/* Payday / Next Salary */}
-          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-[var(--surface-muted)]">
-            <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
-              <Clock size={16} strokeWidth={2} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-label text-[var(--text-secondary)]">
-                {lang === 'en' ? 'Next payday' : 'Nästa lön'}
-              </span>
-              <span className="text-card-title text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
-                {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
-              </span>
+            {/* Payday / Next Salary */}
+            <div className="flex items-center gap-3 p-3.5">
+              <div className="w-8 h-8 rounded-[var(--radius-button-sm,10px)] bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                <Clock size={16} strokeWidth={2} />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-label text-[var(--text-secondary)]">
+                  {lang === 'en' ? 'Next payday' : 'Nästa lön'}
+                </span>
+                <span className="text-card-title text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
+                  {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -685,6 +819,7 @@ export function TodayView({
         onToggleStar={onToggleStar}
         onAddTransaction={onAddTransaction}
         onNavigate={onNavigate}
+        onUpdateConfig={onUpdateConfig}
         t={t}
       />
     </div>

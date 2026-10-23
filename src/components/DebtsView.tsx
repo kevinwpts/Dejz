@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, CheckCircle2, HandCoins, X, User } from 'lucide-react';
 import { Config, Debt } from '../types';
 import { formatAmount, parseAmount } from '../utils/format';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { formatShortDate } from '../utils/date';
-import { Card, Button, IconButton, FilterButtonGroup, EmptyState, BottomSheet } from './ui';
+import { Card, Button, IconButton, FilterButtonGroup, EmptyState, BottomSheet, Switch } from './ui';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
 
@@ -13,9 +13,10 @@ interface DebtsViewProps {
   onBack: () => void;
   config: Config;
   setConfig: (config: Config) => void;
+  onSettleAsTransaction?: (debt: Debt) => Promise<void> | void;
 }
 
-export function DebtsView({ config, setConfig }: DebtsViewProps) {
+export function DebtsView({ config, setConfig, onSettleAsTransaction }: DebtsViewProps) {
   const curr = config.currency || 'kr';
   const isEn = config.language === 'en';
 
@@ -23,6 +24,8 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [debtToDelete, setDebtToDelete] = useState<Debt | null>(null);
+  const [debtToSettle, setDebtToSettle] = useState<Debt | null>(null);
+  const [recordInBudgetOnSettle, setRecordInBudgetOnSettle] = useState(true);
 
   // Form State
   const [debtType, setDebtType] = useState<'owe_me' | 'i_owe'>('owe_me');
@@ -107,19 +110,34 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
     setIsModalOpen(false);
   };
 
-  const handleToggleSettle = (id: string) => {
-    if (typeof feedback?.light === 'function') feedback.light();
+  const applySettleToggle = async (debt: Debt, shouldRecordTx: boolean) => {
+    const nextSettled = !debt.isSettled;
     const updated = debts.map((d) => {
-      if (d.id === id) {
+      if (d.id === debt.id) {
         return {
           ...d,
-          isSettled: !d.isSettled,
-          settledAt: !d.isSettled ? Date.now() : undefined,
+          isSettled: nextSettled,
+          settledAt: nextSettled ? Date.now() : undefined,
         };
       }
       return d;
     });
     setConfig({ ...config, debts: updated });
+    if (nextSettled && shouldRecordTx && onSettleAsTransaction) {
+      await onSettleAsTransaction(debt);
+    }
+  };
+
+  const handleToggleSettle = (id: string) => {
+    if (typeof feedback?.light === 'function') feedback.light();
+    const target = debts.find((d) => d.id === id);
+    if (!target) return;
+    if (!target.isSettled && onSettleAsTransaction) {
+      setRecordInBudgetOnSettle(true);
+      setDebtToSettle(target);
+      return;
+    }
+    applySettleToggle(target, false);
   };
 
   const handleDeleteDebt = (id: string) => {
@@ -145,20 +163,20 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             </span>
           </div>
           <span className="text-large-amount font-amount font-bold text-[var(--success-color)] tracking-tight tabular-nums block truncate">
-            +{formatAmount(totalOweMe, config.language)} {curr}
+            {formatAmount(totalOweMe, config.language)} {curr}
           </span>
         </Card>
 
         {/* Att betala (Jag är skyldig) */}
         <Card variant="default" padding="md" className="space-y-1.5">
           <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-            <ArrowUpRight size={14} className="text-[var(--danger-color)] shrink-0" strokeWidth={2.5} />
+            <ArrowUpRight size={14} className="text-[var(--text-secondary)] shrink-0" strokeWidth={2.5} />
             <span className="text-label font-medium truncate">
               {isEn ? 'To pay' : 'Att betala'}
             </span>
           </div>
           <span className="text-large-amount font-amount font-bold text-[var(--text-primary)] tracking-tight tabular-nums block truncate">
-            −{formatAmount(totalIOwe, config.language)} {curr}
+            {formatAmount(totalIOwe, config.language)} {curr}
           </span>
         </Card>
       </div>
@@ -183,7 +201,6 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           variant="tonal"
           size="sm"
           onClick={openAddModal}
-          icon={<Plus size={13} strokeWidth={2.5} />}
           className="shrink-0"
         >
           {isEn ? 'New debt' : 'Ny skuld'}
@@ -191,123 +208,101 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       </div>
 
       {/* 3. Debt List */}
-      <div className="space-y-[var(--card-gap)]">
-        <AnimatePresence mode="popLayout">
-          {filteredDebts.length > 0 ? (
-            filteredDebts.map((item) => {
+      <div>
+        {filteredDebts.length > 0 ? (
+          <Card variant="default" padding="none" className="divide-y divide-subtle overflow-hidden">
+            {filteredDebts.map((item) => {
               const isOweMe = item.type === 'owe_me';
 
               return (
-                <motion.div
+                <div
                   key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  className={`transition-all ${item.isSettled ? 'opacity-60' : ''}`}
+                  onClick={() => openEditModal(item)}
+                  className={`px-4 py-3 sm:py-3.5 min-h-[58px] flex items-center justify-between gap-3 min-w-0 w-full overflow-hidden cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-colors select-none ${
+                    item.isSettled ? 'opacity-60' : ''
+                  }`}
                 >
-                  <Card
-                    variant="default"
-                    padding="sm"
-                    isInteractive
-                    onClick={() => openEditModal(item)}
-                    className="flex items-center justify-between gap-3 min-w-0 w-full overflow-hidden cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-                      {/* Avatar initial */}
-                      <div
-                        className={`w-[42px] h-[42px] rounded-full flex items-center justify-center font-semibold text-sm shrink-0 ${
-                          item.isSettled
-                            ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
-                            : isOweMe
-                            ? 'bg-[var(--success-container)] text-[var(--success-color)]'
-                            : 'bg-[var(--danger-container)] text-[var(--danger-color)]'
-                        }`}
-                      >
-                        {item.personName.charAt(0).toUpperCase()}
-                      </div>
-
-                      <div className="min-w-0 flex-1 overflow-hidden">
-                        <span className="text-body-medium font-medium text-[var(--text-primary)] truncate block leading-snug">
-                          {item.personName}
-                        </span>
-
-                        <div className="flex items-center gap-1.5 text-secondary text-[var(--text-secondary)] min-w-0 mt-0.5">
-                          <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${isOweMe ? 'bg-[var(--success-color)]' : 'bg-[var(--danger-color)]'}`} />
-                          <span className="shrink-0">
-                            {isOweMe ? (isEn ? 'Owes you' : 'Skyldig dig') : (isEn ? 'You owe' : 'Du är skyldig')}
-                          </span>
-                          {item.description && (
-                            <>
-                              <span className="shrink-0 text-[var(--text-tertiary)]">·</span>
-                              <span className="truncate text-[var(--text-tertiary)]">{item.description}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                    {/* Avatar initial */}
+                    <div
+                      className={`w-[42px] h-[42px] rounded-full flex items-center justify-center font-semibold text-sm shrink-0 ${
+                        item.isSettled
+                          ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
+                          : isOweMe
+                          ? 'bg-[var(--success-container)] text-[var(--success-color)]'
+                          : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      {item.personName.charAt(0).toUpperCase()}
                     </div>
 
-                    {/* Right: Amount & Settle Check button */}
-                    <div className="flex items-center gap-2.5 shrink-0 text-right ml-auto" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex flex-col items-end">
-                        <span
-                          className={`text-list-amount font-amount font-semibold tabular-nums whitespace-nowrap block shrink-0 ${
-                            item.isSettled
-                              ? 'line-through text-[var(--text-tertiary)]'
-                              : isOweMe
-                              ? 'text-[var(--success-color)]'
-                              : 'text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {isOweMe ? '+' : '−'}{formatAmount(item.amount, config.language)} {curr}
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <span className="text-body-medium font-medium text-[var(--text-primary)] truncate block leading-snug">
+                        {item.personName}
+                      </span>
+
+                      <div className="flex items-center gap-1.5 text-secondary text-[var(--text-secondary)] min-w-0 mt-0.5">
+                        <span className="shrink-0">
+                          {isOweMe ? (isEn ? 'Owes you' : 'Skyldig dig') : (isEn ? 'You owe' : 'Du är skyldig')}
                         </span>
-                        {item.date && (
-                          <span className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                            {formatShortDate(item.date, config.language || 'sv')}
-                          </span>
+                        {item.description && (
+                          <>
+                            <span className="shrink-0 text-[var(--text-tertiary)]">·</span>
+                            <span className="truncate text-[var(--text-tertiary)]">{item.description}</span>
+                          </>
                         )}
                       </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <IconButton
-                          icon={item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
-                          onClick={() => handleToggleSettle(item.id)}
-                          size="sm"
-                          variant={item.isSettled ? 'primary' : 'muted'}
-                          className={item.isSettled ? 'bg-[var(--success-color)] text-white' : ''}
-                          title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
-                          aria-label={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera')}
-                        />
-
-                        <IconButton
-                          icon={<Trash2 size={14} strokeWidth={2} />}
-                          onClick={() => setDebtToDelete(item)}
-                          size="sm"
-                          variant="ghost"
-                          className="text-[var(--text-tertiary)] hover:text-[var(--danger-color)]"
-                          title={isEn ? 'Delete' : 'Ta bort'}
-                          aria-label={isEn ? 'Delete' : 'Ta bort'}
-                        />
-                      </div>
                     </div>
-                  </Card>
-                </motion.div>
+                  </div>
+
+                  {/* Right: Amount & Settle Check button */}
+                  <div className="flex items-center gap-2.5 shrink-0 text-right ml-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex flex-col items-end">
+                      <span
+                        className={`text-list-amount font-amount font-semibold tabular-nums whitespace-nowrap block shrink-0 ${
+                          item.isSettled
+                            ? 'line-through text-[var(--text-tertiary)]'
+                            : isOweMe
+                            ? 'text-[var(--success-color)]'
+                            : 'text-[var(--text-primary)]'
+                        }`}
+                      >
+                        {isOweMe ? '+' : '−'}{formatAmount(item.amount, config.language)} {curr}
+                      </span>
+                      {item.date && (
+                        <span className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                          {formatShortDate(item.date, config.language || 'sv')}
+                        </span>
+                      )}
+                    </div>
+
+                    <IconButton
+                      icon={item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
+                      onClick={() => handleToggleSettle(item.id)}
+                      size="sm"
+                      variant={item.isSettled ? 'primary' : 'muted'}
+                      className={item.isSettled ? 'bg-[var(--success-color)] text-white' : ''}
+                      title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
+                      aria-label={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera')}
+                    />
+                  </div>
+                </div>
               );
-            })
-          ) : (
-            <EmptyState
-              icon={HandCoins}
-              title={isEn ? 'No debts registered yet' : 'Inga skulder eller utlägg registrerade'}
-              description={
-                isEn
-                  ? 'Keep track of money you lent or borrowed from friends and family.'
-                  : 'Håll enkelt koll på pengar du lånat ut till vänner eller är skyldig andra.'
-              }
-              actionLabel={activeTab === 'all' ? (isEn ? 'Add debt' : 'Lägg till skuld') : undefined}
-              onAction={activeTab === 'all' ? openAddModal : undefined}
-            />
-          )}
-        </AnimatePresence>
+            })}
+          </Card>
+        ) : (
+          <EmptyState
+            icon={HandCoins}
+            title={isEn ? 'No debts registered yet' : 'Inga skulder eller utlägg registrerade'}
+            description={
+              isEn
+                ? 'Keep track of money you lent or borrowed from friends and family.'
+                : 'Håll enkelt koll på pengar du lånat ut till vänner eller är skyldig andra.'
+            }
+            actionLabel={activeTab === 'all' ? (isEn ? 'Add debt' : 'Lägg till skuld') : undefined}
+            onAction={activeTab === 'all' ? openAddModal : undefined}
+          />
+        )}
       </div>
 
       {/* Add / Edit Debt BottomSheet */}
@@ -330,7 +325,6 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
               disabled={!personName.trim() || parseAmount(amount) <= 0}
               className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
               onClick={handleSaveDebt}
-              icon={<Check size={16} strokeWidth={2.5} />}
             >
               {editingDebt
                 ? (isEn ? 'Save changes' : 'Spara ändringar')
@@ -373,7 +367,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             onClick={() => setDebtType('i_owe')}
             className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               debtType === 'i_owe'
-                ? 'bg-[var(--surface-color)] text-[var(--danger-color)]'
+                ? 'bg-[var(--surface-color)] text-[var(--text-primary)]'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -383,13 +377,13 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         </div>
 
         {/* 1. First Group: Person Name & Amount */}
-        <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border border-subtle space-y-2.5">
+        <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
           <div className="flex items-center gap-3">
             <div
               className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${
                 debtType === 'owe_me'
                   ? 'bg-[var(--success-container)] text-[var(--success-color)]'
-                  : 'bg-[var(--danger-container)] text-[var(--danger-color)]'
+                  : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
               }`}
             >
               {personName.trim() ? personName.trim().charAt(0).toUpperCase() : <User size={22} strokeWidth={2} />}
@@ -430,7 +424,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                     }
                   }}
                   placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
+                  className="bg-transparent outline-none text-hero-amount text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
                 />
                 <span className="text-secondary font-medium text-[var(--text-tertiary)] tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
                   {curr}
@@ -441,7 +435,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         </div>
 
         {/* 2. Second Group: Note / Description */}
-        <div className="rounded-card bg-[var(--surface-color)] overflow-hidden border border-subtle divide-y divide-subtle">
+        <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-subtle">
           <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
             <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
               {isEn ? 'Note' : 'Egen notering'}
@@ -466,6 +460,91 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             </div>
           </div>
         </div>
+      </BottomSheet>
+
+      {/* Settle Confirmation BottomSheet with Budget Integration */}
+      <BottomSheet
+        isOpen={Boolean(debtToSettle)}
+        onClose={() => setDebtToSettle(null)}
+        size="sm"
+        zIndex={155}
+        title={
+          debtToSettle?.type === 'owe_me'
+            ? (isEn ? 'Mark as paid back' : 'Klarmarkera inbetalning')
+            : (isEn ? 'Mark debt as paid' : 'Klarmarkera betalad skuld')
+        }
+        footer={
+          <div className="flex items-center gap-2.5 w-full">
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
+              className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+              onClick={() => setDebtToSettle(null)}
+            >
+              {isEn ? 'Cancel' : 'Avbryt'}
+            </Button>
+            <Button
+              type="button"
+              variant="accent"
+              size="lg"
+              className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+              onClick={async () => {
+                if (!debtToSettle) return;
+                const target = debtToSettle;
+                setDebtToSettle(null);
+                await applySettleToggle(target, recordInBudgetOnSettle);
+              }}
+            >
+              {isEn ? 'Confirm' : 'Klarmarkera'}
+            </Button>
+          </div>
+        }
+      >
+        {debtToSettle && (
+          <div className="space-y-3">
+            <div className="p-4 rounded-card bg-[var(--surface-color)] flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-body-medium font-semibold text-[var(--text-primary)] block truncate">
+                  {debtToSettle.personName}
+                </span>
+                {debtToSettle.description && (
+                  <span className="text-caption text-[var(--text-secondary)] block truncate">
+                    {debtToSettle.description}
+                  </span>
+                )}
+              </div>
+              <span
+                className={`text-list-amount font-amount font-bold tabular-nums shrink-0 ${
+                  debtToSettle.type === 'owe_me' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
+                }`}
+              >
+                {debtToSettle.type === 'owe_me' ? '+' : '−'}{formatAmount(debtToSettle.amount, config.language)} {curr}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-card bg-[var(--surface-color)] flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <span className="text-body font-medium text-[var(--text-primary)] block">
+                  {debtToSettle.type === 'owe_me'
+                    ? (isEn ? 'Add as income in budget' : 'Lägg till som inkomst i budgeten')
+                    : (isEn ? 'Add as expense in budget' : 'Registrera som utgift i budgeten')}
+                </span>
+                <span className="text-caption text-[var(--text-secondary)] block mt-0.5">
+                  {debtToSettle.type === 'owe_me'
+                    ? (isEn ? 'Increases your available amount to spend' : 'Ökar ditt belopp kvar att spendera i perioden')
+                    : (isEn ? 'Deducts the payment from your period budget' : 'Drar av betalningen från din periodbudget')}
+                </span>
+              </div>
+              <Switch
+                checked={recordInBudgetOnSettle}
+                onChange={setRecordInBudgetOnSettle}
+                size="sm"
+                aria-label={isEn ? 'Record in budget' : 'Registrera i budgeten'}
+              />
+            </div>
+          </div>
+        )}
       </BottomSheet>
 
       {/* Delete Confirmation Modal */}

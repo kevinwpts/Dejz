@@ -8,8 +8,9 @@ import { getCategoryIconName } from "../utils/icons";
 import { capitalize, formatAmount, formatDeductionDayDisplay } from "../utils/format";
 import {
   formatShortDate,
-  getLastPaymentDate,
+  getCancelledListSecondaryText,
   getNextFixedExpensePaymentDate,
+  isExpenseCancelledAndExpired,
 } from "../utils/cancellation";
 
 interface BudgetItemProps {
@@ -56,10 +57,12 @@ export function BudgetItemLogo({
   item,
   type,
   config,
+  size = "md",
 }: {
   item: any;
   type: "income" | "expense";
   config?: Config;
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
   const isItemVariable = Boolean(item?.isVariable || item?.is_variable);
   const tx = {
@@ -69,16 +72,8 @@ export function BudgetItemLogo({
     isVariable: isItemVariable,
   };
   return (
-    <div className="relative inline-flex shrink-0 w-[42px] h-[42px] items-center justify-center">
-      <TransactionLogo transaction={tx} config={config} />
-      {isItemVariable && (
-        <span
-          title="Varierande belopp"
-          className="absolute bottom-0 -right-0.5 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-micro-label font-bold flex items-center justify-center leading-none border-[1.5px] border-[var(--surface-color)] shadow-xs pointer-events-none z-20 select-none font-sans"
-        >
-          R
-        </span>
-      )}
+    <div className="relative inline-flex shrink-0 items-center justify-center">
+      <TransactionLogo transaction={tx} config={config} size={size} />
     </div>
   );
 }
@@ -107,8 +102,6 @@ export function BudgetItem({
   );
   const rawAmount = hasOverride ? item.periodOverrides[currentPeriodId] : (item.amount || 0);
 
-  // Standardize to monthly equivalent
-  let monthlyAmount = rawAmount;
   const freq = item.frequency;
   const isQuarterly = freq === Frequency.QUARTERLY || freq === "Kvartalsvis" || freq === "QUARTERLY";
   const isSemiAnnual =
@@ -116,19 +109,21 @@ export function BudgetItem({
   const isAnnual = freq === Frequency.ANNUALLY || freq === "Årsvis" || freq === "ANNUALLY";
   const isNonMonthly = isQuarterly || isSemiAnnual || isAnnual;
 
+  // On the card, when listed under frequency groups (kvartalsvis, årsvis, etc.),
+  // show the actual sum for that period with the matching frequency suffix.
+  const displayAmount = rawAmount;
+  let frequencySuffix = t("perMonthSuffix");
   if (isQuarterly) {
-    monthlyAmount = rawAmount / 3;
+    frequencySuffix = t("perQuarterSuffix");
   } else if (isSemiAnnual) {
-    monthlyAmount = rawAmount / 6;
+    frequencySuffix = t("perHalfYearSuffix");
   } else if (isAnnual) {
-    monthlyAmount = rawAmount / 12;
+    frequencySuffix = t("perYearSuffix");
   }
-
-  const finalDisplayAmount = Math.round(monthlyAmount);
 
   const tx: Transaction = {
     id: item.id,
-    amount: finalDisplayAmount,
+    amount: displayAmount,
     category:
       item.category ||
       (type === "income"
@@ -150,21 +145,15 @@ export function BudgetItem({
     cancellationDate: item.cancellationDate,
     cancelledAt: item.cancelledAt,
     lastPaymentDate: item.lastPaymentDate,
-    originalAmount: rawAmount !== finalDisplayAmount ? rawAmount : undefined,
     isVariable: isItemVariable,
   } as any;
 
   if (isFixedExpenseList) {
     const isCancelled = Boolean(item?.isCancelled);
-    const cancelledStatusText = t("cancelledStatus");
-    const lastPayIso = isCancelled ? getLastPaymentDate(item) || item.cancellationDate : null;
-    const lastPayShort = lastPayIso ? formatShortDate(lastPayIso, language) : "";
-    const cancelledDatePart = lastPayShort
-      ? `${t("lastPaymentDateLabel")} ${lastPayShort}`
+    const isExpired = isCancelled && isExpenseCancelledAndExpired(item);
+    const fullCancelledLine = isCancelled
+      ? getCancelledListSecondaryText(item, language)
       : "";
-    const fullCancelledLine = [cancelledStatusText, cancelledDatePart]
-      .filter(Boolean)
-      .join(" · ");
 
     const methodText = formatFixedExpensePaymentMethod(item?.paymentMethod, t);
     const rawCat =
@@ -200,10 +189,10 @@ export function BudgetItem({
     return (
       <div
         onClick={onClick}
-        className={`px-4 py-3 sm:py-3.5 min-h-[56px] relative z-10 flex items-center gap-3 group transition-colors duration-150 ${
+        className={`px-3.5 sm:px-4 py-2.5 sm:py-3 min-h-[54px] relative z-10 flex items-center gap-2.5 sm:gap-3 group transition-colors duration-150 ${
           isGrouped
             ? "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none"
-            : "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-card shadow-subtle border border-subtle"
+            : "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-card shadow-subtle border-none"
         } cursor-pointer select-none`}
       >
         <BudgetItemLogo item={item} type={type} config={config || ({ currency, language } as any)} />
@@ -211,16 +200,23 @@ export function BudgetItem({
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           {/* Rad 1: Namn till vänster, beräknat månadsbelopp högerställt inkl. kr/mån */}
           <div className="flex items-baseline justify-between gap-3 min-w-0">
-            <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate min-w-0 flex-1">
-              {displayName}
-            </p>
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <p className="text-list-name text-[var(--text-primary)] leading-snug truncate min-w-0">
+                {displayName}
+              </p>
+              {isCancelled && !isExpired && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-micro-label font-medium leading-none bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
+                  {language === "en" ? "Cancelled" : "Uppsagd"}
+                </span>
+              )}
+            </div>
             <p className="text-list-amount whitespace-nowrap shrink-0 text-[var(--text-primary)]">
-              <span className="opacity-80 mr-0.5">−</span>
-              <span className="tabular-nums">{formatAmount(finalDisplayAmount, language)}</span>
-              <span className="text-secondary opacity-80 font-normal ml-1">
+              {isItemVariable && <span className="opacity-70 mr-0.5">~</span>}
+              <span className="tabular-nums">{formatAmount(displayAmount, language)}</span>
+              <span className="text-unit text-[var(--text-secondary)] font-normal ml-1">
                 {currency}
-                <span className="text-micro-label opacity-70 ml-0.5">
-                  {t("perMonthSuffix")}
+                <span className="text-micro-label text-[var(--text-tertiary)] ml-0.5">
+                  {frequencySuffix}
                 </span>
               </span>
             </p>
@@ -229,13 +225,13 @@ export function BudgetItem({
           {/* Rad 2: Uppsagda utgifter använder hela radens bredd; aktiva har alltid kategoriikon + kategori till vänster och betalningsmetod + datum till höger */}
           {isCancelled ? (
             <div className="mt-0.5 min-w-0 w-full">
-              <p className="text-secondary leading-snug text-amber-600 dark:text-amber-400 font-medium tabular-nums truncate w-full">
+              <p className="text-secondary leading-snug text-[var(--text-secondary)] tabular-nums break-words w-full">
                 {fullCancelledLine}
               </p>
             </div>
           ) : (
-            <div className="mt-0.5 flex items-center justify-between gap-3 min-w-0 w-full">
-              <div className="flex items-end gap-1 min-w-0 flex-1 text-[var(--text-secondary)]">
+            <div className="mt-0.5 flex items-center justify-between gap-2 min-w-0 w-full">
+              <div className="flex items-center gap-1 min-w-0 flex-1 text-[var(--text-secondary)]">
                 {categoryIconKey ? (
                   <CategoryIcon
                     icon={categoryIconKey}
@@ -249,7 +245,7 @@ export function BudgetItem({
                 </span>
               </div>
               {rightMetadataText ? (
-                <p className="text-secondary leading-snug text-[var(--text-secondary)] tabular-nums whitespace-nowrap shrink-0 text-right">
+                <p className="text-secondary leading-snug text-[var(--text-tertiary)] tabular-nums whitespace-nowrap shrink-0 text-right">
                   {rightMetadataText}
                 </p>
               ) : null}
@@ -266,10 +262,11 @@ export function BudgetItem({
       config={config || ({ currency, language } as any)}
       isFixed={true}
       hideFixedBadge={true}
+      hideSign={true}
       isVariable={isItemVariable}
       onClick={onClick}
       isGrouped={isGrouped}
-      displayAmount={finalDisplayAmount}
+      displayAmount={displayAmount}
     />
   );
 }

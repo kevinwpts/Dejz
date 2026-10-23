@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Receipt, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
-import { formatAmount, capitalize } from '../utils/format';
+import { formatAmount, capitalize, getTransactionReceipts } from '../utils/format';
 import { formatShortDate } from '../utils/date';
 import { Card, Input, EmptyState } from './ui';
 import { CategoryIcon } from './CategoryIcon';
@@ -25,9 +25,9 @@ export function ReceiptsView({
   const isEn = config.language === 'en';
   const curr = config.currency || 'kr';
 
-  // Filter transactions that have a receiptUrl
+  // Filter transactions that have at least one receipt/attachment
   const receiptTransactions = (transactions || [])
-    .filter((t) => t.receiptUrl && typeof t.receiptUrl === 'string' && t.receiptUrl.trim() !== '')
+    .filter((t) => getTransactionReceipts(t).length > 0)
     .sort((a, b) => b.timestamp - a.timestamp);
 
   // Filter by search query
@@ -82,102 +82,93 @@ export function ReceiptsView({
         )}
 
         {filteredTransactions.length > 0 ? (
-          <div className="space-y-[var(--card-gap)] min-w-0 w-full">
-            <AnimatePresence mode="popLayout">
-              {filteredTransactions.map((item) => {
-                const searchCat = (item.category || '').trim().toLowerCase();
-                const matchedCategory = (config?.categories || []).concat(config?.incomeCategories || []).find(
-                  (c) => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === item.category || (c?.id || '').toLowerCase() === searchCat
-                );
-                const iconKey = matchedCategory?.icon || getCategoryIconName(item.category || '');
-                const isPdf = item.receiptUrl ? item.receiptUrl.toLowerCase().includes('.pdf') : false;
+          <Card variant="default" padding="none" className="divide-y divide-subtle overflow-hidden">
+            {filteredTransactions.map((item) => {
+              const searchCat = (item.category || '').trim().toLowerCase();
+              const matchedCategory = (config?.categories || []).concat(config?.incomeCategories || []).find(
+                (c) => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === item.category || (c?.id || '').toLowerCase() === searchCat
+              );
+              const iconKey = matchedCategory?.icon || getCategoryIconName(item.category || '');
+              const urls = getTransactionReceipts(item);
+              const primaryUrl = urls[0];
+              const isPdf = primaryUrl ? primaryUrl.toLowerCase().includes('.pdf') : false;
 
-                return (
-                  <motion.div
-                    key={item.id}
-                    layoutId={`receipt-card-${item.id}`}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    id={`receipt_item_${item.id}`}
-                    className="min-w-0 w-full"
-                  >
-                    <Card
-                      variant="default"
-                      padding="sm"
-                      isInteractive
-                      onClick={() => onViewTransaction(item)}
-                      className="group flex items-center justify-between gap-3 min-w-0 w-full transition-all active:scale-[0.99] cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-                        {/* Receipt Thumbnail Container */}
-                        <div className="w-11 h-11 rounded-[var(--radius-card-nested,12px)] overflow-hidden relative shrink-0 bg-[var(--surface-muted)] border border-subtle flex items-center justify-center">
-                          {item.receiptUrl && !isPdf ? (
-                            <img
-                              src={item.receiptUrl}
-                              alt={item.merchant || 'Kvitto'}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              referrerPolicy="no-referrer"
-                              loading="lazy"
+              return (
+                <div
+                  key={item.id}
+                  id={`receipt_item_${item.id}`}
+                  onClick={() => onViewTransaction(item)}
+                  className="group px-4 py-3 flex items-center justify-between gap-3 min-w-0 w-full hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                    {/* Receipt Thumbnail Container */}
+                    <div className="w-10 h-10 rounded-card-nested overflow-hidden relative shrink-0 bg-[var(--surface-muted)] flex items-center justify-center">
+                      {primaryUrl && !isPdf ? (
+                        <img
+                          src={primaryUrl}
+                          alt={item.merchant || 'Kvitto'}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Receipt size={18} className="text-[var(--text-secondary)]" strokeWidth={1.8} />
+                      )}
+                      {urls.length > 1 && (
+                        <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded-full bg-black/75 text-[9px] font-bold text-white tabular-nums leading-tight">
+                          +{urls.length - 1}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Middle: Payee + Category */}
+                    <div className="min-w-0 flex-1 flex flex-col justify-center">
+                      <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate">
+                        {item.merchant || item.category || (isEn ? 'Receipt' : 'Kvitto')}
+                      </p>
+
+                      <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
+                        <div className="flex items-center gap-1 shrink-0">
+                          {iconKey && (
+                            <CategoryIcon
+                              icon={iconKey}
+                              categoryName={item.category}
+                              variant="minimal"
+                              size="2xs"
                             />
-                          ) : (
-                            <Receipt size={20} className="text-[var(--text-secondary)]" strokeWidth={1.8} />
                           )}
+                          <span className="text-secondary text-[var(--text-secondary)] whitespace-nowrap truncate max-w-[140px] sm:max-w-[180px]">
+                            {capitalize(item.category || '')}
+                          </span>
                         </div>
-
-                        {/* Middle: Payee + Category */}
-                        <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate">
-                            {item.merchant || item.category || (isEn ? 'Receipt' : 'Kvitto')}
-                          </p>
-
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
-                            {/* Category with Icon */}
-                            <div className="flex items-center gap-1 shrink-0">
-                              {iconKey && (
-                                <CategoryIcon
-                                  icon={iconKey}
-                                  categoryName={item.category}
-                                  variant="minimal"
-                                  size="2xs"
-                                />
-                              )}
-                              <span className="text-secondary text-[var(--text-secondary)] whitespace-nowrap truncate max-w-[140px] sm:max-w-[180px]">
-                                {capitalize(item.category || '')}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Optional note */}
-                          {item.note && (
-                            <p className="text-secondary text-[var(--text-tertiary)] opacity-80 mt-0.5 truncate">
-                              {item.note}
-                            </p>
-                          )}
-                        </div>
+                        {item.note && (
+                          <span className="text-secondary text-[var(--text-tertiary)] truncate">
+                            · {item.note}
+                          </span>
+                        )}
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Right: Amount + Date under amount */}
-                      <div className="flex flex-col items-end justify-center shrink-0 whitespace-nowrap pl-1 text-right">
-                        <p
-                          className={`text-list-amount font-amount tabular-nums font-semibold whitespace-nowrap ${
-                            item.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
-                          }`}
-                        >
-                          <span className="opacity-80 mr-0.5">{item.type === 'income' ? '+' : '−'}</span>
-                          {formatAmount(item.amount, config.language)} {curr}
-                        </p>
+                  {/* Right: Amount + Date under amount */}
+                  <div className="flex flex-col items-end justify-center shrink-0 whitespace-nowrap pl-1 text-right">
+                    <p
+                      className={`text-list-amount font-amount tabular-nums font-semibold whitespace-nowrap ${
+                        item.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {item.type === 'income' ? '+' : ''}
+                      {formatAmount(item.amount, config.language)} {curr}
+                    </p>
 
-                        <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                          {formatDate(item.timestamp)}
-                        </p>
-                      </div>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
+                    <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                      {formatDate(item.timestamp)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </Card>
         ) : (
           <EmptyState
             icon={FileText}

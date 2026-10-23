@@ -2,11 +2,11 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown } from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown, ChevronLeft, ChevronRight, Heart, MoreHorizontal } from 'lucide-react';
 import { Button, IconButton } from './ui';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
-import { formatAmount } from '../utils/format';
+import { formatAmount, getTransactionReceipts } from '../utils/format';
 import { formatShortDate } from '../utils/date';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
@@ -28,6 +28,7 @@ interface TransactionViewModalProps {
   onEdit: (transaction: Transaction) => void;
   onDelete?: (id: string) => void;
   onDuplicate: (transaction: Transaction) => void;
+  onToggleStar?: (transaction: Transaction) => void;
   t: (key: TranslationKey) => string;
   config: Config;
   onUpdateTransaction?: (transaction: Transaction) => void;
@@ -41,6 +42,7 @@ export function TransactionViewModal({
   onEdit, 
   onDelete, 
   onDuplicate, 
+  onToggleStar,
   t, 
   config,
   onUpdateTransaction: _onUpdateTransaction
@@ -55,9 +57,12 @@ export function TransactionViewModal({
   const dragControls = useDragControls();
   const isIncome = currentTx.type === 'income';
   const isSavings = currentTx.type === 'savings';
+  const isStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
+  const [activeReceiptIndex, setActiveReceiptIndex] = useState(0);
   const [showSimilar, setShowSimilar] = useState(false);
   const [_brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
 
@@ -131,7 +136,7 @@ export function TransactionViewModal({
   }, [transaction, config]);
 
   const getLocale = () => {
-    const lang = config.language || 'sv';
+    const lang = config?.language || 'sv';
     const mapping: Record<string, string> = {
       sv: 'sv-SE',
       en: 'en-US',
@@ -143,7 +148,7 @@ export function TransactionViewModal({
   };
 
   const date = new Date(currentTx.timestamp || transaction.timestamp);
-  const formattedDate = formatShortDate(date, config.language || 'sv');
+  const formattedDate = formatShortDate(date, config?.language || 'sv');
   const hasSpecificTime = !isNaN(date.getTime()) && !(date.getHours() === 0 && date.getMinutes() === 0);
   const formattedTime = hasSpecificTime
     ? date.toLocaleTimeString(getLocale(), {
@@ -159,7 +164,9 @@ export function TransactionViewModal({
     : (currentTx.merchant || (typeof currentTx.category === 'object' ? (currentTx.category as any)?.name : currentTx.category));
 
   const hasNote = Boolean(currentTx.note && currentTx.note.trim().length > 0);
-  const hasReceipt = Boolean(currentTx.receiptUrl && currentTx.receiptUrl.trim().length > 0);
+  const receiptUrls = useMemo(() => getTransactionReceipts(currentTx), [currentTx]);
+  const hasReceipt = receiptUrls.length > 0;
+  const activeReceiptUrl = receiptUrls[Math.min(activeReceiptIndex, Math.max(0, receiptUrls.length - 1))] || receiptUrls[0];
   const hasTags = Boolean(currentTx.tags && currentTx.tags.length > 0);
 
   if (typeof document === 'undefined' || !document.body) return null;
@@ -206,13 +213,95 @@ export function TransactionViewModal({
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
-          {/* Top Bar with Title & Close */}
-          <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-              {config.language === 'en' ? 'Transaction' : 'Transaktion'}
-            </h2>
+        {/* Pinned Top Bar with Title, Star, 3-dots Menu & Close */}
+        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
+          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+            {config?.language === 'en' ? 'Transaction' : 'Transaktion'}
+          </h2>
+          <div className="flex items-center gap-1.5 relative">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                const currentStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
+                const nextStarred = !currentStarred;
+                const currentTags = Array.isArray(currentTx.tags) ? currentTx.tags : [];
+                const nextTags = nextStarred
+                  ? Array.from(new Set([...currentTags, 'starred']))
+                  : currentTags.filter((tag) => tag !== 'starred');
+                const updated = {
+                  ...currentTx,
+                  isStarred: nextStarred,
+                  tags: nextTags,
+                };
+                setCurrentTx(updated);
+                if (onToggleStar) {
+                  onToggleStar(currentTx);
+                } else if (_onUpdateTransaction) {
+                  _onUpdateTransaction(updated);
+                }
+              }}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isStarred
+                  ? 'text-[var(--danger-color)] bg-red-500/10'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
+              }`}
+              title={isStarred ? (config?.language === 'en' ? 'Remove from saved' : 'Ta bort från sparade') : (config?.language === 'en' ? 'Save transaction' : 'Spara transaktion')}
+              aria-label={isStarred ? (config?.language === 'en' ? 'Remove from saved' : 'Ta bort från sparade') : (config?.language === 'en' ? 'Save transaction' : 'Spara transaktion')}
+            >
+              <Heart 
+                size={18} 
+                fill={isStarred ? 'currentColor' : 'none'} 
+                strokeWidth={2} 
+              />
+            </button>
+            <IconButton 
+              icon={<MoreHorizontal size={16} strokeWidth={2.2} />}
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowActionsMenu((prev) => !prev);
+              }} 
+              variant="muted"
+              size="md"
+              title={config?.language === 'en' ? 'More options' : 'Fler val'}
+              aria-label={config?.language === 'en' ? 'More options' : 'Fler val'}
+            />
+            {showActionsMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setShowActionsMenu(false)}
+                />
+                <div className="absolute right-10 top-10 z-40 min-w-[170px] rounded-card-nested bg-[var(--surface-color)] border border-subtle shadow-modal py-1 overflow-hidden divide-y divide-subtle">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setShowActionsMenu(false);
+                      onDuplicate(currentTx);
+                    }}
+                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                  >
+                    <Repeat size={15} strokeWidth={2} className="text-[var(--text-secondary)]" />
+                    <span>{t('duplicate')}</span>
+                  </button>
+                  {onDelete && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        setShowActionsMenu(false);
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--danger-color)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                    >
+                      <Trash2 size={15} strokeWidth={2} />
+                      <span>{config?.language === 'en' ? 'Delete' : 'Ta bort'}</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
             <IconButton 
               icon={<X size={15} strokeWidth={2.5} />}
               onClick={() => {
@@ -225,9 +314,13 @@ export function TransactionViewModal({
               aria-label={t('close')}
             />
           </div>
+        </div>
+
+        {/* Main Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-6 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
 
           {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
-          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border border-subtle space-y-2.5">
+          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
             <div className="flex items-center gap-3">
               <div className="relative rounded-full overflow-hidden shrink-0">
                 <TransactionLogo 
@@ -237,8 +330,8 @@ export function TransactionViewModal({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
-                  {config.language === 'en' ? 'Name' : 'Namn'}
+                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Name' : 'Namn'}
                 </span>
                 <div className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug py-0.5 truncate">
                   {merchantName}
@@ -246,14 +339,14 @@ export function TransactionViewModal({
               </div>
             </div>
 
-            <div className="pt-2.5 border-t border-subtle flex items-center justify-between gap-3">
+            <div className="pt-2.5 border-t border-divider flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
-                  {config.language === 'en' ? 'Amount' : 'Belopp'}
+                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Amount' : 'Belopp'}
                 </span>
                 <div className={`flex items-baseline gap-1.5 font-amount w-full ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
-                  <span className="font-amount font-bold tabular-nums tracking-tight text-[30px] sm:text-[36px] leading-none">
-                    {isIncome ? '+' : isSavings ? '→' : '−'}{formatAmount(currentTx.amount, config.language)}
+                  <span className="text-hero-amount leading-none">
+                    {isIncome ? '+' : isSavings ? '→' : '−'}{formatAmount(currentTx.amount, config?.language)}
                   </span>
                   <span className="text-secondary font-medium text-[var(--text-tertiary)] tracking-tight select-none shrink-0 font-sans ml-1 pb-1">
                     {config?.currency || 'kr'}
@@ -264,10 +357,10 @@ export function TransactionViewModal({
           </div>
 
           {/* 2. Second Group: Category, Date, Time (when present), Note (when non-empty), Attachment (when non-empty) */}
-          <div className="rounded-card bg-[var(--surface-color)] overflow-hidden border border-subtle divide-y divide-subtle text-left">
+          <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-subtle text-left">
             {/* Row 1: Category */}
-            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
-              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
+            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right min-w-0">
@@ -277,7 +370,7 @@ export function TransactionViewModal({
                     ? rawSplits
                     : (typeof rawSplits === 'string' ? (() => { try { const p = JSON.parse(rawSplits); return Array.isArray(p) ? p : []; } catch { return []; } })() : []);
 
-                  const allCats = [...(config.categories || []), ...(config.incomeCategories || [])];
+                  const allCats = [...(config?.categories || []), ...(config?.incomeCategories || [])];
 
                   if (splitsArray.length > 0) {
                     return (
@@ -299,9 +392,9 @@ export function TransactionViewModal({
                                 variant="primary" 
                                 size="xs" 
                               />
-                              <span className="text-sm font-medium text-[var(--text-primary)] truncate">{splitCatName}</span>
+                              <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate">{splitCatName}</span>
                               <span className="text-label text-[var(--text-secondary)] font-amount tabular-nums shrink-0">
-                                ({formatAmount(split.amount, config.language)} {config.currency})
+                                ({formatAmount(split.amount, config?.language)} {config.currency})
                               </span>
                             </div>
                           );
@@ -326,7 +419,7 @@ export function TransactionViewModal({
                         variant="primary" 
                         size="xs" 
                       />
-                      <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
+                      <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
                         {catName}
                       </span>
                     </div>
@@ -336,22 +429,22 @@ export function TransactionViewModal({
             </div>
 
             {/* Row 2: Date */}
-            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
-              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
+            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
                 {formattedDate}
               </span>
             </div>
 
             {/* Row 3: Time (when present) */}
             {formattedTime && (
-              <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
-                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
-                  {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
+              <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
+                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+                  {config?.language === 'en' ? 'Time' : config?.language === 'fi' ? 'Aika' : 'Tid'}
                 </span>
-                <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
+                <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
                   {formattedTime}
                 </span>
               </div>
@@ -359,72 +452,124 @@ export function TransactionViewModal({
 
             {/* Row 4: Note (only if non-empty) */}
             {hasNote && (
-              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
-                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
+              <div className="px-4 py-2.5 sm:py-3 flex items-start justify-between min-h-[46px] gap-4">
+                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                   {t('ownNote')}
                 </span>
-                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {currentTx.note}
                 </span>
               </div>
             )}
 
-            {/* Row 5: Attachment / Receipt (only if non-empty) */}
-            {hasReceipt && currentTx.receiptUrl && (
-              <div className="p-4 space-y-2.5">
+            {/* Row 5: Attachment / Receipts (Supports 1 or multiple) */}
+            {hasReceipt && (
+              <div className="px-4 py-3 space-y-2.5">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
-                    {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-secondary text-[var(--text-secondary)]">
+                      {receiptUrls.length > 1
+                        ? (config?.language === 'en' ? 'Receipts & Attachments' : 'Kvitton & Bilagor')
+                        : (config?.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga')}
+                    </span>
+                    {receiptUrls.length > 1 && (
+                      <span className="text-label font-semibold text-[var(--text-secondary)] bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full tabular-nums">
+                        {receiptUrls.length}
+                      </span>
+                    )}
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setShowReceiptLightbox(true)}
+                    onClick={() => {
+                      setActiveReceiptIndex(0);
+                      setShowReceiptLightbox(true);
+                    }}
                     className="flex items-center gap-2 text-sm font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
                   >
                     <div className="w-6 h-6 rounded-icon-button overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
-                      {currentTx.receiptUrl.includes('.pdf') ? (
+                      {receiptUrls[0].toLowerCase().includes('.pdf') ? (
                         <FileText size={13} className="text-[var(--text-secondary)]" />
                       ) : (
-                        <img src={currentTx.receiptUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        <img src={receiptUrls[0]} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       )}
                     </div>
-                    <span>{config.language === 'en' ? 'View full screen' : 'Visa i helskärm'}</span>
+                    <span>{config?.language === 'en' ? 'View full screen' : 'Visa i helskärm'}</span>
                   </button>
                 </div>
 
-                <div 
-                  onClick={() => setShowReceiptLightbox(true)}
-                  className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card-nested overflow-hidden bg-black/5 dark:bg-black/20 flex items-center justify-center cursor-pointer group transition-all"
-                >
-                  {currentTx.receiptUrl.includes('.pdf') ? (
-                    <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
-                      <FileText size={36} className="text-[var(--text-secondary)]" />
-                      <span className="text-sm font-medium text-[var(--text-primary)]">
-                        {config.language === 'en' ? 'PDF document (Click to open)' : 'PDF-dokument (Klicka för att öppna)'}
-                      </span>
-                    </div>
-                  ) : (
-                    <img 
-                      src={currentTx.receiptUrl} 
-                      alt={config.language === 'en' ? 'Attachment' : 'Bilaga'} 
-                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                      referrerPolicy="no-referrer"
-                    />
-                  )}
-                </div>
+                {receiptUrls.length === 1 ? (
+                  <div 
+                    onClick={() => {
+                      setActiveReceiptIndex(0);
+                      setShowReceiptLightbox(true);
+                    }}
+                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card-nested overflow-hidden bg-black/5 dark:bg-black/20 flex items-center justify-center cursor-pointer group transition-all"
+                  >
+                    {receiptUrls[0].toLowerCase().includes('.pdf') ? (
+                      <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
+                        <FileText size={36} className="text-[var(--text-secondary)]" />
+                        <span className="text-sm font-medium text-[var(--text-primary)]">
+                          {config?.language === 'en' ? 'PDF document (Click to open)' : 'PDF-dokument (Klicka för att öppna)'}
+                        </span>
+                      </div>
+                    ) : (
+                      <img 
+                        src={receiptUrls[0]} 
+                        alt={config?.language === 'en' ? 'Attachment' : 'Bilaga'} 
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {receiptUrls.map((url, idx) => {
+                      const isPdf = url.toLowerCase().includes('.pdf');
+                      return (
+                        <div
+                          key={`${url}-${idx}`}
+                          onClick={() => {
+                            setActiveReceiptIndex(idx);
+                            setShowReceiptLightbox(true);
+                          }}
+                          className="relative aspect-[4/3] rounded-card-nested overflow-hidden bg-black/5 dark:bg-black/20 flex items-center justify-center cursor-pointer group transition-all"
+                        >
+                          {isPdf ? (
+                            <div className="flex flex-col items-center justify-center p-4 text-center space-y-1.5">
+                              <FileText size={28} className="text-[var(--text-secondary)]" />
+                              <span className="text-xs font-medium text-[var(--text-primary)]">
+                                {config?.language === 'en' ? `PDF ${idx + 1}` : `PDF ${idx + 1}`}
+                              </span>
+                            </div>
+                          ) : (
+                            <img
+                              src={url}
+                              alt={`Bilaga ${idx + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                              referrerPolicy="no-referrer"
+                            />
+                          )}
+                          <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[11px] font-semibold text-white tabular-nums">
+                            {idx + 1}/{receiptUrls.length}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
             {/* Optional Tags Row (only if non-empty) */}
             {hasTags && (
-              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
+              <div className="px-4 py-2.5 sm:py-3 flex items-start justify-between min-h-[46px] gap-4">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0">
                   <Tag size={13} strokeWidth={2} />
-                  <span className="text-body font-normal">{t('tags')}</span>
+                  <span className="text-secondary text-[var(--text-secondary)]">{t('tags')}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(currentTx.tags || []).map((tag, index) => (
-                    <span key={index} className="text-sm font-medium text-[var(--text-primary)]">
+                    <span key={index} className="text-body-medium font-semibold text-[var(--text-primary)]">
                       {tag}{index < (currentTx.tags?.length || 0) - 1 ? ' · ' : ''}
                     </span>
                   ))}
@@ -434,7 +579,7 @@ export function TransactionViewModal({
           </div>
 
           {/* Lightbox Modal Portal */}
-          {showReceiptLightbox && currentTx.receiptUrl && createPortal(
+          {showReceiptLightbox && activeReceiptUrl && createPortal(
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -446,17 +591,18 @@ export function TransactionViewModal({
                 <div className="flex items-center gap-2 text-white">
                   <Paperclip size={18} />
                   <span className="text-sm font-medium">
-                    {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
+                    {config?.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
+                    {receiptUrls.length > 1 ? ` (${activeReceiptIndex + 1}/${receiptUrls.length})` : ''}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <a 
-                    href={currentTx.receiptUrl} 
+                    href={activeReceiptUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-btn-sm text-xs font-medium transition-colors"
                   >
-                    {config.language === 'en' ? 'Open original' : 'Öppna original'}
+                    {config?.language === 'en' ? 'Open original' : 'Öppna original'}
                   </a>
                   <button
                     type="button"
@@ -470,31 +616,81 @@ export function TransactionViewModal({
               </div>
 
               <div 
-                className="flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2 sm:p-4 my-auto"
+                className="relative flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2 sm:p-4 my-auto"
                 onClick={(e) => e.stopPropagation()}
               >
-                {currentTx.receiptUrl.includes('.pdf') ? (
+                {receiptUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveReceiptIndex((prev) => (prev - 1 + receiptUrls.length) % receiptUrls.length)}
+                    className="absolute left-2 sm:left-4 z-10 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
+                    aria-label={config?.language === 'en' ? 'Previous attachment' : 'Föregående bilaga'}
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+
+                {activeReceiptUrl.toLowerCase().includes('.pdf') ? (
                   <div className="bg-white dark:bg-[var(--surface-color)] p-8 rounded-modal text-center space-y-4">
                     <FileText size={64} className="mx-auto text-[var(--accent-color)]" />
                     <p className="text-sm font-medium text-[var(--text-primary)] dark:text-white">PDF-dokument</p>
                     <a 
-                      href={currentTx.receiptUrl} 
+                      href={activeReceiptUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-block bg-[var(--accent-color)] hover:bg-[var(--accent-color)] text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors"
                     >
-                      {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
+                      {config?.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
                     </a>
                   </div>
                 ) : (
                   <img 
-                    src={currentTx.receiptUrl} 
+                    src={activeReceiptUrl} 
                     alt="Receipt Fullscreen" 
-                    className="max-h-[80vh] max-w-full object-contain rounded-card"
+                    className="max-h-[75vh] max-w-full object-contain rounded-card"
                     referrerPolicy="no-referrer"
                   />
                 )}
+
+                {receiptUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveReceiptIndex((prev) => (prev + 1) % receiptUrls.length)}
+                    className="absolute right-2 sm:right-4 z-10 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
+                    aria-label={config?.language === 'en' ? 'Next attachment' : 'Nästa bilaga'}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                )}
               </div>
+
+              {receiptUrls.length > 1 && (
+                <div
+                  className="flex items-center justify-center gap-2 pt-2 overflow-x-auto max-w-full"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {receiptUrls.map((url, idx) => {
+                    const isPdf = url.toLowerCase().includes('.pdf');
+                    const isSelected = idx === activeReceiptIndex;
+                    return (
+                      <button
+                        key={`${url}-${idx}`}
+                        type="button"
+                        onClick={() => setActiveReceiptIndex(idx)}
+                        className={`w-12 h-12 rounded-btn-sm overflow-hidden shrink-0 transition-all cursor-pointer flex items-center justify-center bg-white/10 ${
+                          isSelected ? 'ring-2 ring-white scale-105 opacity-100' : 'opacity-50 hover:opacity-80'
+                        }`}
+                      >
+                        {isPdf ? (
+                          <FileText size={18} className="text-white" />
+                        ) : (
+                          <img src={url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>,
             document.body
           )}
@@ -502,116 +698,80 @@ export function TransactionViewModal({
           {/* Similar Transactions Section */}
           {similarTransactions.length > 0 && (
             <div className="pt-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback?.light === 'function') feedback.light();
-                  setShowSimilar(prev => !prev);
-                }}
-                className="w-full py-3 px-4 rounded-card bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between cursor-pointer border border-subtle text-left touch-press"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+              <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setShowSimilar(prev => !prev);
+                  }}
+                  className="w-full py-3.5 px-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between cursor-pointer text-left touch-press"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
                     <span className="text-body font-semibold text-[var(--text-primary)] tracking-tight">
-                      {config.language === 'en' ? 'Similar transactions' : 'Liknande transaktioner'}
+                      {config?.language === 'en' ? 'Similar transactions' : 'Liknande transaktioner'}
                     </span>
-                    <span className="text-label font-medium text-[var(--text-secondary)] tabular-nums">
-                      ({similarTransactions.length})
+                    <span className="text-label font-medium text-[var(--text-secondary)] opacity-75 tabular-nums">
+                      {similarTransactions.length}
                     </span>
                   </div>
-                  <span className="text-label text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
-                    {config.language === 'en' 
-                      ? `${similarTransactions.length} other ${similarTransactions.length === 1 ? 'transaction' : 'transactions'} with similar name`
-                      : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'annan transaktion' : 'andra transaktioner'} med liknande namn`}
-                  </span>
-                </div>
-                <ChevronDown 
-                  size={16} 
-                  className={`text-[var(--text-secondary)] transition-transform duration-200 shrink-0 ml-2 ${showSimilar ? 'rotate-180' : ''}`} 
-                />
-              </button>
+                  <ChevronDown 
+                    size={16} 
+                    className={`text-[var(--text-secondary)] transition-transform duration-200 shrink-0 ml-2 ${showSimilar ? 'rotate-180' : ''}`} 
+                  />
+                </button>
 
-              {showSimilar && (
-                <div className="mt-2 space-y-2">
-                  {similarTransactions.map((similarTx) => (
-                    <TransactionItem
-                      key={similarTx.id}
-                      transaction={similarTx}
-                      config={config}
-                      showDate={true}
-                      onClick={() => {
-                        if (typeof feedback?.selection === 'function') feedback.selection();
-                        if (onSelectTransaction) {
-                          onSelectTransaction(similarTx);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+                {showSimilar && (
+                  <div className="divide-y divide-subtle">
+                    {similarTransactions.map((similarTx) => (
+                      <TransactionItem
+                        key={similarTx.id}
+                        transaction={similarTx}
+                        config={config}
+                        showDate={true}
+                        isGrouped={true}
+                        onClick={() => {
+                          if (typeof feedback?.selection === 'function') feedback.selection();
+                          if (onSelectTransaction) {
+                            onSelectTransaction(similarTx);
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Action Buttons Footer: Primary 'Redigera', Secondary 'Duplicera' with visible label, and Global Delete IconButton */}
+        {/* Action Button Footer: Primary 'Redigera' */}
         <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
             variant="primary"
             size="lg"
-            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+            className="w-full rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(currentTx);
             }} 
-            icon={<Pencil size={15} strokeWidth={2} />}
           >
             {t('edit')}
           </Button>
-
-          <Button 
-            type="button"
-            variant="secondary"
-            size="lg"
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onDuplicate(transaction);
-            }} 
-            icon={<Repeat size={15} strokeWidth={2} />}
-            className="rounded-[var(--radius-button,12px)] px-4 text-label font-semibold shrink-0"
-            title={config.language === 'en' ? 'Create a copy of this transaction' : 'Skapa en kopia av transaktionen'}
-            aria-label={config.language === 'en' ? 'Duplicate transaction' : 'Duplicera transaktion'}
-          >
-            {t('duplicate')}
-          </Button>
-
-          {onDelete && (
-            <IconButton 
-              icon={<Trash2 size={16} strokeWidth={2} />}
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowDeleteConfirm(true);
-              }} 
-              variant="danger"
-              size="xl"
-              shape="button"
-              title={config.language === 'en' ? 'Delete' : 'Ta bort'}
-              aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-            />
-          )}
         </div>
 
         {showDeleteConfirm && transaction && transaction.id && onDelete && (
           <ConfirmModal
             isOpen={showDeleteConfirm}
-            title={config.language === 'en' ? "Delete transaction?" : "Radera transaktion?"}
+            title={config?.language === 'en' ? "Delete transaction?" : "Radera transaktion?"}
             message={
-              config.language === 'en'
-                ? `Do you want to delete the transaction of ${formatAmount(transaction.amount, config.language)} ${config?.currency || 'kr'}?`
-                : `Vill du radera transaktionen på ${formatAmount(transaction.amount, config.language)} ${config?.currency || 'kr'}?`
+              config?.language === 'en'
+                ? `Do you want to delete the transaction of ${formatAmount(transaction.amount, config?.language)} ${config?.currency || 'kr'}?`
+                : `Vill du radera transaktionen på ${formatAmount(transaction.amount, config?.language)} ${config?.currency || 'kr'}?`
             }
-            confirmText={config.language === 'en' ? "Delete" : "Radera"}
-            cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+            confirmText={config?.language === 'en' ? "Delete" : "Radera"}
+            cancelText={config?.language === 'en' ? "Cancel" : "Avbryt"}
             variant="danger"
             onConfirm={() => {
               onDelete(transaction.id);

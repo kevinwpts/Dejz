@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar as CalendarIcon, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { TranslationKey, Language } from '../i18n';
 import { BottomSheet, Card, ListRow } from './ui';
@@ -68,7 +68,27 @@ export function CalendarModal({
           <UniversalPeriodSelector
             periods={periods}
             currentDate={currentPeriodDate}
-            onChange={onPeriodChange}
+            onChange={(newDate) => {
+              onPeriodChange(newDate);
+              const matchedPeriod = periods.find(
+                (p: any) =>
+                  p.start &&
+                  p.end &&
+                  newDate.getTime() >= new Date(p.start).getTime() &&
+                  newDate.getTime() <= new Date(p.end).getTime()
+              );
+              if (matchedPeriod?.isCurrent) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                onSelectDate(today);
+              } else if (matchedPeriod?.start) {
+                const startD = new Date(matchedPeriod.start);
+                startD.setHours(0, 0, 0, 0);
+                onSelectDate(startD);
+              } else {
+                onSelectDate(newDate);
+              }
+            }}
             periodName={periodName}
             isCurrentPeriod={isCurrentPeriod}
             variant="modal"
@@ -96,21 +116,21 @@ export function CalendarModal({
                 key={p.name || idx}
                 variant="grouped"
                 isLast={idx === filteredPeriods.length - 1}
-                icon={<CalendarIcon size={18} strokeWidth={2} />}
-                iconColor={isSelected ? 'text-[var(--accent-color)]' : 'text-[var(--text-secondary)]'}
                 title={mPart}
                 subtitle={dRange || undefined}
-                badge={
-                  p.isCurrent ? (
-                    <span className="text-micro-label font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
-                      {language === 'en' ? 'Current' : 'Nu'}
-                    </span>
-                  ) : undefined
-                }
                 showCheck={isSelected}
                 onClick={() => {
-                  onPeriodChange(p.date);
-                  onSelectDate(p.date);
+                  if (p.isCurrent) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    onPeriodChange(today);
+                    onSelectDate(today);
+                  } else {
+                    const target = p.start ? new Date(p.start) : new Date(p.date);
+                    target.setHours(0, 0, 0, 0);
+                    onPeriodChange(target);
+                    onSelectDate(target);
+                  }
                   onClose();
                 }}
               />

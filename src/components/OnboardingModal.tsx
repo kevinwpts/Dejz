@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck, Receipt } from 'lucide-react';
+import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
@@ -11,7 +11,6 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { BudgetItem } from './BudgetItem';
 import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
-import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput, Modal, Button, Input } from './ui';
 import { Switch } from './ui/Switch';
@@ -563,7 +562,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
   const handleNext = () => {
     if (step === 'name') {
-      if (!fullName.trim()) return;
       setStep('payday');
     } else if (step === 'payday') {
       setStep('income');
@@ -617,7 +615,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
     setError(null);
     try {
       const trimmedName = fullName.trim();
-      if (trimmedName) {
+      if (trimmedName && userId && userId !== 'sandbox' && userId !== 'demo-user') {
         try {
           await supabase.auth.updateUser({
             data: { full_name: trimmedName }
@@ -855,13 +853,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="name" />
-                        <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                            {s.nameQuestion}
-                          </h3>
-                        </div>
+                      <div className="text-center pb-1">
+                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                          {s.nameQuestion}
+                        </h3>
                       </div>
 
                       <Input
@@ -879,14 +874,20 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
 
 
-                      <div className="pt-1">
+                      <div className="pt-4 sm:pt-5 flex flex-col gap-2.5">
                         <button 
                           onClick={handleNext}
-                          disabled={!fullName.trim()}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer shadow-xs hover:opacity-95"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowExitConfirm(true)}
+                          className="w-full py-2 px-3 min-h-[36px] text-micro-label font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center flex items-center justify-center"
+                        >
+                          {isEn ? 'Skip onboarding & open Dejz directly' : 'Hoppa över introduktionen & kom igång direkt'}
                         </button>
                       </div>
                     </motion.div>
@@ -902,16 +903,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="payday" payday={payday} />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                            {s.paydayQuestion}
-                          </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            {s.paydayDesc}
-                          </p>
-                        </div>
+                      <div className="text-center pb-1 space-y-1">
+                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                          {s.paydayQuestion}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                          {s.paydayDesc}
+                        </p>
                       </div>
 
                       {/* Quick Choices: 25:e, 27:e, 30:e, 1:e & Annan dag */}
@@ -974,7 +972,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         )}
 
                         {/* Lön tidigare vid helg toggle */}
-                        <div className="pt-3 border-t border-[var(--border-color)]">
+                        <div className="pt-3.5 mt-2 border-t border-[var(--border-color)]">
                           <div className="flex items-center justify-between p-1">
                             <div className="flex flex-col pr-4 text-left">
                               <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">
@@ -992,7 +990,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         </div>
                       </div>
 
-                      <div className="pt-1">
+                      <div className="pt-4 sm:pt-5">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
@@ -1014,16 +1012,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="income" />
-                        <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                            {s.incomeQuestion}
-                          </h3>
-                        </div>
+                      <div className="text-center pb-1">
+                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                          {s.incomeQuestion}
+                        </h3>
                       </div>
 
-                      <div className="space-y-3 max-h-[36vh] overflow-y-auto px-2 -mx-2 py-2 -my-2 no-scrollbar">
+                      <div className="space-y-3 max-h-[42vh] overflow-y-auto px-2 -mx-2 py-2 -my-2 no-scrollbar">
                         {/* Direct Natural Language Input */}
                         <SmartInput
                           hideLabel
@@ -1038,23 +1033,27 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           inputClassName="h-[46px]"
                         />
 
-
                         {/* Incomes List */}
-                        {incomes.map((inc, i) => (
-                          <BudgetItem
-                            key={i}
-                            item={inc}
-                            type="income"
-                            onClick={() => {
-                              setEditingIncomeIndex(i);
-                              setIsAddingIncome(true);
-                            }}
-                            currency={config.currency}
-                            language={(config.language || 'sv') as any}
-                            t={t}
-                            config={config}
-                          />
-                        ))}
+                        {incomes.length > 0 && (
+                          <div className="bg-[var(--surface-color)] rounded-card divide-y divide-subtle overflow-hidden">
+                            {incomes.map((inc, i) => (
+                              <BudgetItem
+                                key={i}
+                                item={inc}
+                                type="income"
+                                isGrouped={true}
+                                onClick={() => {
+                                  setEditingIncomeIndex(i);
+                                  setIsAddingIncome(true);
+                                }}
+                                currency={config.currency}
+                                language={(config.language || 'sv') as any}
+                                t={t}
+                                config={config}
+                              />
+                            ))}
+                          </div>
+                        )}
 
                         {/* Separate Manual Add Button */}
                         <button 
@@ -1063,14 +1062,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                             setEditingIncomeIndex(null);
                             setIsAddingIncome(true);
                           }}
-                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[var(--radius-xs,8px)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full py-3 rounded-btn text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-semibold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
-                          <Plus size={14} />
+                          <Plus size={15} />
                           <span>{s.addIncome}</span>
                         </button>
                       </div>
 
-                      <div className="pt-1">
+                      <div className="pt-4 sm:pt-5 flex flex-col gap-2.5">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
@@ -1078,6 +1077,18 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
                         </button>
+                        {incomes.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMidMonthSpent('0');
+                              setStep('summary');
+                            }}
+                            className="w-full py-2 px-3 min-h-[36px] text-micro-label font-bold text-[var(--brand-signature,var(--accent-color))] hover:underline transition-all cursor-pointer text-center flex items-center justify-center"
+                          >
+                            {isEn ? 'Done! Show my plan directly' : 'Klar! Visa vad jag har kvar att spendera'}
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -1092,16 +1103,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-0 sm:my-auto flex flex-col flex-1 pb-0"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="expenses" />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                            {s.expensesQuestion}
-                          </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            {s.expensesDesc}
-                          </p>
-                        </div>
+                      <div className="text-center pb-1 space-y-1">
+                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                          {s.expensesQuestion}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                          {s.expensesDesc}
+                        </p>
                       </div>
 
                       {/* Search Bar */}
@@ -1174,14 +1182,15 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         )}
                       </div>
 
-                      {/* Added Fixed Expenses List - Natural height without internal scroll */}
+                      {/* Added Fixed Expenses List - Grouped surface card */}
                       {fixedExpenses.length > 0 && (
-                        <div className="space-y-1.5 pt-2 border-t border-[var(--border-color)]/60">
+                        <div className="bg-[var(--surface-color)] rounded-card divide-y divide-subtle overflow-hidden">
                           {fixedExpenses.map((exp, i) => (
                             <BudgetItem
                               key={i}
                               item={exp}
                               type="expense"
+                              isGrouped={true}
                               onClick={() => {
                                 setEditingExpenseIndex(i);
                                 setIsAddingExpense(true);
@@ -1203,28 +1212,38 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                             setEditingExpenseIndex(null);
                             setIsAddingExpense(true);
                           }}
-                          className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[var(--radius-xs,8px)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full py-3 rounded-btn text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-semibold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
-                          <Plus size={14} />
+                          <Plus size={15} />
                           <span>{s.customExpense}</span>
                         </button>
                       </div>
 
                       {/* Generous bottom spacing clearance so the last expense and custom button can be scrolled completely above the fixed Next button */}
-                      <div className="h-28 sm:h-24 shrink-0" aria-hidden="true" />
+                      <div className="h-36 sm:h-32 shrink-0" aria-hidden="true" />
 
                       {/* Fixed Next Button docked to the very bottom */}
-                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)] border-t border-[var(--border-color)]/50 px-4 sm:px-6 pt-3 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] shadow-modal">
+                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)]/95 backdrop-blur-md border-t border-[var(--border-color)]/60 px-4 sm:px-6 pt-3.5 pb-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.75rem))] shadow-modal">
                         {/* Subtle upward gradient fade */}
-                        <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-t from-[var(--bg-color)] to-transparent pointer-events-none" />
+                        <div className="absolute -top-5 left-0 right-0 h-5 bg-gradient-to-t from-[var(--bg-color)] to-transparent pointer-events-none" />
 
-                        <div className="max-w-sm sm:max-w-md mx-auto w-full">
+                        <div className="max-w-sm sm:max-w-md mx-auto w-full flex flex-col gap-2.5">
                           <button 
                             onClick={handleNext}
                             className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-subtle hover:opacity-95"
                           >
                             <span>{s.next}</span>
                             <ArrowRight size={16} strokeWidth={2.5} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMidMonthSpent('0');
+                              setStep('summary');
+                            }}
+                            className="w-full py-1.5 px-3 min-h-[32px] text-micro-label font-bold text-[var(--brand-signature,var(--accent-color))] hover:underline transition-all cursor-pointer text-center flex items-center justify-center"
+                          >
+                            {isEn ? 'Done! Show my plan directly' : 'Klar! Visa vad jag har kvar att spendera'}
                           </button>
                         </div>
                       </div>
@@ -1241,13 +1260,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="goals" />
-                        <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                            {s.savingsQuestion}
-                          </h3>
-                        </div>
+                      <div className="text-center pb-1">
+                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                          {s.savingsQuestion}
+                        </h3>
                       </div>
 
                       {/* Main Amount Input for Monthly Savings */}
@@ -1287,13 +1303,23 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         </div>
                       </div>
 
-                      <div className="pt-2">
+                      <div className="pt-4 sm:pt-5 flex flex-col gap-2.5">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMidMonthSpent('0');
+                            setStep('summary');
+                          }}
+                          className="w-full py-2 px-3 min-h-[36px] flex items-center justify-center text-micro-label font-bold text-[var(--brand-signature,var(--accent-color))] hover:underline transition-all cursor-pointer text-center"
+                        >
+                          {isEn ? 'Done! Show my plan directly' : 'Klar! Visa vad jag har kvar att spendera'}
                         </button>
                       </div>
                     </motion.div>
@@ -1313,11 +1339,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         const content = getStep6DynamicContent(daysSincePayday, isEn);
                         return (
                           <>
-                            <div className="text-center pb-2 sm:pb-2.5">
-                              <OnboardingCharacterArt step="midMonth" days={daysSincePayday} payday={payday} />
-
+                            <div className="text-center pb-1">
                               {/* Kombinerad huvudrubrik */}
-                              <h3 className="mt-4 sm:mt-5 text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
+                              <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
                                 {content.headline}
                               </h3>
                             </div>
@@ -1341,7 +1365,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                               </p>
                             </div>
 
-                            <div className="pt-1">
+                            <div className="pt-4 sm:pt-5">
                               <button 
                                 onClick={handleNext}
                                 className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
@@ -1366,24 +1390,20 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.25 }}
                       className="space-y-6 sm:space-y-7 my-auto text-center"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="summary" />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
-                            {s.summaryQuestion}
-                          </h3>
-                          <p className="text-xs font-medium text-[var(--text-secondary)]">
-                            {s.untilPayday(nextPaydayFormatted)}
-                          </p>
-                        </div>
+                      <div className="text-center pb-1 space-y-1">
+                        <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                          {s.summaryQuestion}
+                        </h3>
+                        <p className="text-xs font-medium text-[var(--text-secondary)]">
+                          {s.untilPayday(nextPaydayFormatted)}
+                        </p>
                       </div>
 
                       {/* Clean Breakdown Card: Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda */}
-                      <div className="p-4 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs space-y-2.5 text-left">
+                      <div className="p-4 rounded-card bg-[var(--surface-color)] space-y-2.5 text-left">
                         {/* Income */}
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <ArrowUpRight size={14} className="text-[var(--success-color)]" />
+                          <span className="text-xs font-medium text-[var(--text-secondary)]">
                             {s.incomeLabel}
                           </span>
                           <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1393,8 +1413,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
                         {/* Fixed Expenses */}
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <ArrowDownRight size={14} className="text-[var(--danger-color)]" />
+                          <span className="text-xs font-medium text-[var(--text-secondary)]">
                             {s.fixedCostsLabel}
                           </span>
                           <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1404,8 +1423,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
                         {/* Monthly Savings */}
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <PiggyBank size={14} className="text-[var(--warning-color)]" />
+                          <span className="text-xs font-medium text-[var(--text-secondary)]">
                             {s.savingsLabel}
                           </span>
                           <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1413,11 +1431,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           </span>
                         </div>
 
-                        {/* Spenderat hittills (visas om användaren angett ett spenderat belopp i pågående period) */}
+                        {/* Spenderat hittills */}
                         {initialSpentAmount > 0 && (
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                              <Receipt size={14} className="text-[var(--warning-color)]" />
+                            <span className="text-xs font-medium text-[var(--text-secondary)]">
                               {s.spentSoFarLabel}
                             </span>
                             <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1426,38 +1443,35 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           </div>
                         )}
 
-                        <div className="h-px bg-[var(--border-color)] my-1" />
+                        <div className="h-px bg-[var(--border-divider)] my-1" />
 
                         {/* Kvar att använda */}
                         <div className="flex items-center justify-between pt-0.5">
                           <span className="text-xs font-bold text-[var(--text-primary)]">
                             {s.freeSpendLabel}
                           </span>
-                          <span className="text-base font-extrabold font-amount text-[var(--accent-color)] tabular-nums">
+                          <span className="text-base font-extrabold font-amount text-[var(--text-primary)] tabular-nums">
                             {formatAmount(calculatedLeftToUse, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
                       </div>
 
                       {error && (
-                        <div className="p-2.5 bg-[var(--surface-color)] border border-subtle rounded-card-nested text-[var(--text-secondary)] text-xs text-center font-medium">
+                        <div className="p-2.5 bg-[var(--surface-color)] rounded-card-nested text-[var(--text-secondary)] text-xs text-center font-medium">
                           {error}
                         </div>
                       )}
 
-                      <div className="pt-1">
+                      <div className="pt-4 sm:pt-5">
                         <button 
                           onClick={() => handleSave()}
                           disabled={isUpdating}
-                          className="w-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-subtle cursor-pointer"
+                          className="w-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                         >
                           {isUpdating ? (
                             <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <>
-                              <span>{s.openDejz}</span>
-                              <ShieldCheck size={16} />
-                            </>
+                            <span>{s.openDejz}</span>
                           )}
                         </button>
                       </div>
@@ -1506,6 +1520,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                 userId={userId}
                 isPro={isPro}
                 paymentMethods={paymentMethods}
+                config={config}
+                hideStatus={true}
               />
             )}
           </AnimatePresence>

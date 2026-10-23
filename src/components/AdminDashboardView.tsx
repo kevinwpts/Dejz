@@ -13,13 +13,15 @@ import {
   Copy, 
   Check, 
   FileCode,
-  Play
+  Play,
+  Palette
 } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { dataService } from '../services/dataService';
 import { createFreshTestAccount, seedDemoData } from '../utils/demoData';
 import { feedback } from '../utils/feedback';
-import { Modal, Button } from './ui';
+import { Modal, Button, SegmentedControl } from './ui';
+import { DesignLibraryView } from './DesignLibraryView';
 
 interface AdminDashboardViewProps {
   onBack: () => void;
@@ -33,6 +35,8 @@ interface AdminDashboardViewProps {
   fixedExpenses: FixedExpense[];
   onRefresh: () => void;
   addToast: (message: string, type: 'success' | 'error') => void;
+  initialTab?: 'dashboard' | 'designLibrary';
+  profile?: any;
 }
 
 export function AdminDashboardView({
@@ -45,7 +49,10 @@ export function AdminDashboardView({
   fixedExpenses,
   onRefresh,
   addToast,
+  initialTab = 'dashboard',
+  profile,
 }: AdminDashboardViewProps) {
+  const [activeAdminTab, setActiveAdminTab] = useState<'dashboard' | 'designLibrary'>(initialTab);
   const [feedbackList, setFeedbackList] = useState<Array<{ id: string; user_id?: string; message: string; created_at: string }>>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(true);
   const [adminStats, setAdminStats] = useState<{ totalUsers: number; dbHealthy: boolean; timestamp: string }>({
@@ -57,11 +64,20 @@ export function AdminDashboardView({
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const isEn = config.language === 'en';
+  const isAdmin =
+    user?.email?.toLowerCase() === 'kevinwpts@gmail.com' ||
+    profile?.role === 'admin' ||
+    user?.user_metadata?.role === 'admin';
 
   useEffect(() => {
+    setActiveAdminTab(initialTab);
+  }, [initialTab]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
     loadFeedback();
     loadAdminStats();
-  }, []);
+  }, [isAdmin]);
 
   const loadFeedback = async () => {
     setLoadingFeedback(true);
@@ -121,6 +137,25 @@ export function AdminDashboardView({
     setTimeout(() => setCopiedDebug(false), 2000);
   };
 
+  if (!isAdmin) {
+    return (
+      <div className="bg-[var(--surface-color)] rounded-card card-p text-center space-y-3 py-10">
+        <ShieldCheck size={32} className="mx-auto text-[var(--danger-color)]" />
+        <h3 className="text-card-title text-[var(--text-primary)]">
+          Åtkomst nekad
+        </h3>
+        <p className="text-secondary text-[var(--text-secondary)]">
+          Den här sidan kräver administratörsbehörighet.
+        </p>
+        <div className="pt-2">
+          <Button variant="secondary" onClick={_onBack}>
+            Tillbaka
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -129,6 +164,20 @@ export function AdminDashboardView({
       transition={{ duration: 0.2 }}
       className="flex flex-col gap-section pb-16 font-sans w-full"
     >
+      {/* Top Navigation inside Admin Panel */}
+      <SegmentedControl
+        value={activeAdminTab}
+        onChange={setActiveAdminTab}
+        options={[
+          { value: 'dashboard', label: isEn ? 'System & Tools' : 'System & Verktyg', icon: <ShieldCheck size={15} /> },
+          { value: 'designLibrary', label: 'Designbibliotek', icon: <Palette size={15} /> },
+        ]}
+      />
+
+      {activeAdminTab === 'designLibrary' ? (
+        <DesignLibraryView />
+      ) : (
+        <>
       {/* Admin Hero Card */}
       <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center justify-between">
@@ -167,7 +216,7 @@ export function AdminDashboardView({
         </div>
 
         <div className="grid grid-cols-3 gap-2.5 pt-2">
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-xs,8px)] border border-subtle">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-btn-sm">
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Database' : 'Databas'}
             </span>
@@ -186,7 +235,7 @@ export function AdminDashboardView({
             </div>
           </div>
 
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-xs,8px)] border border-subtle">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-btn-sm">
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Transactions' : 'Transaktioner'}
             </span>
@@ -195,7 +244,7 @@ export function AdminDashboardView({
             </span>
           </div>
 
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-xs,8px)] border border-subtle">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-btn-sm">
             <span className="text-label font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Categories' : 'Kategorier'}
             </span>
@@ -206,10 +255,31 @@ export function AdminDashboardView({
         </div>
       </div>
 
+      {/* Designbibliotek Card (Admin Only) */}
+      <div className="bg-[var(--surface-color)] rounded-card card-p shadow-none space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Palette size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
+            <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
+              Designbibliotek
+            </h3>
+          </div>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => setActiveAdminTab('designLibrary')}
+          >
+            Öppna Designbibliotek
+          </Button>
+        </div>
+        <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
+          Se och testa appens gemensamma design, riktiga komponenter, popupfönster, bottom sheets och användarflöden i en isolerad miljö med valbara teman (Light, Dark, Black), accentfärger, skärmbredder och testdata.
+        </p>
+      </div>
+
       {/* Quick Test Account Tools (Admin Only) */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
+      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
-          <Sparkles size={18} strokeWidth={2} className="text-[var(--warning-color)]" />
           <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Quick Test Account (Admin Only)' : 'Snabbtest & Testkonto (Endast Admin)'}
           </h3>
@@ -231,7 +301,7 @@ export function AdminDashboardView({
                 window.location.reload();
               }, 400);
             }}
-            className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-subtle text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+            className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
           >
             <div className="flex items-center justify-between">
               <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight">
@@ -269,7 +339,7 @@ export function AdminDashboardView({
                 window.location.reload();
               }, 400);
             }}
-            className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-subtle text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+            className="p-4 rounded-card-nested bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
           >
             <div className="flex items-center justify-between">
               <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight">
@@ -285,7 +355,7 @@ export function AdminDashboardView({
       </div>
 
       {/* User Feedback Module */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card-nested,12px)] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
+      <div className="bg-[var(--surface-color)] rounded-card card-p shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
@@ -307,7 +377,7 @@ export function AdminDashboardView({
             {feedbackList.map((item) => (
               <div
                 key={item.id}
-                className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-[var(--radius-card-nested,12px)] border border-subtle space-y-2 group"
+                className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-card-nested space-y-2 group"
               >
                 <div className="flex items-center justify-between text-label text-[var(--text-secondary)]">
                   <span className="font-mono opacity-60">
@@ -341,7 +411,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Developer & Diagnostic Tools */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,20px)] card-p border-none shadow-subtle space-y-[var(--card-gap)]">
+      <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-subtle space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Database size={18} strokeWidth={2} className="text-[var(--success-color)]" />
           <h3 className="text-section-title font-bold text-[var(--text-primary)] tracking-tight">
@@ -353,7 +423,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={handleCopyDiagnostics}
-            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] border border-subtle text-secondary font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
+            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-card-nested text-secondary font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
           >
             <div className="flex items-center gap-2.5">
               <FileCode size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
@@ -378,7 +448,7 @@ export function AdminDashboardView({
                 addToast('Kunde inte rensa cache', 'error');
               }
             }}
-            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] border border-subtle text-secondary font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
+            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-card-nested text-secondary font-semibold text-[var(--text-primary)] transition-all cursor-pointer touch-press"
           >
             <div className="flex items-center gap-2.5">
               <RefreshCw size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
@@ -425,6 +495,8 @@ export function AdminDashboardView({
             </Button>
           </div>
         </Modal>
+      )}
+        </>
       )}
     </motion.div>
   );

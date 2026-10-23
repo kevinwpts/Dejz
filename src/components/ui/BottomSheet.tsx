@@ -123,8 +123,8 @@ export function BottomSheet({
 
             {/* Header */}
             {hasHeader && (
-              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-subtle">
-                <div className="flex items-center gap-3 min-w-0 pr-3 flex-1">
+              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-2.5 flex items-start justify-between shrink-0 border-b border-divider">
+                <div className="flex items-start gap-3 min-w-0 pr-3 flex-1">
                   {headerLeading && (
                     <div className="shrink-0">
                       {headerLeading}
@@ -137,7 +137,7 @@ export function BottomSheet({
                       </h2>
                     )}
                     {subtitle && (
-                      <p className="text-secondary truncate mt-0.5">
+                      <p className="text-secondary leading-snug break-words whitespace-normal mt-0.5">
                         {subtitle}
                       </p>
                     )}
@@ -173,7 +173,7 @@ export function BottomSheet({
 
             {/* Footer */}
             {footer && (
-              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-divider shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
                 {footer}
               </div>
             )}
@@ -232,11 +232,11 @@ export function BottomSheetOption<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[var(--radius-button-sm,8px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
+      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-btn-sm transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
-          <div className="w-8 h-8 rounded-[var(--radius-icon-button,6px)] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+          <div className="w-8 h-8 rounded-icon-button bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
             {icon}
           </div>
         )}

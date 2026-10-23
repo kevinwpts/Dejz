@@ -83,36 +83,50 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-16 h-16 rounded-full',
-      icon: 30,
-    },
-    lg: {
       container: 'w-14 h-14 rounded-full',
+      padding: 'p-2',
       icon: 26,
     },
+    lg: {
+      container: 'w-12 h-12 rounded-full',
+      padding: 'p-1.5',
+      icon: 22,
+    },
     md: {
-      container: 'w-[42px] h-[42px] rounded-full',
-      icon: 20,
+      container: 'w-9 h-9 sm:w-[38px] sm:h-[38px] rounded-full',
+      padding: 'p-1',
+      icon: 18,
     },
     sm: {
-      container: 'w-8 h-8 rounded-full',
-      icon: 15,
+      container: 'w-7 h-7 sm:w-8 sm:h-8 rounded-full',
+      padding: 'p-1',
+      icon: 14,
     },
   }[size] || {
-    container: 'w-[42px] h-[42px] rounded-full',
-    icon: 20,
+    container: 'w-9 h-9 sm:w-[38px] sm:h-[38px] rounded-full',
+    padding: 'p-1',
+    icon: 18,
   };
 
-  // If there's an official logo and no load error (Klarna / Apple Pay circular icon style)
+  // Official logo: preserve aspect ratio without cropping
   if (activeLogoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 select-none`}
+        className={`${sizeConfig.container} ${sizeConfig.padding} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/[0.08] border border-black/[0.04] dark:border-white/[0.06] select-none`}
       >
         <img
           src={activeLogoUrl}
           alt={merchantName || 'Logo'}
-          className="w-full h-full object-cover object-center select-none pointer-events-none block"
+          className="w-full h-full object-contain object-center select-none pointer-events-none block"
+          onLoad={(e) => {
+            if (
+              activeLogoUrl.includes('sz=128') &&
+              e.currentTarget.naturalWidth <= 16 &&
+              e.currentTarget.naturalHeight <= 16
+            ) {
+              setImgError(true);
+            }
+          }}
           onError={handleImageError}
           referrerPolicy="no-referrer"
           loading="lazy"
@@ -133,31 +147,16 @@ export function TransactionLogo({
     );
   }
 
-  // Fallback Category / Default Icon (with Icons8 Color support)
-  const categoryIconKey = visual.categoryIcon || visual.iconKey;
+  // Always fall back to CategoryIcon with the category's icon and color
+  const categoryIconKey = visual.categoryIcon || visual.iconKey || 'receipt';
   const resolvedCategoryName = visual.categoryName || categoryName;
 
-  if (categoryIconKey || resolvedCategoryName) {
-    return (
-      <CategoryIcon
-        icon={categoryIconKey}
-        color={visual.backgroundColor}
-        categoryName={resolvedCategoryName}
-        size={size}
-      />
-    );
-  }
-
-  const IconComponent = visual.iconComponent || Receipt;
-  const bgColor = visual.backgroundColor;
-  const textColor = visual.textColor;
-
   return (
-    <div
-      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 select-none ${!bgColor ? "bg-[var(--surface-muted)] text-[var(--text-primary)]" : ""}`}
-      style={bgColor ? { backgroundColor: bgColor, color: textColor } : undefined}
-    >
-      <IconComponent size={sizeConfig.icon} strokeWidth={2} />
-    </div>
+    <CategoryIcon
+      icon={categoryIconKey}
+      color={visual.backgroundColor}
+      categoryName={resolvedCategoryName}
+      size={size}
+    />
   );
 }

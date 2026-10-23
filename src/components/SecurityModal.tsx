@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Smartphone, Fingerprint } from 'lucide-react';
+import { Smartphone, Fingerprint } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { hasPin, removePin, isBiometricsEnabled, setBiometricsEnabled } from '../utils/security';
 import { PinLockScreen } from './PinLockScreen';
@@ -11,21 +11,26 @@ interface SecurityModalProps {
   t: (key: TranslationKey) => string;
   addToast: (message: string, type: 'success' | 'error') => void;
   _userEmail?: string;
+  sandboxMode?: boolean;
 }
 
-export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalProps) {
+export function SecurityModal({ isOpen, onClose, t, addToast, sandboxMode = false }: SecurityModalProps) {
   const [view, setView] = useState<'menu' | 'pin-setup' | 'pin-disable'>('menu');
   const [pinEnabled, setPinEnabled] = useState(false);
   const [biometricsEnabled, setBiometricsState] = useState(false);
 
   useEffect(() => {
-    setPinEnabled(hasPin());
-    setBiometricsState(isBiometricsEnabled());
-  }, [isOpen, view]);
+    if (!sandboxMode) {
+      setPinEnabled(hasPin());
+      setBiometricsState(isBiometricsEnabled());
+    }
+  }, [isOpen, view, sandboxMode]);
 
   const toggleBiometrics = () => {
     const newState = !biometricsEnabled;
-    setBiometricsEnabled(newState);
+    if (!sandboxMode) {
+      setBiometricsEnabled(newState);
+    }
     setBiometricsState(newState);
     addToast(t('saved'), 'success');
   };
@@ -36,6 +41,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
         mode="setup"
         t={t}
         onSuccess={() => {
+          if (sandboxMode) setPinEnabled(true);
           addToast(t('pinSet'), 'success');
           setView('menu');
         }}
@@ -50,7 +56,11 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
         mode="disable"
         t={t}
         onSuccess={() => {
-          removePin();
+          if (!sandboxMode) {
+            removePin();
+          } else {
+            setPinEnabled(false);
+          }
           addToast(t('pinRemoved'), 'success');
           setView('menu');
         }}
@@ -65,54 +75,45 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
       onClose={onClose}
       center
       size="sm"
+      title={t('security')}
       showCloseButton={true}
-      bodyClassName="p-6 sm:p-7 text-center"
+      bodyClassName="p-5 sm:p-6"
     >
-      <div className="text-center">
-        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border border-subtle">
-          <Lock size={24} strokeWidth={2} />
-        </div>
+      {view === 'menu' && (
+        <Card variant="nested" padding="none" className="divide-y divide-subtle text-left">
+          <ListRow
+            variant="grouped"
+            icon={<Smartphone size={18} strokeWidth={2} />}
+            iconBg="bg-transparent"
+            iconColor="text-[var(--text-secondary)]"
+            title={t('appLock')}
+            control={
+              <Switch
+                checked={pinEnabled}
+                onChange={() => setView(pinEnabled ? 'pin-disable' : 'pin-setup')}
+                aria-label={t('appLock')}
+              />
+            }
+          />
 
-        <h2 className="text-section-title font-bold text-[var(--text-primary)] mb-5">
-          {t('security')}
-        </h2>
-
-        {view === 'menu' && (
-          <Card variant="nested" padding="none" className="divide-y divide-subtle text-left">
+          {pinEnabled && (
             <ListRow
               variant="grouped"
-              icon={<Smartphone size={18} strokeWidth={2} />}
+              icon={<Fingerprint size={18} strokeWidth={2} />}
               iconBg="bg-transparent"
               iconColor="text-[var(--text-secondary)]"
-              title={t('appLock')}
+              title={t('biometrics')}
               control={
                 <Switch
-                  checked={pinEnabled}
-                  onChange={() => setView(pinEnabled ? 'pin-disable' : 'pin-setup')}
-                  aria-label={t('appLock')}
+                  checked={biometricsEnabled}
+                  onChange={toggleBiometrics}
+                  aria-label={t('biometrics')}
                 />
               }
             />
-
-            {pinEnabled && (
-              <ListRow
-                variant="grouped"
-                icon={<Fingerprint size={18} strokeWidth={2} />}
-                iconBg="bg-transparent"
-                iconColor="text-[var(--text-secondary)]"
-                title={t('biometrics')}
-                control={
-                  <Switch
-                    checked={biometricsEnabled}
-                    onChange={toggleBiometrics}
-                    aria-label={t('biometrics')}
-                  />
-                }
-              />
-            )}
-          </Card>
-        )}
-      </div>
+          )}
+        </Card>
+      )}
     </Modal>
   );
 }

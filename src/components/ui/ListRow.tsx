@@ -79,10 +79,10 @@ export const ListRow: React.FC<ListRowProps> = ({
   const hasIconBg = iconBg && iconBg !== 'bg-transparent';
   const iconContainerSize = isCompact
     ? hasIconBg
-      ? 'w-8 h-8 rounded-[9px] [&_svg]:w-[19px] [&_svg]:h-[19px]'
+      ? 'w-8 h-8 rounded-icon-button [&_svg]:w-[19px] [&_svg]:h-[19px]'
       : 'w-7 h-7 [&_svg]:w-[19px] [&_svg]:h-[19px]'
     : hasIconBg
-      ? 'w-9 h-9 rounded-[10px] [&_svg]:w-[20px] [&_svg]:h-[20px]'
+      ? 'w-9 h-9 rounded-icon-button [&_svg]:w-[20px] [&_svg]:h-[20px]'
       : 'w-8 h-8 [&_svg]:w-[20px] [&_svg]:h-[20px]';
 
   const gapSize = 'gap-3.5';

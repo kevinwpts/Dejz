@@ -1,5 +1,4 @@
 import React from 'react';
-import { Shield, FileText, Mail, Info } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { Modal, Card } from './ui';
 
@@ -106,10 +105,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
       case 'contact':
         return (
           <div className="space-y-6 text-body text-[var(--text-secondary)] leading-relaxed">
-            <Card variant="default" padding="lg" className="flex flex-col items-center text-center space-y-4">
-              <div className="w-14 h-14 rounded-icon-button bg-[var(--surface-muted)] text-[var(--accent-color)] flex items-center justify-center">
-                <Mail size={28} />
-              </div>
+            <Card variant="default" padding="lg" className="flex flex-col text-left space-y-3">
               <div>
                 <h3 className="text-section-title font-semibold font-display text-[var(--text-primary)]">Hjälp & Feedback</h3>
                 <p className="text-body text-[var(--text-secondary)] mt-1">
@@ -134,31 +130,13 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
     }
   };
 
-  const getIcon = () => {
-    switch (type) {
-      case 'privacy': return <Shield size={20} className="text-[var(--accent-color)]" />;
-      case 'terms': return <FileText size={20} className="text-[var(--accent-color)]" />;
-      case 'cookies': return <Info size={20} className="text-[var(--accent-color)]" />;
-      case 'contact': return <Mail size={20} className="text-[var(--accent-color)]" />;
-    }
-  };
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       size="md"
-      title={
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-card-nested bg-[var(--surface-muted)] flex items-center justify-center border-none shrink-0">
-            {getIcon()}
-          </div>
-          <div>
-            <h2 className="text-section-title font-bold font-display tracking-tight text-[var(--text-primary)]">{getTitle()}</h2>
-            <p className="text-secondary font-medium text-[var(--text-secondary)]">Juridisk information</p>
-          </div>
-        </div>
-      }
+      title={getTitle()}
+      subtitle="Juridisk information"
     >
       <div className="p-2 sm:p-4">
         {getContent()}

@@ -67,7 +67,6 @@ export function VariableAmountUpdateModal({
           variant="primary"
           fullWidth
           size="lg"
-          icon={<Check size={18} strokeWidth={2} />}
         >
           {t('save')}
         </Button>
@@ -75,32 +74,38 @@ export function VariableAmountUpdateModal({
     >
 
 
-            <div className="px-6 py-6 space-y-4">
-              {/* Amount Input */}
-              <div className="relative group overflow-hidden rounded-[var(--radius-input,14px)]">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(formatAmount(e.target.value))}
-                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAmount(evaluateAndFormatAmount(amount));
-                      handleSave();
-                    }
-                  }}
-                  placeholder={defaultAmountText}
-                  className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-primary)] px-6 py-6 rounded-[var(--radius-input,14px)] transition-all outline-none font-amount text-4xl sm:text-5xl font-bold tracking-tighter text-center pr-20 focus:border-[var(--accent-color)]"
-                />
-                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <span className="text-label font-semibold text-accent bg-accent/10 px-3 py-1.5 rounded-full">
-                    {config.currency || 'kr'}
-                  </span>
-                </div>
-              </div>
-            </div>
+      <div className="px-5 py-5">
+        <div
+          onClick={() => inputRef.current?.focus()}
+          className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] cursor-text"
+        >
+          <span className="text-label font-medium text-[var(--text-tertiary)] block mb-1">
+            {config?.language === 'en' ? 'Amount this period' : 'Belopp denna period'}
+          </span>
+          <div className="flex items-baseline gap-2 font-amount w-full">
+            <input
+              ref={inputRef}
+              type="text"
+              autoFocus
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(formatAmount(e.target.value))}
+              onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setAmount(evaluateAndFormatAmount(amount));
+                  handleSave();
+                }
+              }}
+              placeholder={defaultAmountText}
+              className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)] text-[34px] sm:text-[40px] w-full leading-none shrink min-w-[60px]"
+            />
+            <span className="text-lg font-medium text-[var(--text-tertiary)] select-none shrink-0 font-sans ml-1 pb-1">
+              {config?.currency || 'kr'}
+            </span>
+          </div>
+        </div>
+      </div>
 
     </BottomSheet>
   );

@@ -10,15 +10,17 @@ import {
   Layers, 
   RotateCcw
 } from 'lucide-react';
-import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
+import { Transaction, Config, FixedExpense, Income, WeekendAdjustment } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { Input, BottomSheet, Button, FilterButtonGroup } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
+import { CalendarWidget } from './CalendarWidget';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { formatFullDate } from '../utils/date';
+import { formatFullDate, getPeriodBoundaries, getPeriodId, getPaydayTypeFromDay, isFixedItemScheduledOnDay } from '../utils/date';
+import { isFixedPaymentScheduledOnDate } from '../utils/cancellation';
 import { getCategoryIconName } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 
@@ -103,19 +105,30 @@ export function LogView({
     const items: (Transaction & { isFixed: boolean; originalItem: any })[] = [];
     const isEn = currentLang === 'en';
 
-    // Helper to check if a recurring item is active in a given month (0-11)
-    const isItemActiveInMonth = (item: { frequency?: Frequency; startMonth?: number }, monthIndex: number) => {
-      if (!item.frequency || item.frequency === Frequency.MONTHLY) return true;
-      if (item.startMonth === undefined) return true;
-      const startM = item.startMonth;
-      if (item.frequency === Frequency.QUARTERLY) return (monthIndex - startM + 12) % 3 === 0;
-      if (item.frequency === Frequency.SEMI_ANNUALLY) return (monthIndex - startM + 12) % 6 === 0;
-      if (item.frequency === Frequency.ANNUALLY) return monthIndex === startM;
-      return true;
+    const resolvePeriodIdForDate = (itemDate: Date): string => {
+      const ts = itemDate.getTime();
+      const allPeriods = periods && periods.length > 0 ? periods : chronologicalPeriods;
+      for (const p of allPeriods) {
+        if (!p.start || !p.end) continue;
+        const pStart = new Date(p.start);
+        pStart.setHours(0, 0, 0, 0);
+        const pEnd = new Date(p.end);
+        pEnd.setHours(23, 59, 59, 999);
+        if (ts >= pStart.getTime() && ts <= pEnd.getTime()) {
+          return p.periodId || p.id || getPeriodId(pStart);
+        }
+      }
+      const paydaySetting = config?.payday || 25;
+      const paydayType = getPaydayTypeFromDay(paydaySetting);
+      const adjustment = config?.paydayBeforeWeekend
+        ? WeekendAdjustment.BEFORE
+        : WeekendAdjustment.NONE;
+      const bounds = getPeriodBoundaries(itemDate, paydayType, paydaySetting, adjustment);
+      return getPeriodId(bounds.start);
     };
 
     // Determine the month range to generate for
-    const targetMonths: { year: number; month: number; periodId?: string }[] = [];
+    const targetMonths: { year: number; month: number }[] = [];
     const seenYearMonths = new Set<string>();
 
     if (chronologicalPeriods.length > 0) {
@@ -130,7 +143,7 @@ export function LogView({
           const ymKey = `${curr.getFullYear()}-${curr.getMonth()}`;
           if (!seenYearMonths.has(ymKey)) {
             seenYearMonths.add(ymKey);
-            targetMonths.push({ year: curr.getFullYear(), month: curr.getMonth(), periodId: p.id });
+            targetMonths.push({ year: curr.getFullYear(), month: curr.getMonth() });
           }
           curr = new Date(curr.getFullYear(), curr.getMonth() + 1, 1);
         }
@@ -148,30 +161,37 @@ export function LogView({
       }
     }
 
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
     // Generate entries for each target month
-    targetMonths.forEach(({ year, month, periodId }) => {
+    targetMonths.forEach(({ year, month }) => {
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
       // 1. Incomes
       (incomes || []).forEach(inc => {
-        if (!isItemActiveInMonth(inc, month)) return;
         const rawDay = inc.deductionDay || config?.payday || 25;
         const day = Math.min(rawDay, daysInMonth);
         const itemDate = new Date(year, month, day, 12, 0, 0);
+        if (!isFixedItemScheduledOnDay({ ...inc, deductionDay: rawDay }, itemDate)) return;
+        if (!isFixedPaymentScheduledOnDate(inc as any, itemDate)) return;
 
+        const periodId = resolvePeriodIdForDate(itemDate);
         const amount = inc.isVariable && periodId && inc.periodOverrides && inc.periodOverrides[periodId] !== undefined
           ? inc.periodOverrides[periodId]
           : inc.amount;
+        const isPlanned = itemDate.getTime() > endOfToday.getTime();
 
         items.push({
           id: `fixed-income-${inc.id}-${year}-${month}-${day}`,
           merchant: inc.name,
           category: inc.category || (isEn ? 'Income' : 'Inkomst'),
-          amount: amount || 0,
+          amount: Number(amount) || 0,
           type: 'income',
           timestamp: itemDate.getTime(),
           date: itemDate.toISOString(),
           isFixed: true,
+          isPlanned,
           originalItem: inc,
           icon: inc.icon,
           logo: inc.logo,
@@ -180,24 +200,28 @@ export function LogView({
 
       // 2. Fixed Expenses
       (fixedExpenses || []).forEach(fe => {
-        if (!isItemActiveInMonth(fe, month)) return;
         const rawDay = fe.deductionDay || config?.payday || 25;
         const day = Math.min(rawDay, daysInMonth);
         const itemDate = new Date(year, month, day, 12, 0, 0);
+        if (!isFixedItemScheduledOnDay({ ...fe, deductionDay: rawDay }, itemDate)) return;
+        if (!isFixedPaymentScheduledOnDate(fe, itemDate)) return;
 
+        const periodId = resolvePeriodIdForDate(itemDate);
         const amount = fe.isVariable && periodId && fe.periodOverrides && fe.periodOverrides[periodId] !== undefined
           ? fe.periodOverrides[periodId]
           : fe.amount;
+        const isPlanned = itemDate.getTime() > endOfToday.getTime();
 
         items.push({
           id: `fixed-expense-${fe.id}-${year}-${month}-${day}`,
           merchant: fe.name,
           category: fe.category || (isEn ? 'Fixed Expense' : 'Fast utgift'),
-          amount: amount || 0,
+          amount: Number(amount) || 0,
           type: 'expense',
           timestamp: itemDate.getTime(),
           date: itemDate.toISOString(),
           isFixed: true,
+          isPlanned,
           originalItem: fe,
           icon: fe.icon,
           logo: fe.logo,
@@ -210,14 +234,17 @@ export function LogView({
         : (stats?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0);
 
       savingsList.forEach((ms: any) => {
-        if (!isItemActiveInMonth(ms, month)) return;
         const rawDay = ms.deductionDay || config?.payday || 25;
         const day = Math.min(rawDay, daysInMonth);
         const itemDate = new Date(year, month, day, 12, 0, 0);
+        if (!isFixedItemScheduledOnDay({ ...ms, deductionDay: rawDay }, itemDate)) return;
+        if (!isFixedPaymentScheduledOnDate(ms, itemDate)) return;
 
+        const periodId = resolvePeriodIdForDate(itemDate);
         const amount = ms.isVariable && periodId && ms.periodOverrides && ms.periodOverrides[periodId] !== undefined
           ? ms.periodOverrides[periodId]
           : (ms.amount !== undefined ? ms.amount : (ms.targetAmount || 0));
+        const isPlanned = itemDate.getTime() > endOfToday.getTime();
 
         items.push({
           id: `fixed-saving-${ms.id}-${year}-${month}-${day}`,
@@ -228,6 +255,7 @@ export function LogView({
           timestamp: itemDate.getTime(),
           date: itemDate.toISOString(),
           isFixed: true,
+          isPlanned,
           originalItem: ms,
           icon: ms.icon || 'PiggyBank',
           logo: ms.logo,
@@ -236,7 +264,7 @@ export function LogView({
     });
 
     return items;
-  }, [config?.showFixedExpensesInHistory, config?.monthlySavingsItems, config?.payday, chronologicalPeriods, incomes, fixedExpenses, stats?.savingsGoals, currentLang]);
+  }, [config?.showFixedExpensesInHistory, config?.monthlySavingsItems, config?.payday, config?.paydayBeforeWeekend, periods, chronologicalPeriods, incomes, fixedExpenses, stats?.savingsGoals, currentLang]);
 
   // Combined transactions list (regular + fixed if option enabled)
   const allCombinedTransactions = useMemo(() => {
@@ -251,6 +279,17 @@ export function LogView({
       ? selectedPeriod.name.split('(')[0].trim()
       : selectedPeriod.name;
   }, [selectedPeriod]);
+
+  const selectedPeriodInterval = useMemo(() => {
+    if (!selectedPeriod?.start || !selectedPeriod?.end) return '';
+    const s = new Date(selectedPeriod.start);
+    const e = new Date(selectedPeriod.end);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return '';
+    const loc = getLocale();
+    const sStr = s.toLocaleDateString(loc, { day: 'numeric', month: 'short' }).replace('.', '');
+    const eStr = e.toLocaleDateString(loc, { day: 'numeric', month: 'short' }).replace('.', '');
+    return `${sStr}–${eStr}`;
+  }, [selectedPeriod, currentLang]);
 
   const activeFilterLabel = useMemo(() => {
     if (selectedDate) {
@@ -273,11 +312,13 @@ export function LogView({
     }
 
     if (selectedPeriod) {
-      return selectedMonthName;
+      return selectedPeriodInterval
+        ? `${selectedMonthName} · ${selectedPeriodInterval}`
+        : selectedMonthName;
     }
 
     return getL10n('Alla perioder', 'All periods', 'Alle perioder', 'Alle perioder', 'Kaikki jaksot');
-  }, [selectedDate, selectedPeriod, selectedMonthName, currentLang]);
+  }, [selectedDate, selectedPeriod, selectedMonthName, selectedPeriodInterval, currentLang]);
 
   // Available categories in the current filtered period / data set for quick pills
   const availableCategories = useMemo(() => {
@@ -300,9 +341,18 @@ export function LogView({
 
       if (typeFilter !== 'all' && tx.type !== typeFilter) return;
 
-      const catName = tx.category?.trim();
-      if (catName) {
-        catMap.set(catName, (catMap.get(catName) || 0) + 1);
+      if (tx.splits && Array.isArray(tx.splits) && tx.splits.length > 0) {
+        tx.splits.forEach((s: any) => {
+          const sCat = s.category?.trim();
+          if (sCat) {
+            catMap.set(sCat, (catMap.get(sCat) || 0) + 1);
+          }
+        });
+      } else {
+        const catName = tx.category?.trim();
+        if (catName) {
+          catMap.set(catName, (catMap.get(catName) || 0) + 1);
+        }
       }
     });
 
@@ -350,14 +400,23 @@ export function LogView({
           const matchCategory = e.category?.toLowerCase().includes(q);
           const matchNote = e.note?.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q);
           const matchAmount = String(e.amount).includes(q);
-          if (!matchMerchant && !matchCategory && !matchNote && !matchAmount) {
+          const matchSplit = Array.isArray(e.splits) && e.splits.some((s: any) =>
+            (s.category || '').toLowerCase().includes(q) ||
+            String(Math.abs(Number(s.amount) || 0)).includes(q)
+          );
+          if (!matchMerchant && !matchCategory && !matchNote && !matchAmount && !matchSplit) {
             return false;
           }
         }
 
         // 2. Category Filter
         if (categoryFilter) {
-          if (e.category?.trim().toLowerCase() !== categoryFilter.toLowerCase()) {
+          const targetCat = categoryFilter.toLowerCase();
+          const directMatch = e.category?.trim().toLowerCase() === targetCat;
+          const splitMatch = Array.isArray(e.splits) && e.splits.some((s: any) =>
+            (s.category || '').trim().toLowerCase() === targetCat
+          );
+          if (!directMatch && !splitMatch) {
             return false;
           }
         }
@@ -414,10 +473,31 @@ export function LogView({
     };
   }, [filteredExpenses]);
 
-  // Group transactions by day and calculate each day's net sum
-  const groupedExpenses = useMemo(() => {
-    const groups: Record<string, { items: (Transaction & { isFixed?: boolean; originalItem?: any })[]; dayNet: number }> = {};
+  // Group planned recurring payments separately from registered transactions
+  const groupedPlannedExpenses = useMemo(() => {
+    const groups: Record<string, { items: (Transaction & { isFixed?: boolean; isPlanned?: boolean; originalItem?: any })[]; dayNet: number }> = {};
     filteredExpenses.forEach((e: any) => {
+      if (!e.isPlanned) return;
+      const dateKey = new Date(e.timestamp).toDateString();
+      if (!groups[dateKey]) {
+        groups[dateKey] = { items: [], dayNet: 0 };
+      }
+      groups[dateKey].items.push(e);
+      const amt = Number(e.amount) || 0;
+      if (e.type === 'income') {
+        groups[dateKey].dayNet += amt;
+      } else {
+        groups[dateKey].dayNet -= amt;
+      }
+    });
+    return Object.entries(groups).sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
+  }, [filteredExpenses]);
+
+  // Group registered transactions by day and calculate each day's net sum
+  const groupedExpenses = useMemo(() => {
+    const groups: Record<string, { items: (Transaction & { isFixed?: boolean; isPlanned?: boolean; originalItem?: any })[]; dayNet: number }> = {};
+    filteredExpenses.forEach((e: any) => {
+      if (e.isPlanned) return;
       const dateKey = new Date(e.timestamp).toDateString();
       if (!groups[dateKey]) {
         groups[dateKey] = { items: [], dayNet: 0 };
@@ -550,58 +630,25 @@ export function LogView({
         />
       </div>
 
-      {/* 2. Top Controls: Compact Inline Row (Period button + Transaction type filters + Icon-only Filter button) - Samma upplägg som Analysfliken */}
-      <div>
-        <div className="flex items-center justify-between gap-2 py-1.5 px-1.5 -my-1.5 -mx-1.5 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Period Button */}
-            <button
-              type="button"
-              onClick={() => {
-                const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
-                setModalPeriod(initial);
-                setIsPeriodPickerOpen(true);
-              }}
-              className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-subtle shadow-2xs hover:bg-black/[0.02] dark:hover:bg-white/[0.04] cursor-pointer active:scale-[0.98] transition-all select-none"
-            >
-              <CalendarIcon size={14} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
-              {selectedPeriod?.isCurrent && (
-                <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
-                  {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
-                </span>
-              )}
-              <ChevronDown size={13} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
-            </button>
+      {/* 2. Top Controls: Non-scrolling mobile-optimized row (Period button + Filter icon button on left, Type pills on right) */}
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0">
+          {/* Period Button */}
+          <button
+            type="button"
+            onClick={() => {
+              const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
+              setModalPeriod(initial);
+              setIsPeriodPickerOpen(true);
+            }}
+            className="h-[38px] sm:h-[40px] px-3 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-label sm:text-body-medium font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-subtle shadow-2xs hover:bg-[var(--surface-hover)] cursor-pointer active:scale-[0.98] transition-all select-none min-w-0"
+          >
+            <CalendarIcon size={14} className="text-[var(--text-secondary)] shrink-0" />
+            <span className="truncate max-w-[145px] xs:max-w-[175px] sm:max-w-none tabular-nums">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
+            <ChevronDown size={13} className="text-[var(--text-secondary)] shrink-0" />
+          </button>
 
-            {/* Inline Transaction Type Filters */}
-            <div className="flex-shrink-0">
-              <FilterButtonGroup
-                options={[
-                  {
-                    id: 'all',
-                    label: getL10n('Alla', 'All', 'Alle', 'Alle', 'Kaikki'),
-                  },
-                  {
-                    id: 'expense',
-                    label: getL10n('Utgifter', 'Expenses', 'Utgifter', 'Udgifter', 'Menot'),
-                  },
-                  {
-                    id: 'income',
-                    label: getL10n('Inkomster', 'Income', 'Inntekt', 'Indkomst', 'Tulot'),
-                  },
-                ]}
-                selectedId={typeFilter}
-                onSelect={(id) => {
-                  if (typeof feedback?.selection === 'function') feedback.selection();
-                  setTypeFilter(id as 'all' | 'income' | 'expense');
-                }}
-                ariaLabel={getL10n('Filtrera typ', 'Filter type')}
-              />
-            </div>
-          </div>
-
-          {/* Filter Toggle Button (Icon only) */}
+          {/* Filter Toggle Button (Placed directly to the right of Period button so it is always visible on mobile) */}
           <button
             type="button"
             onClick={() => {
@@ -623,6 +670,32 @@ export function LogView({
               </span>
             )}
           </button>
+        </div>
+
+        {/* Inline Transaction Type Filters */}
+        <div className="min-w-0 shrink-0">
+          <FilterButtonGroup
+            options={[
+              {
+                id: 'all',
+                label: getL10n('Alla', 'All', 'Alle', 'Alle', 'Kaikki'),
+              },
+              {
+                id: 'expense',
+                label: getL10n('Utgifter', 'Expenses', 'Utgifter', 'Udgifter', 'Menot'),
+              },
+              {
+                id: 'income',
+                label: getL10n('Inkomster', 'Income', 'Inntekt', 'Indkomst', 'Tulot'),
+              },
+            ]}
+            selectedId={typeFilter}
+            onSelect={(id) => {
+              if (typeof feedback?.selection === 'function') feedback.selection();
+              setTypeFilter(id as 'all' | 'income' | 'expense');
+            }}
+            ariaLabel={getL10n('Filtrera typ', 'Filter type')}
+          />
         </div>
       </div>
 
@@ -688,55 +761,129 @@ export function LogView({
         </div>
       )}
 
-      {/* 6. Transactions List Grouped by Day */}
-      <div className="space-y-[var(--card-gap)]">
-        <div className="space-y-4 sm:space-y-4.5">
-          {groupedExpenses.map(([date, dayData], index) => (
-            <motion.div 
-              key={date} 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.03 }}
-              className="space-y-1.5"
-            >
-              {/* Day Header with Date */}
-              <div className="px-1 pb-0.5">
-                <span className="text-label font-medium text-[var(--text-secondary)]">
-                  {formatFullDate(date, currentLang)}
-                </span>
-              </div>
+      {/* 6. Transactions List Grouped by Planned vs Registered */}
+      <div className="space-y-5">
+        {/* 6a. Planned Recurring Payments Section */}
+        {groupedPlannedExpenses.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-section-title">
+                {getL10n('Planerade betalningar', 'Planned payments', 'Planlagte betalinger', 'Planlagte betalinger', 'Suunnitellut maksut')}
+              </h2>
+              <span className="text-micro-label text-[var(--text-tertiary)]">
+                {getL10n('Ännu ej dragna', 'Not yet deducted', 'Ikke trukket ennå', 'Endnu ikke trukket', 'Ei vielä veloitettu')}
+              </span>
+            </div>
 
-              {/* Transactions for this Day */}
-              <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
-                {dayData.items.map((transaction: any) => (
-                  <TransactionItem 
-                    key={transaction.id}
-                    transaction={transaction}
-                    isFixed={Boolean(transaction.isFixed)}
-                    isGrouped={true}
-                    config={config}
-                    onView={transaction.isFixed ? undefined : onViewTransaction}
-                    onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
-                    onToggleStar={transaction.isFixed ? undefined : onToggleStar}
-                    onClick={() => {
-                      if (transaction.isFixed) {
-                        if (transaction.type === 'income' && onViewIncome) {
-                          onViewIncome(transaction.originalItem);
-                        } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
-                          onViewMonthlySaving(transaction.originalItem);
-                        } else if (onViewFixedExpense) {
-                          onViewFixedExpense(transaction.originalItem);
-                        }
-                      } else if (onViewTransaction) {
-                        onViewTransaction(transaction);
-                      }
-                    }}
-                  />
-                ))}
+            <div className="space-y-3.5">
+              {groupedPlannedExpenses.map(([date, dayData], index) => (
+                <motion.div
+                  key={`planned-${date}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                  className="space-y-1.5"
+                >
+                  <div className="px-1 pb-0.5">
+                    <h3 className="text-date-header text-[var(--text-secondary)]">
+                      {formatFullDate(date, currentLang)}
+                    </h3>
+                  </div>
+
+                  <div className="rounded-card bg-[var(--surface-color)]/80 border border-dashed border-[var(--border-subtle)] shadow-subtle overflow-hidden divide-subtle">
+                    {dayData.items.map((transaction: any) => (
+                      <TransactionItem
+                        key={transaction.id}
+                        transaction={transaction}
+                        isFixed={Boolean(transaction.isFixed)}
+                        isGrouped={true}
+                        config={config}
+                        onClick={() => {
+                          if (transaction.isFixed) {
+                            if (transaction.type === 'income' && onViewIncome) {
+                              onViewIncome(transaction.originalItem);
+                            } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
+                              onViewMonthlySaving(transaction.originalItem);
+                            } else if (onViewFixedExpense) {
+                              onViewFixedExpense(transaction.originalItem);
+                            }
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 6b. Registered Transactions Section */}
+        {groupedExpenses.length > 0 && (
+          <div className="space-y-3">
+            {groupedPlannedExpenses.length > 0 && (
+              <div className="px-1 pt-1">
+                <h2 className="text-section-title">
+                  {getL10n('Registrerade transaktioner', 'Registered transactions', 'Registrerte transaksjoner', 'Registrerede transaktioner', 'Kirjatut tapahtumat')}
+                </h2>
               </div>
-            </motion.div>
-          ))}
-        </div>
+            )}
+
+            <div className="space-y-4 sm:space-y-4.5">
+              {groupedExpenses.map(([date, dayData], index) => (
+                <motion.div 
+                  key={date} 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                  className="space-y-1.5"
+                >
+                  {/* Day Header with Date */}
+                  <div className="px-1 pb-0.5">
+                    <h3
+                      className={`text-date-header ${
+                        date === new Date().toISOString().split('T')[0]
+                          ? 'text-[var(--text-primary)] font-semibold'
+                          : 'text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      {formatFullDate(date, currentLang)}
+                    </h3>
+                  </div>
+
+                  {/* Transactions for this Day */}
+                  <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+                    {dayData.items.map((transaction: any) => (
+                      <TransactionItem 
+                        key={transaction.id}
+                        transaction={transaction}
+                        isFixed={Boolean(transaction.isFixed)}
+                        isGrouped={true}
+                        config={config}
+                        onView={transaction.isFixed ? undefined : onViewTransaction}
+                        onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
+                        onToggleStar={transaction.isFixed ? undefined : onToggleStar}
+                        onClick={() => {
+                          if (transaction.isFixed) {
+                            if (transaction.type === 'income' && onViewIncome) {
+                              onViewIncome(transaction.originalItem);
+                            } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
+                              onViewMonthlySaving(transaction.originalItem);
+                            } else if (onViewFixedExpense) {
+                              onViewFixedExpense(transaction.originalItem);
+                            }
+                          } else if (onViewTransaction) {
+                            onViewTransaction(transaction);
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Empty State */}
         {(filteredExpenses?.length || 0) === 0 && (
@@ -854,124 +1001,27 @@ export function LogView({
         showCalendarOption={true}
         currentLang={currentLang}
         calendarContent={
-          <div className="bg-[var(--surface-color)] border border-subtle shadow-subtle rounded-card p-3.5 sm:p-4 space-y-3.5">
-            {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between pb-3 border-b border-subtle">
-              <button
-                type="button"
-                onClick={handleModalPrev}
-                disabled={!canModalGoPrev}
-                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
-                  canModalGoPrev
-                    ? 'text-[var(--text-primary)] bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
-                    : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
-                }`}
-                aria-label="Föregående period"
-                title="Föregående period"
-              >
-                <ChevronLeft size={16} strokeWidth={2} />
-              </button>
-
-              <div className="flex flex-col items-center text-center px-2 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate capitalize">
-                    {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
-                  </span>
-                  {modalPeriod?.isCurrent && (
-                    <span className="text-micro-label font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)]">
-                      {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
-                    </span>
-                  )}
-                </div>
-                {modalPeriod?.name?.includes('(') && (
-                  <span className="text-secondary text-[var(--text-tertiary)] font-normal truncate mt-0.5">
-                    {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
-                  </span>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleModalNext}
-                disabled={!canModalGoNext}
-                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
-                  canModalGoNext
-                    ? 'text-[var(--text-primary)] bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
-                    : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
-                }`}
-                aria-label="Nästa period"
-                title="Nästa period"
-              >
-                <ChevronRight size={16} strokeWidth={2} />
-              </button>
-            </div>
-
-            {/* Interactive Calendar Days Grid */}
-            <div className="select-none">
-              {/* Weekday headers */}
-              <div className="grid grid-cols-7 gap-1 mb-1.5 text-center">
-                {weekdayNames.map((d, i) => (
-                  <div key={i} className="text-center text-micro-label font-semibold text-[var(--text-tertiary)] tracking-wider py-0.5">
-                    {d}
-                  </div>
-                ))}
-              </div>
-
-              {/* Days Grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {Array.from({ length: calendarMonthData.firstDayWeekday }).map((_, i) => (
-                  <div key={`empty-${i}`} className="aspect-square opacity-0 pointer-events-none" />
-                ))}
-                
-                {Array.from({ length: calendarMonthData.daysInMonth }).map((_, i) => {
-                  const dayNum = i + 1;
-                  const dayDate = new Date(calendarMonthData.year, calendarMonthData.month, dayNum);
-                  const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
-                  const isToday = dayDate.toDateString() === today.toDateString();
-                  const dayTx = calendarMonthData.txByDay[dayNum];
-
-                  return (
-                    <button
-                      key={dayNum}
-                      type="button"
-                      onClick={() => {
-                        if (typeof feedback?.selection === 'function') feedback.selection();
-                        else if (typeof feedback?.tap === 'function') feedback.tap();
-                        setSelectedDate(dayDate);
-                        setSelectedPeriod(modalPeriod);
-                        setIsPeriodPickerOpen(false);
-                      }}
-                      className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
-                        isSelected 
-                          ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
-                          : isToday
-                          ? 'bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold'
-                          : 'bg-transparent text-[var(--text-primary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] font-medium'
-                      }`}
-                    >
-                      <span className={`text-xs sm:text-body leading-none tabular-nums ${
-                        isSelected ? 'text-[var(--on-accent)]' : 'text-[var(--text-primary)]'
-                      }`}>
-                        {dayNum}
-                      </span>
-                      
-                      {/* Transaction Dots */}
-                      <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
-                        {dayTx?.hasIncome && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--success-color)]'}`} />
-                        )}
-                        {dayTx?.hasExpense && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--danger-color)]'}`} />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quick Action: View whole period */}
-            <div className="pt-2 border-t border-subtle flex justify-center">
+          <CalendarWidget
+            normalizedSelectedDate={selectedDate}
+            setSelectedDate={(dayDate) => {
+              if (typeof feedback?.selection === 'function') feedback.selection();
+              else if (typeof feedback?.tap === 'function') feedback.tap();
+              setSelectedDate(dayDate);
+              setSelectedPeriod(modalPeriod);
+              setIsPeriodPickerOpen(false);
+            }}
+            t={t}
+            currentLang={currentLang}
+            customYear={calendarMonthData.year}
+            customMonth={calendarMonthData.month}
+            txByDay={calendarMonthData.txByDay}
+            headerTitle={modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
+            headerSubtitle={getL10n('Kalendermånad', 'Calendar month', 'Kalendermåned', 'Kalendermåned', 'Kalenterikuukausi')}
+            onPrev={handleModalPrev}
+            onNext={handleModalNext}
+            canGoPrev={canModalGoPrev}
+            canGoNext={canModalGoNext}
+            footerContent={
               <button
                 type="button"
                 onClick={() => {
@@ -981,17 +1031,17 @@ export function LogView({
                   setSelectedDate(null);
                   setIsPeriodPickerOpen(false);
                 }}
-                className={`inline-flex items-center justify-center gap-1.5 w-full h-9 px-3.5 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all cursor-pointer border-none active:scale-[0.98] ${
+                className={`inline-flex items-center justify-center gap-1.5 w-full h-9 px-3.5 rounded-[var(--radius-button-sm,10px)] text-label font-semibold transition-all cursor-pointer border-none active:scale-[0.98] ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
                     ? 'bg-[var(--accent-soft)] text-[var(--accent-color)]'
-                    : 'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
+                    : 'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
                 }`}
               >
                 <Layers size={13} strokeWidth={2} />
                 <span>{getL10n('Visa hela perioden', 'View full period', 'Vis hele perioden', 'Vis hele perioden', 'Koko jakso')}</span>
               </button>
-            </div>
-          </div>
+            }
+          />
         }
       />
 
@@ -1040,18 +1090,6 @@ export function LogView({
       >
         {/* Categories Pills */}
         <div className="space-y-2.5">
-          {categoryFilter && (
-            <div className="flex justify-end px-0.5">
-              <button
-                type="button"
-                onClick={() => setCategoryFilter(null)}
-                className="text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
-              >
-                {getL10n('Återställ', 'Reset')}
-              </button>
-            </div>
-          )}
-
           <div className="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1 py-0.5">
             <button
               type="button"
@@ -1099,9 +1137,7 @@ export function LogView({
                   />
                   <span>{cat.name}</span>
                   {cat.count !== undefined && cat.count > 0 && (
-                    <span className={`text-micro-label font-semibold px-1.5 py-0.2 rounded-full ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-tertiary)]'
-                    }`}>
+                    <span className="text-micro-label opacity-65 tabular-nums">
                       {cat.count}
                     </span>
                   )}

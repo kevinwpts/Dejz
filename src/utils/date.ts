@@ -1,17 +1,33 @@
 import { WeekendAdjustment, PaydayType, Frequency } from '../types';
 import { getLocaleFromLanguage } from './nordic';
 
-export const getActualPayday = (year: number, month: number, paydayType: PaydayType, targetDay: number, adjustment: WeekendAdjustment) => {
+export const getPaydayTypeFromDay = (day: number): PaydayType => {
+  if (day === 1) return PaydayType.FIRST_DAY;
+  if (day === 25) return PaydayType.TWENTY_FIFTH;
+  if (day === 31) return PaydayType.LAST_DAY;
+  return PaydayType.CUSTOM;
+};
+
+export const getActualPayday = (
+  year: number,
+  month: number,
+  paydayType: PaydayType,
+  targetDay: number,
+  adjustment: WeekendAdjustment
+) => {
   let day: number;
   
-  if (paydayType === PaydayType.FIRST_DAY) {
+  // Prioritize explicit targetDay setting when specified
+  if (typeof targetDay === 'number' && targetDay >= 1 && targetDay <= 31) {
+    day = targetDay;
+  } else if (paydayType === PaydayType.FIRST_DAY) {
     day = 1;
   } else if (paydayType === PaydayType.LAST_DAY) {
     day = new Date(year, month + 1, 0).getDate();
   } else if (paydayType === PaydayType.TWENTY_FIFTH) {
     day = 25;
   } else {
-    day = targetDay;
+    day = 25;
   }
 
   const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
@@ -64,7 +80,10 @@ export const getPeriodName = (start: Date, end: Date, paydayType: PaydayType, la
     return monthName.charAt(0).toUpperCase() + monthName.slice(1);
   };
 
-  if (paydayType === PaydayType.FIRST_DAY) {
+  const lastDayOfEndMonth = new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate();
+  const isCalendarMonth = start.getDate() === 1 && (end.getDate() === lastDayOfEndMonth && start.getMonth() === end.getMonth());
+
+  if (isCalendarMonth || paydayType === PaydayType.FIRST_DAY) {
     return getMonthName(start);
   } else if (paydayType === PaydayType.LAST_DAY) {
     return getMonthName(end);
@@ -204,18 +223,61 @@ export const parseReceiptDate = (dateStr: any): Date | null => {
   return isNaN(parsed.getTime()) ? null : parsed;
 };
 
+export const normalizeFrequencyValue = (freq?: Frequency | string): Frequency => {
+  if (!freq) return Frequency.MONTHLY;
+  const s = String(freq).trim().toLowerCase();
+  if (
+    freq === Frequency.QUARTERLY ||
+    s === 'kvartalsvis' ||
+    s === 'quarterly' ||
+    s === 'kvartal'
+  ) {
+    return Frequency.QUARTERLY;
+  }
+  if (
+    freq === Frequency.SEMI_ANNUALLY ||
+    s === 'halvårsvis' ||
+    s === 'semi_annually' ||
+    s === 'semi-annually' ||
+    s === 'halvår'
+  ) {
+    return Frequency.SEMI_ANNUALLY;
+  }
+  if (
+    freq === Frequency.ANNUALLY ||
+    s === 'årsvis' ||
+    s === 'annually' ||
+    s === 'yearly' ||
+    s === 'helår'
+  ) {
+    return Frequency.ANNUALLY;
+  }
+  return Frequency.MONTHLY;
+};
+
 export const isFixedItemDueInPeriod = (
-  fe: { frequency?: Frequency; startMonth?: number; deductionDay?: number },
+  fe: {
+    frequency?: Frequency | string;
+    startMonth?: number;
+    deductionDay?: number;
+    periodOverrides?: Record<string, any>;
+  },
   periodStart: Date,
   periodEnd: Date
 ): boolean => {
-  const freq = fe.frequency || Frequency.MONTHLY;
+  const freq = normalizeFrequencyValue(fe.frequency || fe.periodOverrides?._frequency);
   if (freq === Frequency.MONTHLY) {
     return true;
   }
 
-  const startM = fe.startMonth !== undefined ? fe.startMonth : 0;
-  const day = fe.deductionDay || 1;
+  const rawStartM =
+    fe.startMonth !== undefined
+      ? Number(fe.startMonth)
+      : fe.periodOverrides?._start_month !== undefined
+      ? Number(fe.periodOverrides._start_month)
+      : 0;
+  const startM = Number.isFinite(rawStartM) ? ((rawStartM % 12) + 12) % 12 : 0;
+  const day = Number(fe.deductionDay) || 1;
 
   const yearsToCheck = Array.from(new Set([
     periodStart.getFullYear() - 1,
@@ -247,3 +309,44 @@ export const isFixedItemDueInPeriod = (
 
   return false;
 };
+
+export const isFixedItemScheduledOnDay = (
+  fe: {
+    frequency?: Frequency | string;
+    startMonth?: number;
+    deductionDay?: number;
+    periodOverrides?: Record<string, any>;
+  },
+  date: Date
+): boolean => {
+  const year = date.getFullYear();
+  const currentMonth = date.getMonth();
+  const maxDaysInMonth = new Date(year, currentMonth + 1, 0).getDate();
+  const day = Number(fe.deductionDay) || 1;
+  const actualDay = Math.min(day, maxDaysInMonth);
+
+  if (date.getDate() !== actualDay) {
+    return false;
+  }
+
+  const freq = normalizeFrequencyValue(fe.frequency || fe.periodOverrides?._frequency);
+  if (freq === Frequency.MONTHLY) {
+    return true;
+  }
+
+  const rawStartM =
+    fe.startMonth !== undefined
+      ? Number(fe.startMonth)
+      : fe.periodOverrides?._start_month !== undefined
+      ? Number(fe.periodOverrides._start_month)
+      : 0;
+  const startM = Number.isFinite(rawStartM) ? ((rawStartM % 12) + 12) % 12 : 0;
+  const monthDiff = ((currentMonth - startM) % 12 + 12) % 12;
+
+  if (freq === Frequency.QUARTERLY) return monthDiff % 3 === 0;
+  if (freq === Frequency.SEMI_ANNUALLY) return monthDiff % 6 === 0;
+  if (freq === Frequency.ANNUALLY) return monthDiff === 0;
+
+  return true;
+};
+

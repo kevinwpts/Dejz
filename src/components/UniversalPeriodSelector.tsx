@@ -205,8 +205,7 @@ export function UniversalPeriodSelector({
                   Nu
                 </span>
               )}
-              <CalendarIcon size={14} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-colors" />
-              <ChevronDown size={13} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-opacity" />
+              <ChevronDown size={14} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-opacity" />
             </div>
             {dates && (
               <span className="text-label text-[var(--text-secondary)] mt-0.5">

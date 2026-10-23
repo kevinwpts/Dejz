@@ -121,6 +121,7 @@ export interface Config {
   showFixedExpensesInCalendar: boolean;
   showFixedExpensesInHistory?: boolean;
   hideEmptyCategories?: boolean;
+  hideBudgetOnHome?: boolean;
   heroBackgroundImage?: string;
   userAgeGroup?: string;
   homeWidgets?: HomeWidgetConfig[];
@@ -207,6 +208,8 @@ export interface FixedExpense {
   cancellationDate?: string; // Slutdatum (När abonnemanget upphör)
   cancelledAt?: number;      // Uppsägningsdatum (När det sades upp)
   lastPaymentDate?: string;  // Sista betalningsdag
+  hasNoMorePayments?: boolean; // Om sista dragningen redan är gjord
+  cancellationScenario?: 'already_paid' | 'one_remaining' | 'multiple_remaining';
 }
 
 export interface SavingsPotTransaction {
@@ -239,6 +242,7 @@ export interface Transaction {
   icon?: string;
   paymentMethod?: PaymentMethod;
   receiptUrl?: string;
+  receiptUrls?: string[];
   splits?: TransactionSplit[];
   isVariable?: boolean;
 }

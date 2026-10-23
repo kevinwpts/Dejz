@@ -22,7 +22,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
   return (
     <div
-      className={`bg-[var(--surface-color)] rounded-card p-6 sm:p-7 flex flex-col items-center justify-center text-center border border-subtle shadow-subtle ${className}`}
+      className={`bg-[var(--surface-color)] rounded-card p-6 sm:p-7 flex flex-col items-center justify-center text-center ${className}`}
     >
       <div className="space-y-1 max-w-[280px] sm:max-w-xs flex flex-col items-center">
         <h3 className="text-section-title font-semibold text-[var(--text-primary)] text-center">

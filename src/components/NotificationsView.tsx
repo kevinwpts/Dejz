@@ -83,29 +83,22 @@ export function NotificationsView({
         const isEditing = editingId === n.id;
 
         let statusBadgeText = '';
-        let statusBadgeStyle = '';
 
         if (isIncome) {
           if (isToday) {
             statusBadgeText = config.language === 'en' ? 'Arrives today' : 'Kommer idag';
-            statusBadgeStyle = 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)]';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Arrived on the ${n.deductionDay}th` : `Kom den ${n.deductionDay}:e`;
-            statusBadgeStyle = 'bg-[var(--warning-container)] text-[var(--warning-color)]';
           } else {
             statusBadgeText = config.language === 'en' ? `Arrives on the ${n.deductionDay}th` : `Kommer den ${n.deductionDay}:e`;
-            statusBadgeStyle = 'bg-[var(--surface-muted)] text-[var(--text-secondary)]';
           }
         } else {
           if (isToday) {
             statusBadgeText = config.language === 'en' ? 'Due today' : 'Dras idag';
-            statusBadgeStyle = 'bg-[var(--warning-container)] text-[var(--warning-color)]';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Due on the ${n.deductionDay}th` : `Dras den ${n.deductionDay}:e`;
-            statusBadgeStyle = 'bg-[var(--danger-container)] text-[var(--danger-color)]';
           } else {
             statusBadgeText = config.language === 'en' ? `Due on the ${n.deductionDay}th` : `Dras den ${n.deductionDay}:e`;
-            statusBadgeStyle = 'bg-[var(--surface-muted)] text-[var(--text-secondary)]';
           }
         }
 
@@ -116,7 +109,7 @@ export function NotificationsView({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="p-5 sm:p-6 rounded-[var(--radius-card,16px)] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
+            className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] transition-all flex flex-col gap-3.5 relative shadow-subtle"
           >
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">
@@ -127,24 +120,16 @@ export function NotificationsView({
                   config={config}
                 />
                 <div className="min-w-0">
-                  {n.item.budgetType === 'income' && (
-                    <span className="text-micro-label font-semibold text-success block">
-                      {config.language === 'en' ? 'Income' : 'Inkomst'}
-                    </span>
-                  )}
                   <span className="text-card-title font-bold text-[var(--text-primary)] leading-tight block truncate">
                     {n.item.name}
+                  </span>
+                  <span className="text-secondary text-[var(--text-secondary)] block truncate mt-0.5">
+                    {statusBadgeText}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span
-                  className={`px-3 py-1 rounded-full text-micro-label font-bold tracking-wide ${statusBadgeStyle}`}
-                >
-                  {statusBadgeText}
-                </span>
-
+              <div className="flex items-center gap-1.5 shrink-0">
                 <IconButton
                   icon={<X size={15} />}
                   onClick={() => onDismiss(n.id)}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cookie, Check, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button, IconButton } from './ui';
 
 interface CookieConsentModalProps {
@@ -44,7 +44,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[150] pointer-events-auto"
         >
-          <div className="bg-[var(--bg-color)] border border-[var(--border-divider)] rounded-card p-5 sm:p-6 shadow-modal space-y-4 relative font-sans">
+          <div className="bg-[var(--surface-color)] rounded-card p-5 sm:p-6 shadow-modal space-y-4 relative font-sans">
             <div className="absolute top-4 right-4">
               <IconButton
                 variant="surface"
@@ -57,25 +57,20 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
               />
             </div>
 
-            <div className="flex items-start gap-3.5 pr-8">
-              <div className="w-10 h-10 rounded-icon-button bg-[var(--surface-muted)] flex items-center justify-center shrink-0 text-[var(--text-primary)]">
-                <Cookie size={20} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-section-title font-bold font-display tracking-tight text-[var(--text-primary)]">
-                  {t('cookieConsentTitle')}
-                </h3>
-                <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
-                  {t('cookieConsentDesc')}{' '}
-                  <button
-                    type="button"
-                    onClick={onOpenPrivacyPolicy}
-                    className="text-[var(--accent-color)] font-semibold underline hover:opacity-80 transition-opacity inline-flex items-center gap-0.5 cursor-pointer"
-                  >
-                    {t('readMore')}
-                  </button>
-                </p>
-              </div>
+            <div className="space-y-1 pr-8">
+              <h3 className="text-section-title font-bold font-display tracking-tight text-[var(--text-primary)]">
+                {t('cookieConsentTitle')}
+              </h3>
+              <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
+                {t('cookieConsentDesc')}{' '}
+                <button
+                  type="button"
+                  onClick={onOpenPrivacyPolicy}
+                  className="text-[var(--accent-color)] font-semibold underline hover:opacity-80 transition-opacity inline-flex items-center gap-0.5 cursor-pointer"
+                >
+                  {t('readMore')}
+                </button>
+              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
@@ -91,7 +86,6 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
                 variant="accent"
                 size="md"
                 fullWidth
-                icon={<Check size={14} strokeWidth={2.5} />}
                 onClick={handleAcceptAll}
               >
                 {t('acceptAll')}

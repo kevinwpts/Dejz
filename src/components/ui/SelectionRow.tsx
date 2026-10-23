@@ -37,10 +37,10 @@ export function SelectionRow<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-3 px-4 rounded-[12px] transition-colors cursor-pointer text-left min-h-[56px] border-2 ${
+      className={`w-full flex items-center justify-between py-3 px-4 rounded-card-nested transition-colors cursor-pointer text-left min-h-[56px] ${
         isSelected
-          ? 'bg-[var(--surface-color)] border-[var(--accent-color)] shadow-none'
-          : 'bg-transparent border-transparent hover:bg-[var(--bg-hover)]'
+          ? 'bg-[var(--surface-color)] shadow-none'
+          : 'bg-transparent hover:bg-[var(--bg-hover)]'
       } disabled:opacity-40 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] ${className}`}
     >
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -57,7 +57,7 @@ export function SelectionRow<T = string>({
               {label}
             </span>
             {badge && (
-              <span className="text-label font-medium px-1.5 py-0.5 rounded-[6px] bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
+              <span className="text-label font-medium px-1.5 py-0.5 rounded-badge bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
                 {badge}
               </span>
             )}

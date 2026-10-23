@@ -57,7 +57,7 @@ export function LanguagePicker({
       {isOpen && (
         <div
           role="listbox"
-          className={`absolute z-50 w-44 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-modal overflow-hidden py-1 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 right-0 ${
+          className={`absolute z-50 w-44 rounded-[var(--radius-card-nested,12px)] bg-[var(--surface-color)] shadow-modal overflow-hidden py-1 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 right-0 ${
             variant === 'footer' || variant === 'pill-hero' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
           }`}
         >

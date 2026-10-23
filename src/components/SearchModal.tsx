@@ -18,6 +18,7 @@ interface SearchModalProps {
   onViewTransaction: (transaction: Transaction) => void;
   onViewFixedExpense?: (expense: FixedExpense) => void;
   onViewIncome?: (income: Income) => void;
+  onViewMonthlySaving?: (saving: any) => void;
   searchQuery?: string;
   setSearchQuery?: (q: string) => void;
 }
@@ -32,6 +33,7 @@ export function SearchModal({
   onViewTransaction,
   onViewFixedExpense,
   onViewIncome,
+  onViewMonthlySaving,
   searchQuery = '',
   setSearchQuery
 }: SearchModalProps) {
@@ -123,6 +125,29 @@ export function SearchModal({
       });
   }, [incomes, trimmedQuery]);
 
+  const matchingMonthlySavings = useMemo(() => {
+    if (!trimmedQuery) {
+      return [];
+    }
+    return (config?.monthlySavingsItems || [])
+      .filter((ms: any) => {
+        if (ms.isCancelled) return false;
+        const name = (ms.name || '').toLowerCase();
+        const note = (ms.note || '').toLowerCase();
+        const category = getL10n('månadssparande sparande', 'monthly saving savings').toLowerCase();
+        const amountStr = String(Math.abs(Number(ms.amount) || 0));
+        const deductionDayStr = ms.deductionDay ? String(ms.deductionDay) : '';
+
+        return (
+          name.includes(trimmedQuery) ||
+          note.includes(trimmedQuery) ||
+          category.includes(trimmedQuery) ||
+          amountStr.includes(trimmedQuery) ||
+          (deductionDayStr && (deductionDayStr === trimmedQuery || `${deductionDayStr}:e`.includes(trimmedQuery)))
+        );
+      });
+  }, [config?.monthlySavingsItems, trimmedQuery]);
+
   const matchingTransactions = useMemo(() => {
     if (!trimmedQuery) {
       return [];
@@ -134,17 +159,22 @@ export function SearchModal({
         const category = (t.category || '').toLowerCase();
         const tags = (t.tags || []).map(tag => tag.toLowerCase());
         const amountStr = String(Math.abs(t.amount));
+        const splitMatch = Array.isArray((t as any).splits) && (t as any).splits.some((s: any) =>
+          (s.category || '').toLowerCase().includes(trimmedQuery) ||
+          String(Math.abs(Number(s.amount) || 0)).includes(trimmedQuery)
+        );
 
         return merchant.includes(trimmedQuery) ||
                note.includes(trimmedQuery) ||
                category.includes(trimmedQuery) ||
                amountStr.includes(trimmedQuery) ||
+               splitMatch ||
                tags.some(tag => tag.includes(trimmedQuery));
       })
       .sort((a, b) => b.timestamp - a.timestamp);
   }, [transactions, trimmedQuery]);
 
-  const totalMatches = matchingFixedExpenses.length + matchingIncomes.length + matchingTransactions.length;
+  const totalMatches = matchingFixedExpenses.length + matchingIncomes.length + matchingMonthlySavings.length + matchingTransactions.length;
 
   return (
     <AnimatePresence>
@@ -186,6 +216,7 @@ export function SearchModal({
                   "Søg transaktion, fast udgift, butik...",
                   "Etsi tapahtumaa, kiinteää kulua, kauppaa..."
                 )}
+                className="text-body placeholder:text-[13px] placeholder:font-normal"
                 wrapperClassName="flex-1"
               />
 
@@ -235,16 +266,19 @@ export function SearchModal({
                   )}
                 />
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {/* Fixed Expenses Section */}
                   {matchingFixedExpenses.length > 0 && (
-                    <div className="space-y-[var(--card-gap)]">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between px-1">
-                        <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70 uppercase">
-                          {getL10n("Fasta utgifter", "Fixed expenses", "Faste utgifter", "Faste udgifter", "Kiinteät kulut")} ({matchingFixedExpenses.length})
+                        <span className="text-label font-semibold text-[var(--text-secondary)]">
+                          {getL10n("Fasta utgifter", "Fixed expenses", "Faste utgifter", "Faste udgifter", "Kiinteät kulut")}
+                        </span>
+                        <span className="text-label text-[var(--text-secondary)] opacity-70 tabular-nums">
+                          {matchingFixedExpenses.length}
                         </span>
                       </div>
-                      <div className="space-y-[var(--card-gap)]">
+                      <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden">
                         {matchingFixedExpenses.map((fe) => (
                           <BudgetItem
                             key={fe.id}
@@ -254,6 +288,7 @@ export function SearchModal({
                             language={config.language as any}
                             t={(k: any) => k}
                             config={config}
+                            isGrouped={true}
                             onClick={() => {
                               if (onViewFixedExpense) {
                                 onViewFixedExpense(fe);
@@ -268,13 +303,16 @@ export function SearchModal({
 
                   {/* Fixed Incomes Section */}
                   {matchingIncomes.length > 0 && (
-                    <div className="space-y-[var(--card-gap)]">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between px-1">
-                        <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70 uppercase">
-                          {getL10n("Inkomster", "Incomes", "Inntekter", "Indkomster", "Tulot")} ({matchingIncomes.length})
+                        <span className="text-label font-semibold text-[var(--text-secondary)]">
+                          {getL10n("Inkomster", "Incomes", "Inntekter", "Indkomster", "Tulot")}
+                        </span>
+                        <span className="text-label text-[var(--text-secondary)] opacity-70 tabular-nums">
+                          {matchingIncomes.length}
                         </span>
                       </div>
-                      <div className="space-y-[var(--card-gap)]">
+                      <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden">
                         {matchingIncomes.map((inc) => (
                           <BudgetItem
                             key={inc.id}
@@ -284,6 +322,7 @@ export function SearchModal({
                             language={config.language as any}
                             t={(k: any) => k}
                             config={config}
+                            isGrouped={true}
                             onClick={() => {
                               if (onViewIncome) {
                                 onViewIncome(inc);
@@ -296,21 +335,59 @@ export function SearchModal({
                     </div>
                   )}
 
-                  {/* Transactions Section */}
-                  {matchingTransactions.length > 0 && (
-                    <div className="space-y-[var(--card-gap)]">
+                  {/* Monthly Savings Section */}
+                  {matchingMonthlySavings.length > 0 && (
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between px-1">
-                        <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70 uppercase">
-                          {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
+                        <span className="text-label font-semibold text-[var(--text-secondary)]">
+                          {getL10n("Månadssparande", "Monthly savings", "Månedlig sparing", "Månedlig opsparing", "Kuukausisäästö")}
+                        </span>
+                        <span className="text-label text-[var(--text-secondary)] opacity-70 tabular-nums">
+                          {matchingMonthlySavings.length}
                         </span>
                       </div>
-                      <div className="space-y-[var(--card-gap)]">
+                      <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden">
+                        {matchingMonthlySavings.map((ms: any) => (
+                          <BudgetItem
+                            key={ms.id}
+                            item={ms}
+                            currency={config.currency}
+                            type="savings"
+                            language={config.language as any}
+                            t={(k: any) => k}
+                            config={config}
+                            isGrouped={true}
+                            onClick={() => {
+                              if (onViewMonthlySaving) {
+                                onViewMonthlySaving(ms);
+                              }
+                              onClose();
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Transactions Section */}
+                  {matchingTransactions.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between px-1">
+                        <span className="text-label font-semibold text-[var(--text-secondary)]">
+                          {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")}
+                        </span>
+                        <span className="text-label text-[var(--text-secondary)] opacity-70 tabular-nums">
+                          {matchingTransactions.length}
+                        </span>
+                      </div>
+                      <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden">
                         {matchingTransactions.map((t) => (
                           <TransactionItem 
                             key={t.id} 
                             transaction={t} 
                             config={config} 
                             showDate={true}
+                            isGrouped={true}
                             onView={(trans) => {
                               onViewTransaction(trans);
                               onClose();

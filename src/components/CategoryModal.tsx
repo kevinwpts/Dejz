@@ -146,7 +146,6 @@ export function CategoryModal({
             disabled={!name.trim()}
             variant="primary"
             fullWidth
-            icon={<Check size={18} strokeWidth={2} />}
           >
             {t('save')}
           </Button>

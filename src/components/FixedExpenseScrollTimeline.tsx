@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { FixedExpense, Config, Transaction } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 import { formatAmount } from '../utils/format';
+import { hasRemainingPayments } from '../utils/cancellation';
 import { Card } from './ui/Card';
 import { Modal } from './ui/Modal';
 
@@ -24,9 +25,9 @@ export function FixedExpenseScrollTimeline({
   const today = new Date();
   const currentDay = today.getDate(); // 1 - 31
 
-  // Filter out cancelled expenses
+  // Filter out cancelled expenses that have no remaining payments
   const activeExpenses = useMemo(() => {
-    return (expenses || []).filter((e) => !e.isCancelled);
+    return (expenses || []).filter((e) => hasRemainingPayments(e, today));
   }, [expenses]);
 
   // Group active expenses by deduction day (1..31)

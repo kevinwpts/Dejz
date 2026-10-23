@@ -223,7 +223,6 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t, language = 
             onClick={handleSubmit} 
             disabled={!message.trim() || isSubmitting}
             loading={isSubmitting}
-            icon={<Send size={16} strokeWidth={2} />}
           >
             {isSubmitting ? t('sending') : t('sendFeedback')}
           </Button>

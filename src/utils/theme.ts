@@ -93,3 +93,46 @@ export function applyThemeColor(_themeColorHex: string = 'neutral', isDark: bool
     target.style.setProperty('--accent-active-icon', activeIconColor);
   });
 }
+
+export const LIBRARY_ACCENT_OPTIONS: { id: string; label: string; value: string; desc: string }[] = [
+  { id: 'signature', label: 'Dejz Signatur', value: DEJZ_SIGNATURE_COLOR, desc: 'Appens etablerade primära accentfärg (--accent-color)' },
+  { id: 'neutral', label: 'Neutral (Monokrom)', value: 'neutral', desc: 'Högkontrast monokrom accent' },
+  { id: 'emerald', label: 'Smaragd', value: '#05B862', desc: 'Semantisk grön ton' },
+  { id: 'amber', label: 'Bärnsten', value: '#F59E0B', desc: 'Semantisk varm ton' },
+  { id: 'violet', label: 'Violett', value: '#7C3AED', desc: 'Alternativ accent för kontrasttest' },
+];
+
+export function applyLibraryAccentPreview(accentValue: string = DEJZ_SIGNATURE_COLOR, isDark: boolean = false) {
+  if (typeof document === 'undefined') return;
+
+  const isNeutral = accentValue === 'neutral';
+  const hex = isNeutral ? (isDark ? '#FFFFFF' : '#151718') : accentValue;
+  const { r, g, b } = hexToRgb(hex);
+  const onAccentColor = isNeutral && isDark ? '#141414' : '#FFFFFF';
+
+  const targets = [document.documentElement, document.body].filter(Boolean);
+  targets.forEach((target) => {
+    target.style.setProperty('--user-accent-hex', hex);
+    target.style.setProperty('--user-accent-rgb', `${r}, ${g}, ${b}`);
+    target.style.setProperty('--user-accent', hex);
+    target.style.setProperty('--user-accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.10)`);
+    target.style.setProperty('--accent-color', hex);
+    target.style.setProperty('--accent-hover', hex);
+    target.style.setProperty('--accent-pressed', hex);
+    target.style.setProperty('--accent-gradient', hex);
+    target.style.setProperty('--accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.10)`);
+    target.style.setProperty('--on-accent', onAccentColor);
+    target.style.setProperty('--text-on-accent', onAccentColor);
+    target.style.setProperty('--accent-container', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.10)`);
+    target.style.setProperty('--on-accent-container', hex);
+    target.style.setProperty('--accent-on-solid', onAccentColor);
+    target.style.setProperty('--dejz-accent', hex);
+    target.style.setProperty('--btn-primary-bg', hex);
+    target.style.setProperty('--btn-primary-text', onAccentColor);
+    target.style.setProperty('--nav-plus-bg', hex);
+    target.style.setProperty('--nav-plus-color', onAccentColor);
+    target.style.setProperty('--nav-active-color', hex);
+    target.style.setProperty('--accent-active-icon', hex);
+  });
+}
+

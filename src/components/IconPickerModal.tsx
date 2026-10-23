@@ -107,7 +107,7 @@ export function IconPickerModal({
       <div className="px-5 py-1.5 flex items-center justify-between text-label text-[var(--text-secondary)] font-medium shrink-0">
         <span>
           {activeCategory === 'all' 
-            ? (searchQuery ? `Sökresultat för "${searchQuery}"` : 'Alla ikoner (Icons8 Color)') 
+            ? (searchQuery ? `Sökresultat för "${searchQuery}"` : 'Alla ikoner') 
             : (ICONS8_CATEGORY_GROUPS.find(c => c.id === activeCategory)?.label || 'Kategori')}
         </span>
         <span className="opacity-75">

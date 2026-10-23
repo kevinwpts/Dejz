@@ -18,6 +18,8 @@ interface AuthProps {
   onBack?: () => void;
   currentLanguage?: Language;
   onLanguageChange?: (lang: Language) => void;
+  sandboxMode?: boolean;
+  onSandboxComplete?: (action: 'login' | 'register' | 'reset' | 'social', email: string) => void;
 }
 
 export function Auth({ 
@@ -28,6 +30,8 @@ export function Auth({
   onBack,
   currentLanguage = 'sv',
   onLanguageChange,
+  sandboxMode = false,
+  onSandboxComplete,
 }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(initialIsRegistering);
@@ -90,6 +94,16 @@ export function Auth({
     setLoading(true);
     setError(null);
 
+    if (sandboxMode) {
+      setTimeout(() => {
+        setIsResetSent(true);
+        setLoading(false);
+        onShowToast(getLocalizedAuthMsg('resetSent', 'Återställningslänk har skickats! (Testläge)'), 'success');
+        onSandboxComplete?.('reset', email.trim());
+      }, 300);
+      return;
+    }
+
     try {
       localStorage.setItem('app_language', currentLanguage);
       localStorage.setItem('app_language_manual', 'true');
@@ -125,6 +139,28 @@ export function Auth({
       lowerEmail === 'test@dejz.se' ||
       lowerEmail.endsWith('@example.com');
 
+    if (isRegistering && password.length < 6) {
+      const message = getLocalizedAuthMsg('passwordMin6', 'Lösenordet måste vara minst 6 tecken långt.');
+      setError(message);
+      onShowToast(message, 'error');
+      setLoading(false);
+      return;
+    }
+
+    if (sandboxMode) {
+      setTimeout(() => {
+        setLoading(false);
+        if (isRegistering) {
+          onShowToast('Testläge: Registrering genomförd utan att skapa riktigt konto.', 'success');
+          onSandboxComplete?.('register', email.trim());
+        } else {
+          onShowToast('Testläge: Inloggning genomförd i isolerad förhandsgranskning.', 'success');
+          onSandboxComplete?.('login', email.trim());
+        }
+      }, 350);
+      return;
+    }
+
     if (isMockEmail) {
       setTimeout(() => {
         createFreshTestAccount();
@@ -134,20 +170,18 @@ export function Auth({
       return;
     }
 
-    if (isRegistering && password.length < 6) {
-      const message = getLocalizedAuthMsg('passwordMin6', 'Lösenordet måste vara minst 6 tecken långt.');
-      setError(message);
-      onShowToast(message, 'error');
-      setLoading(false);
-      return;
-    }
-
     try {
       localStorage.setItem('app_language', currentLanguage);
       localStorage.setItem('app_language_manual', 'true');
       const regDefaults = getRegionDefaults(currentLanguage);
 
       if (isRegistering) {
+        try {
+          localStorage.removeItem('dejz_has_saved_initial_budget');
+          localStorage.removeItem('dejz_has_saved_budget');
+        } catch (_e) {
+          // ignore
+        }
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -204,6 +238,11 @@ export function Auth({
   };
 
   const handleSocialLogin = async (provider: 'google') => {
+    if (sandboxMode) {
+      onShowToast('Testläge: Google-inloggning simulerad.', 'success');
+      onSandboxComplete?.('social', email || 'demo@dejz.se');
+      return;
+    }
     try {
       let inIframe = false;
       try {

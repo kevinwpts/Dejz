@@ -1,7 +1,7 @@
 import { StarredTransactionsView } from './StarredTransactionsView';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Switch, Card, ListRow } from './ui';
+import { Switch, Card, ListRow, SegmentedControl } from './ui';
 import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag , Heart} from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
@@ -60,6 +60,8 @@ interface ProfileViewProps {
   onToggleStar?: (transaction: Transaction) => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
+  onCancelledSubscriptionsClick?: () => void;
+  onSettleDebtAsTransaction?: (debt: any) => Promise<void> | void;
 }
 
 export function ProfileView({ 
@@ -108,6 +110,7 @@ export function ProfileView({
   onToggleStar,
   onRenameCategory,
   onMigrateAndDeleteCategory,
+  onSettleDebtAsTransaction,
 }: ProfileViewProps) {
   const [activePage, setActivePage] = useState<
     | 'main'
@@ -126,6 +129,7 @@ export function ProfileView({
     | 'guides'
     | 'notifications'
     | 'admin'
+    | 'designLibrary'
   >(initialSection as any);
 
   const isAdmin = user?.email?.toLowerCase() === 'kevinwpts@gmail.com' || profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
@@ -134,7 +138,7 @@ export function ProfileView({
     setActivePage(initialSection as any);
   }, [initialSection, navTrigger]);
 
-  if (activePage === 'admin') {
+  if (activePage === 'admin' || activePage === 'designLibrary') {
     return (
       <AdminDashboardView
         onBack={() => {
@@ -142,6 +146,8 @@ export function ProfileView({
           onNavigate('profile', 'main');
         }}
         user={user}
+        profile={profile}
+        initialTab={activePage === 'designLibrary' ? 'designLibrary' : 'dashboard'}
         config={config}
         setConfig={setConfig}
         subscriptionStatus={subscriptionStatus}
@@ -193,6 +199,7 @@ export function ProfileView({
         }}
         config={config}
         setConfig={setConfig}
+        onSettleAsTransaction={onSettleDebtAsTransaction}
       />
     );
   }
@@ -312,52 +319,46 @@ export function ProfileView({
       className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-4 sm:p-4.5 border border-subtle shadow-2xs flex items-center gap-4">
-        <div 
-          onClick={() => handleSectionClick('manageAccount')}
-          className="relative shrink-0 cursor-pointer group"
-          title={t('manageAccount')}
-        >
-          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
+      <button
+        type="button"
+        onClick={() => handleSectionClick('manageAccount')}
+        className="w-full bg-[var(--surface-color)] rounded-card p-4 shadow-subtle flex items-center justify-between gap-3.5 text-left hover:bg-black/[0.015] dark:hover:bg-white/[0.025] transition-colors cursor-pointer group active:scale-[0.99]"
+      >
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden relative bg-[var(--surface-muted)] shrink-0">
             {avatarUrl ? (
-              <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+              <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
+              <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xl font-bold">
                 {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
               </div>
             )}
           </div>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="text-card-title font-bold text-[var(--text-primary)] truncate">
-              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('user')}
-            </h3>
-            {isAdmin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-micro-label font-bold border border-[var(--warning-color)]/20 shrink-0">
-                <Crown size={11} strokeWidth={2} />
-                Admin
-              </span>
-            )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-card-title font-bold text-[var(--text-primary)] truncate">
+                {user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('user')}
+              </h3>
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] text-micro-label font-semibold shrink-0">
+                  <Crown size={11} strokeWidth={2} />
+                  Admin
+                </span>
+              )}
+            </div>
+            <p className="text-secondary text-[var(--text-secondary)] truncate mt-0.5">
+              {user?.email}
+            </p>
           </div>
-          <p className="text-secondary truncate opacity-60 mb-2">
-            {user?.email}
-          </p>
-          <button 
-            onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 text-micro-label font-semibold text-[var(--text-primary)] rounded-[var(--radius-sm,6px)] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
-          >
-            {t('manageAccount')}
-            <ChevronRight size={11} strokeWidth={2.5} />
-          </button>
         </div>
-      </div>
+        <ChevronRight size={18} strokeWidth={2} className="text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)] transition-colors shrink-0" />
+      </button>
 
       {/* Quick Access Priority Modules */}
       <div className="grid grid-cols-3 gap-2.5">
         <button
           onClick={() => handleSectionClick('receipts')}
-          className="flex flex-col items-center justify-center p-3 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center p-3 rounded-card bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] transition-all cursor-pointer group active:scale-[0.98]"
         >
           <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1.5 group-hover:text-[var(--accent-color)] transition-colors">
             <Receipt size={19} strokeWidth={2} />
@@ -369,7 +370,7 @@ export function ProfileView({
 
         <button
           onClick={() => handleSectionClick('debts')}
-          className="flex flex-col items-center justify-center p-3 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center p-3 rounded-card bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] transition-all cursor-pointer group active:scale-[0.98]"
         >
           <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1.5 group-hover:text-[var(--accent-color)] transition-colors">
             <HandCoins size={19} strokeWidth={2} />
@@ -381,7 +382,7 @@ export function ProfileView({
 
         <button
           onClick={() => handleSectionClick('starred')}
-          className="flex flex-col items-center justify-center p-3 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+          className="flex flex-col items-center justify-center p-3 rounded-card bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] transition-all cursor-pointer group active:scale-[0.98]"
         >
           <div className="w-8 h-8 flex items-center justify-center text-[var(--text-primary)] mb-1.5 group-hover:text-[var(--accent-color)] transition-colors">
             <Heart size={19} strokeWidth={2} />
@@ -411,6 +412,17 @@ export function ProfileView({
                 title={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'}
                 subtitle={config.language === 'en' ? 'Owner tools, system overview & feedback' : 'Ägarverktyg, systemöversikt & feedback'}
                 onClick={() => handleSectionClick('admin')}
+              />
+              <ListRow
+                variant="grouped"
+                density="compact"
+                showChevron
+                multiline={true}
+                icon={<Palette size={18} strokeWidth={2} />}
+                iconColor="text-[var(--accent-color)]"
+                title="Designbibliotek"
+                subtitle="Se och testa appens gemensamma design, komponenter och flöden"
+                onClick={() => handleSectionClick('designLibrary')}
               />
             </Card>
           </div>
@@ -515,15 +527,38 @@ export function ProfileView({
             <ListRow
               variant="grouped"
               density="compact"
-              showChevron
               icon={<Palette size={18} strokeWidth={2} />}
               title={t('appearance' as any) || 'Utseende'}
-              value={
-                <span className="text-label font-semibold text-[var(--text-secondary)]">
-                  {config.darkMode ? (config.language === 'en' ? 'Dark' : 'Mörkt') : (config.language === 'en' ? 'Light' : 'Ljust')}
-                </span>
+              control={
+                <SegmentedControl
+                  size="sm"
+                  fullWidth={false}
+                  value={config.themeMode || (config.darkMode ? 'dark' : 'light')}
+                  options={[
+                    { value: 'light', label: config.language === 'en' ? 'Light' : 'Ljust' },
+                    { value: 'dark', label: config.language === 'en' ? 'Dark' : 'Mörkt' },
+                    { value: 'system', label: 'System' },
+                  ]}
+                  onChange={(nextMode) => {
+                    const isSystemDark =
+                      typeof window !== 'undefined' &&
+                      window.matchMedia &&
+                      window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    const nextDark =
+                      nextMode === 'dark' ? true : nextMode === 'light' ? false : isSystemDark;
+                    try {
+                      localStorage.setItem('dejz_dark_mode', nextMode);
+                    } catch (_e) {
+                      // ignore
+                    }
+                    setConfig({
+                      ...config,
+                      themeMode: nextMode,
+                      darkMode: nextDark,
+                    });
+                  }}
+                />
               }
-              onClick={() => handleSectionClick('appearance')}
             />
             <ListRow
               variant="grouped"
@@ -614,6 +649,34 @@ export function ProfileView({
                 />
               }
             />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              multiline
+              icon={<PieChart size={18} strokeWidth={2} />}
+              title={config.language === 'en' ? 'Hide budget on Home' : 'Dölj budget på hemfliken'}
+              subtitle={
+                config.language === 'en'
+                  ? 'Hides category budgets from the Home tab for a cleaner view focused on Available to spend.'
+                  : 'Döljer kategoribudgetar på hemfliken för en renare vy med fokus på Kvar att spendera.'
+              }
+              control={
+                <Switch
+                  checked={Boolean(config.hideBudgetOnHome ?? (localStorage.getItem('dejz_hide_budget_on_home') === 'true'))}
+                  onChange={() => {
+                    const currentVal = Boolean(config.hideBudgetOnHome ?? (localStorage.getItem('dejz_hide_budget_on_home') === 'true'));
+                    const nextVal = !currentVal;
+                    try {
+                      localStorage.setItem('dejz_hide_budget_on_home', nextVal ? 'true' : 'false');
+                    } catch (err) {
+                      void err;
+                    }
+                    setConfig({ ...config, hideBudgetOnHome: nextVal });
+                  }}
+                  aria-label={config.language === 'en' ? 'Hide budget on Home' : 'Dölj budget på hemfliken'}
+                />
+              }
+            />
           </Card>
         </div>
 
@@ -665,17 +728,11 @@ export function ProfileView({
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             {isDemoMode && (
-              <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-[var(--card-gap)]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-color)]" />
-                    </span>
-                    <span className="text-label font-semibold text-[var(--accent-color)]">{t('demoModeActive')}</span>
-                  </div>
-                </div>
-                <p className="text-micro-label text-[var(--text-secondary)] opacity-80 leading-relaxed">
+              <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
+                <span className="text-label font-semibold text-[var(--text-primary)] block">
+                  {t('demoModeActive')}
+                </span>
+                <p className="text-micro-label text-[var(--text-secondary)] leading-relaxed">
                   Du utforskar appen med exempeldata. När du är redo kan du avsluta demot för att skapa ett nytt konto eller logga in.
                 </p>
                 <button 

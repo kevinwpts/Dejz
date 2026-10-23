@@ -81,8 +81,8 @@ export function FilterButtonGroup<T extends string = string>({
               }}
               className={`flex-shrink-0 whitespace-nowrap h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20 ${
                 isSelected
-                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border border-transparent shadow-xs font-semibold'
-                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-[var(--border-subtle)] shadow-none'
+                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold'
+                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
               }`}
             >
               {option.icon && (

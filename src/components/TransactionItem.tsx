@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Transaction, Config } from '../types';
 import { TransactionLogo } from './TransactionLogo';
-import { formatAmount, capitalize, formatDeductionDayDisplay } from '../utils/format';
+import { formatAmount, capitalize, formatDeductionDayDisplay, getTransactionReceipts } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
 import { Paperclip, Trash2, RotateCw, Clock } from 'lucide-react';
@@ -25,8 +25,10 @@ interface TransactionItemProps {
   variant?: 'default' | 'nested' | 'transparent';
   hideCategoryBadge?: boolean;
   hideFixedBadge?: boolean;
+  hideSign?: boolean;
   showDate?: boolean;
   isVariable?: boolean;
+  compact?: boolean;
   onToggleStar?: (transaction: Transaction) => void;
 }
 
@@ -44,8 +46,10 @@ export function TransactionItem({
   variant,
   hideCategoryBadge,
   hideFixedBadge,
+  hideSign,
   showDate,
   isVariable,
+  compact = false,
   onToggleStar: _onToggleStar,
 }: TransactionItemProps) {
   const transaction = originalTransaction as any;
@@ -98,21 +102,22 @@ export function TransactionItem({
   };
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
-  const _amountColor = transaction.type === 'income' 
-    ? 'text-[var(--success-color)]' 
-    : 'text-[var(--text-metric-label)]';
 
-  // Determine layout style classes with translucent glass surfaces
+  // Determine layout style classes
   let containerClasses = "";
-  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[56px]";
+  let paddingClasses = compact
+    ? "pl-9 sm:pl-11 pr-3.5 sm:pr-4 py-2.5 min-h-[48px]"
+    : "px-3.5 sm:px-4 py-2.5 sm:py-3 min-h-[54px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-4 px-3";
+    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3.5 px-3.5";
     paddingClasses = "";
   } else if (isGrouped) {
     containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
-    paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[60px]";
+    paddingClasses = compact
+      ? "pl-9 sm:pl-11 pr-3.5 sm:pr-4 py-2.5 min-h-[48px]"
+      : "px-3.5 sm:px-4 py-2.5 sm:py-3 min-h-[54px]";
   } else if (variant === 'nested') {
     containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] shadow-none border-none rounded-[var(--radius-card,12px)]";
   } else {
@@ -128,7 +133,7 @@ export function TransactionItem({
     const iconKey = matchedCategory?.icon || getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-end gap-1 shrink-0 text-[var(--text-secondary)]">
+      <div className="flex items-center gap-1 min-w-0 text-[var(--text-secondary)]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
@@ -137,7 +142,7 @@ export function TransactionItem({
             size="2xs" 
           />
         ) : null}
-        <span className="text-secondary text-[var(--text-secondary)] whitespace-nowrap">
+        <span className={`${compact ? 'text-micro-label' : 'text-secondary'} text-[var(--text-secondary)] truncate`}>
           {capitalize(categoryName || '')}{extraCount && extraCount > 0 ? ` +${extraCount}` : ''}
           {amount !== undefined && <span className="ml-0.5 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
@@ -181,7 +186,26 @@ export function TransactionItem({
     : '';
 
   const formattedDayText = dayFormatted ? dayFormatted.replace(':', '') : '';
-  const fixedSubtitleRight = [methodStr, formattedDayText].filter(Boolean).join(', ');
+  const fixedSubtitleRight = [methodStr, formattedDayText].filter(Boolean).join(' · ');
+
+  // Format date or valid time for variable transactions (never show default 00:00 or 12:00 timestamps)
+  const formattedDateOrTime = (() => {
+    if (isFixedItem) return null;
+    const ts = transaction.timestamp || transaction.createdAt || transaction.date;
+    if (!ts) return null;
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return null;
+    if (showDate) {
+      return d.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
+    }
+    const hrs = d.getHours().toString().padStart(2, '0');
+    const mins = d.getMinutes().toString().padStart(2, '0');
+    const timeStr = `${hrs}:${mins}`;
+    if (timeStr === '00:00' || (transaction.isBackdated && timeStr === '12:00')) return null;
+    return timeStr;
+  })();
+
+  const receiptCount = getTransactionReceipts(transaction).length;
 
   return (
     <>
@@ -190,7 +214,7 @@ export function TransactionItem({
         {canSwipe && (
           <motion.div 
             style={{ opacity: actionOpacity, display: actionDisplay }}
-            className="absolute inset-y-0 right-0 w-[84px] bg-[var(--surface-muted)] text-[var(--text-primary)] text-white flex items-center justify-center z-0 cursor-pointer"
+            className="absolute inset-y-0 right-0 w-[84px] bg-[var(--danger-color)] text-white flex items-center justify-center z-0 cursor-pointer"
           >
             <button
               type="button"
@@ -200,10 +224,10 @@ export function TransactionItem({
                 feedback.tap();
                 setShowConfirmModal(true);
               }}
-              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer select-none"
+              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-black/10 active:scale-95 transition-all cursor-pointer select-none"
               aria-label={getL10n('Ta bort', 'Delete')}
             >
-              <Trash2 size={19} strokeWidth={2} />
+              <Trash2 size={18} strokeWidth={2} />
               <span className="text-micro-label font-medium tracking-tight">
                 {getL10n('Ta bort', 'Delete')}
               </span>
@@ -211,7 +235,7 @@ export function TransactionItem({
           </motion.div>
         )}
 
-        {/* Foreground Draggable Transaction Card */}
+        {/* Foreground Draggable Transaction Card - Unified 2-Row Structure */}
         <motion.div 
           drag={canSwipe ? "x" : false}
           dragDirectionLock={true}
@@ -237,72 +261,87 @@ export function TransactionItem({
               onView(transaction);
             }
           }}
-          className={`${paddingClasses} relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+          className={`${paddingClasses} relative z-10 flex items-center gap-2.5 sm:gap-3 group transition-colors duration-150 ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {/* Real Logo in original color with floating Variable 'R' badge */}
-            <div className="flex-shrink-0 relative">
-              <TransactionLogo transaction={transaction} config={config} />
-              {isVariableItem && (
-                <span
-                  title={getL10n(
-                    'Varierande belopp',
-                    'Variable amount',
-                    'Varierende beløp',
-                    'Varierende beløb',
-                    'Vaihteleva summa'
-                  )}
-                  className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-micro-label font-bold flex items-center justify-center leading-none border-[1.5px] border-[var(--surface-color)] shadow-xs pointer-events-none z-20 select-none font-sans"
-                >
-                  R
+          {/* Left: Proportional Uncropped Logo */}
+          <div className="flex-shrink-0 relative">
+            <TransactionLogo transaction={transaction} config={config} size={compact ? 'sm' : 'md'} />
+          </div>
+          
+          {/* Right: 2-Row Content (Row 1: Name + Amount, Row 2: Secondary metadata) */}
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            {/* Row 1: Name on left (truncates cleanly) + Amount on right (never pushed off) */}
+            <div className="flex items-baseline justify-between gap-3 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <p className={`${compact ? 'text-[13px] font-medium' : 'text-list-name'} text-[var(--text-primary)] leading-snug truncate min-w-0`}>
+                  {merchantName}
+                </p>
+                {isFixedItem && !hideFixedBadge && (
+                  <span 
+                    title={getL10n(
+                      'Återkommande betalning',
+                      'Recurring payment',
+                      'Gjentakende betaling',
+                      'Tilbagevendende betaling',
+                      'Toistuva maksu'
+                    )}
+                    className="inline-flex items-center justify-center text-[var(--text-tertiary)] shrink-0 select-none align-middle"
+                  >
+                    <RotateCw size={11} strokeWidth={2.2} className="shrink-0" />
+                  </span>
+                )}
+                {(transaction as any).isPlanned && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--surface-muted)] text-[var(--text-secondary)] text-micro-label font-medium shrink-0 select-none leading-none">
+                    {getL10n('Planerad', 'Planned', 'Planlagt', 'Planlagt', 'Suunniteltu')}
+                  </span>
+                )}
+              </div>
+
+              <p className={`${compact ? 'text-[13.5px] font-semibold font-amount tabular-nums' : 'text-list-amount'} whitespace-nowrap shrink-0 ${
+                (transaction as any).isPlanned
+                  ? 'text-[var(--text-secondary)]'
+                  : transaction.type === 'income'
+                  ? 'text-[var(--success-color)]'
+                  : 'text-[var(--text-primary)]'
+              }`}>
+                {hideSign ? (
+                  isVariableItem ? <span className="opacity-70 mr-0.5">~</span> : null
+                ) : transaction.type !== 'saving' && transaction.type !== 'savings' ? (
+                  <span className="opacity-80 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
+                ) : null}
+                <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+                <span className="text-unit text-[var(--text-secondary)] font-normal ml-1">
+                  {config?.currency || 'kr'}
+                  {transaction.frequency ? (
+                    <span className="text-micro-label text-[var(--text-tertiary)] ml-0.5">
+                      {transaction.frequency === 'Månadsvis' || transaction.frequency === 'MONTHLY' ? (config?.language === 'en' ? '/mo' : '/mån') :
+                      transaction.frequency === 'Kvartalsvis' || transaction.frequency === 'QUARTERLY' ? (config?.language === 'en' ? '/quarter' : '/kvartal') :
+                      transaction.frequency === 'Halvårsvis' || transaction.frequency === 'SEMI_ANNUALLY' ? (config?.language === 'en' ? '/half-year' : '/halvår') :
+                      transaction.frequency === 'Årsvis' || transaction.frequency === 'ANNUALLY' ? (config?.language === 'en' ? '/yr' : '/år') : (config?.language === 'en' ? '/mo' : '/mån')}
+                    </span>
+                  ) : ''}
                 </span>
-              )}
+              </p>
             </div>
             
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              {/* Primary Merchant Name + Fixed Icon Badge */}
-              <div className="flex items-center min-w-0">
-                <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate flex-1 min-w-0 flex items-center">
-                  <span className="truncate">{merchantName}</span>
-                  {isFixedItem && !hideFixedBadge && (
-                    <span 
-                      title={getL10n(
-                        transaction.type === 'income' ? 'Fast inkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparande' : 'Fast utgift',
-                        transaction.type === 'income' ? 'Fixed income' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fixed savings' : 'Fixed expense',
-                        transaction.type === 'income' ? 'Fast inntekt' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparing' : 'Fast utgift',
-                        transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
-                        transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
-                      )}
-                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-subtle shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
-                    >
-                      <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
-                    </span>
-                  )}
-                </p>
-              </div>
-              
-              {/* Secondary Details: smaller category icon & text */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)] flex-wrap">
+            {/* Row 2: Secondary information (Category / Date / Payment Method) */}
+            <div className="mt-0.5 flex items-center justify-between gap-2 min-w-0 w-full">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1 text-[var(--text-secondary)] overflow-hidden">
                 {(transaction as any).isCancelled && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded-full shrink-0 select-none">
+                  <span className="inline-flex items-center gap-1 text-micro-label font-medium text-[var(--text-secondary)] bg-[var(--surface-muted)] px-2 py-0.5 rounded-full shrink-0 select-none">
                     <Clock size={10} strokeWidth={2} />
                     <span>{getCancellationBadgeText(transaction as any, config?.language)}</span>
                   </span>
                 )}
                 {hideCategoryBadge ? (
-                  (transaction.timestamp || transaction.date || transaction.createdAt) ? (
-                    (() => {
-                      const ts = transaction.timestamp || transaction.createdAt || transaction.date;
-                      const d = new Date(ts);
-                      if (isNaN(d.getTime())) return null;
-                      const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                      if (timeStr === '00:00') return null;
-                      return (
-                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
-                          {timeStr}
-                        </span>
-                      );
-                    })()
+                  isFixedItem ? (
+                    <span className={`${compact ? 'text-micro-label' : 'text-secondary'} text-[var(--text-secondary)] truncate tabular-nums`}>
+                      {fixedSubtitleRight || getL10n('Fast utgift', 'Fixed expense')}
+                    </span>
+                  ) : formattedDateOrTime ? (
+                    <span className={`${compact ? 'text-micro-label' : 'text-secondary'} text-[var(--text-secondary)] truncate tabular-nums`}>
+                      {formattedDateOrTime}
+                    </span>
                   ) : null
                 ) : showAllCategories && isSplit ? (
                   splitsArray.map((split: any, idx: number) => (
@@ -316,86 +355,50 @@ export function TransactionItem({
                   renderCategoryBadge(transaction.category)
                 )}
 
-                {transaction.receiptUrl && (
-                  <Paperclip className="w-3 h-3 text-[var(--text-tertiary)] shrink-0" />
+                {receiptCount > 0 && (
+                  <span className="inline-flex items-center gap-0.5 text-[var(--text-tertiary)] shrink-0">
+                    <Paperclip className="w-3 h-3 shrink-0" />
+                    {receiptCount > 1 && (
+                      <span className="text-[10px] font-medium tabular-nums leading-none">
+                        {receiptCount}
+                      </span>
+                    )}
+                  </span>
                 )}
               </div>
+
+              {/* Right secondary info (only when category badge is shown on the left so info is never duplicated) */}
+              {!hideCategoryBadge && (
+                !isFixedItem ? (
+                  formattedDateOrTime ? (
+                    <span className={`${compact ? 'text-micro-label' : 'text-secondary'} text-[var(--text-tertiary)] tabular-nums whitespace-nowrap shrink-0 text-right`}>
+                      {formattedDateOrTime}
+                    </span>
+                  ) : null
+                ) : (
+                  (transaction.originalAmount || fixedSubtitleRight) ? (
+                    <div className="flex items-center justify-end gap-1 shrink-0 whitespace-nowrap text-right">
+                      {transaction.originalAmount ? (
+                        <span className="text-secondary text-[var(--text-tertiary)] font-normal tabular-nums">
+                          {formatAmount(transaction.originalAmount, config?.language || "sv")} {config?.currency || "kr"}
+                          {transaction.frequency === "Kvartalsvis" || transaction.frequency === "QUARTERLY" ? (config?.language === "en" ? "/qtr" : "/kvartal") :
+                           transaction.frequency === "Halvårsvis" || transaction.frequency === "SEMI_ANNUALLY" ? (config?.language === "en" ? "/half-yr" : "/halvår") :
+                           (config?.language === "en" ? "/yr" : "/år")}
+                        </span>
+                      ) : null}
+                      {transaction.originalAmount && fixedSubtitleRight ? (
+                        <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label select-none">·</span>
+                      ) : null}
+                      {fixedSubtitleRight ? (
+                        <span className="text-secondary text-[var(--text-tertiary)] font-normal tabular-nums select-none">
+                          {fixedSubtitleRight}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null
+                )
+              )}
             </div>
-          </div>
-          
-          {/* Primary Amount */}
-          <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-1">
-            <p className={`text-list-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
-              <span className="opacity-80 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
-              <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-secondary opacity-80 font-normal ml-1">
-                {config?.currency || 'kr'}
-                {transaction.frequency ? (
-                  <span className="text-micro-label opacity-70 ml-0.5">
-                    {transaction.originalAmount ? (config?.language === 'en' ? '/mo' : '/mån') :
-                    transaction.frequency === 'Månadsvis' || transaction.frequency === 'MONTHLY' ? (config?.language === 'en' ? '/mo' : '/mån') :
-                    transaction.frequency === 'Kvartalsvis' || transaction.frequency === 'QUARTERLY' ? (config?.language === 'en' ? '/quarter' : '/kvartal') :
-                    transaction.frequency === 'Halvårsvis' || transaction.frequency === 'SEMI_ANNUALLY' ? (config?.language === 'en' ? '/half-year' : '/halvår') :
-                    transaction.frequency === 'Årsvis' || transaction.frequency === 'ANNUALLY' ? (config?.language === 'en' ? '/yr' : '/år') : ''}
-                  </span>
-                ) : ''}
-              </span>
-            </p>
-            {(transaction.timestamp || transaction.date || transaction.createdAt) && !isFixedItem ? (
-              (() => {
-                const ts = transaction.timestamp || transaction.createdAt || transaction.date;
-                const d = new Date(ts);
-                if (isNaN(d.getTime())) return null;
-                if (showDate) {
-                  return (
-                    <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                      {d.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
-                    </p>
-                  );
-                }
-                const hrs = d.getHours().toString().padStart(2, '0');
-                const mins = d.getMinutes().toString().padStart(2, '0');
-                const timeStr = `${hrs}:${mins}`;
-                if (timeStr === '00:00') return null;
-                return (
-                  <p className="text-secondary text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                    {timeStr}
-                  </p>
-                );
-              })()
-            ) : isFixedItem && (
-              <div className="mt-0.5 flex items-center justify-end gap-1.5 flex-wrap">
-                {transaction.originalAmount ? (
-                  <span className="text-secondary text-[var(--text-tertiary)] font-normal mr-0.5 tabular-nums">
-                    {formatAmount(transaction.originalAmount, config?.language || "sv")} {config?.currency || "kr"}
-                    {transaction.frequency === "Kvartalsvis" || transaction.frequency === "QUARTERLY" ? (config?.language === "en" ? "/qtr" : "/kvartal") :
-                     transaction.frequency === "Halvårsvis" || transaction.frequency === "SEMI_ANNUALLY" ? (config?.language === "en" ? "/half-yr" : "/halvår") :
-                     (config?.language === "en" ? "/yr" : "/år")}
-                  </span>
-                ) : null}
-                {transaction.originalAmount && fixedSubtitleRight ? (
-                  <span className="text-[var(--text-tertiary)] opacity-50 text-micro-label select-none">·</span>
-                ) : null}
-                {fixedSubtitleRight ? (
-                  <span className="text-secondary text-[var(--text-tertiary)] font-normal tabular-nums select-none">
-                    {fixedSubtitleRight}
-                  </span>
-                ) : (transaction.timestamp || transaction.date) ? (
-                  (() => {
-                    const ts = transaction.timestamp || transaction.createdAt || transaction.date;
-                    const d = new Date(ts);
-                    if (isNaN(d.getTime())) return null;
-                    const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                    if (timeStr === '00:00') return null;
-                    return (
-                      <span className="text-secondary text-[var(--text-tertiary)] tabular-nums">
-                        {timeStr}
-                      </span>
-                    );
-                  })()
-                ) : null}
-              </div>
-            )}
           </div>
         </motion.div>
       </div>

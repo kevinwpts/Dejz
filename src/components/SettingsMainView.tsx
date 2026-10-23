@@ -5,8 +5,7 @@ import { Language, TranslationKey, languageInfo } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
 import { SettingsView } from './SettingsView';
 import { formatPaydaySummary } from '../utils/format';
-import { getThemeColorLabel } from '../utils/theme';
-import { Card, ListRow, Icon } from './ui';
+import { Card, ListRow, Icon, SegmentedControl } from './ui';
 
 interface SettingsMainViewProps {
   onBack: () => void;
@@ -200,12 +199,39 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
-          showChevron
           icon={<Icon name="palette" size={22} />}
           title={config?.language === 'en' ? 'Appearance' : 'Utseende'}
           titleWeight="semibold"
-          subtitle={`${config.darkMode ? (config?.language === 'en' ? 'Dark' : 'Mörkt') : (config?.language === 'en' ? 'Light' : 'Ljust')} · ${getThemeColorLabel(config.themeColor, config?.language === 'en')}`}
-          onClick={() => handleSectionClick('appearance')}
+          control={
+            <SegmentedControl
+              size="sm"
+              fullWidth={false}
+              value={config.themeMode || (config.darkMode ? 'dark' : 'light')}
+              options={[
+                { value: 'light', label: config?.language === 'en' ? 'Light' : 'Ljust' },
+                { value: 'dark', label: config?.language === 'en' ? 'Dark' : 'Mörkt' },
+                { value: 'system', label: 'System' },
+              ]}
+              onChange={(nextMode) => {
+                const isSystemDark =
+                  typeof window !== 'undefined' &&
+                  window.matchMedia &&
+                  window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const nextDark =
+                  nextMode === 'dark' ? true : nextMode === 'light' ? false : isSystemDark;
+                try {
+                  localStorage.setItem('dejz_dark_mode', nextMode);
+                } catch (_e) {
+                  // ignore
+                }
+                setConfig({
+                  ...config,
+                  themeMode: nextMode,
+                  darkMode: nextDark,
+                });
+              }}
+            />
+          }
         />
 
         <ListRow

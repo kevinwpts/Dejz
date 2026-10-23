@@ -18,8 +18,11 @@ export const checkImage = (url: string, timeoutMs = 2500): Promise<boolean> => {
             if (!finished) {
                 finished = true;
                 clearTimeout(timer);
-                // Reject tiny 1x1 tracking pixels
-                if (img.naturalWidth <= 1 && img.naturalHeight <= 1) {
+                // Reject tiny 1x1 tracking pixels or 16x16 default Google Favicon globe when sz=128 was requested
+                if (
+                    (img.naturalWidth <= 1 && img.naturalHeight <= 1) ||
+                    (url.includes('sz=128') && img.naturalWidth <= 16 && img.naturalHeight <= 16)
+                ) {
                     resolve(false);
                 } else {
                     resolve(true);
@@ -1374,7 +1377,7 @@ function normalizeInputText(text: string): string {
     return text
         .toLowerCase()
         // Ensure parentheses/brackets have spaces around them so "Fastigheter(Hyra)" never glues tokens together
-        .replace(/([([{\<])/g, ' $1 ')
+        .replace(/([([<{])/g, ' $1 ')
         .replace(/([)\]>])/g, ' $1 ')
         .replace(/[åä]/g, 'a')
         .replace(/[ö]/g, 'o')
@@ -1394,7 +1397,7 @@ function normalizeInputText(text: string): string {
 function stripGenericModifiers(segment: string): string {
     const cleaned = segment
         .toLowerCase()
-        .replace(/[([{\<)\]>]/g, ' ')
+        .replace(/[([<{)\]>]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 
@@ -1452,7 +1455,7 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
     }
 
     // 1. Text outside parentheses/brackets (e.g. "Svea Fastigheter(Hyra)" -> "Svea Fastigheter")
-    const outsideParens = trimmed.replace(/\s*[([{\<].*?[)\]>]\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    const outsideParens = trimmed.replace(/\s*[([<{].*?[)\]>]\s*/g, ' ').replace(/\s+/g, ' ').trim();
     if (outsideParens) {
         const strippedOutside = stripGenericModifiers(outsideParens);
         if (strippedOutside) addCandidate(strippedOutside);
@@ -1460,7 +1463,7 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
     }
 
     // 2. Text inside parentheses/brackets (e.g. "Hyra (Svea Fastigheter)" -> "Svea Fastigheter")
-    const insideMatches = Array.from(trimmed.matchAll(/[([{\<](.*?)[)\]>]/g));
+    const insideMatches = Array.from(trimmed.matchAll(/[([<{](.*?)[)\]>]/g));
     for (const match of insideMatches) {
         const insideText = (match[1] || '').trim();
         if (insideText) {
@@ -1485,7 +1488,7 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
     }
 
     // 4. Whole input with parentheses turned into spaces and generic modifiers stripped
-    const spacedInput = trimmed.replace(/[([{\<)\]>]/g, ' ').replace(/\s+/g, ' ').trim();
+    const spacedInput = trimmed.replace(/[([<{)\]>]/g, ' ').replace(/\s+/g, ' ').trim();
     const strippedWhole = stripGenericModifiers(spacedInput);
     if (strippedWhole) addCandidate(strippedWhole);
     addCandidate(spacedInput);
@@ -1552,7 +1555,7 @@ export function findKnownBrandDomain(name: string, category?: string): string | 
     }
 
     // 2. Word-boundary matching using length-descending keys (so "svea fastigheter" matches before "svea", "ica maxi" before "ica")
-    const spacedLower = lower.replace(/([([{\<])/g, ' $1 ').replace(/([)\]>])/g, ' $1 ');
+    const spacedLower = lower.replace(/([([<{])/g, ' $1 ').replace(/([)\]>])/g, ' $1 ');
     const normalized = normalizeInputText(spacedLower);
     const primaryCleanCandidate = candidates[0] || spacedLower;
 
@@ -1621,11 +1624,20 @@ export function sanitizeLogoUrl(url?: string, name?: string, category?: string):
     }
 
     // If this is an automatic logo URL (logo.dev / google favicons / clearbit) and we have the item's name,
-    // verify whether findKnownBrandDomain resolves to a more specific brand domain (e.g. sveafastigheter.se instead of svea.com)
+    // verify whether findKnownBrandDomain resolves to a known brand domain (or explicit domain in name).
+    // If not, discard the guessed URL so the item cleanly falls back to its category icon instead of a letter avatar.
     if (name && (url.includes('img.logo.dev/') || url.includes('google.com/s2/favicons') || url.includes('logo.clearbit.com/'))) {
         const knownDomain = findKnownBrandDomain(name, category);
-        if (knownDomain && !url.includes(knownDomain)) {
-            return getDomainPrimaryLogoUrl(knownDomain);
+        if (knownDomain) {
+            if (!url.includes(knownDomain)) {
+                return getDomainPrimaryLogoUrl(knownDomain);
+            }
+        } else {
+            const candidates = extractBrandSearchCandidates(name);
+            const explicitDomain = candidates.find((c) => /^[a-z0-9-]+\.(se|nu|com|org|net|io|app|ai|co)$/i.test(c));
+            if (!explicitDomain) {
+                return undefined;
+            }
         }
     }
 
@@ -1734,7 +1746,7 @@ const resolvedLogoCache = new Map<string, string | null>();
  * Queries Clearbit's public Company Autocomplete API to resolve domains for companies
  * not in the static dictionary, prioritizing Swedish (.se / .nu) domains and exact brand matches.
  */
-async function lookupCompanyDomainOnline(query: string): Promise<string | undefined> {
+async function _lookupCompanyDomainOnline(query: string): Promise<string | undefined> {
     const candidates = extractBrandSearchCandidates(query);
     const primaryCandidate = candidates[0] || query.toLowerCase().trim();
 
@@ -1841,64 +1853,21 @@ export const fetchLogoForName = async (name: string, category?: string): Promise
         return fallbackUrl;
     }
 
-    // 2. Extract cleaned company name candidates (stripping "(Hyra)", "- El", generic modifiers, etc.)
+    // 2. Check if user typed an explicit domain (e.g. "synsam.se")
     const candidates = extractBrandSearchCandidates(name);
-    const primaryCandidate = candidates[0] || name.toLowerCase().trim();
-
-    const normalizedAscii = primaryCandidate
-        .replace(/[åä]/g, 'a')
-        .replace(/[ö]/g, 'o')
-        .replace(/\b(ab|hb|kb|aktiebolag)\b/g, '')
-        .trim();
-
-    const cleanName = normalizedAscii.replace(/[^a-z0-9]/g, '');
-    const firstWord = normalizedAscii.split(/\s+/)[0]?.replace(/[^a-z0-9]/g, '') || '';
-
-    if (
-        !cleanName ||
-        GENERIC_NON_BRAND_WORDS.has(primaryCandidate) ||
-        GENERIC_NON_BRAND_WORDS.has(normalizedAscii) ||
-        GENERIC_NON_BRAND_WORDS.has(cleanName) ||
-        (normalizedAscii.split(/\s+/).length === 1 && GENERIC_NON_BRAND_WORDS.has(firstWord))
-    ) {
-        resolvedLogoCache.set(cacheKey, null);
-        return undefined;
-    }
-
-    // 3. Live online lookup via Clearbit Company Autocomplete API using the cleaned company candidate
-    const onlineDomain = await lookupCompanyDomainOnline(primaryCandidate);
-    if (onlineDomain) {
-        const candidateUrls = buildDomainLogoUrls(onlineDomain);
-        for (const url of candidateUrls) {
-            if (await checkImage(url)) {
-                resolvedLogoCache.set(cacheKey, url);
-                return url;
+    for (const candidate of candidates) {
+        if (/^[a-z0-9-]+\.(se|nu|com|org|net|io|app|ai|co)$/i.test(candidate)) {
+            const candidateUrls = buildDomainLogoUrls(candidate);
+            for (const url of candidateUrls) {
+                if (await checkImage(url)) {
+                    resolvedLogoCache.set(cacheKey, url);
+                    return url;
+                }
             }
         }
     }
 
-    // 4. Direct .se domain probe on img.logo.dev using cleaned candidate (with fallback=404 so only verified indexed .se companies return 200 OK)
-    const apiKey = import.meta.env?.VITE_LOGODEV_API_KEY;
-    if (apiKey && cleanName.length >= 3 && cleanName.length <= 28 && normalizedAscii.split(/\s+/).length <= 3) {
-        const seDomainsToTry = [`${cleanName}.se`];
-        const words = normalizedAscii.split(/\s+/).filter(Boolean);
-        // If user wrote "<Company> Fastigheter" / "<Company> Bostäder" / "<Company> Bil", also try "<company>.se" if "<companyfastigheter>.se" 404s
-        if (words.length === 2 && /^(fastigheter|fastighets|bostader|bostad|bil|energi|gruppen|holding|forvaltning)$/i.test(words[1])) {
-            const firstClean = words[0].replace(/[^a-z0-9]/g, '');
-            if (firstClean.length >= 4 && !GENERIC_NON_BRAND_WORDS.has(firstClean)) {
-                seDomainsToTry.push(`${firstClean}.se`);
-            }
-        }
-
-        for (const seDomain of seDomainsToTry) {
-            const seLogoDevUrl = `https://img.logo.dev/${seDomain}?token=${apiKey}&fallback=404`;
-            if (await checkImage(seLogoDevUrl, 1800)) {
-                resolvedLogoCache.set(cacheKey, seLogoDevUrl);
-                return seLogoDevUrl;
-            }
-        }
-    }
-
+    // Do not guess unverified domains via Clearbit or blind .se probes — fall back cleanly to category icon
     resolvedLogoCache.set(cacheKey, null);
     return undefined;
 };

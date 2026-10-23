@@ -126,9 +126,9 @@ export function ManageAccountModal({
       >
         <div className="space-y-4 pt-1">
           {/* Profile Avatar Upload Card */}
-          <Card padding="md" className="flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden bg-[var(--surface-color)] border border-subtle shadow-2xs">
+          <Card padding="md" className="flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden bg-[var(--surface-color)]">
             <label htmlFor="avatar-modal" className="relative cursor-pointer group">
-              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,12px)] overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
+              <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-card-nested overflow-hidden bg-[var(--surface-muted)] relative transition-all duration-300 group-hover:scale-105 active:scale-95 shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -168,7 +168,7 @@ export function ManageAccountModal({
             <h4 className="text-section-title px-1">
               {t('personalInfo' as any) || 'Personuppgifter'}
             </h4>
-            <Card padding="md" className="space-y-3.5 bg-[var(--surface-color)] border border-subtle shadow-2xs">
+            <Card padding="md" className="space-y-3.5 bg-[var(--surface-color)]">
               <Input
                 label={t('fullName')}
                 type="text"
@@ -264,7 +264,6 @@ export function ManageAccountModal({
               }}
               variant="ghost"
               fullWidth
-              icon={<LogOut size={16} strokeWidth={2} />}
             >
               {t('signOut')}
             </Button>

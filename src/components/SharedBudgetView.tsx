@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Users2, Copy, Check, UserCheck, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Users2, Copy, Check, UserCheck } from 'lucide-react';
 import { Config } from '../types';
 import { Button, Card, Input } from './ui';
 
@@ -56,7 +56,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
     >
       {/* 1. Compact Intro Description */}
       <Card variant="default" padding="md" className="flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
           <Users2 size={18} strokeWidth={2} />
         </div>
         <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
@@ -70,40 +70,18 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       {isConnected ? (
         <div className="space-y-[var(--card-gap)]">
           {/* Connected Card */}
-          <Card variant="default" padding="lg" className="bg-[var(--success-container)] border-none space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--success-color)] text-white flex items-center justify-center font-bold text-body shadow-xs">
-                  <UserCheck size={18} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <span className="text-micro-label font-bold uppercase text-[var(--success-color)] block">
-                    {isEn ? 'Connected' : 'Sammankopplad'}
-                  </span>
-                  <span className="text-body-medium font-bold text-[var(--text-primary)]">
-                    {config.partnerName || (isEn ? 'Partner' : 'Partner')}
-                  </span>
-                </div>
+          <Card variant="default" padding="md" className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] flex items-center justify-center font-bold text-body shrink-0">
+                <UserCheck size={18} strokeWidth={2} />
               </div>
-
-              <span className="text-micro-label font-bold uppercase tracking-wider bg-[var(--success-container)] text-[var(--success-color)] px-2.5 py-0.5 rounded-full">
-                {isEn ? 'Active' : 'Aktiv'}
-              </span>
-            </div>
-
-            {/* Quick Feature List */}
-            <div className="space-y-2 pt-2 text-secondary text-[var(--text-secondary)] border-t border-[var(--success-color)]/20">
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-[var(--success-color)] shrink-0" />
-                <span>{isEn ? 'Shared category budgets in real time' : 'Gemensamma kategoribudgetar i realtid'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-[var(--success-color)] shrink-0" />
-                <span>{isEn ? 'Payer avatar on every transaction' : 'Vem betalade-markering på alla köp'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check size={14} className="text-[var(--success-color)] shrink-0" />
-                <span>{isEn ? 'Comments and reactions' : 'Kommentarer och reaktioner'}</span>
+              <div className="min-w-0">
+                <span className="text-body-medium font-bold text-[var(--text-primary)] block truncate">
+                  {config.partnerName || (isEn ? 'Partner' : 'Partner')}
+                </span>
+                <span className="text-secondary text-[var(--text-secondary)] block">
+                  {isEn ? 'Connected to shared budget' : 'Sammankopplad med delad budget'}
+                </span>
               </div>
             </div>
           </Card>
@@ -120,11 +98,11 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
         <div className="space-y-[var(--card-gap)]">
           {/* Step 1: My Invite Code */}
           <Card variant="default" padding="md" className="space-y-2.5">
-            <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] block">
-              {isEn ? '1. Your invite code' : '1. Din inbjudningskod'}
+            <span className="text-label font-medium text-[var(--text-secondary)] block">
+              {isEn ? 'Your invite code' : 'Din inbjudningskod'}
             </span>
 
-            <div className="flex items-center justify-between p-2.5 rounded-[var(--radius-card-nested,16px)] bg-black/[0.03] dark:bg-white/[0.04] border-none">
+            <div className="flex items-center justify-between p-2.5 pl-3.5 rounded-card-nested bg-[var(--surface-muted)] border-none">
               <span className="text-body font-bold font-mono tracking-widest text-[var(--text-primary)]">
                 {myInviteCode}
               </span>
@@ -135,11 +113,11 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
                 onClick={handleCopyCode}
                 icon={copied ? <Check size={13} strokeWidth={2.5} /> : <Copy size={13} strokeWidth={2} />}
               >
-                {copied ? (isEn ? 'Kopierad' : 'Kopierad') : (isEn ? 'Kopiera' : 'Kopiera')}
+                {copied ? (isEn ? 'Copied' : 'Kopierad') : (isEn ? 'Copy' : 'Kopiera')}
               </Button>
             </div>
 
-            <p className="text-micro-label font-medium text-[var(--text-tertiary)]">
+            <p className="text-micro-label text-[var(--text-secondary)]">
               {isEn
                 ? 'Send this code to your partner so they can join your shared budget.'
                 : 'Skicka denna kod till din partner så kan ni ansluta direkt.'}
@@ -148,8 +126,8 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
 
           {/* Step 2: Enter Partner's Code */}
           <Card variant="default" padding="md" className="space-y-3">
-            <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] block">
-              {isEn ? '2. Join with partner code' : '2. Anslut med partnerns kod'}
+            <span className="text-label font-medium text-[var(--text-secondary)] block">
+              {isEn ? 'Join with partner code' : 'Anslut med partnerns kod'}
             </span>
 
             <div className="space-y-2">
@@ -176,34 +154,6 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
               {isEn ? 'Connect' : 'Koppla ihop'}
             </Button>
           </Card>
-
-          {/* Value props */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <Card variant="default" padding="sm" className="space-y-1 py-3">
-              <div className="w-7 h-7 rounded-full bg-accent/10 text-accent flex items-center justify-center mx-auto">
-                <Users2 size={14} strokeWidth={2} />
-              </div>
-              <span className="text-micro-label font-bold text-[var(--text-primary)] block">
-                {isEn ? 'Shared pot' : 'Delad pott'}
-              </span>
-            </Card>
-            <Card variant="default" padding="sm" className="space-y-1 py-3">
-              <div className="w-7 h-7 rounded-full bg-accent/10 text-accent flex items-center justify-center mx-auto">
-                <MessageSquare size={14} strokeWidth={2} />
-              </div>
-              <span className="text-micro-label font-bold text-[var(--text-primary)] block">
-                {isEn ? 'Chat & notes' : 'Snabbchatt'}
-              </span>
-            </Card>
-            <Card variant="default" padding="sm" className="space-y-1 py-3">
-              <div className="w-7 h-7 rounded-full bg-accent/10 text-accent flex items-center justify-center mx-auto">
-                <ShieldCheck size={14} strokeWidth={2} />
-              </div>
-              <span className="text-micro-label font-bold text-[var(--text-primary)] block">
-                {isEn ? '100% Private' : '100% Privat'}
-              </span>
-            </Card>
-          </div>
         </div>
       )}
     </motion.div>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { AlertCircle } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { Modal, Button, Input } from './ui';
 
@@ -41,17 +40,11 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t }: DeleteAcco
       onClose={onClose}
       center
       size="sm"
+      title={t('deleteAccount')}
       showCloseButton={true}
-      bodyClassName="p-6 sm:p-7 text-center"
+      bodyClassName="p-6 sm:p-7"
     >
-      <div className="text-center">
-        <div className="w-12 h-12 bg-[var(--danger-container)] text-[var(--danger-color)] rounded-[var(--radius-card-nested,12px)] flex items-center justify-center mx-auto mb-4 border border-[var(--danger-color)]/20 shadow-none">
-          <AlertCircle size={22} strokeWidth={2} />
-        </div>
-
-        <h2 className="text-section-title font-bold text-[var(--text-primary)] mb-2">
-          {t('deleteAccount')}
-        </h2>
+      <div>
         <p className="text-secondary font-medium text-[var(--text-secondary)] mb-5 leading-relaxed">
           {t('deleteAccountConfirm')}
         </p>

@@ -1,4 +1,5 @@
 import { Config, Income, FixedExpense, Transaction, Account, PaydayType, Frequency, PaymentMethod } from '../types';
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 
 export function seedDemoData() {
   if (!localStorage.getItem('cookie_consent')) {
@@ -859,12 +860,25 @@ export function seedDemoData() {
   return mockSession;
 }
 
-export function createFreshTestAccount() {
+export function createFreshTestAccount(preferredLang?: string) {
   if (!localStorage.getItem('cookie_consent')) {
     localStorage.setItem('cookie_consent', 'demo_accepted');
   }
 
-  const lang = (localStorage.getItem('app_language') as any) || 'sv';
+  try {
+    localStorage.removeItem('dejz_onboarding_completed_demo-user');
+    localStorage.removeItem('dejz_onboarding_skipped_demo-user');
+    localStorage.removeItem('dejz_onboarding_completed');
+    localStorage.removeItem('dejz_onboarding_skipped');
+    localStorage.removeItem('dejz_has_saved_initial_budget');
+    localStorage.removeItem('dejz_has_saved_initial_budget_demo-user');
+    localStorage.removeItem('dejz_has_saved_budget');
+    localStorage.removeItem('user_settings_demo-user');
+  } catch (_e) {
+    // ignore
+  }
+
+  const lang = (preferredLang as any) || (localStorage.getItem('app_language') as any) || 'sv';
 
   const defaultFreshConfig: Config = {
     currency: 'kr',
@@ -872,28 +886,8 @@ export function createFreshTestAccount() {
     payday: 25,
     paydayType: PaydayType.TWENTY_FIFTH,
     paydayBeforeWeekend: true,
-    categories: [
-      { name: 'Mat & Dagligvaror', icon: 'ShoppingCart', color: '#ef4444' },
-      { name: 'Restaurang', icon: 'Utensils', color: '#f97316' },
-      { name: 'Fika', icon: 'Coffee', color: '#d97706' },
-      { name: 'Shopping', icon: 'ShoppingBag', color: '#ec4899' },
-      { name: 'Boende', icon: 'Home', color: '#6366f1' },
-      { name: 'Transport', icon: 'Car', color: '#0ea5e9' },
-      { name: 'Abonnemang', icon: 'Smartphone', color: '#3b82f6' },
-      { name: 'Streaming', icon: 'Tv', color: '#8b5cf6' },
-      { name: 'Nöjen', icon: 'Gamepad2', color: '#a855f7' },
-      { name: 'Hälsa', icon: 'Dumbbell', color: '#10b981' },
-      { name: 'Räkningar', icon: 'Receipt', color: '#e11d48' },
-      { name: 'Försäkringar', icon: 'ShieldCheck', color: '#0284c7' },
-      { name: 'Resor', icon: 'Plane', color: '#06b6d4' },
-      { name: 'Övrigt', icon: 'Package', color: '#0d9488' },
-    ],
-    incomeCategories: [
-      { name: 'Lön', icon: 'Briefcase', color: '#10b981' },
-      { name: 'Sidoinkomst', icon: 'DollarSign', color: '#3b82f6' },
-      { name: 'Bidrag', icon: 'Gift', color: '#f59e0b' },
-      { name: 'Övrigt', icon: 'MoreHorizontal', color: '#4f46e5' },
-    ],
+    categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: null })),
+    incomeCategories: DEFAULT_INCOME_CATEGORIES,
     paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
     initialSpent: 0,
     notifications: {
@@ -915,6 +909,7 @@ export function createFreshTestAccount() {
     showFixedExpensesInTodayView: false,
     showFixedExpensesInCalendar: false,
     showFixedExpensesInHistory: false,
+    hasSavedInitialBudget: false,
   };
 
   const freshProfile = {
@@ -924,6 +919,7 @@ export function createFreshTestAccount() {
     currency: 'kr',
     language: lang,
     onboarding_completed: false,
+    has_saved_initial_budget: false,
     categories: defaultFreshConfig.categories,
     income_categories: defaultFreshConfig.incomeCategories,
     payment_methods: defaultFreshConfig.paymentMethods,

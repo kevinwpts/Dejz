@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Share, PlusSquare, X, Download, MoreVertical, Smartphone } from 'lucide-react';
+import { X, Download, Smartphone } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { Button, Card, IconButton, SegmentedControl, Modal } from './ui';
@@ -242,7 +242,6 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             variant="accent"
             size="lg"
             fullWidth
-            icon={<Download size={18} strokeWidth={2} />}
             onClick={handleInstallClick}
           >
             {localized.installBtn}
@@ -258,39 +257,37 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
         </div>
       ) : (
         <div className="w-full space-y-4">
-          <div className="space-y-2.5">
+          <Card variant="default" padding="none" className="divide-y divide-subtle overflow-hidden">
             {/* Step 1 */}
-            <Card variant="default" padding="sm" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-icon-button bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] font-display font-bold text-secondary shrink-0">
+            <div className="p-3.5 flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] font-display font-bold text-label shrink-0">
                 1
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-secondary font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                  {activePlatform === 'ios' ? <Share size={13} className="text-[var(--accent-color)]" /> : <MoreVertical size={13} className="text-[var(--accent-color)]" />}
+                <div className="text-secondary font-semibold text-[var(--text-primary)]">
                   {activePlatform === 'ios' ? localized.iosStep1Title : localized.androidStep1Title}
                 </div>
                 <div className="text-label text-[var(--text-secondary)] truncate">
                   {activePlatform === 'ios' ? localized.iosStep1Desc : localized.androidStep1Desc}
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* Step 2 */}
-            <Card variant="default" padding="sm" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-icon-button bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] font-display font-bold text-secondary shrink-0">
+            <div className="p-3.5 flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] font-display font-bold text-label shrink-0">
                 2
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-secondary font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                  <PlusSquare size={13} className="text-[var(--text-primary)]" />
+                <div className="text-secondary font-semibold text-[var(--text-primary)]">
                   {activePlatform === 'ios' ? localized.iosStep2Title : localized.androidStep2Title}
                 </div>
                 <div className="text-label text-[var(--text-secondary)] truncate">
                   {activePlatform === 'ios' ? localized.iosStep2Desc : localized.androidStep2Desc}
                 </div>
               </div>
-            </Card>
-          </div>
+            </div>
+          </Card>
 
           <Button
             variant="accent"

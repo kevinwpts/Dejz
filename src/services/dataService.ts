@@ -2,6 +2,7 @@ import { supabase } from '../supabaseClient';
 import { Config, Income, FixedExpense, Transaction } from '../types';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { seedDemoData } from '../utils/demoData';
+import { getTransactionReceipts, serializeTransactionReceipts } from '../utils/format';
 
 function extractMissingColumn(error: any): string | null {
   if (!error) return null;
@@ -15,6 +16,38 @@ function extractMissingColumn(error: any): string | null {
   if (postgresMatch && postgresMatch[1]) return postgresMatch[1];
 
   return null;
+}
+
+const missingColumnsByTable: Record<string, Set<string>> = {
+  profiles: new Set<string>(),
+  fixed_expenses: new Set<string>(),
+  income_sources: new Set<string>(),
+};
+
+function stripKnownMissingColumns(table: string, payload: Record<string, any>) {
+  const set = missingColumnsByTable[table];
+  if (!set) return;
+  for (const col of set) {
+    if (col in payload) {
+      delete payload[col];
+    }
+  }
+}
+
+function recordMissingColumn(table: string, col: string) {
+  if (!missingColumnsByTable[table]) {
+    missingColumnsByTable[table] = new Set<string>();
+  }
+  missingColumnsByTable[table].add(col);
+}
+
+export function hasValidSavedCategoryBudgets(cats: any): boolean {
+  if (!Array.isArray(cats) || cats.length === 0) return false;
+  const budgetVals = cats.map((c: any) => Number(c?.budget) || 0);
+  const totalSum = budgetVals.reduce((a: number, b: number) => a + b, 0);
+  const maxVal = Math.max(...budgetVals, 0);
+  const isLegacyPercentDefault = maxVal <= 100 && totalSum <= 100 && totalSum > 0;
+  return !isLegacyPercentDefault && budgetVals.some((v: number) => v > 0);
 }
 
 export const dataService = {
@@ -49,6 +82,12 @@ export const dataService = {
       // Ignore localStorage read errors
     }
 
+    const resolvedCategories = hasValidSavedCategoryBudgets(profileData.categories)
+      ? profileData.categories
+      : (localSavedConfig?.hasSavedInitialBudget !== false && hasValidSavedCategoryBudgets(localSavedConfig?.categories)
+          ? localSavedConfig.categories
+          : (profileData.categories || localSavedConfig?.categories));
+
     return {
       currency: profileData.currency,
       currencyCode: profileData.currency_code || localSavedConfig?.currencyCode || undefined,
@@ -59,8 +98,8 @@ export const dataService = {
       payday: profileData.payday,
       paydayType: profileData.payday_type,
       paydayBeforeWeekend: profileData.payday_before_weekend,
-      categories: profileData.categories,
-      incomeCategories: profileData.income_categories,
+      categories: resolvedCategories,
+      incomeCategories: profileData.income_categories || localSavedConfig?.incomeCategories,
       paymentMethods: profileData.payment_methods || ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
       initialSpent: profileData.initial_spent,
       notifications: profileData.notifications,
@@ -98,13 +137,12 @@ export const dataService = {
       hideEmptyCategories: profileData.hide_empty_categories !== undefined
         ? profileData.hide_empty_categories
         : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
-      hasSavedInitialBudget: profileData.has_saved_initial_budget !== undefined && profileData.has_saved_initial_budget !== null
-        ? Boolean(profileData.has_saved_initial_budget)
-        : (localSavedConfig?.hasSavedInitialBudget !== undefined 
-            ? Boolean(localSavedConfig.hasSavedInitialBudget) 
-            : (Array.isArray(profileData.categories) && profileData.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)
-                ? true
-                : (typeof window !== 'undefined' && localStorage.getItem('dejz_has_saved_initial_budget') === 'true'))),
+      hideBudgetOnHome: (profileData.hide_budget_on_home !== undefined && profileData.hide_budget_on_home !== null)
+        ? Boolean(profileData.hide_budget_on_home)
+        : (localSavedConfig?.hideBudgetOnHome !== undefined
+            ? Boolean(localSavedConfig.hideBudgetOnHome)
+            : (typeof window !== 'undefined' && localStorage.getItem('dejz_hide_budget_on_home') === 'true')),
+      hasSavedInitialBudget: hasValidSavedCategoryBudgets(resolvedCategories),
     };
   },
 
@@ -201,11 +239,31 @@ export const dataService = {
       return;
     }
 
+    const effectiveHasSavedBudget = Boolean(
+      config.hasSavedInitialBudget || hasValidSavedCategoryBudgets(config.categories)
+    );
+    const configToPersist = {
+      ...config,
+      hasSavedInitialBudget: effectiveHasSavedBudget,
+      updatedAt: Date.now(),
+    };
+
     try {
-      localStorage.setItem(`user_settings_${userId}`, JSON.stringify(config));
+      localStorage.setItem(`user_settings_${userId}`, JSON.stringify(configToPersist));
+      if (effectiveHasSavedBudget) {
+        localStorage.setItem(`dejz_has_saved_initial_budget_${userId}`, 'true');
+      } else {
+        localStorage.removeItem(`dejz_has_saved_initial_budget_${userId}`);
+      }
     } catch {
       // Ignore localStorage write errors
     }
+
+    const notificationsPayload = {
+      ...(config.notifications || {}),
+      _hasSavedInitialBudget: effectiveHasSavedBudget,
+      _onboardingCompleted: true,
+    };
 
     const payload: any = {
       id: userId,
@@ -222,7 +280,7 @@ export const dataService = {
       income_categories: config.incomeCategories,
       payment_methods: config.paymentMethods,
       initial_spent: config.initialSpent,
-      notifications: config.notifications,
+      notifications: notificationsPayload,
       security_lock: config.securityLock,
       dark_mode: Boolean(config.darkMode),
       theme_mode: config.darkMode ? 'dark' : 'light',
@@ -241,9 +299,12 @@ export const dataService = {
       show_fixed_expenses_in_history: config.showFixedExpensesInHistory,
       home_widgets: config.homeWidgets,
       hide_empty_categories: config.hideEmptyCategories,
-      has_saved_initial_budget: config.hasSavedInitialBudget,
+      has_saved_initial_budget: effectiveHasSavedBudget,
+      onboarding_completed: true,
       updated_at: new Date().toISOString()
     };
+
+    stripKnownMissingColumns('profiles', payload);
 
     let { error } = await supabase
       .from('profiles')
@@ -256,7 +317,7 @@ export const dataService = {
       attempts++;
       const missingCol = extractMissingColumn(error);
       if (missingCol && missingCol in payload) {
-        console.warn(`[Supabase saveSettings] Column "${missingCol}" missing. Stripping and retrying UPDATE (${attempts}/35)...`);
+        recordMissingColumn('profiles', missingCol);
         delete payload[missingCol];
         const retryResult = await supabase.from('profiles').update(payload).eq('id', userId);
         error = retryResult.error;
@@ -277,7 +338,7 @@ export const dataService = {
         upsertAttempts++;
         const missingCol = extractMissingColumn(upsertError);
         if (missingCol && missingCol in payload) {
-          console.warn(`[Supabase saveSettings] Column "${missingCol}" missing. Stripping and retrying UPSERT (${upsertAttempts}/35)...`);
+          recordMissingColumn('profiles', missingCol);
           delete payload[missingCol];
           const retryResult = await supabase.from('profiles').upsert(payload);
           upsertError = retryResult.error;
@@ -297,7 +358,15 @@ export const dataService = {
   // --- Transactions (Expenses/Incomes) ---
   async getTransactions(userId: string): Promise<Transaction[]> {    if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_transactions');
-      return saved ? JSON.parse(saved) : [];
+      const parsed: Transaction[] = saved ? JSON.parse(saved) : [];
+      return parsed.map((t) => {
+        const urls = getTransactionReceipts(t);
+        return {
+          ...t,
+          receiptUrl: urls[0],
+          receiptUrls: urls,
+        };
+      });
     }
     const { data, error } = await supabase
       .from('transactions')
@@ -306,30 +375,38 @@ export const dataService = {
       .order('timestamp', { ascending: false });
     
     if (error) throw error;
-    return (data || []).map(t => ({
-      id: t.id,
-      amount: Number(t.amount),
-      category: t.category,
-      note: t.note,
-      merchant: t.merchant,
-      timestamp: Number(t.timestamp),
-      type: t.type,
-      isBackdated: t.is_backdated,
-      logo: t.logo,
-      icon: t.icon || (t.logo && (isEmojiString(t.logo) || ICON_MAP[t.logo]) ? t.logo : undefined),
-      paymentMethod: t.payment_method,
-      receiptUrl: t.receipt_url,
-      tags: t.tags || [],
-      splits: typeof t.splits === 'string' ? (() => { try { const p = JSON.parse(t.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(t.splits) ? t.splits : []),
-      isStarred: Boolean(t.is_starred || (t.tags && Array.isArray(t.tags) && t.tags.includes('starred')))
-    }));
+    return (data || []).map(t => {
+      const receiptUrls = getTransactionReceipts({ receipt_url: t.receipt_url, receiptUrls: t.receipt_urls });
+      return {
+        id: t.id,
+        amount: Number(t.amount),
+        category: t.category,
+        note: t.note,
+        merchant: t.merchant,
+        timestamp: Number(t.timestamp),
+        type: t.type,
+        isBackdated: t.is_backdated,
+        logo: t.logo,
+        icon: t.icon || (t.logo && (isEmojiString(t.logo) || ICON_MAP[t.logo]) ? t.logo : undefined),
+        paymentMethod: t.payment_method,
+        receiptUrl: receiptUrls[0],
+        receiptUrls,
+        tags: t.tags || [],
+        splits: typeof t.splits === 'string' ? (() => { try { const p = JSON.parse(t.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(t.splits) ? t.splits : []),
+        isStarred: Boolean(t.is_starred || (t.tags && Array.isArray(t.tags) && t.tags.includes('starred')))
+      };
+    });
   },
 
-  async addTransaction(userId: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> {    if (userId === 'demo-user') {
+  async addTransaction(userId: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> {
+    const normalizedReceipts = getTransactionReceipts(transaction);
+    if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_transactions');
       const list = saved ? JSON.parse(saved) : [];
       const newTx: Transaction = {
         ...transaction,
+        receiptUrl: normalizedReceipts[0],
+        receiptUrls: normalizedReceipts,
         id: `demo-tx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
       };
       list.unshift(newTx);
@@ -349,6 +426,8 @@ export const dataService = {
       ? Array.from(new Set([...(transaction.tags || []), 'starred']))
       : (transaction.tags || []).filter(t => t !== 'starred');
 
+    const serializedReceipt = serializeTransactionReceipts(transaction.receiptUrls, transaction.receiptUrl);
+
     const { data, error } = await supabase
       .from('transactions')
       .insert({
@@ -363,7 +442,7 @@ export const dataService = {
         logo: transaction.logo,
         icon: transaction.icon,
         payment_method: transaction.paymentMethod,
-        receipt_url: transaction.receiptUrl,
+        receipt_url: serializedReceipt,
         tags: tagsWithStar,
         splits: transaction.splits
       })
@@ -376,6 +455,7 @@ export const dataService = {
     if (!data || data.length === 0) throw new Error('Ingen data returnerades från databasen');
     
     const row = data[0];
+    const rowReceipts = getTransactionReceipts({ receipt_url: row.receipt_url });
     return {
       id: row.id,
       amount: Number(row.amount),
@@ -388,18 +468,26 @@ export const dataService = {
       logo: row.logo,
       icon: row.icon || (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
       paymentMethod: row.payment_method,
-      receiptUrl: row.receipt_url,
+      receiptUrl: rowReceipts[0],
+      receiptUrls: rowReceipts,
       tags: row.tags || [],
       splits: typeof row.splits === 'string' ? (() => { try { const p = JSON.parse(row.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(row.splits) ? row.splits : []),
       isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
     };
   },
 
-  async updateTransaction(id: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> {    if (id.startsWith('demo-')) {
+  async updateTransaction(id: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> {
+    const normalizedReceipts = getTransactionReceipts(transaction);
+    if (id.startsWith('demo-')) {
       const saved = localStorage.getItem('demo_transactions');
       const list: Transaction[] = saved ? JSON.parse(saved) : [];
       const index = list.findIndex(t => t.id === id);
-      const updatedTx: Transaction = { ...transaction, id };
+      const updatedTx: Transaction = {
+        ...transaction,
+        receiptUrl: normalizedReceipts[0],
+        receiptUrls: normalizedReceipts,
+        id,
+      };
       if (index !== -1) {
         list[index] = updatedTx;
       } else {
@@ -411,6 +499,8 @@ export const dataService = {
     const tagsWithStar = transaction.isStarred
       ? Array.from(new Set([...(transaction.tags || []), 'starred']))
       : (transaction.tags || []).filter(t => t !== 'starred');
+
+    const serializedReceipt = serializeTransactionReceipts(transaction.receiptUrls, transaction.receiptUrl);
 
     const { data, error } = await supabase
       .from('transactions')
@@ -425,7 +515,7 @@ export const dataService = {
         logo: transaction.logo,
         icon: transaction.icon,
         payment_method: transaction.paymentMethod,
-        receipt_url: transaction.receiptUrl,
+        receipt_url: serializedReceipt,
         tags: tagsWithStar,
         splits: transaction.splits
       })
@@ -436,6 +526,7 @@ export const dataService = {
     if (!data || data.length === 0) throw new Error('Kunde inte uppdatera transaktionen');
     
     const row = data[0];
+    const rowReceipts = getTransactionReceipts({ receipt_url: row.receipt_url });
     return {
       id: row.id,
       amount: Number(row.amount),
@@ -448,7 +539,8 @@ export const dataService = {
       logo: row.logo,
       icon: row.icon || (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
       paymentMethod: row.payment_method,
-      receiptUrl: row.receipt_url,
+      receiptUrl: rowReceipts[0],
+      receiptUrls: rowReceipts,
       tags: row.tags || [],
       splits: typeof row.splits === 'string' ? (() => { try { const p = JSON.parse(row.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(row.splits) ? row.splits : []),
       isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
@@ -585,10 +677,16 @@ export const dataService = {
       isVariable: e.is_variable,
       periodOverrides: e.period_overrides || {},
       note: e.note || undefined,
-      isCancelled: e.is_cancelled || false,
-      cancellationDate: e.cancellation_date || undefined,
-      cancelledAt: e.cancelled_at || undefined,
-      lastPaymentDate: e.last_payment_date || e.period_overrides?._last_payment_date || undefined
+      isCancelled: Boolean(e.is_cancelled || e.period_overrides?._is_cancelled),
+      cancellationDate: e.cancellation_date || e.period_overrides?._cancellation_date || undefined,
+      cancelledAt: e.cancelled_at || e.period_overrides?._cancelled_at || undefined,
+      lastPaymentDate: e.last_payment_date || e.period_overrides?._last_payment_date || undefined,
+      hasNoMorePayments: Boolean(
+        e.has_no_more_payments !== undefined && e.has_no_more_payments !== null
+          ? (e.has_no_more_payments || e.period_overrides?._has_no_more_payments)
+          : (e.period_overrides?._has_no_more_payments ?? false)
+      ),
+      cancellationScenario: e.cancellation_scenario || e.period_overrides?._cancellation_scenario || undefined,
     }));
   },
 
@@ -608,10 +706,27 @@ export const dataService = {
       return;
     }
 
+    const baseOverrides = { ...(expense.periodOverrides || {}) };
+    delete (baseOverrides as any)._is_cancelled;
+    delete (baseOverrides as any)._cancellation_date;
+    delete (baseOverrides as any)._cancelled_at;
+    delete (baseOverrides as any)._last_payment_date;
+    delete (baseOverrides as any)._has_no_more_payments;
+    delete (baseOverrides as any)._cancellation_scenario;
+
     const periodOverrides = {
-      ...(expense.periodOverrides || {}),
+      ...baseOverrides,
       ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {}),
-      ...(expense.lastPaymentDate ? { _last_payment_date: expense.lastPaymentDate } : {})
+      ...(expense.isCancelled
+        ? {
+            _is_cancelled: true,
+            ...(expense.cancellationDate ? { _cancellation_date: expense.cancellationDate } : {}),
+            ...(expense.cancelledAt ? { _cancelled_at: expense.cancelledAt } : {}),
+            ...(expense.lastPaymentDate ? { _last_payment_date: expense.lastPaymentDate } : {}),
+            _has_no_more_payments: Boolean(expense.hasNoMorePayments),
+            ...(expense.cancellationScenario ? { _cancellation_scenario: expense.cancellationScenario } : {}),
+          }
+        : {}),
     };
 
     const payload: any = {
@@ -630,14 +745,18 @@ export const dataService = {
       period_overrides: periodOverrides,
       note: expense.note && expense.note.trim() ? expense.note.trim() : null,
       is_cancelled: expense.isCancelled || false,
-      cancellation_date: expense.cancellationDate || null,
-      cancelled_at: expense.cancelledAt || null,
-      last_payment_date: expense.lastPaymentDate || null
+      cancellation_date: expense.isCancelled && expense.cancellationDate ? expense.cancellationDate : null,
+      cancelled_at: expense.isCancelled && expense.cancelledAt ? expense.cancelledAt : null,
+      last_payment_date: expense.isCancelled && expense.lastPaymentDate ? expense.lastPaymentDate : null,
+      has_no_more_payments: expense.isCancelled ? Boolean(expense.hasNoMorePayments) : false,
+      cancellation_scenario: expense.isCancelled && expense.cancellationScenario ? expense.cancellationScenario : null,
     };
 
     const currentPayload = { ...payload };
+    stripKnownMissingColumns('fixed_expenses', currentPayload);
+
     let attempts = 0;
-    while (attempts < 5) {
+    while (attempts < 15) {
       attempts++;
       const { error } = await supabase
         .from('fixed_expenses')
@@ -647,7 +766,7 @@ export const dataService = {
 
       const missingCol = extractMissingColumn(error);
       if (missingCol && missingCol in currentPayload) {
-        console.warn(`[Supabase fixed_expenses] Column "${missingCol}" missing in schema. Stripping and retrying...`);
+        recordMissingColumn('fixed_expenses', missingCol);
         delete currentPayload[missingCol];
         continue;
       }

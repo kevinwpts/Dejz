@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, CheckCircle2 } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Button, Input, Modal } from './ui';
 
@@ -63,36 +63,24 @@ export function ResetPasswordModal({
       onClose={onClose}
       center
       size="sm"
+      title={success ? undefined : 'Välj ett nytt lösenord'}
       showCloseButton={true}
       bodyClassName="p-6 sm:p-7"
     >
       {success ? (
-        <div className="text-center py-6 space-y-4">
-          <div className="w-14 h-14 bg-[var(--success-container)] text-[var(--success-color)] rounded-icon-button flex items-center justify-center mx-auto border border-[var(--success-color)]/20 shadow-xs">
-            <CheckCircle2 size={30} strokeWidth={2} />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-section-title font-bold text-[var(--text-primary)]">
-              Lösenord uppdaterat!
-            </h3>
-            <p className="text-secondary font-medium text-[var(--text-secondary)]">
-              Ditt nya lösenord har sparats och du kan nu fortsätta använda appen.
-            </p>
-          </div>
+        <div className="text-center py-6 space-y-2">
+          <h3 className="text-section-title font-bold text-[var(--text-primary)]">
+            Lösenord uppdaterat!
+          </h3>
+          <p className="text-secondary font-medium text-[var(--text-secondary)]">
+            Ditt nya lösenord har sparats och du kan nu fortsätta använda appen.
+          </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1 text-left pr-8">
-            <div className="w-10 h-10 rounded-icon-button bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center mb-3 border-none">
-              <Lock size={18} strokeWidth={2} />
-            </div>
-            <h3 className="text-section-title font-bold text-[var(--text-primary)]">
-              Välj ett nytt lösenord
-            </h3>
-            <p className="text-secondary text-[var(--text-secondary)]">
-              Ange ditt nya lösenord nedan för att slutföra återställningen.
-            </p>
-          </div>
+          <p className="text-secondary text-[var(--text-secondary)]">
+            Ange ditt nya lösenord nedan för att slutföra återställningen.
+          </p>
 
           <div className="space-y-3 pt-2">
             <Input

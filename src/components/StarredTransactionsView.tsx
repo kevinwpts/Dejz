@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TransactionItem } from './TransactionItem';
@@ -74,20 +74,19 @@ export function StarredTransactionsView({
         )}
 
         {filteredTransactions.length > 0 ? (
-          <div className="space-y-[var(--card-gap)] min-w-0 w-full">
-            <AnimatePresence mode="popLayout">
-              {filteredTransactions.map((tx) => (
-                <TransactionItem
-                  key={tx.id}
-                  transaction={tx}
-                  config={config}
-                  showDate={true}
-                  onView={() => onViewTransaction(tx)}
-                  onDelete={onDeleteTransaction ? () => onDeleteTransaction(tx.id) : undefined}
-                  onToggleStar={onToggleStar}
-                />
-              ))}
-            </AnimatePresence>
+          <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-subtle overflow-hidden divide-subtle">
+            {filteredTransactions.map((tx) => (
+              <TransactionItem
+                key={tx.id}
+                transaction={tx}
+                isGrouped={true}
+                config={config}
+                showDate={true}
+                onView={() => onViewTransaction(tx)}
+                onDelete={onDeleteTransaction ? () => onDeleteTransaction(tx.id) : undefined}
+                onToggleStar={onToggleStar}
+              />
+            ))}
           </div>
         ) : (
           <EmptyState

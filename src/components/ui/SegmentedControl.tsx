@@ -27,15 +27,15 @@ export function SegmentedControl<T extends string = string>({
   className = '',
 }: SegmentedControlProps<T>) {
   const sizeStyles = {
-    sm: 'p-1 rounded-[10px] text-label',
-    md: 'p-1 rounded-[10px] text-secondary',
-    lg: 'p-1 rounded-[10px] text-body-medium',
+    sm: 'p-1 rounded-card-nested text-label',
+    md: 'p-1 rounded-card-nested text-secondary',
+    lg: 'p-1 rounded-card-nested text-body-medium',
   }[size];
 
   const itemSizeStyles = {
-    sm: 'min-h-[32px] py-1 px-2.5 rounded-[8px]',
-    md: 'min-h-[36px] py-1.5 px-3 rounded-[8px]',
-    lg: 'min-h-[40px] py-2 px-3.5 rounded-[8px]',
+    sm: 'min-h-[32px] py-1 px-2.5 rounded-btn-sm',
+    md: 'min-h-[36px] py-1.5 px-3 rounded-btn-sm',
+    lg: 'min-h-[40px] py-2 px-3.5 rounded-btn-sm',
   }[size];
 
   const containerVariantStyles =
@@ -67,7 +67,7 @@ export function SegmentedControl<T extends string = string>({
             <span>{option.label}</span>
             {option.badge !== undefined && (
               <span
-                className={`text-label font-medium px-1.5 py-0.5 rounded-[6px] ${
+                className={`text-label font-medium px-1.5 py-0.5 rounded-badge ${
                   isSelected
                     ? 'bg-[var(--card-nested-bg)] text-[var(--text-primary)]'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
