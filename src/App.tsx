@@ -59,6 +59,7 @@ import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
 import { CookieConsentModal } from "./components/CookieConsentModal";
 import { getLogoUrl } from "./utils/logo";
 import { FeedbackModal } from "./components/FeedbackModal";
+import { FloatingFeedbackWidget } from "./components/FloatingFeedbackWidget";
 import { DeleteAccountModal } from "./components/DeleteAccountModal";
 import { SecurityModal } from "./components/SecurityModal";
 import { ManageAccountModal } from "./components/ManageAccountModal";
@@ -3936,8 +3937,8 @@ export default function App() {
       targetTab = section === "log" || section === "transactions" ? "transactions" : "analysis";
     }
 
-    // Map budget category settings calls to profile budget section
-    if (targetTab === "budget" && (targetSection === "budget" || targetSection === "category-budgets")) {
+    // Map old budget calls only when explicitly targeting profile budget
+    if (targetTab === "budget" && targetSection === "budget") {
       targetTab = "profile";
       targetSection = "budget";
     }
@@ -4809,8 +4810,8 @@ export default function App() {
         </div>
       )}
 
-      <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`page-max mx-auto page-px relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-[calc(10rem+env(safe-area-inset-bottom,0px))] sm:pb-44'}`}>
+            <PullToRefresh onRefresh={handleRefresh}>
+        <main className={`page-max mx-auto page-px relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           {stats && (
             <div style={{ display: activeTab === "today" ? "block" : "none" }}>
               <TodayView
@@ -5183,6 +5184,14 @@ export default function App() {
           )}
         </main>
       </PullToRefresh>
+
+      {/* Floating Feedback Widget */}
+      {!(isAddTransactionOpen || isFeedbackModalOpen || isSearchModalOpen || isAddIncomeOpen || editingTransaction || viewingTransaction || isCalculatorOpen || isDeleteAccountModalOpen || isSecurityModalOpen || isManageAccountModalOpen || isVariableUpdateModalOpen || legalModal.isOpen || isFixedExpenseModalOpen || isMonthlySavingModalOpen || viewingFixedExpense || viewingMonthlySaving || editingMonthlySaving || isPlusMenuOpen || isReceiptCameraOpen) && (
+        <FloatingFeedbackWidget 
+          onOpenFeedback={() => setIsFeedbackModalOpen(true)}
+          language={config?.language || 'sv'}
+        />
+      )}
 
       {/* Bottom Navigation */}
       {!isAddTransactionOpen && (

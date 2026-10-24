@@ -8,6 +8,7 @@ import { EmptyState } from './EmptyState';
 import { Button, Card, FilterButtonGroup } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
+import { BudgetCategoriesView } from './BudgetCategoriesView';
 import {
   isExpenseCancelledAndExpired,
   isExpenseActiveForPeriod,
@@ -137,18 +138,47 @@ export function BudgetView({
   initialSection,
   onClearSection
 }: BudgetViewProps) {
-  const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>(() => {
+  const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings' | 'categories'>(() => {
+    if (initialSection === 'category-budgets' || initialSection === 'allocate' || initialSection === 'budget') {
+      return 'categories';
+    }
     if (initialSection === 'income' || initialSection === 'fixed' || initialSection === 'savings') {
       return initialSection;
     }
     return 'fixed';
   });
 
+  const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(false);
+
+  const handleOpenCategoryBudgets = React.useCallback(() => {
+    setBudgetFilter('categories');
+  }, []);
+
   React.useEffect(() => {
-    if (initialSection === 'income' || initialSection === 'fixed' || initialSection === 'savings') {
+    if (initialSection === 'category-budgets' || initialSection === 'allocate' || initialSection === 'budget') {
+      handleOpenCategoryBudgets();
+    } else if (initialSection === 'income' || initialSection === 'fixed' || initialSection === 'savings') {
       setBudgetFilter(initialSection);
+    } else if (!initialSection) {
+      setShowCategoryBudgets(false);
     }
-  }, [initialSection]);
+  }, [initialSection, handleOpenCategoryBudgets]);
+
+  const handleCloseCategoryBudgets = () => {
+    const hasAnyBudget = Boolean(
+      config.categories && config.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)
+    );
+    if (hasAnyBudget && !config.hasSavedInitialBudget) {
+      const updatedConfig = {
+        ...config,
+        hasSavedInitialBudget: true,
+      };
+      setConfig(updatedConfig);
+    }
+    setShowCategoryBudgets(false);
+    setBudgetFilter('fixed');
+    onClearSection?.();
+  };
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
@@ -426,6 +456,25 @@ export function BudgetView({
         : (Number(config.monthlySavings) || 0));
 
 
+  if (showCategoryBudgets) {
+    return (
+      <BudgetCategoriesView
+        config={config}
+        setConfig={setConfig}
+        incomes={incomes}
+        fixedExpenses={fixedExpenses}
+        stats={stats}
+        currentPeriodId={currentPeriodId}
+        transactions={_allTransactions}
+        t={t}
+        initialTab="budget"
+        mode="budget"
+        onDone={handleCloseCategoryBudgets}
+      />
+    );
+  }
+
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -448,71 +497,61 @@ export function BudgetView({
             id: 'savings',
             label: config?.language === 'en' ? 'Savings' : 'Sparande',
           },
+          {
+            id: 'categories',
+            label: config?.language === 'en' ? 'Category budget' : 'Kategoribudget',
+          },
         ]}
         selectedId={budgetFilter}
         onSelect={(id) => {
-          setBudgetFilter(id as 'fixed' | 'income' | 'savings');
-          onClearSection?.();
+          setBudgetFilter(id as 'fixed' | 'income' | 'savings' | 'categories');
+          if (id !== 'categories') {
+            onClearSection?.();
+          }
         }}
         ariaLabel={config?.language === 'en' ? 'Filter finances' : 'Filtrera ekonomi'}
       />
 
       {/* Overview Summary Card */}
-      <Card variant="default" padding="md" className="select-none space-y-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-metric-label font-medium text-[var(--text-secondary)]">
-            {budgetFilter === 'income' && (config?.language === 'en' ? 'Income · Monthly average' : 'Inkomster · Månadsgenomsnitt')}
-            {budgetFilter === 'savings' && (config?.language === 'en' ? 'Savings · Monthly average' : 'Sparande · Månadsgenomsnitt')}
-            {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Fixed expenses · Monthly average' : 'Fasta utgifter · Månadsgenomsnitt')}
-          </span>
-        </div>
-        <div className="flex items-baseline gap-1.5 pt-0.5">
-          <AnimatedNumber
-            value={Math.round(
-              budgetFilter === 'income'
-                ? totalMonthlyIncomeAverage
-                : budgetFilter === 'savings'
-                ? totalSavingsSum
-                : totalMonthlyFixedAverage
-            )}
-            className={`text-large-amount font-bold font-amount tabular-nums ${
-              budgetFilter === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
-            }`}
-            formatter={(val) => formatAmount(val, config?.language)}
-          />
-          <span className="text-label font-medium text-[var(--text-secondary)] select-none">
-            {config?.currency || 'kr'}
-            <span className="text-micro-label text-[var(--text-tertiary)] ml-0.5">
-              {config?.language === 'en' ? '/mo' : '/mån'}
-            </span>
-          </span>
-        </div>
-        {budgetFilter === 'fixed' && stats?.totalFixed !== undefined && (
-          <div className="pt-1.5 border-t border-[var(--border-divider)] flex items-center justify-between gap-2 text-secondary tabular-nums">
-            <span className="text-[var(--text-secondary)] truncate">
-              {config?.language === 'en' ? 'Fixed this period' : 'Fasta denna period'}
-              {stats?.periodStart && stats?.periodEnd ? (
-                <span className="text-[var(--text-tertiary)] ml-1">
-                  ({new Date(stats.periodStart).toLocaleDateString(config?.language === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' }).replace('.', '')}–{new Date(stats.periodEnd).toLocaleDateString(config?.language === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' }).replace('.', '')})
-                </span>
-              ) : null}
-            </span>
-            <span className="font-semibold font-amount text-[var(--text-primary)] shrink-0">
-              {formatAmount(Math.round(stats.totalFixed), config?.language)} {config?.currency || 'kr'}
+      {budgetFilter !== 'categories' && (
+        <Card variant="default" padding="md" className="select-none space-y-1">
+          <div>
+            <span className="text-metric-label font-medium text-[var(--text-secondary)]">
+              {budgetFilter === 'income' && (config?.language === 'en' ? 'Total monthly income' : 'Totala månadsinkomster')}
+              {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total monthly savings' : 'Totalt månadssparande')}
+              {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Total monthly fixed expenses' : 'Totala fasta utgifter')}
             </span>
           </div>
-        )}
-        {budgetFilter === 'income' && stats?.totalIncome !== undefined && Math.round(stats.totalIncome) !== Math.round(totalMonthlyIncomeAverage) && (
-          <div className="pt-1.5 border-t border-[var(--border-divider)] flex items-center justify-between gap-2 text-secondary tabular-nums">
-            <span className="text-[var(--text-secondary)] truncate">
-              {config?.language === 'en' ? 'Income this period' : 'Inkomst denna period'}
-            </span>
-            <span className="font-semibold font-amount text-[var(--text-primary)] shrink-0">
-              {formatAmount(Math.round(stats.totalIncome), config?.language)} {config?.currency || 'kr'}
+          <div className="flex items-baseline gap-1.5 pt-1">
+            <AnimatedNumber
+              value={Math.round(
+                budgetFilter === 'income'
+                  ? totalMonthlyIncomeAverage
+                  : budgetFilter === 'savings'
+                  ? totalSavingsSum
+                  : totalMonthlyFixedAverage
+              )}
+              className={`text-large-amount font-bold font-amount tabular-nums ${
+                budgetFilter === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'
+              }`}
+              formatter={(val) => formatAmount(val, config?.language)}
+            />
+            <span className="text-label font-medium text-[var(--text-secondary)] select-none">
+              {config?.currency || 'kr'}
+              <span className="text-micro-label text-[var(--text-tertiary)] ml-0.5">
+                {config?.language === 'en' ? '/mo' : '/mån'}
+              </span>
             </span>
           </div>
-        )}
-      </Card>
+          {budgetFilter === 'fixed' && Math.round(cancelledButDeductedThisPeriodAmount) > 0 && (
+            <p className="text-secondary text-[var(--text-secondary)] pt-0.5 tabular-nums">
+              {config?.language === 'en'
+                ? `This period: ${formatAmount(Math.round(totalMonthlyFixedAverage + cancelledButDeductedThisPeriodAmount), config?.language)} ${config?.currency || 'kr'} (incl. ${formatAmount(Math.round(cancelledButDeductedThisPeriodAmount), config?.language)} ${config?.currency || 'kr'} already paid)`
+                : `Denna period: ${formatAmount(Math.round(totalMonthlyFixedAverage + cancelledButDeductedThisPeriodAmount), config?.language)} ${config?.currency || 'kr'} (inkl. ${formatAmount(Math.round(cancelledButDeductedThisPeriodAmount), config?.language)} ${config?.currency || 'kr'} som redan dragits)`}
+            </p>
+          )}
+        </Card>
+      )}
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -523,6 +562,22 @@ export function BudgetView({
           transition={{ duration: 0.2 }}
           className="space-y-[var(--card-gap)]"
         >
+          {/* Category Budgets Section */}
+          {budgetFilter === 'categories' && (
+            <BudgetCategoriesView
+              config={config}
+              setConfig={setConfig}
+              incomes={incomes}
+              fixedExpenses={fixedExpenses}
+              stats={stats}
+              currentPeriodId={currentPeriodId}
+              transactions={_allTransactions}
+              t={t}
+              initialTab="budget"
+              mode="budget"
+              onDone={handleCloseCategoryBudgets}
+            />
+          )}
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
             <div className="space-y-[var(--card-gap)]">

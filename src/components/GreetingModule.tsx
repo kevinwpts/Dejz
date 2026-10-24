@@ -86,11 +86,6 @@ export function GreetingModule({
     return Math.max(0, Math.min(100, Math.round((remainingCents / totalPotCents) * 100)));
   }, [remainingCents, totalPotCents]);
 
-  const remainingSharePercent = useMemo(() => {
-    if (remainingCents <= 0 || totalPotCents <= 0) return 0;
-    return Math.max(0, Math.min(100, Math.round((remainingCents / totalPotCents) * 100)));
-  }, [remainingCents, totalPotCents]);
-
   const totalIncomeDisplay = Math.round((stats?.totalIncome || 0) + totalExtraIncomeUpToToday);
   const totalFixedDisplay = Math.round(stats?.totalFixed || 0);
   const totalSavingsDisplay = Math.round((stats?.totalSavings || 0) + (stats?.totalSavedInPot || 0));
@@ -123,110 +118,102 @@ export function GreetingModule({
         className="w-full select-none"
       >
         <div
-          className="bg-[var(--surface-color)] rounded-card p-5 sm:p-6 relative overflow-hidden transition-all flex flex-col justify-between gap-4 text-[var(--text-primary)] shadow-subtle"
+          className="bg-[var(--surface-color)] rounded-card p-4 sm:p-5 relative overflow-hidden transition-all flex flex-col justify-between gap-3.5 text-[var(--text-primary)]"
         >
-          {/* Upper Hero Area: Label, Period selector on its own row, Info button & Large Amount */}
+          {/* Upper Hero Area: Label, Period pill, Info button & Large Amount */}
           <div className="flex flex-col gap-2.5">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-section-title font-semibold text-[var(--text-primary)]">
-                  {t('totalRemaining') || (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
-                </span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-card-title sm:text-body font-medium text-[var(--text-secondary)] truncate">
+                {t('totalRemaining') || (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
+              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={onOpenPeriodInfo}
+                  className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none p-0 flex items-center gap-1 tabular-nums"
+                >
+                  <span>{periodIntervalText}</span>
+                  {formattedPaydayBadge && (
+                    <>
+                      <span className="text-[var(--text-tertiary)]">·</span>
+                      <span className="text-[var(--text-primary)] font-semibold">
+                        {formattedPaydayBadge}
+                      </span>
+                    </>
+                  )}
+                </button>
                 <button
                   type="button"
                   onClick={() => {
                     if (typeof feedback?.tap === 'function') feedback.tap();
                     setIsCalculationInfoOpen(true);
                   }}
-                  className="w-7 h-7 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-muted)] hover:bg-[var(--surface-hover)] transition-all cursor-pointer border-none flex items-center justify-center shrink-0"
+                  className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
                   aria-label="Info"
                   title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
                 >
                   <Icon name="info" size={14} />
                 </button>
               </div>
-
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  onClick={onOpenPeriodInfo}
-                  className="p-0 bg-transparent text-secondary font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none inline-flex items-center gap-1.5 tabular-nums text-left"
-                >
-                  <span>{periodIntervalText}</span>
-                  {formattedPaydayBadge && (
-                    <>
-                      <span className="text-[var(--text-tertiary)]">·</span>
-                      <span className="text-[var(--text-secondary)] font-medium">
-                        {formattedPaydayBadge}
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
             </div>
 
-            <div className="flex items-end justify-between gap-3 min-w-0 pt-0.5">
+            <div className="flex items-end justify-between gap-3 min-w-0 py-0.5">
               <div className="flex items-baseline gap-1.5 min-w-0">
                 <AnimatedNumber
                   value={remainingCents}
-                  className={`text-hero-amount leading-none font-bold font-amount tabular-nums tracking-tight ${
+                  className={`text-hero-amount leading-none font-bold tabular-nums tracking-tight ${
                     remainingCents < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
                   }`}
                   formatter={(val) => `${val < 0 ? '−' : ''}${formatAmount(Math.abs(val), language)}`}
                 />
-                <span className="text-section-title leading-none shrink-0 font-semibold text-[var(--text-secondary)] align-baseline">
+                <span className="text-[14px] leading-none shrink-0 font-medium text-[var(--text-secondary)] align-baseline">
                   {currency || 'kr'}
                 </span>
               </div>
 
-              {/* Right Context: Daily allowance as secondary info */}
+              {/* Right Context: Per day + Total pot */}
               <div className="flex flex-col items-end shrink-0 text-right pb-0.5">
                 {!stats?.isPastPeriod && (
                   remainingCents > 0 ? (
-                    <span className="text-secondary font-medium font-amount tabular-nums text-[var(--text-secondary)] leading-tight">
-                      ~{formatAmount(dailyRemaining, language)}{' '}
-                      <span className="text-unit">{currency || 'kr'}/{isEn ? 'day' : 'dag'}</span>
+                    <span className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)] leading-tight">
+                      ~{formatAmount(dailyRemaining, language)} {currency || 'kr'}/{isEn ? 'day' : 'dag'}
                     </span>
                   ) : remainingCents < 0 ? (
-                    <span className="text-secondary font-medium text-[var(--danger-color)] leading-tight">
+                    <span className="text-label font-semibold text-[var(--danger-color)] leading-tight">
                       {isEn ? 'Over budget' : 'Över budget'}
                     </span>
                   ) : totalPotCents > 0 ? (
-                    <span className="text-secondary font-medium font-amount tabular-nums text-[var(--text-secondary)] leading-tight">
-                      0 <span className="text-unit">{currency || 'kr'}/{isEn ? 'day' : 'dag'}</span>
+                    <span className="text-label font-semibold font-amount tabular-nums text-[var(--text-secondary)] leading-tight">
+                      0 {currency || 'kr'}/{isEn ? 'day' : 'dag'}
                     </span>
                   ) : null
+                )}
+                {totalPotCents > 0 && (
+                  <span className="text-micro-label text-[var(--text-secondary)] font-amount tabular-nums leading-tight mt-0.5">
+                    {isEn ? 'of' : 'av'} {formatAmount(totalPotCents, language)} {currency || 'kr'}
+                  </span>
                 )}
               </div>
             </div>
 
-            {/* Discreet Period Budget Label + Progress Bar */}
+            {/* Thin Progress Bar */}
             {totalPotCents > 0 && (
-              <div className="space-y-1 pt-0.5">
-                <div className="flex items-center justify-between text-micro-label text-[var(--text-tertiary)] font-amount tabular-nums">
-                  <span>
-                    {isEn
-                      ? `${remainingSharePercent} % left of period budget (${formatAmount(totalPotCents, language)} ${currency || 'kr'})`
-                      : `${remainingSharePercent} % kvar av periodbudgeten (${formatAmount(totalPotCents, language)} ${currency || 'kr'})`}
-                  </span>
-                </div>
-                <div className="w-full h-1.5 bg-[var(--surface-muted)] rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      remainingCents < 0 || status.level === 'danger'
-                        ? 'bg-[var(--danger-color)]'
-                        : remainingRatioPercent <= 20 || status.level === 'warning'
-                        ? 'bg-[var(--warning-color)]'
-                        : 'bg-[var(--success-color)]'
-                    }`}
-                    style={{ width: `${remainingRatioPercent}%` }}
-                  />
-                </div>
+              <div className="w-full h-1 bg-[var(--surface-muted)] rounded-full overflow-hidden mt-0.5">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    remainingCents < 0 || status.level === 'danger'
+                      ? 'bg-[var(--danger-color)]'
+                      : remainingRatioPercent <= 20 || status.level === 'warning'
+                      ? 'bg-[var(--warning-color)]'
+                      : 'bg-[var(--success-color)]'
+                  }`}
+                  style={{ width: `${remainingRatioPercent}%` }}
+                />
               </div>
             )}
           </div>
 
-          {/* Integrated 4-Column Economy Breakdown Footer (toned down) */}
+          {/* Integrated 4-Column Economy Breakdown Footer */}
           <div className="pt-3 border-t border-[var(--border-divider)] grid grid-cols-4 divide-x divide-[var(--border-divider)] text-left w-full">
             <button
               type="button"
@@ -236,12 +223,12 @@ export function GreetingModule({
               }}
               className="flex flex-col min-w-0 pr-2 text-left bg-transparent border-none p-0 cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all"
             >
-              <span className="text-micro-label text-[var(--text-tertiary)] truncate">
+              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
                 {isEn ? 'Income' : 'Inkomst'}
               </span>
               <span
-                className={`text-secondary font-semibold font-amount tabular-nums truncate mt-0.5 ${
-                  totalIncomeDisplay > 0 ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
+                className={`text-label font-semibold font-amount tabular-nums truncate mt-0.5 ${
+                  totalIncomeDisplay > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {totalIncomeDisplay > 0 ? formatAmount(totalIncomeDisplay, language) : '0'}
@@ -256,12 +243,12 @@ export function GreetingModule({
               }}
               className="flex flex-col min-w-0 px-2.5 text-left bg-transparent border-y-0 border-r-0 p-0 cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all"
             >
-              <span className="text-micro-label text-[var(--text-tertiary)] truncate">
+              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
                 {isEn ? 'Fixed' : 'Fasta'}
               </span>
               <span
-                className={`text-secondary font-semibold font-amount tabular-nums truncate mt-0.5 ${
-                  totalFixedDisplay > 0 ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
+                className={`text-label font-semibold font-amount tabular-nums truncate mt-0.5 ${
+                  totalFixedDisplay > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {totalFixedDisplay > 0 ? formatAmount(totalFixedDisplay, language) : '0'}
@@ -276,12 +263,12 @@ export function GreetingModule({
               }}
               className="flex flex-col min-w-0 px-2.5 text-left bg-transparent border-y-0 border-r-0 p-0 cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all"
             >
-              <span className="text-micro-label text-[var(--text-tertiary)] truncate">
+              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
                 {isEn ? 'Savings' : 'Sparande'}
               </span>
               <span
-                className={`text-secondary font-semibold font-amount tabular-nums truncate mt-0.5 ${
-                  totalSavingsDisplay > 0 ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
+                className={`text-label font-semibold font-amount tabular-nums truncate mt-0.5 ${
+                  totalSavingsDisplay > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {totalSavingsDisplay > 0 ? formatAmount(totalSavingsDisplay, language) : '0'}
@@ -296,12 +283,12 @@ export function GreetingModule({
               }}
               className="flex flex-col min-w-0 pl-2.5 text-left bg-transparent border-y-0 border-r-0 p-0 cursor-pointer hover:opacity-80 active:scale-[0.98] transition-all"
             >
-              <span className="text-micro-label text-[var(--text-tertiary)] truncate">
+              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
                 {isEn ? 'Spent' : 'Spenderat'}
               </span>
               <span
-                className={`text-secondary font-semibold font-amount tabular-nums truncate mt-0.5 ${
-                  totalSpentDisplay > 0 ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
+                className={`text-label font-semibold font-amount tabular-nums truncate mt-0.5 ${
+                  totalSpentDisplay > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {totalSpentDisplay > 0 ? formatAmount(totalSpentDisplay, language) : '0'}
@@ -349,7 +336,7 @@ export function GreetingModule({
 
               {/* 2. Fixed Expenses */}
               <div className="flex justify-between items-center text-xs py-1 border-b border-[var(--border-divider)]">
-                <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed this period' : 'Fasta denna period'}</span>
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed Expenses' : 'Fasta utgifter (verkliga)'}</span>
                 <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
                   −{formatAmount(stats?.totalFixed || 0, language)} {currency}
                 </span>

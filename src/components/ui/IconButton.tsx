@@ -26,21 +26,21 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center transition-all duration-[var(--duration-fast,100ms)] active:scale-90 select-none cursor-pointer disabled:pointer-events-none disabled:bg-[var(--surface-nested,#ECEAEA)] disabled:text-[var(--text-disabled,#A4ACAF)] disabled:border-none disabled:shadow-none shrink-0 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,var(--accent-color))]';
+      'inline-flex items-center justify-center transition-all duration-[var(--duration-fast,100ms)] active:scale-90 select-none cursor-pointer disabled:pointer-events-none disabled:bg-[var(--surface-nested,#ECEEF2)] disabled:text-[var(--text-disabled,#A8AEB9)] disabled:border-none disabled:shadow-none shrink-0 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--focus-color,#0B0B0F)]';
 
     const shapeStyles =
       shape === 'circle'
         ? 'rounded-full'
-        : shape === 'rounded' || shape === 'button' || size === 'xl'
+        : shape === 'button' || size === 'xl'
         ? 'rounded-icon-button'
         : 'rounded-full';
 
     const sizeStyles = {
-      xs: 'min-w-[28px] min-h-[28px] w-7 h-7 text-xs',
-      sm: 'min-w-[32px] min-h-[32px] w-8 h-8 text-sm',
-      md: 'min-w-[36px] min-h-[36px] w-9 h-9 text-sm',
-      lg: 'min-w-[44px] min-h-[44px] w-11 h-11 text-base',
-      xl: 'min-w-[48px] min-h-[48px] w-12 h-12 text-base',
+      xs: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-xs',
+      sm: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-sm',
+      md: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-sm',
+      lg: 'min-w-[44px] min-h-[44px] w-[44px] h-[44px] text-base',
+      xl: 'min-w-[48px] min-h-[48px] w-[48px] h-[48px] text-base',
     }[size];
 
     const surfaceStyle =

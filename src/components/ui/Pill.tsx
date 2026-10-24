@@ -31,14 +31,14 @@ export const Pill: React.FC<PillProps> = ({
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-pill transition-colors duration-150 active:scale-95 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${sizeStyles} ${activeStyles} ${className}`}
+      className={`inline-flex items-center justify-center rounded-btn-sm transition-colors duration-150 active:scale-95 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${sizeStyles} ${activeStyles} ${className}`}
       {...props}
     >
       {icon && <span className="shrink-0">{icon}</span>}
       <span>{children}</span>
       {count !== undefined && (
         <span
-          className={`ml-1 text-label font-medium px-1.5 py-0.5 rounded-badge ${
+          className={`ml-1 text-label font-medium px-1.5 py-0.2 rounded-badge ${
             active
               ? 'bg-black/15 text-current'
               : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'

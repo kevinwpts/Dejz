@@ -51,25 +51,25 @@ export function CategoryIcon({
 
   // Container sizing
   const containerSizes: Record<string, string> = {
-    '2xs': 'w-4 h-4',
+    '2xs': 'w-[18px] h-[18px]',
     xs: 'w-6 h-6',
-    sm: 'w-7 h-7 sm:w-8 sm:h-8',
-    md: 'w-9 h-9 sm:w-[38px] sm:h-[38px]',
-    lg: 'w-12 h-12',
-    xl: 'w-14 h-14',
+    sm: 'w-8 h-8',
+    md: 'w-[38px] h-[38px] sm:w-[42px] sm:h-[42px]',
+    lg: 'w-11 h-11',
+    xl: 'w-14 h-14 sm:w-16 sm:h-16',
   };
 
   // Icon / image pixel sizing
   const imageSizes: Record<string, number> = {
-    '2xs': 13,
-    xs: 16,
-    sm: 19,
-    md: 24,
-    lg: 30,
-    xl: 36,
+    '2xs': 14,
+    xs: 18,
+    sm: 24,
+    md: 30,
+    lg: 34,
+    xl: 44,
   };
 
-  const currentPx = imageSizes[size] || 24;
+  const currentPx = imageSizes[size] || 30;
 
   // If emoji was explicitly chosen
   if (isEmoji) {

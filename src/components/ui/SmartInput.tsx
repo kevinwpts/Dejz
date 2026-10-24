@@ -199,11 +199,11 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full h-[var(--height-input,46px)] bg-[var(--surface-input)] border border-transparent focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 rounded-input text-body text-[var(--text-primary)] placeholder:text-[13px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] outline-none transition-all shadow-none ${
+            className={`w-full min-h-[48px] bg-[var(--surface-input)] border border-transparent focus:border-[var(--accent-color)] rounded-input text-body text-[var(--text-primary)] placeholder:text-[13px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] outline-none transition-colors shadow-none ${
               leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')
-            } py-2.5 disabled:opacity-50 disabled:cursor-not-allowed ${inputClassName}`}
+            } py-3 disabled:opacity-50 disabled:cursor-not-allowed ${inputClassName}`}
           />
 
           {/* Clear Button */}
@@ -227,7 +227,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
               title={submitTitle || (isProcessing ? 'Bearbetar...' : submitText)}
               aria-label={submitAriaLabel || (isProcessing ? 'Bearbetar...' : submitText)}
               disabled={(!value.trim() && !allowSubmitWhenEmpty) || isProcessing || disabled}
-              className={`absolute right-1.5 z-10 w-9 h-9 rounded-btn-sm ${
+              className={`absolute right-2 z-10 w-10 h-10 rounded-btn-sm ${
                 submitButtonClassName || 'bg-[var(--accent-color)] text-[var(--on-accent)] border border-[var(--accent-color)]'
               } hover:opacity-90 disabled:opacity-30 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed shadow-none`}
             >
@@ -245,7 +245,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           <button
             type="submit"
             disabled={!value.trim() || isProcessing || disabled}
-            className="h-[var(--height-input,46px)] px-4 rounded-input bg-[var(--accent-color)] text-[var(--on-accent)] text-button flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-none active:scale-95 shrink-0"
+            className="min-h-[48px] px-4 rounded-input bg-[var(--accent-color)] text-[var(--on-accent)] text-button flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-none active:scale-95 shrink-0"
           >
             {isProcessing ? (
               <Icon name="spinner" size={16} className="animate-spin" />

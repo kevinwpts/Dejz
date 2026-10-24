@@ -42,7 +42,6 @@
   --color-text-primary: var(--text-primary);
   --color-text-metric-label: var(--text-metric-label);
   --color-text-secondary: var(--text-secondary);
-  --color-text-tertiary: var(--text-tertiary);
   --color-text-muted: var(--text-muted);
   --color-text-disabled: var(--text-disabled);
 
@@ -142,19 +141,44 @@ h6 {
   font-family: var(--font-display) !important;
 }
 
-@utility font-unbounded {
+.font-display {
   font-family: var(--font-display) !important;
+}
+
+@utility font-unbounded {
+  font-family: var(--font-unbounded) !important;
+}
+
+.font-unbounded {
+  font-family: var(--font-unbounded) !important;
 }
 
 @utility font-sans {
   font-family: var(--font-sans) !important;
 }
 
-@utility font-barlow {
+.font-sans {
   font-family: var(--font-sans) !important;
 }
 
+@utility font-barlow {
+  font-family: var(--font-barlow) !important;
+}
+
+.font-barlow,
+.font-barlow *,
+.font-barlow-standard,
+.font-barlow-standard *,
+[data-font="barlow"],
+[data-font="barlow"] * {
+  font-family: var(--font-barlow) !important;
+}
+
 @utility font-shoulders {
+  font-family: var(--font-display) !important;
+}
+
+.font-shoulders {
   font-family: var(--font-display) !important;
 }
 
@@ -162,6 +186,17 @@ h6 {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+.font-amount {
+  font-family: var(--font-amount) !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.font-barlow .font-amount,
+.font-barlow-standard .font-amount {
+  font-family: var(--font-amount) !important;
 }
 
 @utility no-scrollbar {
@@ -173,7 +208,11 @@ h6 {
 }
 
 @utility font-editorial {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-editorial) !important;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial) !important;
 }
 
 /* Central Semantic Design Utilities */
@@ -316,23 +355,10 @@ h6 {
 }
 
 /* Central Semantic Typography Utilities */
-@utility text-hero-number {
-  font-size: 38px;
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-family: var(--font-amount);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
 @utility text-hero-amount {
-  font-size: 34px;
-  @media (min-width: 640px) {
-    font-size: 36px;
-  }
+  font-size: 36px;
   font-weight: 700;
-  line-height: 1.06;
+  line-height: 1.08;
   letter-spacing: -0.025em;
   font-family: var(--font-amount);
   font-variant-numeric: tabular-nums;
@@ -341,11 +367,8 @@ h6 {
 
 @utility text-large-amount {
   font-size: 24px;
-  @media (min-width: 640px) {
-    font-size: 26px;
-  }
   font-weight: 700;
-  line-height: 1.12;
+  line-height: 1.15;
   letter-spacing: -0.025em;
   font-family: var(--font-amount);
   font-variant-numeric: tabular-nums;
@@ -353,22 +376,13 @@ h6 {
 }
 
 @utility text-list-amount {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.015em;
   font-family: var(--font-amount);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-}
-
-@utility text-list-name {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  font-family: var(--font-sans);
-  color: var(--text-primary);
 }
 
 @utility text-page-title {
@@ -389,17 +403,8 @@ h6 {
   color: var(--text-primary);
 }
 
-@utility text-date-header {
-  font-size: 13.5px;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  font-family: var(--font-sans);
-  color: var(--text-secondary);
-}
-
 @utility text-card-title {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
   letter-spacing: -0.005em;
@@ -417,9 +422,9 @@ h6 {
 }
 
 @utility text-body-medium {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.45;
   letter-spacing: -0.01em;
   font-family: var(--font-sans);
   color: var(--text-primary);
@@ -428,16 +433,7 @@ h6 {
 @utility text-secondary {
   font-size: 12px;
   font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0em;
-  font-family: var(--font-sans);
-  color: var(--text-secondary);
-}
-
-@utility text-unit {
-  font-size: 11.5px;
-  font-weight: 500;
-  line-height: 1.25;
+  line-height: 1.45;
   letter-spacing: 0em;
   font-family: var(--font-sans);
   color: var(--text-secondary);
@@ -462,30 +458,12 @@ h6 {
 }
 
 @utility text-micro-label {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: 0.005em;
   font-family: var(--font-sans);
   color: var(--text-secondary);
-}
-
-@utility text-caption {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0.005em;
-  font-family: var(--font-sans);
-  color: var(--text-tertiary);
-}
-
-@utility text-section-header {
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  font-family: var(--font-display);
-  color: var(--text-primary);
 }
 
 @utility text-nav-label {
@@ -786,15 +764,13 @@ h6 {
   --btn-secondary-bg: #FFFFFF;
 
   --modal-bg: var(--bg-color);
-  --header-bg: color-mix(in srgb, var(--bg-top-color, var(--bg-color)) 88%, transparent);
-  --focus-color: var(--accent-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.025), 0 4px 14px rgba(0, 0, 0, 0.035);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: #E8E6E6;
 
-  --card-shadow: none;
+  --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
 
   --success-color: #05B862;
@@ -913,8 +889,6 @@ h6 {
   --surface-elevated: #181818;
   --surface-elevated-gradient: #181818;
   --modal-bg: var(--bg-color);
-  --header-bg: var(--bg-color);
-  --focus-color: var(--accent-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
   --shadow-subtle: none;
   --surface-high: #1A1A1A;
@@ -928,17 +902,11 @@ h6 {
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
   --chip-bg: #181818;
-  --text-primary: #FFFFFF;
   --text-metric-label: #D6D6D6;
-  --text-secondary: #B8B8B8;
-  --text-tertiary: #999999;
-  --text-muted: #999999;
-  --text-disabled: #707070;
-  --text-inactive: #707070;
-  --border-subtle: transparent;
-  --border-color: transparent;
-  --border-control: transparent;
-  --border-strong: transparent;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-control: #2A2A2A;
+  --border-strong: #333333;
   --border-divider: rgba(255, 255, 255, 0.06);
   --border-menu-divider: rgba(255, 255, 255, 0.06);
   --input-bg: #181818;
@@ -952,13 +920,9 @@ h6 {
   --btn-primary-pressed: #E0294A;
   --btn-secondary-bg: #1A1A1A;
 
-  --success-color: #4ADE80;
   --success-container: rgba(74, 222, 128, 0.15);
-  --warning-color: #FBBF24;
   --warning-container: rgba(251, 191, 36, 0.15);
-  --danger-color: #FF8080;
   --danger-container: rgba(239, 68, 68, 0.16);
-  --info-color: #FFFFFF;
   --info-container: var(--surface-muted);
 }
 
@@ -979,8 +943,6 @@ h6 {
   --surface-elevated: #242424;
   --surface-elevated-gradient: #242424;
   --modal-bg: var(--bg-color);
-  --header-bg: var(--bg-color);
-  --focus-color: var(--accent-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
   --surface-high: #252525;
@@ -1074,6 +1036,25 @@ h6 {
   --date-inactive-color: #B8B8B8;
 }
 
+/* Glass-Card Surface Utility (borderless translucent glass) */
+.glass-card,
+.surface-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dark .glass-card,
+.dark .surface-card {
+  background: #191919 !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 /* Glass-Navigation Utility */
 .glass-nav {
   background: rgba(255, 255, 255, 0.75) !important;
@@ -1082,9 +1063,8 @@ h6 {
   border: none !important;
   box-shadow: none !important;
 }
-.dark .glass-nav,
-.black-theme .glass-nav {
-  background: color-mix(in srgb, var(--bg-color) 94%, transparent) !important;
+.dark .glass-nav {
+  background: rgba(20, 20, 20, 0.94) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -1125,17 +1105,6 @@ h6 {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: var(--font-sans);
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-x: hidden;
-  }
-
-  html::-webkit-scrollbar, body::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
   }
 
   #root {
@@ -1212,6 +1181,23 @@ h6 {
   button {
     -webkit-tap-highlight-color: transparent;
     font-weight: 500;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-tertiary);
+    font-family: inherit;
+    font-weight: 400;
+    font-size: 0.8125rem;
+    letter-spacing: -0.005em;
+    opacity: 0.85;
+  }
+
+  input.font-amount::placeholder,
+  input.text-section-title::placeholder {
+    font-size: inherit;
+    font-weight: 400;
+    opacity: 0.55;
   }
 
   ::selection {
@@ -1398,7 +1384,7 @@ h6 {
   .divider {
     width: 100%;
     height: 1px;
-    background: var(--border-divider);
+    background: var(--border-color);
   }
 
   .pill {
@@ -1428,7 +1414,7 @@ h6 {
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--border-divider);
+    background: var(--border-strong);
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -1459,8 +1445,32 @@ h6 {
   }
 }
 
+/* Hide native scrollbars and scroll indicators on iOS PWA / mobile / desktop */
+html, body {
+  background-color: var(--bg-top-color, var(--bg-color));
+  color: var(--text-primary);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+
+  -webkit-tap-highlight-color: transparent;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 * {
   -webkit-tap-highlight-color: transparent !important;
+}
+
+
+
+/* Ensure smooth, native inertia scrolling on iOS and Android devices */
+html, body {
+  overscroll-behavior-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -1531,6 +1541,14 @@ input.text-section-title::placeholder {
     transform: translateX(100%);
   }
 }
+
+.font-unbounded {
+  font-family: var(--font-unbounded) !important;
+}
+
+
+
+
 
 .card-stack {
   display: flex;

@@ -65,13 +65,13 @@ export function PeriodSelectorModal({
       }
       title={
         viewMode === 'calendar' 
-          ? (currentLang === 'en' ? 'Select date (Calendar month)' : 'Välj datum (Kalendermånad)')
-          : (currentLang === 'en' ? 'Select pay period' : 'Välj löneperiod')
+          ? (currentLang === 'en' ? 'Select date' : 'Välj datum')
+          : (currentLang === 'en' ? 'Select period' : 'Välj period')
       }
       subtitle={
         viewMode === 'calendar'
-          ? (currentLang === 'en' ? 'Pick a specific day in the calendar month' : 'Välj en specifik dag i kalendermånaden')
-          : (currentLang === 'en' ? 'Shows transactions within the selected pay period' : 'Visar transaktioner inom vald löneperiod')
+          ? (currentLang === 'en' ? 'Pick a day or view full period' : 'Välj en dag eller visa hela perioden')
+          : (currentLang === 'en' ? 'Choose a pay period' : 'Välj löneperiod att visa')
       }
       showCloseButton={true}
       bodyClassName="px-4 sm:px-5 py-4 custom-scrollbar overflow-y-auto max-h-[70vh]"
@@ -99,7 +99,7 @@ export function PeriodSelectorModal({
             <ListRow
               variant="grouped"
               title={currentLang === 'en' ? 'All periods' : 'Alla perioder'}
-              subtitle={currentLang === 'en' ? 'Show all transactions across periods' : 'Visa alla transaktioner sammanlagt'}
+              subtitle={currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner sammanlagt'}
               showCheck={!selectedPeriod && !selectedDate}
               onClick={() => {
                 if (typeof feedback?.selection === 'function') feedback.selection();
@@ -124,19 +124,15 @@ export function PeriodSelectorModal({
             let title = capitalizedMonth;
             let sub = '';
 
-            if (startDate && endDate && !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
-              const startStr = startDate.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' }).replace('.', '');
-              const endStr = endDate.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' }).replace('.', '');
-              sub = `${currentLang === 'en' ? 'Pay period' : 'Löneperiod'} ${startStr}–${endStr}`;
-              if (p.name && p.name.includes('(')) {
-                const extractedTitle = p.name.split('(')[0].trim();
-                if (extractedTitle) title = extractedTitle;
-              }
-            } else if (p.name && p.name.includes('(')) {
+            if (p.name && p.name.includes('(')) {
               const parts = p.name.split('(');
               const extractedTitle = parts[0].trim();
               if (extractedTitle) title = extractedTitle;
               sub = parts[1]?.replace(')', '').trim() || '';
+            } else if (startDate && endDate && !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+              const startStr = startDate.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+              const endStr = endDate.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' });
+              sub = `${startStr} – ${endStr}`;
             } else if (p.name) {
               title = p.name;
             }

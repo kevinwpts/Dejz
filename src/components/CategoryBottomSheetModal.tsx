@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Pencil, Check } from 'lucide-react';
 import { Transaction, Config, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
+import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
 import { BottomSheet, EmptyState } from './ui';
@@ -181,6 +183,37 @@ export function CategoryBottomSheetModal({
     ? Math.round((actualTotalSpent / budget) * 100)
     : 0;
 
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const [budgetInputVal, setBudgetInputVal] = useState('');
+
+  useEffect(() => {
+    setIsEditingBudget(false);
+    setBudgetInputVal(budget > 0 ? String(budget) : '');
+  }, [targetCategoryName, isOpen, budget]);
+
+  const handleSaveInlineBudget = () => {
+    if (!onUpdateConfig || !targetCategoryName) {
+      setIsEditingBudget(false);
+      return;
+    }
+    const parsed = Number(budgetInputVal.replace(/\D/g, '')) || 0;
+    const finalBudget = Math.max(actualFixedSpent, parsed);
+    const norm = targetCategoryName.trim().toLowerCase();
+    const updatedCategories = (config.categories || []).map((c) => {
+      if ((c.name || '').trim().toLowerCase() === norm) {
+        return { ...c, budget: finalBudget > 0 ? finalBudget : undefined };
+      }
+      return c;
+    });
+    const hasAnyBudget = updatedCategories.some((c: any) => typeof c.budget === 'number' && c.budget > 0);
+    onUpdateConfig({
+      ...config,
+      categories: updatedCategories,
+      hasSavedInitialBudget: hasAnyBudget,
+    });
+    setIsEditingBudget(false);
+  };
+
   if (!targetCategoryName || typeof document === 'undefined' || !document.body) return null;
 
   return (
@@ -198,127 +231,153 @@ export function CategoryBottomSheetModal({
         />
       }
       title={targetCategoryName}
+      headerRight={
+        onUpdateConfig && !isEditingBudget ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof feedback.light === 'function') feedback.light();
+              setBudgetInputVal(budget > 0 ? String(budget) : '');
+              setIsEditingBudget(true);
+            }}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-[var(--surface-muted)] hover:bg-[var(--bg-hover)] text-xs font-semibold text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
+          >
+            <Pencil size={12} strokeWidth={2.2} className="text-[var(--text-secondary)]" />
+            <span>{hasBudget ? (isEn ? 'Budget' : 'Budget') : (isEn ? 'Set budget' : 'Sätt budget')}</span>
+          </button>
+        ) : undefined
+      }
       bodyClassName="px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0"
     >
-      {/* Category Budget Status Card (Read-only overview with structured breakdown) */}
+      {/* Category Budget Status Card / Clean Edit Card */}
       <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] shrink-0 space-y-3.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-label font-medium text-[var(--text-secondary)]">
-              {hasBudget
-                ? remaining < 0
-                  ? (isEn ? 'Exceeded by' : 'Överskridet med')
-                  : (isEn ? 'Remaining in budget' : 'Kvar i budget')
-                : (isEn ? 'Spent this period' : 'Spenderat i perioden')}
-            </span>
-            <span
-              className={`text-large-amount font-bold font-amount tabular-nums tracking-tight mt-0.5 ${
-                hasBudget && remaining < 0
-                  ? 'text-[var(--danger-color)]'
-                  : 'text-[var(--text-primary)]'
-              }`}
-            >
-              {hasBudget
-                ? `${formatAmount(Math.abs(remaining), language)} ${curr}`
-                : `${formatAmount(actualTotalSpent, language)} ${curr}`}
-            </span>
-          </div>
-
-          {hasBudget && (
-            <span
-              className={`px-2.5 py-1 rounded-full text-label font-semibold font-amount tabular-nums shrink-0 ${
-                remaining < 0
-                  ? 'bg-[var(--danger-container)] text-[var(--danger-color)]'
-                  : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
-              }`}
-            >
-              {Math.min(999, Math.max(0, usedPercentage))} % {isEn ? 'used' : 'använt'}
-            </span>
-          )}
-        </div>
-
-        {/* Progress Bar (only when hasBudget) */}
-        {hasBudget && (
-          <div
-            className={`w-full h-1.5 rounded-full overflow-hidden transition-colors ${
-              remaining < 0
-                ? 'bg-[var(--danger-container)]'
-                : 'bg-[var(--surface-muted)]'
-            }`}
-          >
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                remaining < 0
-                  ? 'bg-[var(--danger-color)]'
-                  : remaining === 0
-                  ? 'bg-[var(--text-tertiary)]'
-                  : 'bg-[var(--success-color)]'
-              }`}
-              style={{
-                width: `${remaining < 0 ? 100 : Math.min(100, Math.max(0, usedPercentage))}%`,
-              }}
-            />
-          </div>
-        )}
-
-        {/* Structured Breakdown Footer (replaces loose "Budget: X kr · varav Y kr fast" text) */}
-        {hasBudget ? (
-          <div
-            className={`pt-3 border-t border-[var(--border-divider)] grid ${
-              actualFixedSpent > 0 ? 'grid-cols-3' : 'grid-cols-2'
-            } divide-x divide-[var(--border-divider)] text-left w-full`}
-          >
-            <div className="flex flex-col min-w-0 pr-2.5">
-              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
-                {isEn ? 'Total budget' : 'Total budget'}
+        {isEditingBudget ? (
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-label font-medium text-[var(--text-secondary)]">
+                {isEn ? 'Monthly budget' : 'Månadsbudget'}
               </span>
-              <span className="text-card-title font-bold font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
-                {formatAmount(budget, language)} {curr}
+              {actualFixedSpent > 0 && (
+                <span className="text-xs text-[var(--text-tertiary)] font-amount tabular-nums">
+                  {isEn
+                    ? `incl. ${formatAmount(actualFixedSpent, language)} ${curr} fixed`
+                    : `varav ${formatAmount(actualFixedSpent, language)} ${curr} fast`}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-baseline gap-1.5 font-amount border-b border-divider pb-2.5">
+              <input
+                type="text"
+                autoFocus
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={budgetInputVal}
+                onChange={(e) => setBudgetInputVal(e.target.value.replace(/\D/g, ''))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveInlineBudget();
+                  if (e.key === 'Escape') setIsEditingBudget(false);
+                }}
+                placeholder={String(actualFixedSpent || 0)}
+                className="bg-transparent outline-none text-hero-amount text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none"
+              />
+              <span className="text-secondary font-medium text-[var(--text-tertiary)] shrink-0 select-none">
+                {curr}{isEn ? '/mo' : '/mån'}
               </span>
             </div>
 
-            <div className={`flex flex-col min-w-0 ${actualFixedSpent > 0 ? 'px-2.5' : 'pl-2.5'}`}>
-              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
-                {actualFixedSpent > 0
-                  ? (isEn ? 'Variable spent' : 'Rörligt')
-                  : (isEn ? 'Spent' : 'Spenderat')}
-              </span>
-              <span className="text-card-title font-bold font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
-                {formatAmount(actualFixedSpent > 0 ? actualVariableSpent : actualTotalSpent, language)} {curr}
-              </span>
+            <div className="flex items-center gap-2.5 pt-0.5">
+              <button
+                type="button"
+                onClick={() => setIsEditingBudget(false)}
+                className="flex-1 h-10 rounded-btn bg-[var(--surface-muted)] hover:bg-[var(--bg-hover)] text-xs font-semibold text-[var(--text-primary)] transition-colors cursor-pointer active:scale-[0.98]"
+              >
+                {isEn ? 'Cancel' : 'Avbryt'}
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveInlineBudget}
+                className="flex-1 h-10 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] text-white text-xs font-semibold transition-opacity hover:opacity-95 cursor-pointer active:scale-[0.98] inline-flex items-center justify-center gap-1.5"
+              >
+                <Check size={14} strokeWidth={2.5} />
+                <span>{isEn ? 'Save' : 'Spara'}</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              {/* Left: Main text + Subtext */}
+              <div className="flex flex-col min-w-0 flex-1">
+                {hasBudget ? (
+                  <>
+                    <span
+                      className={`text-large-amount font-bold font-amount tabular-nums tracking-tight ${
+                        remaining < 0
+                          ? 'text-[var(--danger-color)] dark:text-[var(--danger-color)]'
+                          : 'text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {remaining < 0
+                        ? `${formatAmount(Math.abs(remaining), language)} ${curr} ${isEn ? 'over budget' : 'över budget'}`
+                        : remaining === 0
+                        ? `0 ${curr} ${isEn ? 'left' : 'kvar'}`
+                        : `${formatAmount(remaining, language)} ${curr} ${isEn ? 'left' : 'kvar'}`}
+                    </span>
+                    <span className="text-secondary font-medium text-[var(--text-secondary)] mt-0.5 tabular-nums">
+                      {remaining < 0
+                        ? `Budget: ${formatAmount(budget, language)} ${curr}`
+                        : `${isEn ? 'of' : 'av'} ${formatAmount(budget, language)} ${curr}`}
+                      {actualFixedSpent > 0 && (
+                        <span className="text-[var(--text-tertiary)] font-normal">
+                          {' · '}
+                          {isEn
+                            ? `incl. ${formatAmount(actualFixedSpent, language)} ${curr} fixed`
+                            : `varav ${formatAmount(actualFixedSpent, language)} ${curr} fast`}
+                        </span>
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-large-amount font-bold text-[var(--text-primary)] tracking-tight">
+                      {actualTotalSpent > 0
+                        ? `${formatAmount(actualTotalSpent, language)} ${curr} ${isEn ? 'spent' : 'spenderat'}`
+                        : (isEn ? 'No budget set' : 'Ingen budget satt')}
+                    </span>
+                    <span className="text-secondary font-medium text-[var(--text-secondary)] mt-0.5">
+                      {isEn ? 'No monthly budget set for this category' : 'Ingen månadsbudget satt för kategorin'}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
-            {actualFixedSpent > 0 && (
-              <div className="flex flex-col min-w-0 pl-2.5">
-                <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
-                  {isEn ? 'Fixed expenses' : 'Fast kostnad'}
-                </span>
-                <span className="text-card-title font-bold font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
-                  {formatAmount(actualFixedSpent, language)} {curr}
-                </span>
+            {/* Progress Bar (only when hasBudget) */}
+            {hasBudget && (
+              <div
+                className={`w-full h-1.5 rounded-full overflow-hidden transition-colors ${
+                  remaining < 0
+                    ? 'bg-[var(--danger-container)] dark:bg-[var(--danger-container)]'
+                    : 'bg-[var(--surface-muted)]'
+                }`}
+              >
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    remaining < 0
+                      ? 'bg-[var(--danger-color)] dark:bg-[var(--danger-color)]'
+                      : remaining === 0
+                      ? 'bg-[var(--text-tertiary)]'
+                      : 'bg-[var(--success-color)] dark:bg-[var(--success-color)]'
+                  }`}
+                  style={{
+                    width: `${remaining < 0 ? 100 : Math.min(100, Math.max(0, usedPercentage))}%`,
+                  }}
+                />
               </div>
             )}
-          </div>
-        ) : actualFixedSpent > 0 ? (
-          <div className="pt-3 border-t border-[var(--border-divider)] grid grid-cols-2 divide-x divide-[var(--border-divider)] text-left w-full">
-            <div className="flex flex-col min-w-0 pr-2.5">
-              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
-                {isEn ? 'Variable spent' : 'Rörligt spenderat'}
-              </span>
-              <span className="text-card-title font-bold font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
-                {formatAmount(actualVariableSpent, language)} {curr}
-              </span>
-            </div>
-            <div className="flex flex-col min-w-0 pl-2.5">
-              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
-                {isEn ? 'Fixed expenses' : 'Fast kostnad'}
-              </span>
-              <span className="text-card-title font-bold font-amount tabular-nums text-[var(--text-primary)] truncate mt-0.5">
-                {formatAmount(actualFixedSpent, language)} {curr}
-              </span>
-            </div>
-          </div>
-        ) : null}
+          </>
+        )}
       </div>
 
       {/* Expenses List: Fixed Expenses and Variable Transactions */}
@@ -327,14 +386,11 @@ export function CategoryBottomSheetModal({
         {matchingFixedExpenses.length > 0 && (
           <div className="space-y-1.5 shrink-0">
             <div className="flex items-center justify-between px-1">
-              <h4 className="text-section-title">
-                {isEn ? 'Fixed expenses' : 'Fasta utgifter'}
-                <span className="text-secondary text-[var(--text-secondary)] font-normal ml-1">
-                  ({matchingFixedExpenses.length})
-                </span>
-              </h4>
-              <span className="text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                {formatAmount(totalFixedAmount, language)} <span className="text-unit">{curr}{isEn ? '/mo' : '/mån'}</span>
+              <span className="text-secondary font-bold text-[var(--text-secondary)] tracking-tight">
+                {isEn ? 'Fixed expenses' : 'Fasta utgifter'} ({matchingFixedExpenses.length})
+              </span>
+              <span className="text-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                {formatAmount(totalFixedAmount, language)} {curr}{isEn ? '/mo' : '/mån'}
               </span>
             </div>
 
@@ -363,21 +419,19 @@ export function CategoryBottomSheetModal({
         {/* 2. Rörliga transaktioner */}
         {displayTransactions.length > 0 ? (
           <div className="space-y-2 flex-1 flex flex-col min-h-0">
-            <div className="flex items-center justify-between px-1 pt-1">
-              <h4 className="text-section-title">
-                {isEn ? 'Variable expenses' : 'Rörliga utgifter'}
-                <span className="text-secondary text-[var(--text-secondary)] font-normal ml-1">
-                  ({displayTransactions.length})
+            {matchingFixedExpenses.length > 0 && (
+              <div className="flex items-center justify-between px-1 pt-1">
+                <span className="text-secondary font-bold text-[var(--text-secondary)] tracking-tight">
+                  {isEn ? 'Variable transactions' : 'Rörliga utgifter'} ({displayTransactions.length})
                 </span>
-              </h4>
-              <span className="text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                {formatAmount(
-                  displayTransactions.reduce((s, tx) => s + (Number(tx.amount) || 0), 0),
-                  language
-                )}{' '}
-                <span className="text-unit">{curr}</span>
-              </span>
-            </div>
+                <span className="text-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                  {formatAmount(
+                    displayTransactions.reduce((s, tx) => s + (Number(tx.amount) || 0), 0),
+                    language
+                  )} {curr}
+                </span>
+              </div>
+            )}
 
             <div className="overflow-y-auto no-scrollbar pr-0.5 flex-1">
               <div className="rounded-card bg-[var(--surface-color)] border border-subtle shadow-none divide-subtle overflow-hidden">
@@ -391,7 +445,6 @@ export function CategoryBottomSheetModal({
                     onDelete={onDeleteTransaction}
                     onToggleStar={onToggleStar}
                     showDate={true}
-                    hideCategoryBadge={true}
                   />
                 ))}
               </div>

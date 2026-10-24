@@ -106,45 +106,24 @@ export function AnalysisView({
   const isEn = config.language === 'en';
   const effectiveStats = stats;
 
-  // Display period name + payday date interval (e.g. "Oktober · 25 sep–24 okt") so it is never confused with a calendar month
+  // Display period name (e.g. "Augusti") instead of date interval
   const periodDisplayName = useMemo(() => {
     const rawName = effectiveStats?.periodName || currentPeriod?.name;
-    let baseName = isEn ? 'Period' : 'Period';
     if (rawName) {
       const cleanName = rawName.includes('(') ? rawName.split('(')[0].trim() : rawName.trim();
-      if (cleanName) baseName = cleanName;
-    } else {
-      const targetDate = stats?.periodEnd || stats?.periodStart || currentPeriod?.end || currentPeriod?.start;
-      if (targetDate) {
-        const d = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-        if (!isNaN(d.getTime())) {
-          const monthName = d.toLocaleDateString(isEn ? 'en-US' : 'sv-SE', { month: 'long' });
-          baseName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-        }
+      if (cleanName) return cleanName;
+    }
+    // Fallback if no periodName: format month name from period start/end date
+    const targetDate = stats?.periodEnd || stats?.periodStart || currentPeriod?.end || currentPeriod?.start;
+    if (targetDate) {
+      const d = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
+      if (!isNaN(d.getTime())) {
+        const monthName = d.toLocaleDateString(isEn ? 'en-US' : 'sv-SE', { month: 'long' });
+        return monthName.charAt(0).toUpperCase() + monthName.slice(1);
       }
     }
-    return baseName;
+    return isEn ? 'Period' : 'Period';
   }, [effectiveStats?.periodName, currentPeriod?.name, stats?.periodEnd, stats?.periodStart, currentPeriod?.end, currentPeriod?.start, isEn]);
-
-  const periodIntervalLabel = useMemo(() => {
-    const startRaw = stats?.periodStart || currentPeriod?.start;
-    const endRaw = stats?.periodEnd || currentPeriod?.end;
-    if (startRaw && endRaw) {
-      const s = typeof startRaw === 'string' ? new Date(startRaw) : startRaw;
-      const e = typeof endRaw === 'string' ? new Date(endRaw) : endRaw;
-      if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
-        const locale = isEn ? 'en-US' : 'sv-SE';
-        const sStr = s.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace('.', '');
-        const eStr = e.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace('.', '');
-        return `${sStr}–${eStr}`;
-      }
-    }
-    const rawName = effectiveStats?.periodName || currentPeriod?.name;
-    if (rawName && rawName.includes('(')) {
-      return rawName.split('(')[1]?.replace(')', '').trim() || '';
-    }
-    return '';
-  }, [stats?.periodStart, stats?.periodEnd, currentPeriod?.start, currentPeriod?.end, effectiveStats?.periodName, currentPeriod?.name, isEn]);
 
   const isPastPeriod = useMemo(() => {
     if (!stats) return false;
@@ -484,9 +463,20 @@ export function AnalysisView({
       : (isEn ? 'Remaining to spend' : 'Kvar att spendera');
   }, [isPastPeriod, isEn]);
 
-  // Donut chart items: 1:1 with categoryData so every category uses the exact same color in the chart and list
+  // Donut chart items: Top 5 categories + "Övriga kategorier"
   const chartItems = useMemo(() => {
-    return categoryData.map(c => ({
+    if (categoryData.length <= 5) {
+      return categoryData.map(c => ({
+        name: c.name,
+        value: c.value,
+        color: c.color,
+        icon: c.icon,
+        pct: totalSpent > 0 ? Math.round((c.value / totalSpent) * 100) : 0,
+        isOther: false,
+      }));
+    }
+
+    const top5 = categoryData.slice(0, 5).map(c => ({
       name: c.name,
       value: c.value,
       color: c.color,
@@ -494,23 +484,29 @@ export function AnalysisView({
       pct: totalSpent > 0 ? Math.round((c.value / totalSpent) * 100) : 0,
       isOther: false,
     }));
-  }, [categoryData, totalSpent]);
+
+    const otherSum = categoryData.slice(5).reduce((acc, c) => acc + c.value, 0);
+    const otherPct = totalSpent > 0 ? Math.max(0, 100 - top5.reduce((acc, c) => acc + c.pct, 0)) : 0;
+
+    top5.push({
+      name: isEn ? 'Other categories' : 'Övriga kategorier',
+      value: otherSum,
+      color: '#79728D',
+      icon: 'morehorizontal',
+      pct: otherPct,
+      isOther: true,
+    });
+
+    return top5;
+  }, [categoryData, totalSpent, isEn]);
 
   const hoveredItem = useMemo(() => chartItems.find(i => i.name === hoveredCategory) || null, [chartItems, hoveredCategory]);
-
-  const previousPeriodIntervalLabel = useMemo(() => {
-    if (!previousPeriodBounds) return '';
-    const locale = isEn ? 'en-US' : 'sv-SE';
-    const sStr = previousPeriodBounds.start.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace('.', '');
-    const eStr = previousPeriodBounds.end.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace('.', '');
-    return `${sStr}–${eStr}`;
-  }, [previousPeriodBounds, isEn]);
 
   if (!stats) return null;
 
   return (
     <div className="space-y-[var(--menu-content-gap)] font-sans">
-      {/* 1. Top Controls: Inline Period Selector (with payday interval) + Filter Options */}
+      {/* 1. Top Controls: Inline Period Selector + Filter Options */}
       <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         {/* Period Button */}
         <button
@@ -519,14 +515,7 @@ export function AnalysisView({
           className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-subtle shadow-2xs hover:bg-black/[0.02] dark:hover:bg-white/[0.04] cursor-pointer active:scale-[0.98] transition-all select-none"
         >
           <Calendar size={14} className="text-[var(--text-secondary)] shrink-0" />
-          <span className="font-semibold text-[var(--text-primary)] truncate">
-            {periodDisplayName}
-          </span>
-          {periodIntervalLabel && (
-            <span className="text-[var(--text-secondary)] font-normal tabular-nums whitespace-nowrap">
-              · {periodIntervalLabel}
-            </span>
-          )}
+          <span className="truncate max-w-[140px] sm:max-w-none">{periodDisplayName}</span>
           <ChevronDown size={13} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
         </button>
 
@@ -611,89 +600,52 @@ export function AnalysisView({
               {config.currency || 'kr'}
             </span>
           </div>
-          <div className="pt-1">
-            <span className="text-micro-label text-[var(--text-tertiary)] tabular-nums block truncate">
-              {periodIntervalLabel
-                ? (isPastPeriod
-                    ? (isEn ? `Completed period (${periodIntervalLabel})` : `Avslutad löneperiod (${periodIntervalLabel})`)
-                    : (isEn ? `Ongoing period (${periodIntervalLabel})` : `Pågående löneperiod (${periodIntervalLabel})`))
-                : ''}
-            </span>
-          </div>
         </Card>
 
-        {/* Jämförelse mot föregående period / Budgetförbrukning */}
+        {/* Mot föregående period / Budgetförbrukning */}
         <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
-          {hasPreviousPeriodData && previousPeriodSpent !== null ? (
-            (() => {
-              const diff = Math.round(totalSpent) - Math.round(previousPeriodSpent);
-              const absDiff = Math.abs(diff);
-              const isLess = diff < 0;
-              const isMore = diff > 0;
-              return (
-                <>
-                  <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
-                    {isPastPeriod
-                      ? (isEn ? 'Compared to previous period' : 'Jämfört med förra perioden')
-                      : (isEn ? 'So far vs full previous period' : 'Hittills mot hela förra perioden')}
-                  </span>
-                  <div className="pt-1.5">
-                    <div className="flex items-baseline gap-1 flex-wrap">
-                      <span
-                        className={`text-large-amount font-bold tabular-nums tracking-tight ${
-                          isLess
-                            ? 'text-[var(--success-color)]'
-                            : isMore
-                            ? 'text-[var(--text-primary)]'
-                            : 'text-[var(--text-secondary)]'
-                        }`}
-                      >
-                        {formatAmount(absDiff, config.language)}
-                      </span>
-                      <span className="text-label font-medium text-[var(--text-secondary)]">
-                        {config.currency || 'kr'}{' '}
-                        {isLess
-                          ? (isEn ? 'less spent' : 'mindre spenderat')
+          <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            {hasPreviousPeriodData && previousPeriodSpent !== null
+              ? (isEn ? 'vs previous period' : 'Mot förra perioden')
+              : (isEn ? 'Budget used' : 'Budget förbrukad')}
+          </span>
+          <div className="flex items-baseline gap-1 pt-1.5">
+            {hasPreviousPeriodData && previousPeriodSpent !== null ? (
+              (() => {
+                const diff = Math.round(totalSpent) - Math.round(previousPeriodSpent);
+                const isLess = diff < 0;
+                const isMore = diff > 0;
+                return (
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      className={`text-large-amount font-bold tabular-nums tracking-tight ${
+                        isLess
+                          ? 'text-[var(--success-color)]'
                           : isMore
-                          ? (isEn ? 'more spent' : 'mer spenderat')
-                          : (isEn ? 'difference' : 'skillnad')}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="pt-1">
-                    <span className="text-micro-label text-[var(--text-tertiary)] tabular-nums block truncate">
-                      {previousPeriodIntervalLabel
-                        ? (isEn
-                            ? `Previous full period: ${formatAmount(Math.round(previousPeriodSpent), config.language)} ${config.currency || 'kr'} (${previousPeriodIntervalLabel})`
-                            : `Förra hela perioden: ${formatAmount(Math.round(previousPeriodSpent), config.language)} ${config.currency || 'kr'} (${previousPeriodIntervalLabel})`)
-                        : (isEn
-                            ? `Previous full period: ${formatAmount(Math.round(previousPeriodSpent), config.language)} ${config.currency || 'kr'}`
-                            : `Förra hela perioden: ${formatAmount(Math.round(previousPeriodSpent), config.language)} ${config.currency || 'kr'}`)}
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      {isLess ? '−' : isMore ? '+' : ''}
+                      {formatAmount(Math.abs(diff), config.language)}
+                    </span>
+                    <span className="text-label font-medium text-[var(--text-secondary)]">
+                      {config.currency || 'kr'}
                     </span>
                   </div>
-                </>
-              );
-            })()
-          ) : (
-            <>
-              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
-                {isEn ? 'Period budget used' : 'Periodbudget förbrukad'}
-              </span>
-              <div className="flex items-baseline gap-1 pt-1.5">
+                );
+              })()
+            ) : (
+              <div className="flex items-baseline gap-1">
                 <span className="text-large-amount font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
-                  {budgetUsedPct} %
+                  {budgetUsedPct}%
                 </span>
                 <span className="text-label font-medium text-[var(--text-secondary)]">
                   {isEn ? 'used' : 'använt'}
                 </span>
               </div>
-              <div className="pt-1">
-                <span className="text-micro-label text-[var(--text-tertiary)] block truncate">
-                  {isEn ? 'No previous period to compare' : 'Ingen tidigare period att jämföra med'}
-                </span>
-              </div>
-            </>
-          )}
+            )}
+          </div>
         </Card>
       </div>
 
@@ -723,10 +675,10 @@ export function AnalysisView({
 
       {/* 3. CIRKELDIAGRAM & FÖRDELNING - Sammanhängande kortmodul */}
       {categoryData.length > 0 && totalSpent > 0 && (
-        <Card variant="default" padding="sm" className="py-3.5 px-4 select-none">
+        <Card variant="default" padding="md" className="space-y-4 select-none">
           {/* Donut Chart Visual & Center Display */}
-          <div className="flex flex-col items-center justify-center">
-            <div className="relative w-[192px] h-[192px] sm:w-[212px] sm:h-[212px] flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center pt-1 pb-1">
+            <div className="relative w-[236px] h-[236px] sm:w-[264px] sm:h-[264px] flex items-center justify-center">
               <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
                 {/* Background track ring */}
                 <circle
@@ -748,8 +700,8 @@ export function AnalysisView({
                   return validItems.map((item) => {
                     const fraction = item.value / totalSpent;
                     const strokeLength = fraction * circumference;
-                    const gap = hasMultiple ? 1.1 : 0;
-                    const visibleLength = Math.max(0.6, strokeLength - gap);
+                    const gap = hasMultiple ? 2.5 : 0;
+                    const visibleLength = Math.max(1, strokeLength - gap);
                     const dashArray = `${visibleLength} ${circumference - visibleLength}`;
                     const dashOffset = -accumulatedPercent * circumference;
                     accumulatedPercent += fraction;
@@ -767,7 +719,7 @@ export function AnalysisView({
                         strokeWidth={isHovered ? 11.5 : 9.5}
                         strokeDasharray={dashArray}
                         strokeDashoffset={dashOffset}
-                        strokeLinecap="butt"
+                        strokeLinecap={hasMultiple ? "round" : "butt"}
                         className="transition-all duration-200 cursor-pointer"
                         style={{
                           opacity: hoveredCategory && !isHovered ? 0.45 : 1,
@@ -791,26 +743,26 @@ export function AnalysisView({
               {/* Airy Center: Shows Total or Active Category on Hover/Tap */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
                 {hoveredItem ? (
-                  <div className="flex flex-col items-center max-w-[140px] sm:max-w-[160px]">
+                  <div className="flex flex-col items-center max-w-[160px] sm:max-w-[185px]">
                     <span className="text-secondary font-medium text-[var(--text-secondary)] truncate max-w-full">
                       {hoveredItem.name}
                     </span>
-                    <span className="text-large-amount font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-0.5">
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
                       {formatAmount(Math.round(hoveredItem.value), config.language)}
-                      <span className="text-unit ml-1">{config.currency || "kr"}</span>
+                      <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                     </span>
-                    <span className="text-secondary font-medium text-[var(--text-secondary)] tabular-nums mt-0.5">
+                    <span className="text-label font-medium text-[var(--text-secondary)] tabular-nums mt-0.5">
                       {hoveredItem.pct} %
                     </span>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center max-w-[140px] sm:max-w-[160px]">
-                    <span className="text-metric-label font-medium text-[var(--text-secondary)]">
+                  <div className="flex flex-col items-center max-w-[160px] sm:max-w-[185px]">
+                    <span className="text-metric-label font-medium uppercase tracking-wider text-[var(--text-tertiary)]">
                       {spentLabel}
                     </span>
                     <span className="text-large-amount font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-0.5">
                       {formatAmount(Math.round(totalSpent), config.language)}
-                      <span className="text-unit ml-1 select-none">{config.currency || "kr"}</span>
+                      <span className="text-label font-medium text-[var(--text-secondary)] ml-1 select-none">{config.currency || "kr"}</span>
                     </span>
                   </div>
                 )}
@@ -862,20 +814,20 @@ export function AnalysisView({
                   return isCategoryMatch(catName, (e as any).categoryId, item.name);
                 });
 
-              // Visning: måste avse exakt samma valda period och filter som diagrammet och kategorisumman
-              const displayTransactions = analysisFilter === 'fixed'
-                ? []
+              // Visning: prioritera matchade poster så användaren alltid ser transaktionerna
+              const displayTransactions = analysisFilter === 'fixed' 
+                ? (categoryFixedExpenses.length > 0 ? [] : categoryTransactions)
                 : categoryTransactions;
-
+                
               const displayFixedExpenses = analysisFilter === 'variable'
-                ? []
+                ? (categoryTransactions.length > 0 ? [] : categoryFixedExpenses)
                 : categoryFixedExpenses;
 
               const totalItemCount = displayTransactions.length + displayFixedExpenses.length;
               const categoryPct = totalSpent > 0 ? Math.round((item.value / totalSpent) * 100) : 0;
               const _catTrend = getCategoryTrend(item.name, item.value);
 
-              // Budgetspårning per kategori (avser kategoribudget för rörliga utgifter)
+              // Budgetspårning per kategori (jämför alltid mot rörliga utgifter, inte fasta räkningar)
               const budget = item.budgetInKronor;
               const hasBudget = budget > 0 && analysisFilter !== 'fixed';
               const spentRound = Math.round(item.value);
@@ -891,43 +843,30 @@ export function AnalysisView({
                 <div key={item.name} ref={isExpanded ? expandedCardRef : null} className="transition-colors">
                   {/* Kompakt standardläge (hopfällt) */}
                   <div 
-                    className="px-3.5 sm:px-4 py-2.5 sm:py-3 min-h-[54px] flex items-center justify-between gap-3 group hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer select-none"
+                    className="p-3.5 sm:p-4 flex items-center justify-between gap-3 group hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer select-none"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
-                    {/* Vänster: Ikon, Kategorinamn + Färgmarkör (samma som i diagrammet), Tydlig kategoribudgetstatus */}
+                    {/* Vänster: Ikon, Kategorinamn, Diskret budgetstatus */}
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" categoryName={item.name} />
                       <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span
-                            className="w-2 h-2 rounded-full shrink-0"
-                            style={{ backgroundColor: item.color || '#6366f1' }}
-                            aria-hidden="true"
-                          />
-                          <p className="text-list-name truncate text-[var(--text-primary)]">
-                            {item.name}
+                        <p className="text-body-medium font-medium leading-tight truncate text-[var(--text-primary)]">
+                          {item.name}
+                        </p>
+                        {hasBudget && (
+                          <p className={`text-secondary leading-tight mt-1 truncate ${
+                            isOverBudget
+                              ? 'text-[var(--danger-color)] font-medium'
+                              : 'text-[var(--text-tertiary)]'
+                          }`}>
+                            {isOverBudget
+                              ? (isEn 
+                                  ? `${formatAmount(variableSpentRound - budget, config.language)} ${config.currency || 'kr'} over budget` 
+                                  : `${formatAmount(variableSpentRound - budget, config.language)} ${config.currency || 'kr'} över budget`)
+                              : (isEn 
+                                  ? `${formatAmount(budget - variableSpentRound, config.language)} ${config.currency || 'kr'} left of budget` 
+                                  : `${formatAmount(budget - variableSpentRound, config.language)} ${config.currency || 'kr'} kvar av budget`)}
                           </p>
-                        </div>
-                        {analysisFilter !== 'fixed' && (
-                          hasBudget ? (
-                            <p className={`text-secondary leading-tight mt-0.5 truncate ${
-                              isOverBudget
-                                ? 'text-[var(--danger-color)] font-medium'
-                                : 'text-[var(--text-secondary)]'
-                            }`}>
-                              {isOverBudget
-                                ? (isEn 
-                                    ? `${formatAmount(variableSpentRound - budget, config.language)} ${config.currency || 'kr'} over category budget` 
-                                    : `${formatAmount(variableSpentRound - budget, config.language)} ${config.currency || 'kr'} över kategoribudget`)
-                                : (isEn 
-                                    ? `${formatAmount(budget - variableSpentRound, config.language)} ${config.currency || 'kr'} left of category budget` 
-                                    : `${formatAmount(budget - variableSpentRound, config.language)} ${config.currency || 'kr'} kvar av kategoribudget`)}
-                            </p>
-                          ) : (
-                            <p className="text-secondary leading-tight mt-0.5 truncate text-[var(--text-tertiary)]">
-                              {isEn ? 'No category budget' : 'Ingen kategoribudget'}
-                            </p>
-                          )
                         )}
                       </div>
                     </div>
@@ -937,9 +876,9 @@ export function AnalysisView({
                       <div className="w-[110px] sm:w-[130px] text-right flex flex-col items-end justify-center shrink-0">
                         <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight tabular-nums">
                           {formatAmount(spentRound, config.language)}
-                          <span className="text-unit ml-1 select-none">{config.currency || 'kr'}</span>
+                          <span className="text-secondary font-normal opacity-80 ml-1 select-none">{config.currency || 'kr'}</span>
                         </p>
-                        <span className="text-secondary text-[var(--text-secondary)] tabular-nums mt-0.5 leading-tight font-normal">
+                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-0.5 leading-tight font-normal">
                           {categoryPct} %
                         </span>
                       </div>
@@ -949,7 +888,7 @@ export function AnalysisView({
                     </div>
                   </div>
                   
-                  {/* Expanderat detaljläge (underordnade rader med indrag och utan kategoridubblering) */}
+                  {/* Expanderat detaljläge */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
@@ -960,33 +899,17 @@ export function AnalysisView({
                         className="overflow-hidden bg-[var(--card-nested-bg)] border-t border-subtle"
                       >
                         <div className="divide-subtle">
-                          {displayTransactions.map((t) => {
-                            // Om transaktionen är uppdelad på flera kategorier, visa den del som ingår i kategorins summa
-                            let txPeriodAmount = t.amount;
-                            const txSplits = (t as any).splits;
-                            if (Array.isArray(txSplits) && txSplits.length > 0) {
-                              const matchingSplitSum = txSplits
-                                .filter((s: any) => isCategoryMatch(s.category, s.categoryId, item.name))
-                                .reduce((acc: number, s: any) => acc + (Number(s.amount) || 0), 0);
-                              if (matchingSplitSum > 0) {
-                                txPeriodAmount = matchingSplitSum;
-                              }
-                            }
-                            return (
-                              <TransactionItem 
-                                key={t.id}
-                                transaction={t}
-                                displayAmount={txPeriodAmount}
-                                config={config}
-                                onView={onViewTransaction}
-                                onDelete={onDeleteTransaction}
-                                variant="transparent"
-                                showDate={true}
-                                hideCategoryBadge={true}
-                                compact={true}
-                              />
-                            );
-                          })}
+                          {displayTransactions.map((t) => (
+                            <TransactionItem 
+                              key={t.id}
+                              transaction={t}
+                              config={config}
+                              onView={onViewTransaction}
+                              onDelete={onDeleteTransaction}
+                              variant="transparent"
+                              showDate
+                            />
+                          ))}
 
                           {displayFixedExpenses.map((fe) => {
                             const effectiveFeAmount =
@@ -996,17 +919,13 @@ export function AnalysisView({
                               fe.periodOverrides[stats.periodId] !== undefined
                                 ? Number(fe.periodOverrides[stats.periodId]) || 0
                                 : fe.amount;
-                            // Present the actual period expense amount included in the chart sum (no /mo or /yr contract suffix)
-                            const feTransaction: any = {
+                            const feTransaction: Transaction = {
                               id: fe.id,
                               merchant: fe.name,
                               category: fe.category,
                               amount: effectiveFeAmount,
                               type: 'expense',
-                              deductionDay: fe.deductionDay,
-                              paymentMethod: fe.paymentMethod,
-                              icon: fe.icon,
-                              logo: fe.logo,
+                              date: new Date().toISOString(),
                             };
                             return (
                               <TransactionItem
@@ -1017,8 +936,6 @@ export function AnalysisView({
                                 onClick={() => onViewFixedExpense?.(fe)}
                                 onView={() => onViewFixedExpense?.(fe)}
                                 variant="transparent"
-                                hideCategoryBadge={true}
-                                compact={true}
                               />
                             );
                           })}

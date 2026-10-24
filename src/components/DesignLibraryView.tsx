@@ -116,14 +116,14 @@ const COLOR_TOKENS_METADATA: {
   { cssVar: '--success-color', name: 'Grön (Positivt)', usage: 'Inkomster, sparande och klarmarkeringar', group: 'Accent & Status' },
   { cssVar: '--warning-color', name: 'Gul/Orange (Varning)', usage: 'Nära budgetgräns eller saker att se över', group: 'Accent & Status' },
   { cssVar: '--danger-color', name: 'Röd (Fel / Radera)', usage: 'Felmeddelanden, överskriden budget och raderingsknappar', group: 'Accent & Status' },
-  { cssVar: '--border-divider', name: 'Avdelare (Divider)', usage: 'Subtila linjer mellan listrader, sektioner och i modaler', group: 'Linjer & Kontroller' },
-  { cssVar: '--focus-color', name: 'Fokusmarkering', usage: 'Tydlig fokusram vid tangentbordsnavigering', group: 'Linjer & Kontroller' },
+  { cssVar: '--border-subtle', name: 'Subtil linje', usage: 'Avdelare mellan listrader och inmatningsfält (ej runt standardkort)', group: 'Linjer & Kontroller' },
+  { cssVar: '--border-strong', name: 'Tydlig linje', usage: 'Markerad ram vid fokus eller betoning', group: 'Linjer & Kontroller' },
 ];
 
 const TYPOGRAPHY_ROLES: {
   label: string;
   className: string;
-  fontRole: 'Outfit (Rubriker & Siffror)' | 'Manrope (Text & Kontroller)';
+  fontRole: 'Outfit (Rubriker & Siffror)' | 'DM Sans (Text & Kontroller)';
   sampleText: string;
   usage: string;
 }[] = [
@@ -151,35 +151,35 @@ const TYPOGRAPHY_ROLES: {
   {
     label: 'Kortrubrik (.text-card-title)',
     className: 'text-card-title',
-    fontRole: 'Manrope (Text & Kontroller)',
+    fontRole: 'DM Sans (Text & Kontroller)',
     sampleText: 'Spotify Duo',
     usage: 'Rubrik inuti kort och viktiga rader',
   },
   {
     label: 'Sektionsrubrik (.text-section-header)',
     className: 'text-section-header',
-    fontRole: 'Manrope (Text & Kontroller)',
+    fontRole: 'DM Sans (Text & Kontroller)',
     sampleText: 'FASTA UTGIFTER',
     usage: 'Små versala rubriker ovanför listor och grupper',
   },
   {
     label: 'Brödtext (.text-body)',
     className: 'text-body',
-    fontRole: 'Manrope (Text & Kontroller)',
+    fontRole: 'DM Sans (Text & Kontroller)',
     sampleText: 'Du säger själv upp tjänsten hos företaget. Dejz registrerar uppsägningen i din budget.',
     usage: 'Vanlig löpande text, formulärfält och rader',
   },
   {
     label: 'Sekundär text (.text-secondary)',
     className: 'text-secondary',
-    fontRole: 'Manrope (Text & Kontroller)',
+    fontRole: 'DM Sans (Text & Kontroller)',
     sampleText: 'Uppsagd · Sista betalning 15 nov',
     usage: 'Underrader i listor och förklarande hjälptext',
   },
   {
     label: 'Mikrotext (.text-caption)',
     className: 'text-caption',
-    fontRole: 'Manrope (Text & Kontroller)',
+    fontRole: 'DM Sans (Text & Kontroller)',
     sampleText: 'Valfritt · Uppdaterad idag kl. 14:20',
     usage: 'Tidsstämplar och små etiketter',
   },
@@ -204,7 +204,7 @@ function SectionCard({
 }) {
   return (
     <Card variant="default" padding="lg" className="space-y-4">
-      <div className="pb-3 border-b border-[var(--border-divider)] space-y-2">
+      <div className="pb-3 border-b border-[var(--border-subtle)] space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <h3 className="text-card-title text-[var(--text-primary)]">{title}</h3>
@@ -222,7 +222,7 @@ function SectionCard({
         {/* Spårbarhet (Källa & Användningsställen) – kompakt och lättläst */}
         {showTechDetails && (
           <div className="pt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-[var(--text-secondary)]">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--surface-nested)] font-mono text-[var(--text-primary)] border border-[var(--border-divider)]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--surface-nested)] font-mono text-[var(--text-primary)] border border-[var(--border-subtle)]">
               <FileCode size={11} className="shrink-0 text-[var(--accent-color)]" />
               {sourcePath}
             </span>
@@ -233,7 +233,7 @@ function SectionCard({
             {usedIn.map((place) => (
               <span
                 key={place}
-                className="px-1.5 py-0.5 rounded bg-[var(--surface-nested)] text-[var(--text-secondary)] border border-[var(--border-divider)]"
+                className="px-1.5 py-0.5 rounded bg-[var(--surface-nested)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
               >
                 {place}
               </span>
@@ -1598,21 +1598,21 @@ export function DesignLibraryView() {
 
             {/* 1.2 Typsnitt */}
             {(foundationTab === 'typography' || isSearching) &&
-              matchesSearch(['typsnitt', 'typografi', 'font', 'outfit', 'manrope', 'textstorlek', 'rubrik']) && (
+              matchesSearch(['typsnitt', 'typografi', 'font', 'outfit', 'dm sans', 'textstorlek', 'rubrik']) && (
                 <SectionCard
                   title="Typsnitt, Textstorlekar & Vikter"
-                  description="Dejz använder två typsnitt: Outfit för rubriker och belopp, samt Manrope för brödtext och knappar."
+                  description="Dejz använder två typsnitt: Outfit för rubriker och belopp, samt DM Sans för brödtext och knappar."
                   sourcePath="src/index.css & src/constants/designSystem.ts"
                   usedIn={['Alla sidor och komponenter']}
                   showTechDetails={showTechDetails}
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                    <div className="p-3.5 rounded-card-nested bg-[var(--surface-nested)] border border-[var(--border-divider)]">
+                    <div className="p-3.5 rounded-card-nested bg-[var(--surface-nested)] border border-[var(--border-subtle)]">
                       <div className="text-caption uppercase font-bold tracking-wider mb-1">Text & Kontroller</div>
-                      <div className="font-sans text-lg font-bold text-[var(--text-primary)]">Manrope</div>
+                      <div className="font-sans text-lg font-bold text-[var(--text-primary)]">DM Sans</div>
                       <div className="text-caption mt-1">Används för brödtext, knappar, formulär, listrader och etiketter.</div>
                     </div>
-                    <div className="p-3.5 rounded-card-nested bg-[var(--surface-nested)] border border-[var(--border-divider)]">
+                    <div className="p-3.5 rounded-card-nested bg-[var(--surface-nested)] border border-[var(--border-subtle)]">
                       <div className="text-caption uppercase font-bold tracking-wider mb-1">Rubriker & Belopp</div>
                       <div className="font-display text-lg font-bold text-[var(--text-primary)]">Outfit</div>
                       <div className="text-caption mt-1">Används för sidrubriker och alla ekonomiska siffror.</div>
@@ -1709,17 +1709,17 @@ export function DesignLibraryView() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-4 rounded-card bg-[var(--surface-color)] border border-[var(--border-divider)] shadow-none">
-                        <div className="text-xs font-bold text-[var(--text-primary)]">Ytskugga (.shadow-none)</div>
-                        <div className="text-caption mt-1">Standard på vanliga kort (Zero-shadow)</div>
+                      <div className="p-4 rounded-card bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-card">
+                        <div className="text-xs font-bold text-[var(--text-primary)]">Kortskugga (.shadow-card)</div>
+                        <div className="text-caption mt-1">Används på vanliga kort</div>
                       </div>
-                      <div className="p-4 rounded-card bg-[var(--surface-elevated)] border border-[var(--border-divider)] shadow-subtle">
-                        <div className="text-xs font-bold text-[var(--text-primary)]">Subtil (.shadow-subtle)</div>
-                        <div className="text-caption mt-1">Används på aktiva flikar, sökfält och sekundärknappar</div>
+                      <div className="p-4 rounded-card bg-[var(--surface-elevated)] border border-[var(--border-strong)] shadow-elevated">
+                        <div className="text-xs font-bold text-[var(--text-primary)]">Upphöjd (.shadow-elevated)</div>
+                        <div className="text-caption mt-1">Används på menyer och flytande kort</div>
                       </div>
-                      <div className="p-4 rounded-card bg-[var(--surface-elevated)] border border-[var(--border-divider)] shadow-modal">
+                      <div className="p-4 rounded-card bg-[var(--surface-elevated)] border border-[var(--border-subtle)] shadow-modal">
                         <div className="text-xs font-bold text-[var(--text-primary)]">Modal (.shadow-modal)</div>
-                        <div className="text-caption mt-1">Används på popupfönster och bottom sheets</div>
+                        <div className="text-caption mt-1">Används på popupfönster</div>
                       </div>
                     </div>
                   </div>

@@ -57,12 +57,10 @@ export function BudgetItemLogo({
   item,
   type,
   config,
-  size = "md",
 }: {
   item: any;
   type: "income" | "expense";
   config?: Config;
-  size?: "sm" | "md" | "lg" | "xl";
 }) {
   const isItemVariable = Boolean(item?.isVariable || item?.is_variable);
   const tx = {
@@ -72,8 +70,8 @@ export function BudgetItemLogo({
     isVariable: isItemVariable,
   };
   return (
-    <div className="relative inline-flex shrink-0 items-center justify-center">
-      <TransactionLogo transaction={tx} config={config} size={size} />
+    <div className="relative inline-flex shrink-0 w-[42px] h-[42px] items-center justify-center">
+      <TransactionLogo transaction={tx} config={config} />
     </div>
   );
 }
@@ -189,7 +187,7 @@ export function BudgetItem({
     return (
       <div
         onClick={onClick}
-        className={`px-3.5 sm:px-4 py-2.5 sm:py-3 min-h-[54px] relative z-10 flex items-center gap-2.5 sm:gap-3 group transition-colors duration-150 ${
+        className={`px-4 py-3 sm:py-3.5 min-h-[56px] relative z-10 flex items-center gap-3 group transition-colors duration-150 ${
           isGrouped
             ? "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none"
             : "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-card shadow-subtle border-none"
@@ -201,7 +199,7 @@ export function BudgetItem({
           {/* Rad 1: Namn till vänster, beräknat månadsbelopp högerställt inkl. kr/mån */}
           <div className="flex items-baseline justify-between gap-3 min-w-0">
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
-              <p className="text-list-name text-[var(--text-primary)] leading-snug truncate min-w-0">
+              <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate min-w-0">
                 {displayName}
               </p>
               {isCancelled && !isExpired && (
@@ -213,9 +211,9 @@ export function BudgetItem({
             <p className="text-list-amount whitespace-nowrap shrink-0 text-[var(--text-primary)]">
               {isItemVariable && <span className="opacity-70 mr-0.5">~</span>}
               <span className="tabular-nums">{formatAmount(displayAmount, language)}</span>
-              <span className="text-unit text-[var(--text-secondary)] font-normal ml-1">
+              <span className="text-secondary opacity-80 font-normal ml-1">
                 {currency}
-                <span className="text-micro-label text-[var(--text-tertiary)] ml-0.5">
+                <span className="text-micro-label opacity-70 ml-0.5">
                   {frequencySuffix}
                 </span>
               </span>
@@ -230,8 +228,8 @@ export function BudgetItem({
               </p>
             </div>
           ) : (
-            <div className="mt-0.5 flex items-center justify-between gap-2 min-w-0 w-full">
-              <div className="flex items-center gap-1 min-w-0 flex-1 text-[var(--text-secondary)]">
+            <div className="mt-0.5 flex items-center justify-between gap-3 min-w-0 w-full">
+              <div className="flex items-end gap-1 min-w-0 flex-1 text-[var(--text-secondary)]">
                 {categoryIconKey ? (
                   <CategoryIcon
                     icon={categoryIconKey}
@@ -245,7 +243,7 @@ export function BudgetItem({
                 </span>
               </div>
               {rightMetadataText ? (
-                <p className="text-secondary leading-snug text-[var(--text-tertiary)] tabular-nums whitespace-nowrap shrink-0 text-right">
+                <p className="text-secondary leading-snug text-[var(--text-secondary)] tabular-nums whitespace-nowrap shrink-0 text-right">
                   {rightMetadataText}
                 </p>
               ) : null}

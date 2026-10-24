@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown, ChevronLeft, ChevronRight, Heart, MoreHorizontal } from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Button, IconButton } from './ui';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
@@ -60,7 +60,6 @@ export function TransactionViewModal({
   const isStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
   const [activeReceiptIndex, setActiveReceiptIndex] = useState(0);
   const [showSimilar, setShowSimilar] = useState(false);
@@ -213,111 +212,63 @@ export function TransactionViewModal({
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title, Star, 3-dots Menu & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {config?.language === 'en' ? 'Transaction' : 'Transaktion'}
-          </h2>
-          <div className="flex items-center gap-1.5 relative">
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                const currentStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
-                const nextStarred = !currentStarred;
-                const currentTags = Array.isArray(currentTx.tags) ? currentTx.tags : [];
-                const nextTags = nextStarred
-                  ? Array.from(new Set([...currentTags, 'starred']))
-                  : currentTags.filter((tag) => tag !== 'starred');
-                const updated = {
-                  ...currentTx,
-                  isStarred: nextStarred,
-                  tags: nextTags,
-                };
-                setCurrentTx(updated);
-                if (onToggleStar) {
-                  onToggleStar(currentTx);
-                } else if (_onUpdateTransaction) {
-                  _onUpdateTransaction(updated);
-                }
-              }}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                isStarred
-                  ? 'text-[var(--danger-color)] bg-red-500/10'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
-              }`}
-              title={isStarred ? (config?.language === 'en' ? 'Remove from saved' : 'Ta bort från sparade') : (config?.language === 'en' ? 'Save transaction' : 'Spara transaktion')}
-              aria-label={isStarred ? (config?.language === 'en' ? 'Remove from saved' : 'Ta bort från sparade') : (config?.language === 'en' ? 'Save transaction' : 'Spara transaktion')}
-            >
-              <Heart 
-                size={18} 
-                fill={isStarred ? 'currentColor' : 'none'} 
-                strokeWidth={2} 
-              />
-            </button>
-            <IconButton 
-              icon={<MoreHorizontal size={16} strokeWidth={2.2} />}
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowActionsMenu((prev) => !prev);
-              }} 
-              variant="muted"
-              size="md"
-              title={config?.language === 'en' ? 'More options' : 'Fler val'}
-              aria-label={config?.language === 'en' ? 'More options' : 'Fler val'}
-            />
-            {showActionsMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setShowActionsMenu(false)}
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {config?.language === 'en' ? 'Transaction' : 'Transaktion'}
+            </h2>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  const currentStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
+                  const nextStarred = !currentStarred;
+                  const currentTags = Array.isArray(currentTx.tags) ? currentTx.tags : [];
+                  const nextTags = nextStarred
+                    ? Array.from(new Set([...currentTags, 'starred']))
+                    : currentTags.filter((tag) => tag !== 'starred');
+                  const updated = {
+                    ...currentTx,
+                    isStarred: nextStarred,
+                    tags: nextTags,
+                  };
+                  setCurrentTx(updated);
+                  if (onToggleStar) {
+                    onToggleStar(currentTx);
+                  } else if (_onUpdateTransaction) {
+                    _onUpdateTransaction(updated);
+                  }
+                }}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                  isStarred
+                    ? 'text-[var(--danger-color)] bg-red-500/10'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+                title={isStarred ? (config?.language === 'en' ? 'Remove from saved' : 'Ta bort från sparade') : (config?.language === 'en' ? 'Save transaction' : 'Spara transaktion')}
+                aria-label={isStarred ? (config?.language === 'en' ? 'Remove from saved' : 'Ta bort från sparade') : (config?.language === 'en' ? 'Save transaction' : 'Spara transaktion')}
+              >
+                <Heart 
+                  size={18} 
+                  fill={isStarred ? 'currentColor' : 'none'} 
+                  strokeWidth={2} 
                 />
-                <div className="absolute right-10 top-10 z-40 min-w-[170px] rounded-card-nested bg-[var(--surface-color)] border border-subtle shadow-modal py-1 overflow-hidden divide-y divide-subtle">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowActionsMenu(false);
-                      onDuplicate(currentTx);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
-                  >
-                    <Repeat size={15} strokeWidth={2} className="text-[var(--text-secondary)]" />
-                    <span>{t('duplicate')}</span>
-                  </button>
-                  {onDelete && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof feedback?.light === 'function') feedback.light();
-                        setShowActionsMenu(false);
-                        setShowDeleteConfirm(true);
-                      }}
-                      className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--danger-color)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
-                    >
-                      <Trash2 size={15} strokeWidth={2} />
-                      <span>{config?.language === 'en' ? 'Delete' : 'Ta bort'}</span>
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-            <IconButton 
-              icon={<X size={15} strokeWidth={2.5} />}
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                onClose();
-              }} 
-              variant="muted"
-              size="md"
-              title={t('close')}
-              aria-label={t('close')}
-            />
+              </button>
+              <IconButton 
+                icon={<X size={15} strokeWidth={2.5} />}
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  onClose();
+                }} 
+                variant="muted"
+                size="md"
+                title={t('close')}
+                aria-label={t('close')}
+              />
+            </div>
           </div>
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-6 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
 
           {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
@@ -330,7 +281,7 @@ export function TransactionViewModal({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Name' : 'Namn'}
                 </span>
                 <div className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug py-0.5 truncate">
@@ -341,7 +292,7 @@ export function TransactionViewModal({
 
             <div className="pt-2.5 border-t border-divider flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                   {config?.language === 'en' ? 'Amount' : 'Belopp'}
                 </span>
                 <div className={`flex items-baseline gap-1.5 font-amount w-full ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
@@ -359,8 +310,8 @@ export function TransactionViewModal({
           {/* 2. Second Group: Category, Date, Time (when present), Note (when non-empty), Attachment (when non-empty) */}
           <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-subtle text-left">
             {/* Row 1: Category */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right min-w-0">
@@ -392,7 +343,7 @@ export function TransactionViewModal({
                                 variant="primary" 
                                 size="xs" 
                               />
-                              <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate">{splitCatName}</span>
+                              <span className="text-sm font-medium text-[var(--text-primary)] truncate">{splitCatName}</span>
                               <span className="text-label text-[var(--text-secondary)] font-amount tabular-nums shrink-0">
                                 ({formatAmount(split.amount, config?.language)} {config.currency})
                               </span>
@@ -419,7 +370,7 @@ export function TransactionViewModal({
                         variant="primary" 
                         size="xs" 
                       />
-                      <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
                         {catName}
                       </span>
                     </div>
@@ -429,22 +380,22 @@ export function TransactionViewModal({
             </div>
 
             {/* Row 2: Date */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formattedDate}
               </span>
             </div>
 
             {/* Row 3: Time (when present) */}
             {formattedTime && (
-              <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {config?.language === 'en' ? 'Time' : config?.language === 'fi' ? 'Aika' : 'Tid'}
                 </span>
-                <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                   {formattedTime}
                 </span>
               </div>
@@ -452,11 +403,11 @@ export function TransactionViewModal({
 
             {/* Row 4: Note (only if non-empty) */}
             {hasNote && (
-              <div className="px-4 py-2.5 sm:py-3 flex items-start justify-between min-h-[46px] gap-4">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('ownNote')}
                 </span>
-                <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {currentTx.note}
                 </span>
               </div>
@@ -464,10 +415,10 @@ export function TransactionViewModal({
 
             {/* Row 5: Attachment / Receipts (Supports 1 or multiple) */}
             {hasReceipt && (
-              <div className="px-4 py-3 space-y-2.5">
+              <div className="p-4 space-y-2.5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-secondary text-[var(--text-secondary)]">
+                    <span className="text-body font-normal text-[var(--text-secondary)]">
                       {receiptUrls.length > 1
                         ? (config?.language === 'en' ? 'Receipts & Attachments' : 'Kvitton & Bilagor')
                         : (config?.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga')}
@@ -562,14 +513,14 @@ export function TransactionViewModal({
 
             {/* Optional Tags Row (only if non-empty) */}
             {hasTags && (
-              <div className="px-4 py-2.5 sm:py-3 flex items-start justify-between min-h-[46px] gap-4">
+              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0">
                   <Tag size={13} strokeWidth={2} />
-                  <span className="text-secondary text-[var(--text-secondary)]">{t('tags')}</span>
+                  <span className="text-body font-normal">{t('tags')}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(currentTx.tags || []).map((tag, index) => (
-                    <span key={index} className="text-body-medium font-semibold text-[var(--text-primary)]">
+                    <span key={index} className="text-sm font-medium text-[var(--text-primary)]">
                       {tag}{index < (currentTx.tags?.length || 0) - 1 ? ' · ' : ''}
                     </span>
                   ))}
@@ -745,13 +696,13 @@ export function TransactionViewModal({
           )}
         </div>
 
-        {/* Action Button Footer: Primary 'Redigera' */}
+        {/* Action Buttons Footer: Primary 'Redigera', Secondary 'Duplicera' with visible label, and Global Delete IconButton */}
         <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
             variant="primary"
             size="lg"
-            className="w-full rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(currentTx);
@@ -759,6 +710,36 @@ export function TransactionViewModal({
           >
             {t('edit')}
           </Button>
+
+          <Button 
+            type="button"
+            variant="secondary"
+            size="lg"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onDuplicate(transaction);
+            }} 
+            className="rounded-[var(--radius-button,12px)] px-4 text-label font-semibold shrink-0"
+            title={config?.language === 'en' ? 'Create a copy of this transaction' : 'Skapa en kopia av transaktionen'}
+            aria-label={config?.language === 'en' ? 'Duplicate transaction' : 'Duplicera transaktion'}
+          >
+            {t('duplicate')}
+          </Button>
+
+          {onDelete && (
+            <IconButton 
+              icon={<Trash2 size={16} strokeWidth={2} />}
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowDeleteConfirm(true);
+              }} 
+              variant="danger"
+              size="xl"
+              shape="button"
+              title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+              aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+            />
+          )}
         </div>
 
         {showDeleteConfirm && transaction && transaction.id && onDelete && (

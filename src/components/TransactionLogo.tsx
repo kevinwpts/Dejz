@@ -83,41 +83,36 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-14 h-14 rounded-full',
-      padding: 'p-2',
-      icon: 26,
+      container: 'w-16 h-16 rounded-full',
+      icon: 30,
     },
     lg: {
-      container: 'w-12 h-12 rounded-full',
-      padding: 'p-1.5',
-      icon: 22,
+      container: 'w-14 h-14 rounded-full',
+      icon: 26,
     },
     md: {
-      container: 'w-9 h-9 sm:w-[38px] sm:h-[38px] rounded-full',
-      padding: 'p-1',
-      icon: 18,
+      container: 'w-[42px] h-[42px] rounded-full',
+      icon: 20,
     },
     sm: {
-      container: 'w-7 h-7 sm:w-8 sm:h-8 rounded-full',
-      padding: 'p-1',
-      icon: 14,
+      container: 'w-8 h-8 rounded-full',
+      icon: 15,
     },
   }[size] || {
-    container: 'w-9 h-9 sm:w-[38px] sm:h-[38px] rounded-full',
-    padding: 'p-1',
-    icon: 18,
+    container: 'w-[42px] h-[42px] rounded-full',
+    icon: 20,
   };
 
-  // Official logo: preserve aspect ratio without cropping
+  // If there's an official logo and no load error (Klarna / Apple Pay circular icon style)
   if (activeLogoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} ${sizeConfig.padding} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/[0.08] border border-black/[0.04] dark:border-white/[0.06] select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 select-none`}
       >
         <img
           src={activeLogoUrl}
           alt={merchantName || 'Logo'}
-          className="w-full h-full object-contain object-center select-none pointer-events-none block"
+          className="w-full h-full object-cover object-center select-none pointer-events-none block"
           onLoad={(e) => {
             if (
               activeLogoUrl.includes('sz=128') &&

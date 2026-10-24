@@ -427,7 +427,7 @@ export function TodayView({
                     {item.name}
                   </span>
                   <span className="text-micro-label text-[var(--text-secondary)] shrink-0">
-                    · {lang === 'en' ? 'Enter actual amount' : 'Ange faktiskt belopp'}
+                    · {lang === 'en' ? 'Confirm amount' : 'Bekräfta belopp'}
                   </span>
                 </div>
               </div>
@@ -455,7 +455,7 @@ export function TodayView({
                 type="button"
                 onClick={() => {
                   if (typeof feedback.light === 'function') feedback.light();
-                  onNavigate("profile", "budget");
+                  onNavigate("budget", "category-budgets");
                 }}
                 className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5"
               >
@@ -491,14 +491,14 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       handleCategoryClick(cat.name);
                     }}
-                    className="snap-start flex-shrink-0 min-w-[156px] sm:min-w-[172px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
+                    className="snap-start flex-shrink-0 min-w-[148px] sm:min-w-[164px] p-3 sm:p-3.5 rounded-card bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2 shadow-subtle group select-none"
                   >
                     {/* Ikon + Totalbudget */}
                     <div className="flex items-center justify-between gap-2 w-full">
                       <CategoryIcon icon={cat.iconName} color={catColor} size="sm" categoryName={cat.name} />
                       {cat.hasBudget && cat.budget > 0 && (
                         <span className="text-micro-label text-[var(--text-tertiary)] font-amount tabular-nums truncate">
-                          Budget {formatAmount(Math.round(cat.budget), lang)} {currency}
+                          {lang === 'en' ? 'of' : 'av'} {formatAmount(Math.round(cat.budget), lang)}
                         </span>
                       )}
                     </div>
@@ -506,7 +506,7 @@ export function TodayView({
                     {/* Kategorinamn, Belopp + Tunn progress-linje */}
                     <div className="min-w-0 pt-0.5 space-y-1.5 w-full">
                       <div>
-                        <span className="text-list-name text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
+                        <span className="text-card-title text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
                           {cat.name}
                         </span>
                         <span
@@ -517,16 +517,12 @@ export function TodayView({
                           {!cat.hasBudget
                             ? `${formatAmount(Math.round(cat.spent), lang)}`
                             : `${formatAmount(Math.abs(rem), lang)}`}
-                          <span
-                            className={`text-unit ml-1 inline-flex items-baseline align-baseline ${
-                              isOverBudget ? 'text-[var(--danger-color)] font-medium' : 'text-[var(--text-secondary)]'
-                            }`}
-                          >
+                          <span className="text-[11px] font-normal text-[var(--text-secondary)] ml-1 inline-flex items-baseline align-baseline">
                             {currency}{' '}
                             {!cat.hasBudget
                               ? (lang === 'en' ? 'spent' : 'spenderat')
                               : rem < 0
-                              ? (lang === 'en' ? 'over budget' : 'över budget')
+                              ? (lang === 'en' ? 'over' : 'över')
                               : (lang === 'en' ? 'left' : 'kvar')}
                           </span>
                         </span>
@@ -581,13 +577,7 @@ export function TodayView({
           {/* Date Header directly connected with timeline */}
           <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
             <div className="flex items-center gap-2 min-w-0">
-              <h2
-                className={`text-date-header truncate ${
-                  !stats.isPastPeriod && isTodaySelected
-                    ? 'text-[var(--text-primary)] font-semibold'
-                    : 'text-[var(--text-secondary)]'
-                }`}
-              >
+              <h2 className="text-section-title truncate">
                 {stats.isPastPeriod
                   ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
                   : selectedDate.toDateString() === new Date().toDateString()

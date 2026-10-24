@@ -538,15 +538,10 @@ export function BudgetCategoriesView({
               className="sticky top-0 z-20 bg-[var(--surface-color)] rounded-card card-p shadow-subtle space-y-3"
             >
               <div className="flex items-end justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-metric-label font-medium text-[var(--text-secondary)]">
-                      {isEn ? 'Left to allocate' : 'Kvar att fördela'}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[var(--surface-muted)] text-micro-label font-medium text-[var(--text-secondary)]">
-                      {isEn ? 'Optional' : 'Valfritt'}
-                    </span>
-                  </div>
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-metric-label font-medium text-[var(--text-secondary)] block">
+                    {isEn ? 'Left to allocate (optional)' : 'Kvar att fördela (valfritt)'}
+                  </span>
                   <div
                     className={`text-large-amount font-bold font-amount tabular-nums leading-tight ${
                       isOverAllocated
@@ -558,7 +553,7 @@ export function BudgetCategoriesView({
                   </div>
                 </div>
 
-                <div className="px-2.5 py-1 rounded-full bg-[var(--surface-muted)] text-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums shrink-0 mb-0.5">
+                <div className="text-right text-secondary font-medium text-[var(--text-secondary)] font-amount tabular-nums shrink-0 pb-0.5">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
@@ -690,10 +685,10 @@ export function BudgetCategoriesView({
                           {cat.name}
                         </span>
                         {fixedSpent > 0 && effectiveMode === 'budget' && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[var(--surface-muted)] text-micro-label font-medium text-[var(--text-secondary)] truncate mt-1 font-amount tabular-nums w-fit">
+                          <span className="text-xs text-[var(--text-tertiary)] truncate mt-0.5 font-amount tabular-nums">
                             {isEn
-                              ? `Fixed: ${formatAmount(fixedSpent, config.language)} ${curr}`
-                              : `Fast: ${formatAmount(fixedSpent, config.language)} ${curr}`}
+                              ? `incl. ${formatAmount(fixedSpent, config.language)} ${curr} fixed`
+                              : `varav ${formatAmount(fixedSpent, config.language)} ${curr} fast`}
                           </span>
                         )}
                       </div>

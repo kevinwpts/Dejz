@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, ChevronUp, Pencil, ChevronRight, Calendar, Repeat, CreditCard, MoreHorizontal } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, ChevronUp, Pencil, ChevronRight, Calendar, Repeat, CreditCard } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { TranslationKey } from '../i18n';
@@ -79,7 +79,6 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
   useScrollLock(true);
   const dragControls = useDragControls();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const expenseCompatible = {
     ...income,
     note: income.name,
@@ -173,45 +172,13 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title, 3-dots Menu & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {config.language === 'en' ? 'Income' : 'Inkomst'}
-          </h2>
-          <div className="flex items-center gap-1.5 relative">
-            <IconButton 
-              icon={<MoreHorizontal size={16} strokeWidth={2.2} />}
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowActionsMenu((prev) => !prev);
-              }} 
-              variant="muted"
-              size="md"
-              title={config.language === 'en' ? 'More options' : 'Fler val'}
-              aria-label={config.language === 'en' ? 'More options' : 'Fler val'}
-            />
-            {showActionsMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setShowActionsMenu(false)}
-                />
-                <div className="absolute right-10 top-10 z-40 min-w-[160px] rounded-card-nested bg-[var(--surface-color)] border border-subtle shadow-modal py-1 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowActionsMenu(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--danger-color)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={15} strokeWidth={2} />
-                    <span>{config.language === 'en' ? 'Delete' : 'Ta bort'}</span>
-                  </button>
-                </div>
-              </>
-            )}
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {config.language === 'en' ? 'Income' : 'Inkomst'}
+            </h2>
             <IconButton 
               icon={<X size={15} strokeWidth={2.5} />}
               onClick={() => {
@@ -224,10 +191,6 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               aria-label={t('close')}
             />
           </div>
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-6 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
 
           {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
@@ -240,7 +203,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                   {config.language === 'en' ? 'Name' : 'Namn'}
                 </span>
                 <div className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug py-0.5 truncate">
@@ -252,7 +215,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             <div className="pt-2.5 border-t border-divider flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                  <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                     {config.language === 'en' ? 'Amount' : 'Belopp'}
                   </span>
                   <div className="flex items-baseline gap-1.5 font-amount w-full text-[var(--success-color)] flex-wrap">
@@ -265,19 +228,15 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   </div>
                 </div>
               </div>
-              {(isNonMonthly || hasAdjustment) && (
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  {isNonMonthly && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[var(--surface-muted)] text-label font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                      {t('equivalentMonthlyPrefix')} {formatAmount(monthlyEquivalent, config.language)} {currency}{t('perMonthSuffix')}
-                    </span>
-                  )}
-                  {hasAdjustment && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[var(--surface-muted)] text-label font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                      {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
-                    </span>
-                  )}
-                </div>
+              {isNonMonthly && (
+                <p className="text-secondary text-[var(--text-secondary)] tabular-nums">
+                  {t('equivalentMonthlyPrefix')} {formatAmount(monthlyEquivalent, config.language)} {currency}{t('perMonthSuffix')}
+                </p>
+              )}
+              {hasAdjustment && (
+                <p className="text-label font-normal text-[var(--text-secondary)] tabular-nums">
+                  {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
+                </p>
               )}
             </div>
           </div>
@@ -285,8 +244,8 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           {/* 2. Second Group: Category, Arrival Day, Frequency, Type, Note (when non-empty) */}
           <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-subtle text-left">
             {/* Row 1: Category */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2 min-w-0">
@@ -307,7 +266,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                         variant="primary" 
                         size="xs" 
                       />
-                      <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
                         {catName}
                       </span>
                     </>
@@ -317,24 +276,24 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             </div>
 
             {/* Row 2: Arrival Day */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('arrivalDay')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(income.deductionDay, config.language, true)}
               </span>
             </div>
 
             {/* Row 3: Frequency */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {getFrequencyLabel(income.frequency, t)}
                 {income.frequency && income.frequency !== Frequency.MONTHLY && income.startMonth !== undefined && (
-                  <span className="text-secondary font-normal text-[var(--text-secondary)] ml-1">
+                  <span className="text-secondary text-[var(--text-secondary)] ml-1">
                     ({new Date(2024, income.startMonth, 1).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE', { month: 'short' })})
                   </span>
                 )}
@@ -342,22 +301,22 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             </div>
 
             {/* Row 4: Type */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {income.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
 
             {/* Row 5: Note (only if non-empty) */}
             {income.note && income.note.trim().length > 0 && (
-              <div className="px-4 py-2.5 sm:py-3 flex items-start justify-between min-h-[46px] gap-4">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('ownNote')}
                 </span>
-                <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {income.note}
                 </span>
               </div>
@@ -365,13 +324,13 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           </div>
         </div>
 
-        {/* Action Buttons Footer: Primary 'Redigera' */}
+        {/* Action Buttons Footer: Primary 'Redigera' and Global Delete IconButton */}
         <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
             variant="primary"
             size="lg"
-            className="w-full rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(income);
@@ -379,6 +338,19 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           >
             {t('edit')}
           </Button>
+
+          <IconButton 
+            icon={<Trash2 size={16} strokeWidth={2} />}
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowDeleteConfirm(true);
+            }} 
+            variant="danger"
+            size="xl"
+            shape="button"
+            title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+            aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+          />
         </div>
 
         {showDeleteConfirm && (
@@ -562,28 +534,27 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {income 
-              ? (config?.language === 'en' ? 'Edit Income' : 'Redigera inkomst') 
-              : (config?.language === 'en' ? 'New Income' : 'Ny inkomst')}
-          </h2>
-          <IconButton 
-            icon={<X size={15} strokeWidth={2.5} />}
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onClose();
-            }} 
-            variant="muted"
-            size="md"
-            title={t('close')}
-            aria-label={t('close')}
-          />
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-8 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {income 
+                ? (config?.language === 'en' ? 'Edit Income' : 'Redigera inkomst') 
+                : (config?.language === 'en' ? 'New Income' : 'Ny inkomst')}
+            </h2>
+            <IconButton 
+              icon={<X size={15} strokeWidth={2.5} />}
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onClose();
+              }} 
+              variant="muted"
+              size="md"
+              title={t('close')}
+              aria-label={t('close')}
+            />
+          </div>
 
           {/* 1. Primärt kort: Namn, Belopp & Kategori */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
@@ -1042,7 +1013,6 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
   useScrollLock(true);
   const dragControls = useDragControls();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [cancelModalMode, setCancelModalMode] = useState<'register' | 'guide' | null>(null);
   const expenseCompatible = {
     ...expense,
@@ -1140,45 +1110,13 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title, 3-dots Menu & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {config.language === 'en' ? 'Fixed Expense' : 'Fast utgift'}
-          </h2>
-          <div className="flex items-center gap-1.5 relative">
-            <IconButton 
-              icon={<MoreHorizontal size={16} strokeWidth={2.2} />}
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowActionsMenu((prev) => !prev);
-              }} 
-              variant="muted"
-              size="md"
-              title={config.language === 'en' ? 'More options' : 'Fler val'}
-              aria-label={config.language === 'en' ? 'More options' : 'Fler val'}
-            />
-            {showActionsMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setShowActionsMenu(false)}
-                />
-                <div className="absolute right-10 top-10 z-40 min-w-[160px] rounded-card-nested bg-[var(--surface-color)] border border-subtle shadow-modal py-1 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowActionsMenu(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--danger-color)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={15} strokeWidth={2} />
-                    <span>{config.language === 'en' ? 'Delete' : 'Ta bort'}</span>
-                  </button>
-                </div>
-              </>
-            )}
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {config.language === 'en' ? 'Fixed Expense' : 'Fast utgift'}
+            </h2>
             <IconButton 
               icon={<X size={15} strokeWidth={2.5} />}
               onClick={() => {
@@ -1191,10 +1129,6 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
               aria-label={t('close')}
             />
           </div>
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-6 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
 
           {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
@@ -1207,7 +1141,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                   {config.language === 'en' ? 'Name' : 'Namn'}
                 </span>
                 <div className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug py-0.5 truncate">
@@ -1219,7 +1153,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
             <div className="pt-2.5 border-t border-divider flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                  <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                     {config.language === 'en' ? 'Amount' : 'Belopp'}
                   </span>
                   <div className="flex items-baseline gap-1.5 font-amount w-full text-[var(--text-primary)] flex-wrap">
@@ -1232,19 +1166,15 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
                   </div>
                 </div>
               </div>
-              {(isNonMonthly || hasAdjustment) && (
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  {isNonMonthly && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[var(--surface-muted)] text-label font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                      {t('equivalentMonthlyPrefix')} {formatAmount(monthlyEquivalent, config.language)} {currency}{t('perMonthSuffix')}
-                    </span>
-                  )}
-                  {hasAdjustment && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[var(--surface-muted)] text-label font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                      {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
-                    </span>
-                  )}
-                </div>
+              {isNonMonthly && (
+                <p className="text-secondary text-[var(--text-secondary)] tabular-nums">
+                  {t('equivalentMonthlyPrefix')} {formatAmount(monthlyEquivalent, config.language)} {currency}{t('perMonthSuffix')}
+                </p>
+              )}
+              {hasAdjustment && (
+                <p className="text-label font-normal text-[var(--text-secondary)] tabular-nums">
+                  {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
+                </p>
               )}
             </div>
           </div>
@@ -1252,8 +1182,8 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
           {/* 2. Second Group: Category, Deduction Day, Frequency, Payment Method, Type, Cancellation, Note */}
           <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-subtle text-left">
             {/* Row 1: Category */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2 min-w-0">
@@ -1274,7 +1204,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
                         variant="primary" 
                         size="xs" 
                       />
-                      <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
+                      <span className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[180px] sm:max-w-[240px]">
                         {catName}
                       </span>
                     </>
@@ -1284,26 +1214,26 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
             </div>
 
             {/* Row 2: Deduction Day / Payment Day */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {expense.paymentMethod === 'autogiro' || (typeof expense.paymentMethod === 'string' && (expense.paymentMethod.toLowerCase().includes('autogiro') || expense.paymentMethod.toLowerCase().includes('kort')))
                   ? (config.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config.language === 'en' ? 'Payment day' : 'Betaldag')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(expense.deductionDay, config.language, true)}
               </span>
             </div>
 
             {/* Row 3: Frequency */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {freqText}
                 {expense.frequency !== Frequency.MONTHLY && expense.startMonth !== undefined && (
-                  <span className="text-secondary font-normal text-[var(--text-secondary)] ml-1">
+                  <span className="text-secondary text-[var(--text-secondary)] ml-1">
                     ({new Date(2024, expense.startMonth, 1).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE', { month: 'short' })})
                   </span>
                 )}
@@ -1311,43 +1241,43 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
             </div>
 
             {/* Row 4: Payment Method */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('paymentMethod')}
               </span>
               <div className="flex items-center justify-end gap-2">
                 {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
-                <span className="text-body-medium font-semibold text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   {methodStr || '-'}
                 </span>
               </div>
             </div>
 
             {/* Row 5: Type */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {expense.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
 
             {/* Row 6: Unified Status Row */}
-            <div className="px-4 py-2.5 sm:py-3 flex flex-col gap-1.5 justify-center min-h-[46px]">
+            <div className="p-4 flex flex-col gap-1.5 justify-center min-h-[58px]">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   Status
                 </span>
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate">
+                  <span className="text-sm font-medium text-[var(--text-secondary)] truncate">
                     {getSubscriptionStatusLabel(expense, config.language)}
                   </span>
                   {!expense.isCancelled && (
                     <button
                       type="button"
                       onClick={() => setCancelModalMode('register')}
-                      className="px-3 py-1 rounded-btn-sm text-label font-semibold bg-[var(--surface-muted)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all cursor-pointer active:scale-95 shrink-0"
+                      className="px-3 py-1.5 rounded-btn-sm text-label font-semibold bg-[var(--surface-muted)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] transition-all cursor-pointer active:scale-95 shrink-0"
                     >
                       {config.language === 'en' ? 'Mark as cancelled' : 'Markera som uppsagd'}
                     </button>
@@ -1372,11 +1302,11 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
 
             {/* Row 7: Note (only if non-empty) */}
             {expense.note && expense.note.trim().length > 0 && (
-              <div className="px-4 py-2.5 sm:py-3 flex items-start justify-between min-h-[46px] gap-4">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 flex items-start justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('ownNote')}
                 </span>
-                <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-sm font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {expense.note}
                 </span>
               </div>
@@ -1388,10 +1318,10 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
             <button
               type="button"
               onClick={() => setCancelModalMode('guide')}
-              className="w-full px-4 py-3 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] rounded-card flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left"
+              className="w-full p-4 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] rounded-card flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left"
             >
               <div>
-                <p className="text-body-medium font-medium text-[var(--text-primary)]">
+                <p className="text-body font-medium text-[var(--text-primary)]">
                   {config.language === 'en' ? 'How to cancel' : 'Så säger du upp'}
                 </p>
                 <p className="text-secondary font-normal text-[var(--text-secondary)] mt-0.5">
@@ -1405,13 +1335,13 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
           )}
         </div>
 
-        {/* Action Buttons Footer: Primary 'Redigera' */}
+        {/* Action Buttons Footer: Primary 'Redigera' and Global Delete IconButton */}
         <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
             variant="primary"
             size="lg"
-            className="w-full rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(expense);
@@ -1419,6 +1349,19 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onUpdateExpens
           >
             {t('edit')}
           </Button>
+
+          <IconButton 
+            icon={<Trash2 size={16} strokeWidth={2} />}
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowDeleteConfirm(true);
+            }} 
+            variant="danger"
+            size="xl"
+            shape="button"
+            title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+            aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+          />
         </div>
 
         {showDeleteConfirm && (
@@ -1702,28 +1645,27 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {expense 
-              ? (config?.language === 'en' ? 'Edit Fixed Expense' : 'Redigera fast utgift') 
-              : (config?.language === 'en' ? 'New Fixed Expense' : 'Ny fast utgift')}
-          </h2>
-          <IconButton 
-            icon={<X size={15} strokeWidth={2.5} />}
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onClose();
-            }} 
-            variant="muted"
-            size="md"
-            title={t('close')}
-            aria-label={t('close')}
-          />
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-8 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {expense 
+                ? (config?.language === 'en' ? 'Edit Fixed Expense' : 'Redigera fast utgift') 
+                : (config?.language === 'en' ? 'New Fixed Expense' : 'Ny fast utgift')}
+            </h2>
+            <IconButton 
+              icon={<X size={15} strokeWidth={2.5} />}
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onClose();
+              }} 
+              variant="muted"
+              size="md"
+              title={t('close')}
+              aria-label={t('close')}
+            />
+          </div>
 
           {/* 1. Primärt kort: Namn, Belopp & Kategori */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
@@ -2373,7 +2315,6 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
   useScrollLock(true);
   const dragControls = useDragControls();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
   const expenseCompatible = {
     ...saving,
     note: saving.name,
@@ -2468,45 +2409,13 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title, 3-dots Menu & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {config.language === 'en' ? 'Monthly Saving' : 'Månadssparande'}
-          </h2>
-          <div className="flex items-center gap-1.5 relative">
-            <IconButton 
-              icon={<MoreHorizontal size={16} strokeWidth={2.2} />}
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowActionsMenu((prev) => !prev);
-              }} 
-              variant="muted"
-              size="md"
-              title={config.language === 'en' ? 'More options' : 'Fler val'}
-              aria-label={config.language === 'en' ? 'More options' : 'Fler val'}
-            />
-            {showActionsMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setShowActionsMenu(false)}
-                />
-                <div className="absolute right-10 top-10 z-40 min-w-[160px] rounded-card-nested bg-[var(--surface-color)] border border-subtle shadow-modal py-1 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowActionsMenu(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="w-full px-3.5 py-2.5 flex items-center gap-2.5 text-left text-body-medium font-medium text-[var(--danger-color)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={15} strokeWidth={2} />
-                    <span>{config.language === 'en' ? 'Delete' : 'Ta bort'}</span>
-                  </button>
-                </div>
-              </>
-            )}
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {config.language === 'en' ? 'Monthly Saving' : 'Månadssparande'}
+            </h2>
             <IconButton 
               icon={<X size={15} strokeWidth={2.5} />}
               onClick={() => {
@@ -2519,10 +2428,6 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               aria-label={t('close')}
             />
           </div>
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-6 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
 
           {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
@@ -2535,7 +2440,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                   {config.language === 'en' ? 'Name' : 'Namn'}
                 </span>
                 <div className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug py-0.5 truncate">
@@ -2546,7 +2451,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
 
             <div className="pt-2.5 border-t border-divider flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <span className="text-micro-label text-[var(--text-tertiary)] block mb-0.5">
+                <span className="text-label font-medium text-[var(--text-tertiary)] block mb-0.5">
                   {config.language === 'en' ? 'Amount' : 'Belopp'}
                 </span>
                 <div className="flex items-baseline gap-1.5 font-amount w-full text-[var(--text-primary)]">
@@ -2569,24 +2474,24 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           {/* 2. Second Group: Deduction Day, Frequency, Payment Method, Type */}
           <div className="rounded-card bg-[var(--surface-color)] overflow-hidden divide-y divide-subtle text-left">
             {/* Row 1: Deduction Day */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {config.language === 'en' ? 'Deduction day' : 'Dragningsdag'}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formatDeductionDayDisplay(saving.deductionDay, config.language, true)}
               </span>
             </div>
 
             {/* Row 2: Frequency */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {freqText}
                 {saving.frequency && saving.frequency !== Frequency.MONTHLY && saving.startMonth !== undefined && (
-                  <span className="text-secondary font-normal text-[var(--text-secondary)] ml-1">
+                  <span className="text-secondary text-[var(--text-secondary)] ml-1">
                     ({new Date(2024, saving.startMonth, 1).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE', { month: 'short' })})
                   </span>
                 )}
@@ -2595,13 +2500,13 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
 
             {/* Row 3: Payment Method (if present) */}
             {saving.paymentMethod && (
-              <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+                <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('paymentMethod')}
                 </span>
                 <div className="flex items-center justify-end gap-2">
                   {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
-                  <span className="text-body-medium font-semibold text-[var(--text-primary)]">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
                     {methodStr}
                   </span>
                 </div>
@@ -2609,24 +2514,24 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             )}
 
             {/* Row 4: Type */}
-            <div className="px-4 py-2.5 sm:py-3 flex items-center justify-between min-h-[46px] gap-4">
-              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-4">
+              <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)] text-right">
+              <span className="text-sm font-medium text-[var(--text-primary)] text-right">
                 {saving.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons Footer: Primary 'Redigera' */}
+        {/* Action Buttons Footer: Primary 'Redigera' and Global Delete IconButton */}
         <div className="shrink-0 px-4 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-[var(--bg-color)] flex items-center gap-2.5 relative z-10 w-full">
           <Button 
             type="button"
             variant="primary"
             size="lg"
-            className="w-full rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={() => {
               if (typeof feedback?.tap === 'function') feedback.tap();
               onEdit(saving);
@@ -2634,6 +2539,19 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           >
             {t('edit')}
           </Button>
+
+          <IconButton 
+            icon={<Trash2 size={16} strokeWidth={2} />}
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowDeleteConfirm(true);
+            }} 
+            variant="danger"
+            size="xl"
+            shape="button"
+            title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+            aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+          />
         </div>
       </motion.div>
 
@@ -2834,28 +2752,27 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Pinned Top Bar with Title & Close */}
-        <div className="shrink-0 px-4 sm:px-6 pt-3 sm:pt-4 pb-2.5 border-b border-subtle bg-[var(--bg-color)] flex items-center justify-between relative z-20 w-full">
-          <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
-            {saving 
-              ? (config?.language === 'en' ? 'Edit Monthly Saving' : 'Redigera månadssparande') 
-              : (config?.language === 'en' ? 'New Monthly Saving' : 'Nytt månadssparande')}
-          </h2>
-          <IconButton 
-            icon={<X size={15} strokeWidth={2.5} />}
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onClose();
-            }} 
-            variant="muted"
-            size="md"
-            title={t('close')}
-            aria-label={t('close')}
-          />
-        </div>
-
-        {/* Main Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3.5 pb-8 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-section-title text-[var(--text-primary)] tracking-tight">
+              {saving 
+                ? (config?.language === 'en' ? 'Edit Monthly Saving' : 'Redigera månadssparande') 
+                : (config?.language === 'en' ? 'New Monthly Saving' : 'Nytt månadssparande')}
+            </h2>
+            <IconButton 
+              icon={<X size={15} strokeWidth={2.5} />}
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onClose();
+              }} 
+              variant="muted"
+              size="md"
+              title={t('close')}
+              aria-label={t('close')}
+            />
+          </div>
 
           {/* 1. First Group: Left-aligned Summary (Logo + Name on top, Amount below) */}
           <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] space-y-2.5">
