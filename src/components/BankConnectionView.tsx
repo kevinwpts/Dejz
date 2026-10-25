@@ -14,6 +14,7 @@ import {
   Loader2,
   ShieldCheck,
   Wallet,
+  Sparkles,
 } from 'lucide-react';
 import { Card, Button, ListRow, Modal } from './ui';
 import {
@@ -38,6 +39,7 @@ interface BankConnectionViewProps {
   } | null;
   onClearPendingCallback?: () => void;
   addToast?: (message: string, type: 'success' | 'error') => void;
+  onStartOnboardingWithBank?: () => void;
 }
 
 function formatDateTimeSv(isoString: string | null | undefined): string {
@@ -63,6 +65,7 @@ export function BankConnectionView({
   pendingCallbackData = null,
   onClearPendingCallback,
   addToast,
+  onStartOnboardingWithBank,
 }: BankConnectionViewProps) {
   const [subView, setSubView] = useState<'connections' | 'transactions'>(initialSubView);
   const [connections, setConnections] = useState<BankConnection[]>([]);
@@ -648,6 +651,17 @@ export function BankConnectionView({
               icon={<ArrowRight size={14} />}
             >
               Banktransaktioner
+            </Button>
+          )}
+
+          {onStartOnboardingWithBank && (
+            <Button
+              variant="tonal"
+              size="sm"
+              onClick={onStartOnboardingWithBank}
+              icon={<Sparkles size={14} />}
+            >
+              Testa onboarding & bankanalys
             </Button>
           )}
         </div>

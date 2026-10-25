@@ -447,7 +447,7 @@ export function OnboardingModal({
       // If no transactions are stored yet, trigger a sync first and re-fetch
       if (allTransactions.length === 0 && (targetAccounts.length > 0 || existingConnections.length > 0)) {
         try {
-          await bankService.sync(existingConnections[0]?.id);
+          await bankService.sync({ connectionId: existingConnections[0]?.id });
           const syncedFirstPage = await bankService.listTransactions({ page: 1, pageSize: 100, statusFilter: 'all' });
           allTransactions = [...(syncedFirstPage.transactions || [])];
           if (syncedFirstPage.hasMorePages) {
@@ -528,7 +528,7 @@ export function OnboardingModal({
     }
   };
 
-  // Restore saved onboarding progress when returning from bank redirect
+  // Restore saved onboarding progress when returning from bank redirect (or reset to first step when opened fresh)
   useEffect(() => {
     if (!isOpen) return;
     const savedDraft = loadOnboardingBankDraft();
@@ -544,6 +544,10 @@ export function OnboardingModal({
       if (isBankIntegrationEnabled && savedDraft.step === 'bank') {
         setStep('bank');
       }
+    } else if (!pendingBankCallback) {
+      setStep('name');
+      setBankAnalysisResult(null);
+      setBankAnalysisError(null);
     }
   }, [isOpen, isBankIntegrationEnabled]);
 

@@ -402,8 +402,8 @@ serve(async (req: Request) => {
     const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // Feature flag / Restricted mode enforcement:
-    // Only allow admin user unless ENABLE_BANKING_ALLOW_ALL_USERS === "true"
-    const allowAllUsers = Deno.env.get("ENABLE_BANKING_ALLOW_ALL_USERS") === "true";
+    // Allow all authenticated users by default for onboarding/testing unless ENABLE_BANKING_ALLOW_ALL_USERS === "false"
+    const allowAllUsers = Deno.env.get("ENABLE_BANKING_ALLOW_ALL_USERS") !== "false";
     const userEmail = (user.email || "").toLowerCase();
     let isAuthorizedUser = allowAllUsers || ADMIN_EMAILS.has(userEmail);
 

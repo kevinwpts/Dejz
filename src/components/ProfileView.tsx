@@ -67,6 +67,7 @@ interface ProfileViewProps {
   onSettleDebtAsTransaction?: (debt: any) => Promise<void> | void;
   pendingBankCallback?: PendingBankCallback | null;
   onClearPendingBankCallback?: () => void;
+  onStartOnboardingWithBank?: () => void;
 }
 
 export function ProfileView({ 
@@ -118,6 +119,7 @@ export function ProfileView({
   onSettleDebtAsTransaction,
   pendingBankCallback,
   onClearPendingBankCallback,
+  onStartOnboardingWithBank,
 }: ProfileViewProps) {
   const [activePage, setActivePage] = useState<
     | 'main'
@@ -161,6 +163,7 @@ export function ProfileView({
         pendingCallbackData={pendingBankCallback}
         onClearPendingCallback={onClearPendingBankCallback}
         addToast={addToast}
+        onStartOnboardingWithBank={onStartOnboardingWithBank}
       />
     );
   }

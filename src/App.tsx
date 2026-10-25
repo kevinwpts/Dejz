@@ -5249,6 +5249,9 @@ export default function App() {
                   setPendingBankCallback(null);
                   clearPendingBankCallback();
                 }}
+                onStartOnboardingWithBank={() => {
+                  setIsOnboarding(true);
+                }}
               />
             </div>
           )}
