@@ -29,7 +29,6 @@ import {
   formatSwishTitle,
   getBankAccountTitle,
   getNormalizedBankTxAmount,
-  isExplicitInflowTransaction,
   isInternalTransferOrMicroSavings,
 } from './utils/bankHistoryAnalyzer';
 import { deduplicateTransactions } from './utils/transactionDedup';
@@ -48,14 +47,6 @@ function getActualTransactionDate(bt: BankTransactionItem): string {
 }
 
 function sanitizeTransactionDate(item: TransactionItem): TransactionItem {
-  const todayStr = getSwedishDateStr();
-  if (item.date && item.date > todayStr) {
-    return {
-      ...item,
-      bookingDate: item.bookingDate || item.date,
-      date: todayStr,
-    };
-  }
   return item;
 }
 
@@ -158,17 +149,10 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
 
   // Lönedagsinställning (standard 25:e)
-  const [targetPayday, setTargetPayday] = useState<number>(() => {
-    const saved = localStorage.getItem('dejz_payday');
-    return saved ? Number(saved) : 25;
-  });
+  const [targetPayday, setTargetPayday] = useState<number>(25);
 
   // Helghantering (standard 'before' = fredagen före helg)
-  const [weekendHandling, setWeekendHandling] = useState<WeekendHandlingMode>(() => {
-    const saved = localStorage.getItem('dejz_weekend_handling');
-    if (saved === 'before' || saved === 'after' || saved === 'none') return saved;
-    return 'before';
-  });
+  const [weekendHandling, setWeekendHandling] = useState<WeekendHandlingMode>('before');
 
   // Enable Banking connections & accounts
   const [connections, setConnections] = useState<BankConnection[]>([]);
@@ -180,96 +164,19 @@ export const App: React.FC = () => {
   const syncInFlightRef = useRef(false);
   const lastSyncTimestampRef = useRef<number>(0);
 
-  // Riktiga inkomster – Startar tomt (INGA placeholders)
-  const [incomes, setIncomes] = useState<IncomeItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('dejz_incomes');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Riktiga inkomster – Startar tomt
+  const [incomes, setIncomes] = useState<IncomeItem[]>([]);
 
-  // Riktiga fasta utgifter – Startar tomt (INGA placeholders)
-  const [fixedExpenses, setFixedExpenses] = useState<FixedExpenseItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('dejz_fixed_expenses');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Riktiga fasta utgifter – Startar tomt
+  const [fixedExpenses, setFixedExpenses] = useState<FixedExpenseItem[]>([]);
 
-  // Riktiga köp – Startar tomt (INGA placeholders)
-  const [transactions, setTransactions] = useState<TransactionItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('dejz_transactions');
-      if (!saved) return [];
-      const parsed: TransactionItem[] = JSON.parse(saved);
-      const cleaned = parsed.map((t) => {
-        let item = t;
-        if (item.time === '12:00' || item.time === '00:00') {
-          item = { ...item, time: undefined };
-        }
-        // Reparera eventuella felaktigt sparade bankutgifter i lokalt minne:
-        if (item.id.startsWith('bank-') && item.type === 'income') {
-          const isRealInflow = isExplicitInflowTransaction(item.note || item.title, item.title);
-          if (!isRealInflow) {
-            const rawDesc = item.note || item.title;
-            const catInfo = categorizeBankTransactionForApp({
-              id: item.id.replace(/^bank-/, ''),
-              user_id: '',
-              connection_id: '',
-              bank_account_id: '',
-              external_key: '',
-              entry_reference: null,
-              transaction_id: null,
-              booking_status: 'PDNG',
-              booking_date: item.date,
-              value_date: item.date,
-              transaction_date: item.date,
-              amount: -Math.abs(item.amount),
-              currency: 'SEK',
-              credit_debit_indicator: 'DBIT',
-              description: rawDesc,
-              counterparty_name: item.title,
-              created_at: '',
-              updated_at: '',
-            });
-            item = {
-              ...item,
-              type: 'expense',
-              category:
-                item.category === 'Inkomst' || item.category === 'Insättning'
-                  ? catInfo.category
-                  : item.category,
-              logo: item.logo || catInfo.logo || getLogoUrl(item.title, catInfo.category),
-            };
-          }
-        }
-        // Korrigera eventuella transaktioner som sparats med morgondagens datum:
-        const todayStr = getSwedishDateStr();
-        if (item.date && item.date > todayStr) {
-          item = {
-            ...item,
-            bookingDate: item.bookingDate || item.date,
-            date: todayStr,
-          };
-        }
-        return sanitizeTransactionDate(item);
-      });
-      return deduplicateTransactions(cleaned);
-    } catch {
-      return [];
-    }
-  });
+  // Riktiga köp – Startar tomt
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
 
   // Inloggad användare i Supabase
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userAvatar, setUserAvatar] = useState<string | null>(() => {
-    return localStorage.getItem('dejz_avatar_url') || null;
-  });
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
 
   // Modaltillstånd
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
@@ -281,28 +188,8 @@ export const App: React.FC = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionItem | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Sparade borttagna genererade inkomst-ID:n så att raderade transaktioner förblir raderade
-  const [dismissedTxIds, setDismissedTxIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('dejz_dismissed_tx_ids');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // Spara lokalt som cache
-  useEffect(() => { localStorage.setItem('dejz_payday', targetPayday.toString()); }, [targetPayday]);
-  useEffect(() => { localStorage.setItem('dejz_weekend_handling', weekendHandling); }, [weekendHandling]);
-  useEffect(() => {
-    if (userAvatar) {
-      localStorage.setItem('dejz_avatar_url', userAvatar);
-    }
-  }, [userAvatar]);
-  useEffect(() => { localStorage.setItem('dejz_incomes', JSON.stringify(incomes)); }, [incomes]);
-  useEffect(() => { localStorage.setItem('dejz_fixed_expenses', JSON.stringify(fixedExpenses)); }, [fixedExpenses]);
-  useEffect(() => { localStorage.setItem('dejz_transactions', JSON.stringify(transactions)); }, [transactions]);
-  useEffect(() => { localStorage.setItem('dejz_dismissed_tx_ids', JSON.stringify(dismissedTxIds)); }, [dismissedTxIds]);
+  // Borttagna genererade inkomst-ID:n
+  const [dismissedTxIds, setDismissedTxIds] = useState<string[]>([]);
 
   // Ladda Enable Banking status + banktransaktioner från Supabase
   const refreshBankStatus = useCallback(async (): Promise<{

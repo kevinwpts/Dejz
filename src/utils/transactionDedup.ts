@@ -58,9 +58,19 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
         if (bothAreBankTxs) return false;
       }
 
-      // REGEL 3: För bankutgifter med olika bank-ID:
-      // Avduplicera endast om klockslagen är identiska eller saknas och butiken är densamma (för att fånga speglade kortkonton).
-      // Om klockslagen skiljer sig åt (t.ex. två köp på Espresso House kl 08:15 och 14:30) är det två faktiska köp!
+      // REGEL 3: För bankutgifter med samma belopp och datum och numerisk/generisk eller identisk titel (t.ex. testpings/dubbletter):
+      if (bothAreBankTxs && itemAmt === existAmt && itemDate === existDate && itemType !== 'income') {
+        if (
+          itemTitleNorm === existTitleNorm ||
+          /^\d+$/.test(itemTitleNorm) ||
+          /^\d+$/.test(existTitleNorm) ||
+          !itemTitleNorm ||
+          !existTitleNorm
+        ) {
+          return true;
+        }
+      }
+
       if (bothAreBankTxs) {
         const itemTime = item.time?.trim();
         const existTime = existing.time?.trim();

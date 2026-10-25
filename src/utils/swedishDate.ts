@@ -220,7 +220,6 @@ export function getActualBankPaymentDateAndMeta(
   bookingStatus: string;
   paymentTime?: string;
 } {
-  const todayStr = getSwedishDateStr();
   const raw = bt.raw_json || {};
   const status = (bt.booking_status || 'BOOK').toUpperCase();
   const description = `${bt.description || ''} ${bt.counterparty_name || ''} ${raw.remittance_information || ''}`.trim();
@@ -240,7 +239,7 @@ export function getActualBankPaymentDateAndMeta(
   // 2. Om vi har sparad reservation från när köpet gjordes:
   if (knownReservationDate && /^\d{4}-\d{2}-\d{2}$/.test(knownReservationDate)) {
     return {
-      paymentDate: knownReservationDate <= todayStr ? knownReservationDate : todayStr,
+      paymentDate: knownReservationDate,
       bookingDate: bookingDate || knownReservationDate,
       bookingStatus: status,
       paymentTime: knownReservationTime,
@@ -285,7 +284,7 @@ export function getActualBankPaymentDateAndMeta(
 
   // 4. Leta efter köpdatum i transaktionstexten
   if (!rawPurchaseDate && description) {
-    const textDate = parseDateFromSwedishText(description, todayStr);
+    const textDate = parseDateFromSwedishText(description);
     if (textDate) {
       rawPurchaseDate = textDate;
     }
@@ -302,26 +301,7 @@ export function getActualBankPaymentDateAndMeta(
     }
   }
 
-  // 6. Fallback till bokföringsdatum (endast om bokföringsdatum inte är i framtiden)
-  if (!rawPurchaseDate && bookingDate) {
-    if (bookingDate <= todayStr) {
-      rawPurchaseDate = bookingDate;
-    }
-  }
-
-  // 7. Garantera att betaldatum ALDRIG kan vara i framtiden (t.ex. morgondagens bankdag)
-  let paymentDate = rawPurchaseDate || todayStr;
-  if (paymentDate > todayStr) {
-    if (bt.created_at) {
-      const createdDate = formatIsoDateStockholm(bt.created_at);
-      paymentDate = createdDate <= todayStr ? createdDate : todayStr;
-    } else {
-      paymentDate = todayStr;
-    }
-  }
-  if (paymentDate > todayStr) {
-    paymentDate = todayStr;
-  }
+  const paymentDate = rawPurchaseDate || bookingDate || getSwedishDateStr();
 
   return {
     paymentDate,

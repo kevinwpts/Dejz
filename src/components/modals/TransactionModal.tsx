@@ -57,11 +57,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   if (!isOpen) return null;
 
   const isEditing = Boolean(initialTransaction);
+  const isBankTx = Boolean(initialTransaction && initialTransaction.id.startsWith('bank-'));
   const formatKr = (val: number) =>
     new Intl.NumberFormat('sv-SE').format(Math.round(val)) + ' kr';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isBankTx) return;
     const val = parseFloat(amount.replace(',', '.'));
     const cleanTitle = title.trim();
     if (!cleanTitle || isNaN(val) || val <= 0) return;
@@ -191,6 +193,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isBankTx && (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold text-center">
+              Banktransaktion från Enable Banking (kan ej redigeras)
+            </div>
+          )}
+
           <div>
             <label className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">
               Butik / Inköp
@@ -206,10 +214,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <input
                 type="text"
                 required
+                disabled={isBankTx}
                 placeholder="t.ex. ICA, Spotify, Circle K, SL"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] focus:outline-none"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -221,10 +230,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <input
               type="text"
               required
+              disabled={isBankTx}
               placeholder="0 kr"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-lg font-display font-bold text-[var(--text-primary)] tabular-nums focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-lg font-display font-bold text-[var(--text-primary)] tabular-nums focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -236,8 +246,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </label>
               <select
                 value={category}
+                disabled={isBankTx}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] focus:outline-none"
+                className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {Array.from(new Set([...CATEGORIES, category])).map((c) => (
                   <option key={c} value={c}>
@@ -255,8 +266,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <input
                 type="date"
                 value={date}
+                disabled={isBankTx}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] focus:outline-none"
+                className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -270,8 +282,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               type="text"
               placeholder="Lägg till en notering..."
               value={note}
+              disabled={isBankTx}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -316,12 +329,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               Stäng
             </button>
 
-            <button
-              type="submit"
-              className="flex-1 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 transition-opacity"
-            >
-              {isEditing ? 'Spara ändringar' : 'Spara utgift'}
-            </button>
+            {!isBankTx && (
+              <button
+                type="submit"
+                className="flex-1 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 transition-opacity"
+              >
+                {isEditing ? 'Spara ändringar' : 'Spara utgift'}
+              </button>
+            )}
           </div>
         </form>
       </div>
