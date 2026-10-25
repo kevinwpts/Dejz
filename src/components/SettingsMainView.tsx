@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { Building2 } from 'lucide-react';
 import { Config, Income, FixedExpense } from '../types';
 import { Language, TranslationKey, languageInfo } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
 import { SettingsView } from './SettingsView';
+import { BankConnectionView } from './BankConnectionView';
+import { isBankIntegrationEnabledForUser } from '../utils/bankFeatureFlag';
 import { formatPaydaySummary } from '../utils/format';
 import { Card, ListRow, Icon, SegmentedControl } from './ui';
 
@@ -30,7 +33,7 @@ interface SettingsMainViewProps {
   transactions?: any[];
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   onNavigate: (tab: string, section?: string) => void;
-  initialSection?: 'main' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
+  initialSection?: 'main' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications' | 'bank' | 'bankTransactions';
   onCancelledSubscriptionsClick?: () => void;
   incomes?: Income[];
   fixedExpenses?: FixedExpense[];
@@ -68,7 +71,8 @@ export function SettingsMainView({
   stats,
   currentPeriodId,
 }: SettingsMainViewProps) {
-  const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications'>(initialSection);
+  const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications' | 'bank' | 'bankTransactions'>(initialSection);
+  const canUseBankIntegration = isBankIntegrationEnabledForUser(session?.user, profile?.role);
 
   useEffect(() => {
     setActiveSection(initialSection);
@@ -78,6 +82,20 @@ export function SettingsMainView({
     setActiveSection(section);
     onNavigate('settings', section);
   };
+
+  if ((activeSection === 'bank' || activeSection === 'bankTransactions') && canUseBankIntegration) {
+    return (
+      <BankConnectionView
+        config={config}
+        initialSubView={activeSection === 'bankTransactions' ? 'transactions' : 'connections'}
+        onSubViewChange={(sub) => {
+          const nextSection = sub === 'transactions' ? 'bankTransactions' : 'bank';
+          setActiveSection(nextSection);
+          onNavigate('settings', nextSection);
+        }}
+      />
+    );
+  }
 
   if (activeSection !== 'main') {
     return (
@@ -175,6 +193,18 @@ export function SettingsMainView({
           subtitle={`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
           onClick={() => handleSectionClick('paymentMethods')}
         />
+
+        {canUseBankIntegration && (
+          <ListRow
+            variant="grouped"
+            showChevron
+            icon={<Building2 size={22} />}
+            title="Bankkoppling"
+            titleWeight="semibold"
+            subtitle="Anslutna banker, saldon & transaktioner"
+            onClick={() => handleSectionClick('bank')}
+          />
+        )}
 
         <ListRow
           variant="grouped"

@@ -2,7 +2,7 @@ import { StarredTransactionsView } from './StarredTransactionsView';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Switch, Card, ListRow, SegmentedControl } from './ui';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag , Heart} from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag, Heart, Building2 } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -12,6 +12,8 @@ import { DebtsView } from './DebtsView';
 import { SharedBudgetView } from './SharedBudgetView';
 import { GuidesView } from './GuidesView';
 import { AdminDashboardView } from './AdminDashboardView';
+import { BankConnectionView } from './BankConnectionView';
+import { isBankIntegrationEnabledForUser, PendingBankCallback } from '../utils/bankFeatureFlag';
 import { DejzLogo } from './DejzLogo';
 
 interface ProfileViewProps {
@@ -49,19 +51,22 @@ interface ProfileViewProps {
   incomes: Income[];
   fixedExpenses: FixedExpense[];
   initialSection?: 'main' | 'manageAccount' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts'
-    | 'starred' | 'debts' | 'sharedBudget' | 'guides' | 'notifications';
+    | 'starred' | 'debts' | 'sharedBudget' | 'guides' | 'notifications' | 'bank' | 'bankTransactions';
   navTrigger?: number;
   setCurrentPeriodDate: (date: Date) => void;
   periods: any[];
   onCalculatorClick?: () => void;
   onTriggerProUpgradeModal?: () => void;
   isDemoMode?: boolean;
+  onExitDemo?: () => void;
   onViewTransaction: (t: Transaction) => void;
   onToggleStar?: (transaction: Transaction) => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   onCancelledSubscriptionsClick?: () => void;
   onSettleDebtAsTransaction?: (debt: any) => Promise<void> | void;
+  pendingBankCallback?: PendingBankCallback | null;
+  onClearPendingBankCallback?: () => void;
 }
 
 export function ProfileView({ 
@@ -111,6 +116,8 @@ export function ProfileView({
   onRenameCategory,
   onMigrateAndDeleteCategory,
   onSettleDebtAsTransaction,
+  pendingBankCallback,
+  onClearPendingBankCallback,
 }: ProfileViewProps) {
   const [activePage, setActivePage] = useState<
     | 'main'
@@ -130,13 +137,33 @@ export function ProfileView({
     | 'notifications'
     | 'admin'
     | 'designLibrary'
+    | 'bank'
+    | 'bankTransactions'
   >(initialSection as any);
 
   const isAdmin = user?.email?.toLowerCase() === 'kevinwpts@gmail.com' || profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
+  const canUseBankIntegration = isBankIntegrationEnabledForUser(user || session?.user, profile?.role);
 
   useEffect(() => {
     setActivePage(initialSection as any);
   }, [initialSection, navTrigger]);
+
+  if ((activePage === 'bank' || activePage === 'bankTransactions') && canUseBankIntegration) {
+    return (
+      <BankConnectionView
+        config={config}
+        initialSubView={activePage === 'bankTransactions' ? 'transactions' : 'connections'}
+        onSubViewChange={(sub) => {
+          const nextSection = sub === 'transactions' ? 'bankTransactions' : 'bank';
+          setActivePage(nextSection);
+          onNavigate('profile', nextSection);
+        }}
+        pendingCallbackData={pendingBankCallback}
+        onClearPendingCallback={onClearPendingBankCallback}
+        addToast={addToast}
+      />
+    );
+  }
 
   if (activePage === 'admin' || activePage === 'designLibrary') {
     return (
@@ -466,6 +493,16 @@ export function ProfileView({
               title={t('paymentMethod')}
               onClick={() => handleSectionClick('paymentMethods')}
             />
+            {canUseBankIntegration && (
+              <ListRow
+                variant="grouped"
+                density="compact"
+                showChevron
+                icon={<Building2 size={18} strokeWidth={2} />}
+                title="Bankkoppling"
+                onClick={() => handleSectionClick('bank')}
+              />
+            )}
             <ListRow
               variant="grouped"
               density="compact"

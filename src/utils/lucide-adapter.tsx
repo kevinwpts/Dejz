@@ -301,6 +301,7 @@ const wrap = (PhosIcon: React.ComponentType<any>): LucideIcon => {
 export const Activity = wrap(PhosPulse);
 export const AirVent = wrap(PhosFan);
 export const AlertCircle = wrap(PhosWarningCircle);
+export const AlertTriangle = wrap(PhosWarningCircle);
 export const Anchor = wrap(PhosAnchor);
 export const Apple = wrap(PhosAppleLogo);
 export const Armchair = wrap(PhosArmchair);

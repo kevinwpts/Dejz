@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X } from 'lucide-react';
+import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, Building2, Sparkles, ShieldCheck, Edit2, RefreshCw } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
@@ -15,8 +15,18 @@ import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput, Modal, Button, Input } from './ui';
 import { Switch } from './ui/Switch';
 import { getLogoUrl, fetchLogoForName } from '../utils/logo';
+import { BankConnectFlowModal } from './BankConnectFlowModal';
+import { bankService, BankAccount, BankConnection, BankTransactionItem } from '../services/bankService';
+import { analyzeBankTransactionsForOnboarding, AnalyzedBankOnboardingData } from '../utils/bankHistoryAnalyzer';
+import {
+  saveOnboardingBankDraft,
+  loadOnboardingBankDraft,
+  clearOnboardingBankDraft,
+  clearBankRedirectOrigin,
+  PendingBankCallback,
+} from '../utils/bankFeatureFlag';
 
-export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
+export type Step = 'name' | 'bank' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
 export const AGE_OPTIONS = [
   { id: '<18', labelSv: 'Under 18 år', labelEn: 'Under 18', isYoung: true },
@@ -318,6 +328,9 @@ interface OnboardingModalProps {
   config: Config;
   userId?: string;
   isPro: boolean;
+  isBankIntegrationEnabled?: boolean;
+  pendingBankCallback?: PendingBankCallback | null;
+  onClearPendingBankCallback?: () => void;
   onComplete: (data: {
     fullName: string;
     incomes: { amount: number; name: string; icon?: string; logo?: string; deductionDay?: number }[];
@@ -340,7 +353,19 @@ interface OnboardingModalProps {
   onClose?: () => void;
 }
 
-export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onClose, t, currentPeriodId }: OnboardingModalProps) {
+export function OnboardingModal({
+  isOpen,
+  config,
+  userId,
+  isPro,
+  isBankIntegrationEnabled = false,
+  pendingBankCallback = null,
+  onClearPendingBankCallback,
+  onComplete,
+  onClose,
+  t,
+  currentPeriodId,
+}: OnboardingModalProps) {
   useScrollLock(isOpen);
   const norm = normalizeLanguage(config.language);
   const isEn = norm === 'en';
@@ -367,6 +392,186 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
   const [fixedExpenses, setFixedExpenses] = useState<Omit<FixedExpense, 'id'>[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<Omit<SavingsGoal, 'id' | 'currentAmount' | 'createdAt' | 'priority'>[]>([]);
   const [monthlySavingsInput, setMonthlySavingsInput] = useState<string>('0');
+
+  // Bank Connection & Historical Analysis State inside Onboarding
+  const [isBankFlowOpen, setIsBankFlowOpen] = useState(false);
+  const [activeCallbackForModal, setActiveCallbackForModal] = useState<PendingBankCallback | null>(null);
+  const [connectedBankAccounts, setConnectedBankAccounts] = useState<BankAccount[]>([]);
+  const [existingConnections, setExistingConnections] = useState<BankConnection[]>([]);
+  const [isCheckingBankStatus, setIsCheckingBankStatus] = useState(false);
+  const [isAnalyzingBankHistory, setIsAnalyzingBankHistory] = useState(false);
+  const [bankAnalysisError, setBankAnalysisError] = useState<string | null>(null);
+  const [bankAnalysisResult, setBankAnalysisResult] = useState<AnalyzedBankOnboardingData | null>(null);
+
+  // Check if the user already has an active connected bank when reaching step === 'bank'
+  useEffect(() => {
+    if (!isOpen || !isBankIntegrationEnabled || step !== 'bank') return;
+    let cancelled = false;
+    setIsCheckingBankStatus(true);
+    bankService
+      .getStatus()
+      .then((res) => {
+        if (cancelled) return;
+        const activeConns = (res.connections || []).filter((c) => c.status === 'active');
+        setExistingConnections(activeConns);
+        const selectedAccs = (res.accounts || []).filter((a) => a.is_selected);
+        if (selectedAccs.length > 0 && connectedBankAccounts.length === 0) {
+          setConnectedBankAccounts(selectedAccs);
+        }
+      })
+      .catch(() => {
+        // Ignore status check errors in onboarding
+      })
+      .finally(() => {
+        if (!cancelled) setIsCheckingBankStatus(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, isBankIntegrationEnabled, step]);
+
+  const runBankHistoryAnalysis = async (accountsOverride?: BankAccount[]) => {
+    setIsAnalyzingBankHistory(true);
+    setBankAnalysisError(null);
+    try {
+      const targetAccounts = accountsOverride || connectedBankAccounts;
+      if (accountsOverride && accountsOverride.length > 0) {
+        setConnectedBankAccounts(accountsOverride);
+      }
+
+      // Fetch up to 3 pages (300 transactions) backward in time
+      let allTransactions: BankTransactionItem[] = [];
+      const firstPage = await bankService.listTransactions({ page: 1, pageSize: 100, statusFilter: 'all' });
+      allTransactions = [...(firstPage.transactions || [])];
+
+      // If no transactions are stored yet, trigger a sync first and re-fetch
+      if (allTransactions.length === 0 && (targetAccounts.length > 0 || existingConnections.length > 0)) {
+        try {
+          await bankService.sync(existingConnections[0]?.id);
+          const syncedFirstPage = await bankService.listTransactions({ page: 1, pageSize: 100, statusFilter: 'all' });
+          allTransactions = [...(syncedFirstPage.transactions || [])];
+          if (syncedFirstPage.hasMorePages) {
+            const p2 = await bankService.listTransactions({ page: 2, pageSize: 100, statusFilter: 'all' });
+            allTransactions.push(...(p2.transactions || []));
+          }
+        } catch (syncErr) {
+          console.warn('Sync during onboarding analysis failed:', syncErr);
+        }
+      } else if (firstPage.hasMorePages) {
+        const page2 = await bankService.listTransactions({ page: 2, pageSize: 100, statusFilter: 'all' });
+        allTransactions.push(...(page2.transactions || []));
+        if (page2.hasMorePages) {
+          const page3 = await bankService.listTransactions({ page: 3, pageSize: 100, statusFilter: 'all' });
+          allTransactions.push(...(page3.transactions || []));
+        }
+      }
+
+      const analysis = analyzeBankTransactionsForOnboarding(allTransactions, payday, paydayBeforeWeekend);
+      setBankAnalysisResult(analysis);
+
+      // 1. Pre-fill suggested payday if detected
+      if (analysis.suggestedPayday && analysis.suggestedPayday >= 1 && analysis.suggestedPayday <= 31) {
+        setPayday(analysis.suggestedPayday);
+      }
+
+      // 2. Pre-fill detected recurring incomes
+      if (analysis.detectedIncomes.length > 0) {
+        setIncomes((prev) => {
+          const merged = [...prev];
+          for (const detInc of analysis.detectedIncomes) {
+            const exists = merged.some(
+              (inc) => inc.name.trim().toLowerCase() === detInc.name.trim().toLowerCase()
+            );
+            if (!exists) {
+              merged.push(detInc);
+            }
+          }
+          return merged;
+        });
+      }
+
+      // 3. Pre-fill detected fixed expenses (stripping analysis metadata for FixedExpense items)
+      if (analysis.detectedFixedExpenses.length > 0) {
+        const cleanDetected: Omit<FixedExpense, 'id'>[] = analysis.detectedFixedExpenses.map(
+          ({ detectedOccurrences: _occ, lastDate: _ld, ...rest }) => rest
+        );
+        setFixedExpenses((prev) => {
+          const merged = [...prev];
+          for (const detExp of cleanDetected) {
+            const existingIdx = merged.findIndex(
+              (e) => e.name.trim().toLowerCase() === detExp.name.trim().toLowerCase()
+            );
+            if (existingIdx >= 0) {
+              merged[existingIdx] = detExp;
+            } else {
+              merged.push(detExp);
+            }
+          }
+          return merged;
+        });
+      }
+
+      // 4. Pre-fill variable spending since payday if calculated
+      if (analysis.calculatedSpentSincePayday > 0) {
+        setMidMonthSpent(String(analysis.calculatedSpentSincePayday));
+      }
+    } catch (err: any) {
+      console.error('Error analyzing bank history in onboarding:', err);
+      setBankAnalysisError(
+        err?.message ||
+          (isEn
+            ? 'Could not analyze bank history right now. You can continue and review manually.'
+            : 'Kunde inte analysera bankhistoriken just nu. Du kan fortsätta och granska manuellt.')
+      );
+    } finally {
+      setIsAnalyzingBankHistory(false);
+    }
+  };
+
+  // Restore saved onboarding progress when returning from bank redirect
+  useEffect(() => {
+    if (!isOpen) return;
+    const savedDraft = loadOnboardingBankDraft();
+    if (savedDraft) {
+      if (savedDraft.fullName !== undefined) setFullName(savedDraft.fullName);
+      if (savedDraft.payday !== undefined) setPayday(savedDraft.payday);
+      if (savedDraft.paydayBeforeWeekend !== undefined) setPaydayBeforeWeekend(savedDraft.paydayBeforeWeekend);
+      if (Array.isArray(savedDraft.incomes)) setIncomes(savedDraft.incomes as any);
+      if (Array.isArray(savedDraft.fixedExpenses)) setFixedExpenses(savedDraft.fixedExpenses as any);
+      if (Array.isArray(savedDraft.savingsGoals)) setSavingsGoals(savedDraft.savingsGoals as any);
+      if (savedDraft.monthlySavingsInput !== undefined) setMonthlySavingsInput(savedDraft.monthlySavingsInput);
+      if (savedDraft.midMonthSpent !== undefined) setMidMonthSpent(savedDraft.midMonthSpent);
+      if (isBankIntegrationEnabled && savedDraft.step === 'bank') {
+        setStep('bank');
+      }
+    }
+  }, [isOpen, isBankIntegrationEnabled]);
+
+  // If returned from /bank/callback during onboarding, open BankConnectFlowModal to finish code exchange & account selection
+  useEffect(() => {
+    if (!isOpen || !isBankIntegrationEnabled || !pendingBankCallback) return;
+    setStep('bank');
+    setActiveCallbackForModal(pendingBankCallback);
+    setIsBankFlowOpen(true);
+    if (onClearPendingBankCallback) {
+      onClearPendingBankCallback();
+    }
+  }, [isOpen, isBankIntegrationEnabled, pendingBankCallback, onClearPendingBankCallback]);
+
+  const persistCurrentOnboardingDraft = () => {
+    saveOnboardingBankDraft({
+      fullName,
+      payday,
+      paydayBeforeWeekend,
+      incomes: incomes as any,
+      fixedExpenses: fixedExpenses as any,
+      savingsGoals: savingsGoals as any,
+      monthlySavingsInput,
+      midMonthSpent,
+      step: 'bank',
+      savedAt: Date.now(),
+    });
+  };
 
   // Modals State
   const [isAddingIncome, setIsAddingIncome] = useState(false);
@@ -480,14 +685,21 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
       .filter((p): p is SwedishExpensePreset => p !== undefined);
   }, []);
 
-  const stepNumber = 
-    step === 'name' ? 1 : 
-    step === 'payday' ? 2 : 
-    step === 'income' ? 3 : 
-    step === 'expenses' ? 4 : 
-    step === 'goals' ? 5 : 
-    step === 'midMonth' ? 6 : 7;
-  const totalSteps = 7;
+  const stepNumber = isBankIntegrationEnabled
+    ? (step === 'name' ? 1 :
+       step === 'bank' ? 2 :
+       step === 'payday' ? 3 :
+       step === 'income' ? 4 :
+       step === 'expenses' ? 5 :
+       step === 'goals' ? 6 :
+       step === 'midMonth' ? 7 : 8)
+    : (step === 'name' ? 1 : 
+       step === 'payday' ? 2 : 
+       step === 'income' ? 3 : 
+       step === 'expenses' ? 4 : 
+       step === 'goals' ? 5 : 
+       step === 'midMonth' ? 6 : 7);
+  const totalSteps = isBankIntegrationEnabled ? 8 : 7;
 
   // Financial Metrics: Inkomst - Fasta kostnader - Månadssparande = Kvar att använda
   const totalIncome = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
@@ -562,6 +774,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
 
   const handleNext = () => {
     if (step === 'name') {
+      setStep(isBankIntegrationEnabled ? 'bank' : 'payday');
+    } else if (step === 'bank') {
       setStep('payday');
     } else if (step === 'payday') {
       setStep('income');
@@ -582,7 +796,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
   };
 
   const handleBack = () => {
-    if (step === 'payday') setStep('name');
+    if (step === 'bank') setStep('name');
+    else if (step === 'payday') setStep(isBankIntegrationEnabled ? 'bank' : 'name');
     else if (step === 'income') setStep('payday');
     else if (step === 'expenses') setStep('income');
     else if (step === 'goals') setStep('expenses');
@@ -614,6 +829,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
     setIsUpdating(true);
     setError(null);
     try {
+      clearOnboardingBankDraft();
+      clearBankRedirectOrigin();
       const trimmedName = fullName.trim();
       if (trimmedName && userId && userId !== 'sandbox' && userId !== 'demo-user') {
         try {
@@ -788,9 +1005,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
           <div className="p-4 sm:p-6 pb-6 flex-1 overflow-y-auto no-scrollbar flex flex-col">
             <div className="max-w-sm sm:max-w-md mx-auto w-full flex-1 flex flex-col justify-between">
               
-              {/* Step Progress Segmented Indicator: Exactly 7 Steps */}
+              {/* Step Progress Segmented Indicator */}
               <div className="flex items-center gap-1.5 mb-3 sm:mb-4 shrink-0">
-                {[1, 2, 3, 4, 5, 6, 7].map((sNum) => (
+                {Array.from({ length: totalSteps }, (_, i) => i + 1).map((sNum) => (
                   <div 
                     key={sNum} 
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
@@ -818,6 +1035,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </span>
                     <h2 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)]">
                       {step === 'name' ? s.welcome : 
+                       step === 'bank' ? (isEn ? 'Choose setup method' : 'Välj hur du vill börja') :
                        step === 'payday' ? s.paydayTitle :
                        step === 'income' ? s.incomeTitle : 
                        step === 'expenses' ? s.expensesTitle : 
@@ -872,8 +1090,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         }}
                       />
 
-
-
                       <div className="pt-4 sm:pt-5 flex flex-col gap-2.5">
                         <button 
                           onClick={handleNext}
@@ -893,7 +1109,278 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </motion.div>
                   )}
 
-                  {/* STEP 2: När får du lön? */}
+                  {/* STEP 2 (Bank Enabled): Välj Koppla bank vs Sköt allt manuellt + Historikanalys */}
+                  {step === 'bank' && isBankIntegrationEnabled && (
+                    <motion.div
+                      key="bank"
+                      initial={{ opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-5 my-auto"
+                    >
+                      {isAnalyzingBankHistory ? (
+                        <div className="p-6 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] text-center space-y-4 shadow-xs">
+                          <div className="w-12 h-12 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center mx-auto">
+                            <Loader2 size={24} className="animate-spin" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <h3 className="text-base font-bold text-[var(--text-primary)]">
+                              {isEn ? 'Analyzing your bank history...' : 'Analyserar din bankhistorik bakåt i tiden...'}
+                            </h3>
+                            <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed max-w-[280px] mx-auto">
+                              {isEn
+                                ? 'Identifying recurring fixed expenses, subscriptions, and salary from your transactions.'
+                                : 'Vi letar efter återkommande fasta utgifter, abonnemang och lön i dina transaktioner.'}
+                            </p>
+                          </div>
+                        </div>
+                      ) : bankAnalysisResult ? (
+                        <div className="space-y-4">
+                          <div className="text-center space-y-1">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--success-container)] text-[var(--success-color)] text-[11px] font-bold mb-1">
+                              <Check size={12} strokeWidth={2.5} />
+                              <span>
+                                {isEn
+                                  ? `${bankAnalysisResult.analyzedTransactionCount} transactions analyzed`
+                                  : `${bankAnalysisResult.analyzedTransactionCount} transaktioner analyserade`}
+                              </span>
+                            </div>
+                            <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight">
+                              {bankAnalysisResult.detectedFixedExpenses.length > 0
+                                ? isEn
+                                  ? `We found ${bankAnalysisResult.detectedFixedExpenses.length} fixed expenses`
+                                  : `Vi hittade ${bankAnalysisResult.detectedFixedExpenses.length} fasta utgifter`
+                                : isEn
+                                  ? 'Bank history analyzed'
+                                  : 'Bankhistoriken är analyserad'}
+                            </h3>
+                            <p className="text-xs text-[var(--text-secondary)] font-medium max-w-[310px] mx-auto leading-relaxed">
+                              {isEn
+                                ? 'Everything is pre-filled for you. In the next steps you can review, adjust amounts, or remove anything.'
+                                : 'Vi har fyllt i allt åt dig. I nästa steg granskar du enkelt listan och kan ändra belopp eller ta bort.'}
+                            </p>
+                          </div>
+
+                          {/* Summary Card of Detected Items */}
+                          <div className="p-3.5 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] space-y-3 shadow-2xs">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-[var(--text-secondary)]">
+                                {isEn ? 'Detected fixed costs' : 'Hittade fasta utgifter'}
+                              </span>
+                              <span className="font-bold font-amount text-[var(--text-primary)]">
+                                {bankAnalysisResult.detectedFixedExpenses.length}{' '}
+                                {isEn ? 'items' : 'st'} (
+                                {formatCurrency(
+                                  bankAnalysisResult.detectedFixedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+                                  config.currency || 'kr',
+                                  lang
+                                )}
+                                /{isEn ? 'mo' : 'mån'})
+                              </span>
+                            </div>
+
+                            {bankAnalysisResult.detectedFixedExpenses.length > 0 && (
+                              <div className="max-h-[190px] overflow-y-auto divide-y divide-[var(--border-color)]/60 pr-1 [scrollbar-width:thin]">
+                                {bankAnalysisResult.detectedFixedExpenses.map((exp, idx) => (
+                                  <div key={idx} className="py-2 flex items-center justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                                        {exp.name}
+                                      </p>
+                                      <p className="text-[11px] text-[var(--text-secondary)] font-medium">
+                                        {exp.category}
+                                        {exp.detectedOccurrences > 1
+                                          ? isEn
+                                            ? ` • Seen ${exp.detectedOccurrences} times`
+                                            : ` • Hittad ${exp.detectedOccurrences} ggr`
+                                          : ''}
+                                      </p>
+                                    </div>
+                                    <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)] shrink-0">
+                                      {formatCurrency(exp.amount, config.currency || 'kr', lang)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {(bankAnalysisResult.detectedIncomes.length > 0 || bankAnalysisResult.suggestedPayday) && (
+                              <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between text-xs">
+                                <span className="font-semibold text-[var(--text-secondary)]">
+                                  {isEn ? 'Detected salary / payday' : 'Identifierad lön & lönedag'}
+                                </span>
+                                <span className="font-bold font-amount text-[var(--text-primary)]">
+                                  {bankAnalysisResult.suggestedPayday
+                                    ? `${bankAnalysisResult.suggestedPayday}:e`
+                                    : `${payday}:e`}
+                                  {bankAnalysisResult.detectedIncomes.length > 0
+                                    ? ` • ${formatCurrency(
+                                        bankAnalysisResult.detectedIncomes.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+                                        config.currency || 'kr',
+                                        lang
+                                      )}`
+                                    : ''}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-2 flex flex-col gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setStep('payday')}
+                              className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                            >
+                              <span>{isEn ? 'Review & continue' : 'Granska & fortsätt'}</span>
+                              <ArrowRight size={16} strokeWidth={2.5} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBankAnalysisResult(null)}
+                              className="w-full py-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                            >
+                              {isEn ? 'Back to connection options' : 'Tillbaka till val av metod'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="text-center pb-1 space-y-1.5">
+                            <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
+                              {isEn ? 'Will you connect your bank?' : 'Vill du koppla din bank?'}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[310px] mx-auto leading-relaxed">
+                              {isEn
+                                ? 'Choose whether Dejz should analyze your bank history for fixed expenses or if you prefer to set everything up manually.'
+                                : 'Hämta konton, saldon och transaktioner från din bank – så analyserar vi bakåt i tiden vilka fasta utgifter du har.'}
+                            </p>
+                          </div>
+
+                          {bankAnalysisError && (
+                            <div className="p-3 rounded-card-nested bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 dark:text-amber-300 font-medium">
+                              {bankAnalysisError}
+                            </div>
+                          )}
+
+                          <div className="space-y-3">
+                            {/* OPTION 1: KOPPLA BANK (AUTOMATISK ANALYS) */}
+                            <div className="p-4 rounded-card bg-[var(--surface-color)] border-2 border-[var(--accent-color)]/35 shadow-xs space-y-3">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0 mt-0.5">
+                                  <Building2 size={20} />
+                                </div>
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                                      {existingConnections.length > 0
+                                        ? isEn
+                                          ? `Use connected bank (${existingConnections[0].aspsp_name})`
+                                          : `Analysera kopplad bank (${existingConnections[0].aspsp_name})`
+                                        : isEn
+                                          ? 'Connect your bank'
+                                          : 'Koppla bank'}
+                                    </h4>
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-color)]/12 text-[var(--accent-color)] text-[10px] font-bold">
+                                      <Sparkles size={10} />
+                                      {isEn ? 'Auto-detects fixed costs' : 'Hittar fasta utgifter'}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                                    {isEn
+                                      ? 'We scan your historical transactions to find recurring bills, rent, subscriptions, and salary automatically.'
+                                      : 'Vi analyserar din historik bakåt i tiden och fyller i dina fasta utgifter, abonnemang och lön automatiskt.'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {existingConnections.length > 0 ? (
+                                <div className="space-y-2 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => runBankHistoryAnalysis()}
+                                    disabled={isCheckingBankStatus}
+                                    className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3 rounded-btn font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                                  >
+                                    <Sparkles size={15} />
+                                    <span>
+                                      {isEn
+                                        ? `Analyze history from ${existingConnections[0].aspsp_name}`
+                                        : `Analysera historik från ${existingConnections[0].aspsp_name}`}
+                                    </span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveCallbackForModal(null);
+                                      setIsBankFlowOpen(true);
+                                    }}
+                                    className="w-full py-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+                                  >
+                                    {isEn ? 'Or connect another bank' : 'Eller koppla en annan bank'}
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setActiveCallbackForModal(null);
+                                    setIsBankFlowOpen(true);
+                                  }}
+                                  className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3 rounded-btn font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                                >
+                                  <Building2 size={15} />
+                                  <span>{isEn ? 'Connect bank' : 'Koppla bank'}</span>
+                                </button>
+                              )}
+                            </div>
+
+                            {/* OPTION 2: SKÖT ALLT MANUELLT */}
+                            <div className="p-4 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] space-y-3">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-[var(--surface-muted)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 mt-0.5">
+                                  <Edit2 size={18} />
+                                </div>
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                                    {isEn ? 'Manage everything manually' : 'Sköt allt manuellt'}
+                                  </h4>
+                                  <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                                    {isEn
+                                      ? 'Pick your fixed expenses from ready-made templates and enter your income yourself.'
+                                      : 'Välj dina fasta utgifter från färdiga mallar och fyll i lönedag och inkomst själv.'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  clearOnboardingBankDraft();
+                                  clearBankRedirectOrigin();
+                                  setStep('payday');
+                                }}
+                                className="w-full py-2.5 rounded-btn bg-[var(--surface-muted)] hover:bg-[var(--border-color)]/50 text-[var(--text-primary)] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all cursor-pointer"
+                              >
+                                {isEn ? 'Continue without bank' : 'Fortsätt utan bank'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--text-secondary)] font-medium pt-1">
+                            <ShieldCheck size={13} className="text-[var(--accent-color)] shrink-0" />
+                            <span>
+                              {isEn
+                                ? 'Read-only access via Enable Banking (PSD2). You approve everything.'
+                                : 'Säker läsåtkomst via Enable Banking (PSD2). Du granskar och godkänner allt.'}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+
+                  {/* STEP 2/3: När får du lön? */}
                   {step === 'payday' && (
                     <motion.div
                       key="payday"
@@ -904,6 +1391,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
                       <div className="text-center pb-1 space-y-1">
+                        {bankAnalysisResult?.suggestedPayday && (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[11px] font-bold mb-1">
+                            <Sparkles size={11} />
+                            <span>
+                              {isEn
+                                ? `Suggested from your bank history: ${bankAnalysisResult.suggestedPayday}th`
+                                : `Föreslagen från din bankhistorik: den ${bankAnalysisResult.suggestedPayday}:e`}
+                            </span>
+                          </div>
+                        )}
                         <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                           {s.paydayQuestion}
                         </h3>
@@ -1002,7 +1499,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </motion.div>
                   )}
 
-                  {/* STEP 3: Månadsinkomst */}
+                  {/* STEP 3/4: Månadsinkomst */}
                   {step === 'income' && (
                     <motion.div
                       key="income"
@@ -1012,7 +1509,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-1">
+                      <div className="text-center pb-1 space-y-1">
+                        {bankAnalysisResult && bankAnalysisResult.detectedIncomes.length > 0 && (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[11px] font-bold mb-1">
+                            <Sparkles size={11} />
+                            <span>
+                              {isEn
+                                ? 'Pre-filled from your bank history – tap to adjust'
+                                : 'Hämtat från din bankhistorik – tryck för att ändra'}
+                            </span>
+                          </div>
+                        )}
                         <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                           {s.incomeQuestion}
                         </h3>
@@ -1093,7 +1600,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </motion.div>
                   )}
 
-                  {/* STEP 4: Fasta kostnader */}
+                  {/* STEP 4/5: Fasta kostnader */}
                   {step === 'expenses' && (
                     <motion.div
                       key="expenses"
@@ -1101,26 +1608,72 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-6 sm:space-y-7 my-0 sm:my-auto flex flex-col flex-1 pb-0"
+                      className="space-y-5 sm:space-y-6 my-0 sm:my-auto flex flex-col flex-1 pb-0"
                     >
                       <div className="text-center pb-1 space-y-1">
                         <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
                           {s.expensesQuestion}
                         </h3>
-                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                          {s.expensesDesc}
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[300px] mx-auto leading-relaxed">
+                          {bankAnalysisResult && bankAnalysisResult.detectedFixedExpenses.length > 0
+                            ? isEn
+                              ? 'We pre-filled your fixed expenses from your bank history. Tap any item to edit or remove it, or add more below.'
+                              : 'Vi har fyllt i de fasta utgifter vi hittade i din bankhistorik. Tryck på en utgift för att ändra eller ta bort.'
+                            : s.expensesDesc}
                         </p>
                       </div>
 
+                      {/* When bank analysis detected expenses, show the user's added fixedExpenses list FIRST at the top so they can review immediately */}
+                      {bankAnalysisResult && fixedExpenses.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between px-1">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)]">
+                              <Sparkles size={13} />
+                              {isEn
+                                ? `Your fixed expenses (${fixedExpenses.length})`
+                                : `Dina fasta utgifter (${fixedExpenses.length} st)`}
+                            </span>
+                            <span className="text-xs font-bold font-amount text-[var(--text-primary)]">
+                              {formatCurrency(totalFixed, config.currency || 'kr', lang)}/{isEn ? 'mo' : 'mån'}
+                            </span>
+                          </div>
+                          <div className="bg-[var(--surface-color)] rounded-card divide-y divide-subtle overflow-hidden border border-[var(--border-color)]">
+                            {fixedExpenses.map((exp, i) => (
+                              <BudgetItem
+                                key={i}
+                                item={exp}
+                                type="expense"
+                                isGrouped={true}
+                                onClick={() => {
+                                  setEditingExpenseIndex(i);
+                                  setIsAddingExpense(true);
+                                }}
+                                currency={config.currency}
+                                language={(config.language || 'sv') as any}
+                                t={t}
+                                config={config}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Search Bar */}
-                      <Input
-                        variant="search"
-                        type="text"
-                        value={presetSearch}
-                        onChange={(e) => setPresetSearch(e.target.value)}
-                        onClear={() => setPresetSearch('')}
-                        placeholder={s.searchPresetsPlaceholder}
-                      />
+                      <div className="space-y-2">
+                        {bankAnalysisResult && fixedExpenses.length > 0 && (
+                          <p className="text-xs font-semibold text-[var(--text-secondary)] px-1">
+                            {isEn ? 'Missing anything? Add from templates or create custom:' : 'Saknas något? Sök bland mallar eller lägg till egen:'}
+                          </p>
+                        )}
+                        <Input
+                          variant="search"
+                          type="text"
+                          value={presetSearch}
+                          onChange={(e) => setPresetSearch(e.target.value)}
+                          onClear={() => setPresetSearch('')}
+                          placeholder={s.searchPresetsPlaceholder}
+                        />
+                      </div>
 
                       {/* Presets Grid: Scrollable box showing ~6 cards at a time, scrollable for all 30 */}
                       <div className="max-h-[196px] overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
@@ -1182,8 +1735,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         )}
                       </div>
 
-                      {/* Added Fixed Expenses List - Grouped surface card */}
-                      {fixedExpenses.length > 0 && (
+                      {/* Added Fixed Expenses List (when in manual mode without bankAnalysisResult) */}
+                      {!bankAnalysisResult && fixedExpenses.length > 0 && (
                         <div className="bg-[var(--surface-color)] rounded-card divide-y divide-subtle overflow-hidden">
                           {fixedExpenses.map((exp, i) => (
                             <BudgetItem
@@ -1250,7 +1803,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </motion.div>
                   )}
 
-                  {/* STEP 5: Månadssparande */}
+                  {/* STEP 5/6: Månadssparande */}
                   {step === 'goals' && (
                     <motion.div
                       key="goals"
@@ -1325,7 +1878,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </motion.div>
                   )}
 
-                  {/* STEP 6: Dynamisk start i perioden */}
+                  {/* STEP 6/7: Dynamisk start i perioden */}
                   {step === 'midMonth' && (
                     <motion.div
                       key="midMonth"
@@ -1339,7 +1892,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         const content = getStep6DynamicContent(daysSincePayday, isEn);
                         return (
                           <>
-                            <div className="text-center pb-1">
+                            <div className="text-center pb-1 space-y-1.5">
+                              {bankAnalysisResult && bankAnalysisResult.calculatedSpentSincePayday > 0 && (
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[11px] font-bold mb-1">
+                                  <Sparkles size={11} />
+                                  <span>
+                                    {isEn
+                                      ? 'Calculated from your bank purchases since payday (excluding fixed costs)'
+                                      : 'Beräknat från dina övriga köp sedan lön (exklusive fasta utgifter)'}
+                                  </span>
+                                </div>
+                              )}
                               {/* Kombinerad huvudrubrik */}
                               <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
                                 {content.headline}
@@ -1380,7 +1943,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </motion.div>
                   )}
 
-                  {/* STEP 7: Din plan */}
+                  {/* STEP 7/8: Din plan */}
                   {step === 'summary' && (
                     <motion.div
                       key="summary"
@@ -1525,6 +2088,37 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
               />
             )}
           </AnimatePresence>
+
+          {/* Bank Connection Modal for Onboarding */}
+          {isBankIntegrationEnabled && (
+            <BankConnectFlowModal
+              isOpen={isBankFlowOpen}
+              onClose={() => {
+                setIsBankFlowOpen(false);
+                setActiveCallbackForModal(null);
+              }}
+              originContext="onboarding"
+              returnStep="bank"
+              onBeforeRedirect={persistCurrentOnboardingDraft}
+              initialCallbackData={activeCallbackForModal}
+              language={lang}
+              onCompleted={(accounts) => {
+                setConnectedBankAccounts(accounts);
+                setIsBankFlowOpen(false);
+                setActiveCallbackForModal(null);
+                clearOnboardingBankDraft();
+                clearBankRedirectOrigin();
+                runBankHistoryAnalysis(accounts);
+              }}
+              onSkipOrContinueWithoutBank={() => {
+                setIsBankFlowOpen(false);
+                setActiveCallbackForModal(null);
+                clearOnboardingBankDraft();
+                clearBankRedirectOrigin();
+                setStep('payday');
+              }}
+            />
+          )}
 
           {/* Exit / Skip Confirmation Modal */}
           {showExitConfirm && (

@@ -113,6 +113,15 @@ import {
   parseReceiptDate,
 } from "./utils/date";
 import { uploadLogo } from "./services/storageService";
+import {
+  isBankIntegrationEnabledForUser,
+  savePendingBankCallback,
+  loadPendingBankCallback,
+  clearPendingBankCallback,
+  loadBankRedirectOrigin,
+  loadOnboardingBankDraft,
+  PendingBankCallback,
+} from "./utils/bankFeatureFlag";
 
 import {
   DEFAULT_EXPENSE_CATEGORIES,
@@ -290,6 +299,8 @@ export default function App() {
     | "sharedBudget"
     | "guides"
     | "notifications"
+    | "bank"
+    | "bankTransactions"
   >("main");
   const [settingsSection, setSettingsSection] = useState<
     | "main"
@@ -301,8 +312,35 @@ export default function App() {
     | "appearance"
     | "currency"
     | "notifications"
+    | "bank"
+    | "bankTransactions"
   >("main");
   const [budgetSection, setBudgetSection] = useState<string | null>(null);
+
+  // Capture /bank/callback query parameters synchronously BEFORE URL-sync useEffect rewrites pathname
+  const [pendingBankCallback, setPendingBankCallback] = useState<PendingBankCallback | null>(() => {
+    if (typeof window === "undefined") return null;
+    const path = window.location.pathname.toLowerCase();
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get("code") || undefined;
+    const state = searchParams.get("state") || undefined;
+    const error = searchParams.get("error") || undefined;
+    const errorDescription = searchParams.get("error_description") || undefined;
+
+    if (path.includes("/bank/callback") && (code || state || error)) {
+      const payload: PendingBankCallback = {
+        code,
+        state,
+        error,
+        errorDescription,
+        capturedAt: Date.now(),
+      };
+      savePendingBankCallback(payload);
+      return payload;
+    }
+
+    return loadPendingBankCallback();
+  });
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [plusQuickText, setPlusQuickText] = useState("");
@@ -733,7 +771,15 @@ export default function App() {
   const [itemToUpdateVariable, setItemToUpdateVariable] = useState<any>(null);
   const [navHistory, setNavHistory] = useState<{ tab: Tab; section?: string }[]>([]);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes("/bank/callback") || loadPendingBankCallback()) {
+        return false;
+      }
+    }
+    return true;
+  });
   const [isOnboarding, setIsOnboarding] = useState(false);
   const hasDismissedOnboardingSession = useRef(false);
 
@@ -1532,16 +1578,19 @@ export default function App() {
   const prevSessionRef = useRef<Session | null>(null);
 
   // Clear lingering error toasts and ALWAYS land on Hem (today) when user logs in after being logged out
+  // (Unless returning from a bank callback, in which case we route back to the bank connection flow)
   useEffect(() => {
     if (session) {
       setToasts([]);
       if (!prevSessionRef.current) {
-        setActiveTab("today");
+        if (!pendingBankCallback && !loadPendingBankCallback()) {
+          setActiveTab("today");
+        }
         window.scrollTo({ top: 0, behavior: "instant" as any });
       }
     }
     prevSessionRef.current = session;
-  }, [session]);
+  }, [session, pendingBankCallback]);
 
   const showConfirm = (
     title: string,
@@ -1695,6 +1744,38 @@ export default function App() {
       window.history.pushState(null, '', newPath);
     }
   }, [config?.language, landingLanguage, activeTab, showLanding, publicLegalDoc]);
+
+  const canUseBankIntegration = isBankIntegrationEnabledForUser(
+    session?.user,
+    profile?.role
+  );
+
+  // Handle return from Enable Banking redirect (/bank/callback) including lost login session recovery
+  useEffect(() => {
+    if (isAuthLoading || !pendingBankCallback) return;
+
+    // Case 1: Login session was lost during redirect in mobile browser -> direct user to login screen
+    // while keeping pendingBankCallback stored so it resumes immediately after login
+    if (!session) {
+      setShowLanding(false);
+      setInitialIsRegistering(false);
+      addToast("Logga in för att slutföra din bankkoppling.", "info");
+      return;
+    }
+
+    // Case 2: Authenticated user returned from bank redirect -> route back to where flow started
+    if (config && canUseBankIntegration) {
+      const originMeta = loadBankRedirectOrigin();
+      const onboardingDraft = loadOnboardingBankDraft();
+      if (originMeta?.originContext === "onboarding" || onboardingDraft) {
+        setIsOnboarding(true);
+      } else {
+        setActiveTab("profile");
+        setProfileSection("bank");
+        setNavTrigger((prev) => prev + 1);
+      }
+    }
+  }, [isAuthLoading, session, config, pendingBankCallback, canUseBankIntegration]);
 
   // --- Auth Logic ---
   useEffect(() => {
@@ -4492,6 +4573,8 @@ export default function App() {
         case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
+        case "bank": return "Bankkoppling";
+        case "bankTransactions": return "Banktransaktioner";
         default: return config?.language === 'en' ? 'Settings' : 'Inställningar';
       }
     }
@@ -4514,6 +4597,8 @@ export default function App() {
         case "notifications": return t("notifications");
         case "admin": return config?.language === 'en' ? 'Admin Dashboard' : 'Adminpanel';
         case "designLibrary": return "Designbibliotek";
+        case "bank": return "Bankkoppling";
+        case "bankTransactions": return "Banktransaktioner";
         default: return t("profile");
       }
     }
@@ -5159,6 +5244,11 @@ export default function App() {
                     "success",
                   );
                 }}
+                pendingBankCallback={!isOnboarding ? pendingBankCallback : null}
+                onClearPendingBankCallback={() => {
+                  setPendingBankCallback(null);
+                  clearPendingBankCallback();
+                }}
               />
             </div>
           )}
@@ -5280,6 +5370,12 @@ export default function App() {
           userId={session?.user.id}
           currentPeriodId={currentPeriodId}
           isPro={true}
+          isBankIntegrationEnabled={canUseBankIntegration}
+          pendingBankCallback={isOnboarding ? pendingBankCallback : null}
+          onClearPendingBankCallback={() => {
+            setPendingBankCallback(null);
+            clearPendingBankCallback();
+          }}
           onClose={() => {
             setIsOnboarding(false);
             hasDismissedOnboardingSession.current = true;
