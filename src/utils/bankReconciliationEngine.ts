@@ -1065,10 +1065,12 @@ export function matchBankToPlannedOccasions(params: {
         const relDiff = plannedAmt > 0 ? amtDiff / plannedAmt : 1;
 
         const sim = computeMerchantSimilarity(bankText, fe.name);
+        const feNameLower = String(fe.name || '').toLowerCase();
+        const feCatLower = String(fe.category || '').toLowerCase();
         const housingSynonyms =
-          (fe.name.toLowerCase().includes('hyra') ||
-            fe.name.toLowerCase().includes('boende') ||
-            fe.category.toLowerCase() === 'boende') &&
+          (feNameLower.includes('hyra') ||
+            feNameLower.includes('boende') ||
+            feCatLower === 'boende') &&
           (bankTextLower.includes('fastighet') ||
             bankTextLower.includes('hyra') ||
             bankTextLower.includes('bostad') ||
@@ -1078,7 +1080,7 @@ export function matchBankToPlannedOccasions(params: {
             bankTextLower.includes('heimstaden'));
 
         const elSynonyms =
-          (fe.name.toLowerCase().includes('el') || fe.name.toLowerCase().includes('energi')) &&
+          (feNameLower.includes('el') || feNameLower.includes('energi')) &&
           (bankTextLower.includes('vattenfall') ||
             bankTextLower.includes('tibber') ||
             bankTextLower.includes('ellevio') ||
@@ -1189,11 +1191,11 @@ export function matchBankToPlannedOccasions(params: {
         const plannedIncAmt = Number(inc.amount) || 0;
         const amtDiff = Math.abs(absAmt - plannedIncAmt);
         const relDiff = plannedIncAmt > 0 ? amtDiff / plannedIncAmt : 1;
-        const sim = computeMerchantSimilarity(bankText, `${inc.name} ${inc.category || ''}`);
+        const sim = computeMerchantSimilarity(bankText, `${inc.name || ''} ${inc.category || ''}`);
 
         const isSalaryPlan =
-          inc.name.toLowerCase().includes('lön') ||
-          (inc.category || '').toLowerCase().includes('lön') ||
+          String(inc.name || '').toLowerCase().includes('lön') ||
+          String(inc.category || '').toLowerCase().includes('lön') ||
           plannedIncAmt >= 10000;
         const isSalaryTx =
           bankTextLower.includes('lön') ||

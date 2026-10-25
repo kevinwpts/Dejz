@@ -519,15 +519,26 @@ export const bankService = {
     };
   },
 
-  async listAllTransactionsForReconciliation(bankAccountId?: string | null): Promise<BankTransactionItem[]> {
-    // First try direct query on public.bank_transactions (up to 1000 rows) for speed and full fields
+  async listAllTransactionsForReconciliation(
+    bankAccountIdOrLimit?: string | number | null
+  ): Promise<BankTransactionItem[]> {
+    const bankAccountId =
+      typeof bankAccountIdOrLimit === 'string' && bankAccountIdOrLimit.trim().length > 0
+        ? bankAccountIdOrLimit.trim()
+        : null;
+    const maxRows =
+      typeof bankAccountIdOrLimit === 'number' && bankAccountIdOrLimit > 0
+        ? bankAccountIdOrLimit
+        : 1000;
+
+    // First try direct query on public.bank_transactions for speed and full fields
     try {
       let query = supabase
         .from('bank_transactions')
         .select('*')
         .order('booking_date', { ascending: false, nullsFirst: true })
         .order('created_at', { ascending: false })
-        .limit(1000);
+        .limit(maxRows);
 
       if (bankAccountId) {
         query = query.eq('bank_account_id', bankAccountId);
@@ -544,9 +555,10 @@ export const bankService = {
     const all: BankTransactionItem[] = [];
     let page = 1;
     let hasMore = true;
-    while (hasMore && page <= 10) {
+    const maxPages = Math.max(1, Math.ceil(maxRows / 100));
+    while (hasMore && page <= maxPages) {
       const res = await this.listTransactions({
-        bankAccountId: bankAccountId || null,
+        bankAccountId,
         statusFilter: 'all',
         page,
         pageSize: 100,

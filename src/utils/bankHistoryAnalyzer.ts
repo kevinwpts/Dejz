@@ -530,8 +530,8 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['klarna'], cleanName: 'Klarna', preferredCategories: ['Shopping', 'Övrigt'] },
 ];
 
-function normalizeMerchantKey(rawText: string): string {
-  return rawText
+function normalizeMerchantKey(rawText: string | null | undefined): string {
+  return String(rawText || '')
     .toLowerCase()
     .replace(/\b(ab|aktiebolag|sverige|sweden|se|stockholm|göteborg|malmö|halmstad|hovas|hovås|autogiro|betalning|kortköp|kortkop|bg|pg)\b/g, ' ')
     .replace(/[0-9*#/_.,:-]+/g, ' ')
@@ -539,8 +539,8 @@ function normalizeMerchantKey(rawText: string): string {
     .trim();
 }
 
-export function cleanDisplayMerchantName(rawText: string): string {
-  const cleaned = rawText
+export function cleanDisplayMerchantName(rawText: string | null | undefined): string {
+  const cleaned = String(rawText || '')
     .replace(/^\d{5,}\s+/, '') // Strip leading reference numbers like "916601517227 SVEAFASTIGHETER"
     .replace(/^(AUTOGIRO|BG|PG|KORTKÖP|KORTKOP|BETALNING)\s+/i, '')
     .replace(/\s+\d{4,}.*$/, '')
@@ -825,12 +825,13 @@ function runCoreBankDetection(
     const frequency = inferFrequencyFromDates(cand.dates);
     const minAmt = Math.min(...cand.amounts);
     const maxAmt = Math.max(...cand.amounts);
+    const candNameLower = String(cand.name || '').toLowerCase();
     const isUtilityVariable =
-      cand.name.toLowerCase().includes('el') ||
-      cand.name.toLowerCase().includes('tibber') ||
-      cand.name.toLowerCase().includes('vattenfall') ||
-      cand.name.toLowerCase().includes('fortum') ||
-      cand.name.toLowerCase().includes('trängselskatt');
+      candNameLower.includes('el') ||
+      candNameLower.includes('tibber') ||
+      candNameLower.includes('vattenfall') ||
+      candNameLower.includes('fortum') ||
+      candNameLower.includes('trängselskatt');
     const isVariable =
       isUtilityVariable || (cand.amounts.length >= 2 && (maxAmt - minAmt) / (minAmt || 1) > 0.05);
 
@@ -1246,9 +1247,10 @@ export function analyzeBankTransactionsForOnboarding(
 // 5. SMART MERGE ANALYZER FOR EXISTING USERS (SETTINGS -> BANKKOPPLING)
 // ---------------------------------------------------------------------------
 
-function isSameFixedExpenseName(nameA: string, nameB: string): boolean {
-  const a = nameA.toLowerCase().trim();
-  const b = nameB.toLowerCase().trim();
+function isSameFixedExpenseName(nameA: string | null | undefined, nameB: string | null | undefined): boolean {
+  const a = String(nameA || '').toLowerCase().trim();
+  const b = String(nameB || '').toLowerCase().trim();
+  if (!a || !b) return false;
   if (a === b) return true;
   if (a.includes(b) || b.includes(a)) return true;
   if (
@@ -1308,7 +1310,7 @@ export function analyzeBankForExistingBudget(params: {
     const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     for (const fixed of activeExistingFixed) {
-      const fixedName = fixed.name.toLowerCase().trim();
+      const fixedName = String(fixed.name || '').toLowerCase().trim();
       if (fixedName.length >= 3 && text.includes(fixedName)) return true;
       if (fixed.amount >= 1500 && Math.abs(fixed.amount - absAmt) / fixed.amount <= 0.05) {
         return true;
@@ -1370,9 +1372,9 @@ export function analyzeBankForExistingBudget(params: {
   const incomeMatches: ExistingBudgetIncomeMatch[] = core.detectedIncomes.map((det, idx) => {
     const matchedInc = existingIncomes.find(
       (inc) =>
-        inc.name.toLowerCase().includes('lön') ||
-        (inc.category || '').toLowerCase() === (det.category || '').toLowerCase() ||
-        inc.name.toLowerCase() === det.name.toLowerCase()
+        String(inc.name || '').toLowerCase().includes('lön') ||
+        String(inc.category || '').toLowerCase() === String(det.category || '').toLowerCase() ||
+        String(inc.name || '').toLowerCase() === String(det.name || '').toLowerCase()
     );
 
     if (!matchedInc) {
@@ -1481,23 +1483,41 @@ export function analyzeBankForExistingBudget(params: {
  * that should be automatically imported into the app's main `transactions` table
  * so they appear in Hem, Historik, Analys, and Budget without duplicating fixed expenses or internal transfers.
  */
-export function getAutoImportableBankTransactions(params: {
-  bankTransactions: BankTransactionItem[];
-  userAccounts?: BankAccount[];
-  existingFixedExpenses: FixedExpense[];
-  existingIncomes?: Income[];
-  existingAppTransactions: Transaction[];
-  config: Config;
-  dismissedBankTxIds?: Set<string>;
-}): Array<Omit<Transaction, 'id'>> {
-  const {
-    bankTransactions,
-    userAccounts = [],
-    existingFixedExpenses = [],
-    existingAppTransactions = [],
-    config,
-    dismissedBankTxIds,
-  } = params;
+export function getAutoImportableBankTransactions(
+  paramsOrTxs:
+    | {
+        bankTransactions: BankTransactionItem[];
+        userAccounts?: BankAccount[];
+        existingFixedExpenses: FixedExpense[];
+        existingIncomes?: Income[];
+        existingAppTransactions: Transaction[];
+        config?: Config | null;
+        dismissedBankTxIds?: Set<string> | string[];
+      }
+    | BankTransactionItem[],
+  posUserAccounts?: BankAccount[],
+  posExistingFixedExpenses?: FixedExpense[],
+  posExistingAppTransactions?: Transaction[],
+  posConfig?: Config | null,
+  posDismissedBankTxIds?: Set<string> | string[]
+): Array<Omit<Transaction, 'id'>> {
+  const isArrayArg = Array.isArray(paramsOrTxs);
+  const bankTransactions = isArrayArg ? paramsOrTxs : paramsOrTxs?.bankTransactions || [];
+  const userAccounts = isArrayArg ? posUserAccounts || [] : paramsOrTxs?.userAccounts || [];
+  const existingFixedExpenses = isArrayArg
+    ? posExistingFixedExpenses || []
+    : paramsOrTxs?.existingFixedExpenses || [];
+  const existingAppTransactions = isArrayArg
+    ? posExistingAppTransactions || []
+    : paramsOrTxs?.existingAppTransactions || [];
+  const config = isArrayArg ? posConfig : paramsOrTxs?.config;
+  const rawDismissed = isArrayArg ? posDismissedBankTxIds : paramsOrTxs?.dismissedBankTxIds;
+  const dismissedSet =
+    rawDismissed instanceof Set
+      ? rawDismissed
+      : Array.isArray(rawDismissed)
+      ? new Set(rawDismissed)
+      : new Set<string>();
 
   if (!Array.isArray(bankTransactions) || bankTransactions.length === 0) {
     return [];
@@ -1517,10 +1537,20 @@ export function getAutoImportableBankTransactions(params: {
       .map((a) => a.id)
   );
 
-  const relevantBankTxs =
+  const rawRelevantBankTxs =
     allowedAccountIds.size > 0
       ? bankTransactions.filter((t) => allowedAccountIds.has(t.bank_account_id))
       : bankTransactions;
+
+  // Sort BOOK transactions before PDNG/HOLD so booked transactions take precedence over reservations
+  const relevantBankTxs = [...rawRelevantBankTxs].sort((a, b) => {
+    const aBook = a.booking_status === 'BOOK' ? 0 : 1;
+    const bBook = b.booking_status === 'BOOK' ? 0 : 1;
+    if (aBook !== bBook) return aBook - bBook;
+    const dA = a.booking_date || a.transaction_date || a.value_date || '';
+    const dB = b.booking_date || b.transaction_date || b.value_date || '';
+    return dB.localeCompare(dA);
+  });
 
   const core = runCoreBankDetection(
     relevantBankTxs,
@@ -1535,7 +1565,7 @@ export function getAutoImportableBankTransactions(params: {
     const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     for (const fixed of activeExistingFixed) {
-      const fixedName = (fixed.name || '').toLowerCase().trim();
+      const fixedName = String(fixed.name || '').toLowerCase().trim();
       if (fixedName.length >= 3 && text.includes(fixedName)) return true;
       const cleanedFixed = fixedName.replace(/^hyra\s*\(|\)$/g, '').trim();
       if (cleanedFixed.length >= 3 && text.includes(cleanedFixed)) return true;
@@ -1550,26 +1580,27 @@ export function getAutoImportableBankTransactions(params: {
   const seenKeysInBatch = new Set<string>();
 
   for (const tx of relevantBankTxs) {
-    // Only import booked transactions into main budget & history
-    if (tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD') {
+    if (
+      tx.booking_status === 'CNCL' ||
+      tx.booking_status === 'RJCT'
+    ) {
       continue;
     }
 
     if (
       tx.reconciliation_status === 'excluded' ||
       tx.reconciliation_status === 'internal_transfer' ||
-      tx.reconciliation_status === 'confirmed_fixed' ||
+      tx.reconciliation_status === 'confirmed_fixed_expense' ||
       tx.reconciliation_status === 'confirmed_income' ||
       tx.reconciliation_status === 'confirmed_saving' ||
-      tx.reconciliation_status === 'replaced_reservation'
+      tx.reconciliation_status === 'reserved_replaced'
     ) {
       continue;
     }
 
     if (
-      dismissedBankTxIds &&
-      (dismissedBankTxIds.has(tx.id) ||
-        (tx.external_key && dismissedBankTxIds.has(tx.external_key)))
+      dismissedSet.has(tx.id) ||
+      (tx.external_key && dismissedSet.has(tx.external_key))
     ) {
       continue;
     }
@@ -1600,6 +1631,22 @@ export function getAutoImportableBankTransactions(params: {
     const timestamp = Number.isFinite(parsedDateMs) ? parsedDateMs : Date.now();
 
     const categorized = categorizeBankTransactionForApp(tx, availableCategories);
+    const isReserved = tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD';
+
+    // If this is a PDNG/HOLD reservation and we already imported a BOOK transaction with same amount & merchant within 4 days, skip it
+    if (isReserved) {
+      const hasMatchingBookedInBatch = toImport.some((imp) => {
+        const sameAmt = Math.abs(Number(imp.amount) - absAmount) < 0.5;
+        const dayDiff = Math.abs(Number(imp.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
+        const sameMerch =
+          String(imp.merchant || '').toLowerCase().trim() ===
+          String(categorized.merchant || '').toLowerCase().trim();
+        return sameAmt && dayDiff <= 4 && sameMerch;
+      });
+      if (hasMatchingBookedInBatch) {
+        continue;
+      }
+    }
 
     const alreadyInApp = existingAppTransactions.some((appTx) => {
       if (appTx.bankTransactionId === tx.id) return true;
@@ -1611,13 +1658,13 @@ export function getAutoImportableBankTransactions(params: {
           return true;
         }
       }
-      // Also guard against manual duplicate on same day with same amount and merchant
+      // Also guard against manual/reservation duplicate on same day with same amount and merchant
       const sameAmount = Math.abs(Number(appTx.amount) - absAmount) < 0.5;
       const dayDiff = Math.abs(Number(appTx.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
       const sameMerchant =
-        (appTx.merchant || '').toLowerCase().trim() ===
-        (categorized.merchant || '').toLowerCase().trim();
-      return sameAmount && dayDiff <= 1.5 && sameMerchant;
+        String(appTx.merchant || '').toLowerCase().trim() ===
+        String(categorized.merchant || '').toLowerCase().trim();
+      return sameAmount && dayDiff <= (isReserved ? 4 : 1.5) && sameMerchant;
     });
 
     if (alreadyInApp) {

@@ -929,8 +929,8 @@ export const resolveLucideIcon = (val: string | undefined | null): string => {
   return 'tag';
 };
 
-export const getCategoryIconName = (categoryName: string): string => {
-  const name = categoryName.toLowerCase();
+export const getCategoryIconName = (categoryName?: string | null): string => {
+  const name = String(categoryName || '').toLowerCase();
   if (name.includes('streaming') || name.includes('media') || name.includes('tv') || name.includes('netflix') || name.includes('spotify')) return 'tv';
   if (name.includes('fika') || name.includes('kaffe') || name.includes('café') || name.includes('kafé')) return 'coffee';
   if (name.includes('dagligvaror') || name.includes('matbutik') || name.includes('livsmedel') || name.includes('supermarket')) return 'shoppingcart';
@@ -1810,8 +1810,8 @@ export const suggestCategory = (
   return undefined;
 };
 
-export const getPaymentMethodIcon = (method: string): any => {
-  const m = method.toLowerCase();
+export const getPaymentMethodIcon = (method?: string | null): any => {
+  const m = String(method || '').toLowerCase();
   if (m.includes('apple')) return Apple;
   if (m.includes('google')) return Chrome;
   if (m.includes('kivra')) return Mail;

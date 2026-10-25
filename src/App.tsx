@@ -785,8 +785,7 @@ export default function App() {
       currentTransactions: Transaction[],
       currentConfig?: Config | null,
     ) => {
-      if (!userId || userId === "demo-user" || isSyncingBankToAppRef.current) return;
-      isSyncingBankToAppRef.current = true;
+      if (!userId || userId === "demo-user") return;
       try {
         const status = await bankService.getStatus();
         const accounts = status?.accounts || [];
@@ -794,7 +793,7 @@ export default function App() {
 
         if (accounts.length === 0) return;
 
-        const bankTxs = await bankService.listAllTransactionsForReconciliation(1000);
+        const bankTxs = await bankService.listAllTransactionsForReconciliation();
         if (!bankTxs || bankTxs.length === 0) return;
 
         let dismissedIds: string[] = [];
@@ -805,14 +804,14 @@ export default function App() {
           // ignore
         }
 
-        const toImport = getAutoImportableBankTransactions(
-          bankTxs,
-          accounts,
-          currentFixed,
-          currentTransactions,
-          currentConfig,
-          dismissedIds,
-        );
+        const toImport = getAutoImportableBankTransactions({
+          bankTransactions: bankTxs,
+          userAccounts: accounts,
+          existingFixedExpenses: currentFixed,
+          existingAppTransactions: currentTransactions,
+          config: currentConfig,
+          dismissedBankTxIds: new Set(dismissedIds),
+        });
 
         let updatedList = [...currentTransactions];
 
@@ -832,27 +831,46 @@ export default function App() {
         }
 
         if (toImport.length > 0) {
+          // 1. Immediately update UI state so transactions appear in Hem, Tidslinjen, Historik, and Analys without delay
+          const optimisticNew: Transaction[] = toImport.map((draft, idx) => ({
+            ...draft,
+            id: `temp-bank-${draft.bankTransactionId || idx}-${Date.now()}`,
+          }));
+          const optimisticCombined = [...optimisticNew, ...updatedList].sort(
+            (a, b) => b.timestamp - a.timestamp
+          );
+          setTransactions(optimisticCombined);
+
+          // 2. Persist to Supabase in parallel batches of 8 for fast completion
           const savedNew: Transaction[] = [];
-          for (const draft of toImport) {
-            try {
-              const saved = await dataService.addTransaction(userId, draft);
+          const chunkSize = 8;
+          for (let i = 0; i < toImport.length; i += chunkSize) {
+            const chunk = toImport.slice(i, i + chunkSize);
+            const results = await Promise.all(
+              chunk.map(async (draft) => {
+                try {
+                  return await dataService.addTransaction(userId, draft);
+                } catch (e) {
+                  console.warn("[BankAutoImport] Could not save bank transaction:", e);
+                  return null;
+                }
+              })
+            );
+            for (const saved of results) {
               if (saved && !updatedList.some((t) => t.id === saved.id)) {
                 savedNew.push(saved);
               }
-            } catch (e) {
-              console.warn("[BankAutoImport] Could not save bank transaction:", e);
             }
           }
           if (savedNew.length > 0) {
             updatedList = [...savedNew, ...updatedList].sort((a, b) => b.timestamp - a.timestamp);
+            setTransactions(updatedList);
           }
+        } else {
+          setTransactions(updatedList);
         }
-
-        setTransactions(updatedList);
       } catch (err) {
         console.warn("[BankAutoImport] Could not sync bank transactions:", err);
-      } finally {
-        isSyncingBankToAppRef.current = false;
       }
     },
     []
@@ -2646,11 +2664,11 @@ export default function App() {
           showFixedExpensesInTodayView:
             dbProfile.show_fixed_expenses_in_today_view !== undefined && dbProfile.show_fixed_expenses_in_today_view !== null
               ? Boolean(dbProfile.show_fixed_expenses_in_today_view)
-              : (localSavedConfig?.showFixedExpensesInTodayView === true),
+              : (localSavedConfig?.showFixedExpensesInTodayView !== false),
           showFixedExpensesInCalendar:
             dbProfile.show_fixed_expenses_in_calendar !== undefined && dbProfile.show_fixed_expenses_in_calendar !== null
               ? Boolean(dbProfile.show_fixed_expenses_in_calendar)
-              : (localSavedConfig?.showFixedExpensesInCalendar === true),
+              : (localSavedConfig?.showFixedExpensesInCalendar !== false),
           showFixedExpensesInHistory:
             dbProfile.show_fixed_expenses_in_history !== undefined && dbProfile.show_fixed_expenses_in_history !== null
               ? Boolean(dbProfile.show_fixed_expenses_in_history)
