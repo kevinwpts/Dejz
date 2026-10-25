@@ -1119,28 +1119,34 @@ h6 {
     display: none;
   }
 
-  /* App Header Backdrop & Background States */
+  /* App Header Backdrop & Background States (solid top surface to prevent iOS status bar blur overlay) */
   .app-header-top {
-    background-color: transparent;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
+    background-color: var(--bg-top-color, var(--bg-color));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-bottom: 1px solid transparent;
     box-shadow: none;
   }
 
   .app-header-scrolled {
-    background-color: color-mix(in srgb, var(--bg-top-color, var(--bg-color)) 88%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-subtle);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    background-color: var(--bg-top-color, var(--bg-color));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid var(--border-divider);
+    box-shadow: none;
   }
 
+  .dark .app-header-top,
+  .black-theme .app-header-top,
   .dark .app-header-scrolled,
   .black-theme .app-header-scrolled {
     background-color: var(--bg-color);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .dark .app-header-scrolled,
+  .black-theme .app-header-scrolled {
     border-bottom-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   }
 
 

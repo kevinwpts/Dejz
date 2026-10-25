@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from './Icon';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+  label?: React.ReactNode;
   error?: string | null;
   helperText?: string;
   icon?: React.ReactNode;
@@ -33,7 +33,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
+    const inputId =
+      id ||
+      (typeof label === 'string' && label
+        ? `input-${label.toLowerCase().replace(/\s+/g, '-')}`
+        : undefined);
 
     const isSearch = variant === 'search';
     const isAmount = variant === 'amount';

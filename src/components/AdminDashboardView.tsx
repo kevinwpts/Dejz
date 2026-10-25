@@ -37,6 +37,7 @@ interface AdminDashboardViewProps {
   addToast: (message: string, type: 'success' | 'error') => void;
   initialTab?: 'dashboard' | 'designLibrary';
   profile?: any;
+  onStartOnboardingWithBank?: () => void;
 }
 
 export function AdminDashboardView({
@@ -51,6 +52,7 @@ export function AdminDashboardView({
   addToast,
   initialTab = 'dashboard',
   profile,
+  onStartOnboardingWithBank,
 }: AdminDashboardViewProps) {
   const [activeAdminTab, setActiveAdminTab] = useState<'dashboard' | 'designLibrary'>(initialTab);
   const [feedbackList, setFeedbackList] = useState<Array<{ id: string; user_id?: string; message: string; created_at: string }>>([]);
@@ -313,6 +315,29 @@ export function AdminDashboardView({
               {isEn ? 'Clears test data and opens initial setup wizard' : 'Nollställer testdata och öppnar introduktionsguiden'}
             </p>
           </button>
+
+          {onStartOnboardingWithBank && (
+            <button
+              type="button"
+              onClick={() => {
+                feedback.tap();
+                onStartOnboardingWithBank();
+              }}
+              className="p-4 rounded-[var(--radius-card-nested,12px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-secondary font-bold text-[var(--text-primary)] tracking-tight">
+                  {isEn ? 'Test Onboarding with Bank Analysis' : 'Testa onboarding med bankanalys'}
+                </span>
+                <Sparkles size={14} strokeWidth={2.5} className="text-[var(--accent-color)] group-hover:translate-x-0.5 transition-transform" />
+              </div>
+              <p className="text-label text-[var(--text-secondary)] opacity-75">
+                {isEn
+                  ? 'Opens the onboarding flow at the bank connection & historical analysis step'
+                  : 'Öppnar introduktionsguiden direkt vid bankkoppling och förslagsgranskning'}
+              </p>
+            </button>
+          )}
 
           <button
             type="button"

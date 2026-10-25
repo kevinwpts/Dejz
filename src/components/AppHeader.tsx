@@ -34,54 +34,28 @@ export function AppHeader({
   language = "sv",
   activeTab,
 }: AppHeaderProps) {
-  const [isVisible, setIsVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(() => typeof window !== "undefined" ? window.scrollY > 15 : false);
-  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
-    lastScrollYRef.current = window.scrollY;
     setIsScrolled(window.scrollY > 15);
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const lastScrollY = lastScrollYRef.current;
-      const delta = currentScrollY - lastScrollY;
-
-      setIsScrolled(currentScrollY > 15);
-
-      // Always show when near the very top of the page
-      if (currentScrollY <= 25) {
-        setIsVisible(true);
-      } else if (delta > 8) {
-        // Scrolling down -> hide header
-        setIsVisible(false);
-      } else if (delta < -8) {
-        // Scrolling up -> reveal header
-        setIsVisible(true);
-      }
-
-      lastScrollYRef.current = Math.max(0, currentScrollY);
+      setIsScrolled(window.scrollY > 15);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Reset visibility when changing tab or view title
+  // Reset scrolled state when changing tab or view title
   useEffect(() => {
-    setIsVisible(true);
     setIsScrolled(window.scrollY > 15);
-    lastScrollYRef.current = window.scrollY;
   }, [activeTab, title]);
 
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-colors duration-200 ${
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
-      } ${
-        isVisible
-          ? 'translate-y-0 opacity-100 pointer-events-auto'
-          : '-translate-y-full opacity-0 pointer-events-none'
       } ${
         isScrolled ? 'app-header-scrolled' : 'app-header-top'
       }`}

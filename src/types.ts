@@ -245,6 +245,12 @@ export interface Transaction {
   receiptUrls?: string[];
   splits?: TransactionSplit[];
   isVariable?: boolean;
+  bankTransactionId?: string;
+  bankAccountId?: string;
+  originalBankDescription?: string;
+  originalBankAmount?: number;
+  originalBankCurrency?: string;
+  refundOfTransactionId?: string;
 }
 
 export interface AppNotification {

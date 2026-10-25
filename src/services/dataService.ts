@@ -22,6 +22,7 @@ const missingColumnsByTable: Record<string, Set<string>> = {
   profiles: new Set<string>(),
   fixed_expenses: new Set<string>(),
   income_sources: new Set<string>(),
+  transactions: new Set<string>(),
 };
 
 function stripKnownMissingColumns(table: string, payload: Record<string, any>) {
@@ -356,7 +357,8 @@ export const dataService = {
   },
 
   // --- Transactions (Expenses/Incomes) ---
-  async getTransactions(userId: string): Promise<Transaction[]> {    if (userId === 'demo-user') {
+  async getTransactions(userId: string): Promise<Transaction[]> {
+    if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_transactions');
       const parsed: Transaction[] = saved ? JSON.parse(saved) : [];
       return parsed.map((t) => {
@@ -373,10 +375,18 @@ export const dataService = {
       .select('*')
       .eq('user_id', userId)
       .order('timestamp', { ascending: false });
-    
+
     if (error) throw error;
-    return (data || []).map(t => {
-      const receiptUrls = getTransactionReceipts({ receipt_url: t.receipt_url, receiptUrls: t.receipt_urls });
+    return (data || []).map((t) => {
+      const receiptUrls = getTransactionReceipts({
+        receipt_url: t.receipt_url,
+        receiptUrls: t.receipt_urls,
+      });
+      const tags: string[] = Array.isArray(t.tags) ? t.tags : [];
+      const bankTxTag = tags.find((tag) => typeof tag === 'string' && tag.startsWith('bank_tx:'));
+      const bankAccTag = tags.find((tag) => typeof tag === 'string' && tag.startsWith('bank_acc:'));
+      const refundTag = tags.find((tag) => typeof tag === 'string' && tag.startsWith('refund_of:'));
+
       return {
         id: t.id,
         amount: Number(t.amount),
@@ -387,18 +397,50 @@ export const dataService = {
         type: t.type,
         isBackdated: t.is_backdated,
         logo: t.logo,
-        icon: t.icon || (t.logo && (isEmojiString(t.logo) || ICON_MAP[t.logo]) ? t.logo : undefined),
+        icon:
+          t.icon ||
+          (t.logo && (isEmojiString(t.logo) || ICON_MAP[t.logo]) ? t.logo : undefined),
         paymentMethod: t.payment_method,
         receiptUrl: receiptUrls[0],
         receiptUrls,
-        tags: t.tags || [],
-        splits: typeof t.splits === 'string' ? (() => { try { const p = JSON.parse(t.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(t.splits) ? t.splits : []),
-        isStarred: Boolean(t.is_starred || (t.tags && Array.isArray(t.tags) && t.tags.includes('starred')))
+        tags,
+        splits:
+          typeof t.splits === 'string'
+            ? (() => {
+                try {
+                  const p = JSON.parse(t.splits);
+                  return Array.isArray(p) ? p : [];
+                } catch {
+                  return [];
+                }
+              })()
+            : Array.isArray(t.splits)
+            ? t.splits
+            : [],
+        isStarred: Boolean(
+          t.is_starred || (tags && Array.isArray(tags) && tags.includes('starred'))
+        ),
+        bankTransactionId:
+          t.bank_transaction_id || (bankTxTag ? bankTxTag.slice('bank_tx:'.length) : undefined),
+        bankAccountId:
+          t.bank_account_id || (bankAccTag ? bankAccTag.slice('bank_acc:'.length) : undefined),
+        originalBankDescription: t.original_bank_description || undefined,
+        originalBankAmount:
+          t.original_bank_amount !== undefined && t.original_bank_amount !== null
+            ? Number(t.original_bank_amount)
+            : undefined,
+        originalBankCurrency: t.original_bank_currency || undefined,
+        refundOfTransactionId:
+          t.refund_of_transaction_id ||
+          (refundTag ? refundTag.slice('refund_of:'.length) : undefined),
       };
     });
   },
 
-  async addTransaction(userId: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> {
+  async addTransaction(
+    userId: string,
+    transaction: Omit<Transaction, 'id'>
+  ): Promise<Transaction> {
     const normalizedReceipts = getTransactionReceipts(transaction);
     if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_transactions');
@@ -407,55 +449,127 @@ export const dataService = {
         ...transaction,
         receiptUrl: normalizedReceipts[0],
         receiptUrls: normalizedReceipts,
-        id: `demo-tx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+        id: `demo-tx-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       };
       list.unshift(newTx);
       localStorage.setItem('demo_transactions', JSON.stringify(list));
       return newTx;
     }
     // First, ensure the profile exists to avoid foreign key violations
-    const { data: profile } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
-    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
     if (!profile) {
       console.warn('[Data] Profile missing during transaction add, attempting repair...');
-      // Minimal profile insert with default light mode
-      await supabase.from('profiles').upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
+      await supabase
+        .from('profiles')
+        .upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
     }
 
-    const tagsWithStar = transaction.isStarred
-      ? Array.from(new Set([...(transaction.tags || []), 'starred']))
-      : (transaction.tags || []).filter(t => t !== 'starred');
+    const baseTags = (transaction.tags || []).filter(
+      (t) =>
+        t !== 'starred' &&
+        !t.startsWith('bank_tx:') &&
+        !t.startsWith('bank_acc:') &&
+        !t.startsWith('refund_of:')
+    );
+    if (transaction.isStarred) baseTags.push('starred');
+    if (transaction.bankTransactionId) baseTags.push(`bank_tx:${transaction.bankTransactionId}`);
+    if (transaction.bankAccountId) baseTags.push(`bank_acc:${transaction.bankAccountId}`);
+    if (transaction.refundOfTransactionId) {
+      baseTags.push(`refund_of:${transaction.refundOfTransactionId}`);
+    }
+    const tagsWithStar = Array.from(new Set(baseTags));
 
-    const serializedReceipt = serializeTransactionReceipts(transaction.receiptUrls, transaction.receiptUrl);
+    const serializedReceipt = serializeTransactionReceipts(
+      transaction.receiptUrls,
+      transaction.receiptUrl
+    );
 
-    const { data, error } = await supabase
-      .from('transactions')
-      .insert({
-        user_id: userId,
-        amount: transaction.amount,
-        category: transaction.category,
-        note: transaction.note,
-        merchant: transaction.merchant,
-        timestamp: transaction.timestamp,
-        type: transaction.type,
-        is_backdated: transaction.isBackdated,
-        logo: transaction.logo,
-        icon: transaction.icon,
-        payment_method: transaction.paymentMethod,
-        receipt_url: serializedReceipt,
-        tags: tagsWithStar,
-        splits: transaction.splits
-      })
-      .select();
-    
+    const payload: Record<string, any> = {
+      user_id: userId,
+      amount: transaction.amount,
+      category: transaction.category,
+      note: transaction.note,
+      merchant: transaction.merchant,
+      timestamp: transaction.timestamp,
+      type: transaction.type,
+      is_backdated: transaction.isBackdated,
+      logo: transaction.logo,
+      icon: transaction.icon,
+      payment_method: transaction.paymentMethod,
+      receipt_url: serializedReceipt,
+      tags: tagsWithStar,
+      splits: transaction.splits,
+      ...(transaction.bankTransactionId
+        ? { bank_transaction_id: transaction.bankTransactionId }
+        : {}),
+      ...(transaction.bankAccountId ? { bank_account_id: transaction.bankAccountId } : {}),
+      ...(transaction.originalBankDescription
+        ? { original_bank_description: transaction.originalBankDescription }
+        : {}),
+      ...(transaction.originalBankAmount !== undefined
+        ? { original_bank_amount: transaction.originalBankAmount }
+        : {}),
+      ...(transaction.originalBankCurrency
+        ? { original_bank_currency: transaction.originalBankCurrency }
+        : {}),
+      ...(transaction.refundOfTransactionId
+        ? { refund_of_transaction_id: transaction.refundOfTransactionId }
+        : {}),
+    };
+
+    stripKnownMissingColumns('transactions', payload);
+
+    let data: any[] | null = null;
+    let error: any = null;
+    let attempts = 0;
+
+    while (attempts < 10) {
+      attempts++;
+      const res = await supabase.from('transactions').insert(payload).select();
+      data = res.data;
+      error = res.error;
+      if (!error) break;
+
+      const missingCol = extractMissingColumn(error);
+      if (missingCol && missingCol in payload) {
+        recordMissingColumn('transactions', missingCol);
+        delete payload[missingCol];
+        continue;
+      }
+      // Handle unique index conflict on bank_transaction_id idempotently
+      if (
+        error.code === '23505' &&
+        transaction.bankTransactionId
+      ) {
+        const { data: existingRows } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', userId)
+          .contains('tags', [`bank_tx:${transaction.bankTransactionId}`])
+          .limit(1);
+        if (existingRows && existingRows.length > 0) {
+          data = existingRows;
+          error = null;
+          break;
+        }
+      }
+      break;
+    }
+
     if (error) {
       console.error('[Supabase Error] addTransaction:', error);
       throw error;
     }
     if (!data || data.length === 0) throw new Error('Ingen data returnerades från databasen');
-    
+
     const row = data[0];
     const rowReceipts = getTransactionReceipts({ receipt_url: row.receipt_url });
+    const rowTags: string[] = Array.isArray(row.tags) ? row.tags : tagsWithStar;
     return {
       id: row.id,
       amount: Number(row.amount),
@@ -466,22 +580,53 @@ export const dataService = {
       type: row.type,
       isBackdated: row.is_backdated,
       logo: row.logo,
-      icon: row.icon || (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
+      icon:
+        row.icon ||
+        (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
       paymentMethod: row.payment_method,
       receiptUrl: rowReceipts[0],
       receiptUrls: rowReceipts,
-      tags: row.tags || [],
-      splits: typeof row.splits === 'string' ? (() => { try { const p = JSON.parse(row.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(row.splits) ? row.splits : []),
-      isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
+      tags: rowTags,
+      splits:
+        typeof row.splits === 'string'
+          ? (() => {
+              try {
+                const p = JSON.parse(row.splits);
+                return Array.isArray(p) ? p : [];
+              } catch {
+                return [];
+              }
+            })()
+          : Array.isArray(row.splits)
+          ? row.splits
+          : [],
+      isStarred: Boolean(
+        row.is_starred ||
+          (rowTags && Array.isArray(rowTags) && rowTags.includes('starred')) ||
+          transaction.isStarred
+      ),
+      bankTransactionId: row.bank_transaction_id || transaction.bankTransactionId,
+      bankAccountId: row.bank_account_id || transaction.bankAccountId,
+      originalBankDescription:
+        row.original_bank_description || transaction.originalBankDescription,
+      originalBankAmount:
+        row.original_bank_amount !== undefined && row.original_bank_amount !== null
+          ? Number(row.original_bank_amount)
+          : transaction.originalBankAmount,
+      originalBankCurrency: row.original_bank_currency || transaction.originalBankCurrency,
+      refundOfTransactionId: row.refund_of_transaction_id || transaction.refundOfTransactionId,
     };
   },
 
-  async updateTransaction(id: string, transaction: Omit<Transaction, 'id'>): Promise<Transaction> {
+  async updateTransaction(
+    id: string,
+    transaction: Omit<Transaction, 'id'>
+  ): Promise<Transaction> {
     const normalizedReceipts = getTransactionReceipts(transaction);
     if (id.startsWith('demo-')) {
       const saved = localStorage.getItem('demo_transactions');
       const list: Transaction[] = saved ? JSON.parse(saved) : [];
-      const index = list.findIndex(t => t.id === id);
+      const index = list.findIndex((t) => t.id === id);
       const updatedTx: Transaction = {
         ...transaction,
         receiptUrl: normalizedReceipts[0],
@@ -496,37 +641,89 @@ export const dataService = {
       localStorage.setItem('demo_transactions', JSON.stringify(list));
       return updatedTx;
     }
-    const tagsWithStar = transaction.isStarred
-      ? Array.from(new Set([...(transaction.tags || []), 'starred']))
-      : (transaction.tags || []).filter(t => t !== 'starred');
 
-    const serializedReceipt = serializeTransactionReceipts(transaction.receiptUrls, transaction.receiptUrl);
+    const baseTags = (transaction.tags || []).filter(
+      (t) =>
+        t !== 'starred' &&
+        !t.startsWith('bank_tx:') &&
+        !t.startsWith('bank_acc:') &&
+        !t.startsWith('refund_of:')
+    );
+    if (transaction.isStarred) baseTags.push('starred');
+    if (transaction.bankTransactionId) baseTags.push(`bank_tx:${transaction.bankTransactionId}`);
+    if (transaction.bankAccountId) baseTags.push(`bank_acc:${transaction.bankAccountId}`);
+    if (transaction.refundOfTransactionId) {
+      baseTags.push(`refund_of:${transaction.refundOfTransactionId}`);
+    }
+    const tagsWithStar = Array.from(new Set(baseTags));
 
-    const { data, error } = await supabase
-      .from('transactions')
-      .update({
-        amount: transaction.amount,
-        category: transaction.category,
-        note: transaction.note,
-        merchant: transaction.merchant,
-        timestamp: transaction.timestamp,
-        type: transaction.type,
-        is_backdated: transaction.isBackdated,
-        logo: transaction.logo,
-        icon: transaction.icon,
-        payment_method: transaction.paymentMethod,
-        receipt_url: serializedReceipt,
-        tags: tagsWithStar,
-        splits: transaction.splits
-      })
-      .eq('id', id)
-      .select();
-    
+    const serializedReceipt = serializeTransactionReceipts(
+      transaction.receiptUrls,
+      transaction.receiptUrl
+    );
+
+    const payload: Record<string, any> = {
+      amount: transaction.amount,
+      category: transaction.category,
+      note: transaction.note,
+      merchant: transaction.merchant,
+      timestamp: transaction.timestamp,
+      type: transaction.type,
+      is_backdated: transaction.isBackdated,
+      logo: transaction.logo,
+      icon: transaction.icon,
+      payment_method: transaction.paymentMethod,
+      receipt_url: serializedReceipt,
+      tags: tagsWithStar,
+      splits: transaction.splits,
+      ...(transaction.bankTransactionId !== undefined
+        ? { bank_transaction_id: transaction.bankTransactionId || null }
+        : {}),
+      ...(transaction.bankAccountId !== undefined
+        ? { bank_account_id: transaction.bankAccountId || null }
+        : {}),
+      ...(transaction.originalBankDescription !== undefined
+        ? { original_bank_description: transaction.originalBankDescription || null }
+        : {}),
+      ...(transaction.originalBankAmount !== undefined
+        ? { original_bank_amount: transaction.originalBankAmount ?? null }
+        : {}),
+      ...(transaction.originalBankCurrency !== undefined
+        ? { original_bank_currency: transaction.originalBankCurrency || null }
+        : {}),
+      ...(transaction.refundOfTransactionId !== undefined
+        ? { refund_of_transaction_id: transaction.refundOfTransactionId || null }
+        : {}),
+    };
+
+    stripKnownMissingColumns('transactions', payload);
+
+    let data: any[] | null = null;
+    let error: any = null;
+    let attempts = 0;
+
+    while (attempts < 10) {
+      attempts++;
+      const res = await supabase.from('transactions').update(payload).eq('id', id).select();
+      data = res.data;
+      error = res.error;
+      if (!error) break;
+
+      const missingCol = extractMissingColumn(error);
+      if (missingCol && missingCol in payload) {
+        recordMissingColumn('transactions', missingCol);
+        delete payload[missingCol];
+        continue;
+      }
+      break;
+    }
+
     if (error) throw error;
     if (!data || data.length === 0) throw new Error('Kunde inte uppdatera transaktionen');
-    
+
     const row = data[0];
     const rowReceipts = getTransactionReceipts({ receipt_url: row.receipt_url });
+    const rowTags: string[] = Array.isArray(row.tags) ? row.tags : tagsWithStar;
     return {
       id: row.id,
       amount: Number(row.amount),
@@ -537,13 +734,41 @@ export const dataService = {
       type: row.type,
       isBackdated: row.is_backdated,
       logo: row.logo,
-      icon: row.icon || (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
+      icon:
+        row.icon ||
+        (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
       paymentMethod: row.payment_method,
       receiptUrl: rowReceipts[0],
       receiptUrls: rowReceipts,
-      tags: row.tags || [],
-      splits: typeof row.splits === 'string' ? (() => { try { const p = JSON.parse(row.splits); return Array.isArray(p) ? p : []; } catch { return []; } })() : (Array.isArray(row.splits) ? row.splits : []),
-      isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
+      tags: rowTags,
+      splits:
+        typeof row.splits === 'string'
+          ? (() => {
+              try {
+                const p = JSON.parse(row.splits);
+                return Array.isArray(p) ? p : [];
+              } catch {
+                return [];
+              }
+            })()
+          : Array.isArray(row.splits)
+          ? row.splits
+          : [],
+      isStarred: Boolean(
+        row.is_starred ||
+          (rowTags && Array.isArray(rowTags) && rowTags.includes('starred')) ||
+          transaction.isStarred
+      ),
+      bankTransactionId: row.bank_transaction_id || transaction.bankTransactionId,
+      bankAccountId: row.bank_account_id || transaction.bankAccountId,
+      originalBankDescription:
+        row.original_bank_description || transaction.originalBankDescription,
+      originalBankAmount:
+        row.original_bank_amount !== undefined && row.original_bank_amount !== null
+          ? Number(row.original_bank_amount)
+          : transaction.originalBankAmount,
+      originalBankCurrency: row.original_bank_currency || transaction.originalBankCurrency,
+      refundOfTransactionId: row.refund_of_transaction_id || transaction.refundOfTransactionId,
     };
   },
 

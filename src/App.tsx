@@ -122,6 +122,9 @@ import {
   loadOnboardingBankDraft,
   PendingBankCallback,
 } from "./utils/bankFeatureFlag";
+import { bankService, BankAccount } from "./services/bankService";
+import { merchantSimilarity } from "./utils/bankReconciliationEngine";
+import { getAutoImportableBankTransactions } from "./utils/bankHistoryAnalyzer";
 
 import {
   DEFAULT_EXPENSE_CATEGORIES,
@@ -326,8 +329,9 @@ export default function App() {
     const state = searchParams.get("state") || undefined;
     const error = searchParams.get("error") || undefined;
     const errorDescription = searchParams.get("error_description") || undefined;
+    const hasPendingOrigin = Boolean(loadBankRedirectOrigin() || loadOnboardingBankDraft());
 
-    if (path.includes("/bank/callback") && (code || state || error)) {
+    if ((path.includes("/bank/callback") && (code || state || error)) || (code && state && hasPendingOrigin)) {
       const payload: PendingBankCallback = {
         code,
         state,
@@ -771,16 +775,116 @@ export default function App() {
   const [itemToUpdateVariable, setItemToUpdateVariable] = useState<any>(null);
   const [navHistory, setNavHistory] = useState<{ tab: Tab; section?: string }[]>([]);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const isSyncingBankToAppRef = useRef(false);
+
+  const syncBankToAppTransactions = useCallback(
+    async (
+      userId: string,
+      currentFixed: FixedExpense[],
+      currentTransactions: Transaction[],
+      currentConfig?: Config | null,
+    ) => {
+      if (!userId || userId === "demo-user" || isSyncingBankToAppRef.current) return;
+      isSyncingBankToAppRef.current = true;
+      try {
+        const status = await bankService.getStatus();
+        const accounts = status?.accounts || [];
+        setBankAccounts(accounts);
+
+        if (accounts.length === 0) return;
+
+        const bankTxs = await bankService.listAllTransactionsForReconciliation(1000);
+        if (!bankTxs || bankTxs.length === 0) return;
+
+        let dismissedIds: string[] = [];
+        try {
+          const raw = localStorage.getItem(`dejz_dismissed_bank_tx_ids_${userId}`);
+          if (raw) dismissedIds = JSON.parse(raw);
+        } catch {
+          // ignore
+        }
+
+        const toImport = getAutoImportableBankTransactions(
+          bankTxs,
+          accounts,
+          currentFixed,
+          currentTransactions,
+          currentConfig,
+          dismissedIds,
+        );
+
+        let updatedList = [...currentTransactions];
+
+        // Remove any synthetic mid-period lump sum adjustment if real bank transactions exist
+        const adjustmentTxs = updatedList.filter(
+          (tx) => tx.note === "Justering för start mitt i period" && !tx.bankTransactionId
+        );
+        if (adjustmentTxs.length > 0 && (toImport.length > 0 || updatedList.some((tx) => Boolean(tx.bankTransactionId)))) {
+          for (const adj of adjustmentTxs) {
+            try {
+              await dataService.deleteTransaction(adj.id);
+              updatedList = updatedList.filter((t) => t.id !== adj.id);
+            } catch {
+              // ignore
+            }
+          }
+        }
+
+        if (toImport.length > 0) {
+          const savedNew: Transaction[] = [];
+          for (const draft of toImport) {
+            try {
+              const saved = await dataService.addTransaction(userId, draft);
+              if (saved && !updatedList.some((t) => t.id === saved.id)) {
+                savedNew.push(saved);
+              }
+            } catch (e) {
+              console.warn("[BankAutoImport] Could not save bank transaction:", e);
+            }
+          }
+          if (savedNew.length > 0) {
+            updatedList = [...savedNew, ...updatedList].sort((a, b) => b.timestamp - a.timestamp);
+          }
+        }
+
+        setTransactions(updatedList);
+      } catch (err) {
+        console.warn("[BankAutoImport] Could not sync bank transactions:", err);
+      } finally {
+        isSyncingBankToAppRef.current = false;
+      }
+    },
+    []
+  );
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       const path = window.location.pathname.toLowerCase();
-      if (path.includes("/bank/callback") || loadPendingBankCallback()) {
+      if (
+        path.includes("/bank/callback") ||
+        loadPendingBankCallback() ||
+        loadOnboardingBankDraft() ||
+        loadBankRedirectOrigin()
+      ) {
         return false;
       }
     }
     return true;
   });
-  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const hasCallback =
+        window.location.pathname.toLowerCase().includes("/bank/callback") ||
+        Boolean(loadPendingBankCallback());
+      if (
+        hasCallback &&
+        (loadBankRedirectOrigin()?.originContext === "onboarding" || Boolean(loadOnboardingBankDraft()))
+      ) {
+        return true;
+      }
+    }
+    return false;
+  });
   const hasDismissedOnboardingSession = useRef(false);
 
   const tabScrollPositions = useRef<Record<string, number>>({});
@@ -1052,7 +1156,7 @@ export default function App() {
           showFixedExpensesInHistory:
             dbSettings.showFixedExpensesInHistory !== undefined && dbSettings.showFixedExpensesInHistory !== null
               ? Boolean(dbSettings.showFixedExpensesInHistory)
-              : (localStorage.getItem('dejz_show_fixed_in_history') === 'true'),
+              : (localStorage.getItem('dejz_show_fixed_in_history') !== 'false'),
           hideEmptyCategories:
             dbSettings.hideEmptyCategories !== undefined && dbSettings.hideEmptyCategories !== null
               ? Boolean(dbSettings.hideEmptyCategories)
@@ -1077,8 +1181,15 @@ export default function App() {
       });
       setFixedExpenses(upgradedFixedRefresh);
 
+      await syncBankToAppTransactions(
+        session.user.id,
+        upgradedFixedRefresh,
+        dbTransactions || [],
+        config
+      );
+
       // Small delay to make the refresh feel "real"
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 400));
     } catch (error) {
       console.error("Refresh failed:", error);
     }
@@ -1672,11 +1783,11 @@ export default function App() {
 
       const metaTags = document.querySelectorAll('meta[name="theme-color"]');
       if (metaTags.length > 0) {
-        metaTags.forEach((tag) => tag.setAttribute("content", bottomThemeColor));
+        metaTags.forEach((tag) => tag.setAttribute("content", topColor));
       } else {
         const meta = document.createElement("meta");
         meta.setAttribute("name", "theme-color");
-        meta.setAttribute("content", bottomThemeColor);
+        meta.setAttribute("content", topColor);
         document.head.appendChild(meta);
       }
     };
@@ -1767,7 +1878,13 @@ export default function App() {
     if (config && canUseBankIntegration) {
       const originMeta = loadBankRedirectOrigin();
       const onboardingDraft = loadOnboardingBankDraft();
-      if (originMeta?.originContext === "onboarding" || onboardingDraft) {
+      const isNewUnbudgetedAccount = !config.hasSavedInitialBudget;
+      if (
+        originMeta?.originContext === "onboarding" ||
+        onboardingDraft ||
+        isOnboarding ||
+        isNewUnbudgetedAccount
+      ) {
         setIsOnboarding(true);
       } else {
         setActiveTab("profile");
@@ -1775,7 +1892,7 @@ export default function App() {
         setNavTrigger((prev) => prev + 1);
       }
     }
-  }, [isAuthLoading, session, config, pendingBankCallback, canUseBankIntegration]);
+  }, [isAuthLoading, session, config, pendingBankCallback, canUseBankIntegration, isOnboarding]);
 
   // --- Auth Logic ---
   useEffect(() => {
@@ -2198,13 +2315,18 @@ export default function App() {
           (Array.isArray(dbIncomes) && dbIncomes.length > 0) ||
           (Array.isArray(dbFixed) && dbFixed.length > 0);
 
-        shouldSkipOnboarding =
-          isLocallyDone ||
-          isMetaDone ||
-          isDbDone ||
-          hasDismissedOnboardingSession.current;
+        const hasActiveOnboardingBankFlow =
+          (Boolean(loadPendingBankCallback()) || Boolean(pendingBankCallback)) &&
+          (loadBankRedirectOrigin()?.originContext === 'onboarding' || Boolean(loadOnboardingBankDraft()));
 
-        if (!shouldSkipOnboarding) {
+        shouldSkipOnboarding =
+          !hasActiveOnboardingBankFlow &&
+          (isLocallyDone ||
+            isMetaDone ||
+            isDbDone ||
+            hasDismissedOnboardingSession.current);
+
+        if (!shouldSkipOnboarding || hasActiveOnboardingBankFlow) {
           setIsOnboarding(true);
         } else {
           setIsOnboarding(false);
@@ -2532,7 +2654,7 @@ export default function App() {
           showFixedExpensesInHistory:
             dbProfile.show_fixed_expenses_in_history !== undefined && dbProfile.show_fixed_expenses_in_history !== null
               ? Boolean(dbProfile.show_fixed_expenses_in_history)
-              : (localStorage.getItem('dejz_show_fixed_in_history') === 'true' || localSavedConfig?.showFixedExpensesInHistory === true),
+              : (localStorage.getItem('dejz_show_fixed_in_history') !== 'false'),
           hideEmptyCategories:
             dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
               ? Boolean(dbProfile.hide_empty_categories)
@@ -2678,13 +2800,22 @@ export default function App() {
       setTransactions(healedTransactions);
       setIncomes(healedIncomes);
       setFixedExpenses(upgradedFixed);
+
+      if (session?.user?.id) {
+        syncBankToAppTransactions(
+          session.user.id,
+          upgradedFixed,
+          healedTransactions,
+          dbProfile ? config : defaultConfig,
+        ).catch(() => {});
+      }
     } catch (_error) {
       console.error("Failed to fetch initial data:", _error);
       setConfig((prev) => prev || defaultConfig);
     } finally {
       setIsLoading(false);
     }
-  }, [session]);
+  }, [session, syncBankToAppTransactions]);
 
   useEffect(() => {
     fetchData();
@@ -2909,11 +3040,10 @@ export default function App() {
 
         const getAmountForPeriod = (item: any) => {
           if (
-            item.isVariable &&
             item.periodOverrides &&
             item.periodOverrides[periodId] !== undefined
           ) {
-            return item.periodOverrides[periodId];
+            return Number(item.periodOverrides[periodId]) || 0;
           }
           return Number(item.amount) || 0;
         };
@@ -3673,23 +3803,76 @@ export default function App() {
           potDelta += Number(transaction.amount) || 0;
         }
 
-        const newTransaction = await dataService.addTransaction(
-          session.user.id,
-          {
-            ...transaction,
-            timestamp: customTimestamp || Date.now(),
-            isBackdated: transaction.isBackdated,
-          },
-        );
-        setTransactions((prev) => [newTransaction, ...prev]);
+        const txTimestamp = customTimestamp || Date.now();
+        // Check if this manual purchase matches an already-imported bank transaction (1-to-1)
+        const matchingBankImportedTx =
+          transaction.type === "expense" && !transaction.bankTransactionId
+            ? transactions.find((existing) => {
+                const isBankLinked = Boolean(
+                  existing.bankTransactionId ||
+                    existing.tags?.some((t) => t.startsWith("bank_tx:")),
+                );
+                if (!isBankLinked || existing.type !== "expense") return false;
+                if (
+                  Math.abs(
+                    (Number(existing.amount) || 0) -
+                      (Number(transaction.amount) || 0),
+                  ) > 0.01
+                ) {
+                  return false;
+                }
+                const dayDiff =
+                  Math.abs((existing.timestamp || 0) - txTimestamp) /
+                  (24 * 60 * 60 * 1000);
+                if (dayDiff > 4) return false;
+                const sim = merchantSimilarity(
+                  transaction.merchant || transaction.note || "",
+                  existing.merchant || existing.originalBankDescription || "",
+                );
+                return sim >= 0.65;
+              })
+            : undefined;
 
-        if (
-          transaction.type === "income" ||
-          transaction.category === "Spargris"
-        ) {
-          feedback.success();
-        } else {
+        if (matchingBankImportedTx) {
+          const mergedTx = await dataService.updateTransaction(
+            matchingBankImportedTx.id,
+            {
+              ...matchingBankImportedTx,
+              category: transaction.category || matchingBankImportedTx.category,
+              merchant: transaction.merchant || matchingBankImportedTx.merchant,
+              note: transaction.note ?? matchingBankImportedTx.note,
+              receiptUrl:
+                transaction.receiptUrl ?? matchingBankImportedTx.receiptUrl,
+              receiptUrls:
+                transaction.receiptUrls ?? matchingBankImportedTx.receiptUrls,
+              splits: transaction.splits ?? matchingBankImportedTx.splits,
+              isStarred:
+                transaction.isStarred ?? matchingBankImportedTx.isStarred,
+            },
+          );
+          setTransactions((prev) =>
+            prev.map((e) => (e.id === mergedTx.id ? mergedTx : e)),
+          );
           feedback.expense();
+        } else {
+          const newTransaction = await dataService.addTransaction(
+            session.user.id,
+            {
+              ...transaction,
+              timestamp: txTimestamp,
+              isBackdated: transaction.isBackdated,
+            },
+          );
+          setTransactions((prev) => [newTransaction, ...prev]);
+
+          if (
+            transaction.type === "income" ||
+            transaction.category === "Spargris"
+          ) {
+            feedback.success();
+          } else {
+            feedback.expense();
+          }
         }
       }
 
@@ -3736,7 +3919,8 @@ export default function App() {
       const newIncome = {
         ...income,
         isVariable: Boolean(income.isVariable),
-        periodOverrides: income.isVariable ? (income.periodOverrides || {}) : {},
+        periodOverrides:
+          income.periodOverrides || editingIncome?.periodOverrides || {},
         id,
       };
       await dataService.saveIncomeSource(session.user.id, newIncome);
@@ -3778,7 +3962,8 @@ export default function App() {
       const newExpense = {
         ...expense,
         isVariable: Boolean(expense.isVariable),
-        periodOverrides: expense.isVariable ? (expense.periodOverrides || {}) : {},
+        periodOverrides:
+          expense.periodOverrides || editingFixedExpense?.periodOverrides || {},
         id,
       };
       await dataService.saveFixedExpense(session.user.id, newExpense);
@@ -3806,6 +3991,25 @@ export default function App() {
       const transactionToDelete = transactions.find((e) => e.id === id);
       await dataService.deleteTransaction(id);
       setTransactions((prev) => prev.filter((e) => e.id !== id));
+
+      if (session?.user?.id && transactionToDelete) {
+        const bankTxId =
+          transactionToDelete.bankTransactionId ||
+          (transactionToDelete.tags || [])
+            .find((t) => typeof t === "string" && t.startsWith("bank_tx:"))
+            ?.slice("bank_tx:".length);
+        if (bankTxId) {
+          try {
+            const key = `dejz_dismissed_bank_tx_ids_${session.user.id}`;
+            const existing = JSON.parse(localStorage.getItem(key) || "[]");
+            if (!existing.includes(bankTxId)) {
+              localStorage.setItem(key, JSON.stringify([...existing, bankTxId]));
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
 
       // Update savings pot if it was a savings transaction
       if (
@@ -5019,6 +5223,7 @@ export default function App() {
                   });
                 }}
                 onOpenCalculator={() => setIsCalculatorOpen(true)}
+                bankAccounts={bankAccounts}
               />
             </div>
           )}
@@ -5554,6 +5759,9 @@ export default function App() {
                     icon: inc.icon || "Wallet",
                     logo: inc.logo,
                     deductionDay: inc.deductionDay || data.payday || 25,
+                    frequency: inc.frequency || Frequency.MONTHLY,
+                    isVariable: Boolean(inc.isVariable),
+                    periodOverrides: inc.periodOverrides || {},
                   };
                   await dataService.saveIncomeSource(
                     activeUserId,
@@ -5576,6 +5784,9 @@ export default function App() {
                     amount: Number(exp.amount) || 0,
                     paymentMethod: exp.paymentMethod || PaymentMethod.OVRIGT,
                     frequency: exp.frequency || Frequency.MONTHLY,
+                    deductionDay: exp.deductionDay || data.payday || 25,
+                    isVariable: Boolean(exp.isVariable),
+                    periodOverrides: exp.periodOverrides || {},
                     icon: exp.icon || "CreditCard",
                     category: exp.category,
                     logo: fixedLogo,
@@ -5601,6 +5812,32 @@ export default function App() {
                   },
                 );
                 setTransactions((prev) => [initialTransaction, ...prev]);
+              }
+
+              // 7. If bank was connected during onboarding, persist settings and immediately import variable bank transactions into the app
+              try {
+                const bankStatus = await bankService.getStatus();
+                const selectedBankAccs = (bankStatus.accounts || []).filter((a) => a.is_selected);
+                setBankAccounts(bankStatus.accounts || []);
+                if (selectedBankAccs.length > 0) {
+                  const nowIso = new Date().toISOString();
+                  for (const acc of selectedBankAccs) {
+                    await bankService.updateAccountSettings({
+                      bankAccountId: acc.id,
+                      importStartDate: data.bankImportStartDate || nowIso.split("T")[0],
+                      reconciliationCompletedAt: nowIso,
+                      ongoingImportEnabled: true,
+                    });
+                  }
+                  await syncBankToAppTransactions(
+                    activeUserId,
+                    newFixedExpenses,
+                    [],
+                    newConfig,
+                  );
+                }
+              } catch (bankSetErr) {
+                console.warn("Could not update/sync bank accounts after onboarding:", bankSetErr);
               }
 
               // Refresh session to get updated metadata

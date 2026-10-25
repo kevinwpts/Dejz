@@ -154,6 +154,12 @@ export function ProfileView({
     return (
       <BankConnectionView
         config={config}
+        userId={userId}
+        existingTransactions={_transactions}
+        existingIncomes={_incomes}
+        existingFixedExpenses={_fixedExpenses}
+        onRefreshBudget={onRefresh}
+        onNavigateToHome={() => onNavigate('home')}
         initialSubView={activePage === 'bankTransactions' ? 'transactions' : 'connections'}
         onSubViewChange={(sub) => {
           const nextSection = sub === 'transactions' ? 'bankTransactions' : 'bank';
@@ -187,6 +193,7 @@ export function ProfileView({
         fixedExpenses={_fixedExpenses}
         onRefresh={onRefresh}
         addToast={addToast}
+        onStartOnboardingWithBank={onStartOnboardingWithBank}
       />
     );
   }

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, Building2, Sparkles, ShieldCheck, Edit2, RefreshCw } from 'lucide-react';
+import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, Building2, Sparkles, ShieldCheck, Edit2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
@@ -16,7 +16,7 @@ import { SmartInput, Modal, Button, Input } from './ui';
 import { Switch } from './ui/Switch';
 import { getLogoUrl, fetchLogoForName } from '../utils/logo';
 import { BankConnectFlowModal } from './BankConnectFlowModal';
-import { bankService, BankAccount, BankConnection, BankTransactionItem } from '../services/bankService';
+import { bankService, BankAccount, BankConnection } from '../services/bankService';
 import { analyzeBankTransactionsForOnboarding, AnalyzedBankOnboardingData } from '../utils/bankHistoryAnalyzer';
 import {
   saveOnboardingBankDraft,
@@ -402,6 +402,9 @@ export function OnboardingModal({
   const [isAnalyzingBankHistory, setIsAnalyzingBankHistory] = useState(false);
   const [bankAnalysisError, setBankAnalysisError] = useState<string | null>(null);
   const [bankAnalysisResult, setBankAnalysisResult] = useState<AnalyzedBankOnboardingData | null>(null);
+  const [selectedSuggestedExpenseIdxs, setSelectedSuggestedExpenseIdxs] = useState<Set<number>>(new Set());
+  const [selectedSuggestedIncomeIdxs, setSelectedSuggestedIncomeIdxs] = useState<Set<number>>(new Set());
+  const [enableOngoingBankImport, setEnableOngoingBankImport] = useState<boolean>(true);
 
   // Check if the user already has an active connected bank when reaching step === 'bank'
   useEffect(() => {
@@ -430,6 +433,28 @@ export function OnboardingModal({
     };
   }, [isOpen, isBankIntegrationEnabled, step]);
 
+  const applySelectedBankSuggestionsAndContinue = (stepByStep = false) => {
+    if (bankAnalysisResult) {
+      if (bankAnalysisResult.suggestedPayday && bankAnalysisResult.suggestedPayday >= 1 && bankAnalysisResult.suggestedPayday <= 31) {
+        setPayday(bankAnalysisResult.suggestedPayday);
+      }
+
+      const chosenIncomes = bankAnalysisResult.detectedIncomes
+        .filter((_, idx) => selectedSuggestedIncomeIdxs.has(idx))
+        .map(({ detectedOccurrences: _o, lastDate: _l, evidenceDates: _ed, evidenceAmounts: _ea, evidenceSummary: _es, ...rest }) => rest);
+
+      setIncomes(chosenIncomes);
+
+      const chosenFixed: Omit<FixedExpense, 'id'>[] = bankAnalysisResult.detectedFixedExpenses
+        .filter((_, idx) => selectedSuggestedExpenseIdxs.has(idx))
+        .map(({ detectedOccurrences: _occ, lastDate: _ld, evidenceDates: _ed, evidenceAmounts: _ea, evidenceSummary: _es, ...rest }) => rest);
+
+      setFixedExpenses(chosenFixed);
+      setMidMonthSpent('0');
+    }
+    setStep(stepByStep ? 'payday' : 'summary');
+  };
+
   const runBankHistoryAnalysis = async (accountsOverride?: BankAccount[]) => {
     setIsAnalyzingBankHistory(true);
     setBankAnalysisError(null);
@@ -439,81 +464,28 @@ export function OnboardingModal({
         setConnectedBankAccounts(accountsOverride);
       }
 
-      // Fetch up to 3 pages (300 transactions) backward in time
-      let allTransactions: BankTransactionItem[] = [];
-      const firstPage = await bankService.listTransactions({ page: 1, pageSize: 100, statusFilter: 'all' });
-      allTransactions = [...(firstPage.transactions || [])];
+      // Fetch all stored transactions (or sync if empty)
+      let allTransactions = await bankService.listAllTransactionsForReconciliation();
 
-      // If no transactions are stored yet, trigger a sync first and re-fetch
       if (allTransactions.length === 0 && (targetAccounts.length > 0 || existingConnections.length > 0)) {
         try {
           await bankService.sync({ connectionId: existingConnections[0]?.id });
-          const syncedFirstPage = await bankService.listTransactions({ page: 1, pageSize: 100, statusFilter: 'all' });
-          allTransactions = [...(syncedFirstPage.transactions || [])];
-          if (syncedFirstPage.hasMorePages) {
-            const p2 = await bankService.listTransactions({ page: 2, pageSize: 100, statusFilter: 'all' });
-            allTransactions.push(...(p2.transactions || []));
-          }
+          allTransactions = await bankService.listAllTransactionsForReconciliation();
         } catch (syncErr) {
           console.warn('Sync during onboarding analysis failed:', syncErr);
-        }
-      } else if (firstPage.hasMorePages) {
-        const page2 = await bankService.listTransactions({ page: 2, pageSize: 100, statusFilter: 'all' });
-        allTransactions.push(...(page2.transactions || []));
-        if (page2.hasMorePages) {
-          const page3 = await bankService.listTransactions({ page: 3, pageSize: 100, statusFilter: 'all' });
-          allTransactions.push(...(page3.transactions || []));
         }
       }
 
       const analysis = analyzeBankTransactionsForOnboarding(allTransactions, payday, paydayBeforeWeekend);
       setBankAnalysisResult(analysis);
-
-      // 1. Pre-fill suggested payday if detected
+      setSelectedSuggestedExpenseIdxs(
+        new Set(analysis.detectedFixedExpenses.map((_, i) => i))
+      );
+      setSelectedSuggestedIncomeIdxs(
+        new Set(analysis.detectedIncomes.map((_, i) => i))
+      );
       if (analysis.suggestedPayday && analysis.suggestedPayday >= 1 && analysis.suggestedPayday <= 31) {
         setPayday(analysis.suggestedPayday);
-      }
-
-      // 2. Pre-fill detected recurring incomes
-      if (analysis.detectedIncomes.length > 0) {
-        setIncomes((prev) => {
-          const merged = [...prev];
-          for (const detInc of analysis.detectedIncomes) {
-            const exists = merged.some(
-              (inc) => inc.name.trim().toLowerCase() === detInc.name.trim().toLowerCase()
-            );
-            if (!exists) {
-              merged.push(detInc);
-            }
-          }
-          return merged;
-        });
-      }
-
-      // 3. Pre-fill detected fixed expenses (stripping analysis metadata for FixedExpense items)
-      if (analysis.detectedFixedExpenses.length > 0) {
-        const cleanDetected: Omit<FixedExpense, 'id'>[] = analysis.detectedFixedExpenses.map(
-          ({ detectedOccurrences: _occ, lastDate: _ld, ...rest }) => rest
-        );
-        setFixedExpenses((prev) => {
-          const merged = [...prev];
-          for (const detExp of cleanDetected) {
-            const existingIdx = merged.findIndex(
-              (e) => e.name.trim().toLowerCase() === detExp.name.trim().toLowerCase()
-            );
-            if (existingIdx >= 0) {
-              merged[existingIdx] = detExp;
-            } else {
-              merged.push(detExp);
-            }
-          }
-          return merged;
-        });
-      }
-
-      // 4. Pre-fill variable spending since payday if calculated
-      if (analysis.calculatedSpentSincePayday > 0) {
-        setMidMonthSpent(String(analysis.calculatedSpentSincePayday));
       }
     } catch (err: any) {
       console.error('Error analyzing bank history in onboarding:', err);
@@ -689,21 +661,25 @@ export function OnboardingModal({
       .filter((p): p is SwedishExpensePreset => p !== undefined);
   }, []);
 
-  const stepNumber = isBankIntegrationEnabled
-    ? (step === 'name' ? 1 :
-       step === 'bank' ? 2 :
-       step === 'payday' ? 3 :
-       step === 'income' ? 4 :
-       step === 'expenses' ? 5 :
-       step === 'goals' ? 6 :
-       step === 'midMonth' ? 7 : 8)
-    : (step === 'name' ? 1 : 
-       step === 'payday' ? 2 : 
-       step === 'income' ? 3 : 
-       step === 'expenses' ? 4 : 
-       step === 'goals' ? 5 : 
-       step === 'midMonth' ? 6 : 7);
-  const totalSteps = isBankIntegrationEnabled ? 8 : 7;
+  const hasBankFastTrack = Boolean(bankAnalysisResult && (connectedBankAccounts.length > 0 || existingConnections.length > 0));
+
+  const stepNumber = hasBankFastTrack
+    ? (step === 'name' ? 1 : step === 'bank' ? 2 : 3)
+    : isBankIntegrationEnabled
+      ? (step === 'name' ? 1 :
+         step === 'bank' ? 2 :
+         step === 'payday' ? 3 :
+         step === 'income' ? 4 :
+         step === 'expenses' ? 5 :
+         step === 'goals' ? 6 :
+         step === 'midMonth' ? 7 : 8)
+      : (step === 'name' ? 1 : 
+         step === 'payday' ? 2 : 
+         step === 'income' ? 3 : 
+         step === 'expenses' ? 4 : 
+         step === 'goals' ? 5 : 
+         step === 'midMonth' ? 6 : 7);
+  const totalSteps = hasBankFastTrack ? 3 : (isBankIntegrationEnabled ? 8 : 7);
 
   // Financial Metrics: Inkomst - Fasta kostnader - Månadssparande = Kvar att använda
   const totalIncome = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
@@ -715,6 +691,12 @@ export function OnboardingModal({
     }
     return Math.max(0, Number(monthlySavingsInput) || 0);
   }, [savingsGoals, monthlySavingsInput]);
+
+  const totalConnectedBankBalance = useMemo(() => {
+    return connectedBankAccounts
+      .filter((a) => a.is_selected)
+      .reduce((sum, a) => sum + (Number(a.balance_amount) || 0), 0);
+  }, [connectedBankAccounts]);
 
   // Calculate period boundaries and days since actual payday with weekend adjustment
   const currentPeriod = useMemo(() => {
@@ -760,9 +742,11 @@ export function OnboardingModal({
     }
   }, [step, daysSincePayday]);
 
-  const initialSpentAmount = midMonthSpent.trim() !== '' && daysSincePayday > 0 
-    ? Math.max(0, Number(midMonthSpent) || 0) 
-    : 0;
+  const initialSpentAmount = bankAnalysisResult
+    ? Math.max(0, Number(bankAnalysisResult.calculatedSpentSincePayday) || 0)
+    : (midMonthSpent.trim() !== '' && daysSincePayday > 0 
+        ? Math.max(0, Number(midMonthSpent) || 0) 
+        : 0);
 
   // Exact economic calculation for the monthly plan (Source of Truth)
   // Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda
@@ -788,7 +772,7 @@ export function OnboardingModal({
     } else if (step === 'expenses') {
       setStep('goals');
     } else if (step === 'goals') {
-      if (daysSincePayday === 0) {
+      if (daysSincePayday === 0 || bankAnalysisResult) {
         setMidMonthSpent('0');
         setStep('summary');
       } else {
@@ -807,7 +791,9 @@ export function OnboardingModal({
     else if (step === 'goals') setStep('expenses');
     else if (step === 'midMonth') setStep('goals');
     else if (step === 'summary') {
-      if (daysSincePayday === 0) {
+      if (bankAnalysisResult) {
+        setStep('bank');
+      } else if (daysSincePayday === 0) {
         setStep('goals');
       } else {
         setStep('midMonth');
@@ -847,7 +833,10 @@ export function OnboardingModal({
       }
 
       let initialSpent = 0;
-      if (forceInitialSpent !== undefined) {
+      if (bankAnalysisResult || connectedBankAccounts.length > 0) {
+        // Real bank transactions are imported directly into app transactions, so no lump-sum adjustment is needed
+        initialSpent = 0;
+      } else if (forceInitialSpent !== undefined) {
         initialSpent = forceInitialSpent;
       } else if (daysSincePayday === 0) {
         initialSpent = 0;
@@ -885,6 +874,25 @@ export function OnboardingModal({
             deductionDay: payday || 25,
             frequency: Frequency.MONTHLY,
           }] : []);
+
+      // If bank was connected in onboarding, save import_start_date and ongoing_import_enabled on selected accounts
+      if (connectedBankAccounts.length > 0) {
+        const startIso = currentPeriod.startDate.toISOString().split('T')[0];
+        const nowIso = new Date().toISOString();
+        await Promise.all(
+          connectedBankAccounts
+            .filter((a) => a.is_selected)
+            .map((acc) =>
+              bankService.updateAccountSettings({
+                bankAccountId: acc.id,
+                includeInBudget: true,
+                importStartDate: startIso,
+                reconciliationCompletedAt: nowIso,
+                ongoingImportEnabled: true,
+              })
+            )
+        );
+      }
 
       await onComplete({
         fullName: trimmedName,
@@ -1146,37 +1154,101 @@ export function OnboardingModal({
                               <Check size={12} strokeWidth={2.5} />
                               <span>
                                 {isEn
-                                  ? `${bankAnalysisResult.analyzedTransactionCount} transactions analyzed`
-                                  : `${bankAnalysisResult.analyzedTransactionCount} transaktioner analyserade`}
+                                  ? 'Bank account connected'
+                                  : 'Bankkonto kopplat'}
                               </span>
                             </div>
                             <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight">
-                              {bankAnalysisResult.detectedFixedExpenses.length > 0
-                                ? isEn
-                                  ? `We found ${bankAnalysisResult.detectedFixedExpenses.length} fixed expenses`
-                                  : `Vi hittade ${bankAnalysisResult.detectedFixedExpenses.length} fasta utgifter`
-                                : isEn
-                                  ? 'Bank history analyzed'
-                                  : 'Bankhistoriken är analyserad'}
-                            </h3>
-                            <p className="text-xs text-[var(--text-secondary)] font-medium max-w-[310px] mx-auto leading-relaxed">
                               {isEn
-                                ? 'Everything is pre-filled for you. In the next steps you can review, adjust amounts, or remove anything.'
-                                : 'Vi har fyllt i allt åt dig. I nästa steg granskar du enkelt listan och kan ändra belopp eller ta bort.'}
+                                ? 'Accept your incomes & fixed expenses'
+                                : 'Acceptera dina inkomster & fasta utgifter'}
+                            </h3>
+                            <p className="text-xs text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
+                              {isEn
+                                ? 'We identified these from your bank account. Check the ones that apply to add them directly to your budget.'
+                                : 'Vi hittade dessa på ditt kopplade bankkonto. Bocka i de som stämmer så läggs de in direkt under fasta utgifter och inkomster.'}
                             </p>
                           </div>
 
-                          {/* Summary Card of Detected Items */}
+                          {/* Connected Bank Account Total Balance */}
+                          {connectedBankAccounts.filter((a) => a.is_selected).length > 0 && (
+                            <div className="p-3 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Building2 size={16} className="text-[var(--accent-color)] shrink-0" />
+                                <span className="text-xs font-semibold text-[var(--text-secondary)] truncate">
+                                  {isEn ? 'Total on connected bank accounts' : 'Totalt på kopplade bankkonton'}
+                                </span>
+                              </div>
+                              <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)] shrink-0">
+                                {formatCurrency(totalConnectedBankBalance, config.currency || 'kr', lang)}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Summary Card of Detected Items with Checkboxes */}
                           <div className="p-3.5 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] space-y-3 shadow-2xs">
+                            <div className="space-y-1.5 pb-2 border-b border-[var(--border-color)]">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-semibold text-[var(--text-secondary)]">
+                                  {isEn ? 'Identified incomes' : 'Identifierade inkomster'}
+                                </span>
+                                <span className="text-[11px] font-bold text-[var(--accent-color)]">
+                                  Lönedag: den {bankAnalysisResult.suggestedPayday || payday}:e
+                                </span>
+                              </div>
+                              {bankAnalysisResult.detectedIncomes.length === 0 ? (
+                                <p className="text-xs text-[var(--text-secondary)] py-1">
+                                  {isEn ? 'No regular salary found automatically.' : 'Ingen återkommande lön hittades automatiskt.'}
+                                </p>
+                              ) : (
+                                bankAnalysisResult.detectedIncomes.map((inc, idx) => {
+                                  const checked = selectedSuggestedIncomeIdxs.has(idx);
+                                  return (
+                                    <label
+                                      key={idx}
+                                      className="py-1.5 flex items-start justify-between gap-2.5 cursor-pointer select-none"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={() => {
+                                          setSelectedSuggestedIncomeIdxs((prev) => {
+                                            const next = new Set(prev);
+                                            if (next.has(idx)) next.delete(idx);
+                                            else next.add(idx);
+                                            return next;
+                                          });
+                                        }}
+                                        className="mt-0.5 rounded border-[var(--border-color)] text-[var(--accent-color)]"
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                                          {inc.name}
+                                        </p>
+                                        <p className="text-[11px] text-[var(--text-secondary)] font-medium">
+                                          {inc.evidenceSummary || `${inc.category || 'Inkomst'} · den ${inc.deductionDay || 25}:e`}
+                                        </p>
+                                      </div>
+                                      <span className="text-xs font-bold font-amount tabular-nums text-[var(--success-color)] shrink-0">
+                                        +{formatCurrency(inc.amount, config.currency || 'kr', lang)}
+                                      </span>
+                                    </label>
+                                  );
+                                })
+                              )}
+                            </div>
+
                             <div className="flex items-center justify-between text-xs">
                               <span className="font-semibold text-[var(--text-secondary)]">
-                                {isEn ? 'Detected fixed costs' : 'Hittade fasta utgifter'}
+                                {isEn ? 'Identified fixed expenses' : 'Identifierade fasta kostnader'}
                               </span>
                               <span className="font-bold font-amount text-[var(--text-primary)]">
-                                {bankAnalysisResult.detectedFixedExpenses.length}{' '}
-                                {isEn ? 'items' : 'st'} (
+                                {selectedSuggestedExpenseIdxs.size} av {bankAnalysisResult.detectedFixedExpenses.length}{' '}
+                                {isEn ? 'selected' : 'valda'} (
                                 {formatCurrency(
-                                  bankAnalysisResult.detectedFixedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+                                  bankAnalysisResult.detectedFixedExpenses
+                                    .filter((_, i) => selectedSuggestedExpenseIdxs.has(i))
+                                    .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
                                   config.currency || 'kr',
                                   lang
                                 )}
@@ -1184,67 +1256,66 @@ export function OnboardingModal({
                               </span>
                             </div>
 
-                            {bankAnalysisResult.detectedFixedExpenses.length > 0 && (
-                              <div className="max-h-[190px] overflow-y-auto divide-y divide-[var(--border-color)]/60 pr-1 [scrollbar-width:thin]">
-                                {bankAnalysisResult.detectedFixedExpenses.map((exp, idx) => (
-                                  <div key={idx} className="py-2 flex items-center justify-between gap-2">
-                                    <div className="min-w-0 flex-1">
-                                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">
-                                        {exp.name}
-                                      </p>
-                                      <p className="text-[11px] text-[var(--text-secondary)] font-medium">
-                                        {exp.category}
-                                        {exp.detectedOccurrences > 1
-                                          ? isEn
-                                            ? ` • Seen ${exp.detectedOccurrences} times`
-                                            : ` • Hittad ${exp.detectedOccurrences} ggr`
-                                          : ''}
-                                      </p>
-                                    </div>
-                                    <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)] shrink-0">
-                                      {formatCurrency(exp.amount, config.currency || 'kr', lang)}
-                                    </span>
-                                  </div>
-                                ))}
+                            {bankAnalysisResult.detectedFixedExpenses.length > 0 ? (
+                              <div className="max-h-[210px] overflow-y-auto divide-y divide-[var(--border-color)]/60 pr-1 [scrollbar-width:thin]">
+                                {bankAnalysisResult.detectedFixedExpenses.map((exp, idx) => {
+                                  const checked = selectedSuggestedExpenseIdxs.has(idx);
+                                  return (
+                                    <label
+                                      key={idx}
+                                      className="py-2 flex items-start justify-between gap-2.5 cursor-pointer select-none"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        onChange={() => {
+                                          setSelectedSuggestedExpenseIdxs((prev) => {
+                                            const next = new Set(prev);
+                                            if (next.has(idx)) next.delete(idx);
+                                            else next.add(idx);
+                                            return next;
+                                          });
+                                        }}
+                                        className="mt-0.5 rounded border-[var(--border-color)] text-[var(--accent-color)]"
+                                      />
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                                          {exp.name}
+                                        </p>
+                                        <p className="text-[11px] text-[var(--text-secondary)] font-medium">
+                                          {exp.evidenceSummary ||
+                                            `${exp.category} • Hittad ${exp.detectedOccurrences} ggr`}
+                                        </p>
+                                      </div>
+                                      <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)] shrink-0">
+                                        {formatCurrency(exp.amount, config.currency || 'kr', lang)}
+                                      </span>
+                                    </label>
+                                  );
+                                })}
                               </div>
-                            )}
-
-                            {(bankAnalysisResult.detectedIncomes.length > 0 || bankAnalysisResult.suggestedPayday) && (
-                              <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between text-xs">
-                                <span className="font-semibold text-[var(--text-secondary)]">
-                                  {isEn ? 'Detected salary / payday' : 'Identifierad lön & lönedag'}
-                                </span>
-                                <span className="font-bold font-amount text-[var(--text-primary)]">
-                                  {bankAnalysisResult.suggestedPayday
-                                    ? `${bankAnalysisResult.suggestedPayday}:e`
-                                    : `${payday}:e`}
-                                  {bankAnalysisResult.detectedIncomes.length > 0
-                                    ? ` • ${formatCurrency(
-                                        bankAnalysisResult.detectedIncomes.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-                                        config.currency || 'kr',
-                                        lang
-                                      )}`
-                                    : ''}
-                                </span>
-                              </div>
+                            ) : (
+                              <p className="text-xs text-[var(--text-secondary)] py-1">
+                                {isEn ? 'No fixed costs detected yet.' : 'Inga fasta kostnader hittades automatiskt.'}
+                              </p>
                             )}
                           </div>
 
                           <div className="pt-2 flex flex-col gap-2">
                             <button
                               type="button"
-                              onClick={() => setStep('payday')}
+                              onClick={() => applySelectedBankSuggestionsAndContinue(false)}
                               className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                             >
-                              <span>{isEn ? 'Review & continue' : 'Granska & fortsätt'}</span>
+                              <span>{isEn ? 'Accept & see your plan' : 'Acceptera & gå vidare'}</span>
                               <ArrowRight size={16} strokeWidth={2.5} />
                             </button>
                             <button
                               type="button"
-                              onClick={() => setBankAnalysisResult(null)}
+                              onClick={() => applySelectedBankSuggestionsAndContinue(true)}
                               className="w-full py-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                             >
-                              {isEn ? 'Back to connection options' : 'Tillbaka till val av metod'}
+                              {isEn ? 'Or adjust step by step manually' : 'Eller lägg till / justera fler poster manuellt'}
                             </button>
                           </div>
                         </div>
@@ -1257,7 +1328,7 @@ export function OnboardingModal({
                             <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[310px] mx-auto leading-relaxed">
                               {isEn
                                 ? 'Choose whether Dejz should analyze your bank history for fixed expenses or if you prefer to set everything up manually.'
-                                : 'Hämta konton, saldon och transaktioner från din bank – så analyserar vi bakåt i tiden vilka fasta utgifter du har.'}
+                                : 'Hämta konton, saldon och transaktioner från din bank – så analyserar vi bakåt i tiden och föreslår uppgifter som du granskar.'}
                             </p>
                           </div>
 
@@ -1268,7 +1339,7 @@ export function OnboardingModal({
                           )}
 
                           <div className="space-y-3">
-                            {/* OPTION 1: KOPPLA BANK (AUTOMATISK ANALYS) */}
+                            {/* OPTION 1: KOPPLA BANK (FÖRESLÅR UPPGIFTER SOM DU GRANSKAR) */}
                             <div className="p-4 rounded-card bg-[var(--surface-color)] border-2 border-[var(--accent-color)]/35 shadow-xs space-y-3">
                               <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0 mt-0.5">
@@ -1287,13 +1358,13 @@ export function OnboardingModal({
                                     </h4>
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--accent-color)]/12 text-[var(--accent-color)] text-[10px] font-bold">
                                       <Sparkles size={10} />
-                                      {isEn ? 'Auto-detects fixed costs' : 'Hittar fasta utgifter'}
+                                      {isEn ? 'Suggests fixed costs' : 'Föreslår fasta utgifter'}
                                     </span>
                                   </div>
                                   <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
                                     {isEn
-                                      ? 'We scan your historical transactions to find recurring bills, rent, subscriptions, and salary automatically.'
-                                      : 'Vi analyserar din historik bakåt i tiden och fyller i dina fasta utgifter, abonnemang och lön automatiskt.'}
+                                      ? 'We analyze your historical transactions and suggest items that you review.'
+                                      : 'Vi analyserar din historik bakåt i tiden och föreslår uppgifter som du granskar.'}
                                   </p>
                                 </div>
                               </div>
@@ -1955,7 +2026,7 @@ export function OnboardingModal({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.25 }}
-                      className="space-y-6 sm:space-y-7 my-auto text-center"
+                      className="space-y-5 sm:space-y-6 my-auto text-center"
                     >
                       <div className="text-center pb-1 space-y-1">
                         <h3 className="text-section-title sm:text-lg font-display text-[var(--text-primary)] tracking-tight leading-normal">
@@ -1966,8 +2037,8 @@ export function OnboardingModal({
                         </p>
                       </div>
 
-                      {/* Clean Breakdown Card: Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda */}
-                      <div className="p-4 rounded-card bg-[var(--surface-color)] space-y-2.5 text-left">
+                      {/* Clean Breakdown Card: Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar denna perioden */}
+                      <div className="p-4 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] space-y-2.5 text-left">
                         {/* Income */}
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-[var(--text-secondary)]">
@@ -1998,11 +2069,13 @@ export function OnboardingModal({
                           </span>
                         </div>
 
-                        {/* Spenderat hittills */}
+                        {/* Spenderat hittills denna period */}
                         {initialSpentAmount > 0 && (
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-[var(--text-secondary)]">
-                              {s.spentSoFarLabel}
+                              {bankAnalysisResult
+                                ? (isEn ? 'Purchases this period (from bank)' : 'Köp denna period (från bank)')
+                                : s.spentSoFarLabel}
                             </span>
                             <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
                               −{formatAmount(initialSpentAmount, lang)} {config.currency || 'kr'}
@@ -2012,16 +2085,61 @@ export function OnboardingModal({
 
                         <div className="h-px bg-[var(--border-divider)] my-1" />
 
-                        {/* Kvar att använda */}
+                        {/* Kvar denna perioden */}
                         <div className="flex items-center justify-between pt-0.5">
                           <span className="text-xs font-bold text-[var(--text-primary)]">
-                            {s.freeSpendLabel}
+                            {isEn ? 'Remaining this period' : 'Kvar denna perioden'}
                           </span>
                           <span className="text-base font-extrabold font-amount text-[var(--text-primary)] tabular-nums">
                             {formatAmount(calculatedLeftToUse, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
+
+                        {/* Totalt på kopplade bankkonton */}
+                        {connectedBankAccounts.filter((a) => a.is_selected).length > 0 && (
+                          <div className="flex items-center justify-between pt-2 border-t border-[var(--border-divider)]">
+                            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                              {isEn ? 'Total on connected bank accounts' : 'Totalt på kopplade bankkonton'}
+                            </span>
+                            <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
+                              {formatAmount(totalConnectedBankBalance, lang)} {config.currency || 'kr'}
+                            </span>
+                          </div>
+                        )}
                       </div>
+
+                      {/* Quick optional monthly savings selector if fast-tracked via bank */}
+                      {hasBankFastTrack && (
+                        <div className="p-3.5 rounded-card bg-[var(--surface-color)] border border-[var(--border-color)] text-left space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[var(--text-primary)]">
+                              {isEn ? 'Monthly savings (optional)' : 'Månadssparande (valfritt)'}
+                            </span>
+                            <span className="text-xs font-bold font-amount text-[var(--accent-color)]">
+                              {formatCurrency(totalMonthlySavings, config.currency || 'kr', lang)}/{isEn ? 'mo' : 'mån'}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-5 gap-1.5">
+                            {SAVINGS_PRESETS.map((amount) => {
+                              const isSelected = Number(monthlySavingsInput) === amount;
+                              return (
+                                <button
+                                  key={amount}
+                                  type="button"
+                                  onClick={() => handleSavingsChange(amount.toString())}
+                                  className={`py-1.5 rounded-[var(--radius-button-sm,10px)] text-xs font-bold font-amount tabular-nums transition-all border cursor-pointer active:scale-95 ${
+                                    isSelected
+                                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-2xs'
+                                      : 'bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)]'
+                                  }`}
+                                >
+                                  {amount === 0 ? '0 kr' : formatAmount(amount, lang)}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
                       {error && (
                         <div className="p-2.5 bg-[var(--surface-color)] rounded-card-nested text-[var(--text-secondary)] text-xs text-center font-medium">
@@ -2029,7 +2147,7 @@ export function OnboardingModal({
                         </div>
                       )}
 
-                      <div className="pt-4 sm:pt-5">
+                      <div className="pt-2">
                         <button 
                           onClick={() => handleSave()}
                           disabled={isUpdating}

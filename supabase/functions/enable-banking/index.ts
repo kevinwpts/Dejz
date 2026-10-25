@@ -269,42 +269,55 @@ function selectPreferredBalance(balances: any[]): {
   };
 }
 
-function extractCounterpartyAndDescription(tx: any): {
+export type EnableBankingBookingStatus = "BOOK" | "PDNG" | "HOLD" | "SCHD" | "CNCL" | "RJCT" | "OTHR";
+
+function normalizeAccountIdentity(iban?: string | null, bban?: string | null, uid?: string | null): string {
+  const cleanIban = (iban || "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  if (cleanIban.length >= 8) return `IBAN:${cleanIban}`;
+  const cleanBban = (bban || "").replace(/[^0-9]/g, "");
+  if (cleanBban.length >= 6) return `BBAN:${cleanBban}`;
+  return `UID:${String(uid || "").trim()}`;
+}
+
+function isLikelyIncomingCreditText(text: string): boolean {
+  const lower = text.toLowerCase();
+  return (
+    /\b(lön|salary|insättning|återköp|återbetalning|refund|return|kreditering|utbetalning|barnbidrag|csn|pension|skatteverket)\b/i.test(lower) ||
+    lower.includes("från ")
+  );
+}
+
+function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
   description: string;
   counterpartyName: string | null;
   amount: number;
   currency: string;
   creditDebitIndicator: string | null;
+  baseExternalKey: string;
   externalKey: string;
   bookingDate: string | null;
   valueDate: string | null;
   transactionDate: string | null;
-  bookingStatus: "BOOK" | "PDNG" | "HOLD" | "OTHR";
+  bookingStatus: EnableBankingBookingStatus;
 } {
   const rawStatus = String(tx?.status || "BOOK").toUpperCase();
-  const bookingStatus: "BOOK" | "PDNG" | "HOLD" | "OTHR" =
-    rawStatus === "BOOK" || rawStatus === "PDNG" || rawStatus === "HOLD" ? rawStatus : "OTHR";
+  const validStatuses = new Set(["BOOK", "PDNG", "HOLD", "SCHD", "CNCL", "RJCT", "OTHR"]);
+  const bookingStatus: EnableBankingBookingStatus = validStatuses.has(rawStatus)
+    ? (rawStatus as EnableBankingBookingStatus)
+    : "OTHR";
 
   const rawAmountStr = tx?.transaction_amount?.amount ?? tx?.amount ?? "0";
-  let numericAmount = Number(rawAmountStr);
+  let numericAmount = Number(String(rawAmountStr).replace(/\s/g, "").replace(",", "."));
   if (!Number.isFinite(numericAmount)) numericAmount = 0;
 
-  const indicator = tx?.credit_debit_indicator ? String(tx.credit_debit_indicator).toUpperCase() : null;
-  // Normalize signed amount: DBIT is negative outflow, CRDT is positive inflow
-  if (indicator === "DBIT" && numericAmount > 0) {
-    numericAmount = -numericAmount;
-  } else if (indicator === "CRDT" && numericAmount < 0) {
-    numericAmount = Math.abs(numericAmount);
-  }
-
-  const currency = tx?.transaction_amount?.currency || tx?.currency || "SEK";
+  const rawIndicator =
+    tx?.credit_debit_indicator ||
+    tx?.transaction_amount?.credit_debit_indicator ||
+    null;
+  const indicator = rawIndicator ? String(rawIndicator).toUpperCase().trim() : null;
 
   const creditorName = tx?.creditor?.name || tx?.creditor_name || null;
   const debtorName = tx?.debtor?.name || tx?.debtor_name || null;
-  const counterpartyName =
-    indicator === "DBIT"
-      ? creditorName || debtorName
-      : debtorName || creditorName;
 
   let remittance = "";
   if (Array.isArray(tx?.remittance_information)) {
@@ -313,29 +326,76 @@ function extractCounterpartyAndDescription(tx: any): {
     remittance = tx.remittance_information.trim();
   } else if (typeof tx?.remittance_information_unstructured === "string") {
     remittance = tx.remittance_information_unstructured.trim();
+  } else if (Array.isArray(tx?.remittance_information_unstructured_array)) {
+    remittance = tx.remittance_information_unstructured_array.filter(Boolean).join(" ").trim();
   }
+
+  const prelimCounterparty =
+    indicator === "DBIT"
+      ? creditorName || debtorName
+      : indicator === "CRDT"
+      ? debtorName || creditorName
+      : creditorName || debtorName;
 
   const description =
     remittance ||
-    counterpartyName ||
+    prelimCounterparty ||
     tx?.additional_information ||
     tx?.bank_transaction_code?.description ||
     "Banktransaktion";
 
-  const bookingDate = tx?.booking_date || null;
-  const valueDate = tx?.value_date || null;
-  const transactionDate = tx?.transaction_date || bookingDate || valueDate || null;
+  const isReservedStatus = bookingStatus === "PDNG" || bookingStatus === "HOLD";
 
-  // Build a deterministic unique key to avoid duplicates across refreshes and status changes
+  // Normalize signed amount according to Enable Banking credit_debit_indicator & status rules:
+  // - DBIT is always negative outflow.
+  // - CRDT is positive inflow, EXCEPT when an ASPSP returns a reserved card hold (PDNG/HOLD)
+  //   with a creditor (merchant) or non-refund purchase description and missing/mislabelled indicator.
+  if (indicator === "DBIT") {
+    numericAmount = -Math.abs(numericAmount);
+  } else if (indicator === "CRDT") {
+    if (isReservedStatus && creditorName && !debtorName && !isLikelyIncomingCreditText(description)) {
+      numericAmount = -Math.abs(numericAmount);
+    } else {
+      numericAmount = Math.abs(numericAmount);
+    }
+  } else if (isReservedStatus && numericAmount > 0 && !isLikelyIncomingCreditText(description)) {
+    numericAmount = -Math.abs(numericAmount);
+  }
+
+  const counterpartyName =
+    numericAmount < 0
+      ? creditorName || debtorName
+      : debtorName || creditorName;
+
+  const currency = String(tx?.transaction_amount?.currency || tx?.currency || "SEK").toUpperCase().trim();
+
+  // Preserve booking_date, value_date, and transaction_date strictly as distinct fields when present.
+  // Never fabricate a date or copy booking_date into transaction_date when missing.
+  const normalizeIsoDate = (val: any): string | null => {
+    if (!val || typeof val !== "string") return null;
+    const trimmed = val.trim();
+    const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : null;
+  };
+
+  const bookingDate = normalizeIsoDate(tx?.booking_date);
+  const valueDate = normalizeIsoDate(tx?.value_date);
+  const transactionDate = normalizeIsoDate(tx?.transaction_date);
+
+  // Build deterministic unique key per bank item; occurrenceIndex disambiguates legitimate
+  // identical purchases on the same day when the bank omits a unique transaction_id.
   const rawId =
     tx?.entry_reference ||
     tx?.transaction_id ||
     tx?.internal_transaction_id ||
     null;
 
-  const externalKey = rawId
-    ? `${rawId}_${bookingStatus}`
-    : `${bookingStatus}_${bookingDate || transactionDate || "nodate"}_${numericAmount.toFixed(2)}_${currency}_${description.slice(0, 64)}`;
+  const dateAnchor = bookingDate || transactionDate || valueDate || "nodate";
+  const baseExternalKey = rawId
+    ? `${String(rawId).trim()}_${bookingStatus}`
+    : `${bookingStatus}_${dateAnchor}_${numericAmount.toFixed(2)}_${currency}_${description.slice(0, 64)}`;
+
+  const externalKey = occurrenceIndex > 1 ? `${baseExternalKey}#${occurrenceIndex}` : baseExternalKey;
 
   return {
     description,
@@ -343,12 +403,52 @@ function extractCounterpartyAndDescription(tx: any): {
     amount: numericAmount,
     currency,
     creditDebitIndicator: indicator,
+    baseExternalKey,
     externalKey,
     bookingDate,
     valueDate,
     transactionDate,
     bookingStatus,
   };
+}
+
+function buildBatchTransactionRows(
+  rawTxs: any[],
+  userId: string,
+  connectionId: string,
+  bankAccountId: string,
+): any[] {
+  const baseKeyCounts = new Map<string, number>();
+  const rows: any[] = [];
+
+  for (const tx of rawTxs) {
+    const firstPass = extractCounterpartyAndDescription(tx, 1);
+    const nextCount = (baseKeyCounts.get(firstPass.baseExternalKey) || 0) + 1;
+    baseKeyCounts.set(firstPass.baseExternalKey, nextCount);
+
+    const parsed = nextCount > 1 ? extractCounterpartyAndDescription(tx, nextCount) : firstPass;
+    rows.push({
+      user_id: userId,
+      connection_id: connectionId,
+      bank_account_id: bankAccountId,
+      external_key: parsed.externalKey,
+      entry_reference: tx?.entry_reference || null,
+      transaction_id: tx?.transaction_id || null,
+      booking_status: parsed.bookingStatus,
+      booking_date: parsed.bookingDate,
+      value_date: parsed.valueDate,
+      transaction_date: parsed.transactionDate,
+      amount: parsed.amount,
+      currency: parsed.currency,
+      credit_debit_indicator: parsed.creditDebitIndicator,
+      description: parsed.description,
+      counterparty_name: parsed.counterpartyName,
+      raw_json: tx,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  return rows;
 }
 
 function extractClientIp(req: Request): string | null {
@@ -697,7 +797,7 @@ serve(async (req: Request) => {
         sessionData?.access?.valid_until ||
         new Date(Date.now() + 89 * 24 * 60 * 60 * 1000).toISOString();
 
-      // Determine if we are renewing an existing connection for the same bank or creating a new one
+      // Determine if we are renewing/reconnecting an existing connection for the same bank (including previously revoked/expired)
       let connectionId: string | null = stateRecord.connection_id || null;
 
       if (!connectionId) {
@@ -708,7 +808,8 @@ serve(async (req: Request) => {
           .eq("aspsp_name", stateRecord.aspsp_name)
           .eq("aspsp_country", stateRecord.aspsp_country)
           .eq("environment", envToUse)
-          .neq("status", "revoked")
+          .order("updated_at", { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         if (existingSameBank?.id) {
@@ -793,7 +894,14 @@ serve(async (req: Request) => {
         .update({ connection_id: connectionId })
         .eq("id", stateRecord.id);
 
-      // Upsert accounts returned by the bank
+      // Load existing accounts for this user+connection so we can match by stable identity (IBAN / BBAN / UID)
+      // and NEVER create duplicate copies of the same account when renewing consent or reconnecting.
+      const { data: existingConnAccounts } = await adminClient
+        .from("bank_accounts")
+        .select("*")
+        .eq("connection_id", connectionId)
+        .eq("user_id", user.id);
+
       const rawAccounts = Array.isArray(sessionData?.accounts) ? sessionData.accounts : [];
       const upsertedAccounts: any[] = [];
 
@@ -810,6 +918,7 @@ serve(async (req: Request) => {
         const name = acc?.name || acc?.product || acc?.details || stateRecord.aspsp_name;
         const product = acc?.product || acc?.cash_account_type || null;
         const currency = acc?.currency || "SEK";
+        const stableKey = normalizeAccountIdentity(iban, bban, uid);
 
         // Fetch initial balance for each available account so user can see it when choosing accounts
         let balanceInfo = {
@@ -833,32 +942,84 @@ serve(async (req: Request) => {
           // If initial balance fetch fails, still save the account so the user can select it
         }
 
-        const { data: savedAcc, error: accErr } = await adminClient
-          .from("bank_accounts")
-          .upsert(
-            {
-              connection_id: connectionId,
-              user_id: user.id,
-              provider_account_uid: uid,
-              name,
-              product,
-              iban,
-              bban,
-              currency: balanceInfo.currency || currency,
-              balance_amount: balanceInfo.amount,
-              balance_currency: balanceInfo.currency || currency,
-              balance_type: balanceInfo.balanceType,
-              balance_label: balanceInfo.balanceLabel,
-              balances_json: rawBalances,
-              last_synced_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "connection_id,provider_account_uid" },
-          )
-          .select("*")
-          .single();
+        // Check if this physical account already exists on this connection by stable_account_key, iban, bban, or uid
+        const matchedExisting = (existingConnAccounts || []).find((ea: any) => {
+          if (ea.provider_account_uid === uid) return true;
+          const eaStable = ea.stable_account_key || normalizeAccountIdentity(ea.iban, ea.bban, ea.provider_account_uid);
+          if (stableKey && eaStable === stableKey) return true;
+          if (iban && ea.iban && String(ea.iban).replace(/\s/g, "") === String(iban).replace(/\s/g, "")) return true;
+          if (bban && ea.bban && String(ea.bban).replace(/\D/g, "") === String(bban).replace(/\D/g, "") && String(bban).replace(/\D/g, "").length >= 6) return true;
+          return false;
+        });
 
-        if (!accErr && savedAcc) {
+        let savedAcc: any = null;
+
+        if (matchedExisting) {
+          const updatePayload: Record<string, any> = {
+            provider_account_uid: uid,
+            name,
+            product: product || matchedExisting.product,
+            iban: iban || matchedExisting.iban,
+            bban: bban || matchedExisting.bban,
+            currency: balanceInfo.currency || currency,
+            balance_amount: balanceInfo.amount ?? matchedExisting.balance_amount,
+            balance_currency: balanceInfo.currency || currency,
+            balance_type: balanceInfo.balanceType ?? matchedExisting.balance_type,
+            balance_label: balanceInfo.balanceLabel ?? matchedExisting.balance_label,
+            balances_json: rawBalances.length > 0 ? rawBalances : matchedExisting.balances_json,
+            last_synced_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          const { data: updatedRow, error: updErr } = await adminClient
+            .from("bank_accounts")
+            .update(updatePayload)
+            .eq("id", matchedExisting.id)
+            .select("*")
+            .single();
+          if (!updErr && updatedRow) {
+            savedAcc = updatedRow;
+          }
+        } else {
+          const { data: insertedRow, error: accErr } = await adminClient
+            .from("bank_accounts")
+            .upsert(
+              {
+                connection_id: connectionId,
+                user_id: user.id,
+                provider_account_uid: uid,
+                name,
+                product,
+                iban,
+                bban,
+                currency: balanceInfo.currency || currency,
+                balance_amount: balanceInfo.amount,
+                balance_currency: balanceInfo.currency || currency,
+                balance_type: balanceInfo.balanceType,
+                balance_label: balanceInfo.balanceLabel,
+                balances_json: rawBalances,
+                last_synced_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "connection_id,provider_account_uid" },
+            )
+            .select("*")
+            .single();
+
+          if (!accErr && insertedRow) {
+            savedAcc = insertedRow;
+          }
+        }
+
+        if (savedAcc) {
+          // Best-effort save stable_account_key if column exists
+          try {
+            await adminClient
+              .from("bank_accounts")
+              .update({ stable_account_key: stableKey })
+              .eq("id", savedAcc.id);
+          } catch {
+            // Ignore if migration 20261025 hasn't been executed yet
+          }
           upsertedAccounts.push(savedAcc);
         }
       }
@@ -880,8 +1041,116 @@ serve(async (req: Request) => {
       );
     }
 
+    // Helper: Fetch all available transaction pages for an account (up to maxPages safety bound),
+    // upserting each page idempotently without overwriting user reconciliation decisions,
+    // healing legacy positive reserved holds, and resolving reservations against booked transactions.
+    const syncAccountTransactionsMultiPage = async (params: {
+      acc: any;
+      conn: any;
+      envToUse: "production" | "sandbox";
+      loadMoreOnly: boolean;
+      maxPages?: number;
+    }) => {
+      const { acc, conn, envToUse, loadMoreOnly, maxPages = 12 } = params;
+      const dateFrom = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+      let currentContinuationKey: string | null = loadMoreOnly && acc.continuation_key ? acc.continuation_key : null;
+      let pagesFetched = 0;
+      let hitPageLimitWithMoreRemaining = false;
+      const seenActivePendingKeys = new Set<string>();
+
+      while (pagesFetched < maxPages) {
+        let txPath = `/accounts/${encodeURIComponent(acc.provider_account_uid)}/transactions`;
+        if (currentContinuationKey) {
+          txPath += `?continuation_key=${encodeURIComponent(currentContinuationKey)}`;
+        } else {
+          txPath += `?date_from=${dateFrom}`;
+        }
+
+        const txData = await enableBankingRequest(txPath, {
+          method: "GET",
+          environment: envToUse,
+          psuIpAddress,
+          psuUserAgent,
+        });
+
+        pagesFetched += 1;
+        const rawTxs = Array.isArray(txData?.transactions) ? txData.transactions : [];
+        const nextContinuationKey: string | null = txData?.continuation_key || null;
+
+        if (rawTxs.length > 0) {
+          const rowsToUpsert = buildBatchTransactionRows(rawTxs, user.id, conn.id, acc.id);
+          const uniqueMap = new Map<string, any>();
+          for (const row of rowsToUpsert) {
+            uniqueMap.set(row.external_key, row);
+            if (row.booking_status === "PDNG" || row.booking_status === "HOLD") {
+              seenActivePendingKeys.add(row.external_key);
+            }
+          }
+
+          await adminClient
+            .from("bank_transactions")
+            .upsert(Array.from(uniqueMap.values()), {
+              onConflict: "bank_account_id,external_key",
+            });
+        }
+
+        currentContinuationKey = nextContinuationKey;
+
+        // Save continuation_key after every page so an interrupted sync can resume without gaps or duplicates
+        await adminClient
+          .from("bank_accounts")
+          .update({
+            continuation_key: currentContinuationKey,
+            last_synced_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", acc.id);
+
+        if (!currentContinuationKey) {
+          break;
+        }
+        if (pagesFetched >= maxPages && currentContinuationKey) {
+          hitPageLimitWithMoreRemaining = true;
+          break;
+        }
+      }
+
+      // Best-effort update of has_incomplete_history
+      try {
+        await adminClient
+          .from("bank_accounts")
+          .update({ has_incomplete_history: hitPageLimitWithMoreRemaining })
+          .eq("id", acc.id);
+      } catch {
+        // Ignore if column not yet migrated
+      }
+
+      // Heal any legacy positive reserved (PDNG/HOLD) card purchase rows on this account
+      try {
+        const { data: pendingRows } = await adminClient
+          .from("bank_transactions")
+          .select("id, external_key, amount, description, counterparty_name, booking_status, transaction_date, booking_date")
+          .eq("bank_account_id", acc.id)
+          .eq("user_id", user.id)
+          .in("booking_status", ["PDNG", "HOLD"]);
+
+        for (const pRow of pendingRows || []) {
+          const numAmt = Number(pRow.amount) || 0;
+          if (numAmt > 0 && !isLikelyIncomingCreditText(pRow.description || "")) {
+            await adminClient
+              .from("bank_transactions")
+              .update({ amount: -Math.abs(numAmt) })
+              .eq("id", pRow.id);
+          }
+        }
+      } catch {
+        // Ignore healing errors
+      }
+    };
+
     // -------------------------------------------------------------------------
-    // ACTION: select-accounts (Save user's chosen accounts and perform initial sync)
+    // ACTION: select-accounts (Save user's chosen accounts and perform initial multi-page sync)
     // -------------------------------------------------------------------------
     if (action === "select-accounts") {
       const connectionId = String(body?.connectionId || "").trim();
@@ -896,7 +1165,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // Verify ownership
       const { data: conn } = await adminClient
         .from("bank_connections")
         .select("*")
@@ -929,71 +1197,20 @@ serve(async (req: Request) => {
           .eq("user_id", user.id);
       }
 
-      // Sync initial transactions for the selected accounts
       const envToUse: "production" | "sandbox" =
         conn.environment === "sandbox" ? "sandbox" : "production";
 
       const selectedAccounts = (allAccounts || []).filter((a) => selectedAccountIds.includes(a.id));
-      const dateFrom = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
       for (const acc of selectedAccounts) {
         try {
-          const txUrl = `/accounts/${encodeURIComponent(acc.provider_account_uid)}/transactions?date_from=${dateFrom}`;
-          const txData = await enableBankingRequest(txUrl, {
-            method: "GET",
-            environment: envToUse,
-            psuIpAddress,
-            psuUserAgent,
+          await syncAccountTransactionsMultiPage({
+            acc,
+            conn,
+            envToUse,
+            loadMoreOnly: false,
+            maxPages: 12,
           });
-
-          const rawTxs = Array.isArray(txData?.transactions) ? txData.transactions : [];
-          const nextContinuationKey = txData?.continuation_key || null;
-
-          if (rawTxs.length > 0) {
-            const rowsToUpsert = rawTxs.map((tx: any) => {
-              const parsed = extractCounterpartyAndDescription(tx);
-              return {
-                user_id: user.id,
-                connection_id: conn.id,
-                bank_account_id: acc.id,
-                external_key: parsed.externalKey,
-                entry_reference: tx?.entry_reference || null,
-                transaction_id: tx?.transaction_id || null,
-                booking_status: parsed.bookingStatus,
-                booking_date: parsed.bookingDate,
-                value_date: parsed.valueDate,
-                transaction_date: parsed.transactionDate,
-                amount: parsed.amount,
-                currency: parsed.currency,
-                credit_debit_indicator: parsed.creditDebitIndicator,
-                description: parsed.description,
-                counterparty_name: parsed.counterpartyName,
-                raw_json: tx,
-                updated_at: new Date().toISOString(),
-              };
-            });
-
-            // Deduplicate within batch by external_key
-            const uniqueMap = new Map<string, any>();
-            for (const row of rowsToUpsert) {
-              uniqueMap.set(row.external_key, row);
-            }
-
-            await adminClient
-              .from("bank_transactions")
-              .upsert(Array.from(uniqueMap.values()), {
-                onConflict: "bank_account_id,external_key",
-              });
-          }
-
-          await adminClient
-            .from("bank_accounts")
-            .update({
-              continuation_key: nextContinuationKey,
-              last_synced_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", acc.id);
         } catch (syncErr: any) {
           console.error("Initial transaction sync warning:", syncErr?.message || syncErr);
         }
@@ -1022,6 +1239,58 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------------------
+    // ACTION: update-account-settings (Custom account name, include_in_budget, import_start_date, ongoing_import_enabled)
+    // -------------------------------------------------------------------------
+    if (action === "update-account-settings") {
+      const bankAccountId = String(body?.bankAccountId || "").trim();
+      if (!bankAccountId) {
+        return new Response(
+          JSON.stringify({ error: "Saknar bankAccountId." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const updates: Record<string, any> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (body?.customName !== undefined) {
+        updates.custom_name = body.customName ? String(body.customName).trim() : null;
+      }
+      if (typeof body?.isSelected === "boolean") {
+        updates.is_selected = body.isSelected;
+      }
+      if (typeof body?.includeInBudget === "boolean") {
+        updates.include_in_budget = body.includeInBudget;
+      }
+      if (body?.importStartDate !== undefined) {
+        updates.import_start_date = body.importStartDate ? String(body.importStartDate).slice(0, 10) : null;
+      }
+      if (body?.reconciliationCompletedAt !== undefined) {
+        updates.reconciliation_completed_at = body.reconciliationCompletedAt;
+      }
+      if (typeof body?.ongoingImportEnabled === "boolean") {
+        updates.ongoing_import_enabled = body.ongoingImportEnabled;
+      }
+
+      const { data: updatedAcc, error: updErr } = await adminClient
+        .from("bank_accounts")
+        .update(updates)
+        .eq("id", bankAccountId)
+        .eq("user_id", user.id)
+        .select("*")
+        .single();
+
+      if (updErr) {
+        throw new Error(`Kunde inte spara kontoinställningar: ${updErr.message}`);
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, account: updatedAcc }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // -------------------------------------------------------------------------
     // ACTION: status (List user's bank connections & accounts, checking consent expiration)
     // -------------------------------------------------------------------------
     if (action === "status") {
@@ -1036,7 +1305,6 @@ serve(async (req: Request) => {
         throw new Error(`Kunde inte läsa bankkopplingar: ${connErr.message}`);
       }
 
-      // Check if any active connection has passed valid_until
       const nowMs = Date.now();
       const updatedConnections = [];
       for (const conn of connections || []) {
@@ -1057,27 +1325,33 @@ serve(async (req: Request) => {
         }
       }
 
-      const { data: accounts, error: accErr } = await adminClient
-        .from("bank_accounts")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
+      const activeConnIds = updatedConnections.map((c) => c.id);
+      let accounts: any[] = [];
+      if (activeConnIds.length > 0) {
+        const { data: accData, error: accErr } = await adminClient
+          .from("bank_accounts")
+          .select("*")
+          .eq("user_id", user.id)
+          .in("connection_id", activeConnIds)
+          .order("created_at", { ascending: true });
 
-      if (accErr) {
-        throw new Error(`Kunde inte läsa bankkonton: ${accErr.message}`);
+        if (accErr) {
+          throw new Error(`Kunde inte läsa bankkonton: ${accErr.message}`);
+        }
+        accounts = accData || [];
       }
 
       return new Response(
         JSON.stringify({
           connections: updatedConnections,
-          accounts: accounts || [],
+          accounts,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     // -------------------------------------------------------------------------
-    // ACTION: sync (Refresh balances & transactions for selected accounts, or load more via continuation_key)
+    // ACTION: sync (Refresh balances & multi-page transactions for selected accounts, or resume via continuation_key)
     // -------------------------------------------------------------------------
     if (action === "sync") {
       const targetConnectionId = body?.connectionId ? String(body.connectionId) : null;
@@ -1140,7 +1414,6 @@ serve(async (req: Request) => {
 
         for (const acc of accounts || []) {
           try {
-            // 1. Update balances unless user only clicked "Hämta äldre transaktioner" (loadMoreOnly)
             if (!loadMoreOnly) {
               const balRes = await enableBankingRequest(
                 `/accounts/${encodeURIComponent(acc.provider_account_uid)}/balances`,
@@ -1168,77 +1441,18 @@ serve(async (req: Request) => {
                 .eq("id", acc.id);
             }
 
-            // 2. Fetch transactions (either latest or next page via continuation_key)
-            let txPath = `/accounts/${encodeURIComponent(acc.provider_account_uid)}/transactions`;
-            if (loadMoreOnly && acc.continuation_key) {
-              txPath += `?continuation_key=${encodeURIComponent(acc.continuation_key)}`;
-            } else {
-              const dateFrom = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
-                .toISOString()
-                .split("T")[0];
-              txPath += `?date_from=${dateFrom}`;
-            }
-
-            const txData = await enableBankingRequest(txPath, {
-              method: "GET",
-              environment: envToUse,
-              psuIpAddress,
-              psuUserAgent,
+            await syncAccountTransactionsMultiPage({
+              acc,
+              conn,
+              envToUse,
+              loadMoreOnly,
+              maxPages: 12,
             });
-
-            const rawTxs = Array.isArray(txData?.transactions) ? txData.transactions : [];
-            const nextContinuationKey = txData?.continuation_key || null;
-
-            if (rawTxs.length > 0) {
-              const rowsToUpsert = rawTxs.map((tx: any) => {
-                const parsed = extractCounterpartyAndDescription(tx);
-                return {
-                  user_id: user.id,
-                  connection_id: conn.id,
-                  bank_account_id: acc.id,
-                  external_key: parsed.externalKey,
-                  entry_reference: tx?.entry_reference || null,
-                  transaction_id: tx?.transaction_id || null,
-                  booking_status: parsed.bookingStatus,
-                  booking_date: parsed.bookingDate,
-                  value_date: parsed.valueDate,
-                  transaction_date: parsed.transactionDate,
-                  amount: parsed.amount,
-                  currency: parsed.currency,
-                  credit_debit_indicator: parsed.creditDebitIndicator,
-                  description: parsed.description,
-                  counterparty_name: parsed.counterpartyName,
-                  raw_json: tx,
-                  updated_at: new Date().toISOString(),
-                };
-              });
-
-              const uniqueMap = new Map<string, any>();
-              for (const row of rowsToUpsert) {
-                uniqueMap.set(row.external_key, row);
-              }
-
-              await adminClient
-                .from("bank_transactions")
-                .upsert(Array.from(uniqueMap.values()), {
-                  onConflict: "bank_account_id,external_key",
-                });
-            }
-
-            await adminClient
-              .from("bank_accounts")
-              .update({
-                continuation_key: nextContinuationKey,
-                last_synced_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", acc.id);
           } catch (err: any) {
             const status = err?.status;
             const message = err?.message || "Kunde inte uppdatera konto";
             syncErrors.push(`${acc.name}: ${message}`);
 
-            // If Enable Banking returns 401/403/422 due to expired or revoked consent, mark connection expired
             if (status === 401 || status === 403 || message.toLowerCase().includes("expired") || message.toLowerCase().includes("consent")) {
               await adminClient
                 .from("bank_connections")
@@ -1281,11 +1495,15 @@ serve(async (req: Request) => {
         .neq("status", "revoked")
         .order("created_at", { ascending: false });
 
-      const { data: refreshedAccounts } = await adminClient
-        .from("bank_accounts")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
+      const activeIds = (refreshedConnections || []).map((c: any) => c.id);
+      const { data: refreshedAccounts } = activeIds.length > 0
+        ? await adminClient
+            .from("bank_accounts")
+            .select("*")
+            .eq("user_id", user.id)
+            .in("connection_id", activeIds)
+            .order("created_at", { ascending: true })
+        : { data: [] };
 
       return new Response(
         JSON.stringify({
@@ -1304,16 +1522,26 @@ serve(async (req: Request) => {
       const bankAccountId = body?.bankAccountId ? String(body.bankAccountId) : null;
       const statusFilter = body?.statusFilter as "all" | "booked" | "reserved" | undefined;
       const page = Math.max(1, Number(body?.page) || 1);
-      const pageSize = Math.min(100, Math.max(10, Number(body?.pageSize) || 30));
+      const pageSize = Math.min(200, Math.max(10, Number(body?.pageSize) || 30));
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      // Only show transactions from selected accounts of active/expired (non-revoked) connections
-      const { data: selectedAccounts } = await adminClient
-        .from("bank_accounts")
-        .select("id, name, currency, continuation_key, connection_id")
+      const { data: activeConns } = await adminClient
+        .from("bank_connections")
+        .select("id")
         .eq("user_id", user.id)
-        .eq("is_selected", true);
+        .neq("status", "revoked");
+
+      const activeConnIds = (activeConns || []).map((c: any) => c.id);
+
+      const { data: selectedAccounts } = activeConnIds.length > 0
+        ? await adminClient
+            .from("bank_accounts")
+            .select("id, name, currency, continuation_key, connection_id")
+            .eq("user_id", user.id)
+            .in("connection_id", activeConnIds)
+            .eq("is_selected", true)
+        : { data: [] };
 
       const allowedAccountIds = (selectedAccounts || []).map((a) => a.id);
 
@@ -1353,7 +1581,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // Count booked vs reserved for badges
       const { count: bookedCount } = await adminClient
         .from("bank_transactions")
         .select("id", { count: "exact", head: true })
@@ -1410,7 +1637,8 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------------------
-    // ACTION: disconnect (Revoke consent via DELETE /sessions/{session_id} and clean up)
+    // ACTION: disconnect (Revoke consent via DELETE /sessions/{session_id}, stop future sync,
+    // and mark connection 'revoked' WITHOUT deleting imported history or account reconciliation metadata)
     // -------------------------------------------------------------------------
     if (action === "disconnect") {
       const connectionId = String(body?.connectionId || "").trim();
@@ -1458,21 +1686,53 @@ serve(async (req: Request) => {
           );
           providerRevoked = true;
         } catch (revokeErr: any) {
-          // Even if the bank session was already expired/revoked on Enable Banking's side,
-          // we still complete local cleanup and stop all future sync.
           console.warn("Enable Banking session revoke notice:", revokeErr?.message || revokeErr);
         }
       }
 
-      // Delete connection (cascades to bank_provider_sessions, bank_accounts, bank_transactions)
-      const { error: deleteErr } = await adminClient
-        .from("bank_connections")
+      // Remove server-side provider session credentials
+      await adminClient
+        .from("bank_provider_sessions")
         .delete()
+        .eq("connection_id", connectionId)
+        .eq("user_id", user.id);
+
+      // Stop ongoing import and clear continuation keys on accounts, while preserving
+      // accounts and bank_transactions so imported history and budget remain intact
+      // and reconnecting the same bank later reuses the exact same accounts seamlessly.
+      try {
+        await adminClient
+          .from("bank_accounts")
+          .update({
+            continuation_key: null,
+            ongoing_import_enabled: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("connection_id", connectionId)
+          .eq("user_id", user.id);
+      } catch {
+        await adminClient
+          .from("bank_accounts")
+          .update({
+            continuation_key: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("connection_id", connectionId)
+          .eq("user_id", user.id);
+      }
+
+      const { error: revokeUpdateErr } = await adminClient
+        .from("bank_connections")
+        .update({
+          status: "revoked",
+          last_error: null,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", connectionId)
         .eq("user_id", user.id);
 
-      if (deleteErr) {
-        throw new Error(`Kunde inte ta bort bankanslutning: ${deleteErr.message}`);
+      if (revokeUpdateErr) {
+        throw new Error(`Kunde inte koppla från bankanslutning: ${revokeUpdateErr.message}`);
       }
 
       return new Response(

@@ -27,6 +27,7 @@ import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
 import { getCategoryColor } from "../utils/categoryColors";
+import { BankAccount } from "../services/bankService";
 
 interface TodayViewProps {
   stats: any;
@@ -61,6 +62,7 @@ interface TodayViewProps {
   onOpenCalculator?: () => void;
   isDemoMode?: boolean;
   onToggleStar?: (transaction: Transaction) => void;
+  bankAccounts?: BankAccount[];
 }
 
 export function TodayView({
@@ -96,6 +98,7 @@ export function TodayView({
   onViewMonthlySaving,
   onUpdateConfig,
   onOpenCalculator,
+  bankAccounts = [],
 }: TodayViewProps) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [selectedCategoryModalName, setSelectedCategoryModalName] = useState<string | null>(null);
@@ -345,8 +348,9 @@ export function TodayView({
 
   const recentPeriodTransactions = useMemo(() => {
     if (!stats?.periodTransactions || !Array.isArray(stats.periodTransactions)) return [];
-    return stats.periodTransactions.slice(0, 5);
-  }, [stats?.periodTransactions]);
+    const todayIds = new Set((displayedVariableTransactions || []).map((tx: Transaction) => tx.id));
+    return stats.periodTransactions.filter((tx: Transaction) => !todayIds.has(tx.id)).slice(0, 8);
+  }, [stats?.periodTransactions, displayedVariableTransactions]);
 
   const selectedDayNetTotal = useMemo(() => {
     const varSum = displayedVariableTransactions.reduce((acc: number, tx: Transaction) => {
@@ -364,7 +368,7 @@ export function TodayView({
 
   return (
     <div className="space-y-[var(--menu-content-gap)] font-sans">
-      {/* 1. Unified Main Summary Module (Kvar att spendera + Hela ekonomin) */}
+      {/* 1. Unified Main Summary Module (Kvar denna perioden + Hela ekonomin) */}
       <GreetingModule
         userName={userName}
         availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -397,6 +401,7 @@ export function TodayView({
         onQuickAddExpense={onQuickAddExpense}
         onOpenCalculator={onOpenCalculator}
         allTransactions={allTransactions}
+        bankAccounts={bankAccounts}
       />
 
       {/* 1b. Variable Amounts Awaiting Confirmation (endast om det finns poster att bekräfta) */}
@@ -617,56 +622,96 @@ export function TodayView({
         {/* Selected Day's Transactions List */}
         <div className="pt-0.5">
           {displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0 ? (
-            <div className="rounded-card bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-subtle">
-              {displayedVariableTransactions.map((transaction: Transaction) => (
-                <TransactionItem
-                  key={transaction.id}
-                  transaction={transaction}
-                  isGrouped={true}
-                  onView={onViewTransaction}
-                  onDelete={onDeleteTransaction}
-                  onToggleStar={onToggleStar}
-                  config={config}
-                  onClick={() => {
-                    if (onViewTransaction) onViewTransaction(transaction);
-                  }}
-                />
-              ))}
-
-              {displayedFixedTransactions.map((item) => {
-                const isItemVariable = Boolean(item.isVariable || item.originalItem?.isVariable || item.originalItem?.is_variable);
-                const tx: Transaction = {
-                  id: item.id,
-                  merchant: item.merchant,
-                  category: item.category,
-                  amount: item.amount,
-                  type: item.type as any,
-                  date: selectedDate.toISOString(),
-                  isVariable: isItemVariable,
-                  icon: item.icon || item.originalItem?.icon,
-                  logo: item.logo || item.originalItem?.logo,
-                };
-
-                return (
+            <div className="space-y-4">
+              <div className="rounded-card bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-subtle">
+                {displayedVariableTransactions.map((transaction: Transaction) => (
                   <TransactionItem
-                    key={item.id}
-                    transaction={tx}
-                    isFixed={true}
+                    key={transaction.id}
+                    transaction={transaction}
                     isGrouped={true}
-                    isVariable={isItemVariable}
+                    onView={onViewTransaction}
+                    onDelete={onDeleteTransaction}
+                    onToggleStar={onToggleStar}
                     config={config}
                     onClick={() => {
-                      if (item.type === "income" && onViewIncome) {
-                        onViewIncome(item.originalItem);
-                      } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
-                        onViewMonthlySaving(item.originalItem);
-                      } else if (onViewFixedExpense) {
-                        onViewFixedExpense(item.originalItem);
-                      }
+                      if (onViewTransaction) onViewTransaction(transaction);
                     }}
                   />
-                );
-              })}
+                ))}
+
+                {displayedFixedTransactions.map((item) => {
+                  const isItemVariable = Boolean(item.isVariable || item.originalItem?.isVariable || item.originalItem?.is_variable);
+                  const tx: Transaction = {
+                    id: item.id,
+                    merchant: item.merchant,
+                    category: item.category,
+                    amount: item.amount,
+                    type: item.type as any,
+                    date: selectedDate.toISOString(),
+                    isVariable: isItemVariable,
+                    icon: item.icon || item.originalItem?.icon,
+                    logo: item.logo || item.originalItem?.logo,
+                  };
+
+                  return (
+                    <TransactionItem
+                      key={item.id}
+                      transaction={tx}
+                      isFixed={true}
+                      isGrouped={true}
+                      isVariable={isItemVariable}
+                      config={config}
+                      onClick={() => {
+                        if (item.type === "income" && onViewIncome) {
+                          onViewIncome(item.originalItem);
+                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
+                          onViewMonthlySaving(item.originalItem);
+                        } else if (onViewFixedExpense) {
+                          onViewFixedExpense(item.originalItem);
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              {isTodaySelected && recentPeriodTransactions.length > 0 && (
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between px-0.5">
+                    <h3 className="text-section-title">
+                      {lang === "en" ? "Earlier in period" : "Tidigare i perioden"}
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback.light === 'function') feedback.light();
+                        onNavigate("transactions");
+                      }}
+                      className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5 bg-transparent border-none p-0"
+                    >
+                      <span>{lang === "en" ? "See all" : "Visa alla"}</span>
+                      <ChevronRight size={12} strokeWidth={2} />
+                    </button>
+                  </div>
+
+                  <div className="rounded-card bg-[var(--surface-color)] shadow-subtle overflow-hidden divide-subtle">
+                    {recentPeriodTransactions.map((transaction: Transaction) => (
+                      <TransactionItem
+                        key={transaction.id}
+                        transaction={transaction}
+                        isGrouped={true}
+                        showDate={true}
+                        onView={onViewTransaction}
+                        onDelete={onDeleteTransaction}
+                        onToggleStar={onToggleStar}
+                        config={config}
+                        onClick={() => {
+                          if (onViewTransaction) onViewTransaction(transaction);
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : isTodaySelected && recentPeriodTransactions.length > 0 ? (
             <div className="space-y-4">

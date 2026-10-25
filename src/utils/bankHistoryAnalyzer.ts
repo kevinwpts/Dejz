@@ -1,16 +1,282 @@
-import { BankTransactionItem } from '../services/bankService';
+import { BankAccount, BankTransactionItem } from '../services/bankService';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
-import { FixedExpense, Frequency, Income, PaydayType, WeekendAdjustment } from '../types';
+import { Config, FixedExpense, Frequency, Income, PaydayType, Transaction, WeekendAdjustment } from '../types';
 import { getLogoUrl } from './logo';
 import { getPeriodBoundaries } from './date';
 
+export type DetectedFixedExpenseWithEvidence = Omit<FixedExpense, 'id'> & {
+  detectedOccurrences: number;
+  lastDate?: string;
+  evidenceDates?: string[];
+  evidenceAmounts?: number[];
+  evidenceSummary?: string;
+};
+
+export type DetectedIncomeWithEvidence = Omit<Income, 'id'> & {
+  detectedOccurrences?: number;
+  lastDate?: string;
+  evidenceDates?: string[];
+  evidenceAmounts?: number[];
+  evidenceSummary?: string;
+};
+
 export interface AnalyzedBankOnboardingData {
-  detectedFixedExpenses: Array<Omit<FixedExpense, 'id'> & { detectedOccurrences: number; lastDate?: string }>;
-  detectedIncomes: Array<Omit<Income, 'id'>>;
+  detectedFixedExpenses: DetectedFixedExpenseWithEvidence[];
+  detectedIncomes: DetectedIncomeWithEvidence[];
   suggestedPayday: number | null;
   calculatedSpentSincePayday: number;
   analyzedTransactionCount: number;
 }
+
+export interface ExistingBudgetFixedExpenseMatch {
+  id: string;
+  detected: DetectedFixedExpenseWithEvidence;
+  status: 'new' | 'amount_changed' | 'already_exists';
+  existingExpense?: FixedExpense;
+}
+
+export interface ExistingBudgetIncomeMatch {
+  id: string;
+  detected: DetectedIncomeWithEvidence;
+  status: 'new' | 'amount_changed' | 'already_exists';
+  existingIncome?: Income;
+}
+
+export interface PeriodBankPurchaseCandidate {
+  bankTxId: string;
+  externalKey: string;
+  merchant: string;
+  rawDescription: string;
+  amount: number; // positive expense amount for app Transaction
+  dateIso: string;
+  timestamp: number;
+  category: string;
+  logo?: string;
+  isReserved: boolean;
+  alreadyInApp: boolean;
+}
+
+export interface ExistingBudgetBankSyncPlan {
+  periodStartIso: string;
+  periodPurchases: PeriodBankPurchaseCandidate[];
+  skippedFixedInPeriodCount: number;
+  skippedInternalTransfersCount: number;
+  fixedExpenseMatches: ExistingBudgetFixedExpenseMatch[];
+  incomeMatches: ExistingBudgetIncomeMatch[];
+  analyzedTransactionCount: number;
+}
+
+// ---------------------------------------------------------------------------
+// 1. ACCOUNT DISPLAY & SELECTION HELPERS
+// ---------------------------------------------------------------------------
+
+export function isLikelySavingsAccount(acc: Pick<BankAccount, 'name' | 'product' | 'custom_name'>): boolean {
+  const combined = `${acc.custom_name || ''} ${acc.product || ''} ${acc.name || ''}`.toLowerCase();
+  return (
+    combined.includes('sparkonto') ||
+    combined.includes('enkla sparkontot') ||
+    combined.includes('framtidskonto') ||
+    combined.includes('placeringskonto') ||
+    combined.includes('kapitalkonto') ||
+    combined.includes('fasträntekonto') ||
+    combined.includes('buffer')
+  );
+}
+
+export function formatBankAccountNumber(rawNumber: string | null | undefined): string {
+  if (!rawNumber) return '';
+  const digits = rawNumber.replace(/\s+/g, '');
+  // Format 11-digit Swedish SEB/bank account numbers (e.g. 51960050753 -> 5196 00 507 53)
+  if (/^\d{11}$/.test(digits)) {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 9)} ${digits.slice(9, 11)}`;
+  }
+  return rawNumber;
+}
+
+function isLikelyPersonFullName(rawName: string): boolean {
+  const trimmed = rawName.trim();
+  if (!trimmed) return false;
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.includes('konto') ||
+    lower.includes('spar') ||
+    lower.includes('lön') ||
+    lower.includes('privat') ||
+    lower.includes('kort') ||
+    lower.includes('buffert') ||
+    lower.includes('gemensamt') ||
+    lower.includes('hushåll')
+  ) {
+    return false;
+  }
+  // Many Swedish banks (like SEB) put the account holder's full name in `acc.name` in ALL CAPS (e.g. "KEVIN PETERSEN")
+  const words = trimmed.split(/\s+/);
+  if (words.length >= 2 && words.length <= 4 && trimmed === trimmed.toUpperCase() && /^[A-ZÅÄÖ\s-]+$/.test(trimmed)) {
+    return true;
+  }
+  return false;
+}
+
+function isRawAccountNumberOrIban(str: string): boolean {
+  const cleaned = str.replace(/[\s-]/g, '');
+  if (/^\d{6,}$/.test(cleaned)) return true;
+  if (/^[A-Z]{2}\d{2}[A-Z0-9]{8,}$/i.test(cleaned)) return true;
+  return false;
+}
+
+export function getBankAccountTitle(
+  acc: Pick<BankAccount, 'name' | 'product' | 'bban' | 'iban' | 'custom_name'> & {
+    provider_account_uid?: string | null;
+    aspsp_name?: string | null;
+  },
+  aspspName?: string | null
+): string {
+  const custom = (acc.custom_name || '').trim();
+  if (custom) return custom;
+
+  const product = (acc.product || '').trim();
+  const rawName = (acc.name || '').trim();
+
+  if (product && !isLikelyPersonFullName(product) && !isRawAccountNumberOrIban(product)) {
+    return product;
+  }
+
+  if (rawName && !isLikelyPersonFullName(rawName) && !isRawAccountNumberOrIban(rawName)) {
+    return rawName;
+  }
+
+  const bankPrefix = (aspspName || acc.aspsp_name || '').trim() || 'SEB';
+  const shortBank = bankPrefix.toUpperCase().includes('SEB') ? 'SEB' : bankPrefix;
+  const rawNum = (acc.bban || acc.iban || acc.provider_account_uid || '').replace(/\D+/g, '');
+  const last4 = rawNum.length >= 4 ? rawNum.slice(-4) : '';
+  return last4 ? `${shortBank}-konto · ${last4}` : `${shortBank}-konto`;
+}
+
+export function getBankAccountShortLabel(
+  acc: Pick<BankAccount, 'name' | 'product' | 'bban' | 'iban' | 'provider_account_uid' | 'custom_name'> & {
+    aspsp_name?: string | null;
+  },
+  aspspName?: string | null
+): string {
+  const custom = (acc.custom_name || '').trim();
+  const rawNum = (acc.bban || acc.iban || acc.provider_account_uid || '').replace(/\D+/g, '');
+  const last4 = rawNum.length >= 4 ? rawNum.slice(-4) : '';
+
+  if (custom) {
+    return last4 && !custom.endsWith(last4) ? `${custom} · ${last4}` : custom;
+  }
+
+  const title = getBankAccountTitle(acc, aspspName);
+  if (last4 && !title.endsWith(last4)) {
+    return `${title} · ${last4}`;
+  }
+  return title;
+}
+
+export function formatCleanBalanceLabel(rawLabel: string | null | undefined): string {
+  if (!rawLabel) return 'Tillgängligt saldo';
+  // Remove technical ISO codes like (ITAV), (CLAV), (ITBD), (CLBD), (SEK)
+  const cleaned = rawLabel
+    .replace(/\s*\((ITAV|CLAV|ITBD|CLBD|XPCD|OPAV|OPBD|PRCD|VALU|INFO|SEK|EUR|DKK|NOK)\)/gi, '')
+    .trim();
+  return cleaned || 'Tillgängligt saldo';
+}
+
+// ---------------------------------------------------------------------------
+// 2. TRANSACTION SIGN NORMALIZATION & INTERNAL TRANSFER FILTERING
+// ---------------------------------------------------------------------------
+
+const INFLOW_DESCRIPTION_KEYWORDS = [
+  'lön',
+  'lon ',
+  'salary',
+  'utbetalning',
+  'insättning',
+  'insattning',
+  'återköp',
+  'aterkop',
+  'retur',
+  'refund',
+  'barnbidrag',
+  'försäkringskassan',
+  'forsakringskassan',
+  'skatteverket',
+  'återbetalning',
+  'aterbetalning',
+];
+
+/**
+ * Normalizes the signed amount of a bank transaction.
+ * Fixes SEB reserved card purchases (status PDNG / HOLD) where the bank returns
+ * a positive unsigned amount (e.g. +399 SEK for Maxi ICA, +33 SEK for McDonald's, +12 SEK for Apple)
+ * without a DBIT indicator.
+ */
+export function getNormalizedBankTxAmount(tx: BankTransactionItem): number {
+  const raw = Number(tx.amount);
+  if (!Number.isFinite(raw) || raw === 0) return 0;
+
+  if (raw < 0) return raw;
+  if (tx.credit_debit_indicator === 'DBIT') return -Math.abs(raw);
+
+  const isReserved = tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD';
+  const combinedText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+  const hasExplicitInflowKeyword = INFLOW_DESCRIPTION_KEYWORDS.some((kw) => combinedText.includes(kw));
+
+  // Reserved / pending transactions on Swedish bank accounts are card reservations or pending outgoing bills
+  if (isReserved && !hasExplicitInflowKeyword) {
+    return -Math.abs(raw);
+  }
+
+  // Also check if a booked transaction has a known card/expense merchant but missing DBIT indicator
+  if (!tx.credit_debit_indicator && !hasExplicitInflowKeyword) {
+    const looksLikePurchase =
+      VARIABLE_SPENDING_EXCLUSIONS.some((ex) => combinedText.includes(ex)) ||
+      EXTENDED_FIXED_EXPENSE_RULES.some((r) => r.keywords.some((kw) => combinedText.includes(kw)));
+    if (looksLikePurchase) {
+      return -Math.abs(raw);
+    }
+  }
+
+  return raw;
+}
+
+/**
+ * Detects micro-savings and internal transfers between the user's own accounts
+ * (e.g. SEB "Enkla vardagen", "Enkla sparkontot", "Överföring egna konton")
+ * so they are never treated as consumption or fixed expenses.
+ */
+export function isInternalTransferOrMicroSavings(
+  tx: BankTransactionItem,
+  userAccounts: BankAccount[] = []
+): boolean {
+  const combined = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase().trim();
+
+  if (
+    combined.includes('enkla vardagen') ||
+    combined.includes('enkla sparkontot') ||
+    combined.includes('egna konton') ||
+    combined.includes('egen överföring') ||
+    combined.includes('egen overforing') ||
+    combined.includes('mellan egna') ||
+    combined.includes('sparkonto')
+  ) {
+    return true;
+  }
+
+  // Check if the description is just an account number belonging to one of the user's own accounts
+  for (const acc of userAccounts) {
+    const bbanDigits = (acc.bban || '').replace(/\D+/g, '');
+    if (bbanDigits.length >= 7 && combined.replace(/\D+/g, '').includes(bbanDigits)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// ---------------------------------------------------------------------------
+// 3. FIXED EXPENSE & EVERYDAY MERCHANT RULES
+// ---------------------------------------------------------------------------
 
 interface KeywordRule {
   keywords: string[];
@@ -39,13 +305,51 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   { keywords: ['audible'], presetId: 'audible', fallbackName: 'Audible', category: 'Streaming', paymentMethod: 'Kort' },
   { keywords: ['tidal'], presetId: 'tidal', fallbackName: 'Tidal', category: 'Streaming', paymentMethod: 'Kort' },
 
-  // Boende, El & Larm
-  { keywords: ['hyra', 'bostadsrätt', 'bostadsratt', 'brf ', 'hsb ', 'riksbyggen', 'sbc ', 'heimstaden', 'rikky', 'wallenstam', 'willhem', 'akelius', 'stena fastighet', 'balder', 'familjebostäder', 'poseidon', 'stockholmshem', 'svenska bostäder', 'mimer', 'gavlegårdarna', ' Uppsalahem', 'botkyrkabyggen', 'huge bostäder'], presetId: 'hyra-bostad', fallbackName: 'Hyra / Månadsavgift', category: 'Boende', paymentMethod: 'Bankgiro' },
+  // Boende, Hyra, Fastigheter, El & Larm
+  {
+    keywords: [
+      'sveafastigheter',
+      'fastigheter',
+      'fastighets',
+      'hyra',
+      'hyresavi',
+      'bostadsrätt',
+      'bostadsratt',
+      'brf ',
+      'hsb ',
+      'riksbyggen',
+      'sbc ',
+      'heimstaden',
+      'rikky',
+      'wallenstam',
+      'willhem',
+      'akelius',
+      'stena fastighet',
+      'balder',
+      'familjebostäder',
+      'familjebostader',
+      'poseidon',
+      'stockholmshem',
+      'svenska bostäder',
+      'svenska bostader',
+      'mimer',
+      'gavlegårdarna',
+      'uppsalahem',
+      'botkyrkabyggen',
+      'huge bostäder',
+      'hfba',
+      'halmstads fastighets',
+    ],
+    presetId: 'hyra-bostad',
+    fallbackName: 'Hyra / Boende',
+    category: 'Boende',
+    paymentMethod: 'Bankgiro',
+  },
   { keywords: ['bolån', 'bolan', 'bostadslån', 'hypotek', 'sbab', 'landshypotek', 'stabelo', 'amortering'], presetId: 'bostadslan-ranta', fallbackName: 'Bolån & Ränta', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['tibber'], presetId: 'tibber-el', fallbackName: 'Tibber El', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['vattenfall'], presetId: 'vattenfall-el', fallbackName: 'Vattenfall', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['fortum'], presetId: 'fortum-el', fallbackName: 'Fortum', category: 'Boende', paymentMethod: 'Autogiro' },
-  { keywords: ['ellevio', 'e.on', 'eon energi', 'göteborg energi', 'goteborg energi', 'skånska energi', 'kraftringen', 'jämtkraft', 'mälarenergi', 'tekniska verken', 'greenely', ' Bixia', 'godel'], presetId: 'elavtal', fallbackName: 'Elräkning & Nät', category: 'Boende', paymentMethod: 'Autogiro' },
+  { keywords: ['ellevio', 'e.on', 'eon energi', 'göteborg energi', 'goteborg energi', 'skånska energi', 'kraftringen', 'jämtkraft', 'mälarenergi', 'tekniska verken', 'greenely', 'bixia', 'godel', 'hemab'], presetId: 'elavtal', fallbackName: 'Elräkning & Nät', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['verisure'], presetId: 'larm-verisure', fallbackName: 'Verisure Larm', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['sector alarm'], presetId: 'larm-sector-alarm', fallbackName: 'Sector Alarm', category: 'Boende', paymentMethod: 'Autogiro' },
 
@@ -87,6 +391,7 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   { keywords: ['storstockholms lokaltrafik', 'ab sl'], presetId: 'sl-manadskort', fallbackName: 'SL Månadskort', category: 'Transport', paymentMethod: 'Kort' },
   { keywords: ['västtrafik', 'vasttrafik'], presetId: 'vasttrafik-period', fallbackName: 'Västtrafik', category: 'Transport', paymentMethod: 'Kort' },
   { keywords: ['skånetrafiken', 'skanetrafiken'], presetId: 'skanetrafiken-period', fallbackName: 'Skånetrafiken', category: 'Transport', paymentMethod: 'Kort' },
+  { keywords: ['hallandstrafiken'], fallbackName: 'Hallandstrafiken', category: 'Transport', paymentMethod: 'Kort' },
   { keywords: ['transportstyrelsen', 'trängselskatt', 'trangselskatt', 'epass24'], presetId: 'trangselskatt-infrastruktur', fallbackName: 'Trängselskatt / Fordon', category: 'Transport', paymentMethod: 'Autogiro' },
   { keywords: ['volvofinans', 'ziklo bank', 'vw finans', 'volkswagen finans', 'santander consumer', 'dnb finans', 'toyota financial'], presetId: 'bil-leasing', fallbackName: 'Billeasing / Billån', category: 'Transport', paymentMethod: 'Autogiro' },
 
@@ -122,6 +427,7 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
 // Merchants that are everyday variable purchases and should NEVER be auto-classified as fixed monthly expenses
 const VARIABLE_SPENDING_EXCLUSIONS = [
   'ica ',
+  'maxi ica',
   'ica kvantum',
   'ica nära',
   'ica supermarket',
@@ -176,22 +482,128 @@ const VARIABLE_SPENDING_EXCLUSIONS = [
   'webhallen',
 ];
 
+interface EverydayMerchantRule {
+  keywords: string[];
+  cleanName: string;
+  preferredCategories: string[];
+}
+
+const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
+  { keywords: ['maxi ica', 'ica maxi'], cleanName: 'ICA Maxi', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['ica kvantum'], cleanName: 'ICA Kvantum', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['ica supermarket'], cleanName: 'ICA Supermarket', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['ica nära', 'ica nara'], cleanName: 'ICA Nära', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['ica '], cleanName: 'ICA', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['stora coop', 'coop '], cleanName: 'Coop', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['willys'], cleanName: 'Willys', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['hemköp', 'hemkop'], cleanName: 'Hemköp', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['lidl'], cleanName: 'Lidl', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['city gross'], cleanName: 'City Gross', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['systembolaget'], cleanName: 'Systembolaget', preferredCategories: ['Mat & dryck', 'Nöjen', 'Uteliv'] },
+  { keywords: ['mcdonalds', 'mcdonald'], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['max burgers', 'max hamburger'], cleanName: 'MAX Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['burger king'], cleanName: 'Burger King', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['espresso house'], cleanName: 'Espresso House', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['pressbyrån', 'pressbyran'], cleanName: 'Pressbyrån', preferredCategories: ['Mat & dryck', 'Uteliv'] },
+  { keywords: ['7-eleven'], cleanName: '7-Eleven', preferredCategories: ['Mat & dryck', 'Uteliv'] },
+  { keywords: ['foodora'], cleanName: 'Foodora', preferredCategories: ['Uteliv', 'Mat & dryck'] },
+  { keywords: ['wolt'], cleanName: 'Wolt', preferredCategories: ['Uteliv', 'Mat & dryck'] },
+  { keywords: ['circle k'], cleanName: 'Circle K', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['okq8'], cleanName: 'OKQ8', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['preem'], cleanName: 'Preem', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['st1 '], cleanName: 'St1', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['ingo '], cleanName: 'INGO', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['easypark'], cleanName: 'EasyPark', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['aimo park', 'apcoa', 'parkster'], cleanName: 'Parkering', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['apotea'], cleanName: 'Apotea', preferredCategories: ['Hälsa', 'Shopping'] },
+  { keywords: ['apoteket', 'kronans apotek', 'apotek hjärtat', 'hjärtat'], cleanName: 'Apotek', preferredCategories: ['Hälsa', 'Shopping'] },
+  { keywords: ['clas ohlson'], cleanName: 'Clas Ohlson', preferredCategories: ['Shopping', 'Hemmet'] },
+  { keywords: ['kjell & co', 'kjell o co'], cleanName: 'Kjell & Company', preferredCategories: ['Shopping', 'Elektronik'] },
+  { keywords: ['biltema'], cleanName: 'Biltema', preferredCategories: ['Shopping', 'Transport'] },
+  { keywords: ['jula'], cleanName: 'Jula', preferredCategories: ['Shopping', 'Hemmet'] },
+  { keywords: ['rusta'], cleanName: 'Rusta', preferredCategories: ['Shopping', 'Hemmet'] },
+  { keywords: ['ikea'], cleanName: 'IKEA', preferredCategories: ['Shopping', 'Boende'] },
+  { keywords: ['normal '], cleanName: 'NORMAL', preferredCategories: ['Shopping', 'Hälsa'] },
+  { keywords: ['h&m', 'hennes & mauritz'], cleanName: 'H&M', preferredCategories: ['Shopping', 'Kläder'] },
+  { keywords: ['zara'], cleanName: 'Zara', preferredCategories: ['Shopping', 'Kläder'] },
+  { keywords: ['elgiganten'], cleanName: 'Elgiganten', preferredCategories: ['Shopping', 'Elektronik'] },
+  { keywords: ['klarna'], cleanName: 'Klarna', preferredCategories: ['Shopping', 'Övrigt'] },
+];
+
 function normalizeMerchantKey(rawText: string): string {
   return rawText
     .toLowerCase()
-    .replace(/\b(ab|aktiebolag|sverige|sweden|se|stockholm|göteborg|malmö|autogiro|betalning|kortköp|kortkop|bg|pg)\b/g, ' ')
+    .replace(/\b(ab|aktiebolag|sverige|sweden|se|stockholm|göteborg|malmö|halmstad|hovas|hovås|autogiro|betalning|kortköp|kortkop|bg|pg)\b/g, ' ')
     .replace(/[0-9*#/_.,:-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-function cleanDisplayMerchantName(rawText: string): string {
+export function cleanDisplayMerchantName(rawText: string): string {
   const cleaned = rawText
+    .replace(/^\d{5,}\s+/, '') // Strip leading reference numbers like "916601517227 SVEAFASTIGHETER"
     .replace(/^(AUTOGIRO|BG|PG|KORTKÖP|KORTKOP|BETALNING)\s+/i, '')
     .replace(/\s+\d{4,}.*$/, '')
     .trim();
-  if (!cleaned) return 'Fast utgift';
+  if (!cleaned) return 'Banktransaktion';
+  // Convert ALL CAPS to clean Title Case if longer than 3 chars
+  if (cleaned === cleaned.toUpperCase() && cleaned.length > 3) {
+    return cleaned
+      .toLowerCase()
+      .split(/\s+/)
+      .map((w) => (w.length <= 2 && w !== 'ab' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)))
+      .join(' ');
+  }
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+export function categorizeBankTransactionForApp(
+  tx: BankTransactionItem,
+  availableCategories: Array<string | { name?: string }> = [],
+  _incomeCategories?: Array<string | { name?: string }>
+): { merchant: string; category: string; logo?: string } {
+  const combined = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+  const categoryNames = (availableCategories || [])
+    .map((c) => (typeof c === 'string' ? c : c?.name || ''))
+    .filter((name): name is string => typeof name === 'string' && name.trim().length > 0);
+
+  const resolveCategory = (preferredList: string[]): string => {
+    if (categoryNames.length > 0) {
+      for (const pref of preferredList) {
+        const prefLower = (pref || '').toLowerCase();
+        const exact = categoryNames.find((c) => c.toLowerCase() === prefLower);
+        if (exact) return exact;
+        const partial = categoryNames.find(
+          (c) => c.toLowerCase().includes(prefLower) || prefLower.includes(c.toLowerCase())
+        );
+        if (partial) return partial;
+      }
+      const fallbackOther = categoryNames.find(
+        (c) => c.toLowerCase().includes('övrigt') || c.toLowerCase().includes('other')
+      );
+      return fallbackOther || categoryNames[0];
+    }
+    return preferredList[0] || 'Övrigt';
+  };
+
+  for (const rule of EVERYDAY_MERCHANT_RULES) {
+    if (rule.keywords.some((kw) => combined.includes(kw))) {
+      const category = resolveCategory(rule.preferredCategories);
+      return {
+        merchant: rule.cleanName,
+        category,
+        logo: getLogoUrl(rule.cleanName, category),
+      };
+    }
+  }
+
+  const cleanedName = cleanDisplayMerchantName(tx.counterparty_name || tx.description || 'Kortköp');
+  const category = resolveCategory(['Shopping', 'Mat & dryck', 'Övrigt']);
+  return {
+    merchant: cleanedName,
+    category,
+    logo: getLogoUrl(cleanedName, category),
+  };
 }
 
 function getDayOfMonthFromIso(dateStr: string | null | undefined, fallbackDay = 27): number {
@@ -209,40 +621,104 @@ function getYearMonthKey(dateStr: string | null | undefined): string {
   return dateStr.slice(0, 7); // YYYY-MM
 }
 
-export function analyzeBankTransactionsForOnboarding(
+function inferFrequencyFromDates(datesIso: string[]): Frequency {
+  const validDates = Array.from(new Set(datesIso.filter(Boolean))).sort((a, b) =>
+    b.localeCompare(a)
+  );
+  if (validDates.length < 2) return Frequency.MONTHLY;
+
+  const gapsDays: number[] = [];
+  for (let i = 0; i < validDates.length - 1; i++) {
+    const d1 = Date.parse(`${validDates[i]}T12:00:00`);
+    const d2 = Date.parse(`${validDates[i + 1]}T12:00:00`);
+    if (Number.isFinite(d1) && Number.isFinite(d2)) {
+      gapsDays.push(Math.abs(d1 - d2) / (1000 * 60 * 60 * 24));
+    }
+  }
+  if (gapsDays.length === 0) return Frequency.MONTHLY;
+
+  const avgGap = gapsDays.reduce((a, b) => a + b, 0) / gapsDays.length;
+  if (avgGap >= 300) return Frequency.ANNUALLY;
+  if (avgGap >= 150 && avgGap < 300) return Frequency.SEMI_ANNUALLY;
+  if (avgGap >= 70 && avgGap < 150) return Frequency.QUARTERLY;
+  return Frequency.MONTHLY;
+}
+
+function buildEvidenceSummary(
+  occurrences: number,
+  dates: string[],
+  amounts: number[],
+  frequency: Frequency,
+  isVariable?: boolean
+): string {
+  const latestDate = dates[0] || '';
+  const uniqueAmounts = Array.from(new Set(amounts.map((a) => Math.round(a))));
+  const amountLabel =
+    uniqueAmounts.length > 1
+      ? `${Math.min(...uniqueAmounts)}–${Math.max(...uniqueAmounts)} kr (rörligt)`
+      : `${uniqueAmounts[0] || 0} kr`;
+  const freqLabel = frequency || Frequency.MONTHLY;
+  return `${occurrences} ${occurrences === 1 ? 'betalning' : 'betalningar'}${
+    latestDate ? ` (senast ${latestDate})` : ''
+  } · ${amountLabel} · ${freqLabel}${isVariable && uniqueAmounts.length <= 1 ? ' (rörlig)' : ''}`;
+}
+
+// ---------------------------------------------------------------------------
+// 4. CORE HISTORICAL ANALYZER (USED IN BOTH ONBOARDING & SETTINGS SYNC)
+// ---------------------------------------------------------------------------
+
+function runCoreBankDetection(
   transactions: BankTransactionItem[],
   currentPayday = 25,
-  paydayBeforeWeekend = true
-): AnalyzedBankOnboardingData {
-  if (!Array.isArray(transactions) || transactions.length === 0) {
-    return {
-      detectedFixedExpenses: [],
-      detectedIncomes: [],
-      suggestedPayday: null,
-      calculatedSpentSincePayday: 0,
-      analyzedTransactionCount: 0,
-    };
-  }
+  paydayBeforeWeekend = true,
+  userAccounts: BankAccount[] = []
+) {
+  // Only analyze booked transactions (or transactions without status); reserved holds are not proof of recurring agreements
+  const bookedOrDefault = transactions.filter(
+    (t) => t.booking_status !== 'PDNG' && t.booking_status !== 'HOLD'
+  );
 
   // Sort newest first
-  const sorted = [...transactions].sort((a, b) => {
+  const sorted = [...bookedOrDefault].sort((a, b) => {
     const dA = a.booking_date || a.transaction_date || a.value_date || '';
     const dB = b.booking_date || b.transaction_date || b.value_date || '';
     return dB.localeCompare(dA);
   });
 
-  const outflows = sorted.filter((t) => Number(t.amount) < 0);
-  const inflows = sorted.filter((t) => Number(t.amount) > 0);
+  const internalTransferIds = new Set<string>();
+  for (const tx of sorted) {
+    if (isInternalTransferOrMicroSavings(tx, userAccounts)) {
+      internalTransferIds.add(tx.id);
+    }
+  }
 
-  const detectedFixedMap = new Map<
-    string,
-    Omit<FixedExpense, 'id'> & { detectedOccurrences: number; lastDate?: string; matchedTxIds: Set<string> }
-  >();
-  const fixedTransactionIds = new Set<string>();
+  const outflows = sorted.filter(
+    (t) =>
+      !internalTransferIds.has(t.id) &&
+      (t.currency || 'SEK') === 'SEK' &&
+      getNormalizedBankTxAmount(t) < 0
+  );
+  const inflows = sorted.filter(
+    (t) =>
+      !internalTransferIds.has(t.id) &&
+      (t.currency || 'SEK') === 'SEK' &&
+      getNormalizedBankTxAmount(t) > 0
+  );
 
-  // 1. Layer 1: Match against known Swedish fixed expense & subscription rules
+  type RawFixedGroup = Omit<FixedExpense, 'id'> & {
+    detectedOccurrences: number;
+    lastDate?: string;
+    matchedTxIds: Set<string>;
+    dates: string[];
+    amounts: number[];
+    hasExplicitAutogiroOrInvoice: boolean;
+  };
+
+  const candidateFixedMap = new Map<string, RawFixedGroup>();
+
+  // Layer 1: Collect matches against known Swedish fixed expense & subscription rules
   for (const tx of outflows) {
-    const absAmount = Math.round(Math.abs(Number(tx.amount)));
+    const absAmount = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
     if (absAmount <= 0 || absAmount > 60000) continue;
 
     const combinedText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
@@ -265,18 +741,40 @@ export function analyzeBankTransactionsForOnboarding(
         ? SWEDISH_EXPENSE_PRESETS.find((p) => p.id === matchedRule!.presetId)
         : undefined;
 
-      const key = matchedRule.presetId || matchedRule.fallbackName.toLowerCase();
+      const isGenericHousingPreset = matchedRule.presetId === 'hyra-bostad';
+      const cleanedRawName = cleanDisplayMerchantName(
+        tx.counterparty_name || tx.description || ''
+      );
+      const displayName =
+        isGenericHousingPreset && cleanedRawName.length >= 3
+          ? `Hyra (${cleanedRawName})`
+          : preset?.name || matchedRule.fallbackName;
+
+      const key = isGenericHousingPreset
+        ? `housing_${normalizeMerchantKey(cleanedRawName)}`
+        : matchedRule.presetId || matchedRule.fallbackName.toLowerCase();
+
       const txDate = tx.booking_date || tx.transaction_date || tx.value_date || undefined;
       const deductionDay = getDayOfMonthFromIso(txDate, preset?.deductionDay || 27);
-      const displayName = preset?.name || matchedRule.fallbackName;
       const category = preset?.category || matchedRule.category;
       const paymentMethod = preset?.paymentMethod || matchedRule.paymentMethod;
 
-      fixedTransactionIds.add(tx.id);
+      const hasExplicitAutogiroOrInvoice =
+        combinedText.includes('autogiro') ||
+        combinedText.includes('bankgiro') ||
+        combinedText.includes('plusgiro') ||
+        combinedText.includes('hyra') ||
+        combinedText.includes('hyresavi') ||
+        combinedText.includes('bolån') ||
+        combinedText.includes('csn') ||
+        paymentMethod === 'Autogiro' ||
+        paymentMethod === 'Bankgiro' ||
+        category === 'Boende' ||
+        category === 'Försäkringar';
 
-      const existing = detectedFixedMap.get(key);
+      const existing = candidateFixedMap.get(key);
       if (!existing) {
-        detectedFixedMap.set(key, {
+        candidateFixedMap.set(key, {
           name: displayName,
           amount: absAmount,
           category,
@@ -287,29 +785,97 @@ export function analyzeBankTransactionsForOnboarding(
           detectedOccurrences: 1,
           lastDate: txDate,
           matchedTxIds: new Set([tx.id]),
+          dates: txDate ? [txDate] : [],
+          amounts: [absAmount],
+          hasExplicitAutogiroOrInvoice,
         });
       } else {
         existing.detectedOccurrences += 1;
         existing.matchedTxIds.add(tx.id);
+        if (txDate) existing.dates.push(txDate);
+        existing.amounts.push(absAmount);
+        if (hasExplicitAutogiroOrInvoice) {
+          existing.hasExplicitAutogiroOrInvoice = true;
+        }
       }
     }
   }
 
-  // 2. Layer 2: Detect recurring monthly charges across multiple months (for custom landlords, BRFs, child care, etc.)
+  // Requirement 4: "En enstaka transaktion är inte bevis för ett abonnemang."
+  // Filter candidateFixedMap: require >= 2 occurrences across distinct dates/months OR explicit autogiro/bankgiro/housing/insurance agreement
+  const detectedFixedMap = new Map<string, DetectedFixedExpenseWithEvidence & { matchedTxIds: Set<string> }>();
+  const fixedTransactionIds = new Set<string>();
+
+  for (const [key, cand] of candidateFixedMap.entries()) {
+    const distinctDates = Array.from(new Set(cand.dates));
+    const isConfirmedRecurring =
+      cand.detectedOccurrences >= 2 ||
+      distinctDates.length >= 2 ||
+      cand.hasExplicitAutogiroOrInvoice;
+
+    if (!isConfirmedRecurring) {
+      // Single card transaction (e.g. single Apple 12 kr or single game purchase) is NOT proof of a subscription!
+      continue;
+    }
+
+    for (const txId of cand.matchedTxIds) {
+      fixedTransactionIds.add(txId);
+    }
+
+    const frequency = inferFrequencyFromDates(cand.dates);
+    const minAmt = Math.min(...cand.amounts);
+    const maxAmt = Math.max(...cand.amounts);
+    const isUtilityVariable =
+      cand.name.toLowerCase().includes('el') ||
+      cand.name.toLowerCase().includes('tibber') ||
+      cand.name.toLowerCase().includes('vattenfall') ||
+      cand.name.toLowerCase().includes('fortum') ||
+      cand.name.toLowerCase().includes('trängselskatt');
+    const isVariable =
+      isUtilityVariable || (cand.amounts.length >= 2 && (maxAmt - minAmt) / (minAmt || 1) > 0.05);
+
+    const evidenceSummary = buildEvidenceSummary(
+      cand.detectedOccurrences,
+      cand.dates,
+      cand.amounts,
+      frequency,
+      isVariable
+    );
+
+    detectedFixedMap.set(key, {
+      name: cand.name,
+      amount: cand.amount,
+      category: cand.category,
+      frequency,
+      deductionDay: cand.deductionDay,
+      paymentMethod: cand.paymentMethod,
+      isVariable,
+      logo: cand.logo,
+      detectedOccurrences: cand.detectedOccurrences,
+      lastDate: cand.lastDate,
+      evidenceDates: cand.dates.slice(0, 6),
+      evidenceAmounts: cand.amounts.slice(0, 6),
+      evidenceSummary,
+      matchedTxIds: cand.matchedTxIds,
+    });
+  }
+
+  // Layer 2: Detect recurring charges across multiple months/quarters not covered by Layer 1
   const merchantGroups = new Map<string, BankTransactionItem[]>();
   for (const tx of outflows) {
     if (fixedTransactionIds.has(tx.id)) continue;
 
-    const absAmount = Math.round(Math.abs(Number(tx.amount)));
+    const absAmount = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
     if (absAmount < 25 || absAmount > 50000) continue;
 
     const combinedText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     if (VARIABLE_SPENDING_EXCLUSIONS.some((ex) => combinedText.includes(ex))) {
       continue;
     }
-    // Skip Swish to private individuals or generic internal transfers unless explicitly autogiro/avgift
     if (
-      (combinedText.includes('swish') || combinedText.includes('överföring') || combinedText.includes('overforing')) &&
+      (combinedText.includes('swish') ||
+        combinedText.includes('överföring') ||
+        combinedText.includes('overforing')) &&
       !combinedText.includes('autogiro')
     ) {
       continue;
@@ -330,33 +896,31 @@ export function analyzeBankTransactionsForOnboarding(
     distinctMonths.delete('unknown');
 
     const latestTx = groupTxs[0];
-    const latestAmount = Math.round(Math.abs(Number(latestTx.amount)));
+    const latestAmount = Math.round(Math.abs(getNormalizedBankTxAmount(latestTx)));
     const combinedText = `${latestTx.description || ''} ${latestTx.counterparty_name || ''}`.toLowerCase();
 
-    const hasExplicitFixedKeyword =
+    const hasExplicitAutogiroKeyword =
       combinedText.includes('autogiro') ||
       combinedText.includes('bankgiro') ||
       combinedText.includes('plusgiro') ||
-      combinedText.includes('månadsavgift') ||
-      combinedText.includes('manadsavgift') ||
-      combinedText.includes('årsavgift') ||
-      combinedText.includes('abonnemang') ||
-      combinedText.includes('medlemsavgift') ||
+      combinedText.includes('hyresavi') ||
       combinedText.includes('förskola') ||
       combinedText.includes('forskola');
 
-    // Check amount consistency across months (within ±25% of latest amount)
     const consistentCount = groupTxs.filter((t) => {
-      const amt = Math.abs(Number(t.amount));
+      const amt = Math.abs(getNormalizedBankTxAmount(t));
       const ratio = amt / (latestAmount || 1);
-      return ratio >= 0.75 && ratio <= 1.25;
+      return ratio >= 0.65 && ratio <= 1.35;
     }).length;
 
-    const isRecurringMonthly =
-      (distinctMonths.size >= 2 && consistentCount >= 2 && groupTxs.length <= distinctMonths.size * 2) ||
-      (hasExplicitFixedKeyword && latestAmount >= 49);
+    // Require >= 2 distinct months (and at most ~1 charge per month) OR explicit autogiro/bankgiro
+    const isRecurring =
+      (distinctMonths.size >= 2 &&
+        consistentCount >= 2 &&
+        groupTxs.length <= distinctMonths.size * 1.5) ||
+      (hasExplicitAutogiroKeyword && latestAmount >= 49);
 
-    if (isRecurringMonthly) {
+    if (isRecurring) {
       const displayName = cleanDisplayMerchantName(
         latestTx.counterparty_name || latestTx.description || normKey
       );
@@ -372,94 +936,245 @@ export function analyzeBankTransactionsForOnboarding(
       }
 
       const matchedIds = new Set<string>();
+      const dates: string[] = [];
+      const amounts: number[] = [];
       for (const t of groupTxs) {
         fixedTransactionIds.add(t.id);
         matchedIds.add(t.id);
+        const d = t.booking_date || t.transaction_date || t.value_date;
+        if (d) dates.push(d);
+        amounts.push(Math.round(Math.abs(getNormalizedBankTxAmount(t))));
       }
+
+      const frequency = inferFrequencyFromDates(dates);
+      const minAmt = Math.min(...amounts);
+      const maxAmt = Math.max(...amounts);
+      const isVariable = amounts.length >= 2 && (maxAmt - minAmt) / (minAmt || 1) > 0.05;
+      const occurrencesCount = distinctMonths.size || groupTxs.length;
 
       detectedFixedMap.set(`recurring_${normKey}`, {
         name: displayName,
         amount: latestAmount,
         category,
-        frequency: Frequency.MONTHLY,
+        frequency,
         deductionDay,
-        paymentMethod: hasExplicitFixedKeyword ? 'Autogiro' : 'Kort',
+        paymentMethod: hasExplicitAutogiroKeyword ? 'Autogiro' : 'Kort',
+        isVariable,
         logo: getLogoUrl(displayName, category),
-        detectedOccurrences: distinctMonths.size || groupTxs.length,
+        detectedOccurrences: occurrencesCount,
         lastDate: txDate,
+        evidenceDates: dates.slice(0, 6),
+        evidenceAmounts: amounts.slice(0, 6),
+        evidenceSummary: buildEvidenceSummary(
+          occurrencesCount,
+          dates,
+          amounts,
+          frequency,
+          isVariable
+        ),
         matchedTxIds: matchedIds,
       });
     }
   }
 
-  // 3. Detect Monthly Salary / Incomes & Payday
-  const detectedIncomes: Array<Omit<Income, 'id'>> = [];
+  // Layer 3: Detect Monthly Salary / Recurring Incomes & Payday
+  // Requirement 4: "Överföringar och återbetalningar får inte automatiskt bli lön."
+  const detectedIncomes: DetectedIncomeWithEvidence[] = [];
   let suggestedPayday: number | null = null;
 
-  const salaryCandidates = inflows.filter((tx) => {
-    const amt = Number(tx.amount);
-    if (amt < 2500) return false;
+  const REFUND_OR_TRANSFER_EXCLUSIONS = [
+    'överföring',
+    'overforing',
+    'egna konton',
+    'sparkonto',
+    'enkla vardagen',
+    'enkla sparkontot',
+    'swish',
+    'återköp',
+    'aterkop',
+    'retur',
+    'refund',
+    'kreditering',
+    'återbetalning',
+    'aterbetalning',
+    'tillgodo',
+    'apotea',
+    'apoteket',
+    'ica ',
+    'coop ',
+    'willys',
+    'hemköp',
+    'lidl',
+    'ikea',
+    'h&m',
+    'zara',
+    'elgiganten',
+    'klarna',
+    'apple.com',
+    'zalando',
+    'boozt',
+  ];
+
+  const validIncomeInflows = inflows.filter((tx) => {
+    const amt = getNormalizedBankTxAmount(tx);
+    if (amt < 1000) return false;
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
-    // Skip internal transfers
-    if (text.includes('överföring') || text.includes('overforing') || text.includes('egna konton')) {
+    if (REFUND_OR_TRANSFER_EXCLUSIONS.some((kw) => text.includes(kw))) {
       return false;
     }
-    const isSalaryKeyword =
-      text.includes('lön') ||
-      text.includes('lon ') ||
-      text.includes('salary') ||
-      text.includes('utbetalning') ||
-      text.includes('försäkringskassan') ||
-      text.includes('forsakringskassan') ||
-      text.includes('csn') ||
-      text.includes('pension') ||
-      text.includes('barnbidrag');
-    return isSalaryKeyword || amt >= 12000;
+    if (VARIABLE_SPENDING_EXCLUSIONS.some((kw) => text.includes(kw))) {
+      return false;
+    }
+    return true;
   });
 
-  if (salaryCandidates.length > 0) {
-    const primarySalary = salaryCandidates[0];
-    const salaryAmount = Math.round(Number(primarySalary.amount));
-    const salaryDate =
-      primarySalary.booking_date ||
-      primarySalary.transaction_date ||
-      primarySalary.value_date;
-    const dayOfMonth = getDayOfMonthFromIso(salaryDate, 25);
+  // Group inflows by normalized source to get occurrence evidence
+  const incomeGroups = new Map<
+    string,
+    {
+      name: string;
+      category: string;
+      isPrimarySalary: boolean;
+      txs: BankTransactionItem[];
+      dates: string[];
+      amounts: number[];
+    }
+  >();
 
-    if (dayOfMonth >= 22 && dayOfMonth <= 26) {
-      suggestedPayday = 25;
-    } else if (dayOfMonth === 27) {
-      suggestedPayday = 27;
-    } else {
-      suggestedPayday = dayOfMonth;
+  for (const tx of validIncomeInflows) {
+    const amt = Math.round(getNormalizedBankTxAmount(tx));
+    const rawText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+
+    const isExplicitSalary =
+      rawText.includes('lön') ||
+      rawText.includes('lon ') ||
+      rawText.includes('salary') ||
+      rawText.includes('löneutbetalning');
+    const isCsn = rawText.includes('csn') || rawText.includes('studiestöd');
+    const isFk =
+      rawText.includes('försäkringskassan') || rawText.includes('forsakringskassan');
+    const isBarnbidrag = rawText.includes('barnbidrag');
+    const isPension = rawText.includes('pension');
+
+    if (
+      !isExplicitSalary &&
+      !isCsn &&
+      !isFk &&
+      !isBarnbidrag &&
+      !isPension &&
+      amt < 12000
+    ) {
+      continue;
     }
 
-    const rawText = `${primarySalary.description || ''} ${primarySalary.counterparty_name || ''}`.toLowerCase();
+    let groupKey = 'salary';
     let incomeName = 'Lön';
     let incomeCategory = 'Lön';
-    if (rawText.includes('csn')) {
+    let isPrimarySalary = true;
+
+    if (isBarnbidrag) {
+      groupKey = 'barnbidrag';
+      incomeName = 'Barnbidrag';
+      incomeCategory = 'Bidrag';
+      isPrimarySalary = false;
+    } else if (isCsn) {
+      groupKey = 'csn';
       incomeName = 'CSN';
       incomeCategory = 'CSN';
-    } else if (rawText.includes('försäkringskassan') || rawText.includes('forsakringskassan')) {
+      isPrimarySalary = amt >= 8000;
+    } else if (isFk) {
+      groupKey = 'fk';
       incomeName = 'Försäkringskassan';
       incomeCategory = 'Bidrag';
-    } else if (rawText.includes('pension')) {
+      isPrimarySalary = amt >= 10000;
+    } else if (isPension) {
+      groupKey = 'pension';
       incomeName = 'Pension';
       incomeCategory = 'Pension';
-    } else if (primarySalary.counterparty_name) {
-      incomeName = `Lön (${cleanDisplayMerchantName(primarySalary.counterparty_name)})`;
+      isPrimarySalary = true;
+    } else if (tx.counterparty_name) {
+      const cleanEmp = cleanDisplayMerchantName(tx.counterparty_name);
+      groupKey = `salary_${normalizeMerchantKey(cleanEmp)}`;
+      incomeName = `Lön (${cleanEmp})`;
     }
 
+    const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
+    const existing = incomeGroups.get(groupKey);
+    if (!existing) {
+      incomeGroups.set(groupKey, {
+        name: incomeName,
+        category: incomeCategory,
+        isPrimarySalary,
+        txs: [tx],
+        dates: txDate ? [txDate] : [],
+        amounts: [amt],
+      });
+    } else {
+      existing.txs.push(tx);
+      if (txDate) existing.dates.push(txDate);
+      existing.amounts.push(amt);
+    }
+  }
+
+  for (const grp of incomeGroups.values()) {
+    // If an inflow has no explicit salary/benefit keyword (only matched because amt >= 12000),
+    // require either >= 2 occurrences OR explicit 'utbetalning'/'lön' so a one-off large transfer isn't assumed to be salary
+    const firstText = `${grp.txs[0].description || ''} ${grp.txs[0].counterparty_name || ''}`.toLowerCase();
+    const hasExplicitIncomeKeyword =
+      firstText.includes('lön') ||
+      firstText.includes('lon ') ||
+      firstText.includes('salary') ||
+      firstText.includes('utbetalning') ||
+      firstText.includes('csn') ||
+      firstText.includes('försäkringskassan') ||
+      firstText.includes('forsakringskassan') ||
+      firstText.includes('barnbidrag') ||
+      firstText.includes('pension');
+
+    if (!hasExplicitIncomeKeyword && grp.txs.length < 2) {
+      continue;
+    }
+
+    const latestAmount = grp.amounts[0];
+    const latestDate = grp.dates[0];
+    const dayOfMonth = getDayOfMonthFromIso(latestDate, 25);
+
+    let normalizedDay = dayOfMonth;
+    if (grp.isPrimarySalary && dayOfMonth >= 22 && dayOfMonth <= 26) {
+      normalizedDay = 25;
+    }
+
+    if (grp.isPrimarySalary && suggestedPayday === null) {
+      suggestedPayday = normalizedDay;
+    }
+
+    const minAmt = Math.min(...grp.amounts);
+    const maxAmt = Math.max(...grp.amounts);
+    const isVariable =
+      grp.amounts.length >= 2 && (maxAmt - minAmt) / (minAmt || 1) > 0.05;
+
     detectedIncomes.push({
-      name: incomeName,
-      amount: salaryAmount,
-      category: incomeCategory,
-      deductionDay: suggestedPayday || 25,
+      name: grp.name,
+      amount: latestAmount,
+      category: grp.category,
+      deductionDay: normalizedDay,
+      isVariable,
       icon: 'Wallet',
+      detectedOccurrences: grp.txs.length,
+      lastDate: latestDate,
+      evidenceDates: grp.dates.slice(0, 6),
+      evidenceAmounts: grp.amounts.slice(0, 6),
+      evidenceSummary: buildEvidenceSummary(
+        grp.txs.length,
+        grp.dates,
+        grp.amounts,
+        Frequency.MONTHLY,
+        isVariable
+      ),
     });
   }
 
-  // 4. Calculate variable spending since the start of the current pay period (excluding fixed expenses!)
+  // Layer 4: Period Boundaries & Variable Spending
   const effectivePayday = suggestedPayday || currentPayday || 25;
   const paydayType =
     effectivePayday === 25
@@ -476,24 +1191,465 @@ export function analyzeBankTransactionsForOnboarding(
   const { start } = getPeriodBoundaries(today, paydayType, effectivePayday, adjustment);
   const periodStartIso = start.toISOString().split('T')[0];
 
-  let calculatedSpentSincePayday = 0;
-  for (const tx of outflows) {
-    if (fixedTransactionIds.has(tx.id)) continue;
-    const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
-    if (txDate >= periodStartIso) {
-      calculatedSpentSincePayday += Math.abs(Number(tx.amount));
-    }
-  }
-
   const detectedFixedExpenses = Array.from(detectedFixedMap.values())
     .map(({ matchedTxIds: _ignore, ...rest }) => rest)
     .sort((a, b) => b.amount - a.amount);
 
   return {
+    outflows,
+    inflows,
+    internalTransferIds,
+    fixedTransactionIds,
     detectedFixedExpenses,
     detectedIncomes,
     suggestedPayday,
+    periodStartIso,
+  };
+}
+
+export function analyzeBankTransactionsForOnboarding(
+  transactions: BankTransactionItem[],
+  currentPayday = 25,
+  paydayBeforeWeekend = true
+): AnalyzedBankOnboardingData {
+  if (!Array.isArray(transactions) || transactions.length === 0) {
+    return {
+      detectedFixedExpenses: [],
+      detectedIncomes: [],
+      suggestedPayday: null,
+      calculatedSpentSincePayday: 0,
+      analyzedTransactionCount: 0,
+    };
+  }
+
+  const core = runCoreBankDetection(transactions, currentPayday, paydayBeforeWeekend);
+
+  let calculatedSpentSincePayday = 0;
+  for (const tx of core.outflows) {
+    if (core.fixedTransactionIds.has(tx.id)) continue;
+    const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
+    if (txDate >= core.periodStartIso) {
+      calculatedSpentSincePayday += Math.abs(getNormalizedBankTxAmount(tx));
+    }
+  }
+
+  return {
+    detectedFixedExpenses: core.detectedFixedExpenses,
+    detectedIncomes: core.detectedIncomes,
+    suggestedPayday: core.suggestedPayday,
     calculatedSpentSincePayday: Math.round(calculatedSpentSincePayday),
     analyzedTransactionCount: transactions.length,
   };
 }
+
+// ---------------------------------------------------------------------------
+// 5. SMART MERGE ANALYZER FOR EXISTING USERS (SETTINGS -> BANKKOPPLING)
+// ---------------------------------------------------------------------------
+
+function isSameFixedExpenseName(nameA: string, nameB: string): boolean {
+  const a = nameA.toLowerCase().trim();
+  const b = nameB.toLowerCase().trim();
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+  if (
+    (a.includes('hyra') || a.includes('boende') || a.includes('fastighet')) &&
+    (b.includes('hyra') || b.includes('boende') || b.includes('fastighet'))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function analyzeBankForExistingBudget(params: {
+  bankTransactions: BankTransactionItem[];
+  userAccounts?: BankAccount[];
+  existingFixedExpenses: FixedExpense[];
+  existingIncomes: Income[];
+  existingAppTransactions: Transaction[];
+  config: Config;
+}): ExistingBudgetBankSyncPlan {
+  const {
+    bankTransactions,
+    userAccounts = [],
+    existingFixedExpenses = [],
+    existingIncomes = [],
+    existingAppTransactions = [],
+    config,
+  } = params;
+
+  const currentPayday = config.payday || 25;
+  const paydayBeforeWeekend =
+    config.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true;
+  const availableCategories = (config.categories || []).map((c) => c.name);
+
+  if (!Array.isArray(bankTransactions) || bankTransactions.length === 0) {
+    return {
+      periodStartIso: new Date().toISOString().split('T')[0],
+      periodPurchases: [],
+      skippedFixedInPeriodCount: 0,
+      skippedInternalTransfersCount: 0,
+      fixedExpenseMatches: [],
+      incomeMatches: [],
+      analyzedTransactionCount: 0,
+    };
+  }
+
+  const core = runCoreBankDetection(
+    bankTransactions,
+    currentPayday,
+    paydayBeforeWeekend,
+    userAccounts
+  );
+
+  const activeExistingFixed = existingFixedExpenses.filter((e) => !e.isCancelled);
+  const cancelledExistingFixed = existingFixedExpenses.filter((e) => Boolean(e.isCancelled));
+
+  const matchesExistingUserFixed = (tx: BankTransactionItem): boolean => {
+    const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
+    const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    for (const fixed of activeExistingFixed) {
+      const fixedName = fixed.name.toLowerCase().trim();
+      if (fixedName.length >= 3 && text.includes(fixedName)) return true;
+      if (fixed.amount >= 1500 && Math.abs(fixed.amount - absAmt) / fixed.amount <= 0.05) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // 1. Compare Detected Fixed Expenses against Existing Fixed Expenses
+  // Requirement 5: "Historiska förslag får inte återaktivera uppsagda abonnemang eller ersätta användarens befintliga avtal."
+  const fixedExpenseMatches: ExistingBudgetFixedExpenseMatch[] = [];
+
+  core.detectedFixedExpenses.forEach((det, idx) => {
+    // Never suggest or reactivate a subscription that the user has marked as cancelled!
+    const matchesCancelled = cancelledExistingFixed.some((canc) =>
+      isSameFixedExpenseName(canc.name, det.name)
+    );
+    if (matchesCancelled) {
+      return;
+    }
+
+    const matchedExisting = activeExistingFixed.find(
+      (ex) =>
+        isSameFixedExpenseName(ex.name, det.name) ||
+        (ex.category === det.category &&
+          det.amount >= 2000 &&
+          Math.abs(ex.amount - det.amount) <= 300)
+    );
+
+    if (!matchedExisting) {
+      fixedExpenseMatches.push({
+        id: `fixed_match_${idx}_${det.name}`,
+        detected: det,
+        status: 'new',
+      });
+      return;
+    }
+
+    const diff = Math.abs(Number(matchedExisting.amount) - Number(det.amount));
+    if (diff >= 5) {
+      fixedExpenseMatches.push({
+        id: `fixed_match_${idx}_${det.name}`,
+        detected: det,
+        status: 'amount_changed',
+        existingExpense: matchedExisting,
+      });
+      return;
+    }
+
+    fixedExpenseMatches.push({
+      id: `fixed_match_${idx}_${det.name}`,
+      detected: det,
+      status: 'already_exists',
+      existingExpense: matchedExisting,
+    });
+  });
+
+  // 2. Compare Detected Incomes against Existing Incomes
+  const incomeMatches: ExistingBudgetIncomeMatch[] = core.detectedIncomes.map((det, idx) => {
+    const matchedInc = existingIncomes.find(
+      (inc) =>
+        inc.name.toLowerCase().includes('lön') ||
+        (inc.category || '').toLowerCase() === (det.category || '').toLowerCase() ||
+        inc.name.toLowerCase() === det.name.toLowerCase()
+    );
+
+    if (!matchedInc) {
+      return {
+        id: `inc_match_${idx}`,
+        detected: det,
+        status: 'new',
+      };
+    }
+
+    const diff = Math.abs(Number(matchedInc.amount) - Number(det.amount));
+    if (diff >= 50) {
+      return {
+        id: `inc_match_${idx}`,
+        detected: det,
+        status: 'amount_changed',
+        existingIncome: matchedInc,
+      };
+    }
+
+    return {
+      id: `inc_match_${idx}`,
+      detected: det,
+      status: 'already_exists',
+      existingIncome: matchedInc,
+    };
+  });
+
+  // 3. Collect Variable Everyday Purchases in the Current Pay Period
+  const periodPurchases: PeriodBankPurchaseCandidate[] = [];
+  let skippedFixedInPeriodCount = 0;
+  let skippedInternalTransfersCount = 0;
+
+  for (const tx of bankTransactions) {
+    //Requirement 8: Reserved purchases (PDNG / HOLD) do NOT affect ordinary budget in v1
+    if (tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD') {
+      continue;
+    }
+
+    const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
+    if (!txDate || txDate < core.periodStartIso) continue;
+
+    if (core.internalTransferIds.has(tx.id)) {
+      skippedInternalTransfersCount++;
+      continue;
+    }
+
+    const signedAmt = getNormalizedBankTxAmount(tx);
+    if (signedAmt >= 0) continue; // Only outgoing purchases
+
+    if (core.fixedTransactionIds.has(tx.id) || matchesExistingUserFixed(tx)) {
+      skippedFixedInPeriodCount++;
+      continue;
+    }
+
+    const absAmount = Math.round(Math.abs(signedAmt) * 100) / 100;
+    if (absAmount <= 0) continue;
+
+    const categorized = categorizeBankTransactionForApp(tx, availableCategories);
+    const parsedDateMs = Date.parse(`${txDate}T12:00:00`);
+    const timestamp = Number.isFinite(parsedDateMs) ? parsedDateMs : Date.now();
+
+    const alreadyInApp = existingAppTransactions.some((appTx) => {
+      if (appTx.bankTransactionId === tx.id) return true;
+      if (Array.isArray(appTx.tags)) {
+        if (
+          appTx.tags.includes(`bank_tx:${tx.id}`) ||
+          appTx.tags.includes(`bank_key:${tx.external_key}`)
+        ) {
+          return true;
+        }
+      }
+      const sameAmount = Math.abs(Number(appTx.amount) - absAmount) < 1;
+      const dayDiff = Math.abs(Number(appTx.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
+      return sameAmount && dayDiff <= 2.5;
+    });
+
+    periodPurchases.push({
+      bankTxId: tx.id,
+      externalKey: tx.external_key,
+      merchant: categorized.merchant,
+      rawDescription: tx.description,
+      amount: absAmount,
+      dateIso: txDate,
+      timestamp,
+      category: categorized.category,
+      logo: categorized.logo,
+      isReserved: false,
+      alreadyInApp,
+    });
+  }
+
+  return {
+    periodStartIso: core.periodStartIso,
+    periodPurchases,
+    skippedFixedInPeriodCount,
+    skippedInternalTransfersCount,
+    fixedExpenseMatches,
+    incomeMatches,
+    analyzedTransactionCount: bankTransactions.length,
+  };
+}
+
+/**
+ * Returns all booked variable bank transactions (across all periods in bank history)
+ * that should be automatically imported into the app's main `transactions` table
+ * so they appear in Hem, Historik, Analys, and Budget without duplicating fixed expenses or internal transfers.
+ */
+export function getAutoImportableBankTransactions(params: {
+  bankTransactions: BankTransactionItem[];
+  userAccounts?: BankAccount[];
+  existingFixedExpenses: FixedExpense[];
+  existingIncomes?: Income[];
+  existingAppTransactions: Transaction[];
+  config: Config;
+  dismissedBankTxIds?: Set<string>;
+}): Array<Omit<Transaction, 'id'>> {
+  const {
+    bankTransactions,
+    userAccounts = [],
+    existingFixedExpenses = [],
+    existingAppTransactions = [],
+    config,
+    dismissedBankTxIds,
+  } = params;
+
+  if (!Array.isArray(bankTransactions) || bankTransactions.length === 0) {
+    return [];
+  }
+
+  const currentPayday = config?.payday || 25;
+  const paydayBeforeWeekend =
+    config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true;
+  const availableCategories = (config?.categories || []).map((c: any) =>
+    typeof c === 'string' ? c : c?.name || ''
+  );
+
+  // Filter to selected budget accounts if userAccounts is non-empty
+  const allowedAccountIds = new Set(
+    userAccounts
+      .filter((a) => a.is_selected && a.include_in_budget !== false)
+      .map((a) => a.id)
+  );
+
+  const relevantBankTxs =
+    allowedAccountIds.size > 0
+      ? bankTransactions.filter((t) => allowedAccountIds.has(t.bank_account_id))
+      : bankTransactions;
+
+  const core = runCoreBankDetection(
+    relevantBankTxs,
+    currentPayday,
+    paydayBeforeWeekend,
+    userAccounts
+  );
+
+  const activeExistingFixed = existingFixedExpenses.filter((e) => !e.isCancelled);
+
+  const matchesExistingUserFixed = (tx: BankTransactionItem): boolean => {
+    const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
+    const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    for (const fixed of activeExistingFixed) {
+      const fixedName = (fixed.name || '').toLowerCase().trim();
+      if (fixedName.length >= 3 && text.includes(fixedName)) return true;
+      const cleanedFixed = fixedName.replace(/^hyra\s*\(|\)$/g, '').trim();
+      if (cleanedFixed.length >= 3 && text.includes(cleanedFixed)) return true;
+      if (fixed.amount >= 1500 && Math.abs(fixed.amount - absAmt) / fixed.amount <= 0.05) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const toImport: Array<Omit<Transaction, 'id'>> = [];
+  const seenKeysInBatch = new Set<string>();
+
+  for (const tx of relevantBankTxs) {
+    // Only import booked transactions into main budget & history
+    if (tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD') {
+      continue;
+    }
+
+    if (
+      tx.reconciliation_status === 'excluded' ||
+      tx.reconciliation_status === 'internal_transfer' ||
+      tx.reconciliation_status === 'confirmed_fixed' ||
+      tx.reconciliation_status === 'confirmed_income' ||
+      tx.reconciliation_status === 'confirmed_saving' ||
+      tx.reconciliation_status === 'replaced_reservation'
+    ) {
+      continue;
+    }
+
+    if (
+      dismissedBankTxIds &&
+      (dismissedBankTxIds.has(tx.id) ||
+        (tx.external_key && dismissedBankTxIds.has(tx.external_key)))
+    ) {
+      continue;
+    }
+
+    if (seenKeysInBatch.has(tx.id) || (tx.external_key && seenKeysInBatch.has(tx.external_key))) {
+      continue;
+    }
+
+    if (core.internalTransferIds.has(tx.id)) {
+      continue;
+    }
+
+    const signedAmt = getNormalizedBankTxAmount(tx);
+    // Only auto-import outgoing variable purchases (incomes and fixed expenses are handled in Inkomster & Fasta utgifter)
+    if (signedAmt >= 0) {
+      continue;
+    }
+
+    if (core.fixedTransactionIds.has(tx.id) || matchesExistingUserFixed(tx)) {
+      continue;
+    }
+
+    const absAmount = Math.round(Math.abs(signedAmt) * 100) / 100;
+    if (absAmount <= 0) continue;
+
+    const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
+    const parsedDateMs = txDate ? Date.parse(`${txDate}T12:00:00`) : NaN;
+    const timestamp = Number.isFinite(parsedDateMs) ? parsedDateMs : Date.now();
+
+    const categorized = categorizeBankTransactionForApp(tx, availableCategories);
+
+    const alreadyInApp = existingAppTransactions.some((appTx) => {
+      if (appTx.bankTransactionId === tx.id) return true;
+      if (Array.isArray(appTx.tags)) {
+        if (
+          appTx.tags.includes(`bank_tx:${tx.id}`) ||
+          (tx.external_key && appTx.tags.includes(`bank_key:${tx.external_key}`))
+        ) {
+          return true;
+        }
+      }
+      // Also guard against manual duplicate on same day with same amount and merchant
+      const sameAmount = Math.abs(Number(appTx.amount) - absAmount) < 0.5;
+      const dayDiff = Math.abs(Number(appTx.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
+      const sameMerchant =
+        (appTx.merchant || '').toLowerCase().trim() ===
+        (categorized.merchant || '').toLowerCase().trim();
+      return sameAmount && dayDiff <= 1.5 && sameMerchant;
+    });
+
+    if (alreadyInApp) {
+      continue;
+    }
+
+    seenKeysInBatch.add(tx.id);
+    if (tx.external_key) seenKeysInBatch.add(tx.external_key);
+
+    const tags = [`bank_tx:${tx.id}`];
+    if (tx.external_key) tags.push(`bank_key:${tx.external_key}`);
+    if (tx.bank_account_id) tags.push(`bank_acc:${tx.bank_account_id}`);
+
+    toImport.push({
+      amount: absAmount,
+      type: 'expense',
+      category: categorized.category,
+      merchant: categorized.merchant,
+      note: tx.description || categorized.merchant,
+      timestamp,
+      isBackdated: false,
+      logo: categorized.logo,
+      paymentMethod: 'Kortbetalning',
+      tags,
+      bankTransactionId: tx.id,
+      bankAccountId: tx.bank_account_id,
+      originalBankDescription: tx.description,
+      originalBankAmount: signedAmt,
+      originalBankCurrency: tx.currency || 'SEK',
+    });
+  }
+
+  return toImport;
+}
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Building2, Search, Check, AlertCircle, Loader2, RefreshCw, ArrowRight, ShieldCheck, ExternalLink } from 'lucide-react';
-import { Modal, Button, Input, Card } from './ui';
+import { Building2, Check, AlertCircle, Loader2, RefreshCw, ArrowRight, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Modal, Button, Input } from './ui';
 import {
   bankService,
   BankAspsp,
@@ -10,6 +10,12 @@ import {
 } from '../services/bankService';
 import { formatCurrency } from '../utils/format';
 import { saveBankRedirectOrigin } from '../utils/bankFeatureFlag';
+import {
+  getBankAccountTitle,
+  formatBankAccountNumber,
+  formatCleanBalanceLabel,
+  isLikelySavingsAccount,
+} from '../utils/bankHistoryAnalyzer';
 
 interface BankConnectFlowModalProps {
   isOpen: boolean;
@@ -75,11 +81,9 @@ export function BankConnectFlowModal({
         setConnection(res.connection);
         const accs = res.accounts || [];
         setAvailableAccounts(accs);
-        const preselected = accs
-          .filter((a) => a.is_selected)
-          .map((a) => a.id);
+        const nonSavings = accs.filter((a) => !isLikelySavingsAccount(a)).map((a) => a.id);
         setSelectedAccountIds(
-          preselected.length > 0 ? preselected : accs.map((a) => a.id)
+          nonSavings.length > 0 ? nonSavings : accs.map((a) => a.id)
         );
         setStage('pick-accounts');
       })
@@ -548,6 +552,8 @@ export function BankConnectFlowModal({
             <div className="max-h-[300px] overflow-y-auto divide-y divide-subtle border border-[var(--border-color)] rounded-card bg-[var(--surface-color)]">
               {availableAccounts.map((acc) => {
                 const isSelected = selectedAccountIds.includes(acc.id);
+                const isSavings = isLikelySavingsAccount(acc);
+                const accountTitle = getBankAccountTitle(acc);
                 return (
                   <button
                     key={acc.id}
@@ -562,16 +568,16 @@ export function BankConnectFlowModal({
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-[var(--text-primary)] truncate">
-                          {acc.name}
+                          {accountTitle}
                         </p>
-                        {acc.product && acc.product !== acc.name && (
-                          <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--surface-muted)] text-[var(--text-secondary)] font-medium">
-                            {acc.product}
+                        {isSavings && (
+                          <span className="text-[11px] text-[var(--text-secondary)] font-medium">
+                            · Sparkonto
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-[var(--text-secondary)] font-mono truncate">
-                        {acc.bban || acc.iban || acc.provider_account_uid}
+                        {formatBankAccountNumber(acc.bban || acc.iban || acc.provider_account_uid)}
                       </p>
                       {acc.balance_amount !== null && (
                         <p className="text-xs font-semibold text-[var(--text-primary)] pt-0.5">
@@ -581,7 +587,7 @@ export function BankConnectFlowModal({
                             language
                           )}{' '}
                           <span className="text-[11px] font-normal text-[var(--text-secondary)]">
-                            • {acc.balance_label || 'Saldo'}
+                            · {formatCleanBalanceLabel(acc.balance_label)}
                           </span>
                         </p>
                       )}

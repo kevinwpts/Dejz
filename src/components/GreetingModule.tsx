@@ -6,6 +6,7 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 import { getBudgetStatus } from '../utils/budgetStatus';
 import { feedback } from '../utils/feedback';
+import { BankAccount } from '../services/bankService';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -20,6 +21,8 @@ interface GreetingModuleProps {
   paydayText?: string;
   onOpenPeriodInfo?: () => void;
   onNavigate?: (tab: string, section?: string) => void;
+  bankAccounts?: BankAccount[];
+  [key: string]: any;
 }
 
 export function GreetingModule({
@@ -34,9 +37,26 @@ export function GreetingModule({
   paydayText,
   onOpenPeriodInfo,
   onNavigate,
+  bankAccounts = [],
 }: GreetingModuleProps) {
   const isEn = language === 'en';
   const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
+
+  const selectedBankAccounts = useMemo(() => {
+    const selected = (bankAccounts || []).filter((a) => a.is_selected);
+    return selected.length > 0 ? selected : (bankAccounts || []);
+  }, [bankAccounts]);
+
+  const totalBankBalance = useMemo(() => {
+    if (selectedBankAccounts.length === 0) return null;
+    const hasAnyBalance = selectedBankAccounts.some(
+      (a) => a.balance_amount !== null && a.balance_amount !== undefined && !isNaN(Number(a.balance_amount))
+    );
+    if (!hasAnyBalance) return null;
+    return Math.round(
+      selectedBankAccounts.reduce((sum, a) => sum + (Number(a.balance_amount) || 0), 0)
+    );
+  }, [selectedBankAccounts]);
 
   const remainingCents = stats?.remainingPeriodCents || 0;
   const disposablePotCents = stats?.disposablePot || 0;
@@ -110,7 +130,7 @@ export function GreetingModule({
 
   return (
     <div className="flex flex-col font-sans relative space-y-3.5">
-      {/* 1. Unified Main Hero Card - Kvar att spendera + Hela ekonomin */}
+      {/* 1. Unified Main Hero Card - Kvar denna perioden + Hela ekonomin */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -124,7 +144,7 @@ export function GreetingModule({
           <div className="flex flex-col gap-2.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-card-title sm:text-body font-medium text-[var(--text-secondary)] truncate">
-                {t('totalRemaining') || (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
+                {isEn ? 'Remaining this period' : 'Kvar denna perioden'}
               </span>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -295,6 +315,52 @@ export function GreetingModule({
               </span>
             </button>
           </div>
+
+          {/* Connected Bank Accounts Total Balance */}
+          {selectedBankAccounts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onNavigate?.('profile', 'bank');
+              }}
+              className="pt-3 border-t border-[var(--border-divider)] w-full flex flex-col gap-1.5 text-left bg-transparent border-x-0 border-b-0 p-0 cursor-pointer hover:opacity-85 active:scale-[0.99] transition-all"
+            >
+              <div className="flex items-center justify-between gap-2 w-full">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Icon name="landmark" size={14} className="text-[var(--accent-color)] shrink-0" />
+                  <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
+                    {isEn ? 'Total across connected bank accounts' : 'Totalt på kopplade bankkonton'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-label font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                    {totalBankBalance !== null
+                      ? `${formatAmount(totalBankBalance, language)} ${currency || 'kr'}`
+                      : isEn
+                      ? `${selectedBankAccounts.length} connected`
+                      : `${selectedBankAccounts.length} st kopplade`}
+                  </span>
+                  <Icon name="chevron-right" size={13} className="text-[var(--text-tertiary)]" />
+                </div>
+              </div>
+              {selectedBankAccounts.length > 1 && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {selectedBankAccounts.map((acc) => (
+                    <span
+                      key={acc.id}
+                      className="text-[11px] text-[var(--text-tertiary)] font-amount tabular-nums truncate max-w-[180px]"
+                    >
+                      {acc.account_name}:{' '}
+                      {acc.balance_amount !== null && acc.balance_amount !== undefined
+                        ? `${formatAmount(Math.round(Number(acc.balance_amount) || 0), language)} ${currency || 'kr'}`
+                        : '—'}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </button>
+          )}
         </div>
       </motion.div>
 

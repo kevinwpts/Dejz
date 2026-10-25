@@ -7,7 +7,7 @@ export interface SelectOption {
 }
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  label?: string;
+  label?: React.ReactNode;
   error?: string | null;
   helperText?: string;
   options?: SelectOption[];
@@ -31,7 +31,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
-    const selectId = id || (label ? `select-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
+    const selectId =
+      id ||
+      (typeof label === 'string' && label
+        ? `select-${label.toLowerCase().replace(/\s+/g, '-')}`
+        : undefined);
 
     return (
       <div className={`w-full flex flex-col gap-1.5 ${wrapperClassName}`}>

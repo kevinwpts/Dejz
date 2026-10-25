@@ -87,6 +87,11 @@ export function SettingsMainView({
     return (
       <BankConnectionView
         config={config}
+        userId={userId}
+        existingTransactions={transactions}
+        existingIncomes={incomes}
+        existingFixedExpenses={fixedExpenses}
+        onRefreshBudget={onRefresh}
         initialSubView={activeSection === 'bankTransactions' ? 'transactions' : 'connections'}
         onSubViewChange={(sub) => {
           const nextSection = sub === 'transactions' ? 'bankTransactions' : 'bank';
