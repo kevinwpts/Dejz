@@ -548,6 +548,7 @@ export const Send = wrap(PhosPaperPlaneTilt);
 export const Server = wrap(PhosHardDrives);
 export const Settings = wrap(PhosGear);
 export const Share = wrap(PhosShareNetwork);
+export const Share2 = wrap(PhosShareNetwork);
 export const Shield = wrap(PhosShield);
 export const ShieldCheck = wrap(PhosShieldCheck);
 export const Ship = wrap(PhosBoat);

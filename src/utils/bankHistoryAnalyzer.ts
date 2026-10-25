@@ -3,6 +3,7 @@ import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishEx
 import { Config, FixedExpense, Frequency, Income, PaydayType, Transaction, WeekendAdjustment } from '../types';
 import { getLogoUrl } from './logo';
 import { getPeriodBoundaries } from './date';
+import { getActualBankPaymentDateAndMeta } from './swedishDate';
 
 export type DetectedFixedExpenseWithEvidence = Omit<FixedExpense, 'id'> & {
   detectedOccurrences: number;
@@ -186,58 +187,227 @@ export function formatCleanBalanceLabel(rawLabel: string | null | undefined): st
 // 2. TRANSACTION SIGN NORMALIZATION & INTERNAL TRANSFER FILTERING
 // ---------------------------------------------------------------------------
 
-const INFLOW_DESCRIPTION_KEYWORDS = [
-  'lön',
-  'lon ',
-  'salary',
-  'utbetalning',
-  'insättning',
-  'insattning',
-  'återköp',
-  'aterkop',
-  'retur',
-  'refund',
-  'barnbidrag',
-  'försäkringskassan',
-  'forsakringskassan',
-  'skatteverket',
-  'återbetalning',
-  'aterbetalning',
-];
+/**
+ * Kontrollerar om en transaktion är en bekräftad inkomst (lön, inkommande Swish, insättning, bidrag etc.).
+ * Utesluter strikt alla utgående betalningar som kortköp, autogiro, bankgiro, räkningar och utgående Swish.
+ */
+export function isExplicitInflowTransaction(
+  desc: string | null | undefined,
+  counterparty: string | null | undefined,
+  indicator?: string | null,
+  bookingStatus?: string | null
+): boolean {
+  // 1. Om banken explicit flaggat som DBIT (utgift) kan det ALDRIG vara en inkomst
+  if (indicator === 'DBIT') return false;
+
+  const combined = `${desc || ''} ${counterparty || ''}`.toLowerCase().trim();
+
+  // Kända reservationstermer eller preliminär bokningsstatus (PDNG/HOLD)
+  const statusUpper = bookingStatus ? String(bookingStatus).toUpperCase().trim() : null;
+  const isReserved =
+    statusUpper === 'PDNG' ||
+    statusUpper === 'HOLD' ||
+    combined.includes('reserverat') ||
+    combined.includes('reservation') ||
+    combined.includes('preliminär') ||
+    combined.includes('preliminar');
+
+  const isExplicitRefund =
+    combined.includes('återköp') ||
+    combined.includes('aterkop') ||
+    combined.includes('retur') ||
+    combined.includes('refund') ||
+    combined.includes('kreditering');
+
+  // Reservationer hos svenska banker (t.ex. SEB) är uteslutande preliminära kortköp/utgifter.
+  // De får ALDRIG tolkas som inkomst såvida det inte explicit rör sig om en retur/återköp/kreditering.
+  if (isReserved && !isExplicitRefund) {
+    return false;
+  }
+
+  if (!combined && !indicator) return false;
+
+  // 2. Kända utgiftsmönster har alltid företräde (kan ALDRIG bli inkomst):
+  if (
+    combined.includes('kortköp') ||
+    combined.includes('kortkop') ||
+    combined.includes('autogiro') ||
+    combined.includes('bankgiro') ||
+    combined.includes('plusgiro') ||
+    combined.includes('fakturabetalning') ||
+    combined.includes('faktura') ||
+    combined.includes('betalning bg') ||
+    combined.includes('betalning pg') ||
+    combined.includes('inbetalning bg') ||
+    combined.includes('inbetalning pg') ||
+    combined.includes('swish betalning') ||
+    combined.includes('swish till') ||
+    combined.includes('swish skickad') ||
+    combined.includes('swish handel') ||
+    combined.includes('överföring till') ||
+    combined.includes('overforing till') ||
+    combined.includes('uttag') ||
+    combined.includes('bankomat') ||
+    combined.includes('avgift') ||
+    combined.includes('årsavgift') ||
+    combined.includes('månadsavgift') ||
+    combined.includes('räntekostnad') ||
+    combined.includes('csn återbetalning') ||
+    combined.includes('csn aterbetalning') ||
+    combined.includes('premie')
+  ) {
+    return false;
+  }
+
+  // Om transaktionen är "Swish 123..." (dvs till ett 123-företagsnummer vid köp):
+  if (/swish\s*123\d{7}/i.test(combined)) {
+    return false;
+  }
+
+  // 3. Om banken explicit angivit CRDT (kredit/inflöde):
+  // Men OBS: Om det är en reservation litar vi aldrig på CRDT, eftersom banker som SEB
+  // sätter CRDT på spärrbelopp vid kortköp.
+  if (indicator === 'CRDT' && !isReserved) {
+    return true;
+  }
+
+  // 4. Verifierade inkomstmönster:
+  // Lön & arbetsersättning
+  if (
+    combined.includes('lön') ||
+    combined.includes('salary') ||
+    combined.includes('löneutbetalning') ||
+    combined.includes('loneutbetalning') ||
+    /\blon\b/i.test(combined)
+  ) {
+    return true;
+  }
+
+  // Mottagen Swish (inkommande betalning till användaren)
+  if (
+    combined.includes('swish mottagen') ||
+    combined.includes('swish mottagit') ||
+    combined.includes('swish inbetalning') ||
+    combined.includes('swish inb') ||
+    combined.includes('swish från') ||
+    combined.includes('swish fran')
+  ) {
+    return true;
+  }
+
+  // Insättning & överföring från annat konto
+  if (
+    combined.includes('insättning') ||
+    combined.includes('insattning') ||
+    combined.includes('insatt ') ||
+    combined.includes('överföring från') ||
+    combined.includes('overforing fran')
+  ) {
+    return true;
+  }
+
+  // Återbetalning & returer
+  if (
+    combined.includes('återbetalning') ||
+    combined.includes('aterbetalning') ||
+    combined.includes('återköp') ||
+    combined.includes('aterkop') ||
+    combined.includes('retur') ||
+    combined.includes('refund') ||
+    combined.includes('kreditering')
+  ) {
+    return true;
+  }
+
+  // Samhällsbidrag & pensioner
+  if (
+    combined.includes('försäkringskassan') ||
+    combined.includes('forsakringskassan') ||
+    combined.includes('barnbidrag') ||
+    combined.includes('pension') ||
+    combined.includes('pensionsmyndigheten') ||
+    combined.includes('skatteverket') ||
+    combined.includes('skatteåterbäring') ||
+    combined.includes('skatteaterbaring') ||
+    combined.includes('a-kassa') ||
+    combined.includes('akassa') ||
+    combined.includes('studiemedel')
+  ) {
+    return true;
+  }
+
+  // Ränteintäkt eller aktieutdelning
+  if (
+    combined.includes('aktieutdelning') ||
+    combined.includes('ränteintäkt') ||
+    combined.includes('ranteintakt') ||
+    combined.includes('utdelning')
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 /**
  * Normalizes the signed amount of a bank transaction.
- * Fixes SEB reserved card purchases (status PDNG / HOLD) where the bank returns
- * a positive unsigned amount (e.g. +399 SEK for Maxi ICA, +33 SEK for McDonald's, +12 SEK for Apple)
- * without a DBIT indicator.
+ * Ensures that all card purchases, store purchases, bills, autogiro, and outgoing
+ * payments are strictly negative outflows (-Math.abs), while verified inflows
+ * (salary, incoming Swish, deposits, refunds, benefits) remain positive credits.
  */
 export function getNormalizedBankTxAmount(tx: BankTransactionItem): number {
   const raw = Number(tx.amount);
   if (!Number.isFinite(raw) || raw === 0) return 0;
 
-  if (raw < 0) return raw;
-  if (tx.credit_debit_indicator === 'DBIT') return -Math.abs(raw);
+  const desc = tx.description || '';
+  const counterparty = tx.counterparty_name || '';
+  const indicator = tx.credit_debit_indicator
+    ? String(tx.credit_debit_indicator).toUpperCase().trim()
+    : null;
+  const status = tx.booking_status
+    ? String(tx.booking_status).toUpperCase().trim()
+    : null;
 
-  const isReserved = tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD';
-  const combinedText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
-  const hasExplicitInflowKeyword = INFLOW_DESCRIPTION_KEYWORDS.some((kw) => combinedText.includes(kw));
-
-  // Reserved / pending transactions on Swedish bank accounts are card reservations or pending outgoing bills
-  if (isReserved && !hasExplicitInflowKeyword) {
+  // 1. Om banken explicit angivit DBIT:
+  if (indicator === 'DBIT') {
     return -Math.abs(raw);
   }
 
-  // Also check if a booked transaction has a known card/expense merchant but missing DBIT indicator
-  if (!tx.credit_debit_indicator && !hasExplicitInflowKeyword) {
-    const looksLikePurchase =
-      VARIABLE_SPENDING_EXCLUSIONS.some((ex) => combinedText.includes(ex)) ||
-      EXTENDED_FIXED_EXPENSE_RULES.some((r) => r.keywords.some((kw) => combinedText.includes(kw)));
-    if (looksLikePurchase) {
-      return -Math.abs(raw);
-    }
+  const combined = `${desc} ${counterparty}`.toLowerCase();
+  const isReserved =
+    status === 'PDNG' ||
+    status === 'HOLD' ||
+    tx.reconciliation_status === 'reserved_pending' ||
+    combined.includes('reserverat') ||
+    combined.includes('reservation') ||
+    combined.includes('preliminär') ||
+    combined.includes('preliminar');
+
+  const isExplicitRefund =
+    combined.includes('återköp') ||
+    combined.includes('aterkop') ||
+    combined.includes('retur') ||
+    combined.includes('refund') ||
+    combined.includes('kreditering');
+
+  // Reservationer hos svenska banker är uteslutande kortköp/utgifter som hålls spärrade på kontot.
+  // De ska ALLTID vara negativa utgifter (-Math.abs(raw)), såvida det inte uttryckligen är en återbetalning/retur.
+  if (isReserved && !isExplicitRefund) {
+    return -Math.abs(raw);
   }
 
-  return raw;
+  // 2. Om beloppet redan är negativt i bankdatan och det inte är en bekräftad inkomst:
+  if (raw < 0 && !isExplicitInflowTransaction(desc, counterparty, indicator, status)) {
+    return raw;
+  }
+
+  // 3. Kontrollera om transaktionen är en bekräftad inkomst:
+  if (isExplicitInflowTransaction(desc, counterparty, indicator, status)) {
+    return Math.abs(raw);
+  }
+
+  // 4. På ett bankkonto är alla vanliga transaktioner (kortköp, restaurang, butiker, utgående betalningar) utgifter:
+  return -Math.abs(raw);
 }
 
 /**
@@ -539,11 +709,48 @@ function normalizeMerchantKey(rawText: string | null | undefined): string {
     .trim();
 }
 
+export function formatSwishTitle(
+  description: string | null | undefined,
+  counterpartyName: string | null | undefined
+): string {
+  // 1. Om banken redan har ett separat motpartsnamn som inte bara är "Swish"
+  if (counterpartyName && counterpartyName.trim().length > 0) {
+    const cp = counterpartyName.trim();
+    if (!/^swish$/i.test(cp)) {
+      return cleanDisplayMerchantName(cp);
+    }
+  }
+
+  const raw = String(description || '').trim();
+  if (!raw) return 'Swish';
+
+  // 2. Extrahera personens namn från typiska svenska Swish-beskrivningar:
+  // t.ex. "Swish mottagen 0701234567 Anna Svensson"
+  // "SWISH 1234567890 ERIK NILSSON"
+  // "Swish inbetalning Karin Larsson"
+  // "Swish från Olof"
+  let cleaned = raw
+    .replace(/^swish\s*(mottagen|inbetalning|inb\.?|skickad|betalning|från|fran|till)?\s*/i, '')
+    .trim();
+
+  // Rensa bort telefonnummer (t.ex. 07XXXXXXXX, 467XXXXXXXX) eller Swish-nummer (123XXXXXXX)
+  cleaned = cleaned.replace(/^(07\d{8}|467\d{8}|123\d{7}|\d{9,12})\s*/i, '').trim();
+
+  // Rensa bort ledande datum/referensnummer
+  cleaned = cleaned.replace(/^\d+[\s/-]+/, '').trim();
+
+  if (cleaned.length >= 2 && !/^\d+$/.test(cleaned)) {
+    return cleanDisplayMerchantName(cleaned);
+  }
+
+  return 'Swish';
+}
+
 export function cleanDisplayMerchantName(rawText: string | null | undefined): string {
   const cleaned = String(rawText || '')
     .replace(/^\d{5,}\s+/, '') // Strip leading reference numbers like "916601517227 SVEAFASTIGHETER"
     .replace(/^(AUTOGIRO|BG|PG|KORTKÖP|KORTKOP|BETALNING)\s+/i, '')
-    .replace(/\s+\d{4,}.*$/, '')
+    .replace(/\s+\d{4,}$/, '') // Strip trailing store numbers (e.g. "ICA MAXI 1421" -> "ICA MAXI")
     .trim();
   if (!cleaned) return 'Banktransaktion';
   // Convert ALL CAPS to clean Title Case if longer than 3 chars
@@ -585,6 +792,15 @@ export function categorizeBankTransactionForApp(
     }
     return preferredList[0] || 'Övrigt';
   };
+
+  if (combined.includes('swish')) {
+    const swishTitle = formatSwishTitle(tx.description, tx.counterparty_name);
+    return {
+      merchant: swishTitle,
+      category: 'Swish',
+      logo: getLogoUrl(swishTitle, 'Swish'),
+    };
+  }
 
   for (const rule of EVERYDAY_MERCHANT_RULES) {
     if (rule.keywords.some((kw) => combined.includes(kw))) {
@@ -1626,7 +1842,8 @@ export function getAutoImportableBankTransactions(
     const absAmount = Math.round(Math.abs(signedAmt) * 100) / 100;
     if (absAmount <= 0) continue;
 
-    const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
+    const { paymentDate } = getActualBankPaymentDateAndMeta(tx);
+    const txDate = paymentDate;
     const parsedDateMs = txDate ? Date.parse(`${txDate}T12:00:00`) : NaN;
     const timestamp = Number.isFinite(parsedDateMs) ? parsedDateMs : Date.now();
 

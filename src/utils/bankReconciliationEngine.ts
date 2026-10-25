@@ -218,7 +218,7 @@ export type ReconciliationPreviewResult = FirstReconciliationPreview;
  * missing fields on the original BankTransactionItem.
  */
 export function getEffectiveBankTxDate(tx: BankTransactionItem): string | null {
-  return tx.booking_date || tx.transaction_date || tx.value_date || null;
+  return tx.transaction_date || tx.booking_date || tx.value_date || null;
 }
 
 export function getPeriodInfoForDate(

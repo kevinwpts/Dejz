@@ -12,7 +12,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 export const DEJZ_SIGNATURE_COLOR = '#FF385C';
-export const LIGHT_TOP_TINT_COLOR = '#FFD9E2';
+export const LIGHT_TOP_TINT_COLOR = '#F2F0F0';
 export const DARK_TOP_TINT_COLOR = '#141414';
 
 export function getThemeColorLabel(_colorHex?: string, isEn: boolean = false): string {
@@ -53,11 +53,7 @@ export function applyThemeColor(_themeColorHex: string = 'neutral', isDark: bool
     target.style.setProperty('--user-accent-hex', hex);
     target.style.setProperty('--user-accent-rgb', `${r}, ${g}, ${b}`);
 
-    // Pure vertical (180deg) gradient starting with a uniform solid top color (#FFD9E2)
-    // so the iOS Dynamic Island / status bar and the top of the viewport match 100% seamlessly across the entire width.
-    const lightBgGradient = `linear-gradient(180deg, ${LIGHT_TOP_TINT_COLOR} 0px, ${LIGHT_TOP_TINT_COLOR} 28px, #FFE4DC 160px, #F2F0F0 400px)`;
-
-    target.style.setProperty('--app-bg-gradient', isDark ? 'none' : lightBgGradient);
+    target.style.setProperty('--app-bg-gradient', 'none');
     target.style.setProperty('--app-bg-top-tint', 'transparent');
     target.style.setProperty('--app-bg-bottom-tint', 'transparent');
 

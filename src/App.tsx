@@ -1,6646 +1,1476 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  PaymentMethod,
-  Frequency,
-  Config,
-  Income,
-  FixedExpense,
-  Transaction,
-  WeekendAdjustment,
-  PaydayType,
-  SavingsGoal,
-  MonthlySaving,
-  AppNotification,
-} from "./types";
+  calculateCurrentPeriod,
+  PeriodInfo,
+  WeekendHandlingMode,
+  isDateInPeriod,
+} from './utils/periodEngine';
+import { Navbar } from './components/Navbar';
+import { BottomNav, AppTab } from './components/BottomNav';
+import { HomeTab, AccountItem, IncomeItem, FixedExpenseItem, TransactionItem, getTransactionTime } from './components/HomeTab';
+import { FixedTab } from './components/FixedTab';
+import { TransactionsTab } from './components/TransactionsTab';
+import { SettingsTab } from './components/SettingsTab';
+import { BankModal } from './components/modals/BankModal';
+import { IncomeModal } from './components/modals/IncomeModal';
+import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
+import { TransactionModal } from './components/modals/TransactionModal';
+import { AuthModal } from './components/modals/AuthModal';
+import { supabase } from './supabaseClient';
+import { bankService, BankConnection, BankAccount, BankTransactionItem } from './services/bankService';
+import { dataService } from './services/dataService';
+import { Frequency } from './types';
+import { getLogoUrl } from './utils/logo';
 import {
-  AlertCircle,
-  Loader2,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Camera,
-  Mic,
-  Square,
-  Plus,
-} from "lucide-react";
-import { getActiveFixedExpenses, isExpenseActiveForPeriod, isFixedPaymentScheduledOnDate } from './utils/cancellation';
-import { useVoiceExpense } from "./hooks/useVoiceExpense";
-import { parseQuickExpense } from "./utils/expenseAiParser";
-import { SmartInput } from "./components/ui";
-import { applyThemeColor } from "./utils/theme";
-
-
-import { CalendarModal } from './components/CalendarModal';
+  analyzeBankTransactionsForOnboarding,
+  categorizeBankTransactionForApp,
+  cleanDisplayMerchantName,
+  formatBankAccountNumber,
+  formatSwishTitle,
+  getBankAccountTitle,
+  getNormalizedBankTxAmount,
+  isExplicitInflowTransaction,
+  isInternalTransferOrMicroSavings,
+} from './utils/bankHistoryAnalyzer';
+import { deduplicateTransactions } from './utils/transactionDedup';
 import {
-  IncomeModal,
-  FixedExpenseModal,
-  FixedExpenseViewModal,
-  IncomeViewModal,
-  MonthlySavingModal,
-  MonthlySavingViewModal,
-} from "./components/BudgetModals";
-import { CalculatorModal } from "./components/CalculatorModal";
-import { TransactionViewModal } from "./components/TransactionViewModal";
-import { BudgetView } from "./components/BudgetView";
-import { TransactionModal } from "./components/TransactionModal";
-import { LogView } from "./components/LogView";
-import { AnalysisView } from "./components/AnalysisView";
-import { TodayView } from "./components/TodayView";
-import { AppHeader } from "./components/AppHeader";
-import { DejziSummaryModal } from "./components/DejziSummaryModal";
-import { ProfileView } from "./components/ProfileView";
-import { CancelledSubscriptionsModal } from "./components/CancelledSubscriptionsModal";
-import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
-import { CookieConsentModal } from "./components/CookieConsentModal";
-import { getLogoUrl } from "./utils/logo";
-import { FeedbackModal } from "./components/FeedbackModal";
-import { FloatingFeedbackWidget } from "./components/FloatingFeedbackWidget";
-import { DeleteAccountModal } from "./components/DeleteAccountModal";
-import { SecurityModal } from "./components/SecurityModal";
-import { ManageAccountModal } from "./components/ManageAccountModal";
-import { PinLockScreen } from "./components/PinLockScreen";
-import { VariableAmountUpdateModal } from "./components/VariableAmountUpdateModal";
-import { NotificationsView } from "./components/NotificationsView";
-import {
-  supabase,
-  isSupabaseConfigured,
-  isSupabaseKeyValid,
-  isSupabaseUrlValid,
-  supabaseAnonKey,
-} from "./supabaseClient";
-import { Auth } from "./components/Auth";
-import { OnboardingModal } from "./components/OnboardingModal";
-import { SearchModal } from "./components/SearchModal";
-import { ResetPasswordModal } from "./components/ResetPasswordModal";
+  formatIsoDateStockholm,
+  formatIsoTimeStockholm,
+  getActualBankPaymentDateAndMeta,
+  getSwedishDateStr,
+} from './utils/swedishDate';
 
-import { LegalModal } from "./components/LegalModals";
-import { PublicLegalPage, LegalDocType } from "./components/PublicLegalPage";
-import { PullToRefresh } from "./components/PullToRefresh";
-import { Session } from "@supabase/supabase-js";
-import { ToastContainer, ToastMessage, ToastType } from "./components/Toast";
-import { AppSkeleton } from "./components/ui/Skeleton";
-import { ConfirmModal } from "./components/ConfirmModal";
-import { ReceiptCameraModal } from "./components/ReceiptCameraModal";
+const AUTO_SYNC_COOLDOWN_MS = 45_000; // Minst 45 sek mellan automatiska bakgrundssynkningar
+const AUTO_SYNC_INTERVAL_MS = 120_000; // Synka automatiskt var 2:a minut när användaren är aktiv i appen
 
-import { LandingPage } from "./components/LandingPage";
-import { seedDemoData } from "./utils/demoData";
-import { clearDemoData, isDemoMode as checkDemoMode } from "./utils/demoUtils";
+function getActualTransactionDate(bt: BankTransactionItem): string {
+  return getActualBankPaymentDateAndMeta(bt).paymentDate;
+}
 
-import { dataService, hasValidSavedCategoryBudgets } from "./services/dataService";
-import { Language, translations, TranslationKey } from "./i18n";
-import {
-  parseLanguageFromPath,
-  detectBrowserLanguage,
-  buildLanguageUrl,
-  normalizeLanguage,
-  getRegionDefaults,
-} from "./utils/nordic";
-import { updateDocumentSeo } from "./utils/seo";
-import { hasPin } from "./utils/security";
-import {
-  getPeriodBoundaries,
-  getPeriodName,
-  getPeriodId,
-  getPaydayTypeFromDay,
-  isVariableItemDue,
-  isFixedItemDueInPeriod,
-  isFixedItemScheduledOnDay,
-  parseReceiptDate,
-} from "./utils/date";
-import { uploadLogo } from "./services/storageService";
-import {
-  isBankIntegrationEnabledForUser,
-  savePendingBankCallback,
-  loadPendingBankCallback,
-  clearPendingBankCallback,
-  loadBankRedirectOrigin,
-  loadOnboardingBankDraft,
-  PendingBankCallback,
-} from "./utils/bankFeatureFlag";
-import { bankService, BankAccount } from "./services/bankService";
-import { merchantSimilarity } from "./utils/bankReconciliationEngine";
-import { getAutoImportableBankTransactions } from "./utils/bankHistoryAnalyzer";
-
-import {
-  DEFAULT_EXPENSE_CATEGORIES,
-  DEFAULT_INCOME_CATEGORIES,
-  DEFAULT_PAYMENT_METHODS,
-} from "./constants";
-import { CustomBottomNavigation } from "./components/CustomBottomNavigation";
-import { feedback } from "./utils/feedback";
-import { LOGO_URL } from "./constants";
-import { resolveLucideIcon, isEmojiString } from "./utils/icons";
-import { forceUnlockAllScroll } from "./hooks/useScrollLock";
-
-// --- Types ---
-
-type Tab = "today" | "transactions" | "analysis" | "budget" | "profile" | "settings" | "notifications";
-
-const normalizePaymentMethods = (methods: any[] | null | undefined): any[] => {
-  if (!methods || !Array.isArray(methods) || methods.length === 0) {
-    return DEFAULT_PAYMENT_METHODS;
-  }
-  return methods.map(m => {
-    if (typeof m === 'string') {
-      const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === m.toLowerCase());
-      if (found) return found;
-      const lower = m.toLowerCase();
-      if (lower.includes('apple')) {
-        return { name: m, icon: "apple", color: "#374151" };
-      }
-      if (lower.includes('klarna')) {
-        return { name: m, icon: "shopping-bag", color: "#f472b6" };
-      }
-      if (lower.includes('paypal')) {
-        return { name: m, icon: "wallet", color: "#0284c7" };
-      }
-      if (lower.includes('faktura')) {
-        return { name: m, icon: "receipt", color: "#f59e0b" };
-      }
-      if (lower.includes('kort')) {
-        return { name: m, icon: "credit-card", color: "#ec4899" };
-      }
-      if (lower.includes('swish')) {
-        return { name: m, icon: "smartphone", color: "#10b981" };
-      }
-      if (lower.includes('autogiro')) {
-        return { name: m, icon: "refresh", color: "#6366f1" };
-      }
-      if (lower.includes('kontant')) {
-        return { name: m, icon: "banknote", color: "#059669" };
-      }
-      if (lower.includes('överföring') || lower.includes('bank')) {
-        return { name: m, icon: "landmark", color: "#8b5cf6" };
-      }
-      return { name: m, icon: 'credit-card', color: '#6366f1' };
-    }
+function sanitizeTransactionDate(item: TransactionItem): TransactionItem {
+  const todayStr = getSwedishDateStr();
+  if (item.date && item.date > todayStr) {
     return {
-      name: m.name || '',
-      icon: m.icon || 'credit-card',
-      color: m.color || '#6366f1'
+      ...item,
+      bookingDate: item.bookingDate || item.date,
+      date: todayStr,
     };
-  });
-};
-
-export const isGloballyDismissedOnboarding = (userId?: string) => {
-  if (!userId) return false;
-  try {
-    if (localStorage.getItem(`dejz_onboarding_skipped_${userId}`) === 'true') return true;
-    if (localStorage.getItem(`dejz_onboarding_completed_${userId}`) === 'true') return true;
-  } catch (_e) {
-    // Ignore storage availability errors
   }
-  return false;
-};
+  return item;
+}
 
-export const markGloballyDismissedOnboarding = (userId?: string) => {
-  if (!userId) return;
-  try {
-    localStorage.setItem(`dejz_onboarding_skipped_${userId}`, 'true');
-    localStorage.setItem(`dejz_onboarding_completed_${userId}`, 'true');
-  } catch (_e) {
-    // Ignore storage write errors
+function extractBankTxTime(
+  bt: BankTransactionItem,
+  batchMinuteCounts: Map<string, number>,
+  effectiveDate: string,
+  category: string,
+  merchant: string
+): string {
+  const raw = bt.raw_json || {};
+
+  // 1. Kontrollera endast genuina tidsfält (INTE bokföringsdatum eller valuteringsdatum som saknar köptid)
+  const candidateFields = [
+    raw.transaction_time,
+    raw.time,
+    raw.execution_time,
+    raw.timestamp,
+    raw.transaction_date,
+    bt.transaction_date,
+  ];
+
+  for (const val of candidateFields) {
+    if (typeof val !== 'string') continue;
+    const trimmed = val.trim();
+    // Direkt tidformat som "14:35" eller "14:35:10"
+    const directTime = trimmed.match(/^([01]\d|2[0-3]):([0-5]\d)/);
+    if (directTime) {
+      const hhmm = `${directTime[1]}:${directTime[2]}`;
+      if (hhmm !== '00:00' && hhmm !== '12:00') {
+        return hhmm;
+      }
+    }
+    // Om det är en ISO-sträng som innehåller 'T', kolla att den inte är en standard midnatt/middags-placeholder
+    if (trimmed.includes('T') && !trimmed.includes('T00:00') && !trimmed.includes('T12:00') && !trimmed.includes('T10:00:00Z')) {
+      const parsedTime = formatIsoTimeStockholm(trimmed);
+      if (parsedTime) return parsedTime;
+    }
   }
-};
 
-// Header component removed as per user request to save space.
-
-// Rebuild trigger: Accent theme
-export default function App() {
-  const _now = new Date();
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [providerToken, setProviderToken] = useState<string | null>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
-    null,
-  );
-  const [profile, setProfile] = useState<any>(null);
-  const [trialEnd, setTrialEnd] = useState<string | null>(null);
-  const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
-
-  const [config, setConfig] = useState<Config | null>(null);
-  const [landingLanguage, setLandingLanguage] = useState<Language>(() => {
-    // 1. Explicit language in URL (e.g. /da/, /no/, /fi/, /sv/)
-    const parsed = parseLanguageFromPath(window.location.pathname);
-    if (parsed.lang) {
-      localStorage.setItem('app_language', parsed.lang);
-      return parsed.lang;
-    }
-    // 2. Previously manually chosen language
-    const saved = localStorage.getItem('app_language');
-    if (saved) {
-      return normalizeLanguage(saved);
-    }
-    // 3. Browser's preferred language, falling back to 'sv'
-    return detectBrowserLanguage();
-  });
-  const [currentPeriodDate, setCurrentPeriodDate] = useState(new Date());
-
-  const _goToPreviousPeriod = () => {
-    const newDate = new Date(currentPeriodDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    setCurrentPeriodDate(newDate);
-  };
-  const _goToNextPeriod = () => {
-    const newDate = new Date(currentPeriodDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    setCurrentPeriodDate(newDate);
-  };
-  const _goToToday = () => {
-    setCurrentPeriodDate(new Date());
-  };
-
-  const [incomes, setIncomes] = useState<Income[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [_isAtTop, setIsAtTop] = useState(true);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsAtTop(window.scrollY <= 10);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const [activeTab, setActiveTab] = useState<Tab>(() => {
-    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    let tabSegment = 'today';
-    if (pathSegments.length > 0) {
-      const firstSegment = pathSegments[0].toLowerCase();
-      if (['en', 'sv'].includes(firstSegment)) {
-        tabSegment = pathSegments[1] || 'today';
-      } else {
-        tabSegment = pathSegments[0];
+  // 2. Kontrollera om klockslag finns i bankens transaktionsbeskrivning (t.ex. "ICA 14:23" eller "KÖP 15.34")
+  if (bt.description) {
+    const descMatch = bt.description.match(/\b([01]\d|2[0-3])[:.]([0-5]\d)\b/);
+    if (descMatch) {
+      const hhmm = `${descMatch[1]}:${descMatch[2]}`;
+      if (hhmm !== '00:00' && hhmm !== '12:00') {
+        return hhmm;
       }
     }
-    if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(tabSegment)) {
-      return tabSegment as Tab;
+  }
+
+  // 3. Om transaktionen fångades upp i realtid vid köpet
+  if (bt.created_at) {
+    const createdDate = bt.created_at.slice(0, 10);
+    const minuteKey = bt.created_at.slice(0, 16);
+    const sameMinuteCount = batchMinuteCounts.get(minuteKey) || 0;
+    if (createdDate === effectiveDate && sameMinuteCount <= 3) {
+      const liveTime = formatIsoTimeStockholm(bt.created_at);
+      if (liveTime) return liveTime;
     }
-    return "today";
+  }
+
+  // 4. Om banken inte lämnade ut tid: använd ett naturtroget klockslag anpassat efter butikskategori
+  return getTransactionTime({
+    id: `bank-${bt.id}`,
+    title: merchant,
+    category,
+    date: effectiveDate,
+    note: bt.description,
+  });
+}
+
+function getPayDatesForIncome(
+  inc: IncomeItem,
+  fallbackPayday = 25,
+  beforeWeekend = true
+): string[] {
+  const dates: string[] = [];
+  const day = inc.payday || fallbackPayday || 25;
+  const todayStockholm = getSwedishDateStr();
+  const currentYear = parseInt(todayStockholm.slice(0, 4), 10);
+  const currentMonth = parseInt(todayStockholm.slice(5, 7), 10) - 1; // 0-indexed
+
+  for (let offset = 0; offset <= 5; offset++) {
+    const d = new Date(currentYear, currentMonth - offset, day);
+    if (beforeWeekend) {
+      const dow = d.getDay();
+      if (dow === 6) d.setDate(d.getDate() - 1); // Lördag -> Fredag
+      if (dow === 0) d.setDate(d.getDate() - 2); // Söndag -> Fredag
+    }
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(d.getDate()).padStart(2, '0');
+    dates.push(`${y}-${m}-${dayStr}`);
+  }
+  return dates;
+}
+
+export const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<AppTab>('home');
+
+  // Lönedagsinställning (standard 25:e)
+  const [targetPayday, setTargetPayday] = useState<number>(() => {
+    const saved = localStorage.getItem('dejz_payday');
+    return saved ? Number(saved) : 25;
   });
 
-  useEffect(() => {
-    // Safety guard: ensure no lingering scroll lock persists across views or after fast modal closes
-    forceUnlockAllScroll();
-  }, [activeTab]);
-  const [profileSection, setProfileSection] = useState<
-    | "main"
-    | "salary"
-    | "categories"
-    | "paymentMethods"
-    | "language"
-    | "manageAccount"
-    | "receipts"
-    | "debts"
-    | "sharedBudget"
-    | "guides"
-    | "notifications"
-    | "bank"
-    | "bankTransactions"
-  >("main");
-  const [settingsSection, setSettingsSection] = useState<
-    | "main"
-    | "salary"
-    | "budget"
-    | "categories"
-    | "paymentMethods"
-    | "language"
-    | "appearance"
-    | "currency"
-    | "notifications"
-    | "bank"
-    | "bankTransactions"
-  >("main");
-  const [budgetSection, setBudgetSection] = useState<string | null>(null);
-
-  // Capture /bank/callback query parameters synchronously BEFORE URL-sync useEffect rewrites pathname
-  const [pendingBankCallback, setPendingBankCallback] = useState<PendingBankCallback | null>(() => {
-    if (typeof window === "undefined") return null;
-    const path = window.location.pathname.toLowerCase();
-    const searchParams = new URLSearchParams(window.location.search);
-    const code = searchParams.get("code") || undefined;
-    const state = searchParams.get("state") || undefined;
-    const error = searchParams.get("error") || undefined;
-    const errorDescription = searchParams.get("error_description") || undefined;
-    const hasPendingOrigin = Boolean(loadBankRedirectOrigin() || loadOnboardingBankDraft());
-
-    if ((path.includes("/bank/callback") && (code || state || error)) || (code && state && hasPendingOrigin)) {
-      const payload: PendingBankCallback = {
-        code,
-        state,
-        error,
-        errorDescription,
-        capturedAt: Date.now(),
-      };
-      savePendingBankCallback(payload);
-      return payload;
-    }
-
-    return loadPendingBankCallback();
+  // Helghantering (standard 'before' = fredagen före helg)
+  const [weekendHandling, setWeekendHandling] = useState<WeekendHandlingMode>(() => {
+    const saved = localStorage.getItem('dejz_weekend_handling');
+    if (saved === 'before' || saved === 'after' || saved === 'none') return saved;
+    return 'before';
   });
-  const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
-  const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
-  const [plusQuickText, setPlusQuickText] = useState("");
-  const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
-  const [plusSuccessMsg, setPlusSuccessMsg] = useState<{ text: string; transcript?: string; type?: "success" | "error" } | null>(null);
-  const plusQuickInputRef = useRef<HTMLInputElement>(null);
-  const plusCameraInputRef = useRef<HTMLInputElement>(null);
-  const [isScanningReceipt, setIsScanningReceipt] = useState(false);
-  const [isReceiptCameraOpen, setIsReceiptCameraOpen] = useState(false);
 
-  const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
+  // Enable Banking connections & accounts
+  const [connections, setConnections] = useState<BankConnection[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [syncingBank, setSyncingBank] = useState(false);
+  const [callbackStatusMsg, setCallbackStatusMsg] = useState<string | null>(null);
+
+  // Refs för tyst automatisk bakgrundssynk
+  const syncInFlightRef = useRef(false);
+  const lastSyncTimestampRef = useRef<number>(0);
+
+  // Riktiga inkomster – Startar tomt (INGA placeholders)
+  const [incomes, setIncomes] = useState<IncomeItem[]>(() => {
     try {
-      const resized = await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const maxDim = 1024;
-          let w = img.width;
-          let h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) {
-              h = Math.round((h * maxDim) / w);
-              w = maxDim;
-            } else {
-              w = Math.round((w * maxDim) / h);
-              h = maxDim;
-            }
-          }
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            reject(new Error("Canvas context not available"));
-            return;
-          }
-          ctx.drawImage(img, 0, 0, w, h);
-          const base64 = canvas.toDataURL("image/jpeg", 0.85);
-          resolve({
-            base64: base64.includes(",") ? base64.split(",")[1] : base64,
-            mimeType: "image/jpeg"
-          });
-          URL.revokeObjectURL(objectUrl);
-        };
-        img.onerror = () => {
-          reject(new Error("Failed to load image"));
-          URL.revokeObjectURL(objectUrl);
-        };
-        img.src = objectUrl;
-      });
-      return resized;
-    } catch {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const res = reader.result as string;
-          resolve(res.includes(",") ? res.split(",")[1] : res);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      return { base64, mimeType: file.type || "image/jpeg" };
-    }
-  };
-
-  const {
-    isRecording,
-    isAudioTranscribing,
-    error: plusVoiceError,
-    toggleRecording,
-    stopRecordingAndProcess
-  } = useVoiceExpense({
-    isEn: config?.language === "en",
-    onTextUpdate: (text) => setPlusQuickText(text),
-    onSuccess: async (result) => {
-      if (result.items && result.items.length > 0) {
-        for (const item of result.items) {
-          if (item.amount > 0) {
-            const defaultCategory = config?.language === "en" ? "Uncategorized" : "Okategoriserat";
-            await addTransaction({
-              amount: item.amount,
-              type: "expense",
-              category: item.category?.trim() || defaultCategory,
-              merchant: item.merchant?.trim() || (config?.language === "en" ? "Voice expense" : "Röstutgift"),
-              timestamp: Date.now(),
-              tags: []
-            });
-          }
-        }
-        feedback.success();
-        setPlusSuccessMsg({
-          text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
-        });
-        setPlusQuickText("");
-        setTimeout(() => {
-          setPlusSuccessMsg(null);
-          setIsPlusMenuOpen(false);
-        }, 1500);
-      }
-    }
-  });
-
-  const handlePlusKvittoClick = () => {
-    feedback.tap();
-    setIsPlusMenuOpen(false);
-    setIsReceiptCameraOpen(true);
-  };
-
-  const handleReceiptFileCaptured = async (file: File) => {
-    setIsScanningReceipt(true);
-    setPlusSuccessMsg({ text: config?.language === "en" ? "📷 Scanning receipt..." : "📷 Läser av kvitto..." });
-    feedback.tap();
-
-    try {
-      const { base64, mimeType } = await prepareReceiptImage(file);
-
-      // Upload to storage in background or use local object URL
-      let receiptUrl: string | undefined = undefined;
-      try {
-        if (session?.user?.id && session.user.id !== 'demo-user') {
-          const uploaded = await uploadLogo(file, session.user.id);
-          if (uploaded) receiptUrl = uploaded;
-        }
-      } catch (uploadErr) {
-        console.warn('Storage upload error for receipt:', uploadErr);
-      }
-      if (!receiptUrl) {
-        receiptUrl = URL.createObjectURL(file);
-      }
-
-      const { data, error } = await supabase.functions.invoke("scan-receipt", {
-        body: { image: base64, mimeType },
-      });
-
-      let amountVal: number | undefined = undefined;
-      let merchantVal: string = '';
-      let categoryVal: string = '';
-      let dateVal: Date = new Date();
-
-      if (!error && data) {
-        if (data.amount && !isNaN(Number(data.amount))) {
-          amountVal = Number(data.amount);
-        }
-        if (data.merchant && typeof data.merchant === 'string') {
-          merchantVal = data.merchant.trim();
-        }
-        if (data.category && typeof data.category === 'string') {
-          categoryVal = data.category.trim();
-        }
-        if (data.date) {
-          const parsed = parseReceiptDate(data.date);
-          if (parsed) {
-            dateVal = parsed;
-          }
-        }
-      }
-
-      feedback.success();
-      setIsReceiptCameraOpen(false);
-      setPlusSuccessMsg(null);
-      setIsPlusMenuOpen(false);
-      setEditingTransaction(null);
-      setTransactionType("expense");
-      setTargetDate(dateVal);
-      setTransactionPrefill({
-        amount: amountVal,
-        name: merchantVal,
-        category: categoryVal,
-        receiptUrl: receiptUrl,
-        date: dateVal,
-      });
-      setIsAddTransactionOpen(true);
-    } catch (err) {
-      console.error("Auto receipt scan error:", err);
-      setIsReceiptCameraOpen(false);
-      setPlusSuccessMsg(null);
-      setIsPlusMenuOpen(false);
-      setEditingTransaction(null);
-      setTransactionType("expense");
-      setTargetDate(new Date());
-      setTransactionPrefill({
-        receiptUrl: URL.createObjectURL(file)
-      });
-      setIsAddTransactionOpen(true);
-    } finally {
-      setIsScanningReceipt(false);
-    }
-  };
-
-  const handlePlusCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await handleReceiptFileCaptured(file);
-    if (e.target) e.target.value = "";
-  };
-
-  const handlePlusQuickExpenseSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const clean = plusQuickText.trim();
-    if (!clean || isSubmittingQuick) return;
-
-    setIsSubmittingQuick(true);
-    try {
-      const defaultCategory = config?.language === "en" ? "Uncategorized" : "Okategoriserat";
-      const parsed = await parseQuickExpense(
-        clean,
-        config?.categories || [],
-        transactions,
-        defaultCategory
-      );
-
-      if (parsed.amount && parsed.amount > 0) {
-        await addTransaction({
-          amount: parsed.amount,
-          type: "expense",
-          category: parsed.category || defaultCategory,
-          merchant: parsed.merchant || (config?.language === "en" ? "Quick Add" : "Snabbköp"),
-          timestamp: Date.now(),
-          tags: []
-        });
-
-        feedback.success();
-        setPlusSuccessMsg({
-          text: config?.language === "en" ? "Expense added" : "Utgift tillagd",
-          type: "success"
-        });
-        setPlusQuickText("");
-        setTimeout(() => {
-          setPlusSuccessMsg(null);
-          setIsPlusMenuOpen(false);
-        }, 1500);
-      } else {
-        feedback.error();
-        setPlusSuccessMsg({
-          text:
-            config?.language === "en"
-              ? "Please include an amount, e.g. '45 ICA'"
-              : "Ange ett belopp, t.ex. '45 ICA'",
-          type: "error"
-        });
-      }
-    } catch (_err) {
-      console.error("Quick expense failed", _err);
-    } finally {
-      setIsSubmittingQuick(false);
-    }
-  };
-
-  const handlePlusMicClick = async () => {
-    if (isRecording) {
-      const res = await stopRecordingAndProcess(plusQuickText);
-      if (res && !res.handled && plusQuickText.trim()) {
-        handlePlusQuickExpenseSubmit();
-      }
-    } else {
-      toggleRecording(plusQuickText);
-    }
-  };
-  const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [transactionType, setTransactionType] = useState<
-    "income" | "expense" | "savings"
-  >("expense");
-  const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
-
-  const [editingTransaction, setEditingTransaction] =
-    useState<Transaction | null>(null);
-  const [viewingTransaction, setViewingTransaction] =
-    useState<Transaction | null>(null);
-  const [searchModalOpenBeforeViewing, setSearchModalOpenBeforeViewing] = useState(false);
-
-  const handleCloseTransactionView = () => {
-    setViewingTransaction(null);
-    if (searchModalOpenBeforeViewing) {
-      setIsSearchModalOpen(true);
-      setSearchModalOpenBeforeViewing(false);
-    }
-  };
-  const [targetDate, setTargetDate] = useState<Date>(new Date());
-
-  // Reset to today on mount
-  useEffect(() => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    setTargetDate(now);
-    setCurrentPeriodDate(now);
-  }, []);
-
-  const prevPaydayRef = useRef<number | undefined>(config?.payday);
-  const prevPaydayAdjustmentRef = useRef<boolean | undefined>(config?.paydayBeforeWeekend);
-
-  useEffect(() => {
-    if (!config) return;
-    const paydayChanged = prevPaydayRef.current !== undefined && prevPaydayRef.current !== config.payday;
-    const adjustmentChanged = prevPaydayAdjustmentRef.current !== undefined && prevPaydayAdjustmentRef.current !== config.paydayBeforeWeekend;
-
-    if (paydayChanged || adjustmentChanged) {
-      prevPaydayRef.current = config.payday;
-      prevPaydayAdjustmentRef.current = config.paydayBeforeWeekend;
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      setCurrentPeriodDate(now);
-      setTargetDate(now);
-    } else {
-      prevPaydayRef.current = config.payday;
-      prevPaydayAdjustmentRef.current = config.paydayBeforeWeekend;
-    }
-  }, [config?.payday, config?.paydayBeforeWeekend]);
-
-  useEffect(() => {
-    if (!config) return;
-    const paydaySetting = config.payday || 25;
-    const paydayType = config.payday
-      ? getPaydayTypeFromDay(config.payday)
-      : (config.paydayType || PaydayType.TWENTY_FIFTH);
-    const paydayBeforeWeekend = config.paydayBeforeWeekend
-      ? WeekendAdjustment.BEFORE
-      : WeekendAdjustment.NONE;
-
-    const referenceDate = new Date(
-      currentPeriodDate.getFullYear(),
-      currentPeriodDate.getMonth(),
-      currentPeriodDate.getDate(),
-    );
-    referenceDate.setHours(0, 0, 0, 0);
-    const { start, end } = getPeriodBoundaries(
-      referenceDate,
-      paydayType,
-      paydaySetting,
-      paydayBeforeWeekend,
-    );
-
-    const targetTime = targetDate.getTime();
-    if (targetTime < start.getTime() || targetTime > end.getTime()) {
-      const actualToday = new Date();
-      actualToday.setHours(0, 0, 0, 0);
-      if (actualToday >= start && actualToday <= end) {
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        setTargetDate(now);
-      } else {
-        setTargetDate(start);
-      }
-    }
-  }, [currentPeriodDate, config, targetDate]);
-  const [editingIncome, setEditingIncome] = useState<Income | null>(null);
-  const [viewingIncome, setViewingIncome] = useState<Income | null>(null);
-  const [editingFixedExpense, setEditingFixedExpense] =
-    useState<FixedExpense | null>(null);
-
-  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
-  const [isFixedExpenseModalOpen, setIsFixedExpenseModalOpen] = useState(false);
-  const [isMonthlySavingModalOpen, setIsMonthlySavingModalOpen] =
-    useState(false);
-  const [viewingFixedExpense, setViewingFixedExpense] =
-    useState<FixedExpense | null>(null);
-  const [viewingMonthlySaving, setViewingMonthlySaving] = useState<any | null>(
-    null,
-  );
-  const [editingMonthlySaving, setEditingMonthlySaving] = useState<any | null>(
-    null,
-  );
-  const [navTrigger, setNavTrigger] = useState(0);
-
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-  const [isDejziSummaryOpen, setIsDejziSummaryOpen] = useState(false);
-  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
-    useState(false);
-  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
-  const [isCancelledSubscriptionsOpen, setIsCancelledSubscriptionsOpen] = useState(false);
-  const [isManageAccountModalOpen, setIsManageAccountModalOpen] =
-    useState(false);
-  const [legalModal, setLegalModal] = useState<{
-    isOpen: boolean;
-    type: "privacy" | "terms" | "cookies" | "contact";
-  }>({
-    isOpen: false,
-    type: "terms",
-  });
-
-  const [publicLegalDoc, setPublicLegalDoc] = useState<LegalDocType | null>(() => {
-    const path = window.location.pathname.toLowerCase();
-    const hash = window.location.hash.toLowerCase();
-    if (path.includes('privacy') || hash.includes('privacy') || path.includes('integritet')) return 'privacy';
-    if (path.includes('terms') || hash.includes('terms') || path.includes('villkor')) return 'terms';
-    if (path.includes('cookie') || hash.includes('cookie')) return 'cookies';
-    return null;
-  });
-
-  useEffect(() => {
-    const checkLegalUrl = () => {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (path.includes('privacy') || hash.includes('privacy') || path.includes('integritet')) {
-        setPublicLegalDoc('privacy');
-      } else if (path.includes('terms') || hash.includes('terms') || path.includes('villkor')) {
-        setPublicLegalDoc('terms');
-      } else if (path.includes('cookie') || hash.includes('cookie')) {
-        setPublicLegalDoc('cookies');
-      } else if (path === '/' || path === '') {
-        setPublicLegalDoc(null);
-      }
-    };
-
-    window.addEventListener('popstate', checkLegalUrl);
-    window.addEventListener('hashchange', checkLegalUrl);
-    return () => {
-      window.removeEventListener('popstate', checkLegalUrl);
-      window.removeEventListener('hashchange', checkLegalUrl);
-    };
-  }, []);
-
-  const [isLocked, setIsLocked] = useState(false);
-  const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem("dejz_dismissed_notifications");
+      const saved = localStorage.getItem('dejz_incomes');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
-  const [isVariableUpdateModalOpen, setIsVariableUpdateModalOpen] =
-    useState(false);
-  const [itemToUpdateVariable, setItemToUpdateVariable] = useState<any>(null);
-  const [navHistory, setNavHistory] = useState<{ tab: Tab; section?: string }[]>([]);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-  const isSyncingBankToAppRef = useRef(false);
 
-  const syncBankToAppTransactions = useCallback(
-    async (
-      userId: string,
-      currentFixed: FixedExpense[],
-      currentTransactions: Transaction[],
-      currentConfig?: Config | null,
-    ) => {
-      if (!userId || userId === "demo-user") return;
-      try {
-        const status = await bankService.getStatus();
-        const accounts = status?.accounts || [];
-        setBankAccounts(accounts);
+  // Riktiga fasta utgifter – Startar tomt (INGA placeholders)
+  const [fixedExpenses, setFixedExpenses] = useState<FixedExpenseItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('dejz_fixed_expenses');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
-        if (accounts.length === 0) return;
+  // Riktiga köp – Startar tomt (INGA placeholders)
+  const [transactions, setTransactions] = useState<TransactionItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('dejz_transactions');
+      if (!saved) return [];
+      const parsed: TransactionItem[] = JSON.parse(saved);
+      const cleaned = parsed.map((t) => {
+        let item = t;
+        if (item.time === '12:00' || item.time === '00:00') {
+          item = { ...item, time: undefined };
+        }
+        // Reparera eventuella felaktigt sparade bankutgifter i lokalt minne:
+        if (item.id.startsWith('bank-') && item.type === 'income') {
+          const isRealInflow = isExplicitInflowTransaction(item.note || item.title, item.title);
+          if (!isRealInflow) {
+            const rawDesc = item.note || item.title;
+            const catInfo = categorizeBankTransactionForApp({
+              id: item.id.replace(/^bank-/, ''),
+              user_id: '',
+              connection_id: '',
+              bank_account_id: '',
+              external_key: '',
+              entry_reference: null,
+              transaction_id: null,
+              booking_status: 'PDNG',
+              booking_date: item.date,
+              value_date: item.date,
+              transaction_date: item.date,
+              amount: -Math.abs(item.amount),
+              currency: 'SEK',
+              credit_debit_indicator: 'DBIT',
+              description: rawDesc,
+              counterparty_name: item.title,
+              created_at: '',
+              updated_at: '',
+            });
+            item = {
+              ...item,
+              type: 'expense',
+              category:
+                item.category === 'Inkomst' || item.category === 'Insättning'
+                  ? catInfo.category
+                  : item.category,
+              logo: item.logo || catInfo.logo || getLogoUrl(item.title, catInfo.category),
+            };
+          }
+        }
+        // Korrigera eventuella transaktioner som sparats med morgondagens datum:
+        const todayStr = getSwedishDateStr();
+        if (item.date && item.date > todayStr) {
+          item = {
+            ...item,
+            bookingDate: item.bookingDate || item.date,
+            date: todayStr,
+          };
+        }
+        return sanitizeTransactionDate(item);
+      });
+      return deduplicateTransactions(cleaned);
+    } catch {
+      return [];
+    }
+  });
 
-        const bankTxs = await bankService.listAllTransactionsForReconciliation();
-        if (!bankTxs || bankTxs.length === 0) return;
+  // Inloggad användare i Supabase
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(() => {
+    return localStorage.getItem('dejz_avatar_url') || null;
+  });
 
-        let dismissedIds: string[] = [];
-        try {
-          const raw = localStorage.getItem(`dejz_dismissed_bank_tx_ids_${userId}`);
-          if (raw) dismissedIds = JSON.parse(raw);
-        } catch {
-          // ignore
+  // Modaltillstånd
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [selectedIncome, setSelectedIncome] = useState<IncomeItem | null>(null);
+  const [isFixedModalOpen, setIsFixedModalOpen] = useState(false);
+  const [selectedFixedExpense, setSelectedFixedExpense] = useState<FixedExpenseItem | null>(null);
+  const [isTxModalOpen, setIsTxModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionItem | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Sparade borttagna genererade inkomst-ID:n så att raderade transaktioner förblir raderade
+  const [dismissedTxIds, setDismissedTxIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('dejz_dismissed_tx_ids');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Spara lokalt som cache
+  useEffect(() => { localStorage.setItem('dejz_payday', targetPayday.toString()); }, [targetPayday]);
+  useEffect(() => { localStorage.setItem('dejz_weekend_handling', weekendHandling); }, [weekendHandling]);
+  useEffect(() => {
+    if (userAvatar) {
+      localStorage.setItem('dejz_avatar_url', userAvatar);
+    }
+  }, [userAvatar]);
+  useEffect(() => { localStorage.setItem('dejz_incomes', JSON.stringify(incomes)); }, [incomes]);
+  useEffect(() => { localStorage.setItem('dejz_fixed_expenses', JSON.stringify(fixedExpenses)); }, [fixedExpenses]);
+  useEffect(() => { localStorage.setItem('dejz_transactions', JSON.stringify(transactions)); }, [transactions]);
+  useEffect(() => { localStorage.setItem('dejz_dismissed_tx_ids', JSON.stringify(dismissedTxIds)); }, [dismissedTxIds]);
+
+  // Ladda Enable Banking status + banktransaktioner från Supabase
+  const refreshBankStatus = useCallback(async (): Promise<{
+    connections: BankConnection[];
+    accounts: BankAccount[];
+  }> => {
+    try {
+      const status = await bankService.getStatus();
+      const conns = status.connections || [];
+      const accs = status.accounts || [];
+      setConnections(conns);
+      setBankAccounts(accs);
+
+      // Hämta synkade banktransaktioner från Supabase (public.bank_transactions)
+      const bankTxs = await bankService
+        .listAllTransactionsForReconciliation(1000)
+        .catch(() => []);
+
+      if (Array.isArray(bankTxs) && bankTxs.length > 0) {
+        // Analysera återkommande inkomster och fasta utgifter från bankhistoriken
+        const analyzed = analyzeBankTransactionsForOnboarding(
+          bankTxs,
+          targetPayday,
+          weekendHandling === 'before'
+        );
+
+        if (analyzed.detectedIncomes.length > 0) {
+          setIncomes((prev) => {
+            const existingNames = new Set(prev.map((i) => i.name.toLowerCase().trim()));
+            const additions: IncomeItem[] = analyzed.detectedIncomes
+              .filter((det) => !existingNames.has(det.name.toLowerCase().trim()))
+              .map((det, idx) => {
+                const cat = det.category || 'Lön';
+                return {
+                  id: `bank-inc-${idx}-${det.name.toLowerCase().replace(/\s+/g, '-')}`,
+                  name: det.name,
+                  amount: Math.round(Number(det.amount) || 0),
+                  payday: det.deductionDay || targetPayday || 25,
+                  category: cat,
+                  logo: det.logo || getLogoUrl(det.name, cat),
+                };
+              });
+            return additions.length > 0 ? [...prev, ...additions] : prev;
+          });
         }
 
-        const toImport = getAutoImportableBankTransactions({
-          bankTransactions: bankTxs,
-          userAccounts: accounts,
-          existingFixedExpenses: currentFixed,
-          existingAppTransactions: currentTransactions,
-          config: currentConfig,
-          dismissedBankTxIds: new Set(dismissedIds),
+        if (analyzed.detectedFixedExpenses.length > 0) {
+          setFixedExpenses((prev) => {
+            const existingNames = new Set(prev.map((f) => f.name.toLowerCase().trim()));
+            const additions: FixedExpenseItem[] = analyzed.detectedFixedExpenses
+              .filter((det) => !existingNames.has(det.name.toLowerCase().trim()))
+              .map((det, idx) => {
+                const cat = det.category || 'Räkningar';
+                return {
+                  id: `bank-fix-${idx}-${det.name.toLowerCase().replace(/\s+/g, '-')}`,
+                  name: det.name,
+                  amount: Math.round(Number(det.amount) || 0),
+                  dueDay: det.deductionDay || 27,
+                  category: cat,
+                  paymentMethod: det.paymentMethod || 'Autogiro',
+                  logo: det.logo || getLogoUrl(det.name, cat),
+                };
+              });
+            if (additions.length === 0) return prev;
+            return [...prev, ...additions].sort((a, b) => a.dueDay - b.dueDay);
+          });
+        }
+
+        const fixedNameSet = new Set(
+          analyzed.detectedFixedExpenses.map((d) => d.name.toLowerCase().trim())
+        );
+
+        // Räkna hur många banktransaktioner som skapades exakt samma minut (för att skilja live-synk från bulk-historik)
+        const batchMinuteCounts = new Map<string, number>();
+        for (const bt of bankTxs) {
+          if (bt.created_at) {
+            const key = bt.created_at.slice(0, 16);
+            batchMinuteCounts.set(key, (batchMinuteCounts.get(key) || 0) + 1);
+          }
+        }
+
+        // 1. Samla alla bokförda transaktioner för att upptäcka och rensa preliminära reservationer (PDNG/HOLD)
+        const bookedNegativeTxs = bankTxs.filter((bt) => {
+          if (bt.booking_status !== 'BOOK') return false;
+          if (bt.reconciliation_status === 'excluded' || bt.reconciliation_status === 'internal_transfer') return false;
+          return getNormalizedBankTxAmount(bt) < 0;
         });
 
-        let updatedList = [...currentTransactions];
+        // Spara metadata (datum & tid) från preliminära reservationer så att en bokförd transaktion
+        // som ersätter reservationen behåller det exakta datumet och klockslaget från när köpet gjordes
+        const bookedToReservationMeta = new Map<string, { purchaseDate: string; purchaseTime: string }>();
 
-        // Remove any synthetic mid-period lump sum adjustment if real bank transactions exist
-        const adjustmentTxs = updatedList.filter(
-          (tx) => tx.note === "Justering för start mitt i period" && !tx.bankTransactionId
-        );
-        if (adjustmentTxs.length > 0 && (toImport.length > 0 || updatedList.some((tx) => Boolean(tx.bankTransactionId)))) {
-          for (const adj of adjustmentTxs) {
-            try {
-              await dataService.deleteTransaction(adj.id);
-              updatedList = updatedList.filter((t) => t.id !== adj.id);
-            } catch {
-              // ignore
+        // 2. Filtrera fram rörliga kortköp & betalningar (exkludera ersatta reservationer, avbokade och interna överföringar)
+        const mappedBankTxs: TransactionItem[] = bankTxs
+          .filter((bt) => {
+            if (bt.booking_status === 'CNCL' || bt.booking_status === 'RJCT') return false;
+            if (bt.reconciliation_status === 'reserved_replaced' || bt.replaced_by_bank_tx_id) {
+              return false;
             }
-          }
-        }
+            if (bt.reconciliation_status === 'excluded' || bt.reconciliation_status === 'internal_transfer') {
+              return false;
+            }
+            if (isInternalTransferOrMicroSavings(bt, accs)) return false;
+            const rawAmt = getNormalizedBankTxAmount(bt);
+            if (rawAmt === 0) return false;
 
-        if (toImport.length > 0) {
-          // 1. Immediately update UI state so transactions appear in Hem, Tidslinjen, Historik, and Analys without delay
-          const optimisticNew: Transaction[] = toImport.map((draft, idx) => ({
-            ...draft,
-            id: `temp-bank-${draft.bankTransactionId || idx}-${Date.now()}`,
-          }));
-          const optimisticCombined = [...optimisticNew, ...updatedList].sort(
-            (a, b) => b.timestamp - a.timestamp
-          );
-          setTransactions(optimisticCombined);
+            // Om transaktionen är preliminär (reservation), kolla om banken redan hunnit bokföra den
+            if (bt.booking_status === 'PDNG' || bt.booking_status === 'HOLD') {
+              const pendingAmt = Math.round(Math.abs(rawAmt));
+              const pendingMerchant = categorizeBankTransactionForApp(bt).merchant.toLowerCase().trim();
+              const pendingDate = getActualTransactionDate(bt);
 
-          // 2. Persist to Supabase in parallel batches of 8 for fast completion
-          const savedNew: Transaction[] = [];
-          const chunkSize = 8;
-          for (let i = 0; i < toImport.length; i += chunkSize) {
-            const chunk = toImport.slice(i, i + chunkSize);
-            const results = await Promise.all(
-              chunk.map(async (draft) => {
-                try {
-                  return await dataService.addTransaction(userId, draft);
-                } catch (e) {
-                  console.warn("[BankAutoImport] Could not save bank transaction:", e);
-                  return null;
+              const isSettledByBooked = bookedNegativeTxs.some((b) => {
+                const bAmt = Math.round(Math.abs(getNormalizedBankTxAmount(b)));
+                if (bAmt !== pendingAmt) return false;
+                const bMerchant = categorizeBankTransactionForApp(b).merchant.toLowerCase().trim();
+                const merchantsMatch =
+                  bMerchant === pendingMerchant ||
+                  (bt.description && bt.description.toLowerCase().includes(bMerchant)) ||
+                  (b.description && b.description.toLowerCase().includes(pendingMerchant));
+                if (!merchantsMatch) return false;
+
+                const bDate = getActualTransactionDate(b);
+                if (pendingDate && bDate) {
+                  const dayDiff =
+                    Math.abs(new Date(bDate).getTime() - new Date(pendingDate).getTime()) /
+                    (1000 * 60 * 60 * 24);
+                  if (dayDiff <= 4) {
+                    // Spara reservationens ursprungliga köpdatum och köptid
+                    const purchaseDate = pendingDate;
+                    const purchaseTime = extractBankTxTime(
+                      bt,
+                      batchMinuteCounts,
+                      purchaseDate,
+                      pendingMerchant,
+                      pendingMerchant
+                    );
+                    bookedToReservationMeta.set(b.id, { purchaseDate, purchaseTime });
+                    return true;
+                  }
                 }
-              })
-            );
-            for (const saved of results) {
-              if (saved && !updatedList.some((t) => t.id === saved.id)) {
-                savedNew.push(saved);
+                return false;
+              });
+
+              if (isSettledByBooked) {
+                return false;
               }
             }
-          }
-          if (savedNew.length > 0) {
-            updatedList = [...savedNew, ...updatedList].sort((a, b) => b.timestamp - a.timestamp);
-            setTransactions(updatedList);
-          }
-        } else {
-          setTransactions(updatedList);
-        }
-      } catch (err) {
-        console.warn("[BankAutoImport] Could not sync bank transactions:", err);
+
+            return true;
+          })
+          .map((bt) => {
+            const rawAmt = getNormalizedBankTxAmount(bt);
+            const isIncome = rawAmt > 0;
+            const normAmt = Math.abs(rawAmt);
+            let catInfo = categorizeBankTransactionForApp(bt);
+
+            if (isIncome) {
+              const combinedDesc = `${bt.description || ''} ${bt.counterparty_name || ''}`.toLowerCase();
+              let incomeCat = 'Inkomst';
+              if (
+                combinedDesc.includes('lön') ||
+                combinedDesc.includes('salary') ||
+                combinedDesc.includes('löneutbetalning') ||
+                combinedDesc.includes('loneutbetalning')
+              ) {
+                incomeCat = 'Lön';
+              } else if (combinedDesc.includes('swish')) {
+                incomeCat = 'Swish';
+              } else if (combinedDesc.includes('csn')) {
+                incomeCat = 'CSN';
+              } else if (
+                combinedDesc.includes('försäkringskassan') ||
+                combinedDesc.includes('forsakringskassan') ||
+                combinedDesc.includes('fk ')
+              ) {
+                incomeCat = 'Försäkringskassan';
+              } else if (combinedDesc.includes('pension')) {
+                incomeCat = 'Pension';
+              } else if (
+                combinedDesc.includes('återbetalning') ||
+                combinedDesc.includes('aterbetalning') ||
+                combinedDesc.includes('retur') ||
+                combinedDesc.includes('refund') ||
+                combinedDesc.includes('återköp') ||
+                combinedDesc.includes('aterkop')
+              ) {
+                incomeCat = 'Återbetalning';
+              }
+
+              const cleanName =
+                incomeCat === 'Swish'
+                  ? formatSwishTitle(bt.description, bt.counterparty_name)
+                  : cleanDisplayMerchantName(bt.counterparty_name || bt.description || 'Insättning');
+              catInfo = {
+                merchant: cleanName,
+                category: incomeCat,
+                logo: catInfo.logo || getLogoUrl(cleanName, incomeCat),
+              };
+            }
+
+            const reservationMeta = bookedToReservationMeta.get(bt.id);
+            const dateMeta = getActualBankPaymentDateAndMeta(
+              bt,
+              reservationMeta?.purchaseDate,
+              reservationMeta?.purchaseTime
+            );
+            let effectiveDate = dateMeta.paymentDate;
+            const todayStr = getSwedishDateStr();
+            if (effectiveDate > todayStr) {
+              effectiveDate = todayStr;
+            }
+
+            const txTime =
+              dateMeta.paymentTime ||
+              reservationMeta?.purchaseTime ||
+              extractBankTxTime(
+                bt,
+                batchMinuteCounts,
+                effectiveDate,
+                catInfo.category,
+                catInfo.merchant
+              );
+
+            return sanitizeTransactionDate({
+              id: `bank-${bt.id}`,
+              title: catInfo.merchant,
+              amount: Math.round(normAmt),
+              type: isIncome ? ('income' as const) : ('expense' as const),
+              category: catInfo.category,
+              date: effectiveDate,
+              time: txTime,
+              bookingDate: dateMeta.bookingDate,
+              bookingStatus: dateMeta.bookingStatus,
+              reconciliationStatus: bt.reconciliation_status,
+              isExcluded: bt.reconciliation_status === 'excluded',
+              note:
+                bt.description && bt.description.toLowerCase() !== catInfo.merchant.toLowerCase()
+                  ? bt.description
+                  : undefined,
+              logo: catInfo.logo || getLogoUrl(catInfo.merchant, catInfo.category),
+            });
+          })
+          .filter(
+            (item) => item.type === 'income' || !fixedNameSet.has(item.title.toLowerCase().trim())
+          );
+
+        // 3. Avduplicera alla banktransaktioner med den strikta avdupliceringsmotorn
+        const uniqueBankTxs = deduplicateTransactions(mappedBankTxs);
+
+        setTransactions((prev) => {
+          const nonBankPrev = prev.filter((p) => !p.id.startsWith('bank-'));
+          const combined = deduplicateTransactions([...uniqueBankTxs, ...nonBankPrev]);
+          combined.sort((a, b) => {
+            const dCmp = b.date.localeCompare(a.date);
+            if (dCmp !== 0) return dCmp;
+            return getTransactionTime(b).localeCompare(getTransactionTime(a));
+          });
+          return combined;
+        });
+      }
+
+      return { connections: conns, accounts: accs };
+    } catch {
+      // Ej inloggad eller funktion ej nåbar
+      return { connections: [], accounts: [] };
+    }
+  }, [targetPayday, weekendHandling]);
+
+  // Tyst bakgrundssynk mot Enable Banking via Supabase Edge Function
+  const performSilentBankSync = useCallback(
+    async (force = false) => {
+      if (syncInFlightRef.current) return;
+      const now = Date.now();
+      if (!force && now - lastSyncTimestampRef.current < AUTO_SYNC_COOLDOWN_MS) {
+        return;
+      }
+
+      syncInFlightRef.current = true;
+      lastSyncTimestampRef.current = now;
+
+      try {
+        const res = await bankService.sync();
+        if (res.connections) setConnections(res.connections);
+        if (res.accounts) setBankAccounts(res.accounts);
+        await refreshBankStatus();
+      } catch {
+        // Tyst felhantering vid automatisk bakgrundssynk
+      } finally {
+        syncInFlightRef.current = false;
       }
     },
-    []
+    [refreshBankStatus]
   );
-  const [showLanding, setShowLanding] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const path = window.location.pathname.toLowerCase();
-      if (
-        path.includes("/bank/callback") ||
-        loadPendingBankCallback() ||
-        loadOnboardingBankDraft() ||
-        loadBankRedirectOrigin()
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
-  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const hasCallback =
-        window.location.pathname.toLowerCase().includes("/bank/callback") ||
-        Boolean(loadPendingBankCallback());
-      if (
-        hasCallback &&
-        (loadBankRedirectOrigin()?.originContext === "onboarding" || Boolean(loadOnboardingBankDraft()))
-      ) {
-        return true;
-      }
-    }
-    return false;
-  });
-  const hasDismissedOnboardingSession = useRef(false);
 
-  const tabScrollPositions = useRef<Record<string, number>>({});
-
-  // Instantly restore previous scroll position when switching to any tab
-  useLayoutEffect(() => {
-    const savedY = tabScrollPositions.current[activeTab] ?? 0;
-    window.scrollTo({ top: savedY, behavior: "instant" as any });
-
-    const raf = requestAnimationFrame(() => {
-      window.scrollTo({ top: savedY, behavior: "instant" as any });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [activeTab]);
-
-  const handleLegalClick = (
-    type: "privacy" | "terms" | "cookies" | "contact",
-  ) => {
-    if (type === 'privacy' || type === 'terms' || type === 'cookies') {
-      try {
-        window.history.pushState({}, '', `/${type}`);
-      } catch (_e) {
-        // ignore
-      }
-      setPublicLegalDoc(type);
-    } else {
-      setLegalModal({ isOpen: true, type });
-    }
-  };
-
-  // Update app icon and manifest based on theme
-  useEffect(() => {
-    const theme = config?.appIconTheme || "accent";
-
-    // Update manifest
-    const manifestLink = document.querySelector('link[rel="manifest"]');
-    if (manifestLink) {
-      manifestLink.setAttribute("href", `/manifest.json?theme=${theme}`);
-    }
-
-    // Update apple-touch-icon
-    const appleIconLink = document.querySelector(
-      'link[rel="apple-touch-icon"]',
-    );
-    if (appleIconLink) {
-      appleIconLink.setAttribute("href", `/api/icon.svg?theme=${theme}`);
-    }
-
-    // Update favicon
-    const faviconLink = document.querySelector('link[rel="icon"]');
-    if (faviconLink) {
-      faviconLink.setAttribute("href", `/api/icon.svg?theme=${theme}`);
-    }
-  }, [config?.appIconTheme]);
-
-  const handleRefresh = async () => {
-    if (!session) return;
+  // Ladda användarens sparade inkomster/fasta kostnader/transaktioner från Supabase
+  const loadSupabaseUserData = useCallback(async (uid: string) => {
     try {
-      let dbProfile = await dataService.getProfile(session.user.id);
+      const [dbIncomes, dbFixed, dbTxs, dbSettings, dbProfile] = await Promise.all([
+        dataService.getIncomeSources(uid).catch(() => []),
+        dataService.getFixedExpenses(uid).catch(() => []),
+        dataService.getTransactions(uid).catch(() => []),
+        dataService.getSettings(uid).catch(() => null),
+        dataService.getProfile(uid).catch(() => null),
+      ]);
 
-      // Ensure profile exists
-      if (!dbProfile || Object.keys(dbProfile).length === 0) {
-        const preferredLang = session.user.user_metadata?.language || landingLanguage || 'sv';
-        const regDefaults = getRegionDefaults(session.user.user_metadata?.country || preferredLang);
-        const { data, error } = await supabase
-          .from("profiles")
-          .insert({
-            id: session.user.id,
-            email: session.user.email,
-            full_name: session.user.user_metadata?.full_name || "",
-            role:
-              session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
-            language: preferredLang,
-            country: session.user.user_metadata?.country || regDefaults.countryCode,
-            currency: session.user.user_metadata?.currency || regDefaults.currencySymbol,
-            currency_code: session.user.user_metadata?.currencyCode || regDefaults.defaultCurrencyCode,
-            locale: session.user.user_metadata?.locale || regDefaults.locale,
-            timezone: session.user.user_metadata?.timezone || regDefaults.timezone,
-            dark_mode: false,
-            theme_mode: 'light',
+      if (dbSettings?.payday) {
+        setTargetPayday(dbSettings.payday);
+      }
+      if (dbSettings?.paydayBeforeWeekend !== undefined) {
+        const savedLocal = localStorage.getItem('dejz_weekend_handling');
+        if (!savedLocal) {
+          setWeekendHandling(dbSettings.paydayBeforeWeekend ? 'before' : 'none');
+        }
+      }
+      if (dbProfile?.avatar_url) {
+        setUserAvatar(dbProfile.avatar_url);
+      }
+
+      if (Array.isArray(dbIncomes) && dbIncomes.length > 0) {
+        setIncomes(
+          dbIncomes.map((inc) => {
+            const cat = inc.category || 'Lön';
+            return {
+              id: inc.id,
+              name: inc.name,
+              amount: Number(inc.amount) || 0,
+              payday: inc.deductionDay || 25,
+              category: cat,
+              logo: inc.logo || getLogoUrl(inc.name, cat),
+            };
           })
-          .select()
-          .single();
-        if (!error) dbProfile = data;
+        );
       }
 
-      const [dbSettings, dbTransactions, dbIncomes, dbFixed] =
-        await Promise.all([
-          dataService.getSettings(session.user.id),
-          dataService.getTransactions(session.user.id),
-          dataService.getIncomeSources(session.user.id),
-          dataService.getFixedExpenses(session.user.id),
-        ]);
-
-      if (dbProfile) {
-        setProfile(dbProfile);
-        setSubscriptionStatus(dbProfile.subscription_status || "free");
-        setTrialEnd(dbProfile.trial_end);
-        setNextBillingDate(dbProfile.next_billing_date);
-      }
-
-      if (dbSettings) {
-        const VIBRANT_FALLBACK_COLORS = ['#ef4444', '#f97316', '#d97706', '#ec4899', '#6366f1', '#0ea5e9', '#3b82f6', '#8b5cf6', '#a855f7', '#10b981', '#06b6d4', '#0d9488'];
-        const migrateCategories = (categories: any[]) => {
-          let hasChanged = false;
-          if (!Array.isArray(categories)) return { migrated: [], hasChanged: false };
-
-          const colorCounts: Record<string, number> = {};
-          categories.forEach((c) => {
-            if (c.color) {
-              const lowerColor = String(c.color).toLowerCase();
-              colorCounts[lowerColor] = (colorCounts[lowerColor] || 0) + 1;
-            }
-          });
-          const hasUniformColorBug = Object.values(colorCounts).some((count) => count >= 3 && count >= categories.length * 0.3);
-
-          const migrated = categories.map((cat, idx) => {
-            const updated = { ...cat };
-            if (updated.icon && isEmojiString(updated.icon)) {
-              hasChanged = true;
-              updated.icon = resolveLucideIcon(updated.icon);
-            }
-
-            const catNameLower = (updated.name || '').trim().toLowerCase();
-            const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower) 
-              || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower);
-
-            const isGenericColor = !updated.color 
-              || updated.color === '#64748b' 
-              || updated.color === '#94a3b8' 
-              || updated.color === '#71717a' 
-              || updated.color === '#a1a1aa'
-              || hasUniformColorBug;
-
-            if (defaultMatch) {
-              if (updated.color !== defaultMatch.color && (isGenericColor || !updated.color)) {
-                updated.color = defaultMatch.color;
-                hasChanged = true;
-              }
-            } else if (isGenericColor) {
-              updated.color = VIBRANT_FALLBACK_COLORS[idx % VIBRANT_FALLBACK_COLORS.length];
-              hasChanged = true;
-            }
-
-            return updated;
-          });
-          return { migrated, hasChanged };
-        };
-
-        const LEGACY_EXPENSE_RENAMES: Record<string, { name: string; icon: string; color: string }> = {
-          'Shopping & Kläder': { name: 'Shopping', icon: 'shopping', color: '#ec4899' },
-          'Restaurang & Fika': { name: 'Restaurang', icon: 'utensils', color: '#f97316' },
-          'Streaming & Media': { name: 'Streaming', icon: 'tv', color: '#8b5cf6' },
-          'Transport & Pendling': { name: 'Transport', icon: 'car', color: '#0ea5e9' },
-          'Abonnemang & Tjänster': { name: 'Abonnemang', icon: 'smartphone', color: '#3b82f6' },
-          'Nöje & Fritid': { name: 'Nöjen', icon: 'drama', color: '#a855f7' },
-          'Räkningar & Avgifter': { name: 'Räkningar', icon: 'receipt', color: '#64748b' },
-          'Resor & Semester': { name: 'Resor', icon: 'plane', color: '#06b6d4' },
-        };
-
-        const migrateExpenseCategories = (categories: any[]) => {
-          const { migrated, hasChanged: iconChanged } = migrateCategories(categories);
-          let hasChanged = iconChanged;
-          const renamedPairs: { oldName: string; newName: string }[] = [];
-
-          for (let i = 0; i < migrated.length; i++) {
-            const cat = migrated[i];
-            const oldName = (cat.name || '').trim();
-            if (LEGACY_EXPENSE_RENAMES[oldName]) {
-              const target = LEGACY_EXPENSE_RENAMES[oldName];
-              migrated[i] = {
-                ...cat,
-                name: target.name,
-                icon: target.icon || cat.icon,
-                color: cat.color || target.color,
+      if (Array.isArray(dbFixed) && dbFixed.length > 0) {
+        setFixedExpenses(
+          dbFixed
+            .filter((f) => !f.isCancelled)
+            .map((f) => {
+              const cat = f.category || 'Boende';
+              return {
+                id: f.id,
+                name: f.name,
+                amount: Number(f.amount) || 0,
+                dueDay: f.deductionDay || 27,
+                category: cat,
+                paymentMethod: f.paymentMethod,
+                logo: f.logo || getLogoUrl(f.name, cat),
               };
-              renamedPairs.push({ oldName, newName: target.name });
-              hasChanged = true;
-            }
-          }
+            })
+        );
+      }
 
-          return { migrated, hasChanged, renamedPairs };
-        };
-
-        const { migrated: migratedExpense, hasChanged: expenseChanged, renamedPairs: authRenamedPairs } =
-          migrateExpenseCategories(dbSettings.categories || []);
-        const { migrated: migratedIncome, hasChanged: incomeChanged } =
-          migrateCategories(dbSettings.incomeCategories || []);
-
-        if (expenseChanged || incomeChanged) {
-          console.log("[Migration] Migrated categories back to clean standards");
-          const updatedSettings = {
-            ...dbSettings,
-            categories: migratedExpense,
-            incomeCategories: migratedIncome,
+      if (Array.isArray(dbTxs) && dbTxs.length > 0) {
+        const mappedDbTxs: TransactionItem[] = dbTxs.map((t) => {
+          const isIncome = t.type === 'income';
+          const title = t.merchant || t.note || t.category || (isIncome ? 'Inkomst' : 'Utgift');
+          const cat = t.category || (isIncome ? 'Inkomst' : 'Övrigt');
+          const dateStr = formatIsoDateStockholm(t.timestamp);
+          const explicitTime = t.timestamp ? formatIsoTimeStockholm(t.timestamp) : null;
+          return {
+            id: t.id,
+            title,
+            amount: Math.abs(Number(t.amount) || 0),
+            type: isIncome ? ('income' as const) : ('expense' as const),
+            category: cat,
+            date: dateStr,
+            time:
+              explicitTime ||
+              getTransactionTime({
+                id: t.id,
+                title,
+                category: cat,
+                date: dateStr,
+                note: t.note,
+              }),
+            note: t.note,
+            logo: t.logo || getLogoUrl(title, cat),
           };
-          dataService
-            .saveSettings(session.user.id, updatedSettings)
-            .catch((err) => {
-              console.error(
-                "[Migration] Failed to save migrated settings:",
-                err,
-              );
-            });
-          dbSettings.categories = migratedExpense;
-          dbSettings.incomeCategories = migratedIncome;
+        });
 
-          if (authRenamedPairs && authRenamedPairs.length > 0) {
-            for (const pair of authRenamedPairs) {
-              dataService.renameCategory(session.user.id, pair.oldName, pair.newName).catch(() => {});
-            }
-          }
-        }
-
-        let languageToUse = dbSettings.language;
-        const parsedPath = parseLanguageFromPath(window.location.pathname);
-        const urlLang = parsedPath.lang;
-
-        if (!languageToUse) {
-          languageToUse = urlLang || landingLanguage || 'sv';
-          dataService.saveSettings(session.user.id, { ...dbSettings, language: languageToUse });
-        } else if (languageToUse !== landingLanguage) {
-          setLandingLanguage(normalizeLanguage(languageToUse));
-          localStorage.setItem('app_language', languageToUse);
-        }
-
-        const regionDef = getRegionDefaults(dbSettings.country || languageToUse || 'sv');
-
-        setConfig({
-          currency: dbSettings.currency === "SEK" ? "kr" : (dbSettings.currency || regionDef.currencySymbol),
-          currencyCode: dbSettings.currencyCode || regionDef.defaultCurrencyCode,
-          country: dbSettings.country || regionDef.countryCode,
-          locale: dbSettings.locale || regionDef.locale,
-          timezone: dbSettings.timezone || regionDef.timezone,
-          language: languageToUse,
-          payday: dbSettings.payday,
-          paydayType: dbSettings.paydayType || PaydayType.TWENTY_FIFTH,
-          paydayBeforeWeekend: dbSettings.paydayBeforeWeekend,
-          categories: dbSettings.categories,
-          incomeCategories: dbSettings.incomeCategories,
-          initialSpent: Number(dbSettings.initialSpent),
-          notifications: dbSettings.notifications,
-          securityLock: dbSettings.securityLock,
-          darkMode:
-            dbSettings.themeMode === 'dark' ? true : false,
-          themeMode: dbSettings.themeMode === 'dark' ? 'dark' : 'light',
-          themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral',
-          quickChoices: dbSettings.quickChoices || [],
-          savingsPot: dbSettings.savingsPot || 0,
-          savingsGoals: dbSettings.savingsGoals || [],
-          totalSavedLifetime: dbSettings.totalSavedLifetime || 0,
-          paymentMethods: normalizePaymentMethods(dbSettings.paymentMethods),
-          surplusIncome: dbSettings.surplusIncome || 0,
-          monthlySavings: dbSettings.monthlySavings || 0,
-          monthlySavingsItems: dbSettings.monthlySavingsItems || [],
-          appIconTheme: dbSettings.appIconTheme,
-          includeFixedExpensesInAnalysis:
-            dbSettings.includeFixedExpensesInAnalysis !== undefined
-              ? dbSettings.includeFixedExpensesInAnalysis
-              : true,
-          showFixedExpensesInTodayView:
-            dbSettings.showFixedExpensesInTodayView !== undefined && dbSettings.showFixedExpensesInTodayView !== null
-              ? Boolean(dbSettings.showFixedExpensesInTodayView)
-              : false,
-          showFixedExpensesInCalendar:
-            dbSettings.showFixedExpensesInCalendar !== undefined && dbSettings.showFixedExpensesInCalendar !== null
-              ? Boolean(dbSettings.showFixedExpensesInCalendar)
-              : false,
-          showFixedExpensesInHistory:
-            dbSettings.showFixedExpensesInHistory !== undefined && dbSettings.showFixedExpensesInHistory !== null
-              ? Boolean(dbSettings.showFixedExpensesInHistory)
-              : (localStorage.getItem('dejz_show_fixed_in_history') !== 'false'),
-          hideEmptyCategories:
-            dbSettings.hideEmptyCategories !== undefined && dbSettings.hideEmptyCategories !== null
-              ? Boolean(dbSettings.hideEmptyCategories)
-              : (localStorage.getItem('dejz_hide_empty_categories') === 'true'),
-          hasSavedInitialBudget: Boolean(
-            dbSettings.hasSavedInitialBudget ||
-            hasValidSavedCategoryBudgets(dbSettings.categories)
-          ),
+        setTransactions((prev) => {
+          const bankOnly = prev.filter((p) => p.id.startsWith('bank-'));
+          const combined = deduplicateTransactions([...bankOnly, ...mappedDbTxs]);
+          combined.sort((a, b) => {
+            const dCmp = b.date.localeCompare(a.date);
+            if (dCmp !== 0) return dCmp;
+            return getTransactionTime(b).localeCompare(getTransactionTime(a));
+          });
+          return combined;
         });
       }
-
-      setTransactions(dbTransactions || []);
-      setIncomes(dbIncomes || []);
-      const upgradedFixedRefresh = (dbFixed || []).map((fe) => {
-        if (!fe.logo || fe.logo.includes("google.com/s2/favicons")) {
-          const autoLogo = getLogoUrl(fe.name, fe.category);
-          if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
-            return { ...fe, logo: autoLogo };
-          }
-        }
-        return fe;
-      });
-      setFixedExpenses(upgradedFixedRefresh);
-
-      await syncBankToAppTransactions(
-        session.user.id,
-        upgradedFixedRefresh,
-        dbTransactions || [],
-        config
-      );
-
-      // Small delay to make the refresh feel "real"
-      await new Promise((resolve) => setTimeout(resolve, 400));
-    } catch (error) {
-      console.error("Refresh failed:", error);
-    }
-  };
-
-  const handleResetSavingsPot = async () => {
-    if (!session || !config) return;
-
-    setConfirmModal({
-      isOpen: true,
-      title: t("resetSavingsPot"),
-      message: t("resetSavingsPotMessage"),
-      variant: "danger",
-      onConfirm: async () => {
-        try {
-          const currentPot = config.savingsPot || 0;
-          await dataService.resetSavingsPot(session.user.id);
-
-          // Update local state
-          setConfig((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  savingsPot: 0,
-                  totalSavedLifetime: Math.max(
-                    0,
-                    (prev.totalSavedLifetime || 0) - currentPot,
-                  ),
-                }
-              : null,
-          );
-          setTransactions((prev) =>
-            prev.filter(
-              (e) => e.category !== "Spargris" && e.category !== "Budgetökning",
-            ),
-          );
-
-          addToast(t("savingsPotResetSuccess"), "success");
-        } catch (err) {
-          console.error("Error resetting savings pot:", err);
-          addToast(t("errorSaving"), "error");
-        } finally {
-          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-        }
-      },
-    });
-  };
-
-  const handleResetCompletedGoals = async () => {
-    if (!session || !config) return;
-
-    setConfirmModal({
-      isOpen: true,
-      title: t("reset"),
-      message: t("confirmDelete"),
-      variant: "danger",
-      onConfirm: async () => {
-        try {
-          const updatedGoals = (config.savingsGoals || []).filter(
-            (g) => !g.isCompleted,
-          );
-          const newConfig = { ...config, savingsGoals: updatedGoals };
-
-          setConfig(newConfig);
-          await dataService.saveSettings(session.user.id, newConfig);
-
-          addToast(t("reset"), "success");
-        } catch (err) {
-          console.error("Error resetting completed goals:", err);
-          addToast(t("error"), "error");
-        } finally {
-          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-        }
-      },
-    });
-  };
-
-  const handleClearTransactions = async () => {
-    if (!session) return;
-
-    showConfirm(
-      t("clearTransactionsTitle"),
-      t("clearTransactionsMessage"),
-      async () => {
-        try {
-          const { error } = await supabase
-            .from("transactions")
-            .delete()
-            .eq("user_id", session.user.id);
-          if (error) throw error;
-          setTransactions([]);
-          addToast(t("clearTransactionsSuccess"), "success");
-        } catch (err) {
-          console.error("Error clearing transactions:", err);
-          addToast(t("errorSaving"), "error");
-        }
-      },
-    );
-  };
-
-  const _handleAddSavingsGoal = async (
-    goalData: Omit<SavingsGoal, "id" | "currentAmount" | "createdAt">,
-  ) => {
-    if (!session || !config) return;
-    try {
-      const newGoal: SavingsGoal = {
-        ...goalData,
-        id: crypto.randomUUID(),
-        currentAmount: 0,
-        createdAt: Date.now(),
-      };
-
-      const updatedGoals = [...(config.savingsGoals || []), newGoal];
-      const redistributedGoals = dataService.distributeSavingsPot(
-        config.savingsPot || 0,
-        updatedGoals,
-      );
-      const newConfig = { ...config, savingsGoals: redistributedGoals };
-
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-      addToast(t("settingsSaved"), "success");
-    } catch (_error) {
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  const _handleUpdateSavingsGoal = async (
-    id: string,
-    goalData: Partial<SavingsGoal>,
-  ) => {
-    if (!session || !config) return;
-    try {
-      const updatedGoals = (config.savingsGoals || []).map((g) =>
-        g.id === id ? { ...g, ...goalData } : g,
-      );
-
-      const redistributedGoals = dataService.distributeSavingsPot(
-        config.savingsPot || 0,
-        updatedGoals,
-      );
-      const newConfig = { ...config, savingsGoals: redistributedGoals };
-
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-      addToast(t("settingsSaved"), "success");
-    } catch (_error) {
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  const _handleDeleteSavingsGoal = async (id: string) => {
-    if (!session || !config) return;
-    try {
-      const updatedGoals = (config.savingsGoals || []).filter(
-        (g) => g.id !== id,
-      );
-      const redistributedGoals = dataService.distributeSavingsPot(
-        config.savingsPot || 0,
-        updatedGoals,
-      );
-      const newConfig = { ...config, savingsGoals: redistributedGoals };
-
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-      addToast(t("settingsSaved"), "success");
-    } catch (_error) {
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  const _handleReorderSavingsGoal = async (id: string, direction: 'up' | 'down') => {
-    if (!session || !config) return;
-    try {
-      const activeGoals = (config.savingsGoals || []).filter(g => !g.isCompleted);
-      const completedGoals = (config.savingsGoals || []).filter(g => g.isCompleted);
-      
-      const index = activeGoals.findIndex(g => g.id === id);
-      if (index === -1) return;
-      
-      const newActiveGoals = [...activeGoals];
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      
-      if (targetIndex < 0 || targetIndex >= newActiveGoals.length) return;
-      
-      // Swap
-      const temp = newActiveGoals[index];
-      newActiveGoals[index] = newActiveGoals[targetIndex];
-      newActiveGoals[targetIndex] = temp;
-      
-      // Re-distribute pot based on new order
-      const redistributedGoals = dataService.distributeSavingsPot(
-        config.savingsPot || 0,
-        [...newActiveGoals, ...completedGoals]
-      );
-      
-      const newConfig = { ...config, savingsGoals: redistributedGoals };
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-    } catch (_error) {
-      console.error('Reorder error:', error);
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  const _handleCompleteSavingsGoal = async (id: string) => {
-    if (!session || !config) return;
-    try {
-      const goal = (config.savingsGoals || []).find((g) => g.id === id);
-      if (!goal) return;
-
-      // Mark as completed
-      const updatedGoals = (config.savingsGoals || []).map((g) =>
-        g.id === id
-          ? {
-              ...g,
-              isCompleted: true,
-              completedAt: Date.now(),
-              currentAmount: g.targetAmount,
-            }
-          : g,
-      );
-
-      // Subtract target amount from savings pot
-      const newSavingsPot = Math.max(
-        0,
-        (config.savingsPot || 0) - goal.targetAmount,
-      );
-
-      // Redistribute remaining pot to other active goals
-      const redistributedGoals = dataService.distributeSavingsPot(
-        newSavingsPot,
-        updatedGoals,
-      );
-
-      const newConfig = {
-        ...config,
-        savingsPot: newSavingsPot,
-        savingsGoals: redistributedGoals,
-      };
-
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-      feedback.celebrate();
-      addToast(t("goalCompleted"), "success");
-    } catch (_error) {
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-
-
-  const _isAdmin =
-    profile?.role === "admin" || session?.user?.email === "hej@dejz.se" || session?.user?.email === "kevinwpts@gmail.com";
-
-  const _handleResetTotalSaved = async () => {
-    if (!session || !config) return;
-
-    showConfirm(
-      "Nollställ totalt sparat",
-      "Är du säker på att du vill nollställa totalt sparat sedan start?",
-      async () => {
-        try {
-          const updatedConfig = { ...config, totalSavedLifetime: 0 };
-          await dataService.saveSettings(session.user.id, updatedConfig);
-          setConfig(updatedConfig);
-          addToast("Totalt sparat har nollställts", "success");
-        } catch (err) {
-          console.error("Error resetting total saved:", err);
-          addToast(t("errorSaving"), "error");
-        }
-      },
-    );
-  };
-
-  useEffect(() => {
-    if (hasPin()) {
-      setIsLocked(true);
+    } catch {
+      // Fallback till befintlig state
     }
   }, []);
 
-  // Update manifest and favicon when theme changes
+  // Hantera Enable Banking OAuth callback (?code=...&state=...)
   useEffect(() => {
-    if (!config) return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
 
-    const theme = config.appIconTheme || "accent";
+    if (code && state && userId) {
+      setCallbackStatusMsg('Slutför bankkoppling via Enable Banking...');
+      window.history.replaceState({}, '', '/');
 
-    // Update manifest
-    const manifestLink = document.querySelector('link[rel="manifest"]');
-    if (manifestLink) {
-      manifestLink.setAttribute("href", `/manifest.json?theme=${theme}`);
-    }
-
-    // Update favicon and apple-touch-icon
-    const iconUrl = `/api/icon.svg?theme=${theme}`;
-    const iconLink = document.querySelector('link[rel="icon"]');
-    if (iconLink) {
-      iconLink.setAttribute("href", iconUrl);
-    }
-
-    const appleIconLink = document.querySelector(
-      'link[rel="apple-touch-icon"]',
-    );
-    if (appleIconLink) {
-      appleIconLink.setAttribute("href", iconUrl);
-    }
-  }, [config?.appIconTheme]);
-
-  useEffect(() => {
-    if (!config) return;
-    const isDark = Boolean(session && !isOnboarding && (config.themeMode === 'dark' || (config.themeMode !== 'light' && config.darkMode === true)));
-    const themeHex = config.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
-    applyThemeColor(themeHex, isDark);
-  }, [config?.themeColor, config?.darkMode, config?.themeMode, session, isOnboarding]);
-
-  const handleFeedbackSubmit = async (message: string) => {
-    const activeUserId = session?.user?.id || 'demo-user';
-    try {
-      await dataService.saveFeedback(activeUserId, message);
-      addToast(t("feedbackSent"), "success");
-    } catch (err) {
-      console.error("Could not save feedback:", err);
-      addToast(t("feedbackSent"), "success");
-    }
-  };
-
-  const handleConfirmDeleteAccount = async () => {
-    if (!session) return;
-
-    try {
-      if (session.user.id === "demo-user" || checkDemoMode(session)) {
-        clearDemoData();
-        localStorage.removeItem("mock_session");
-        addToast(t("accountDeleted"), "success");
-        setSession(null);
-        setIsDeleteAccountModalOpen(false);
-        return;
-      }
-
-      // Try to revoke Google OAuth token if available
-      if (providerToken && session.user.app_metadata.provider === "google") {
-        try {
-          await fetch(
-            `https://accounts.google.com/o/oauth2/revoke?token=${providerToken}`,
-            {
-              method: "POST",
-              mode: "no-cors", // Google's revoke endpoint doesn't support CORS but still works with no-cors
-            },
-          );
-        } catch (_e) {
-          console.warn("Could not revoke Google token automatically:", _e);
-        }
-      }
-
-      // Call server-side endpoint to delete account completely
-      const response = await fetch("/api/auth/delete-account", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session.access_token
-            ? { Authorization: `Bearer ${session.access_token}` }
-            : {}),
-        },
-        body: JSON.stringify({ userId: session.user.id }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Kunde inte radera kontot");
-      }
-
-      // 2. Sign out (local cleanup)
-      await supabase.auth.signOut();
-
-      addToast(t("accountDeleted"), "success");
-      setSession(null);
-      setIsDeleteAccountModalOpen(false);
-    } catch (err) {
-      console.error("Error deleting account:", err);
-      // Re-throw to be caught by the modal
-      throw err;
-    }
-  };
-
-  const handleExportData = async () => {
-    if (!session) return;
-
-    try {
-      const { data: transactions } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", session.user.id);
-      const { data: fixedExpenses } = await supabase
-        .from("fixed_expenses")
-        .select("*")
-        .eq("user_id", session.user.id);
-      const { data: incomeSources } = await supabase
-        .from("income_sources")
-        .select("*")
-        .eq("user_id", session.user.id);
-      const { data: savingsGoals } = await supabase
-        .from("savings_goals")
-        .select("*")
-        .eq("user_id", session.user.id);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-
-      const exportData = {
-        transactions,
-        fixedExpenses,
-        incomeSources,
-        savingsGoals,
-        profile,
-        exportDate: new Date().toISOString(),
-        version: "1.0",
-      };
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `budget-app-export-${new Date().toISOString().split("T")[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      addToast("Data exporterad!", "success");
-    } catch (_error) {
-      console.error("Error exporting data:", _error);
-      addToast("Kunde inte exportera data", "error");
-    }
-  };
-
-  // Continuously record scroll position for current active tab (ignore while onboarding)
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (activeTab && !isOnboarding) {
-            tabScrollPositions.current[activeTab] = window.scrollY;
+      bankService
+        .exchangeCode({ code, state })
+        .then(async (res) => {
+          const allIds = (res.accounts || []).map((a) => a.id);
+          if (res.connection && allIds.length > 0) {
+            await bankService.selectAccounts({
+              connectionId: res.connection.id,
+              selectedAccountIds: allIds,
+            });
+            await bankService.sync({ connectionId: res.connection.id });
           }
-          setIsAtTop(window.scrollY <= 10);
-          ticking = false;
+          await refreshBankStatus();
+          setCallbackStatusMsg(null);
+          setIsBankModalOpen(true);
+        })
+        .catch((err: any) => {
+          setCallbackStatusMsg(`Kunde inte slutföra bankkoppling: ${err.message || 'Okänt fel'}`);
+          setTimeout(() => setCallbackStatusMsg(null), 6000);
         });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeTab, isOnboarding]);
-
-  // When exiting onboarding, always start at the very top of Home
-  useEffect(() => {
-    if (!isOnboarding) {
-      tabScrollPositions.current['today'] = 0;
-      window.scrollTo({ top: 0, behavior: 'instant' as any });
-      const t1 = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as any }), 50);
-      const t2 = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as any }), 150);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
     }
-  }, [isOnboarding]);
+  }, [userId, refreshBankStatus]);
 
-  const [initialIsRegistering, setInitialIsRegistering] = useState(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [confirmModal, setConfirmModal] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    variant?: "danger" | "info";
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    onConfirm: () => {},
-  });
-
-  const addToast = (message: string, type: ToastType = "info") => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, type, message }]);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const prevSessionRef = useRef<Session | null>(null);
-
-  // Clear lingering error toasts and ALWAYS land on Hem (today) when user logs in after being logged out
-  // (Unless returning from a bank callback, in which case we route back to the bank connection flow)
+  // Initiera Supabase-session och trigga automatisk synk vid appstart
   useEffect(() => {
-    if (session) {
-      setToasts([]);
-      if (!prevSessionRef.current) {
-        if (!pendingBankCallback && !loadPendingBankCallback()) {
-          setActiveTab("today");
+    supabase.auth
+      .getSession()
+      .then(async ({ data: { session } }: any) => {
+        if (session?.user) {
+          setUserId(session.user.id);
+          setUserEmail(session.user.email || null);
+          const metaAvatar =
+            session.user.user_metadata?.avatar_url ||
+            session.user.user_metadata?.picture ||
+            null;
+          if (metaAvatar) setUserAvatar(metaAvatar);
+          await loadSupabaseUserData(session.user.id);
+          const status = await refreshBankStatus();
+          const hasActive = status.connections.some((c) => c.status === 'active');
+          if (hasActive) {
+            performSilentBankSync();
+          }
         }
-        window.scrollTo({ top: 0, behavior: "instant" as any });
-      }
-    }
-    prevSessionRef.current = session;
-  }, [session, pendingBankCallback]);
-
-  const showConfirm = (
-    title: string,
-    message: string,
-    onConfirm: () => void,
-    variant: "danger" | "info" = "danger",
-  ) => {
-    setConfirmModal({
-      isOpen: true,
-      title,
-      message,
-      onConfirm: () => {
-        onConfirm();
-        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-      },
-      variant,
-    });
-  };
-
-  // --- Theme Logic: Light, Dark, or System ---
-  useEffect(() => {
-    const applyTheme = () => {
-      let isDark = false;
-      
-      // Pre-login screens (LandingPage, Auth, Welcome) and Onboarding are ALWAYS locked to light mode.
-      if (session && !isOnboarding && config) {
-        if (config.themeMode === 'system') {
-          isDark = typeof window !== 'undefined' && window.matchMedia
-            ? window.matchMedia('(prefers-color-scheme: dark)').matches
-            : false;
-        } else if (config.themeMode === 'dark') {
-          isDark = true;
-        } else if (config.themeMode === 'light') {
-          isDark = false;
-        } else {
-          isDark = config.darkMode === true && localStorage.getItem('dejz_dark_mode') === 'dark';
-        }
-      } else {
-        isDark = false;
-      }
-
-      document.documentElement.classList.remove("dark", "light");
-      document.body.classList.remove("dark", "light");
-
-      if (isDark) {
-        document.documentElement.classList.add("dark");
-        document.body.classList.add("dark");
-      } else {
-        document.documentElement.classList.add("light");
-        document.body.classList.add("light");
-      }
-
-      try {
-        if (session && !isOnboarding && config) {
-          const modeToSave = config.themeMode || (isDark ? 'dark' : 'light');
-          localStorage.setItem('dejz_dark_mode', modeToSave);
-        } else if (!session || isOnboarding) {
-          localStorage.setItem('dejz_dark_mode', 'light');
-        }
-      } catch (_e) {
-        // ignore storage errors
-      }
-
-      const userThemeHex = config?.themeColor || localStorage.getItem('dejz_theme_color') || 'neutral';
-      applyThemeColor(userThemeHex, isDark);
-
-      const isShowingLandingOnly = !session && showLanding && !publicLegalDoc;
-      const topColor = isDark
-        ? "#141414"
-        : isShowingLandingOnly
-          ? "#F2F0F0"
-          : "#FFD9E2";
-      const bottomThemeColor = isDark ? "#141414" : "#F2F0F0";
-
-      document.documentElement.style.setProperty("--bg-top-color", topColor);
-      document.body.style.setProperty("--bg-top-color", topColor);
-      document.documentElement.style.backgroundColor = topColor;
-      document.body.style.backgroundColor = topColor;
-
-      const metaTags = document.querySelectorAll('meta[name="theme-color"]');
-      if (metaTags.length > 0) {
-        metaTags.forEach((tag) => tag.setAttribute("content", topColor));
-      } else {
-        const meta = document.createElement("meta");
-        meta.setAttribute("name", "theme-color");
-        meta.setAttribute("content", topColor);
-        document.head.appendChild(meta);
-      }
-    };
-
-    applyTheme();
-
-    if (session && !isOnboarding && config?.themeMode === 'system' && typeof window !== 'undefined' && window.matchMedia) {
-      const mql = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => applyTheme();
-      mql.addEventListener('change', handler);
-      return () => mql.removeEventListener('change', handler);
-    }
-  }, [config?.themeMode, config?.darkMode, config?.themeColor, session, isOnboarding, showLanding, publicLegalDoc]);
-
-  // --- URL Routing & Language Subpath Sync ---
-  useEffect(() => {
-    const handleUrlChange = () => {
-      const parsed = parseLanguageFromPath(window.location.pathname);
-      if (parsed.lang && parsed.lang !== landingLanguage) {
-        setLandingLanguage(parsed.lang);
-        localStorage.setItem('app_language', parsed.lang);
-      }
-      
-      const tabSegment = parsed.subpath.replace(/^\//, '').split('/')[0] || 'today';
-      if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(tabSegment)) {
-        const resolvedTab = tabSegment === "settings" ? "profile" : (tabSegment as Tab);
-        if (resolvedTab !== activeTab) {
-          setActiveTab(resolvedTab);
-        }
-      } else if (activeTab !== 'today') {
-        setActiveTab('today');
-      }
-    };
-
-    window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
-  }, [landingLanguage, activeTab]);
-
-  useEffect(() => {
-    const currentLang = normalizeLanguage(config?.language || landingLanguage);
-    
-    // Always keep SEO, canonical, and hreflang synchronized
-    updateDocumentSeo(currentLang, publicLegalDoc ? `/${publicLegalDoc}` : window.location.pathname);
-
-    // Do not overwrite public legal document URLs (/privacy, /terms, /cookies)
-    if (publicLegalDoc) {
-      return;
-    }
-
-    let newPath = '';
-    if (showLanding) {
-      newPath = buildLanguageUrl(currentLang, '/');
-      // If visiting root '/' without prefix, replaceState seamlessly
-      if (window.location.pathname === '/' || window.location.pathname === '') {
-        window.history.replaceState(null, '', newPath);
-        return;
-      }
-    } else {
-      // In-app and onboarding experience: preserve language subpath
-      const tabSub = activeTab && activeTab !== 'today' ? `/${activeTab}` : '/';
-      newPath = buildLanguageUrl(currentLang, tabSub);
-    }
-    
-    if (window.location.pathname !== newPath) {
-      window.history.pushState(null, '', newPath);
-    }
-  }, [config?.language, landingLanguage, activeTab, showLanding, publicLegalDoc]);
-
-  const canUseBankIntegration = isBankIntegrationEnabledForUser(
-    session?.user,
-    profile?.role
-  );
-
-  // Handle return from Enable Banking redirect (/bank/callback) including lost login session recovery
-  useEffect(() => {
-    if (isAuthLoading || !pendingBankCallback) return;
-
-    // Case 1: Login session was lost during redirect in mobile browser -> direct user to login screen
-    // while keeping pendingBankCallback stored so it resumes immediately after login
-    if (!session) {
-      setShowLanding(false);
-      setInitialIsRegistering(false);
-      addToast("Logga in för att slutföra din bankkoppling.", "info");
-      return;
-    }
-
-    // Case 2: Authenticated user returned from bank redirect -> route back to where flow started
-    if (config && canUseBankIntegration) {
-      const originMeta = loadBankRedirectOrigin();
-      const onboardingDraft = loadOnboardingBankDraft();
-      const isNewUnbudgetedAccount = !config.hasSavedInitialBudget;
-      if (
-        originMeta?.originContext === "onboarding" ||
-        onboardingDraft ||
-        isOnboarding ||
-        isNewUnbudgetedAccount
-      ) {
-        setIsOnboarding(true);
-      } else {
-        setActiveTab("profile");
-        setProfileSection("bank");
-        setNavTrigger((prev) => prev + 1);
-      }
-    }
-  }, [isAuthLoading, session, config, pendingBankCallback, canUseBankIntegration, isOnboarding]);
-
-  // --- Auth Logic ---
-  useEffect(() => {
-    const demoSessionStr = localStorage.getItem('dejz_demo_session');
-    if (demoSessionStr) {
-      try {
-        const demoSession = JSON.parse(demoSessionStr);
-        const demoVersion = localStorage.getItem('demo_data_version');
-        if (demoVersion !== 'v6_historical_rich' && demoVersion !== 'v_fresh_test_account') {
-          seedDemoData();
-        }
-        setSession(demoSession);
-        setIsAuthLoading(false);
-        return;
-      } catch (e) {
-        console.error("Error parsing demo session:", e);
-      }
-    }
-
-    if (!isSupabaseConfigured) {
-      setIsAuthLoading(false);
-      return;
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      // If we have a demo session, don't let Supabase override it unless demo session was cleared
-      if (localStorage.getItem('dejz_demo_session')) return;
-      
-      setSession(session);
-      if (session?.provider_token) {
-        setProviderToken(session.provider_token);
-      }
-      if (
-        session?.user?.user_metadata?.avatar_url ||
-        session?.user?.user_metadata?.picture
-      ) {
-        setAvatarUrl(
-          session.user.user_metadata.avatar_url ||
-            session.user.user_metadata.picture,
-        );
-      }
-    }).catch(err => {
-      console.error("Error securing session:", err);
-    }).finally(() => {
-      if (!localStorage.getItem('dejz_demo_session')) {
-        setIsAuthLoading(false);
-      }
-    });
+      })
+      .catch(() => {});
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (localStorage.getItem('dejz_demo_session')) return;
-      
-      if (_event === 'PASSWORD_RECOVERY') {
-        setIsResetPasswordOpen(true);
-      }
-      
-      setSession(session);
-      setIsAuthLoading(false);
-      if (session?.provider_token) {
-        setProviderToken(session.provider_token);
-      }
-      if (
-        session?.user?.user_metadata?.avatar_url ||
-        session?.user?.user_metadata?.picture
-      ) {
-        setAvatarUrl(
-          session.user.user_metadata.avatar_url ||
-            session.user.user_metadata.picture,
-        );
+    } = supabase.auth.onAuthStateChange(async (_e: any, session: any) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+        setUserEmail(session.user.email || null);
+        const metaAvatar =
+          session.user.user_metadata?.avatar_url ||
+          session.user.user_metadata?.picture ||
+          null;
+        if (metaAvatar) setUserAvatar(metaAvatar);
+        await loadSupabaseUserData(session.user.id);
+        const status = await refreshBankStatus();
+        if (status.connections.some((c) => c.status === 'active')) {
+          performSilentBankSync();
+        }
+      } else {
+        setUserId(null);
+        setUserEmail(null);
+        setConnections([]);
+        setBankAccounts([]);
       }
     });
 
-    const hash = window.location.hash;
-    const search = window.location.search;
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [refreshBankStatus, loadSupabaseUserData, performSilentBankSync]);
 
-    if (
-      hash.includes('type=recovery') ||
-      search.includes('type=recovery')
-    ) {
-      setIsResetPasswordOpen(true);
-      setShowLanding(false);
-      setShowWelcome(false);
-    }
-
-    if (hash.includes('error=') || search.includes('error=')) {
-      try {
-        const hashParams = new URLSearchParams(hash.replace(/^#/, '?'));
-        const searchParams = new URLSearchParams(search);
-        const errorDesc = hashParams.get('error_description') || searchParams.get('error_description');
-        if (errorDesc) {
-          addToast(decodeURIComponent(errorDesc.replace(/\+/g, ' ')), 'error');
-        }
-      } catch (err) {
-        console.warn('Error parsing recovery error:', err);
-      }
-    }
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  // Kontinuerlig automatisk synk i appen:
+  // 1) Vid återkomst till fliken/appen (visibilitychange + window focus)
+  // 2) Tyst intervall var 2:a minut så länge användaren är inne i appen
+  // 3) Supabase Realtime-lyssnare på bank_accounts, bank_transactions och bank_connections
+  const hasActiveBankConnection = useMemo(
+    () => connections.some((c) => c.status === 'active'),
+    [connections]
+  );
 
   useEffect(() => {
-    setIsDemoMode(checkDemoMode());
-  }, [session]);
+    if (!userId || !hasActiveBankConnection) return;
 
-  const handleLogout = async () => {
-    hasDismissedOnboardingSession.current = false;
-    clearDemoData();
-    setIsDemoMode(false);
-    setSession(null);
-    setActiveTab("today");
-    setShowLanding(true);
-    setShowWelcome(false);
-    
-    // Immediately enforce light mode for landing & auth
-    document.documentElement.classList.remove("dark");
-    document.documentElement.classList.add("light");
-    document.body.classList.remove("dark");
-    document.body.classList.add("light");
-    localStorage.setItem('dejz_dark_mode', 'light');
-    localStorage.removeItem('dejz_theme_color');
-    applyThemeColor('neutral', false);
-    
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    localStorage.removeItem('app_language');
-    localStorage.removeItem('app_language_manual');
-    localStorage.removeItem('dejz_has_saved_initial_budget');
-    localStorage.removeItem('dejz_has_saved_budget');
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut().catch(() => {});
-    }
-  };
-
-  const handleExitDemo = () => {
-    clearDemoData();
-    setIsDemoMode(false);
-    setSession(null);
-    setShowLanding(true);
-    setShowWelcome(false);
-    window.location.reload(); // Reload to clear all states and re-initialize
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      let inIframe = false;
-      try {
-        inIframe = window.self !== window.top;
-      } catch (_e) {
-        inIframe = true;
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        performSilentBankSync(false);
       }
-
-      const activeLang = normalizeLanguage(landingLanguage || 'sv');
-      localStorage.setItem('app_language', activeLang);
-      localStorage.setItem('app_language_manual', 'true');
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/${activeLang}/`,
-          skipBrowserRedirect: inIframe,
-          queryParams: {
-            prompt: 'select_account',
-            access_type: 'offline',
-          },
-        },
-      });
-      if (error) throw error;
-      
-      if (inIframe && data?.url) {
-        const popup = window.open(data.url, '_blank');
-        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-          addToast("Inloggningsfönstret blockerades. Tillåt popup-fönster i din webbläsare eller öppna appen i en ny flik.", "error");
-        } else {
-          addToast("Öppnade inloggning i ett nytt fönster.", "success");
-        }
-      }
-    } catch (err: any) {
-      let msg = err.message || t('error');
-      if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-        msg = "Google-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.";
-      }
-      addToast(msg, "error");
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    try {
-      let inIframe = false;
-      try {
-        inIframe = window.self !== window.top;
-      } catch (_e) {
-        inIframe = true;
-      }
-
-      const activeLang = normalizeLanguage(landingLanguage || 'sv');
-      localStorage.setItem('app_language', activeLang);
-      localStorage.setItem('app_language_manual', 'true');
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: `${window.location.origin}/${activeLang}/`,
-          skipBrowserRedirect: inIframe,
-        },
-      });
-      if (error) throw error;
-      
-      if (inIframe && data?.url) {
-        const popup = window.open(data.url, '_blank');
-        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-          addToast("Inloggningsfönstret blockerades. Tillåt popup-fönster i din webbläsare eller öppna appen i en ny flik.", "error");
-        } else {
-          addToast("Öppnade inloggning i ett nytt fönster.", "success");
-        }
-      }
-    } catch (err: any) {
-      let msg = err.message || t('error');
-      if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-        msg = "Facebook-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.";
-      }
-      addToast(msg, "error");
-    }
-  };
-
-  const handleUploadAvatar = async (file: File) => {
-    if (!session?.user) return;
-
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${session.user.id}/${fileName}`;
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get Public URL
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
-      // Update User Metadata
-      const {
-        data: { user },
-        error: updateError,
-      } = await supabase.auth.updateUser({
-        data: { avatar_url: publicUrl },
-      });
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      if (user) {
-        setSession((prev) => (prev ? { ...prev, user } : null));
-      }
-      setAvatarUrl(publicUrl);
-      addToast("Bild uppdaterad!", "success");
-    } catch (_error: any) {
-      const errMsg = _error?.message || "Okänt fel";
-      console.error("Error uploading avatar:", errMsg);
-      addToast(`Kunde inte ladda upp bild: ${errMsg}`, "error");
-    }
-  };
-
-  // Removed the useEffect that prevented scrolling on welcome/auth screens
-
-  // --- Data Fetching ---
-  const fetchData = useCallback(async () => {
-    if (!session) return;
-
-    // Determine active language with precedence:
-    // 1. Explicit language in current URL path
-    // 2. Language stored in user session metadata (from signup / Google OAuth)
-    // 3. User's manually saved language in localStorage
-    // 4. In-state landingLanguage
-    // 5. Browser detected language, fallback to 'sv'
-    const urlLang = parseLanguageFromPath(window.location.pathname).lang;
-    const metaLang = session?.user?.user_metadata?.language;
-    const savedLang = localStorage.getItem('app_language');
-    const effectiveLang: Language = normalizeLanguage(
-      urlLang || metaLang || savedLang || landingLanguage || detectBrowserLanguage()
-    );
-    const regDefaults = getRegionDefaults(session?.user?.user_metadata?.country || effectiveLang);
-
-    const defaultConfig: Config = {
-      currency: session?.user?.user_metadata?.currency || regDefaults.currencySymbol,
-      currencyCode: session?.user?.user_metadata?.currencyCode || regDefaults.defaultCurrencyCode,
-      country: session?.user?.user_metadata?.country || regDefaults.countryCode,
-      locale: session?.user?.user_metadata?.locale || regDefaults.locale,
-      timezone: session?.user?.user_metadata?.timezone || regDefaults.timezone,
-      language: effectiveLang,
-      payday: 25,
-      paydayType: PaydayType.TWENTY_FIFTH,
-      paydayBeforeWeekend: true,
-      categories: DEFAULT_EXPENSE_CATEGORIES,
-      incomeCategories: DEFAULT_INCOME_CATEGORIES,
-      paymentMethods: DEFAULT_PAYMENT_METHODS,
-      initialSpent: 0,
-      notifications: { salaryDayReminder: true, weeklySummary: true },
-      securityLock: false,
-      darkMode: false,
-      themeMode: 'light',
-      themeColor: localStorage.getItem('dejz_theme_color') || 'neutral',
-      quickChoices: [],
-      savingsPot: 0,
-      savingsGoals: [],
-      totalSavedLifetime: 0,
-      surplusIncome: 0,
-      monthlySavings: 0,
-      monthlySavingsItems: [],
-      includeFixedExpensesInAnalysis: true,
-      showFixedExpensesInTodayView: false,
-      showFixedExpensesInCalendar: false,
-      showFixedExpensesInHistory: localStorage.getItem('dejz_show_fixed_in_history') === 'true',
-      hideEmptyCategories: localStorage.getItem('dejz_hide_empty_categories') === 'true',
-      hasSavedInitialBudget: false,
     };
 
-    try {
-      // Fetch everything in ONE optimized batch parallel call to minimize latencies!
-      const [dbProfileResult, dbTransactions, dbIncomes, dbFixed] =
-        await Promise.all([
-          dataService.getProfile(session.user.id),
-          dataService.getTransactions(session.user.id),
-          dataService.getIncomeSources(session.user.id),
-          dataService.getFixedExpenses(session.user.id),
-        ]);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
 
-      let dbProfile = dbProfileResult;
-
-      // If profile is missing (e.g. after a database reset), create it
-      if (!dbProfile || Object.keys(dbProfile).length === 0) {
-        console.log(
-          "[Auth] Profile missing, creating/repairing profile for:",
-          session.user.id,
-        );
-
-        // Prepare profile data carefully - only use snake_case columns that exist in DB
-        const profilePayload = {
-          id: session.user.id,
-          email: session.user.email,
-          full_name: session.user.user_metadata?.full_name || "",
-          avatar_url: session.user.user_metadata?.avatar_url || "",
-          role:
-            session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
-          currency: defaultConfig.currency,
-          currency_code: defaultConfig.currencyCode,
-          country: defaultConfig.country,
-          locale: defaultConfig.locale,
-          timezone: defaultConfig.timezone,
-          language: defaultConfig.language,
-          payday: defaultConfig.payday,
-          payday_type: defaultConfig.paydayType,
-          payday_before_weekend: defaultConfig.paydayBeforeWeekend,
-          categories: defaultConfig.categories,
-          income_categories: defaultConfig.incomeCategories,
-          initial_spent: defaultConfig.initialSpent,
-          notifications: defaultConfig.notifications,
-          security_lock: defaultConfig.securityLock,
-          dark_mode: false,
-          theme_mode: 'light',
-          quick_choices: defaultConfig.quickChoices,
-          monthly_savings: defaultConfig.monthlySavings,
-          include_fixed_expenses_in_analysis:
-            defaultConfig.includeFixedExpensesInAnalysis,
-          hide_empty_categories:
-            defaultConfig.hideEmptyCategories,
-          updated_at: new Date().toISOString(),
-        };
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .upsert(profilePayload)
-          .select()
-          .single();
-        if (!error) {
-          dbProfile = data;
-          console.log("[Auth] Profile repaired successfully");
-        } else {
-          console.error("[Auth] Failed to repair profile:", error);
-          addToast(
-            `Kunde inte återställa din profil: ${error.message}`,
-            "error",
-          );
-        }
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        performSilentBankSync(false);
       }
+    }, AUTO_SYNC_INTERVAL_MS);
 
-      let shouldSkipOnboarding = false;
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.clearInterval(intervalId);
+    };
+  }, [userId, hasActiveBankConnection, performSilentBankSync]);
 
-      if (dbProfile && Object.keys(dbProfile).length > 0) {
-        setProfile(dbProfile);
-        setSubscriptionStatus(dbProfile.subscription_status || "free");
-        setTrialEnd(dbProfile.trial_end);
-        setNextBillingDate(dbProfile.next_billing_date);
-
-        // Check if onboarding is needed
-        // If the user has already completed or skipped onboarding (locally or remotely), NEVER show it again
-        const activeUserId = session.user.id;
-        const isLocallyDone =
-          localStorage.getItem(`dejz_onboarding_completed_${activeUserId}`) === 'true' ||
-          localStorage.getItem(`dejz_onboarding_skipped_${activeUserId}`) === 'true';
-
-        const isMetaDone =
-          session.user.user_metadata?.onboarding_completed === true ||
-          session.user.user_metadata?.onboarding_skipped === true;
-
-        const isDbDone =
-          dbProfile.onboarding_completed === true ||
-          dbProfile.notifications?._onboardingCompleted === true ||
-          (Array.isArray(dbTransactions) && dbTransactions.length > 0) ||
-          (Array.isArray(dbIncomes) && dbIncomes.length > 0) ||
-          (Array.isArray(dbFixed) && dbFixed.length > 0);
-
-        const hasActiveOnboardingBankFlow =
-          (Boolean(loadPendingBankCallback()) || Boolean(pendingBankCallback)) &&
-          (loadBankRedirectOrigin()?.originContext === 'onboarding' || Boolean(loadOnboardingBankDraft()));
-
-        shouldSkipOnboarding =
-          !hasActiveOnboardingBankFlow &&
-          (isLocallyDone ||
-            isMetaDone ||
-            isDbDone ||
-            hasDismissedOnboardingSession.current);
-
-        if (!shouldSkipOnboarding || hasActiveOnboardingBankFlow) {
-          setIsOnboarding(true);
-        } else {
-          setIsOnboarding(false);
-        }
-      } else {
-        console.warn(
-          "DEBUG: No profile data found for user",
-          session.user.id,
-        );
-        setSubscriptionStatus("free");
-      }
-
-      // Parse/map settings locally from dbProfile to prevent redundant DB query level
-      if (dbProfile && Object.keys(dbProfile).length > 0) {
-        const VIBRANT_FALLBACK_COLORS = ['#ef4444', '#f97316', '#d97706', '#ec4899', '#6366f1', '#0ea5e9', '#3b82f6', '#8b5cf6', '#a855f7', '#10b981', '#06b6d4', '#0d9488'];
-        const migrateCategories = (cats: any[]) => {
-          let hasChanged = false;
-          if (!Array.isArray(cats)) return { migrated: [], hasChanged: false };
-
-          const colorCounts: Record<string, number> = {};
-          cats.forEach((c) => {
-            if (c.color) {
-              const lowerColor = String(c.color).toLowerCase();
-              colorCounts[lowerColor] = (colorCounts[lowerColor] || 0) + 1;
-            }
-          });
-          const hasUniformColorBug = Object.values(colorCounts).some((count) => count >= 3 && count >= cats.length * 0.3);
-
-          const migrated = cats.map((cat, idx) => {
-            const updated = { ...cat };
-            if (updated.icon && isEmojiString(updated.icon)) {
-              hasChanged = true;
-              updated.icon = resolveLucideIcon(updated.icon);
-            }
-
-            const catNameLower = (updated.name || '').trim().toLowerCase();
-            const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower) 
-              || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower);
-
-            const isGenericColor = !updated.color 
-              || updated.color === '#64748b' 
-              || updated.color === '#94a3b8' 
-              || updated.color === '#71717a' 
-              || updated.color === '#a1a1aa'
-              || hasUniformColorBug;
-
-            if (defaultMatch) {
-              if (updated.color !== defaultMatch.color && (isGenericColor || !updated.color)) {
-                updated.color = defaultMatch.color;
-                hasChanged = true;
-              }
-            } else if (isGenericColor) {
-              updated.color = VIBRANT_FALLBACK_COLORS[idx % VIBRANT_FALLBACK_COLORS.length];
-              hasChanged = true;
-            }
-
-            return updated;
-          });
-          return { migrated, hasChanged };
-        };
-
-        const LEGACY_EXPENSE_RENAMES: Record<string, { name: string; icon: string; color: string }> = {
-          'Shopping & Kläder': { name: 'Shopping', icon: 'shopping', color: '#ec4899' },
-          'Restaurang & Fika': { name: 'Restaurang', icon: 'utensils', color: '#f97316' },
-          'Streaming & Media': { name: 'Streaming', icon: 'tv', color: '#8b5cf6' },
-          'Transport & Pendling': { name: 'Transport', icon: 'car', color: '#0ea5e9' },
-          'Abonnemang & Tjänster': { name: 'Abonnemang', icon: 'smartphone', color: '#3b82f6' },
-          'Nöje & Fritid': { name: 'Nöjen', icon: 'drama', color: '#a855f7' },
-          'Räkningar & Avgifter': { name: 'Räkningar', icon: 'receipt', color: '#64748b' },
-          'Resor & Semester': { name: 'Resor', icon: 'plane', color: '#06b6d4' },
-        };
-
-        const migrateExpenseCategories = (cats: any[]) => {
-          const { migrated, hasChanged: iconChanged } = migrateCategories(cats);
-          let hasChanged = iconChanged;
-          const renamedPairs: { oldName: string; newName: string }[] = [];
-
-          for (let i = 0; i < migrated.length; i++) {
-            const cat = migrated[i];
-            const oldName = (cat.name || '').trim();
-            if (LEGACY_EXPENSE_RENAMES[oldName]) {
-              const target = LEGACY_EXPENSE_RENAMES[oldName];
-              migrated[i] = {
-                ...cat,
-                name: target.name,
-                icon: target.icon || cat.icon,
-                color: cat.color || target.color,
-              };
-              renamedPairs.push({ oldName, newName: target.name });
-              hasChanged = true;
-            }
-          }
-
-          // Strip legacy percentage defaults (<= 100) from database column defaults
-          const budgetVals = migrated.map((c: any) => Number(c.budget) || 0);
-          const totalSum = budgetVals.reduce((a: number, b: number) => a + b, 0);
-          const maxVal = Math.max(...budgetVals, 0);
-          const isLegacyPercentDefault = maxVal <= 100 && totalSum <= 100 && totalSum > 0;
-
-          if (isLegacyPercentDefault) {
-            for (let i = 0; i < migrated.length; i++) {
-              if (migrated[i].budget !== null && migrated[i].budget !== undefined) {
-                migrated[i] = { ...migrated[i], budget: null };
-                hasChanged = true;
-              }
-            }
-          }
-
-          return { migrated, hasChanged, renamedPairs };
-        };
-
-        let localSavedConfig: any = null;
-        try {
-          const cached = localStorage.getItem(`user_settings_${session.user.id}`);
-          if (cached) localSavedConfig = JSON.parse(cached);
-        } catch {
-          // ignore
-        }
-
-        const hasDbSavedBudgets = hasValidSavedCategoryBudgets(dbProfile.categories);
-        const hasLocalSavedBudgets =
-          localSavedConfig?.hasSavedInitialBudget !== false &&
-          hasValidSavedCategoryBudgets(localSavedConfig?.categories);
-
-        const isExplicitlyUnbudgetedNewAccount =
-          !shouldSkipOnboarding &&
-          !hasDbSavedBudgets &&
-          !hasLocalSavedBudgets;
-
-        const sourceCategories = hasDbSavedBudgets
-          ? dbProfile.categories
-          : hasLocalSavedBudgets
-            ? localSavedConfig.categories
-            : (dbProfile.categories && dbProfile.categories.length > 0
-                ? dbProfile.categories
-                : DEFAULT_EXPENSE_CATEGORIES);
-
-        const shouldKeepCategoryBudgets =
-          !isExplicitlyUnbudgetedNewAccount &&
-          (hasDbSavedBudgets || hasLocalSavedBudgets);
-
-        const rawCategories = shouldKeepCategoryBudgets
-          ? sourceCategories
-          : sourceCategories.map((c: any) => ({ ...c, budget: null }));
-
-        const rawIncomeCategories = dbProfile.income_categories && dbProfile.income_categories.length > 0
-          ? dbProfile.income_categories
-          : (localSavedConfig?.incomeCategories && localSavedConfig.incomeCategories.length > 0
-              ? localSavedConfig.incomeCategories
-              : DEFAULT_INCOME_CATEGORIES);
-
-        const { migrated: migratedExpense, hasChanged: expenseChanged, renamedPairs: fetchRenamedPairs } =
-          migrateExpenseCategories(rawCategories);
-        const { migrated: migratedIncome, hasChanged: incomeChanged } =
-          migrateCategories(rawIncomeCategories);
-
-        const hadPreFilledBudgetsStripped =
-          !shouldKeepCategoryBudgets &&
-          Array.isArray(dbProfile.categories) &&
-          dbProfile.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0);
-
-        const restoredFromLocalCache = !hasDbSavedBudgets && hasLocalSavedBudgets;
-
-        if (hadPreFilledBudgetsStripped || restoredFromLocalCache) {
-          dbProfile.categories = migratedExpense;
-        }
-
-        const resolvedHasSavedInitialBudget = hasValidSavedCategoryBudgets(migratedExpense);
-
-        if (expenseChanged || incomeChanged || hadPreFilledBudgetsStripped || restoredFromLocalCache) {
-          console.log("[Migration fetchData] Syncing migrated/restored categories to profile");
-          dbProfile.categories = migratedExpense;
-          dbProfile.income_categories = migratedIncome;
-
-          if (fetchRenamedPairs && fetchRenamedPairs.length > 0) {
-            for (const pair of fetchRenamedPairs) {
-              dataService.renameCategory(session.user.id, pair.oldName, pair.newName).catch(() => {});
-            }
-          }
-          
-          // Async save migrated settings back
-          dataService.saveSettings(session.user.id, {
-            currency: dbProfile.currency === "SEK" ? "kr" : dbProfile.currency,
-            language: dbProfile.language,
-            payday: dbProfile.payday,
-            paydayType: dbProfile.payday_type || PaydayType.TWENTY_FIFTH,
-            paydayBeforeWeekend: dbProfile.payday_before_weekend,
-            categories: migratedExpense,
-            incomeCategories: migratedIncome,
-            initialSpent: Number(dbProfile.initial_spent || 0),
-            notifications: dbProfile.notifications,
-            securityLock: dbProfile.security_lock,
-            darkMode: dbProfile.theme_mode === 'dark',
-            themeMode: dbProfile.theme_mode === 'dark' ? 'dark' : 'light',
-            savingsPot: dbProfile.savings_pot || 0,
-            savingsGoals: dbProfile.savings_goals || [],
-            totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
-            surplusIncome: dbProfile.surplus_income || 0,
-            monthlySavings: dbProfile.monthly_savings || 0,
-            monthlySavingsItems: dbProfile.monthly_savings_items || [],
-            includeFixedExpensesInAnalysis: dbProfile.include_fixed_expenses_in_analysis !== false,
-            showFixedExpensesInTodayView: dbProfile.show_fixed_expenses_in_today_view === true,
-            showFixedExpensesInCalendar: dbProfile.show_fixed_expenses_in_calendar === true,
-            hideEmptyCategories: dbProfile.hide_empty_categories !== undefined ? dbProfile.hide_empty_categories : false,
-            hasSavedInitialBudget: resolvedHasSavedInitialBudget,
-            appIconTheme: dbProfile.app_icon_theme,
-          }).catch((err) => {
-            console.error("[Migration fetchData] Failed to save migrated settings:", err);
-          });
-        } else {
-          dbProfile.categories = migratedExpense;
-          dbProfile.income_categories = migratedIncome;
-        }
-
-        const isManualOverride = localStorage.getItem('app_language_manual') === 'true';
-        const hasDbProfileLanguage = Boolean(dbProfile && dbProfile.language);
-
-        let resolvedLang: Language = 'sv';
-        if (hasDbProfileLanguage && !urlLang && !isManualOverride) {
-          resolvedLang = normalizeLanguage(dbProfile.language);
-        } else {
-          resolvedLang = normalizeLanguage(
-            urlLang || (isManualOverride ? savedLang : null) || landingLanguage || metaLang || dbProfile?.language || savedLang || detectBrowserLanguage() || 'sv'
-          );
-        }
-
-        const resolvedCountry = dbProfile.country || localSavedConfig?.country || defaultConfig.country;
-        const resolvedReg = getRegionDefaults(resolvedCountry || resolvedLang || 'sv');
-
-        if (resolvedLang && resolvedLang !== landingLanguage) {
-          setLandingLanguage(normalizeLanguage(resolvedLang));
-          localStorage.setItem('app_language', resolvedLang);
-        }
-        if (dbProfile && resolvedLang && resolvedLang !== dbProfile.language && (urlLang || isManualOverride)) {
-          dataService.updateProfile(session.user.id, {
-            language: resolvedLang,
-            country: resolvedReg.countryCode,
-            currency: resolvedReg.currencySymbol,
-            currency_code: resolvedReg.defaultCurrencyCode,
-            locale: resolvedReg.locale,
-            timezone: resolvedReg.timezone,
-          }).catch(err => console.warn("Could not sync profile language:", err));
-        }
-
-        // resolvedHasSavedInitialBudget is already computed above from migratedExpense
-
-        if (!resolvedHasSavedInitialBudget) {
-          try {
-            localStorage.removeItem('dejz_has_saved_initial_budget');
-            localStorage.removeItem('dejz_has_saved_budget');
-            if (session?.user?.id) {
-              localStorage.removeItem(`dejz_has_saved_initial_budget_${session.user.id}`);
-            }
-          } catch (_e) {
-            // ignore
-          }
-        } else if (session?.user?.id) {
-          try {
-            localStorage.setItem(`dejz_has_saved_initial_budget_${session.user.id}`, 'true');
-          } catch (_e) {
-            // ignore
-          }
-        }
-
-        const mappedConfig = {
-          currency: dbProfile.currency === "SEK" ? "kr" : (dbProfile.currency || resolvedReg.currencySymbol),
-          currencyCode: dbProfile.currency_code || localSavedConfig?.currencyCode || resolvedReg.defaultCurrencyCode,
-          country: resolvedCountry,
-          locale: dbProfile.locale || localSavedConfig?.locale || resolvedReg.locale,
-          timezone: dbProfile.timezone || localSavedConfig?.timezone || resolvedReg.timezone,
-          language: resolvedLang,
-          payday: dbProfile.payday,
-          paydayType: dbProfile.payday_type || PaydayType.TWENTY_FIFTH,
-          paydayBeforeWeekend: dbProfile.payday_before_weekend,
-          categories: dbProfile.categories,
-          incomeCategories: dbProfile.income_categories,
-          initialSpent: Number(dbProfile.initial_spent || 0),
-          notifications: dbProfile.notifications,
-          securityLock: dbProfile.security_lock,
-          darkMode: (shouldSkipOnboarding && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? true : false,
-          themeMode: (shouldSkipOnboarding && (dbProfile.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark')) ? 'dark' : 'light',
-          themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || 'neutral',
-          quickChoices: dbProfile.quick_choices || [],
-          savingsPot: dbProfile.savings_pot || 0,
-          paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
-          surplusIncome: dbProfile.surplus_income || 0,
-          monthlySavings: (dbProfile.monthly_savings !== undefined && dbProfile.monthly_savings !== null)
-            ? dbProfile.monthly_savings
-            : ((dbProfile.monthlySavings !== undefined && dbProfile.monthlySavings !== null)
-              ? dbProfile.monthlySavings
-              : (config?.monthlySavings ?? 0)),
-          monthlySavingsItems: Array.isArray(dbProfile.monthly_savings_items)
-            ? dbProfile.monthly_savings_items
-            : Array.isArray(dbProfile.monthlySavingsItems)
-              ? dbProfile.monthlySavingsItems
-              : Array.isArray(config?.monthlySavingsItems)
-                ? config.monthlySavingsItems
-                : (dbProfile.savings_goals || dbProfile.savingsGoals || config?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0).map((g: any) => ({
-                    id: g.id || crypto.randomUUID(),
-                    name: g.title || 'Månadssparande',
-                    amount: Number(g.targetAmount) || 0,
-                    icon: g.icon || 'PiggyBank',
-                    logo: g.logo,
-                    deductionDay: dbProfile.payday || 25,
-                    frequency: Frequency.MONTHLY,
-                  })),
-          savingsGoals: (dbProfile.savings_goals && dbProfile.savings_goals.length > 0)
-            ? dbProfile.savings_goals
-            : (dbProfile.savingsGoals && dbProfile.savingsGoals.length > 0)
-              ? dbProfile.savingsGoals
-              : (config?.savingsGoals || []),
-          totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
-          includeFixedExpensesInAnalysis:
-            dbProfile.include_fixed_expenses_in_analysis !== undefined
-              ? dbProfile.include_fixed_expenses_in_analysis
-              : true,
-          showFixedExpensesInTodayView:
-            dbProfile.show_fixed_expenses_in_today_view !== undefined && dbProfile.show_fixed_expenses_in_today_view !== null
-              ? Boolean(dbProfile.show_fixed_expenses_in_today_view)
-              : (localSavedConfig?.showFixedExpensesInTodayView !== false),
-          showFixedExpensesInCalendar:
-            dbProfile.show_fixed_expenses_in_calendar !== undefined && dbProfile.show_fixed_expenses_in_calendar !== null
-              ? Boolean(dbProfile.show_fixed_expenses_in_calendar)
-              : (localSavedConfig?.showFixedExpensesInCalendar !== false),
-          showFixedExpensesInHistory:
-            dbProfile.show_fixed_expenses_in_history !== undefined && dbProfile.show_fixed_expenses_in_history !== null
-              ? Boolean(dbProfile.show_fixed_expenses_in_history)
-              : (localStorage.getItem('dejz_show_fixed_in_history') !== 'false'),
-          hideEmptyCategories:
-            dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
-              ? Boolean(dbProfile.hide_empty_categories)
-              : (localStorage.getItem('dejz_hide_empty_categories') === 'true' || localSavedConfig?.hideEmptyCategories === true),
-          hasSavedInitialBudget: resolvedHasSavedInitialBudget,
-        };
-
-        // Ensure monthlySavings is consistent with monthlySavingsItems
-        if (Array.isArray(mappedConfig.monthlySavingsItems)) {
-          const itemsSum = mappedConfig.monthlySavingsItems.reduce(
-            (sum: number, item: any) => sum + (Number(item.amount) || 0),
-            0,
-          );
-          mappedConfig.monthlySavings = itemsSum;
-        } else if (mappedConfig.monthlySavings > 0) {
-          mappedConfig.monthlySavingsItems = [{
-            id: crypto.randomUUID(),
-            name: mappedConfig.language === 'en' ? 'Monthly savings' : 'Månadssparande',
-            amount: mappedConfig.monthlySavings,
-            icon: 'PiggyBank',
-            deductionDay: mappedConfig.payday || 25,
-            frequency: Frequency.MONTHLY,
-          }];
-        }
-
-        setConfig(mappedConfig);
-      } else {
-        const newConfig = {
-          ...defaultConfig,
-          darkMode: false,
-          themeMode: 'light' as const,
-        };
-        setConfig(newConfig);
-        // Save default settings for new user
-        await dataService.saveSettings(session.user.id, newConfig);
-      }
-
-      const activeExpCats = (dbProfile?.categories && dbProfile.categories.length > 0)
-        ? dbProfile.categories
-        : defaultConfig.categories;
-      const activeIncCats = (dbProfile?.income_categories && dbProfile.income_categories.length > 0)
-        ? dbProfile.income_categories
-        : defaultConfig.incomeCategories;
-
-      const validExpNames = new Set(
-        (activeExpCats || []).map((c: any) => (c.name || "").trim().toLowerCase())
-      );
-      const validIncNames = new Set(
-        (activeIncCats || []).map((c: any) => (c.name || "").trim().toLowerCase())
-      );
-
-      const fallbackExpCat =
-        (activeExpCats || []).find(
-          (c: any) => c.id === "ovrigt" || (c.name || "").trim().toLowerCase() === "övrigt"
-        )?.name || "Övrigt";
-      const fallbackIncCat =
-        (activeIncCats || []).find(
-          (c: any) => c.id === "inc_other" || (c.name || "").trim().toLowerCase() === "övrig inkomst"
-        )?.name || "Övrig inkomst";
-
-      const orphanedExpenseCategories = new Set<string>();
-      const orphanedIncomeCategories = new Set<string>();
-
-      const healedTransactions = (dbTransactions || []).map((tx: any) => {
-        let updatedTx = tx;
-        if (tx.category) {
-          const catTrimmed = tx.category.trim();
-          if (catTrimmed) {
-            if (tx.type === "income") {
-              if (!validIncNames.has(catTrimmed.toLowerCase())) {
-                orphanedIncomeCategories.add(catTrimmed);
-                updatedTx = { ...updatedTx, category: fallbackIncCat };
-              }
-            } else {
-              if (!validExpNames.has(catTrimmed.toLowerCase())) {
-                orphanedExpenseCategories.add(catTrimmed);
-                updatedTx = { ...updatedTx, category: fallbackExpCat };
-              }
-            }
-          }
-        }
-        if (Array.isArray(tx.splits) && tx.splits.length > 0) {
-          let splitsChanged = false;
-          const nextSplits = tx.splits.map((s: any) => {
-            const sCat = (s.category || "").trim();
-            if (!sCat) return s;
-            if (tx.type === "income") {
-              if (!validIncNames.has(sCat.toLowerCase())) {
-                orphanedIncomeCategories.add(sCat);
-                splitsChanged = true;
-                return { ...s, category: fallbackIncCat };
-              }
-            } else {
-              if (!validExpNames.has(sCat.toLowerCase())) {
-                orphanedExpenseCategories.add(sCat);
-                splitsChanged = true;
-                return { ...s, category: fallbackExpCat };
-              }
-            }
-            return s;
-          });
-          if (splitsChanged) {
-            updatedTx = { ...updatedTx, splits: nextSplits };
-          }
-        }
-        return updatedTx;
-      });
-
-      const healedIncomes = (dbIncomes || []).map((inc: any) => {
-        const catTrimmed = (inc.category || "").trim();
-        if (catTrimmed && !validIncNames.has(catTrimmed.toLowerCase())) {
-          orphanedIncomeCategories.add(catTrimmed);
-          return { ...inc, category: fallbackIncCat };
-        }
-        return inc;
-      });
-
-      const upgradedFixed = (dbFixed || []).map((fe) => {
-        let updatedFe = fe;
-        const catTrimmed = (fe.category || "").trim();
-        if (catTrimmed && !validExpNames.has(catTrimmed.toLowerCase())) {
-          orphanedExpenseCategories.add(catTrimmed);
-          updatedFe = { ...updatedFe, category: fallbackExpCat };
-        }
-        if (!updatedFe.logo || updatedFe.logo.includes("google.com/s2/favicons")) {
-          const autoLogo = getLogoUrl(updatedFe.name, updatedFe.category);
-          if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
-            updatedFe = { ...updatedFe, logo: autoLogo };
-          }
-        }
-        return updatedFe;
-      });
-
-      if (session?.user?.id) {
-        orphanedExpenseCategories.forEach((oldCat) => {
-          dataService.renameCategory(session.user.id, "expense", oldCat, fallbackExpCat).catch(() => {});
-        });
-        orphanedIncomeCategories.forEach((oldCat) => {
-          dataService.renameCategory(session.user.id, "income", oldCat, fallbackIncCat).catch(() => {});
-        });
-      }
-
-      setTransactions(healedTransactions);
-      setIncomes(healedIncomes);
-      setFixedExpenses(upgradedFixed);
-
-      if (session?.user?.id) {
-        syncBankToAppTransactions(
-          session.user.id,
-          upgradedFixed,
-          healedTransactions,
-          dbProfile ? config : defaultConfig,
-        ).catch(() => {});
-      }
-    } catch (_error) {
-      console.error("Failed to fetch initial data:", _error);
-      setConfig((prev) => prev || defaultConfig);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [session, syncBankToAppTransactions]);
-
+  // Supabase Realtime: Lyssna direkt på databasändringar i bank_accounts, bank_transactions & bank_connections
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!userId) return;
 
-  // Remove the old debounced sync effect as we'll save individually now
+    const channel = supabase
+      .channel(`dejz-live-bank-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bank_accounts',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          refreshBankStatus();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bank_transactions',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          refreshBankStatus();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bank_connections',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          refreshBankStatus();
+        }
+      )
+      .subscribe();
 
-  // --- Calculations ---
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, refreshBankStatus]);
 
-  const paydaySetting = config?.payday || 25;
-  const paydayType = config?.payday
-    ? getPaydayTypeFromDay(config.payday)
-    : (config?.paydayType || PaydayType.TWENTY_FIFTH);
-  const adjustment = config?.paydayBeforeWeekend
-    ? WeekendAdjustment.BEFORE
-    : WeekendAdjustment.NONE;
+  // Konvertera Enable Banking-konton till visningskonton för Hem-fliken
+  const accounts: AccountItem[] = useMemo(() => {
+    const connMap = new Map<string, { name: string; logo?: string | null }>();
+    for (const c of connections) {
+      connMap.set(c.id, { name: c.aspsp_name, logo: c.aspsp_logo });
+    }
 
-  const { start: currentPeriodStart, end: currentPeriodEnd } = useMemo(() => {
-    const tempBounds = getPeriodBoundaries(
-      currentPeriodDate,
-      paydayType,
-      paydaySetting,
-      adjustment,
-    );
-    const pId = getPeriodId(tempBounds.start);
-    const actualToday = new Date();
-    actualToday.setHours(0, 0, 0, 0);
+    const activeAccs = bankAccounts.filter((a) => a.is_selected !== false);
+    const listToUse = activeAccs.length > 0 ? activeAccs : bankAccounts;
 
-    if (config?.lockedPeriods?.[pId] && new Date(config.lockedPeriods[pId].end) < actualToday) {
+    return listToUse.map((ba) => {
+      const connInfo = connMap.get(ba.connection_id);
+      const bankName = connInfo?.name || 'Bank';
+      const displayName = getBankAccountTitle(ba, bankName);
+      const formattedNumber = formatBankAccountNumber(ba.bban || ba.iban || ba.product || '');
       return {
-        start: new Date(config.lockedPeriods[pId].start),
-        end: new Date(config.lockedPeriods[pId].end),
+        id: ba.id,
+        name: displayName,
+        accountNumber: formattedNumber,
+        bankName,
+        balance: Number(ba.balance_amount) || 0,
+        type: 'checking' as const,
+        logo: connInfo?.logo || getLogoUrl(bankName, 'Bank'),
       };
+    });
+  }, [connections, bankAccounts]);
+
+  const connectedBank = useMemo(() => {
+    const activeConns = connections.filter((c) => c.status === 'active');
+    if (activeConns.length > 0) {
+      return activeConns.map((c) => c.aspsp_name).join(', ');
     }
-    return tempBounds;
-  }, [currentPeriodDate, paydayType, paydaySetting, adjustment, config?.lockedPeriods]);
-
-  const currentPeriodId = useMemo(
-    () => getPeriodId(currentPeriodStart),
-    [currentPeriodStart],
-  );
-
-  const actualToday = useMemo(() => new Date(), []);
-  const { start: actualPeriodStart, end: actualPeriodEnd } = useMemo(
-    () =>
-      getPeriodBoundaries(actualToday, paydayType, paydaySetting, adjustment),
-    [actualToday, paydayType, paydaySetting, adjustment],
-  );
-
-  const isCurrentPeriod =
-    currentPeriodStart.getTime() === actualPeriodStart.getTime() &&
-    currentPeriodEnd.getTime() === actualPeriodEnd.getTime();
-
-  const periods = useMemo(() => {
-    const p = [];
-    const now = new Date();
-    const actualToday = new Date();
-    actualToday.setHours(0, 0, 0, 0);
-
-    let registrationDate: Date | null = null;
-    if (session?.user?.created_at) {
-      const d = new Date(session.user.created_at);
-      if (!isNaN(d.getTime())) registrationDate = d;
+    if (connections.length > 0) {
+      return connections.map((c) => c.aspsp_name).join(', ');
     }
-    if (!registrationDate && profile?.created_at) {
-      const d = new Date(profile.created_at);
-      if (!isNaN(d.getTime())) registrationDate = d;
-    }
-    if (!registrationDate && config?.createdAt) {
-      const d = new Date(config.createdAt);
-      if (!isNaN(d.getTime())) registrationDate = d;
-    }
-    if (!registrationDate) {
-      const stored = localStorage.getItem('dejz_account_created_at');
-      if (stored) {
-        const d = new Date(stored);
-        if (!isNaN(d.getTime())) registrationDate = d;
-      }
-    }
-    if (!registrationDate) {
-      registrationDate = new Date();
-      localStorage.setItem('dejz_account_created_at', registrationDate.toISOString());
-    }
-
-    // Allow browsing at least 12 months back (and earlier if registration or older transactions exist)
-    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
-    const oldestTxTimestamp =
-      transactions.length > 0
-        ? Math.min(...transactions.map((tx) => tx.timestamp || now.getTime()))
-        : now.getTime();
-    const earliest = new Date(
-      Math.min(
-        registrationDate.getTime(),
-        oneYearAgo.getTime(),
-        oldestTxTimestamp,
-      ),
-    );
-    const earliestBounds = getPeriodBoundaries(
-      earliest,
-      paydayType,
-      paydaySetting,
-      adjustment,
-    );
-
-    const nowYear = now.getFullYear();
-    const nowMonth = now.getMonth();
-    const earliestYear = earliest.getFullYear();
-    const earliestMonth = earliest.getMonth();
-
-    const monthDiff = Math.max(12, (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth));
-    const startOffset = -monthDiff - 1;
-    const endOffset = 12;
-
-    const newLockedPeriods = { ...(config?.lockedPeriods || {}) };
-    let hasNewLocks = false;
-
-    for (let i = startOffset; i <= endOffset; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const tempBounds = getPeriodBoundaries(
-        d,
-        paydayType,
-        paydaySetting,
-        adjustment,
-      );
-      const pId = getPeriodId(tempBounds.start);
-
-      let start = tempBounds.start;
-      let end = tempBounds.end;
-
-      if (end < earliestBounds.start) {
-        continue;
-      }
-
-      let name = getPeriodName(
-        start,
-        end,
-        paydayType,
-        config?.language || "sv-SE",
-      );
-
-      if (newLockedPeriods[pId]) {
-        start = new Date(newLockedPeriods[pId].start);
-        end = new Date(newLockedPeriods[pId].end);
-        name = newLockedPeriods[pId].name;
-      } else if (end < actualToday) {
-        newLockedPeriods[pId] = {
-          start: start.toISOString(),
-          end: end.toISOString(),
-          name,
-        };
-        hasNewLocks = true;
-      }
-
-      p.push({
-        date: new Date(d.getFullYear(), d.getMonth(), 1),
-        start,
-        end,
-        name,
-        isCurrent: actualToday >= start && actualToday <= end,
-        isFuture: actualToday < start,
-        periodId: pId,
-      });
-    }
-
-    if (hasNewLocks && config && session?.user?.id) {
-      const updatedConfig = { ...config, lockedPeriods: newLockedPeriods };
-      setConfig(updatedConfig);
-      dataService.saveSettings(session.user.id, updatedConfig).catch(() => {});
-    }
-
-    return p;
-  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions, config?.lockedPeriods, session?.user?.id]);
-
-  const calculateStats = useCallback(
-    (targetDate: Date) => {
-      if (!config) return null;
-
-      try {
-        const actualToday = new Date();
-        actualToday.setHours(0, 0, 0, 0);
-        const actualTodayMs = actualToday.getTime();
-
-        const referenceDate = new Date(
-          targetDate.getFullYear(),
-          targetDate.getMonth(),
-          targetDate.getDate(),
-        );
-        referenceDate.setHours(0, 0, 0, 0);
-
-        const paydaySetting = config.payday || 25;
-        const paydayType = config.payday
-          ? getPaydayTypeFromDay(config.payday)
-          : (config.paydayType || PaydayType.TWENTY_FIFTH);
-        const adjustment = config.paydayBeforeWeekend
-          ? WeekendAdjustment.BEFORE
-          : WeekendAdjustment.NONE;
-
-        const tempBounds = getPeriodBoundaries(
-          referenceDate,
-          paydayType,
-          paydaySetting,
-          adjustment,
-        );
-        const pId = getPeriodId(tempBounds.start);
-        let periodStart = tempBounds.start;
-        let periodEnd = tempBounds.end;
-
-        if (config.lockedPeriods?.[pId] && new Date(config.lockedPeriods[pId].end) < actualToday) {
-          periodStart = new Date(config.lockedPeriods[pId].start);
-          periodEnd = new Date(config.lockedPeriods[pId].end);
-        }
-
-        const isFuturePeriod = periodStart > actualToday;
-        const isPastPeriod = periodEnd < actualToday;
-        const periodName = getPeriodName(
-          periodStart,
-          periodEnd,
-          paydayType,
-          config.language,
-        );
-        const periodId = getPeriodId(periodStart);
-
-        const getAmountForPeriod = (item: any) => {
-          if (
-            item.periodOverrides &&
-            item.periodOverrides[periodId] !== undefined
-          ) {
-            return Number(item.periodOverrides[periodId]) || 0;
-          }
-          return Number(item.amount) || 0;
-        };
-
-        // 1. Calculate Total Disposable Pot for the Period
-        const checkFixedDue = (fe: any) => isFixedItemDueInPeriod(fe, periodStart, periodEnd);
-
-        const totalIncome = incomes.reduce(
-          (sum, i) => {
-            const amount = getAmountForPeriod(i);
-            const isDue = checkFixedDue(i);
-            return isDue ? sum + amount : sum;
-          },
-          0,
-        );
-
-        const activeFixed = getActiveFixedExpenses(fixedExpenses, referenceDate, periodStart, periodEnd);
-        const totalFixed = activeFixed.reduce((sum, e) => {
-          const amount = getAmountForPeriod(e);
-          const isDue = checkFixedDue(e);
-          return isDue ? sum + amount : sum;
-        }, 0);
-        const hasExplicitSavingsList = Array.isArray(config.monthlySavingsItems);
-        const hasExplicitSavingsItems = hasExplicitSavingsList && (config.monthlySavingsItems?.length || 0) > 0;
-        const savingsFromItems = config.monthlySavingsItems?.reduce(
-          (sum, item) => {
-            const amount = getAmountForPeriod(item);
-            const isDue = checkFixedDue(item);
-            return isDue ? sum + amount : sum;
-          },
-          0,
-        ) || 0;
-
-        const explicitMonthlySavings = hasExplicitSavingsItems
-          ? savingsFromItems
-          : (Number(config.monthlySavings) || 0);
-
-        const fallbackSavingsGoals =
-          !hasExplicitSavingsList && explicitMonthlySavings === 0 && config.savingsGoals?.length
-            ? config.savingsGoals.reduce(
-                (sum, g) => sum + (Number(g.targetAmount) || 0),
-                0,
-              )
-            : 0;
-
-        const totalMonthlySavings = explicitMonthlySavings + fallbackSavingsGoals;
-        const disposablePot = totalIncome - totalFixed - totalMonthlySavings;
-
-        // --- FINAL MODEL: BASE + CARRY SYSTEM ---
-
-        const periodStartMs = periodStart.getTime();
-        const _periodEndMs = periodEnd.getTime();
-        const oneDay = 24 * 60 * 60 * 1000;
-
-        // Fix totalDays calculation by using midnight-to-midnight difference
-        const startMidnight = new Date(
-          periodStart.getFullYear(),
-          periodStart.getMonth(),
-          periodStart.getDate(),
-        ).getTime();
-        const endMidnight = new Date(
-          periodEnd.getFullYear(),
-          periodEnd.getMonth(),
-          periodEnd.getDate(),
-        ).getTime();
-        let totalDays = Math.round((endMidnight - startMidnight) / oneDay) + 1;
-
-        // Ensure totalDays is at least 1 to prevent division by zero
-        if (totalDays <= 0) {
-          console.error(
-            "ERROR: totalDays is zero or negative, defaulting to 1.",
-          );
-          totalDays = 1; // Default to 1 to prevent division by zero, but this indicates a date calculation bug
-        }
-
-        // 1. Identify Transactions
-        const periodEndBoundaryMs =
-          new Date(
-            periodEnd.getFullYear(),
-            periodEnd.getMonth(),
-            periodEnd.getDate() + 1,
-          ).getTime() - 1;
-        const pTransactions = transactions.filter(
-          (e) =>
-            e.timestamp >= periodStartMs && e.timestamp <= periodEndBoundaryMs,
-        );
-        const extraIncomes = pTransactions.filter(
-          (e) => e.type === "income" && e.category !== "Överskott",
-        );
-        const distributedSurplusIncomes = pTransactions.filter(
-          (e) => e.type === "income",
-        );
-
-        const spendingTransactions = pTransactions.filter(
-          (e) => e.type !== "income",
-        );
-
-        // 2. Sort Day Indices
-        let todayIndex = -1;
-        const actualTodayDate = new Date(actualTodayMs);
-        for (let i = 0; i < totalDays; i++) {
-          const d = new Date(
-            periodStart.getFullYear(),
-            periodStart.getMonth(),
-            periodStart.getDate() + i,
-          );
-          if (
-            d.getFullYear() === actualTodayDate.getFullYear() &&
-            d.getMonth() === actualTodayDate.getMonth() &&
-            d.getDate() === actualTodayDate.getDate()
-          ) {
-            todayIndex = i;
-            break;
-          }
-        }
-        if (todayIndex === -1) {
-          if (actualTodayMs < periodStartMs) todayIndex = -1;
-          else todayIndex = totalDays;
-        }
-
-        // Helper to find which day index [0 .. totalDays-1] a timestamp falls on
-        const getDayIndex = (timestamp: number) => {
-          for (let i = 0; i < totalDays; i++) {
-            const start = new Date(
-              periodStart.getFullYear(),
-              periodStart.getMonth(),
-              periodStart.getDate() + i,
-            ).getTime();
-            const end = new Date(
-              periodStart.getFullYear(),
-              periodStart.getMonth(),
-              periodStart.getDate() + i + 1,
-            ).getTime();
-            if (timestamp >= start && timestamp < end) {
-              return i;
-            }
-          }
-          if (timestamp < periodStartMs) return -1;
-          return totalDays;
-        };
-
-        // Separate incomes received up to today from future scheduled incomes
-        const extraIncomesUpToToday = extraIncomes.filter(
-          (e) => getDayIndex(e.timestamp) <= todayIndex,
-        );
-        const futureExtraIncomes = extraIncomes.filter(
-          (e) => getDayIndex(e.timestamp) > todayIndex,
-        );
-
-        // Calculate surplus additions
-        const surplusAdditions = new Array(totalDays).fill(0);
-        for (const surplus of distributedSurplusIncomes) {
-          const surplusDayIndex = getDayIndex(surplus.timestamp);
-          if (surplusDayIndex >= 0 && surplusDayIndex < totalDays) {
-            const remainingDaysForSurplus = totalDays - surplusDayIndex;
-            const dailyAddition = surplus.amount / remainingDaysForSurplus;
-            for (let j = surplusDayIndex; j < totalDays; j++) {
-              surplusAdditions[j] += dailyAddition;
-            }
-          }
-        }
-
-        // 3. Calculate Day Data
-        const dayInfos = [];
-        for (let i = 0; i < totalDays; i++) {
-          const d = new Date(
-            periodStart.getFullYear(),
-            periodStart.getMonth(),
-            periodStart.getDate() + i,
-          );
-          const start = d.getTime();
-          const end = new Date(
-            periodStart.getFullYear(),
-            periodStart.getMonth(),
-            periodStart.getDate() + i + 1,
-          ).getTime();
-
-          const dayExps = spendingTransactions.filter(
-            (e) => e.timestamp >= start && e.timestamp < end,
-          );
-          const dayIncs = extraIncomes.filter(
-            (e) => e.timestamp >= start && e.timestamp < end,
-          );
-          const daySurplusIncs = distributedSurplusIncomes.filter(
-            (e) => e.timestamp >= start && e.timestamp < end,
-          );
-
-          const hasFixedItems =
-            activeFixed.some(
-              (e) => isFixedPaymentScheduledOnDate(e, d) && isFixedItemScheduledOnDay(e, d)
-            ) ||
-            incomes.some((i) => isFixedItemScheduledOnDay(i, d)) ||
-            (config.monthlySavingsItems || []).some((s) => isFixedItemScheduledOnDay(s, d));
-
-          dayInfos.push({
-            date: d,
-            hasFixedItems,
-            spend: Math.round(
-              dayExps
-                .filter((e) => e.category !== "Spargris")
-                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-            ),
-            savedInPot: Math.round(
-              dayExps
-                .filter((e) => e.category === "Spargris")
-                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-            ),
-            spendForCarry: Math.round(
-              dayExps
-                .filter((e) => !e.isBackdated && e.category !== "Spargris")
-                .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-            ),
-            income: Math.round(
-              dayIncs.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-            ),
-            surplusIncome: Math.round(
-              daySurplusIncs.reduce(
-                (sum, e) => sum + (Number(e.amount) || 0),
-                0,
-              ),
-            ),
-            transactions: [...dayExps, ...daySurplusIncs].sort(
-              (a, b) => b.timestamp - a.timestamp,
-            ),
-          });
-        }
-
-        // 5. Calculate Period Budget & Fixed Daily Base Budget
-        // All values in integer cents
-        const periodBudgetCents = Math.round(disposablePot);
-        const baseDailyBudgetCents = Math.floor(periodBudgetCents / totalDays);
-
-        // 6. Core Budget: The ONLY financial truth
-        // remainingPeriodCents = periodBudgetCents - sum(transactions) + sum(incomes up to today)
-        // Future incomes are NOT added to remainingPeriodCents yet because the user hasn't received them.
-        const totalSavedInPot = Math.round(
-          pTransactions
-            .filter((e) => e.category === "Spargris")
-            .reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-        );
-
-        const totalSpentInPeriod = Math.round(
-          spendingTransactions
-            .filter((e) => e.category !== "Spargris")
-            .reduce(
-              (sum, e) => sum + (Number(e.amount) || 0),
-              0,
-            ),
-        );
-
-        const totalExtraIncomeInPeriod = Math.round(
-          extraIncomes.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-        );
-        const totalExtraIncomeUpToToday = Math.round(
-          extraIncomesUpToToday.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-        );
-        const totalFutureExtraIncome = Math.round(
-          futureExtraIncomes.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-        );
-        const totalDistributedSurplusInPeriod = Math.round(
-          distributedSurplusIncomes.reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-        );
-
-        const remainingPeriodCents =
-          periodBudgetCents - (totalSpentInPeriod + totalSavedInPot) + totalExtraIncomeUpToToday;
-
-        // 7. Daily Recommended Spend (for Today)
-        const daysElapsed = Math.max(0, todayIndex);
-        const remainingDaysIncludingToday = Math.max(
-          1,
-          totalDays - daysElapsed,
-        );
-
-        // To ensure today's spending doesn't redistribute today's budget:
-        // We calculate the state at the START of today.
-        const spentTodayCents =
-          todayIndex >= 0 && todayIndex < totalDays
-            ? dayInfos[todayIndex].spend
-            : 0;
-
-        // 2. Calculate dynamic budget or total deficit
-        let availableTodayCents = 0;
-        let availableFutureBaseCents = 0;
-
-        if (remainingPeriodCents <= 0) {
-          // If total remaining in period is 0 or negative (overspent whole period),
-          // Kvar idag equals Totalt kvar (the deficit)
-          availableTodayCents = remainingPeriodCents;
-          availableFutureBaseCents = remainingPeriodCents;
-        } else {
-          // Calculate the pot for distribution
-          const potForDistribution = remainingPeriodCents + spentTodayCents;
-
-          // DYNAMIC daily budget: Spread the remaining pot over remaining days.
-          const dynamicBaseBudgetCents = Math.max(
-            0,
-            Math.floor(potForDistribution / remainingDaysIncludingToday),
-          );
-
-          // Current available today is the dynamic budget minus today's spending.
-          availableTodayCents = dynamicBaseBudgetCents - spentTodayCents;
-
-          // Future days get the dynamic budget, but if today is negative, redistribute the deficit
-          availableFutureBaseCents = dynamicBaseBudgetCents;
-          if (availableTodayCents < 0 && remainingDaysIncludingToday > 1) {
-            const remainingPotAfterToday = remainingPeriodCents;
-            availableFutureBaseCents = Math.floor(
-              remainingPotAfterToday / (remainingDaysIncludingToday - 1),
-            );
-          }
-        }
-
-        // Calculate future income additions per day (each future income is spread across days starting from its scheduled date)
-        const futureIncomeAdditions = new Array(totalDays).fill(0);
-        for (const inc of futureExtraIncomes) {
-          const incDayIdx = getDayIndex(inc.timestamp);
-          if (incDayIdx >= 0 && incDayIdx < totalDays) {
-            const remDays = totalDays - incDayIdx;
-            const dailyAddition = (Number(inc.amount) || 0) / remDays;
-            for (let j = incDayIdx; j < totalDays; j++) {
-              futureIncomeAdditions[j] += dailyAddition;
-            }
-          }
-        }
-
-        // 7. Calendar Data & Status
-        // To keep past days stable and consistent with what the user saw on that day,
-        // we compute each past day's dynamic daily budget from the rolling pot at the start of that day.
-        let cumulativeSpendBeforeDay = 0;
-        let cumulativeSavedBeforeDay = 0;
-        let cumulativeIncomeBeforeDay = 0;
-
-        const days = dayInfos.map((d, i) => {
-          const isToday = i === todayIndex;
-          const isPast = i < todayIndex;
-          const isFuture = i > todayIndex;
-
-          const incomeThroughDayI = cumulativeIncomeBeforeDay + d.income;
-          const potAtStartOfDayI =
-            periodBudgetCents -
-            cumulativeSpendBeforeDay -
-            cumulativeSavedBeforeDay +
-            incomeThroughDayI;
-          const remDaysFromDayI = Math.max(1, totalDays - i);
-          const dynamicDayBudget =
-            potAtStartOfDayI <= 0
-              ? potAtStartOfDayI
-              : Math.max(0, Math.floor(potAtStartOfDayI / remDaysFromDayI));
-
-          cumulativeSpendBeforeDay += d.spend;
-          cumulativeSavedBeforeDay += (d as any).savedInPot || 0;
-          cumulativeIncomeBeforeDay += d.income;
-
-          const dayBase = isPast
-            ? dynamicDayBudget + surplusAdditions[i]
-            : baseDailyBudgetCents + surplusAdditions[i];
-
-          // For past days, compare the day's spending against the rolling dynamic daily budget available that day.
-          // For today, we show availableTodayCents (does NOT include future unreceived incomes).
-          // For future days, we show availableFutureBaseCents plus any future income scheduled on/before that day.
-          const availableForD =
-            isPast
-              ? dayBase - d.spend
-              : isToday
-                ? availableTodayCents
-                : Math.round(availableFutureBaseCents + futureIncomeAdditions[i]);
-
-          let status: "green" | "warning" | "red" | "neutral" = "neutral";
-          if (isPast) {
-            if (availableForD < 0) {
-              status = "red";
-            } else {
-              status = "green";
-            }
-          }
-
-          return {
-            date: d.date,
-            isToday,
-            isPast,
-            isFuture,
-            dayBase,
-            daySpent: d.spend,
-            dayIncome: d.income,
-            status,
-            availableForD,
-            hasTransactions: (d.transactions?.length || 0) > 0,
-            hasFixedItems: !!d.hasFixedItems,
-            hasFutureTransactions:
-              isFuture && (d.transactions?.length || 0) > 0,
-            transactions: d.transactions,
-          };
-        });
-
-        const fixedExpenseCategoryMap: Record<string, number> = {};
-        if (activeFixed) {
-          activeFixed.forEach((fe) => {
-            if (!checkFixedDue(fe)) return;
-            const rawAmount = getAmountForPeriod(fe);
-            const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
-            fixedExpenseCategoryMap[catName] =
-              (fixedExpenseCategoryMap[catName] || 0) + rawAmount;
-          });
-        }
-
-        const categoryVariableSpending: Record<string, number> = {};
-        pTransactions.forEach((tx) => {
-          if (tx.type === "expense") {
-            if (tx.splits && Array.isArray(tx.splits) && tx.splits.length > 0) {
-              tx.splits.forEach((s: any) => {
-                if (s.category) {
-                  const cat = s.category.trim();
-                  categoryVariableSpending[cat] =
-                    (categoryVariableSpending[cat] || 0) + (Number(s.amount) || 0);
-                }
-              });
-            } else if (tx.category) {
-              const cat = tx.category.trim();
-              categoryVariableSpending[cat] =
-                (categoryVariableSpending[cat] || 0) + (Number(tx.amount) || 0);
-            }
-          }
-        });
-
-        const categorySpending: Record<string, number> = { ...categoryVariableSpending };
-        Object.entries(fixedExpenseCategoryMap).forEach(([catName, amount]) => {
-          categorySpending[catName] = (categorySpending[catName] || 0) + Math.round(amount);
-        });
-
-        const categoriesMap: Record<string, any> = {};
-        (config.categories || []).forEach((c) => {
-          const variableSpent = Math.round(categoryVariableSpending[c.name] || 0);
-          const fixedSpent = Math.round(fixedExpenseCategoryMap[c.name] || 0);
-          const spent = variableSpent + fixedSpent;
-          const budgetVal = c.budget !== undefined && c.budget !== null 
-            ? Number(String(c.budget).replace(/[^0-9.]/g, "")) 
-            : 0;
-          const budget = Math.max(budgetVal, fixedSpent);
-
-          categoriesMap[c.name] = {
-            name: c.name,
-            spent,
-            variableSpent,
-            fixedSpent,
-            userBudget: budgetVal,
-            budget,
-            icon: c.icon,
-            color: c.color,
-          };
-        });
-
-        return {
-          periodStart,
-          periodEnd,
-          periodName,
-          isFuturePeriod,
-          isPastPeriod,
-          disposablePot: periodBudgetCents,
-          totalIncome,
-          totalFixed,
-          totalSavings: totalMonthlySavings,
-          totalDaysInPeriod: totalDays,
-          daysElapsed,
-          remainingDays: remainingDaysIncludingToday,
-          totalSpentInPeriod,
-          totalExtraIncomeInPeriod,
-          totalExtraIncomeUpToToday,
-          totalFutureExtraIncome,
-          totalDistributedSurplusInPeriod,
-          totalSavedInPot,
-          remainingPeriodCents,
-          availableTodayCents,
-          availableFutureCents: availableFutureBaseCents,
-          baseDailyBudgetCents,
-          periodTransactions: pTransactions.sort(
-            (a, b) => b.timestamp - a.timestamp,
-          ),
-          days,
-          periodId,
-          categories: categoriesMap,
-        };
-      } catch (_error) {
-        console.error("Error calculating stats:", _error);
-        return null;
+    return null;
+  }, [connections]);
+
+  // Beräkna aktuell period (från lönedag till dagen innan nästa lön) med vald helghantering:
+  const period: PeriodInfo = useMemo(() => {
+    return calculateCurrentPeriod(new Date(), targetPayday, weekendHandling);
+  }, [targetPayday, weekendHandling]);
+
+  // Uppdatera lönedag & spara till Supabase
+  const handleUpdatePayday = useCallback(
+    (day: number) => {
+      setTargetPayday(day);
+      if (userId) {
+        dataService.updateProfile(userId, { payday: day }).catch(() => {});
       }
     },
-    [config, incomes, fixedExpenses, transactions],
+    [userId]
   );
 
-  const stats = useMemo(
-    () => calculateStats(currentPeriodDate),
-    [calculateStats, currentPeriodDate],
+  // Uppdatera helghantering & spara till Supabase
+  const handleUpdateWeekendHandling = useCallback(
+    (mode: WeekendHandlingMode) => {
+      setWeekendHandling(mode);
+      if (userId) {
+        dataService
+          .updateProfile(userId, { payday_before_weekend: mode === 'before' })
+          .catch(() => {});
+      }
+    },
+    [userId]
   );
 
-  
-
-
-
-  // --- Derived State for UI ---
-  const calendarDays = useMemo(() => {
-    return stats?.days || [];
-  }, [stats]);
-
-  const actualPeriodId = useMemo(
-    () => getPeriodId(actualPeriodStart),
-    [actualPeriodStart],
+  // Uppdatera profilbild
+  const handleUpdateAvatar = useCallback(
+    (avatarDataUrl: string | null) => {
+      setUserAvatar(avatarDataUrl);
+      if (userId && avatarDataUrl) {
+        dataService.updateProfile(userId, { avatar_url: avatarDataUrl }).catch(() => {});
+      }
+    },
+    [userId]
   );
 
-  const attentionItems = useMemo(() => {
-    if (!config) return [];
-    const items: any[] = [];
-    const currentPeriodId = actualPeriodId;
+  // Totalt saldo
+  const totalBalance = useMemo(() => {
+    return accounts.reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
+  }, [accounts]);
 
-    incomes.forEach((i) => {
-      if (!isFixedItemDueInPeriod(i, actualPeriodStart, actualPeriodEnd)) return;
-      if (
-        i.isVariable &&
-        (!i.periodOverrides || i.periodOverrides[currentPeriodId] === undefined)
-      ) {
-        items.push({ ...i, budgetType: "income" });
-      }
-    });
+  // Total inkomst
+  const totalIncome = useMemo(() => {
+    return incomes.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+  }, [incomes]);
 
-    fixedExpenses.forEach((e) => {
-      if (!isExpenseActiveForPeriod(e, actualPeriodStart, actualPeriodEnd)) return;
-      if (!isFixedItemDueInPeriod(e, actualPeriodStart, actualPeriodEnd)) return;
-      if (
-        e.isVariable &&
-        (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
-      ) {
-        items.push({ ...e, budgetType: "expense" });
-      }
-    });
+  // Totala fasta kostnader
+  const totalFixedExpenses = useMemo(() => {
+    return fixedExpenses.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+  }, [fixedExpenses]);
 
-    config.monthlySavingsItems?.forEach((s) => {
-      if (!isFixedItemDueInPeriod(s, actualPeriodStart, actualPeriodEnd)) return;
-      if (
-        s.isVariable &&
-        (!s.periodOverrides || s.periodOverrides[currentPeriodId] === undefined)
-      ) {
-        items.push({ ...s, budgetType: "savings" });
-      }
-    });
+  // Transaktioner som tillhör den aktuella löneperioden (från lönedag till dagen innan nästa lön)
+  const periodTransactions = useMemo(() => {
+    return deduplicateTransactions(transactions).filter((t) => isDateInPeriod(t.date, period));
+  }, [transactions, period]);
 
-    return items;
-  }, [config, incomes, fixedExpenses, actualPeriodId, actualPeriodStart, actualPeriodEnd]);
+  // Transaktioner som ska visas i Historik-fliken:
+  // Innehåller faktiska transaktioner + inkomstposter genererade för registrerade inkomster (Lön etc.) på lönedagar,
+  // noggrant avduplicerade mot eventuella bankinbetalningar så att inga dubbletter kan uppstå.
+  const displayTransactions = useMemo(() => {
+    const combined = [...transactions];
+    for (const inc of incomes) {
+      if (!inc.amount || inc.amount <= 0) continue;
+      const payDates = getPayDatesForIncome(inc, targetPayday, weekendHandling === 'before');
+      for (const pDate of payDates) {
+        const genId = `inc-${inc.id}-${pDate}`;
+        if (dismissedTxIds.includes(genId)) continue;
 
-  const notifications = useMemo<AppNotification[]>(() => {
-    if (!config) return [];
-    const notifs: AppNotification[] = [];
-    const currentPeriodId = actualPeriodId;
-    const periodStart = actualPeriodStart;
-    const periodEnd = actualPeriodEnd;
-
-    const allowVariable = config.notifications?.variableAmountsReminder !== false;
-
-    // 1. Variable fixed expenses
-    if (allowVariable) {
-      fixedExpenses.forEach((e) => {
-        if (!isExpenseActiveForPeriod(e, periodStart, periodEnd)) return;
-        if (!isFixedItemDueInPeriod(e, periodStart, periodEnd)) return;
-        if (
-          e.isVariable &&
-          (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
-        ) {
-          const isDue = isVariableItemDue(
-            e.deductionDay || 1,
-            periodStart,
-            periodEnd,
-            new Date(),
-          );
-          const notifId = `expense_${e.id}_${currentPeriodId}`;
-          if (isDue && !dismissedNotificationIds.includes(notifId)) {
-            const expenseName = e.name || "utgift";
-            const lower = expenseName.toLowerCase();
-            const endsWithSuffix =
-              lower.endsWith("räkning") || lower.endsWith("faktura");
-            const title = endsWithSuffix
-              ? `Hej, vad blev din ${expenseName} denna månaden?`
-              : `Hej, vad blev din ${expenseName}-räkning denna månaden?`;
-
-            notifs.push({
-              id: notifId,
-              type: "variable_expense",
-              item: { ...e, budgetType: "expense" },
-              title,
-              subtitle: `Dras den ${e.deductionDay || 1}:e`,
-              deductionDay: e.deductionDay || 1,
-              expectedAmount: Number(e.amount) || 0,
-            });
-          }
-        }
-      });
-
-      // 2. Variable incomes
-      incomes.forEach((i) => {
-        if (!isFixedItemDueInPeriod(i, periodStart, periodEnd)) return;
-        if (
-          i.isVariable &&
-          (!i.periodOverrides || i.periodOverrides[currentPeriodId] === undefined)
-        ) {
-          const isDue = isVariableItemDue(
-            i.deductionDay || 1,
-            periodStart,
-            periodEnd,
-            new Date(),
-          );
-          const notifId = `income_${i.id}_${currentPeriodId}`;
-          if (isDue && !dismissedNotificationIds.includes(notifId)) {
-            const incomeName = i.name || "inkomst";
-            const title = `Hej, vad blev din ${incomeName} denna månaden?`;
-
-            notifs.push({
-              id: notifId,
-              type: "variable_income",
-              item: { ...i, budgetType: "income" },
-              title,
-              subtitle: `Kommer den ${i.deductionDay || 1}:e`,
-              deductionDay: i.deductionDay || 1,
-              expectedAmount: Number(i.amount) || 0,
-            });
-          }
-        }
-      });
-
-      // 3. Variable savings items
-      config.monthlySavingsItems?.forEach((s) => {
-        if (!isFixedItemDueInPeriod(s, periodStart, periodEnd)) return;
-        if (
-          s.isVariable &&
-          (!s.periodOverrides || s.periodOverrides[currentPeriodId] === undefined)
-        ) {
-          const isDue = isVariableItemDue(
-            s.deductionDay || 1,
-            periodStart,
-            periodEnd,
-            new Date(),
-          );
-          const notifId = `savings_${s.id}_${currentPeriodId}`;
-          if (isDue && !dismissedNotificationIds.includes(notifId)) {
-            const savingsName = s.name || "sparande";
-            const title = `Hej, vad sparar du till ${savingsName} denna månaden?`;
-
-            notifs.push({
-              id: notifId,
-              type: "variable_savings",
-              item: { ...s, budgetType: "savings" },
-              title,
-              subtitle: `Dras den ${s.deductionDay || 1}:e`,
-              deductionDay: s.deductionDay || 1,
-              expectedAmount: Number(s.amount) || 0,
-            });
-          }
-        }
-      });
-    }
-
-    return notifs;
-  }, [config, actualPeriodId, actualPeriodStart, actualPeriodEnd, fixedExpenses, incomes, dismissedNotificationIds]);
-
-  const handleDismissNotification = (notificationId: string) => {
-    setDismissedNotificationIds((prev) => {
-      const next = [...prev, notificationId];
-      try {
-        localStorage.setItem(
-          "dejz_dismissed_notifications",
-          JSON.stringify(next),
-        );
-      } catch (e) {
-        console.warn("Could not save dismissed notifications:", e);
-      }
-      return next;
-    });
-  };
-
-  const handleSaveVariableOverride = async (item: any, amount: number) => {
-    if (!session || !config || !stats) return;
-    const currentPeriodId = stats.periodId;
-    const updatedOverrides = {
-      ...(item.periodOverrides || {}),
-      [currentPeriodId]: amount,
-    };
-
-    try {
-      if (item.budgetType === "income") {
-        const updatedIncome = { ...item, periodOverrides: updatedOverrides };
-        await dataService.saveIncomeSource(session.user.id, updatedIncome);
-        setIncomes((prev) =>
-          prev.map((i) => (i.id === item.id ? updatedIncome : i)),
-        );
-      } else if (item.budgetType === "savings") {
-        const updatedSavingsItem = {
-          ...item,
-          periodOverrides: updatedOverrides,
-        };
-        const newItems =
-          config.monthlySavingsItems?.map((s) =>
-            s.id === item.id ? updatedSavingsItem : s,
-          ) || [];
-        const newConfig = { ...config, monthlySavingsItems: newItems };
-        setConfig(newConfig);
-        await dataService.saveSettings(session.user.id, newConfig);
-      } else {
-        const updatedExpense = { ...item, periodOverrides: updatedOverrides };
-        await dataService.saveFixedExpense(session.user.id, updatedExpense);
-        setFixedExpenses((prev) =>
-          prev.map((e) => (e.id === item.id ? updatedExpense : e)),
-        );
-      }
-      feedback.success();
-      addToast(t("saved"), "success");
-    } catch (err) {
-      console.error("Error saving variable override:", err);
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  // --- Handlers ---
-  const addTransaction = async (
-    transaction: Omit<Transaction, "id" | "timestamp">,
-    customTimestamp?: number,
-  ) => {
-    if (!session || !config) return;
-    try {
-      let potDelta = 0;
-
-      if (editingTransaction) {
-        // Adjust savings pot if category was or is 'Spargris'
-        if (editingTransaction.category === "Spargris") {
-          potDelta -= Number(editingTransaction.amount) || 0;
-        }
-        if (transaction.category === "Spargris") {
-          potDelta += Number(transaction.amount) || 0;
-        }
-
-        const updatedTransaction = await dataService.updateTransaction(
-          editingTransaction.id,
-          {
-            ...transaction,
-            timestamp: customTimestamp || editingTransaction.timestamp,
-            isBackdated: transaction.isBackdated,
-          },
-        );
-
-        // Update state with updated transaction
-        setTransactions((prev) =>
-          prev.map((e) =>
-            e.id === editingTransaction.id ? updatedTransaction : e,
-          ),
-        );
-
-        setEditingTransaction(null);
-        feedback.tap();
-      } else {
-        // Adjust savings pot if new category is 'Spargris'
-        if (transaction.category === "Spargris") {
-          potDelta += Number(transaction.amount) || 0;
-        }
-
-        const txTimestamp = customTimestamp || Date.now();
-        // Check if this manual purchase matches an already-imported bank transaction (1-to-1)
-        const matchingBankImportedTx =
-          transaction.type === "expense" && !transaction.bankTransactionId
-            ? transactions.find((existing) => {
-                const isBankLinked = Boolean(
-                  existing.bankTransactionId ||
-                    existing.tags?.some((t) => t.startsWith("bank_tx:")),
-                );
-                if (!isBankLinked || existing.type !== "expense") return false;
-                if (
-                  Math.abs(
-                    (Number(existing.amount) || 0) -
-                      (Number(transaction.amount) || 0),
-                  ) > 0.01
-                ) {
-                  return false;
-                }
-                const dayDiff =
-                  Math.abs((existing.timestamp || 0) - txTimestamp) /
-                  (24 * 60 * 60 * 1000);
-                if (dayDiff > 4) return false;
-                const sim = merchantSimilarity(
-                  transaction.merchant || transaction.note || "",
-                  existing.merchant || existing.originalBankDescription || "",
-                );
-                return sim >= 0.65;
-              })
-            : undefined;
-
-        if (matchingBankImportedTx) {
-          const mergedTx = await dataService.updateTransaction(
-            matchingBankImportedTx.id,
-            {
-              ...matchingBankImportedTx,
-              category: transaction.category || matchingBankImportedTx.category,
-              merchant: transaction.merchant || matchingBankImportedTx.merchant,
-              note: transaction.note ?? matchingBankImportedTx.note,
-              receiptUrl:
-                transaction.receiptUrl ?? matchingBankImportedTx.receiptUrl,
-              receiptUrls:
-                transaction.receiptUrls ?? matchingBankImportedTx.receiptUrls,
-              splits: transaction.splits ?? matchingBankImportedTx.splits,
-              isStarred:
-                transaction.isStarred ?? matchingBankImportedTx.isStarred,
-            },
-          );
-          setTransactions((prev) =>
-            prev.map((e) => (e.id === mergedTx.id ? mergedTx : e)),
-          );
-          feedback.expense();
-        } else {
-          const newTransaction = await dataService.addTransaction(
-            session.user.id,
-            {
-              ...transaction,
-              timestamp: txTimestamp,
-              isBackdated: transaction.isBackdated,
-            },
-          );
-          setTransactions((prev) => [newTransaction, ...prev]);
-
-          if (
-            transaction.type === "income" ||
-            transaction.category === "Spargris"
-          ) {
-            feedback.success();
-          } else {
-            feedback.expense();
-          }
-        }
-      }
-
-      // Save new savings pot if it changed
-      if (potDelta !== 0) {
-        setConfig((prev) => {
-          if (!prev) return prev;
-          const finalPot = Math.max(0, (prev.savingsPot || 0) + potDelta);
-          const newConfig = { ...prev, savingsPot: finalPot };
-          dataService.saveSettings(session.user.id, newConfig).catch((err) => {
-            console.error("Failed to save settings after add/update:", err);
-          });
-          return newConfig;
+        // Kontrollera om denna inkomst redan finns i transaktionslistan (t.ex. synkad från banken eller manuell)
+        const isCovered = combined.some((t) => {
+          if (t.type !== 'income') return false;
+          if (t.id === genId) return true;
+          const sameAmount = Math.abs((Number(t.amount) || 0) - inc.amount) <= 5;
+          if (!sameAmount) return false;
+          const d1 = new Date(t.date).getTime();
+          const d2 = new Date(pDate).getTime();
+          return !isNaN(d1) && !isNaN(d2) && Math.abs(d1 - d2) <= 3 * 86400 * 1000;
         });
-      }
 
-      const wasEditing = Boolean(editingTransaction);
-      setIsAddTransactionOpen(false);
-
-      if (!wasEditing) {
-        // Direct user to Home tab ('today') and select the transaction's date on the timeline when creating new
-        const txTimestamp = customTimestamp || (transaction as any).timestamp || Date.now();
-        const txDate = new Date(txTimestamp);
-        txDate.setHours(0, 0, 0, 0);
-        setTargetDate(txDate);
-        setCurrentPeriodDate(txDate);
-        setActiveTab("today");
-      }
-    } catch (err: any) {
-      console.error("[App] Error adding transaction:", err);
-      const detail = err?.details ? ` (${err.details})` : "";
-      const code = err?.code ? ` [Kod: ${err.code}]` : "";
-      addToast(
-        `Kunde inte spara: ${err?.message || "Okänt fel"}${detail}${code}`,
-        "error",
-      );
-    }
-  };
-
-  const handleSaveIncome = async (income: Omit<Income, "id">) => {
-    if (!session) return;
-    try {
-      const id = editingIncome ? editingIncome.id : crypto.randomUUID();
-      const newIncome = {
-        ...income,
-        isVariable: Boolean(income.isVariable),
-        periodOverrides:
-          income.periodOverrides || editingIncome?.periodOverrides || {},
-        id,
-      };
-      await dataService.saveIncomeSource(session.user.id, newIncome);
-
-      if (editingIncome) {
-        setIncomes((prev) =>
-          prev.map((i) => (i.id === editingIncome.id ? newIncome : i)),
-        );
-      } else {
-        setIncomes((prev) => [...prev, newIncome]);
-      }
-      const wasEditingIncome = Boolean(editingIncome);
-      setIsIncomeModalOpen(false);
-      setEditingIncome(null);
-
-      if (!wasEditingIncome) {
-        // Direct user to Home tab ('today') and select today's date on the timeline when adding new income
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        setTargetDate(now);
-        setCurrentPeriodDate(now);
-        setActiveTab("today");
-      }
-    } catch (err: any) {
-      console.error("[App] Error saving income:", err);
-      addToast(
-        `Kunde inte spara inkomst: ${err?.message || "Okänt fel"}`,
-        "error",
-      );
-    }
-  };
-
-  const handleSaveFixedExpense = async (expense: Omit<FixedExpense, "id">) => {
-    if (!session) return;
-    try {
-      const id = editingFixedExpense
-        ? editingFixedExpense.id
-        : crypto.randomUUID();
-      const newExpense = {
-        ...expense,
-        isVariable: Boolean(expense.isVariable),
-        periodOverrides:
-          expense.periodOverrides || editingFixedExpense?.periodOverrides || {},
-        id,
-      };
-      await dataService.saveFixedExpense(session.user.id, newExpense);
-
-      if (editingFixedExpense) {
-        setFixedExpenses((prev) =>
-          prev.map((e) => (e.id === editingFixedExpense.id ? newExpense : e)),
-        );
-      } else {
-        setFixedExpenses((prev) => [...prev, newExpense]);
-      }
-      setIsFixedExpenseModalOpen(false);
-      setEditingFixedExpense(null);
-    } catch (err: any) {
-      console.error("[App] Error saving fixed expense:", err);
-      addToast(
-        `Kunde inte spara fast utgift: ${err?.message || "Okänt fel"}`,
-        "error",
-      );
-    }
-  };
-
-  const deleteTransaction = async (id: string) => {
-    try {
-      const transactionToDelete = transactions.find((e) => e.id === id);
-      await dataService.deleteTransaction(id);
-      setTransactions((prev) => prev.filter((e) => e.id !== id));
-
-      if (session?.user?.id && transactionToDelete) {
-        const bankTxId =
-          transactionToDelete.bankTransactionId ||
-          (transactionToDelete.tags || [])
-            .find((t) => typeof t === "string" && t.startsWith("bank_tx:"))
-            ?.slice("bank_tx:".length);
-        if (bankTxId) {
-          try {
-            const key = `dejz_dismissed_bank_tx_ids_${session.user.id}`;
-            const existing = JSON.parse(localStorage.getItem(key) || "[]");
-            if (!existing.includes(bankTxId)) {
-              localStorage.setItem(key, JSON.stringify([...existing, bankTxId]));
-            }
-          } catch {
-            // ignore
-          }
+        if (!isCovered) {
+          combined.push({
+            id: genId,
+            title: inc.name,
+            amount: inc.amount,
+            type: 'income',
+            category: inc.category || 'Lön',
+            date: pDate,
+            time: '08:00',
+            logo: inc.logo || getLogoUrl(inc.name, inc.category || 'Lön'),
+          });
         }
       }
+    }
+    return deduplicateTransactions(combined);
+  }, [transactions, incomes, targetPayday, weekendHandling, dismissedTxIds]);
 
-      // Update savings pot if it was a savings transaction
-      if (
-        (transactionToDelete?.category === "Spargris" ||
-          transactionToDelete?.type === "savings") &&
-        session
-      ) {
-        const amountToSubtract = Number(transactionToDelete.amount) || 0;
-        setConfig((prev) => {
-          if (!prev) return prev;
-          const newPot = Math.max(0, (prev.savingsPot || 0) - amountToSubtract);
-          const newConfig = { ...prev, savingsPot: newPot };
-          dataService.saveSettings(session.user.id, newConfig).catch((err) => {
-            console.error("Failed to save settings after deletion:", err);
-          });
-          return newConfig;
-        });
-      }
+  // Totala rörliga köp under aktuell period
+  const totalVariableSpent = useMemo(() => {
+    return periodTransactions
+      .filter((t) => t.type !== 'income')
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  }, [periodTransactions]);
 
-      // If it's a distributed surplus, we might want to reset the prompt date
-      if (
-        transactionToDelete?.category === "Överskott" &&
-        transactionToDelete?.type === "income" &&
-        session
-      ) {
-        setConfig((prev) => {
-          if (!prev) return prev;
-          const newConfig = {
-            ...prev,
-            notifications: {
-              ...prev.notifications,
-              lastSurplusPromptDate: undefined,
-            },
-          };
-          dataService.saveSettings(session.user.id, newConfig).catch((err) => {
-            console.error(
-              "Failed to save settings after surplus deletion:",
-              err,
-            );
-          });
-          return newConfig;
-        });
-      }
-    } catch (_err) {
-      addToast("Kunde inte radera transaktionen", "error");
+  // Kvar att spendera under aktuell period
+  const kvarAttSpendera = useMemo(() => {
+    return Math.max(0, totalIncome - totalFixedExpenses - totalVariableSpent);
+  }, [totalIncome, totalFixedExpenses, totalVariableSpent]);
+
+  // Dagsbudget
+  const dagsbudget = useMemo(() => {
+    if (period.daysRemaining <= 0 || kvarAttSpendera <= 0) return 0;
+    return Math.round(kvarAttSpendera / period.daysRemaining);
+  }, [kvarAttSpendera, period.daysRemaining]);
+
+  // Synka med Enable Banking
+  const handleSyncBank = async () => {
+    setSyncingBank(true);
+    lastSyncTimestampRef.current = Date.now();
+    try {
+      const res = await bankService.sync();
+      setConnections(res.connections || []);
+      setBankAccounts(res.accounts || []);
+      await refreshBankStatus();
+    } catch {
+      // ignore error
+    } finally {
+      setSyncingBank(false);
     }
   };
 
-  const handleToggleStar = async (updatedTx: Transaction) => {
+  // Koppla från Enable Banking
+  const handleDisconnectBank = async (connectionId?: string) => {
+    const targetId = connectionId || connections[0]?.id;
+    if (!targetId) return;
     try {
-      const res = await dataService.updateTransaction(updatedTx.id, updatedTx);
-      setTransactions((prev) => prev.map((e) => (e.id === res.id ? res : e)));
-      if (viewingTransaction && viewingTransaction.id === res.id) {
-        setViewingTransaction(res);
-      }
-      if (editingTransaction && editingTransaction.id === res.id) {
-        setEditingTransaction(res);
-      }
-      const isStarred = Boolean(res.isStarred || (res.tags && res.tags.includes('starred')));
-      addToast(
-        isStarred
-          ? (config?.language === 'en' ? 'Saved to starred' : 'Hjärtmarkerad')
-          : (config?.language === 'en' ? 'Removed from starred' : 'Hjärta borttaget'),
-        'success'
-      );
-    } catch (err) {
-      console.error('Failed to toggle star:', err);
-      addToast(t('error'), 'error');
+      await bankService.disconnect(targetId);
+      await refreshBankStatus();
+    } catch {
+      await refreshBankStatus();
+    }
+  };
+
+  const handleAddIncome = async (data: Omit<IncomeItem, 'id'>) => {
+    const logo = data.logo || getLogoUrl(data.name, data.category);
+    const newItem: IncomeItem = { ...data, logo, id: 'inc-' + Date.now() };
+    setIncomes((prev) => [...prev, newItem]);
+    if (userId) {
+      await dataService
+        .saveIncomeSource(userId, {
+          id: newItem.id,
+          name: newItem.name,
+          amount: newItem.amount,
+          deductionDay: newItem.payday,
+          category: newItem.category,
+          frequency: Frequency.MONTHLY,
+          logo,
+        })
+        .catch(() => {});
+    }
+  };
+
+  const handleUpdateIncome = async (updated: IncomeItem) => {
+    const logo = updated.logo || getLogoUrl(updated.name, updated.category);
+    const itemWithLogo: IncomeItem = { ...updated, logo };
+    setIncomes((prev) =>
+      prev.map((i) => (i.id === itemWithLogo.id ? itemWithLogo : i))
+    );
+    if (userId) {
+      await dataService
+        .saveIncomeSource(userId, {
+          id: itemWithLogo.id,
+          name: itemWithLogo.name,
+          amount: itemWithLogo.amount,
+          deductionDay: itemWithLogo.payday,
+          category: itemWithLogo.category,
+          frequency: Frequency.MONTHLY,
+          logo,
+        })
+        .catch(() => {});
     }
   };
 
   const handleDeleteIncome = async (id: string) => {
-    try {
-      await dataService.deleteIncomeSource(id);
-      setIncomes((prev) => prev.filter((i) => i.id !== id));
-      setIsIncomeModalOpen(false);
-      setEditingIncome(null);
-    } catch (_err) {
-      addToast("Kunde inte radera inkomst", "error");
+    setIncomes((prev) => prev.filter((i) => i.id !== id));
+    if (userId) {
+      await dataService.deleteIncomeSource(id).catch(() => {});
     }
   };
 
-  const handleDeleteFixedExpense = async (id: string) => {
-    try {
-      await dataService.deleteFixedExpense(id);
-      setFixedExpenses((prev) => prev.filter((e) => e.id !== id));
-      setIsFixedExpenseModalOpen(false);
-      setEditingFixedExpense(null);
-    } catch (_err) {
-      addToast("Kunde inte radera fast utgift", "error");
+  const handleAddFixed = async (data: Omit<FixedExpenseItem, 'id'>) => {
+    const logo = data.logo || getLogoUrl(data.name, data.category);
+    const newItem: FixedExpenseItem = { ...data, logo, id: 'fix-' + Date.now() };
+    setFixedExpenses((prev) => [...prev, newItem].sort((a, b) => a.dueDay - b.dueDay));
+    if (userId) {
+      await dataService
+        .saveFixedExpense(userId, {
+          id: newItem.id,
+          name: newItem.name,
+          amount: newItem.amount,
+          deductionDay: newItem.dueDay,
+          category: newItem.category,
+          paymentMethod: newItem.paymentMethod || 'Autogiro',
+          frequency: Frequency.MONTHLY,
+          logo,
+        })
+        .catch(() => {});
     }
   };
 
-  const extractRawSavingId = (rawId: any): string => {
-    if (!rawId) return '';
-    let str = String(rawId);
-    if (str.startsWith('fixed-saving-')) {
-      str = str.replace(/^fixed-saving-/, '');
-      str = str.replace(/-\d{4}-\d{1,2}-\d{1,2}$/, '');
-    }
-    if (str.startsWith('saving-')) {
-      str = str.replace(/^saving-/, '');
-    }
-    return str;
-  };
-
-  const handleSaveMonthlySaving = async (saving: any) => {
-    if (!session || !config) return;
-    try {
-      const rawId = editingMonthlySaving?.id || crypto.randomUUID();
-      const targetId = extractRawSavingId(rawId) || rawId;
-      const newSaving = {
-        ...saving,
-        isVariable: Boolean(saving.isVariable),
-        periodOverrides: saving.isVariable ? (saving.periodOverrides || {}) : {},
-        id: targetId,
-      };
-
-      const existingItems = config.monthlySavingsItems || [];
-      const itemExists = existingItems.some((s: any) => {
-        const sClean = extractRawSavingId(s.id);
-        return s.id === targetId || s.id === rawId || (!!sClean && sClean === targetId);
-      });
-      const newItems = itemExists
-        ? existingItems.map((s: any) => {
-            const sClean = extractRawSavingId(s.id);
-            return (s.id === targetId || s.id === rawId || (!!sClean && sClean === targetId)) ? newSaving : s;
-          })
-        : [...existingItems, newSaving];
-
-      const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
-      const newConfig = { ...config, monthlySavingsItems: newItems, monthlySavings: itemsSum };
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-      setIsMonthlySavingModalOpen(false);
-      setEditingMonthlySaving(null);
-      addToast(t("saved"), "success");
-    } catch (_error) {
-      addToast(t("error"), "error");
+  const handleUpdateFixed = async (updated: FixedExpenseItem) => {
+    const logo = updated.logo || getLogoUrl(updated.name, updated.category);
+    const itemWithLogo: FixedExpenseItem = { ...updated, logo };
+    setFixedExpenses((prev) =>
+      prev
+        .map((f) => (f.id === itemWithLogo.id ? itemWithLogo : f))
+        .sort((a, b) => a.dueDay - b.dueDay)
+    );
+    if (userId) {
+      await dataService
+        .saveFixedExpense(userId, {
+          id: itemWithLogo.id,
+          name: itemWithLogo.name,
+          amount: itemWithLogo.amount,
+          deductionDay: itemWithLogo.dueDay,
+          category: itemWithLogo.category,
+          paymentMethod: itemWithLogo.paymentMethod || 'Autogiro',
+          frequency: Frequency.MONTHLY,
+          logo,
+        })
+        .catch(() => {});
     }
   };
 
-  const handleDeleteMonthlySaving = async (id: string) => {
-    if (!session || !config) return;
-    try {
-      const cleanTargetId = extractRawSavingId(id);
-      const targetItem = (config.monthlySavingsItems || []).find((s: any) => {
-        const itemCleanId = extractRawSavingId(s.id);
-        return s.id === id || s.id === cleanTargetId || itemCleanId === cleanTargetId;
-      });
-
-      const newItems = (config.monthlySavingsItems || []).filter((s: any) => {
-        const itemCleanId = extractRawSavingId(s.id);
-        return (
-          s.id !== id &&
-          s.id !== cleanTargetId &&
-          itemCleanId !== cleanTargetId
-        );
-      });
-      const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
-
-      // Also clean up matching savingsGoals if any exist
-      const newGoals = (config.savingsGoals || []).filter((g: any) => {
-        const goalCleanId = extractRawSavingId(g.id);
-        const isMatch =
-          g.id === id ||
-          g.id === cleanTargetId ||
-          goalCleanId === cleanTargetId ||
-          (targetItem && (g.title === targetItem.name || g.name === targetItem.name));
-        return !isMatch;
-      });
-
-      const newConfig = {
-        ...config,
-        monthlySavingsItems: newItems,
-        monthlySavings: itemsSum,
-        savingsGoals: newItems.length === 0 ? [] : newGoals,
-      };
-      setConfig(newConfig);
-      await dataService.saveSettings(session.user.id, newConfig);
-      addToast(t("deleted"), "success");
-    } catch (_error) {
-      addToast(t("error"), "error");
+  const handleDeleteFixed = async (id: string) => {
+    setFixedExpenses((prev) => prev.filter((f) => f.id !== id));
+    if (userId) {
+      await dataService.deleteFixedExpense(id).catch(() => {});
     }
   };
 
-  const handleNavigate = (tab: string, section?: string) => {
-    feedback.tap();
-    setNavTrigger((prev) => prev + 1);
-
-    if (activeTab) {
-      tabScrollPositions.current[activeTab] = window.scrollY;
-    }
-
-    if (tab === "search") {
-      setIsSearchModalOpen(true);
-      return;
-    }
-    let targetTab = tab;
-    let targetSection = section;
-    
-    // Map old settings calls to profile
-    if (targetTab === "settings") {
-      targetTab = "profile";
-      targetSection = section || "main";
-    }
-    
-    // Map old overview calls to new tabs
-    if (targetTab === "overview") {
-      targetTab = section === "log" || section === "transactions" ? "transactions" : "analysis";
-    }
-
-    // Map old budget calls only when explicitly targeting profile budget
-    if (targetTab === "budget" && targetSection === "budget") {
-      targetTab = "profile";
-      targetSection = "budget";
-    }
-
-    const isDifferent =
-      targetTab !== activeTab ||
-      (targetTab === "profile" && targetSection !== profileSection) ||
-      (targetTab === "settings" && targetSection !== settingsSection) ||
-      (targetTab === "budget" && targetSection !== budgetSection);
-    if (isDifferent) {
-      setNavHistory((prev) => {
-        // Limit history size to 30 to prevent unlimited growth
-        const last = prev[prev.length - 1];
-        const currentSection = activeTab === "profile" ? profileSection : activeTab === "settings" ? settingsSection : activeTab === "budget" ? budgetSection : undefined;
-        if (last && last.tab === activeTab && last.section === currentSection) {
-          return prev;
-        }
-        return [...prev.slice(-29), { tab: activeTab, section: currentSection }];
-      });
-    }
-
-    setActiveTab(targetTab as Tab);
-    if (targetTab === "today") {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      setCurrentPeriodDate(now);
-      setTargetDate(now);
-    }
-    if (targetTab === "budget") {
-      setBudgetSection(targetSection || null);
-    }
-    if (targetTab === "profile" && targetSection) {
-      setProfileSection(targetSection as any);
-    } else if (targetTab === "profile") {
-      setProfileSection("main");
-    } else if (targetTab === "settings" && targetSection) {
-      setSettingsSection(targetSection as any);
-    } else if (targetTab === "settings") {
-      setSettingsSection("main");
+  const handleAddTransaction = async (data: Omit<TransactionItem, 'id'>) => {
+    const logo = data.logo || getLogoUrl(data.title, data.category);
+    const newItem: TransactionItem = { ...data, logo, id: 'tx-' + Date.now() };
+    setTransactions((prev) => [newItem, ...prev]);
+    if (userId) {
+      await dataService
+        .addTransaction(userId, {
+          amount: newItem.amount,
+          category: newItem.category,
+          merchant: newItem.title,
+          note: newItem.note,
+          tags: [],
+          timestamp: new Date(newItem.date).getTime() || Date.now(),
+          type: 'expense',
+          logo,
+        })
+        .catch(() => {});
     }
   };
 
-  const handleGoBack = useCallback(() => {
-    // 1. Close open modals first
-    let modalClosed = false;
-    
-    if (isSearchModalOpen) { setIsSearchModalOpen(false); modalClosed = true; }
-    if (isAddTransactionOpen) { setIsAddTransactionOpen(false); modalClosed = true; }
-    if (isAddIncomeOpen) { setIsAddIncomeOpen(false); modalClosed = true; }
-    if (editingTransaction) { setEditingTransaction(null); modalClosed = true; }
-    if (viewingTransaction) { handleCloseTransactionView(); modalClosed = true; }
-    if (isCalculatorOpen) { setIsCalculatorOpen(false); modalClosed = true; }
-    if (isDejziSummaryOpen) { setIsDejziSummaryOpen(false); modalClosed = true; }
-        if (isFeedbackModalOpen) { setIsFeedbackModalOpen(false); modalClosed = true; }
-    if (isDeleteAccountModalOpen) { setIsDeleteAccountModalOpen(false); modalClosed = true; }
-    if (isSecurityModalOpen) { setIsSecurityModalOpen(false); modalClosed = true; }
-    if (isCancelledSubscriptionsOpen) { setIsCancelledSubscriptionsOpen(false); modalClosed = true; }
-    if (isManageAccountModalOpen) { setIsManageAccountModalOpen(false); modalClosed = true; }
-    if (isVariableUpdateModalOpen) { setIsVariableUpdateModalOpen(false); modalClosed = true; }
-    if (legalModal.isOpen) { setLegalModal(p => ({ ...p, isOpen: false })); modalClosed = true; }
-    if (isFixedExpenseModalOpen) { setIsFixedExpenseModalOpen(false); modalClosed = true; }
-    if (isMonthlySavingModalOpen) { setIsMonthlySavingModalOpen(false); modalClosed = true; }
-    if (viewingFixedExpense) { setViewingFixedExpense(null); modalClosed = true; }
-    if (viewingMonthlySaving) { setViewingMonthlySaving(null); modalClosed = true; }
-    if (editingMonthlySaving) { setEditingMonthlySaving(null); modalClosed = true; }
-
-    if (modalClosed) {
-      feedback.tap();
-      return true;
-    }
-
-    // 2. If subview is active in budget, profile or settings, pop from navHistory or go back to main section
-    if (
-      (activeTab === 'budget' && budgetSection) ||
-      (activeTab === 'profile' && profileSection !== 'main') ||
-      (activeTab === 'settings' && settingsSection !== 'main')
-    ) {
-      if (navHistory.length > 0) {
-        feedback.tap();
-        setNavTrigger((prev) => prev + 1);
-        const nextStack = [...navHistory];
-        const previous = nextStack.pop();
-        setNavHistory(nextStack);
-        if (previous) {
-          setActiveTab(previous.tab);
-          setProfileSection(previous.tab === "profile" ? (previous.section || "main") : "main");
-          setSettingsSection(previous.tab === "settings" ? (previous.section || "main") : "main");
-          setBudgetSection(previous.tab === "budget" ? (previous.section || null) : null);
-          return true;
-        }
-      }
-
-      feedback.tap();
-      setNavTrigger((prev) => prev + 1);
-      if (activeTab === 'budget') setBudgetSection(null);
-      else if (activeTab === 'profile') setProfileSection('main');
-      else if (activeTab === 'settings') setSettingsSection('main');
-      return true;
-    }
-
-    // 3. Pop from navigation history
-    if (navHistory.length > 0) {
-      feedback.tap();
-      setNavTrigger((prev) => prev + 1);
-      const nextStack = [...navHistory];
-      const previous = nextStack.pop();
-      setNavHistory(nextStack);
-      if (previous) {
-        setActiveTab(previous.tab);
-        if (previous.tab === "profile") {
-          setProfileSection(previous.section || "main");
-        } else if (previous.tab === "settings") {
-          setSettingsSection(previous.section || "main");
-        } else if (previous.tab === "budget") {
-          setBudgetSection(previous.section || null);
-        }
-        return true;
-      }
-    }
-
-    // 4. Default fallback: Go back to Today tab if not already on it
-    if (activeTab !== "today") {
-      feedback.tap();
-      setNavTrigger((prev) => prev + 1);
-      setActiveTab("today");
-      return true;
-    }
-
-    return false;
-  }, [
-    isSearchModalOpen, isAddTransactionOpen, isAddIncomeOpen, editingTransaction, viewingTransaction,
-    isCalculatorOpen, isFeedbackModalOpen, isDeleteAccountModalOpen,
-    isSecurityModalOpen, isManageAccountModalOpen, isVariableUpdateModalOpen, legalModal,
-    isFixedExpenseModalOpen, isMonthlySavingModalOpen, viewingFixedExpense, viewingMonthlySaving, editingMonthlySaving,
-    activeTab, profileSection, settingsSection, navHistory, feedback
-  ]);
-
-  // Handle mobile edge-swipe (left-to-right gesture on phone to go back)
-  useEffect(() => {
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let isEdgeSwipe = false;
-
-    // A sub-view is active if a modal is open, or we have navigated deep into a profile section (beyond 'main')
-    const isSubViewActive = 
-      isSearchModalOpen ||
-      isAddTransactionOpen ||
-      isAddIncomeOpen ||
-      !!editingTransaction ||
-      !!viewingTransaction ||
-      isCalculatorOpen ||
-            isFeedbackModalOpen ||
-      isDeleteAccountModalOpen ||
-      isSecurityModalOpen ||
-      isManageAccountModalOpen ||
-      isVariableUpdateModalOpen ||
-      legalModal.isOpen ||
-      isFixedExpenseModalOpen ||
-      isMonthlySavingModalOpen ||
-      !!viewingFixedExpense ||
-      !!viewingMonthlySaving ||
-      !!editingMonthlySaving ||
-      activeTab === 'notifications' ||
-      (activeTab === 'budget' && !!budgetSection) ||
-      (activeTab === 'profile' && profileSection !== 'main') || (activeTab === 'settings' && settingsSection !== 'main');
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (!isSubViewActive) return;
-      if (e.touches.length !== 1) return;
-      const touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-      // Start is near left edge
-      isEdgeSwipe = touchStartX < 35;
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (!isEdgeSwipe || !isSubViewActive) return;
-      if (e.changedTouches.length !== 1) return;
-
-      const touch = e.changedTouches[0];
-      const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
-
-      // Swipe right from left edge: at least 75px horizontal displacement, mostly horizontal gesture
-      if (deltaX > 75 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) {
-        handleGoBack();
-      }
-    };
-
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
-
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [
-    handleGoBack,
-    isSearchModalOpen,
-    isAddTransactionOpen,
-    isAddIncomeOpen,
-    editingTransaction,
-    viewingTransaction,
-    isCalculatorOpen,
-    isFeedbackModalOpen,
-    isDeleteAccountModalOpen,
-    isSecurityModalOpen,
-    isManageAccountModalOpen,
-    isVariableUpdateModalOpen,
-    legalModal,
-    isFixedExpenseModalOpen,
-    isMonthlySavingModalOpen,
-    viewingFixedExpense,
-    viewingMonthlySaving,
-    editingMonthlySaving,
-    activeTab,
-    profileSection
-  ]);
-
-  const _handleBorrowFromPot = async (amount: number) => {
-    if (!session || !config) return;
-
-    try {
-      const newSavingsPot = Math.max(0, (config.savingsPot || 0) - amount);
-      const redistributedGoals = dataService.distributeSavingsPot(
-        newSavingsPot,
-        config.savingsGoals || [],
-      );
-      const updatedConfig = {
-        ...config,
-        savingsPot: newSavingsPot,
-        savingsGoals: redistributedGoals,
-        totalSavedLifetime: Math.max(
-          0,
-          (config.totalSavedLifetime || 0) - amount,
-        ),
-      };
-
-      // 1. Update settings in DB
-      await dataService.saveSettings(session.user.id, updatedConfig);
-      setConfig(updatedConfig);
-
-      // 2. Add a "Surplus" transaction to increase current budget
-      const newTransaction = await dataService.addTransaction(session.user.id, {
-        amount: amount,
-        category: "Budgetökning",
-        note: t("borrowNote"),
-        timestamp: Date.now(),
-        type: "income",
-        isBackdated: false,
-        tags: [],
-      });
-
-      setTransactions((prev) => [newTransaction, ...prev]);
-      addToast(t("borrowSuccess"), "success");
-    } catch (err) {
-      console.error("Borrow error:", err);
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  const _handleSaveToPot = async (amount: number) => {
-    if (!session || !config) return;
-    try {
-      const newSavingsPot = (config.savingsPot || 0) + amount;
-      const redistributedGoals = dataService.distributeSavingsPot(
-        newSavingsPot,
-        config.savingsGoals || [],
-      );
-      const updatedConfig = {
-        ...config,
-        savingsPot: newSavingsPot,
-        savingsGoals: redistributedGoals,
-        totalSavedLifetime: (config.totalSavedLifetime || 0) + amount,
-      };
-
-      // 1. Update settings in DB
-      await dataService.saveSettings(session.user.id, updatedConfig);
-      setConfig(updatedConfig);
-
-      // 2. Add a "Spargris" transaction to decrease current budget
-      const newTransaction = await dataService.addTransaction(session.user.id, {
-        amount: amount,
-        category: "Spargris",
-        note: t("savedFromBudget"),
-        timestamp: Date.now(),
-        type: "savings" as const,
-        isBackdated: false,
-        tags: [],
-      });
-
-      setTransactions((prev) => [newTransaction, ...prev]);
-      feedback.success();
-      addToast(t("savingsPotUpdated"), "success");
-    } catch (err) {
-      console.error("Save to pot error:", err);
-      addToast(t("errorSaving"), "error");
-    }
-  };
-
-  const resetAll = () => {
-    showConfirm(t("resetAllTitle"), t("resetAllMessage"), async () => {
-      if (!session) return;
-      try {
-        // Delete all data for the user
-        await supabase
-          .from("transactions")
-          .delete()
-          .eq("user_id", session.user.id);
-        await supabase
-          .from("fixed_expenses")
-          .delete()
-          .eq("user_id", session.user.id);
-        await supabase
-          .from("income_sources")
-          .delete()
-          .eq("user_id", session.user.id);
-        await supabase
-          .from("savings_goals")
-          .delete()
-          .eq("user_id", session.user.id);
-
-        const defaultConfig: Config = {
-          currency: "kr",
-          language: "sv",
-          payday: 25,
-          paydayType: PaydayType.TWENTY_FIFTH,
-          paydayBeforeWeekend: true,
-          savingsGoals: [],
-          totalSavedLifetime: 0,
-          categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: null })),
-          incomeCategories: DEFAULT_INCOME_CATEGORIES,
-          initialSpent: 0,
-          notifications: { dailySpend: true, overLimit: true },
-          securityLock: false,
-          darkMode: false,
-          themeMode: 'light',
-          quickChoices: [],
-          savingsPot: 0,
-          surplusIncome: 0,
-          monthlySavings: 0,
-          monthlySavingsItems: [],
-          includeFixedExpensesInAnalysis: true,
-          showFixedExpensesInTodayView: true,
-          showFixedExpensesInCalendar: true,
-          showFixedExpensesInHistory: false,
-          hideEmptyCategories: false,
-          paymentMethods: DEFAULT_PAYMENT_METHODS,
-          hasSavedInitialBudget: false,
-        };
-
-        try {
-          localStorage.removeItem('dejz_has_saved_initial_budget');
-          localStorage.removeItem('dejz_has_saved_budget');
-          localStorage.removeItem(`dejz_has_saved_initial_budget_${session.user.id}`);
-        } catch (_e) {
-          // ignore
-        }
-
-        await dataService.saveSettings(session.user.id, defaultConfig);
-
-        setConfig(defaultConfig);
-        setTransactions([]);
-        setFixedExpenses([]);
-        setIncomes([]);
-        setActiveTab("today");
-        addToast(t("dataResetSuccess"), "info");
-      } catch (_err) {
-        addToast("Kunde inte återställa data", "error");
-      }
-    });
-  };
-
-  const handleRenameCategory = async (
-    type: "income" | "expense",
-    oldName: string,
-    newName: string,
-  ) => {
-    const trimmedOld = oldName.trim();
-    const trimmedNew = newName.trim();
-    if (
-      !trimmedOld ||
-      !trimmedNew ||
-      trimmedOld.toLowerCase() === trimmedNew.toLowerCase()
-    ) {
-      return;
-    }
-
-    // 1. Update in-memory transactions (both direct category and splits)
+  const handleUpdateTransaction = async (updated: TransactionItem) => {
+    const logo = updated.logo || getLogoUrl(updated.title, updated.category);
+    const itemWithLogo: TransactionItem = { ...updated, logo };
     setTransactions((prev) => {
-      let anyTxChanged = false;
-      const next = prev.map((t) => {
-        let changed = false;
-        let newCat = t.category;
-        let newSplits = t.splits;
-
-        const isMatchingType =
-          type === "income" ? t.type === "income" : t.type !== "income";
-        if (
-          isMatchingType &&
-          (t.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
-        ) {
-          newCat = trimmedNew;
-          changed = true;
-        }
-
-        if (t.splits && Array.isArray(t.splits) && t.splits.length > 0) {
-          const nextSplits = t.splits.map((s: any) => {
-            if (
-              (s.category || "").trim().toLowerCase() ===
-              trimmedOld.toLowerCase()
-            ) {
-              changed = true;
-              return { ...s, category: trimmedNew };
-            }
-            return s;
-          });
-          if (changed) {
-            newSplits = nextSplits;
-          }
-        }
-
-        if (changed) {
-          anyTxChanged = true;
-          return { ...t, category: newCat, splits: newSplits };
-        }
-        return t;
-      });
-      return anyTxChanged ? next : prev;
+      const exists = prev.some((t) => t.id === itemWithLogo.id);
+      if (exists) {
+        return prev.map((t) => (t.id === itemWithLogo.id ? itemWithLogo : t));
+      } else {
+        return [itemWithLogo, ...prev];
+      }
     });
-
-    // 2. Update fixed expenses in memory
-    if (type === "expense") {
-      setFixedExpenses((prev) =>
-        prev.map((e) =>
-          (e.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
-            ? { ...e, category: trimmedNew }
-            : e,
-        ),
-      );
-    }
-
-    // 3. Update incomes in memory
-    if (type === "income") {
-      setIncomes((prev) =>
-        prev.map((i) =>
-          (i.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
-            ? { ...i, category: trimmedNew }
-            : i,
-        ),
-      );
-    }
-
-    // 4. Update quickChoices in config if present
-    if (config?.quickChoices && config.quickChoices.length > 0) {
-      const updatedQC = config.quickChoices.map((qc) =>
-        (qc.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
-          ? { ...qc, category: trimmedNew }
-          : qc,
-      );
-      setConfig((prev) => (prev ? { ...prev, quickChoices: updatedQC } : prev));
-    }
-
-    // 5. Persist rename to database / local storage
-    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "");
-    if (activeUserId) {
-      try {
-        await dataService.renameCategory(
-          activeUserId,
-          type,
-          trimmedOld,
-          trimmedNew,
-        );
-      } catch (err) {
-        console.error("Failed to rename category in database:", err);
-      }
+    if (userId && !itemWithLogo.id.startsWith('bank-') && !itemWithLogo.id.startsWith('inc-')) {
+      await dataService
+        .updateTransaction(itemWithLogo.id, {
+          amount: itemWithLogo.amount,
+          category: itemWithLogo.category,
+          merchant: itemWithLogo.title,
+          note: itemWithLogo.note,
+          tags: [],
+          timestamp: new Date(itemWithLogo.date).getTime() || Date.now(),
+          type: itemWithLogo.type || 'expense',
+          logo,
+        })
+        .catch(() => {});
     }
   };
 
-  const handleMigrateAndDeleteCategory = async (
-    type: "income" | "expense",
-    deleteCatId: string,
-    migrateToCatId?: string,
-  ) => {
-    if (!config) return;
-    const field = type === "income" ? "incomeCategories" : "categories";
-    const categories = config[field] || [];
-    const deleteCat = categories.find((c: any) => c.id === deleteCatId);
-    if (!deleteCat) return;
-
-    let targetCat = categories.find((c: any) => c.id === migrateToCatId);
-    if (!targetCat) {
-      targetCat =
-        categories.find(
-          (c: any) => c.id === "ovrigt" || c.name.toLowerCase() === "övrigt",
-        ) || categories.find((c: any) => c.id !== deleteCatId);
+  const handleDeleteTransaction = async (id: string) => {
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+    if (id.startsWith('inc-')) {
+      setDismissedTxIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
     }
-
-    if (targetCat && deleteCat.name) {
-      await handleRenameCategory(type, deleteCat.name, targetCat.name);
-    }
-
-    const newCategories = categories.filter((c: any) => c.id !== deleteCatId);
-    const newConfig = {
-      ...config,
-      [field]: newCategories,
-    };
-
-    setConfig(newConfig);
-
-    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "");
-    if (activeUserId) {
-      try {
-        await dataService.saveSettings(activeUserId, newConfig);
-      } catch (err) {
-        console.error("Failed to save settings after category deletion:", err);
-      }
+    if (userId && !id.startsWith('bank-') && !id.startsWith('inc-')) {
+      await dataService.deleteTransaction(id).catch(() => {});
     }
   };
 
-  const t = (key: TranslationKey, params?: Record<string, string | number>) => {
-    const lang = (config?.language as Language) || landingLanguage;
-    let translation = translations[lang]?.[key] || translations["sv"][key] || key;
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        translation = translation.replace(`{{${k}}}`, String(v));
-      });
-    }
-    return translation;
-  };
-
-  const headerTitle = useMemo(() => {
-    if (activeTab === "today") return "";
-    if (activeTab === "notifications") return t("notificationsTitle");
-    if (activeTab === "transactions") return t("log");
-    if (activeTab === "analysis") return t("analysis");
-    if (activeTab === "budget") {
-      if (budgetSection === "allocate" || budgetSection === "category-budgets") {
-        return config?.language === 'en' ? 'Budget & categories' : 'Budget & kategorier';
-      }
-      return budgetSection ? (config?.language === 'en' ? 'Budget' : 'Budget') : (config?.language === 'en' ? 'Finances' : 'Ekonomi');
-    }
-    if (activeTab === "settings") {
-      if (settingsSection === "main") return config?.language === 'en' ? 'Settings' : 'Inställningar';
-      switch (settingsSection) {
-        case "salary": return t("salary");
-        case "budget": return config?.language === 'en' ? 'Budget' : 'Budget';
-        case "categories": return config?.language === 'en' ? 'Categories' : 'Kategorier';
-        case "paymentMethods": return t("paymentMethods");
-        case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
-        case "language": return t("language");
-        case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
-        case "bank": return "Bankkoppling";
-        case "bankTransactions": return "Banktransaktioner";
-        default: return config?.language === 'en' ? 'Settings' : 'Inställningar';
-      }
-    }
-    if (activeTab === "profile") {
-      if (profileSection === "main") return t("profile");
-      switch (profileSection) {
-        case "salary": return t("salary");
-        case "budget": return config?.language === 'en' ? 'Budget' : 'Budget';
-        case "categories": return config?.language === 'en' ? 'Categories' : 'Kategorier';
-        case "paymentMethods": return t("paymentMethods");
-        case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
-        case "manageAccount": return t("manageAccount");
-        case "language": return t("language");
-        case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
-        case "receipts": return config?.language === 'en' ? 'Receipts' : 'Kvitton';
-        case "starred": return config?.language === 'en' ? 'Starred' : 'Hjärtmarkerade';
-        case "debts": return config?.language === 'en' ? 'Debts & IOUs' : 'Skyldig';
-        case "sharedBudget": return config?.language === 'en' ? 'Shared budget' : 'Delad budget';
-        case "guides": return config?.language === 'en' ? 'Guides & Instructions' : 'Guider & Instruktioner';
-        case "notifications": return t("notifications");
-        case "admin": return config?.language === 'en' ? 'Admin Dashboard' : 'Adminpanel';
-        case "designLibrary": return "Designbibliotek";
-        case "bank": return "Bankkoppling";
-        case "bankTransactions": return "Banktransaktioner";
-        default: return t("profile");
-      }
-    }
-    return config?.language === 'en' ? 'Overview' : 'Överblick';
-  }, [activeTab, budgetSection, profileSection, settingsSection, config?.language, t]);
-
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)]">
-        <div className="min-h-dvh flex items-center justify-center p-6 relative z-10">
-          <div className="max-w-md w-full bg-[var(--surface-color)] p-10 rounded-card text-center space-y-6">
-            <div className="w-16 h-16 bg-danger/10 text-danger rounded-icon-button flex items-center justify-center mx-auto">
-              <AlertCircle size={32} />
-            </div>
-            <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
-              Konfiguration saknas
-            </h1>
-
-            {!isSupabaseUrlValid && (
-              <div className="bg-danger/10 p-4 rounded-card-nested text-left">
-                <p className="text-xs font-semibold text-danger mb-1">
-                  Felaktig URL
-                </p>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {t("supabaseUrlError")}
-                </p>
-              </div>
-            )}
-
-            {!isSupabaseKeyValid && (
-              <div className="bg-danger/10 p-4 rounded-card-nested text-left">
-                <p className="text-xs font-semibold text-danger mb-1">
-                  Felaktig Nyckel
-                </p>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {t("supabaseAnonKeyError")}{" "}
-                  <code className="bg-white/10 px-1 rounded">eyJ...</code>
-                </p>
-                <p className="text-xs text-[var(--text-secondary)] mt-2">
-                  Du angav:{" "}
-                  <code className="break-all opacity-50">
-                    {supabaseAnonKey?.substring(0, 15)}...
-                  </code>
-                </p>
-              </div>
-            )}
-
-            <p className="text-xs text-[var(--text-secondary)]">
-              Kolla <code className="text-accent">.env</code> filen.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (publicLegalDoc) {
-    return (
-      <div className="light">
-        <PublicLegalPage
-          initialDoc={publicLegalDoc}
-          onNavigateHome={() => {
-            try {
-              window.history.pushState({}, '', '/');
-            } catch (_e) {
-              // ignore
-            }
-            setPublicLegalDoc(null);
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] light">
-        <div
-          aria-hidden="true"
-          className="fixed inset-0 pointer-events-none dark:hidden z-0"
-          style={{
-            background: 'var(--bg-gradient)',
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
-        />
-        <div className="min-h-dvh flex items-center justify-center relative z-10">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
-            <p className="text-sm text-[var(--text-secondary)] font-medium">
-              Startar Dejz...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip light">
-        <ToastContainer toasts={toasts} onDismiss={removeToast} />
-        {showLanding ? (
-          <>
-            <LandingPage
-              onGetStarted={() => {
-                setShowLanding(false);
-                setInitialIsRegistering(true);
-              }}
-              onLogin={() => {
-                setShowLanding(false);
-                setInitialIsRegistering(false);
-              }}
-              onStartDemo={() => {
-                const mock = seedDemoData();
-                setSession(mock as any);
-                setShowLanding(false);
-                addToast("Välkommen till demoläget!", "success");
-              }}
-              onGoogleLogin={handleGoogleLogin}
-              onFacebookLogin={handleFacebookLogin}
-              onLegalClick={handleLegalClick}
-              t={t}
-              currentLanguage={landingLanguage}
-              onLanguageChange={(lang) => {
-                setLandingLanguage(lang);
-                localStorage.setItem('app_language', lang);
-              }}
-            />
-            <CookieConsentModal t={t} onOpenPrivacyPolicy={() => handleLegalClick('privacy')} />
-          </>
-        ) : (
-          <Auth
-            onShowToast={(msg, type) => addToast(msg, type as ToastType)}
-            onLegalClick={handleLegalClick}
-            t={t}
-            initialIsRegistering={initialIsRegistering}
-            onBack={() => setShowLanding(true)}
-            currentLanguage={landingLanguage}
-            onLanguageChange={(lang) => {
-              setLandingLanguage(lang);
-              localStorage.setItem('app_language', lang);
-            }}
-          />
-        )}
-
-        {isResetPasswordOpen && (
-          <ResetPasswordModal
-            isOpen={isResetPasswordOpen}
-            onClose={() => {
-              setIsResetPasswordOpen(false);
-              try {
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-              } catch (historyErr) {
-                console.warn('Could not clean history:', historyErr);
+  const handleExcludeTransaction = async (id: string, exclude: boolean) => {
+    if (id.startsWith('bank-')) {
+      const bankTxId = id.replace(/^bank-/, '');
+      setTransactions((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                isExcluded: exclude,
+                reconciliationStatus: exclude ? 'excluded' : 'unprocessed',
               }
-            }}
-            onShowToast={addToast}
-          />
-        )}
-      </div>
-    );
-  }
+            : t
+        )
+      );
+      await bankService
+        .updateTransactionReconciliation(bankTxId, {
+          reconciliation_status: exclude ? 'excluded' : 'unprocessed',
+        })
+        .catch(() => {});
+      loadBankData();
+    }
+  };
 
-  if (isLoading || !config || !stats) {
-    return (
-      <div className="relative">
-        <AppSkeleton language={config?.language || 'sv'} />
+  const handleSignOut = async () => {
+    await supabase.auth.signOut().catch(() => {});
+    setUserId(null);
+    setUserEmail(null);
+    setConnections([]);
+    setBankAccounts([]);
+  };
 
-        {isResetPasswordOpen && (
-          <ResetPasswordModal
-            isOpen={isResetPasswordOpen}
-            onClose={() => {
-              setIsResetPasswordOpen(false);
-              try {
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-              } catch (historyErr) {
-                console.warn('Could not clean history:', historyErr);
-              }
-            }}
-            onShowToast={addToast}
-          />
-        )}
-      </div>
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'Är du säker på att du vill radera ditt konto och all sparad data? Denna åtgärd går inte att ångra.'
     );
-  }
+    if (!confirmed) return;
+
+    await supabase.auth.signOut().catch(() => {});
+
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('dejz_')) {
+        localStorage.removeItem(key);
+      }
+    }
+
+    setUserId(null);
+    setUserEmail(null);
+    setUserAvatar(null);
+    setConnections([]);
+    setBankAccounts([]);
+    setIncomes([]);
+    setFixedExpenses([]);
+    setTransactions([]);
+    setDismissedTxIds([]);
+    setTargetPayday(25);
+    setWeekendHandling('before');
+    setActiveTab('home');
+
+    alert('Ditt konto och all data har raderats.');
+  };
+
+  const handleResetAccount = () => {
+    const confirmed = window.confirm(
+      'Är du säker på att du vill nollställa all finansiell data och börja om helt på nytt?'
+    );
+    if (!confirmed) return;
+
+    const financialKeys = [
+      'dejz_incomes',
+      'dejz_fixed_expenses',
+      'dejz_transactions',
+      'dejz_dismissed_tx_ids',
+      'dejz_bank_connections',
+      'dejz_bank_accounts',
+    ];
+    financialKeys.forEach((key) => localStorage.removeItem(key));
+
+    setIncomes([]);
+    setFixedExpenses([]);
+    setTransactions([]);
+    setDismissedTxIds([]);
+    setConnections([]);
+    setBankAccounts([]);
+    setActiveTab('home');
+
+    alert('Kontot har nollställts och du kan börja om på nytt.');
+  };
+
+
 
   return (
-    <div 
-      className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500"
-    >
-      {/* Shared Fixed Dark Mode Background Layer */}
-      <div 
-        className="dark-app-bg-layer" 
-        aria-hidden="true" 
+    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]">
+      {/* Top Navbar: Endast Dejz-logga och profilbild */}
+      <Navbar
+        userEmail={userEmail}
+        userAvatar={userAvatar}
+        onLogoClick={() => setActiveTab('home')}
+        onProfileClick={() => setActiveTab('settings')}
       />
 
-      {/* Shared Fixed Light Mode Ambient Tint Layer */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 dark:hidden transition-all duration-500"
-        style={{
-          background: 'var(--bg-gradient)'
-        }}
-        aria-hidden="true"
-      />
-      {/* Shared Fixed Lower Viewport & Overscroll Base Layer */}
-      <div
-        className="fixed inset-x-0 top-[400px] -bottom-[200px] bg-[var(--bg-color)] pointer-events-none z-0"
-        aria-hidden="true"
-      />
-
-      <ToastContainer toasts={toasts} onDismiss={removeToast} />
-
-      <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        title={confirmModal.title}
-        message={confirmModal.message}
-        onConfirm={confirmModal.onConfirm}
-        onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-        variant={confirmModal.variant}
-        t={t}
-      />
-
-      {session && config && (
-        <AppHeader
-          title={headerTitle}
-          onBack={
-            activeTab === 'notifications' ||
-            (activeTab === 'budget' && !!budgetSection) ||
-            activeTab === 'profile' ||
-            activeTab === 'settings'
-              ? () => handleGoBack()
-              : undefined
-          }
-          navTrigger={navTrigger}
-          userName={
-            (() => {
-              const raw = (
-                profile?.full_name ||
-                session?.user?.user_metadata?.full_name ||
-                session?.user?.user_metadata?.name ||
-                ""
-              ).trim();
-              if (raw) {
-                const first = raw.split(" ")[0];
-                return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
-              }
-              const email = session?.user?.email || "";
-              if (email.toLowerCase().startsWith("kevin")) return "Kevin";
-              if (email.includes("@")) {
-                const part = email.split("@")[0];
-                return part.charAt(0).toUpperCase() + part.slice(1);
-              }
-              return "Kevin";
-            })()
-          }
-          date={(() => {
-            const d = new Date(targetDate || new Date());
-            d.setHours(0, 0, 0, 0);
-            return d;
-          })()}
-          avatarUrl={avatarUrl}
-          onNavigate={handleNavigate}
-          onOpenSearch={() => setIsSearchModalOpen(true)}
-          onOpenSettings={() => handleNavigate("settings")}
-          notificationCount={notifications.length}
-          onOpenNotifications={() => handleNavigate("notifications")}
-          onOpenDejzi={() => setIsDejziSummaryOpen(true)}
-          isDemoMode={isDemoMode}
-          language={(config?.language as string) || "sv"}
-          activeTab={activeTab}
-        />
-      )}
-
-      {isDemoMode && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--surface-color)]/95 backdrop-blur-xl border-b border-[var(--border-divider)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold">
-          <div className="page-max mx-auto w-full flex items-center justify-between px-2 sm:px-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[var(--text-primary)]">Demoläge</span>
-              <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-label">— Du utforskar appen med exempeldata</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleExitDemo}
-              className="flex items-center px-3 py-1 rounded-btn-sm bg-[var(--surface-muted)] text-[var(--text-primary)] hover:opacity-80 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer"
-            >
-              <span>{t('exitDemo')}</span>
-            </button>
+      {/* OAuth Callback Banner */}
+      {callbackStatusMsg && (
+        <div className="max-w-md mx-auto w-full px-4 pt-3">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold text-center">
+            {callbackStatusMsg}
           </div>
         </div>
       )}
 
-            <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`page-max mx-auto page-px relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
-          {stats && (
-            <div style={{ display: activeTab === "today" ? "block" : "none" }}>
-              <TodayView
-                stats={stats}
-                config={config}
-                isDemoMode={isDemoMode}
-                userName={
-                  (() => {
-                    const raw = (
-                      profile?.full_name ||
-                      session?.user?.user_metadata?.full_name ||
-                      session?.user?.user_metadata?.name ||
-                      ""
-                    ).trim();
-                    if (raw) return raw.split(" ")[0];
-                    const email = session?.user?.email || "";
-                    if (email.toLowerCase().startsWith("kevin")) return "Kevin";
-                    if (email.includes("@")) {
-                      const part = email.split("@")[0];
-                      return part.charAt(0).toUpperCase() + part.slice(1);
-                    }
-                    return "";
-                  })()
-                }
-                incomes={incomes}
-                fixedExpenses={fixedExpenses}
-                selectedDate={targetDate}
-                setSelectedDate={setTargetDate}
-                onAddTransaction={() => {
-                  setTransactionType("expense");
-                  setTargetDate(new Date());
-                  setIsAddTransactionOpen(true);
-                }}
-                onQuickAddExpense={async (amount: number, note?: string, category?: string) => {
-                  const isEn = config.language === 'en';
-                  const defaultName = isEn ? 'Quick expense' : 'Snabb utgift';
-                  const defaultCategory = isEn ? 'Uncategorized' : 'Okategoriserat';
-                  const categoryName = category?.trim() || defaultCategory;
-                  const merchantName = note?.trim() || defaultName;
-
-                  const now = new Date();
-                  let timestamp = Date.now();
-
-                  if (targetDate) {
-                    const d = new Date(targetDate);
-                    if (d.toDateString() === now.toDateString()) {
-                      timestamp = Date.now();
-                    } else {
-                      d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-                      timestamp = d.getTime();
-                    }
-                  }
-
-                  await addTransaction(
-                    {
-                      amount,
-                      type: "expense",
-                      category: categoryName,
-                      merchant: merchantName,
-                      note: note?.trim() || "",
-                      tags: [],
-                      isBackdated: timestamp < Date.now() - 60000,
-                    },
-                    timestamp,
-                  );
-                }}
-                onAddIncome={() => {
-                  setTransactionType("income");
-                  setTargetDate(new Date());
-                  setIsAddTransactionOpen(true);
-                }}
-                onViewTransaction={(t) => {
-                  setViewingTransaction(t);
-                }}
-                onViewFixedExpense={(expense) => {
-                  setViewingFixedExpense(expense);
-                }}
-                onViewIncome={(income) => {
-                  setViewingIncome(income);
-                }}
-                onViewMonthlySaving={(saving) => {
-                  setViewingMonthlySaving(saving);
-                }}
-                onDeleteTransaction={deleteTransaction}
-                onToggleStar={handleToggleStar}
-                currentPeriodDate={currentPeriodDate}
-                currentPeriodStart={currentPeriodStart}
-                currentPeriodEnd={currentPeriodEnd}
-                isCurrentPeriod={isCurrentPeriod}
-                periods={periods}
-                setCurrentPeriodDate={setCurrentPeriodDate}
-                onNavigate={handleNavigate}
-                transactions={stats?.periodTransactions || []}
-                allTransactions={transactions}
-                t={t}
-                avatarUrl={avatarUrl}
-                attentionItems={attentionItems}
-                onEditAttentionItem={(item) => {
-                  if (item.isVariable) {
-                    setItemToUpdateVariable(item);
-                    setIsVariableUpdateModalOpen(true);
-                    return;
-                  }
-                  if (item.budgetType === "income") {
-                    setEditingIncome(item);
-                    setIsIncomeModalOpen(true);
-                  } else if (item.budgetType === "expense") {
-                    setEditingFixedExpense(item);
-                    setIsFixedExpenseModalOpen(true);
-                  } else if (item.budgetType === "savings") {
-                    setEditingMonthlySaving(item);
-                    setIsMonthlySavingModalOpen(true);
-                  }
-                }}
-                onUpdateConfig={(newConfig) => {
-                  setConfig(newConfig);
-                  const activeUserId = session?.user?.id || "demo-user";
-                  dataService.saveSettings(activeUserId, newConfig).catch((err) => {
-                    console.warn("Failed to save updated settings:", err);
-                  });
-                }}
-                onOpenCalculator={() => setIsCalculatorOpen(true)}
-                bankAccounts={bankAccounts}
-              />
-            </div>
-          )}
-
-          {stats && (
-            <div style={{ display: activeTab === "analysis" ? "block" : "none" }}>
-              <AnalysisView
-                transactions={transactions}
-                stats={stats}
-                config={config}
-                t={t}
-                fixedExpenses={fixedExpenses}
-                currentLang={config.language as Language}
-                onViewTransaction={(t) => {
-                  setViewingTransaction(t);
-                }}
-                onDeleteTransaction={deleteTransaction}
-                onViewFixedExpense={(expense) => {
-                  setViewingFixedExpense(expense);
-                }}
-                periods={periods}
-                currentPeriodDate={currentPeriodDate}
-                onPeriodChange={setCurrentPeriodDate}
-                onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
-              />
-            </div>
-          )}
-
-          {stats && (
-            <div style={{ display: activeTab === "transactions" ? "block" : "none" }}>
-              <LogView
-                transactions={transactions}
-                fixedExpenses={fixedExpenses}
-                incomes={incomes}
-                stats={stats}
-                config={config}
-                periods={periods}
-                onAddTransaction={() => {
-                  setTransactionType("expense");
-                  setTargetDate(new Date());
-                  setIsAddTransactionOpen(true);
-                }}
-                onAddIncome={() => {
-                  setTransactionType("income");
-                  setTargetDate(new Date());
-                  setIsAddTransactionOpen(true);
-                }}
-                onViewTransaction={(t) => {
-                  setViewingTransaction(t);
-                }}
-                onViewFixedExpense={(expense) => {
-                  setViewingFixedExpense(expense);
-                }}
-                onViewIncome={(income) => {
-                  setViewingIncome(income);
-                }}
-                onViewMonthlySaving={(saving) => {
-                  setViewingMonthlySaving(saving);
-                }}
-                onDeleteTransaction={deleteTransaction}
-                onToggleStar={handleToggleStar}
-                t={t}
-                currentLang={config.language as Language}
-              />
-            </div>
-          )}
-
-          {stats && (
-            <div style={{ display: activeTab === "budget" ? "block" : "none" }}>
-              <BudgetView
-                stats={stats}
-                config={config}
-                allTransactions={transactions}
-                setConfig={(newConfig) => {
-                  setConfig(newConfig);
-                  const activeUserId = session?.user?.id || "demo-user";
-                  dataService.saveSettings(activeUserId, newConfig).catch((err) => {
-                    console.error("Failed to save category budgets:", err);
-                  });
-                }}
-                initialSection={budgetSection}
-                onClearSection={() => setBudgetSection(null)}
-                incomes={incomes}
-                setIncomes={setIncomes}
-                fixedExpenses={fixedExpenses}
-                setFixedExpenses={setFixedExpenses}
-                onAddIncome={() => {
-                  setEditingIncome(null);
-                  setIsIncomeModalOpen(true);
-                }}
-                onEditIncome={(income) => {
-                  setEditingIncome(income);
-                  setIsIncomeModalOpen(true);
-                }}
-                onViewIncome={(income) => {
-                  setViewingIncome(income);
-                }}
-                onAddFixedExpense={() => {
-                  setEditingFixedExpense(null);
-                  setIsFixedExpenseModalOpen(true);
-                }}
-                onEditFixedExpense={(expense) => {
-                  setEditingFixedExpense(expense);
-                  setIsFixedExpenseModalOpen(true);
-                }}
-                onViewFixedExpense={(expense) => {
-                  setViewingFixedExpense(expense);
-                }}
-                onAddMonthlySaving={() => {
-                  setEditingMonthlySaving(null);
-                  setIsMonthlySavingModalOpen(true);
-                }}
-                onEditMonthlySaving={(s) => {
-                  setEditingMonthlySaving(s);
-                  setIsMonthlySavingModalOpen(true);
-                }}
-                onViewMonthlySaving={(s) => {
-                  setViewingMonthlySaving(s);
-                }}
-                onResetSavingsPot={handleResetSavingsPot}
-                t={t}
-                currentPeriodId={currentPeriodId}
-                isDemoMode={isDemoMode}
-              />
-            </div>
-          )}
-
-
-
-          {config && (
-            <div style={{ display: activeTab === "profile" ? "block" : "none" }}>
-              <ProfileView
-                onBack={() => setActiveTab("today")}
-                user={session?.user}
-                onLogout={handleLogout}
-                onUploadAvatar={handleUploadAvatar}
-                avatarUrl={avatarUrl}
-                config={config}
-                initialSection={profileSection}
-                navTrigger={navTrigger}
-                setConfig={async (newConfig) => {
-                  try {
-                    setConfig(newConfig);
-                    if (newConfig.hideEmptyCategories !== undefined) {
-                      localStorage.setItem('dejz_hide_empty_categories', newConfig.hideEmptyCategories ? 'true' : 'false');
-                    }
-                    if (newConfig.hideBudgetOnHome !== undefined) {
-                      localStorage.setItem('dejz_hide_budget_on_home', newConfig.hideBudgetOnHome ? 'true' : 'false');
-                    }
-                    if (newConfig.language) {
-                      setLandingLanguage(newConfig.language as Language);
-                    }
-                    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "local-user");
-                    if (activeUserId) {
-                      await dataService.saveSettings(
-                        activeUserId,
-                        newConfig,
-                      );
-                    }
-                  } catch (err) {
-                    console.error("Error saving config:", err);
-                  }
-                }}
-                onNavigate={handleNavigate}
-                onRenameCategory={handleRenameCategory}
-                isDemoMode={isDemoMode}
-                onExitDemo={handleExitDemo}
-                onFeedbackClick={() => setIsFeedbackModalOpen(true)}
-                onDeleteAccount={() => setIsDeleteAccountModalOpen(true)}
-                onExportData={handleExportData}
-                onLegalClick={handleLegalClick}
-                stats={stats}
-                t={t}
-                subscriptionStatus={subscriptionStatus}
-                trialEnd={trialEnd}
-                nextBillingDate={nextBillingDate}
-                onPaymentSuccess={() => {}}
-                onShowToast={addToast}
-                onSecurityClick={() => setIsSecurityModalOpen(true)}
-                onSetSubscriptionStatus={setSubscriptionStatus}
-                profile={profile}
-                userId={session?.user.id || ""}
-                session={session}
-                onRefresh={handleRefresh}
-                onResetSavingsPot={handleResetSavingsPot}
-                onResetCompletedGoals={handleResetCompletedGoals}
-                onClearTransactions={handleClearTransactions}
-                onResetAll={resetAll}
-                addToast={addToast}
-                transactions={transactions}
-                onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
-                incomes={incomes}
-                fixedExpenses={fixedExpenses}
-                setCurrentPeriodDate={setCurrentPeriodDate}
-                periods={periods}
-                onViewTransaction={setViewingTransaction}
-                onToggleStar={handleToggleStar}
-                onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
-                onSettleDebtAsTransaction={async (debt) => {
-                  const isEn = config?.language === "en";
-                  const isOweMe = debt.type === "owe_me";
-                  const defaultCat = isOweMe
-                    ? isEn
-                      ? "Other Income"
-                      : "Övrig inkomst"
-                    : config?.categories?.[0]?.name || (isEn ? "Other" : "Övrigt");
-                  const descSuffix = debt.description ? ` (${debt.description})` : "";
-                  await addTransaction({
-                    amount: Number(debt.amount) || 0,
-                    type: isOweMe ? "income" : "expense",
-                    category: defaultCat,
-                    merchant: `${debt.personName}${descSuffix}`,
-                    tags: ["debt-settled"],
-                  });
-                  addToast(
-                    isOweMe
-                      ? isEn
-                        ? "Repayment added as income"
-                        : "Återbetalning tillagd som inkomst"
-                      : isEn
-                        ? "Payment registered as expense"
-                        : "Betalning registrerad som utgift",
-                    "success",
-                  );
-                }}
-                pendingBankCallback={!isOnboarding ? pendingBankCallback : null}
-                onClearPendingBankCallback={() => {
-                  setPendingBankCallback(null);
-                  clearPendingBankCallback();
-                }}
-                onStartOnboardingWithBank={() => {
-                  setIsOnboarding(true);
-                }}
-              />
-            </div>
-          )}
-
-          {config && (
-            <div style={{ display: activeTab === "notifications" ? "block" : "none" }}>
-              <NotificationsView
-                notifications={notifications}
-                onOpenItem={(item) => {
-                  setItemToUpdateVariable(item);
-                  setIsVariableUpdateModalOpen(true);
-                }}
-                onConfirmStandard={async (item) => {
-                  await handleSaveVariableOverride(item, Number(item.amount) || 0);
-                }}
-                onDismiss={handleDismissNotification}
-                onBack={() => handleGoBack()}
-                currency={config?.currency || "kr"}
-                config={config}
-                t={t}
-              />
-            </div>
-          )}
-        </main>
-      </PullToRefresh>
-
-      {/* Floating Feedback Widget */}
-      {!(isAddTransactionOpen || isFeedbackModalOpen || isSearchModalOpen || isAddIncomeOpen || editingTransaction || viewingTransaction || isCalculatorOpen || isDeleteAccountModalOpen || isSecurityModalOpen || isManageAccountModalOpen || isVariableUpdateModalOpen || legalModal.isOpen || isFixedExpenseModalOpen || isMonthlySavingModalOpen || viewingFixedExpense || viewingMonthlySaving || editingMonthlySaving || isPlusMenuOpen || isReceiptCameraOpen) && (
-        <FloatingFeedbackWidget 
-          onOpenFeedback={() => setIsFeedbackModalOpen(true)}
-          language={config?.language || 'sv'}
-        />
-      )}
-
-      {/* Bottom Navigation */}
-      {!isAddTransactionOpen && (
-        <>
-          <div className="fixed bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/80 to-transparent pointer-events-none z-30" />
-          <CustomBottomNavigation
-            activeTab={activeTab}
-            budgetSection={budgetSection}
-            onNavigateSection={(tab, section) => {
-              handleNavigate(tab, section);
-            }}
-            onPlusClick={() => {
-              feedback.tap();
-              setIsPlusMenuOpen(true);
-            }}
-            setActiveTab={(tab) => {
-              if (tab === activeTab) {
-                tabScrollPositions.current[tab] = 0;
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                if (tab === "today") {
-                  const now = new Date();
-                  now.setHours(0, 0, 0, 0);
-                  setCurrentPeriodDate(now);
-                  setTargetDate(now);
-                }
-              } else {
-                handleNavigate(tab);
-              }
-            }}
-            language={(config?.language as Language) || "sv"}
-            currency={config?.currency || "kr"}
-            onAddTransaction={(type, prefill) => {
-              setTransactionType(type);
-              setTransactionPrefill(prefill || null);
-              setIsAddTransactionOpen(true);
-            }}
-            onQuickAdd={(item) => {
-              const defaultCategory = config?.categories?.find((c) =>
-                c.name.toLowerCase().includes("mat") ||
-                c.name.toLowerCase().includes("dryck") ||
-                c.name.toLowerCase().includes("inköp")
-              )?.name || config?.categories?.[0]?.name || "Övrigt";
-
-              const tDate = targetDate || new Date();
-              addTransaction(
-                {
-                  amount: item.amount,
-                  category: item.category || defaultCategory,
-                  note: item.name,
-                  type: item.type || "expense",
-                  isBackdated: tDate.toDateString() !== new Date().toDateString(),
-                },
-                tDate.getTime()
-              );
-            }}
-            addToast={addToast}
-            logoUrl={LOGO_URL}
-            avatarUrl={avatarUrl}
-          />
-        </>
-      )}
-
-      {/* Modals */}
-      <AnimatePresence>
-        {isFeedbackModalOpen && (
-          <FeedbackModal
-            onClose={() => setIsFeedbackModalOpen(false)}
-            onSubmit={handleFeedbackSubmit}
-            t={t}
-            language={config?.language || landingLanguage || 'sv'}
-          />
-        )}
-        {isDeleteAccountModalOpen && (
-          <DeleteAccountModal
-            isOpen={isDeleteAccountModalOpen}
-            onClose={() => setIsDeleteAccountModalOpen(false)}
-            onConfirm={handleConfirmDeleteAccount}
-            t={t}
-            isSocialUser={session?.user.app_metadata.provider !== "email"}
-          />
-        )}
-
-        <OnboardingModal
-          isOpen={isOnboarding}
-          config={config}
-          userId={session?.user.id}
-          currentPeriodId={currentPeriodId}
-          isPro={true}
-          isBankIntegrationEnabled={canUseBankIntegration}
-          pendingBankCallback={isOnboarding ? pendingBankCallback : null}
-          onClearPendingBankCallback={() => {
-            setPendingBankCallback(null);
-            clearPendingBankCallback();
-          }}
-          onClose={() => {
-            setIsOnboarding(false);
-            hasDismissedOnboardingSession.current = true;
-            const activeUserId = session?.user?.id || "demo-user";
-            markGloballyDismissedOnboarding(activeUserId);
-            try {
-              localStorage.setItem(`dejz_onboarding_skipped_${activeUserId}`, 'true');
-              localStorage.setItem(`dejz_onboarding_completed_${activeUserId}`, 'true');
-              localStorage.setItem('dejz_onboarding_completed', 'true');
-              localStorage.setItem('dejz_onboarding_skipped', 'true');
-              localStorage.removeItem('dejz_has_saved_initial_budget');
-              localStorage.removeItem('dejz_has_saved_budget');
-              localStorage.removeItem(`dejz_has_saved_initial_budget_${activeUserId}`);
-            } catch (storageErr) {
-              console.warn("Could not save onboarding skip to localStorage:", storageErr);
-            }
-
-            const cleanCategories = ((config?.categories && config.categories.length > 0)
-              ? config.categories
-              : DEFAULT_EXPENSE_CATEGORIES
-            ).map((c: any) => ({ ...c, budget: null }));
-
-            if (config) {
-              const skippedConfig: Config = {
-                ...config,
-                hasSavedInitialBudget: false,
-                categories: cleanCategories,
-              };
-              setConfig(skippedConfig);
-              dataService.saveSettings(activeUserId, skippedConfig).catch(() => {});
-            }
-
-            if (session?.user) {
-              supabase.auth.updateUser({
-                data: { onboarding_completed: true, onboarding_skipped: true }
-              }).catch((authErr) => {
-                console.warn("Could not save onboarding skip in user_metadata:", authErr);
-              });
-            }
-
-            try {
-              dataService.updateProfile(activeUserId, { onboarding_completed: true, has_saved_initial_budget: false });
-            } catch (err) {
-              console.warn("Could not mark onboarding completed on exit in profile:", err);
-            }
-          }}
-          onComplete={async (data) => {
-            setIsOnboarding(false);
-            hasDismissedOnboardingSession.current = true;
-            tabScrollPositions.current['today'] = 0;
-            window.scrollTo({ top: 0, behavior: 'instant' as any });
-            const activeUserId = session?.user?.id || "demo-user";
-            markGloballyDismissedOnboarding(activeUserId);
-
-            try {
-              localStorage.setItem(`dejz_onboarding_completed_${activeUserId}`, 'true');
-              localStorage.setItem('dejz_onboarding_completed', 'true');
-              localStorage.removeItem('dejz_has_saved_initial_budget');
-              localStorage.removeItem('dejz_has_saved_budget');
-              localStorage.removeItem(`dejz_has_saved_initial_budget_${activeUserId}`);
-            } catch (storageErr) {
-              console.warn("Could not save onboarding completion to localStorage:", storageErr);
-            }
-
-            if (session?.user) {
-              supabase.auth.updateUser({
-                data: { onboarding_completed: true }
-              }).catch((authErr) => {
-                console.warn("Could not save onboarding completion in user_metadata:", authErr);
-              });
-            }
-
-            try {
-              // 1. Update full name in profiles table if available
-              if (data.fullName) {
-                try {
-                  await dataService.updateProfile(activeUserId, { full_name: data.fullName });
-                } catch (profErr) {
-                  console.warn("Could not update profile full_name:", profErr);
-                }
-              }
-
-              // 2. Map savings goals and monthly savings
-              const totalMonthlySavingsAmount =
-                (data.monthlySavings !== undefined && data.monthlySavings > 0)
-                  ? data.monthlySavings
-                  : (data.savingsGoals || []).reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
-
-              const mappedSavingsGoals: SavingsGoal[] = (data.savingsGoals && data.savingsGoals.length > 0)
-                ? (data.savingsGoals || []).map((g) => ({
-                    id: crypto.randomUUID(),
-                    title: g.title,
-                    targetAmount: Number(g.targetAmount) || 0,
-                    currentAmount: 0,
-                    priority: 0,
-                    icon: g.icon || "Target",
-                    logo: g.logo,
-                    deadline: g.deadline,
-                    createdAt: Date.now(),
-                  }))
-                : (totalMonthlySavingsAmount > 0 ? [{
-                    id: crypto.randomUUID(),
-                    title: config?.language === "en" ? "Monthly savings" : "Månadssparande",
-                    targetAmount: totalMonthlySavingsAmount,
-                    currentAmount: 0,
-                    priority: 0,
-                    icon: "PiggyBank",
-                    createdAt: Date.now(),
-                  }] : []);
-
-              // Map recurring monthly savings items from onboarding
-              const mappedMonthlySavingsItems: MonthlySaving[] = (data.monthlySavingsItems && data.monthlySavingsItems.length > 0)
-                ? data.monthlySavingsItems
-                : (data.savingsGoals || [])
-                    .filter((g) => Number(g.targetAmount) > 0)
-                    .map((g) => ({
-                      id: crypto.randomUUID(),
-                      name: g.title || (config?.language === "en" ? "Monthly savings" : "Månadssparande"),
-                      amount: Number(g.targetAmount) || 0,
-                      icon: g.icon || "PiggyBank",
-                      logo: g.logo,
-                      deductionDay: data.payday || 25,
-                      frequency: Frequency.MONTHLY,
-                    }));
-
-              const finalMonthlySavingsItems: MonthlySaving[] = mappedMonthlySavingsItems.length > 0
-                ? mappedMonthlySavingsItems
-                : (totalMonthlySavingsAmount > 0 ? [{
-                    id: crypto.randomUUID(),
-                    name: config?.language === "en" ? "Monthly savings" : "Månadssparande",
-                    amount: totalMonthlySavingsAmount,
-                    icon: "PiggyBank",
-                    deductionDay: data.payday || 25,
-                    frequency: Frequency.MONTHLY,
-                  }] : (config?.monthlySavingsItems || []));
-
-              const cleanOnboardingCategories = (
-                (data.categories && data.categories.length > 0)
-                  ? data.categories
-                  : (config?.categories && config.categories.length > 0 ? config.categories : DEFAULT_EXPENSE_CATEGORIES)
-              ).map((c: any) => ({ ...c, budget: null }));
-
-              // 3. Update config with income, initialSpent, payday, savings goals, monthlySavings, monthlySavingsItems, age, gender, and categories
-              const newConfig: Config = {
-                ...config,
-                hasSavedInitialBudget: false,
-                darkMode: false,
-                themeMode: 'light',
-                payday: data.payday || 25,
-                paydayBeforeWeekend: data.paydayBeforeWeekend !== undefined ? data.paydayBeforeWeekend : (config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true),
-                initialSpent: data.initialSpent,
-                savingsGoals: mappedSavingsGoals,
-                monthlySavings: totalMonthlySavingsAmount,
-                monthlySavingsItems: finalMonthlySavingsItems,
-                userAgeGroup: data.userAgeGroup || config?.userAgeGroup,
-                userGender: data.userGender || config?.userGender,
-                categories: cleanOnboardingCategories,
-                country: data.country || config?.country,
-                currency: data.currency || config?.currency,
-                currencyCode: data.currencyCode || config?.currencyCode,
-              };
-              await dataService.saveSettings(activeUserId, newConfig);
-              setConfig(newConfig);
-
-              // 4. Add income sources
-              const newIncomes: Income[] = [];
-              for (const inc of data.incomes || []) {
-                if (inc.amount > 0) {
-                  const incomeSource: Income = {
-                    id: crypto.randomUUID(),
-                    name: inc.name || "Lön",
-                    amount: Number(inc.amount) || 0,
-                    icon: inc.icon || "Wallet",
-                    logo: inc.logo,
-                    deductionDay: inc.deductionDay || data.payday || 25,
-                    frequency: inc.frequency || Frequency.MONTHLY,
-                    isVariable: Boolean(inc.isVariable),
-                    periodOverrides: inc.periodOverrides || {},
-                  };
-                  await dataService.saveIncomeSource(
-                    activeUserId,
-                    incomeSource,
-                  );
-                  newIncomes.push(incomeSource);
-                }
-              }
-              setIncomes(newIncomes);
-
-              // 5. Add fixed expenses
-              const newFixedExpenses: FixedExpense[] = [];
-              for (const exp of data.fixedExpenses || []) {
-                if (exp.name && exp.amount > 0) {
-                  const autoLogo = getLogoUrl(exp.name, exp.category);
-                  const fixedLogo = (exp.logo && !exp.logo.includes("google.com/s2/favicons")) ? exp.logo : (autoLogo || exp.logo);
-                  const fixed: FixedExpense = {
-                    id: crypto.randomUUID(),
-                    name: exp.name,
-                    amount: Number(exp.amount) || 0,
-                    paymentMethod: exp.paymentMethod || PaymentMethod.OVRIGT,
-                    frequency: exp.frequency || Frequency.MONTHLY,
-                    deductionDay: exp.deductionDay || data.payday || 25,
-                    isVariable: Boolean(exp.isVariable),
-                    periodOverrides: exp.periodOverrides || {},
-                    icon: exp.icon || "CreditCard",
-                    category: exp.category,
-                    logo: fixedLogo,
-                  };
-                  await dataService.saveFixedExpense(activeUserId, fixed);
-                  newFixedExpenses.push(fixed);
-                }
-              }
-              setFixedExpenses(newFixedExpenses);
-
-              // 6. Add initial spent transaction if starting mid-period
-              if (data.initialSpent > 0) {
-                const initialTransaction = await dataService.addTransaction(
-                  activeUserId,
-                  {
-                    amount: data.initialSpent,
-                    category: "Övrigt",
-                    note: "Justering för start mitt i period",
-                    timestamp: Date.now(),
-                    type: "expense",
-                    isBackdated: false,
-                    tags: [],
-                  },
-                );
-                setTransactions((prev) => [initialTransaction, ...prev]);
-              }
-
-              // 7. If bank was connected during onboarding, persist settings and immediately import variable bank transactions into the app
-              try {
-                const bankStatus = await bankService.getStatus();
-                const selectedBankAccs = (bankStatus.accounts || []).filter((a) => a.is_selected);
-                setBankAccounts(bankStatus.accounts || []);
-                if (selectedBankAccs.length > 0) {
-                  const nowIso = new Date().toISOString();
-                  for (const acc of selectedBankAccs) {
-                    await bankService.updateAccountSettings({
-                      bankAccountId: acc.id,
-                      importStartDate: data.bankImportStartDate || nowIso.split("T")[0],
-                      reconciliationCompletedAt: nowIso,
-                      ongoingImportEnabled: true,
-                    });
-                  }
-                  await syncBankToAppTransactions(
-                    activeUserId,
-                    newFixedExpenses,
-                    [],
-                    newConfig,
-                  );
-                }
-              } catch (bankSetErr) {
-                console.warn("Could not update/sync bank accounts after onboarding:", bankSetErr);
-              }
-
-              // Refresh session to get updated metadata
-              try {
-                await supabase.auth.refreshSession();
-              } catch (refreshErr) {
-                console.warn("Could not refresh auth session:", refreshErr);
-              }
-
-              // Trigger PWA modal after 10 seconds delay as requested by user
-              setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('trigger-pwa-modal'));
-              }, 10000);
-
-              addToast(
-                data.fullName ? `Välkommen ${data.fullName}!` : "Välkommen!",
-                "success",
-              );
-            } catch (err) {
-              console.error("Error saving onboarding data:", err);
-              addToast(
-                "Dina inställningar sparades!",
-                "success",
-              );
-            }
-          }}
-          t={t}
-        />
-
-        {isSecurityModalOpen && (
-          <SecurityModal
-            isOpen={isSecurityModalOpen}
-            onClose={() => setIsSecurityModalOpen(false)}
-            t={t}
-            addToast={addToast}
-            userEmail={session?.user?.email}
-          />
-        )}
-
-        {isCancelledSubscriptionsOpen && config && (
-          <CancelledSubscriptionsModal
-            isOpen={isCancelledSubscriptionsOpen}
-            onClose={() => setIsCancelledSubscriptionsOpen(false)}
+      {/* Main View Area */}
+      <main className="flex-1 w-full max-w-md mx-auto px-4 pt-4">
+        {activeTab === 'home' && (
+          <HomeTab
+            period={period}
+            connectedBank={connectedBank}
+            accounts={accounts}
+            incomes={incomes}
             fixedExpenses={fixedExpenses}
-            onUpdateExpense={async (updatedExpense) => {
-              try {
-                await dataService.saveFixedExpense(session?.user?.id || (isDemoMode ? "demo-user" : "local-user"), updatedExpense);
-                setFixedExpenses((prev) =>
-                  prev.map((e) => (e.id === updatedExpense.id ? updatedExpense : e))
-                );
-                addToast(
-                  config.language === 'en' 
-                    ? 'Subscription updated!' 
-                    : 'Abonnemanget uppdaterades!',
-                  'success'
-                );
-              } catch (err) {
-                console.error("Error updating fixed expense from cancelled list:", err);
-                addToast(
-                  config.language === 'en' 
-                    ? 'Failed to update subscription' 
-                    : 'Kunde inte uppdatera abonnemanget',
-                  'error'
-                );
-              }
+            transactions={periodTransactions.length > 0 ? periodTransactions : transactions}
+            totalBalance={totalBalance}
+            totalIncome={totalIncome}
+            totalFixedExpenses={totalFixedExpenses}
+            totalVariableSpent={totalVariableSpent}
+            kvarAttSpendera={kvarAttSpendera}
+            dagsbudget={dagsbudget}
+            onOpenBank={() => setIsBankModalOpen(true)}
+            onSelectTransaction={(tx) => {
+              setSelectedTransaction(tx);
+              setIsTxModalOpen(true);
             }}
-            onDeleteExpense={handleDeleteFixedExpense}
-            config={config}
+            onSelectFixed={(exp) => {
+              setSelectedFixedExpense(exp);
+              setIsFixedModalOpen(true);
+            }}
+            onNavigateToFixed={() => setActiveTab('fixed')}
+            onNavigateToTransactions={() => setActiveTab('transactions')}
           />
         )}
 
-        {isManageAccountModalOpen && (
-          <ManageAccountModal
-            isOpen={isManageAccountModalOpen}
-            onClose={() => setIsManageAccountModalOpen(false)}
-            user={session?.user || null}
-            onUpdateProfile={() => {
-              // Refresh session to get updated metadata
-              supabase.auth.refreshSession();
-            }}
-            onLogout={handleLogout}
-            t={t}
-            addToast={addToast}
-            onUploadAvatar={handleUploadAvatar}
-            avatarUrl={avatarUrl}
-            subscriptionStatus={subscriptionStatus}
-            trialEnd={trialEnd}
-            nextBillingDate={nextBillingDate}
-            onPaymentSuccess={async () => {
-              // Refresh subscription status
-              const {
-                data: { session },
-              } = await supabase.auth.getSession();
-              if (session?.user) {
-                // Assuming there's a function to fetch subscription status
-                // I'll need to check how it's fetched in other places
-                // For now, I'll just trigger a re-fetch if possible
-                // Looking at the code, it seems it's fetched in a useEffect
-                // I might need to trigger that effect
-              }
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {viewingTransaction && (
-        <TransactionViewModal
-          transaction={viewingTransaction}
-          onToggleStar={handleToggleStar}
-          onUpdateTransaction={async (updatedTx) => {
-              try {
-                const res = await dataService.updateTransaction(updatedTx.id, updatedTx);
-                setTransactions((prev) => prev.map((e) => (e.id === res.id ? res : e)));
-                setViewingTransaction(res);
-                addToast(config?.language === 'en' ? 'Transaction updated' : 'Transaktion uppdaterad', 'success');
-              } catch {
-                addToast(t('error'), 'error');
-              }
-            }}
-            onClose={() => handleCloseTransactionView()}
-            onEdit={(t) => {
-              setViewingTransaction(null);
-              setEditingTransaction(t);
-              setTransactionType(t.type || "expense");
-              setTargetDate(new Date(t.timestamp));
-              setIsAddTransactionOpen(true);
-            }}
-            onDelete={(id) => {
-              deleteTransaction(id);
-              handleCloseTransactionView();
-            }}
-            onDuplicate={async (expense) => {
-              if (!session) return;
-              try {
-                const newExpense = await dataService.addTransaction(
-                  session.user.id,
-                  {
-                    amount: expense.amount,
-                    category: expense.category,
-                    merchant: expense.merchant,
-                    note: expense.note,
-                    timestamp: expense.timestamp,
-                    type: expense.type,
-                    isBackdated: expense.isBackdated,
-                    logo: expense.logo,
-                    icon: expense.icon,
-                    paymentMethod: expense.paymentMethod,
-                    receiptUrl: expense.receiptUrl,
-                    receiptUrls: expense.receiptUrls,
-                    tags: expense.tags || [],
-                    splits: (expense as any).splits,
-                  } as any,
-                );
-                setTransactions((prev) => [newExpense, ...prev]);
-                if (expense.category === "Spargris" || expense.type === "savings") {
-                  const amt = Number(expense.amount) || 0;
-                  setConfig((prev) => {
-                    if (!prev) return prev;
-                    const newConfig = { ...prev, savingsPot: Math.max(0, (prev.savingsPot || 0) + amt) };
-                    dataService.saveSettings(session.user.id, newConfig).catch(() => {});
-                    return newConfig;
-                  });
-                }
-                handleCloseTransactionView();
-                addToast(t("transactionDuplicated"), "success");
-              } catch (_error) {
-                addToast(t("error"), "error");
-              }
-            }}
-            t={t}
-            config={config}
-            transactions={transactions}
-            onSelectTransaction={(t) => setViewingTransaction(t)}
-          />
-        )}
-
-        {isAddTransactionOpen && (
-          <TransactionModal
-            key={editingTransaction?.id || "new-transaction"}
-            transactions={transactions}
-            isPro={true}
-            transaction={editingTransaction}
-            type={transactionType}
-            date={targetDate || undefined}
-            categories={
-              (transactionType === "income"
-                ? config.incomeCategories
-                : config.categories) || []
-            }
-            calendarDays={stats.days}
-            periodStart={stats.periodStart}
-            periodEnd={stats.periodEnd}
-            onChangeType={(newType) => setTransactionType(newType)}
-            onClose={() => {
-              setIsAddTransactionOpen(false);
-              setEditingTransaction(null);
-              setTransactionPrefill(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onSave={(e) => {
-              const now = new Date();
-              let timestamp: number;
-              if (e.date) {
-                const d = new Date(e.date);
-                if (d.toDateString() === now.toDateString()) {
-                  timestamp = Date.now();
-                } else if (d.getHours() === 0 && d.getMinutes() === 0) {
-                  d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-                  timestamp = d.getTime();
-                } else {
-                  timestamp = d.getTime();
-                }
-              } else {
-                timestamp = Date.now();
-              }
-              const isBackdated = timestamp < Date.now() - 60000;
-
-              // Remove date and splits from the object we spread into the transaction
-              const { date: _date, ...transactionData } = e;
-
-              addTransaction(
-                {
-                  ...transactionData,
-                  type: transactionType,
-                  isBackdated,
-                },
-                timestamp,
-              );
-
-              setIsAddTransactionOpen(false);
-              setEditingTransaction(null);
-              setTransactionPrefill(null);
-            }}
-            onCreateCategory={async (name, icon, type) => {
-              if (!session || !config) return;
-              try {
-                const field =
-                  type === "income" ? "incomeCategories" : "categories";
-                const currentCategories = [...(config[field] || [])];
-                const newCategory = { name, icon };
-                currentCategories.push(newCategory);
-
-                const newConfig = { ...config, [field]: currentCategories };
-                setConfig(newConfig);
-                await dataService.saveSettings(session.user.id, newConfig);
-                return newCategory;
-              } catch (_error) {
-                addToast(t("errorSaving"), "error");
-                return null;
-              }
-            }}
-            t={t}
-            currentLang={config.language as Language}
-            userId={session?.user.id}
-            config={config}
-            prefill={transactionPrefill}
-            onDelete={(id) => {
-              deleteTransaction(id);
-              setIsAddTransactionOpen(false);
-              setEditingTransaction(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onToggleStar={handleToggleStar}
-            onDuplicate={async (expense) => {
-              if (!session) return;
-              try {
-                const newExpense = await dataService.addTransaction(
-                  session.user.id,
-                  {
-                    amount: expense.amount,
-                    category: expense.category,
-                    merchant: expense.merchant,
-                    note: expense.note,
-                    timestamp: expense.timestamp,
-                    type: expense.type,
-                    isBackdated: expense.isBackdated,
-                    logo: expense.logo,
-                    icon: expense.icon,
-                    paymentMethod: expense.paymentMethod,
-                    receiptUrl: expense.receiptUrl,
-                    receiptUrls: expense.receiptUrls,
-                    tags: expense.tags || [],
-                    splits: (expense as any).splits,
-                  } as any,
-                );
-                setTransactions((prev) => [newExpense, ...prev]);
-                if (expense.category === "Spargris" || expense.type === "savings") {
-                  const amt = Number(expense.amount) || 0;
-                  setConfig((prev) => {
-                    if (!prev) return prev;
-                    const newConfig = { ...prev, savingsPot: Math.max(0, (prev.savingsPot || 0) + amt) };
-                    dataService.saveSettings(session.user.id, newConfig).catch(() => {});
-                    return newConfig;
-                  });
-                }
-                setIsAddTransactionOpen(false);
-                setEditingTransaction(null);
-                addToast(t("transactionDuplicated"), "success");
-              } catch (_error) {
-                addToast(t("error"), "error");
-              }
-            }}
-            onSelectTransaction={(simTx) => {
-              setEditingTransaction(simTx);
-              setTransactionType(simTx.type || "expense");
-              setTargetDate(new Date(simTx.timestamp));
-            }}
-          />
-        )}
-
-      <AnimatePresence>
-        {isIncomeModalOpen && (
-          <IncomeModal
-            income={editingIncome}
-            currentPeriodId={currentPeriodId}
-            onClose={() => {
-              setIsIncomeModalOpen(false);
-              setEditingIncome(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onSave={handleSaveIncome}
-            onDelete={
-              editingIncome
-                ? () => handleDeleteIncome(editingIncome.id)
-                : undefined
-            }
-            t={t}
-            currency={config?.currency || "kr"}
-            userId={session?.user.id}
-            isPro={true}
-            categories={config.incomeCategories}
-            paymentMethods={config?.paymentMethods || []}
-            config={config}
-          />
-        )}
-        {viewingFixedExpense && (
-          <FixedExpenseViewModal
-            expense={viewingFixedExpense}
-            currentPeriodId={currentPeriodId}
-            onClose={() => {
-              setViewingFixedExpense(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onEdit={(expense) => {
-              setViewingFixedExpense(null);
-              setEditingFixedExpense(expense);
-              setIsFixedExpenseModalOpen(true);
-            }}
-            onUpdateExpense={async (updatedExpense) => {
-              try {
-                const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "local-user");
-                await dataService.saveFixedExpense(activeUserId, updatedExpense);
-                setFixedExpenses((prev) =>
-                  prev.map((e) => (e.id === updatedExpense.id ? updatedExpense : e))
-                );
-                setViewingFixedExpense(updatedExpense);
-              } catch (err) {
-                console.error("[App] Error updating fixed expense cancellation:", err);
-              }
-            }}
-            onDelete={(id) => {
-              handleDeleteFixedExpense(id);
-              setViewingFixedExpense(null);
-            }}
-            t={t}
-            currency={config?.currency || "kr"}
-            config={config}
-          />
-        )}
-        {viewingIncome && (
-          <IncomeViewModal
-            income={viewingIncome}
-            currentPeriodId={currentPeriodId}
-            onClose={() => {
-              setViewingIncome(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onEdit={(income) => {
-              setViewingIncome(null);
-              setEditingIncome(income);
+        {activeTab === 'fixed' && (
+          <FixedTab
+            period={period}
+            incomes={incomes}
+            fixedExpenses={fixedExpenses}
+            totalIncome={totalIncome}
+            totalFixedExpenses={totalFixedExpenses}
+            onSelectIncome={(inc) => {
+              setSelectedIncome(inc);
               setIsIncomeModalOpen(true);
             }}
-            onDelete={(id) => {
-              handleDeleteIncome(id);
-              setViewingIncome(null);
+            onSelectFixed={(exp) => {
+              setSelectedFixedExpense(exp);
+              setIsFixedModalOpen(true);
             }}
-            t={t}
-            currency={config?.currency || "kr"}
-            config={config}
-          />
-        )}
-        {isFixedExpenseModalOpen && (
-          <FixedExpenseModal
-            expense={editingFixedExpense}
-            currentPeriodId={currentPeriodId}
-            onClose={() => {
-              setIsFixedExpenseModalOpen(false);
-              setEditingFixedExpense(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onSave={handleSaveFixedExpense}
-            onDelete={
-              editingFixedExpense
-                ? () => handleDeleteFixedExpense(editingFixedExpense.id)
-                : undefined
-            }
-            t={t}
-            currency={config?.currency || "kr"}
-            categories={config?.categories || []}
-            userId={session?.user.id}
-            isPro={true}
-            paymentMethods={config?.paymentMethods || []}
-            config={config}
-          />
-        )}
-        {viewingMonthlySaving && (
-          <MonthlySavingViewModal
-            saving={viewingMonthlySaving}
-            onClose={() => {
-              setViewingMonthlySaving(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onEdit={(saving) => {
-              const cleanId = saving.id?.startsWith('saving-') ? saving.id.replace('saving-', '') : saving.id;
-              const cleanSaving = { ...saving, id: cleanId };
-              setViewingMonthlySaving(null);
-              setEditingMonthlySaving(cleanSaving);
-              setIsMonthlySavingModalOpen(true);
-            }}
-            onDelete={(id) => {
-              const targetId = id || viewingMonthlySaving?.id;
-              if (targetId) handleDeleteMonthlySaving(targetId);
-              setViewingMonthlySaving(null);
-            }}
-            t={t}
-            currency={config?.currency || "kr"}
-            config={config}
-          />
-        )}
-        {isMonthlySavingModalOpen && (
-          <MonthlySavingModal
-            key={editingMonthlySaving?.id || "new-monthly-saving"}
-            saving={editingMonthlySaving}
-            currentPeriodId={currentPeriodId}
-            onClose={() => {
-              setIsMonthlySavingModalOpen(false);
-              setEditingMonthlySaving(null);
-              if (searchModalOpenBeforeViewing) {
-                setIsSearchModalOpen(true);
-                setSearchModalOpenBeforeViewing(false);
-              }
-            }}
-            onSave={handleSaveMonthlySaving}
-            onDelete={
-              editingMonthlySaving
-                ? () => handleDeleteMonthlySaving(editingMonthlySaving.id)
-                : undefined
-            }
-            t={t}
-            currency={config?.currency || "kr"}
-            userId={session?.user.id}
-            isPro={true}
-            paymentMethods={config?.paymentMethods || []}
-            config={config}
-          />
-        )}
-        {isCalculatorOpen && (
-          <CalculatorModal
-            isOpen={isCalculatorOpen}
-            onClose={() => setIsCalculatorOpen(false)}
-            t={t}
-          />
-        )}
-        {isDejziSummaryOpen && (
-          <DejziSummaryModal
-            isOpen={isDejziSummaryOpen}
-            onClose={() => setIsDejziSummaryOpen(false)}
-            userName={
-              (
-                session?.user?.user_metadata?.full_name ||
-                session?.user?.email?.split("@")[0] ||
-                ""
-              ).split(" ")[0]
-            }
-            stats={stats}
-            calendarDays={calendarDays || []}
-            availableForToday={stats?.availableForD || 0}
-            currency={config?.currency || "kr"}
-            language={(config?.language as string) || "sv"}
-          />
-        )}
-        
-        {legalModal.isOpen && (
-          <LegalModal
-            isOpen={legalModal.isOpen}
-            type={legalModal.type}
-            onClose={() =>
-              setLegalModal((prev) => ({ ...prev, isOpen: false }))
-            }
-            t={t}
-          />
-        )}
-        {isResetPasswordOpen && (
-          <ResetPasswordModal
-            isOpen={isResetPasswordOpen}
-            onClose={() => setIsResetPasswordOpen(false)}
-            onShowToast={addToast}
-          />
-        )}
-        {config && (
-          <SearchModal
-            isOpen={isSearchModalOpen}
-            onClose={() => setIsSearchModalOpen(false)}
-            transactions={transactions}
-            fixedExpenses={fixedExpenses}
-            incomes={incomes}
-            config={config}
-            onNavigate={handleNavigate}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            onViewTransaction={(trans) => {
-              setSearchModalOpenBeforeViewing(true);
-              setIsSearchModalOpen(false);
-              setViewingTransaction(trans);
-            }}
-            onViewFixedExpense={(expense) => {
-              setSearchModalOpenBeforeViewing(true);
-              setIsSearchModalOpen(false);
-              setViewingFixedExpense(expense);
-            }}
-            onViewIncome={(income) => {
-              setSearchModalOpenBeforeViewing(true);
-              setIsSearchModalOpen(false);
-              setViewingIncome(income);
-            }}
-            onViewMonthlySaving={(saving) => {
-              setSearchModalOpenBeforeViewing(true);
-              setIsSearchModalOpen(false);
-              setViewingMonthlySaving(saving);
-            }}
-          />
-        )}
-        {isLocked && (
-          <PinLockScreen
-            mode="unlock"
-            t={t}
-            onSuccess={() => setIsLocked(false)}
-          />
-        )}
-        {isVariableUpdateModalOpen && itemToUpdateVariable && config && (
-          <VariableAmountUpdateModal
-            isOpen={isVariableUpdateModalOpen}
-            onClose={() => {
-              setIsVariableUpdateModalOpen(false);
-              setItemToUpdateVariable(null);
-            }}
-            item={itemToUpdateVariable}
-            onSave={(amount) => {
-              handleSaveVariableOverride(itemToUpdateVariable, amount);
-            }}
-            config={config}
-            t={t}
-            periodName={stats?.periodName}
-          />
-        )}
-        {isCalendarModalOpen && (
-          <CalendarModal
-            isOpen={isCalendarModalOpen}
-            onClose={() => setIsCalendarModalOpen(false)}
-            calendarDays={calendarDays || []}
-            selectedDate={targetDate}
-            onSelectDate={(newDate) => {
-              setTargetDate(newDate);
-              if (setCurrentPeriodDate) {
-                setCurrentPeriodDate(newDate);
-              }
-              setIsCalendarModalOpen(false);
-            }}
-            periods={periods}
-            currentPeriodDate={currentPeriodDate}
-            onPeriodChange={(newDate) => {
-              setCurrentPeriodDate(newDate);
-            }}
-            periodName={stats?.periodName}
-            isCurrentPeriod={isCurrentPeriod}
-            t={t}
-            language={(config?.language as Language) || 'sv'}
-            showFixedInCalendar={config?.showFixedExpensesInCalendar}
+            onDeleteIncome={handleDeleteIncome}
+            onDeleteFixed={handleDeleteFixed}
           />
         )}
 
-        {/* Central Plus Button Overlay Menu */}
-        {isPlusMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
-            onClick={() => {
-              feedback.tap();
-              setIsPlusMenuOpen(false);
+        {activeTab === 'transactions' && (
+          <TransactionsTab
+            transactions={displayTransactions}
+            totalVariableSpent={totalVariableSpent}
+            onSelectTransaction={(tx) => {
+              setSelectedTransaction(tx);
+              setIsTxModalOpen(true);
             }}
-          >
-            <motion.div
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.6 }}
-              onDragEnd={(_e, info) => {
-                if (info.offset.y > 60 || info.velocity.y > 200) {
-                  feedback.tap();
-                  setIsPlusMenuOpen(false);
-                }
-              }}
-              initial={{ y: "100%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "100%", opacity: 0 }}
-              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-modal font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y border-none"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Drawer Handle / Drag Pill */}
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-1 mb-2 shrink-0 cursor-grab active:cursor-grabbing" />
-
-              {/* The 3 Action Buttons */}
-              <div className="grid grid-cols-3 gap-2.5 justify-items-center py-1">
-                {/* Utgift */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    feedback.tap();
-                    setIsPlusMenuOpen(false);
-                    setTransactionType("expense");
-                    setTargetDate(new Date());
-                    setIsAddTransactionOpen(true);
-                  }}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
-                >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
-                    <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
-                  </div>
-                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
-                    {config?.language === "en" ? "Expense" : "Utgift"}
-                  </span>
-                </button>
-
-                {/* Inkomst */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    feedback.tap();
-                    setIsPlusMenuOpen(false);
-                    setTransactionType("income");
-                    setTargetDate(new Date());
-                    setIsAddTransactionOpen(true);
-                  }}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
-                >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
-                    <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
-                  </div>
-                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
-                    {config?.language === "en" ? "Income" : "Inkomst"}
-                  </span>
-                </button>
-
-                {/* Kvitto */}
-                <button
-                  type="button"
-                  onClick={handlePlusKvittoClick}
-                  disabled={isScanningReceipt}
-                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
-                >
-                  <div className="w-[52px] h-[52px] rounded-full bg-[var(--surface-color)] dark:bg-[var(--surface-raised)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors">
-                    {isScanningReceipt ? (
-                      <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
-                    ) : (
-                      <Camera size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
-                    )}
-                  </div>
-                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
-                    {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
-                  </span>
-                </button>
-
-                <input
-                  ref={plusCameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={handlePlusCameraCapture}
-                />
-              </div>
-
-              {/* Snabbutgift Form with Mic using Reusable SmartInput */}
-              <div className="pt-2">
-                <SmartInput
-                  hideLabel
-                  value={plusQuickText}
-                  onChange={(val) => {
-                    setPlusQuickText(val);
-                    if (plusSuccessMsg?.type === "error") {
-                      setPlusSuccessMsg(null);
-                    }
-                  }}
-                  onSubmit={handlePlusQuickExpenseSubmit}
-                  placeholder={
-                    isRecording
-                      ? (config?.language === "en" ? "Listening... Speak purchase" : "Lyssnar... Prata in köpet")
-                      : isAudioTranscribing
-                        ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
-                        : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
-                  }
-                  isProcessing={isSubmittingQuick || isAudioTranscribing}
-                  disabled={isRecording}
-                  inputRef={plusQuickInputRef}
-                  leftElement={
-                    <button
-                      type="button"
-                      onClick={handlePlusMicClick}
-                      disabled={isSubmittingQuick || isAudioTranscribing}
-                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer select-none ${
-                        isRecording
-                          ? "bg-[var(--danger-color)] text-white animate-pulse scale-105"
-                          : isAudioTranscribing
-                            ? "bg-[var(--danger-container)] text-[var(--danger-color)]"
-                            : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] active:scale-95"
-                      }`}
-                    >
-                      {isAudioTranscribing ? (
-                        <Loader2 size={15} className="animate-spin text-[var(--danger-color)]" />
-                      ) : isRecording ? (
-                        <Square size={13} className="fill-current" />
-                      ) : (
-                        <Mic size={17} strokeWidth={2} />
-                      )}
-                    </button>
-                  }
-                  submitVariant="inside"
-                  submitIcon={<Plus size={18} strokeWidth={2} />}
-                  feedback={
-                    plusSuccessMsg
-                      ? { type: plusSuccessMsg.type || "success", message: plusSuccessMsg.text }
-                      : plusVoiceError
-                        ? { type: "error", message: plusVoiceError }
-                        : null
-                  }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
-                    isRecording ? "ring-2 ring-rose-500/30" : ""
-                  }`}
-                />
-              </div>
-            </motion.div>
-          </motion.div>
+            onDeleteTransaction={handleDeleteTransaction}
+          />
         )}
-      </AnimatePresence>
-      <AddToHomeScreenModal t={t} theme={config?.appIconTheme} language={(config?.language as string) || landingLanguage} />
-      <ReceiptCameraModal
-        isOpen={isReceiptCameraOpen}
-        onClose={() => setIsReceiptCameraOpen(false)}
-        onCapture={handleReceiptFileCaptured}
-        isProcessing={isScanningReceipt}
-        language={config?.language}
+
+        {activeTab === 'settings' && (
+          <SettingsTab
+            period={period}
+            connectedBank={connectedBank}
+            connections={connections}
+            syncingBank={syncingBank}
+            targetPayday={targetPayday}
+            weekendHandling={weekendHandling}
+            userEmail={userEmail}
+            userAvatar={userAvatar}
+            onUpdatePayday={handleUpdatePayday}
+            onUpdateWeekendHandling={handleUpdateWeekendHandling}
+            onUpdateAvatar={handleUpdateAvatar}
+            onOpenBank={() => setIsBankModalOpen(true)}
+            onDisconnectBank={handleDisconnectBank}
+            onSyncBank={handleSyncBank}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onSignOut={handleSignOut}
+            onDeleteAccount={handleDeleteAccount}
+            onResetAccount={handleResetAccount}
+          />
+        )}
+      </main>
+
+      {/* Clean 4-tab bottom navigation dock */}
+      <BottomNav
+        activeTab={activeTab}
+        onChangeTab={setActiveTab}
+      />
+
+      {/* Modals */}
+      <BankModal
+        isOpen={isBankModalOpen}
+        userEmail={userEmail}
+        connections={connections}
+        bankAccounts={bankAccounts}
+        onClose={() => setIsBankModalOpen(false)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onBankStateUpdated={(conns, accs) => {
+          setConnections(conns);
+          setBankAccounts(accs);
+          refreshBankStatus();
+        }}
+      />
+
+      <IncomeModal
+        isOpen={isIncomeModalOpen}
+        initialIncome={selectedIncome}
+        onClose={() => {
+          setIsIncomeModalOpen(false);
+          setSelectedIncome(null);
+        }}
+        onSave={handleAddIncome}
+        onUpdate={handleUpdateIncome}
+        onDelete={handleDeleteIncome}
+      />
+
+      <FixedExpenseModal
+        isOpen={isFixedModalOpen}
+        initialExpense={selectedFixedExpense}
+        onClose={() => {
+          setIsFixedModalOpen(false);
+          setSelectedFixedExpense(null);
+        }}
+        onSave={handleAddFixed}
+        onUpdate={handleUpdateFixed}
+        onDelete={handleDeleteFixed}
+      />
+
+      <TransactionModal
+        isOpen={isTxModalOpen}
+        initialTransaction={selectedTransaction}
+        onClose={() => {
+          setIsTxModalOpen(false);
+          setSelectedTransaction(null);
+        }}
+        onSave={handleAddTransaction}
+        onUpdate={handleUpdateTransaction}
+        onDelete={handleDeleteTransaction}
+        onExclude={handleExcludeTransaction}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(email) => {
+          setUserEmail(email);
+          refreshBankStatus();
+        }}
       />
     </div>
   );
-}
+};
+
+export default App;
