@@ -57,6 +57,7 @@ export const BankModal: React.FC<BankModalProps> = ({
   const [activeConnection, setActiveConnection] = useState<BankConnection | null>(null);
   const [fetchedAccounts, setFetchedAccounts] = useState<BankAccount[]>([]);
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
+  const [accountCustomNames, setAccountCustomNames] = useState<Record<string, string>>({});
   const [savingAccounts, setSavingAccounts] = useState(false);
 
   const loadBanks = useCallback(async (env: BankEnvironment) => {
@@ -92,11 +93,13 @@ export const BankModal: React.FC<BankModalProps> = ({
             if (connAccounts.length > 0) {
               setActiveConnection(newestConn);
               setFetchedAccounts(connAccounts);
-              setSelectedAccountIds(
-                connAccounts.filter((a) => a.is_selected).map((a) => a.id).length > 0
-                  ? connAccounts.filter((a) => a.is_selected).map((a) => a.id)
-                  : connAccounts.map((a) => a.id)
-              );
+              const selIds = connAccounts.filter((a) => a.is_selected).map((a) => a.id);
+              setSelectedAccountIds(selIds.length > 0 ? selIds : connAccounts.map((a) => a.id));
+              const nameMap: Record<string, string> = {};
+              for (const a of connAccounts) {
+                nameMap[a.id] = a.custom_name || a.name || '';
+              }
+              setAccountCustomNames(nameMap);
               setStep('select-accounts');
             }
           }
@@ -131,7 +134,6 @@ export const BankModal: React.FC<BankModalProps> = ({
       setAuthState(res.state);
       setStep('authorizing');
 
-      // Check if we are in an iframe (like AI Studio preview) or top window
       const isInIframe = window.self !== window.top;
       if (!isInIframe) {
         window.location.assign(res.url);
@@ -173,6 +175,11 @@ export const BankModal: React.FC<BankModalProps> = ({
       setActiveConnection(res.connection);
       setFetchedAccounts(res.accounts || []);
       setSelectedAccountIds((res.accounts || []).map((a) => a.id));
+      const nameMap: Record<string, string> = {};
+      for (const a of (res.accounts || [])) {
+        nameMap[a.id] = a.custom_name || a.name || '';
+      }
+      setAccountCustomNames(nameMap);
       setStep('select-accounts');
 
       const status = await bankService.getStatus();
@@ -198,6 +205,13 @@ export const BankModal: React.FC<BankModalProps> = ({
     setSavingAccounts(true);
     setErrorMsg(null);
     try {
+      for (const acc of fetchedAccounts) {
+        const customName = accountCustomNames[acc.id]?.trim();
+        if (customName !== undefined) {
+          bankService.saveAccountOverlay(acc.id, { custom_name: customName });
+        }
+      }
+
       await bankService.selectAccounts({
         connectionId: activeConnection.id,
         selectedAccountIds,
@@ -218,6 +232,11 @@ export const BankModal: React.FC<BankModalProps> = ({
     setActiveConnection(conn);
     setFetchedAccounts(connAccs);
     setSelectedAccountIds(connAccs.filter((a) => a.is_selected).map((a) => a.id));
+    const nameMap: Record<string, string> = {};
+    for (const a of connAccs) {
+      nameMap[a.id] = a.custom_name || a.name || '';
+    }
+    setAccountCustomNames(nameMap);
     setStep('select-accounts');
   };
 
@@ -289,7 +308,6 @@ export const BankModal: React.FC<BankModalProps> = ({
               {/* STEP 1: BANK LIST */}
               {step === 'list' && (
                 <div className="space-y-4">
-                  {/* Already connected banks */}
                   {connections.length > 0 && (
                     <div className="space-y-2">
                       <span className="text-[11px] uppercase tracking-wider font-bold text-[var(--text-muted)]">
@@ -324,7 +342,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                             onClick={() => handleOpenExistingAccountSelection(conn)}
                             className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
                           >
-                            Välj konton
+                            Hantera konton & namn
                           </button>
                         </div>
                       ))}
@@ -456,7 +474,6 @@ export const BankModal: React.FC<BankModalProps> = ({
                     </a>
                   </div>
 
-                  {/* Manual callback URL paste fallback (for preview environment when redirect goes to dejz.se/bank/callback) */}
                   <form onSubmit={handleExchangeManualCallback} className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
                     <label className="text-[11px] font-semibold text-[var(--text-secondary)] block">
                       Slutförde du inloggningen i en annan flik (t.ex. dejz.se/bank/callback)?
@@ -492,58 +509,84 @@ export const BankModal: React.FC<BankModalProps> = ({
                 </div>
               )}
 
-              {/* STEP 3: SELECT ACCOUNTS */}
+              {/* STEP 3: SELECT ACCOUNTS & CUSTOM NAMES */}
               {step === 'select-accounts' && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                     <CheckCircle size={20} weight="fill" />
                     <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                      Välj konton att inkludera
+                      Välj konton & anpassa namn
                     </h4>
                   </div>
 
                   <p className="text-xs text-[var(--text-secondary)]">
-                    Välj vilka bankkonton från {activeConnection?.aspsp_name} som ska visas i din översikt.
+                    Välj vilka bankkonton från {activeConnection?.aspsp_name} som ska visas och ge dem egna smeknamn om du vill.
                   </p>
 
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                     {fetchedAccounts.map((acc) => {
                       const isChecked = selectedAccountIds.includes(acc.id);
+                      const currentCustomName =
+                        accountCustomNames[acc.id] !== undefined
+                          ? accountCustomNames[acc.id]
+                          : acc.custom_name || acc.name || '';
                       return (
-                        <button
+                        <div
                           key={acc.id}
-                          type="button"
-                          onClick={() => toggleAccountSelection(acc.id)}
-                          className={`w-full p-3.5 rounded-xl border flex items-center justify-between text-left transition-all ${
+                          className={`p-3.5 rounded-xl border space-y-2 transition-all ${
                             isChecked
                               ? 'bg-[var(--surface-raised)] border-[var(--text-primary)]'
                               : 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-70'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-5 h-5 rounded-md flex items-center justify-center border ${
-                                isChecked
-                                  ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                                  : 'border-[var(--border-subtle)]'
-                              }`}
+                          <div className="flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => toggleAccountSelection(acc.id)}
+                              className="flex items-center gap-3 text-left flex-1 min-w-0"
                             >
-                              {isChecked && <Check size={12} weight="bold" />}
-                            </div>
-                            <div>
-                              <span className="font-bold text-sm text-[var(--text-primary)] block">
-                                {acc.custom_name || acc.name}
-                              </span>
-                              <span className="text-[11px] text-[var(--text-muted)]">
-                                {acc.bban || acc.iban || acc.product || 'Bankkonto'}
-                              </span>
-                            </div>
+                              <div
+                                className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 ${
+                                  isChecked
+                                    ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                                    : 'border-[var(--border-subtle)]'
+                                }`}
+                              >
+                                {isChecked && <Check size={12} weight="bold" />}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="font-bold text-sm text-[var(--text-primary)] block truncate">
+                                  {acc.bban || acc.iban || acc.product || 'Bankkonto'}
+                                </span>
+                                <span className="text-[11px] text-[var(--text-muted)]">
+                                  {acc.bankName || activeConnection?.aspsp_name}
+                                </span>
+                              </div>
+                            </button>
+                            <span className="font-bold text-sm text-[var(--text-primary)] shrink-0 pl-2">
+                              {formatKr(acc.balance_amount, acc.balance_currency || acc.currency)}
+                            </span>
                           </div>
 
-                          <span className="font-bold text-sm text-[var(--text-primary)]">
-                            {formatKr(acc.balance_amount, acc.balance_currency || acc.currency)}
-                          </span>
-                        </button>
+                          {isChecked && (
+                            <div className="pt-2 border-t border-[var(--border-subtle)]">
+                              <label className="text-[10px] uppercase tracking-wider font-bold text-[var(--text-muted)] block mb-1">
+                                Kontonamn i appen (valfritt)
+                              </label>
+                              <input
+                                type="text"
+                                value={currentCustomName}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setAccountCustomNames((prev) => ({ ...prev, [acc.id]: val }));
+                                }}
+                                placeholder="T.ex. Buffert, Reskassa, Privatkonto..."
+                                className="w-full px-3 py-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -555,7 +598,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                     className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {savingAccounts && <SpinnerGap size={16} className="animate-spin" />}
-                    <span>Spara konton & synka</span>
+                    <span>Spara konton & namn</span>
                   </button>
                 </div>
               )}

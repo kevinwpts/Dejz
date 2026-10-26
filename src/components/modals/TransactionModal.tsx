@@ -1,30 +1,20 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Bank,
-  Code,
-  CaretDown,
-  CaretUp,
-  Check,
-  Copy,
-  ArrowsLeftRight,
-  EyeSlash,
-  ArrowsClockwise,
   Heart,
   Paperclip,
   Trash,
   FileText,
   Eye,
+  EyeSlash,
+  ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { TransactionItem, getTransactionTime, FixedExpenseItem, IncomeItem } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
-import {
-  formatSwedishDateHeading,
-  formatSwedishFullDate,
-} from '../../utils/swedishDate';
-import { isInternalTransferTransaction } from '../../utils/transferDetection';
+import { formatSwedishFullDate } from '../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../utils/recurring';
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../../constants';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -48,14 +38,23 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   incomes = [],
   onClose,
   onUpdate,
+  onDelete,
   onExclude,
   onMarkAsFixed,
   onToggleHeart,
-  isInternalTransfer: propIsInternalTransfer,
+  isInternalTransfer: _propIsInternalTransfer,
 }) => {
-  const [showRawJson, setShowRawJson] = useState(false);
-  const [copiedJson, setCopiedJson] = useState(false);
+  const [note, setNote] = useState('');
+  const [category, setCategory] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialTransaction) {
+      setNote(initialTransaction.note || '');
+      setCategory(initialTransaction.category || (initialTransaction.type === 'income' ? 'Lön' : 'Övrigt'));
+    }
+  }, [initialTransaction]);
 
   if (!isOpen || !initialTransaction) return null;
 
@@ -64,8 +63,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const isIncome = initialTransaction.type === 'income';
   const txTime = getTransactionTime(initialTransaction);
-  const isDetectedTransfer =
-    propIsInternalTransfer ?? isInternalTransferTransaction(initialTransaction);
   const isExcluded = Boolean(initialTransaction.isExcluded);
   const recurringStatus = checkIsRecurringTransaction(
     initialTransaction,
@@ -73,68 +70,50 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     incomes
   );
 
-  const rawJsonData = initialTransaction.rawJson || {
-    id: initialTransaction.id,
-    title: initialTransaction.title,
-    amount: initialTransaction.amount,
-    date: initialTransaction.date,
-    bookingDate: initialTransaction.bookingDate,
-    bookingStatus: initialTransaction.bookingStatus,
-    description: initialTransaction.rawDescription || initialTransaction.note,
-  };
+  const availableCategories = isIncome ? DEFAULT_INCOME_CATEGORIES : DEFAULT_EXPENSE_CATEGORIES;
 
-  const handleCopyJson = () => {
-    try {
-      navigator.clipboard.writeText(JSON.stringify(rawJsonData, null, 2));
-      setCopiedJson(true);
-      setTimeout(() => setCopiedJson(false), 2000);
-    } catch {
-      // ignore
+  const handleNoteChange = (newNote: string) => {
+    setNote(newNote);
+    if (onUpdate) {
+      onUpdate({
+        ...initialTransaction,
+        note: newNote,
+        category,
+      });
     }
   };
 
+  const handleCategoryChange = (newCat: string) => {
+    setCategory(newCat);
+    if (onUpdate) {
+      onUpdate({
+        ...initialTransaction,
+        note,
+        category: newCat,
+      });
+    }
+  };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg my-auto bg-[var(--surface-color)] rounded-t-3xl sm:rounded-2xl p-6 border border-[var(--border-subtle)] shadow-xl animate-fade-in max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-lg my-auto bg-[var(--surface-color)] rounded-t-3xl sm:rounded-2xl p-6 border border-[var(--border-subtle)] shadow-xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
-              Transaktionsdetaljer
-            </h3>
+        {/* Top Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] mb-5">
+          <div className="flex items-center gap-2">
             {initialTransaction.id.startsWith('bank-') && (
               <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-semibold border border-blue-500/20 flex items-center gap-1">
                 <Bank size={11} />
-                Enable Banking
-              </span>
-            )}
-            {recurringStatus.isRecurring && (
-              <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-semibold border border-indigo-500/20 flex items-center gap-1">
-                <ArrowsClockwise size={11} weight="bold" />
-                Återkommande {recurringStatus.type === 'income' ? 'inkomst' : 'fast utgift'}
-              </span>
-            )}
-            {isDetectedTransfer && (
-              <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-semibold border border-amber-500/20 flex items-center gap-1">
-                <ArrowsLeftRight size={11} />
-                Intern överföring
-              </span>
-            )}
-            {isExcluded && (
-              <span className="px-2 py-0.5 rounded-md bg-slate-500/15 text-slate-400 text-[10px] font-semibold border border-slate-500/30 flex items-center gap-1">
-                <EyeSlash size={11} />
-                Exkluderad
+                Bank
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             {onToggleHeart && (
               <button
                 type="button"
@@ -156,56 +135,82 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+              className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
           </div>
         </div>
 
-        {/* Summary hero card */}
-        <div className="mb-4 p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+        {/* Hero Receipt Header */}
+        <div className="text-center mb-6 pb-6 border-b border-[var(--border-subtle)]">
+          <div className="flex justify-center mb-3">
             <ItemLogo
               name={initialTransaction.title}
-              category={initialTransaction.category}
+              category={category}
               logoUrl={initialTransaction.logo}
               size="lg"
               isRecurring={recurringStatus.isRecurring}
             />
-            <div className="min-w-0">
-              <span className="font-display font-bold text-base text-[var(--text-primary)] block truncate">
-                {initialTransaction.title}
-              </span>
-              <span className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 truncate tabular-nums">
-                <span>{formatSwedishDateHeading(initialTransaction.date)} kl {txTime} ·</span>
-                <span className="inline-flex items-center gap-1">
-                  <CategoryIcon category={initialTransaction.category} size={11} />
-                  <span>{initialTransaction.category}</span>
-                </span>
-              </span>
-            </div>
           </div>
-          <div className="text-right shrink-0">
-            <span
-              className={`font-display font-extrabold text-xl tabular-nums block ${
-                isIncome
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-[var(--text-primary)]'
-              }`}
-            >
-              {isIncome ? '+' : '-'}
-              {formatKr(initialTransaction.amount)}
-            </span>
+          <h2 className="font-display font-bold text-xl text-[var(--text-primary)] mb-1 truncate px-2">
+            {initialTransaction.title}
+          </h2>
+          <div className="text-xs text-[var(--text-muted)] flex items-center justify-center gap-1.5 mb-3">
+            <span>{formatSwedishFullDate(initialTransaction.date)} · kl {txTime}</span>
+          </div>
+          <div
+            className={`font-display font-extrabold text-3xl tabular-nums ${
+              isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'
+            }`}
+          >
+            {isIncome ? '+' : '-'}
+            {formatKr(initialTransaction.amount)}
           </div>
         </div>
 
-        {/* Kvitto & Bilaga */}
-        <div className="p-3.5 mb-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
+        {/* Editable Fields: Category & Note */}
+        <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-4 text-xs mb-5">
+          {/* Category Selector */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[var(--text-muted)] font-medium">Kategori</label>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {availableCategories.map((cat) => (
+                  <option key={cat.id || cat.name} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+                {!availableCategories.some((c) => c.name === category) && category && (
+                  <option value={category}>{category}</option>
+                )}
+              </select>
+            </div>
+          </div>
+
+          {/* Editable Note */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[var(--text-muted)] font-medium">Anteckning</label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => handleNoteChange(e.target.value)}
+              placeholder="Skriv en anteckning..."
+              className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Kvitto / Bilaga Section */}
+        <div className="mb-5 p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
               <Paperclip size={14} className="text-[var(--text-secondary)]" />
-              <span>Kvitto eller fil</span>
+              <span>Kvitto eller bilaga</span>
             </span>
             {initialTransaction.receiptUrl && onUpdate && (
               <button
@@ -226,23 +231,22 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           {initialTransaction.receiptUrl ? (
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)]">
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)]">
               {initialTransaction.receiptUrl.startsWith('data:image/') ? (
                 <img
                   src={initialTransaction.receiptUrl}
                   alt="Kvitto"
-                  className="w-12 h-12 rounded-lg object-cover border border-[var(--border-subtle)] shrink-0"
+                  className="w-10 h-10 rounded-lg object-cover border border-[var(--border-subtle)] shrink-0"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                  <FileText size={20} />
+                <div className="w-10 h-10 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                  <FileText size={18} />
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
                   {initialTransaction.receiptName || 'Bifogad fil'}
                 </span>
-                <span className="text-[10px] text-[var(--text-muted)] block">Kvitto tillagt</span>
               </div>
               <a
                 href={initialTransaction.receiptUrl}
@@ -280,156 +284,80 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="w-full py-2 px-3 rounded-xl border border-dashed border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <Paperclip size={14} />
-                <span>Bifoga kvitto eller PDF...</span>
+                <Paperclip size={13} />
+                <span>Bifoga kvitto...</span>
               </button>
             </div>
           )}
         </div>
 
-        {/* Återkommande information banner */}
-        {recurringStatus.isRecurring && (
-          <div className="mb-4 p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-start gap-2.5 text-xs text-indigo-900 dark:text-indigo-200">
-            <div className="p-1 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5">
-              <ArrowsClockwise size={14} weight="bold" />
-            </div>
-            <div className="min-w-0">
-              <span className="font-bold text-[var(--text-primary)] block">
-                Återkommande post i Ekonomi
-              </span>
-              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 leading-relaxed">
-                {recurringStatus.type === 'income'
-                  ? 'Denna inkomst är registrerad som en fast inkomst i Ekonomifliken och ingår i budgetperiodens totala inkomst.'
-                  : 'Denna utgift är registrerad som en fast utgift i Ekonomifliken och räknas in i "Fasta utgifter" för månaden.'}
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Action Buttons Row */}
+        <div className="space-y-2 mb-2">
+          <div className="grid grid-cols-2 gap-2">
+            {onExclude && (
+              <button
+                type="button"
+                onClick={() => onExclude(initialTransaction.id, !isExcluded)}
+                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border ${
+                  isExcluded
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                }`}
+              >
+                <EyeSlash size={14} />
+                <span>{isExcluded ? 'Inkludera i budget' : 'Exkludera'}</span>
+              </button>
+            )}
 
-        {/* Markera som fast utgift / inkomst om ej redan återkommande */}
-        {!recurringStatus.isRecurring && onMarkAsFixed && (
-          <div className="p-3.5 mb-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                <ArrowsClockwise size={14} className="text-indigo-500" />
-                <span>{isIncome ? 'Markera som fast inkomst' : 'Markera som fast utgift'}</span>
-              </span>
-              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                {isIncome
-                  ? 'Lägg till i Fasta inkomster för att automatiskt inkludera i budgetperioden.'
-                  : 'Lägg till i Fasta utgifter för att ha full kontroll på dina återkommande kostnader.'}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onMarkAsFixed(initialTransaction, isIncome ? 'income' : 'expense')}
-              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 transition-colors cursor-pointer"
-            >
-              {isIncome ? 'Gör till fast' : 'Gör till fast'}
-            </button>
-          </div>
-        )}
-
-        {/* Exkludera från budget & dölj-kontroll */}
-        {onExclude && (
-          <div className="p-3.5 mb-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                <EyeSlash size={14} className={isExcluded ? 'text-amber-500' : 'text-[var(--text-muted)]'} />
-                {isExcluded ? 'Exkluderad från budget' : 'Exkludera från budget'}
-              </span>
-              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                {isExcluded
-                  ? 'Påverkar inte "Kvar att spendera" och är dold från översikten.'
-                  : 'Dölj från appen och räkna inte med i "Kvar att spendera".'}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onExclude(initialTransaction.id, !isExcluded)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-colors cursor-pointer ${
-                isExcluded
-                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20'
-                  : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-              }`}
-            >
-              {isExcluded ? 'Inkludera igen' : 'Exkludera'}
-            </button>
-          </div>
-        )}
-
-        {/* 1. Allmän översikt */}
-        <div className="space-y-4 mb-5">
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-xs">
-            <div className="px-4 py-3 flex items-center justify-between gap-4">
-              <span className="text-[var(--text-muted)]">Mottagare / Butik</span>
-              <span className="font-semibold text-[var(--text-primary)] text-right truncate">
-                {initialTransaction.title}
-              </span>
-            </div>
-
-            <div className="px-4 py-3 flex items-center justify-between gap-4">
-              <span className="text-[var(--text-muted)]">Belopp</span>
-              <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                {isIncome ? '+' : '-'}
-                {formatKr(initialTransaction.amount)}
-              </span>
-            </div>
-
-            <div className="px-4 py-3 flex items-center justify-between gap-4">
-              <span className="text-[var(--text-muted)]">Kategori</span>
-              <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                <CategoryIcon category={initialTransaction.category} size={13} />
-                <span>{initialTransaction.category}</span>
-              </span>
-            </div>
-
-            <div className="px-4 py-3 flex items-center justify-between gap-4">
-              <span className="text-[var(--text-muted)]">Köptillfälle (Datum & tid)</span>
-              <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                {formatSwedishFullDate(initialTransaction.date)} · kl {txTime}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Open Banking / Rådata avsnitt */}
-        {initialTransaction.id.startsWith('bank-') && (
-          <div className="border-t border-[var(--border-subtle)] pt-4 mt-2">
-            <button
-              type="button"
-              onClick={() => setShowRawJson(!showRawJson)}
-              className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
-            >
-              <span className="flex items-center gap-2">
-                <Code size={15} className="text-[var(--text-primary)]" />
-                <span>Visa rådata från Enable Banking (JSON)</span>
-              </span>
-              {showRawJson ? <CaretUp size={14} /> : <CaretDown size={14} />}
-            </button>
-
-            {showRawJson && (
-              <div className="mt-3 space-y-2 animate-fade-in">
-                <div className="flex items-center justify-between text-xs px-1">
-                  <span className="text-[var(--text-muted)] font-mono text-[11px]">Payload (JSON)</span>
-                  <button
-                    type="button"
-                    onClick={handleCopyJson}
-                    className="flex items-center gap-1 text-xs font-semibold text-[var(--text-primary)] hover:opacity-80 transition-opacity bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-2 py-1 rounded-lg cursor-pointer"
-                  >
-                    {copiedJson ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-                    <span>{copiedJson ? 'Kopierad!' : 'Kopiera JSON'}</span>
-                  </button>
-                </div>
-                <pre className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[10px] font-mono text-[var(--text-secondary)] overflow-x-auto max-h-60 leading-relaxed scrollbar-thin">
-                  {JSON.stringify(rawJsonData, null, 2)}
-                </pre>
-              </div>
+            {!recurringStatus.isRecurring && onMarkAsFixed && (
+              <button
+                type="button"
+                onClick={() => onMarkAsFixed(initialTransaction, isIncome ? 'income' : 'expense')}
+                className="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <ArrowsClockwise size={14} />
+                <span>{isIncome ? 'Gör till fast inkomst' : 'Gör till fast utgift'}</span>
+              </button>
             )}
           </div>
-        )}
+
+          {onDelete && (
+            <div>
+              {showDeleteConfirm ? (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-3 text-xs">
+                  <span className="font-medium text-rose-700 dark:text-rose-300">Ta bort transaktion permanent?</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
+                    >
+                      Avbryt
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(initialTransaction.id)}
+                      className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
+                    >
+                      Ja, ta bort
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full py-2 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Trash size={14} />
+                  <span>Ta bort transaktion</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

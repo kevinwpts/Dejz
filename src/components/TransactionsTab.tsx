@@ -32,10 +32,15 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
-  // Sortera alla transaktioner strikt efter köpdatum och köptid
+  // Sortera alla transaktioner strikt efter köpdatum och köptid, med reserverade högst upp
   const sortedTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions);
     return deduped.sort((a, b) => {
+      const aReserved = a.bookingStatus === 'PDNG' || a.bookingStatus === 'HOLD';
+      const bReserved = b.bookingStatus === 'PDNG' || b.bookingStatus === 'HOLD';
+      if (aReserved && !bReserved) return -1;
+      if (!aReserved && bReserved) return 1;
+
       const dateCmp = (b.date || '').localeCompare(a.date || '');
       if (dateCmp !== 0) return dateCmp;
       return getTransactionTime(b).localeCompare(getTransactionTime(a));
@@ -54,25 +59,56 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     });
   }, [sortedTransactions, searchQuery]);
 
-  // Gruppera per datum
+  // Gruppera per datum och reserverat
   const groupedByDate = useMemo(() => {
     const groups: {
       dateKey: string;
       label: string;
       net: number;
       items: TransactionItem[];
+      isReservedGroup?: boolean;
     }[] = [];
-    const map = new Map<string, TransactionItem[]>();
+
+    const reservedItems: TransactionItem[] = [];
+    const regularItems: TransactionItem[] = [];
 
     for (const tx of filteredTransactions) {
+      const status = (tx.bookingStatus || '').toUpperCase();
+      if (status === 'PDNG' || status === 'HOLD') {
+        reservedItems.push(tx);
+      } else {
+        regularItems.push(tx);
+      }
+    }
+
+    reservedItems.sort((a, b) => getTransactionTime(b).localeCompare(getTransactionTime(a)));
+
+    if (reservedItems.length > 0) {
+      const net = reservedItems.reduce((acc, item) => {
+        const amt = Number(item.amount) || 0;
+        return item.type === 'income' ? acc + amt : acc - amt;
+      }, 0);
+      groups.push({
+        dateKey: 'reserverade',
+        label: 'Reserverade',
+        net,
+        items: reservedItems,
+        isReservedGroup: true,
+      });
+    }
+
+    const map = new Map<string, TransactionItem[]>();
+    for (const tx of regularItems) {
       const key = tx.date || 'Okänt';
       const arr = map.get(key) || [];
       arr.push(tx);
       map.set(key, arr);
     }
 
-    for (const [dateKey, items] of map.entries()) {
-      // Sortera alla transaktioner inom samma datum fallande efter köptid
+    const sortedDateKeys = Array.from(map.keys()).sort((a, b) => b.localeCompare(a));
+
+    for (const dateKey of sortedDateKeys) {
+      const items = map.get(dateKey)!;
       items.sort((a, b) => getTransactionTime(b).localeCompare(getTransactionTime(a)));
       const net = items.reduce((acc, item) => {
         const amt = Number(item.amount) || 0;
@@ -126,11 +162,13 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               key={group.dateKey}
               className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-xs"
             >
-              {/* Datumgrupps-rubrik */}
+              {/* Datumgrupps-rubrik / Reserverade-rubrik */}
               <div className="flex items-center justify-between pb-3 mb-1 border-b border-[var(--border-subtle)] text-xs">
-                <span className="font-bold text-[var(--text-secondary)]">
-                  {group.label}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[var(--text-secondary)]">
+                    {group.label}
+                  </span>
+                </div>
                 <span
                   className={`font-display font-semibold tabular-nums ${
                     group.net > 0

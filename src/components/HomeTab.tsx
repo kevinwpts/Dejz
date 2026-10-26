@@ -11,6 +11,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatIsoTimeStockholm,
+  formatSwedishDateHeading,
 } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
 
@@ -180,15 +181,57 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
-  const recentTransactions = useMemo(() => {
+  const groupedRecentTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions || []);
-    return deduped
+    const sorted = deduped
       .sort((a, b) => {
+        const aReserved = a.bookingStatus === 'PDNG' || a.bookingStatus === 'HOLD';
+        const bReserved = b.bookingStatus === 'PDNG' || b.bookingStatus === 'HOLD';
+        if (aReserved && !bReserved) return -1;
+        if (!aReserved && bReserved) return 1;
+
         const dateCmp = (b.date || '').localeCompare(a.date || '');
         if (dateCmp !== 0) return dateCmp;
         return getTransactionTime(b).localeCompare(getTransactionTime(a));
       })
-      .slice(0, 8);
+      .slice(0, 10);
+
+    const groups: { dateKey: string; label: string; isReserved?: boolean; items: TransactionItem[] }[] = [];
+    const map = new Map<string, TransactionItem[]>();
+    const reservedItems: TransactionItem[] = [];
+
+    for (const tx of sorted) {
+      const isRes = tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
+      if (isRes) {
+        reservedItems.push(tx);
+      } else {
+        const key = tx.date || 'Okänt';
+        const arr = map.get(key) || [];
+        arr.push(tx);
+        map.set(key, arr);
+      }
+    }
+
+    if (reservedItems.length > 0) {
+      groups.push({
+        dateKey: 'reserverade',
+        label: 'Reserverade',
+        isReserved: true,
+        items: reservedItems,
+      });
+    }
+
+    const sortedDates = Array.from(map.keys()).sort((a, b) => b.localeCompare(a));
+    for (const dKey of sortedDates) {
+      const items = map.get(dKey)!;
+      groups.push({
+        dateKey: dKey,
+        label: formatSwedishDateHeading(dKey),
+        items,
+      });
+    }
+
+    return groups;
   }, [transactions]);
 
   return (
@@ -371,65 +414,75 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           )}
         </div>
 
-        {recentTransactions.length > 0 ? (
-          <div className="divide-y divide-[var(--border-subtle)]">
-            {recentTransactions.map((tx) => {
-              const isIncome = tx.type === 'income';
-              const recurringStatus = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
-              const isFixedOrRecurring = recurringStatus.isRecurring;
-
-              return (
-                <button
-                  key={tx.id}
-                  type="button"
-                  onClick={() => onSelectTransaction(tx)}
-                  className="w-full py-3.5 first:pt-2.5 last:pb-0 flex items-center justify-between text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0 pr-3">
-                    <ItemLogo
-                      name={tx.title}
-                      category={tx.category}
-                      logoUrl={tx.logo}
-                      size="md"
-                      isRecurring={recurringStatus.isRecurring}
-                    />
-                    <div className="min-w-0">
-                      <span className="font-semibold text-[var(--text-primary)] block truncate">
-                        {tx.title}
-                      </span>
-                      <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 truncate mt-0.5">
-                        <CategoryIcon category={tx.category} size={11} />
-                        <span>{tx.category}</span>
-                        <span className="text-[10px] text-[var(--text-muted)]/70">· {tx.date}</span>
-                      </div>
-                    </div>
+        {groupedRecentTransactions.length > 0 ? (
+          <div className="space-y-4">
+            {groupedRecentTransactions.map((group, groupIdx) => (
+              <div key={group.dateKey} className={groupIdx > 0 ? 'pt-3 border-t border-[var(--border-subtle)]' : ''}>
+                <div className="flex items-center justify-between mb-2 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-[var(--text-secondary)]">{group.label}</span>
                   </div>
+                </div>
+                <div className="divide-y divide-[var(--border-subtle)]">
+                  {group.items.map((tx) => {
+                    const isIncome = tx.type === 'income';
+                    const recurringStatus = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
+                    const isFixedOrRecurring = recurringStatus.isRecurring;
 
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    <div className={isFixedOrRecurring ? '' : 'text-right'}>
-                      <span
-                        className={`font-display font-bold tabular-nums block ${
-                          isIncome
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-[var(--text-primary)]'
-                        }`}
+                    return (
+                      <button
+                        key={tx.id}
+                        type="button"
+                        onClick={() => onSelectTransaction(tx)}
+                        className="w-full py-3.5 first:pt-2.5 last:pb-0 flex items-center justify-between text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer group"
                       >
-                        {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
-                      </span>
-                      {!isFixedOrRecurring && (
-                        <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
-                          {getTransactionTime(tx)}
-                        </span>
-                      )}
-                    </div>
-                    <CaretRight
-                      size={15}
-                      className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-                    />
-                  </div>
-                </button>
-              );
-            })}
+                        <div className="flex items-center gap-3.5 min-w-0 pr-3">
+                          <ItemLogo
+                            name={tx.title}
+                            category={tx.category}
+                            logoUrl={tx.logo}
+                            size="md"
+                            isRecurring={recurringStatus.isRecurring}
+                          />
+                          <div className="min-w-0">
+                            <span className="font-semibold text-[var(--text-primary)] block truncate">
+                              {tx.title}
+                            </span>
+                            <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 truncate mt-0.5">
+                              <CategoryIcon category={tx.category} size={11} />
+                              <span>{tx.category}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <div className={isFixedOrRecurring ? '' : 'text-right'}>
+                            <span
+                              className={`font-display font-bold tabular-nums block ${
+                                isIncome
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : 'text-[var(--text-primary)]'
+                              }`}
+                            >
+                              {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                            </span>
+                            {!isFixedOrRecurring && (
+                              <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                                {getTransactionTime(tx)}
+                              </span>
+                            )}
+                          </div>
+                          <CaretRight
+                            size={15}
+                            className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         ) : isInitialLoading ? (
           <div className="space-y-3 py-2 animate-pulse">

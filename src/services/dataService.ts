@@ -51,6 +51,8 @@ export function hasValidSavedCategoryBudgets(cats: any): boolean {
   return !isLegacyPercentDefault && budgetVals.some((v: number) => v > 0);
 }
 
+const isUuid = (id?: string) => Boolean(id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+
 export const dataService = {
   // --- User Settings ---
   async getSettings(userId: string): Promise<Config | null> {    // Get settings from profiles table
@@ -827,7 +829,7 @@ export const dataService = {
       return;
     }
     const payload: any = {
-      id: income.id.includes('-') ? income.id : undefined,
+      id: isUuid(income.id) ? income.id : undefined,
       user_id: userId,
       name: income.name,
       amount: income.amount,
@@ -955,7 +957,7 @@ export const dataService = {
     };
 
     const payload: any = {
-      id: expense.id,
+      id: isUuid(expense.id) ? expense.id : undefined,
       user_id: userId,
       name: expense.name,
       amount: expense.amount,
