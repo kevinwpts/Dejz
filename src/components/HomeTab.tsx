@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { 
   Bank, 
   ArrowRight,
@@ -11,8 +11,6 @@ import { CategoryIcon } from './CategoryIcon';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatIsoTimeStockholm,
-  getSwedishDateStr,
-  getYesterdaySwedishDateStr,
 } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
 
@@ -182,114 +180,88 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
-  const todayStr = useMemo(() => getSwedishDateStr(), []);
-  const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
-
-  // Selected date defaults to today
-  const [selectedDate, setSelectedDate] = useState<string>(() => getSwedishDateStr());
-
-  // Generate all days in the current pay period
-  const periodDays = useMemo(() => {
-    if (!period?.startDate || !period?.endDate) return [];
-    const start = new Date(period.startDate);
-    const end = new Date(period.endDate);
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
-
-    const days: {
-      dateStr: string;
-      dayNum: number;
-      monthShort: string;
-      weekdayShort: string;
-      isToday: boolean;
-      isYesterday: boolean;
-      isFuture: boolean;
-    }[] = [];
-
-    const cur = new Date(start);
-    while (cur <= end) {
-      const dateStr = getSwedishDateStr(cur);
-      const dayNum = cur.getDate();
-      const monthShort = new Intl.DateTimeFormat('sv-SE', {
-        timeZone: 'Europe/Stockholm',
-        month: 'short',
-      }).format(cur).replace('.', '');
-      const weekdayShort = new Intl.DateTimeFormat('sv-SE', {
-        timeZone: 'Europe/Stockholm',
-        weekday: 'short',
-      }).format(cur).replace('.', '');
-
-      const isToday = dateStr === todayStr;
-      const isYesterday = dateStr === yesterdayStr;
-      const isFuture = dateStr > todayStr;
-
-      days.push({
-        dateStr,
-        dayNum,
-        monthShort,
-        weekdayShort: weekdayShort.charAt(0).toUpperCase() + weekdayShort.slice(1),
-        isToday,
-        isYesterday,
-        isFuture,
-      });
-      cur.setDate(cur.getDate() + 1);
-    }
-    return days;
-  }, [period, todayStr, yesterdayStr]);
-
-  // Group transactions by date for quick lookup and timeline dot indicators
-  const transactionsByDate = useMemo(() => {
-    const map = new Map<string, TransactionItem[]>();
-    for (const tx of transactions || []) {
-      if (!tx.date) continue;
-      const arr = map.get(tx.date) || [];
-      arr.push(tx);
-      map.set(tx.date, arr);
-    }
-    return map;
+  const recentTransactions = useMemo(() => {
+    const deduped = deduplicateTransactions(transactions || []);
+    return deduped
+      .sort((a, b) => {
+        const dateCmp = (b.date || '').localeCompare(a.date || '');
+        if (dateCmp !== 0) return dateCmp;
+        return getTransactionTime(b).localeCompare(getTransactionTime(a));
+      })
+      .slice(0, 8);
   }, [transactions]);
-
-  // Transactions for the selected day, sorted by time (latest first)
-  const selectedDayTransactions = useMemo(() => {
-    const dayTxs = transactionsByDate.get(selectedDate) || [];
-    const deduped = deduplicateTransactions(dayTxs);
-    return deduped.sort((a, b) => {
-      return getTransactionTime(b).localeCompare(getTransactionTime(a));
-    });
-  }, [transactionsByDate, selectedDate]);
-
-  const timelineScrollRef = useRef<HTMLDivElement>(null);
-  const selectedDayPillRef = useRef<HTMLButtonElement>(null);
-
-  // Auto-scroll the timeline pill into view on change
-  useEffect(() => {
-    if (selectedDayPillRef.current) {
-      selectedDayPillRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
-    }
-  }, [selectedDate]);
-
-  // Initial scroll into view on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (selectedDayPillRef.current) {
-        selectedDayPillRef.current.scrollIntoView({
-          behavior: 'auto',
-          block: 'nearest',
-          inline: 'center',
-        });
-      }
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="space-y-5 pb-36 sm:pb-40 animate-fade-in">
       {/* ============================================================== */}
-      {/* MODUL 1: TOTALT SALDO                                          */}
+      {/* MODUL 1: KVAR ATT SPENDERA (Längst upp)                         */}
+      {/* ============================================================== */}
+      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-6">
+        {/* KVAR ATT SPENDERA (Dominant Focal Anchor) */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-[var(--text-muted)] font-medium">
+              Kvar att spendera
+            </span>
+            <span className="text-xs font-semibold text-[var(--text-secondary)] tabular-nums">
+              {period.startLabel} – {period.endLabel}
+            </span>
+          </div>
+
+          {isInitialLoading && accounts.length === 0 ? (
+            <div className="h-11 w-44 rounded-xl bg-[var(--surface-raised)] animate-pulse mt-1" />
+          ) : (
+            <div className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] tabular-nums">
+              {formatKr(kvarAttSpendera)}
+            </div>
+          )}
+        </div>
+
+        {/* 3-Column Breakdown separated by clean hairline dividers */}
+        <div className="grid grid-cols-3 divide-x divide-[var(--border-subtle)] border-t border-[var(--border-subtle)] mt-6 pt-4">
+          <div className="pr-3 text-left">
+            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
+              Inkomst
+            </span>
+            {isInitialLoading && accounts.length === 0 ? (
+              <div className="h-4 w-14 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+            ) : (
+              <span className="font-display font-bold text-sm text-emerald-600 dark:text-emerald-400 tabular-nums block">
+                +{formatKr(totalIncome)}
+              </span>
+            )}
+          </div>
+
+          <div className="px-3 text-left">
+            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
+              Fasta utgifter
+            </span>
+            {isInitialLoading && accounts.length === 0 ? (
+              <div className="h-4 w-14 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+            ) : (
+              <span className="font-display font-bold text-sm text-[var(--text-primary)] tabular-nums block">
+                -{formatKr(totalFixedExpenses)}
+              </span>
+            )}
+          </div>
+
+          <div className="pl-3 text-left">
+            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
+              Rörliga köp
+            </span>
+            {isInitialLoading && accounts.length === 0 ? (
+              <div className="h-4 w-14 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+            ) : (
+              <span className="font-display font-bold text-sm text-[var(--text-primary)] tabular-nums block">
+                -{formatKr(totalVariableSpent)}
+              </span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* MODUL 2: TOTALT SALDO                                          */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-6">
         {/* Totalt saldo */}
@@ -377,181 +349,31 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* ============================================================== */}
-      {/* MODUL 2: KVAR ATT SPENDERA                                     */}
-      {/* ============================================================== */}
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-6">
-        {/* KVAR ATT SPENDERA (Dominant Focal Anchor) */}
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[var(--text-muted)] font-medium">
-              Kvar att spendera
-            </span>
-            <span className="text-xs font-semibold text-[var(--text-secondary)] tabular-nums">
-              {period.startLabel} – {period.endLabel}
-            </span>
-          </div>
-
-          {isInitialLoading && accounts.length === 0 ? (
-            <div className="h-11 w-44 rounded-xl bg-[var(--surface-raised)] animate-pulse mt-1" />
-          ) : (
-            <div className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] tabular-nums">
-              {formatKr(kvarAttSpendera)}
-            </div>
-          )}
-        </div>
-
-        {/* 3-Column Breakdown separated by clean hairline dividers */}
-        <div className="grid grid-cols-3 divide-x divide-[var(--border-subtle)] border-t border-[var(--border-subtle)] mt-6 pt-4">
-          <div className="pr-3 text-left">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
-              Inkomst
-            </span>
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-4 w-14 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <span className="font-display font-bold text-sm text-emerald-600 dark:text-emerald-400 tabular-nums block">
-                +{formatKr(totalIncome)}
-              </span>
-            )}
-          </div>
-
-          <div className="px-3 text-left">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
-              Fasta utgifter
-            </span>
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-4 w-14 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <span className="font-display font-bold text-sm text-[var(--text-primary)] tabular-nums block">
-                -{formatKr(totalFixedExpenses)}
-              </span>
-            )}
-          </div>
-
-          <div className="pl-3 text-left">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
-              Rörliga köp
-            </span>
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-4 w-14 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <span className="font-display font-bold text-sm text-[var(--text-primary)] tabular-nums block">
-                -{formatKr(totalVariableSpent)}
-              </span>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* MODUL 3: TRANSAKTIONER TIDSLINJE                               */}
+      {/* MODUL 3: SENASTE TRANSAKTIONER                                 */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-xs">
-        {/* Module Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
-              Transaktioner
+              Senaste transaktioner
             </h2>
-            <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-              Tidslinje · {period.startLabel} – {period.endLabel}
-            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {selectedDate !== todayStr && (
-              <button
-                type="button"
-                onClick={() => setSelectedDate(todayStr)}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--surface-raised)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors cursor-pointer"
-              >
-                Idag
-              </button>
-            )}
-            {transactions.length > 0 && (
-              <button
-                type="button"
-                onClick={onNavigateToTransactions}
-                className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer ml-1"
-              >
-                <span>Alla</span>
-                <ArrowRight size={13} />
-              </button>
-            )}
-          </div>
+          {transactions.length > 0 && (
+            <button
+              type="button"
+              onClick={onNavigateToTransactions}
+              className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer"
+            >
+              <span>Visa alla</span>
+              <ArrowRight size={13} />
+            </button>
+          )}
         </div>
 
-        {/* Timeline Day Selector Strip */}
-        <div className="relative mb-4 -mx-1 px-1">
-          <div
-            ref={timelineScrollRef}
-            className="flex items-center gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none scroll-smooth"
-          >
-            {periodDays.map((d) => {
-              const isSelected = d.dateStr === selectedDate;
-              const dayTxs = transactionsByDate.get(d.dateStr) || [];
-              const hasTxs = dayTxs.length > 0;
-              const hasIncome = dayTxs.some((tx) => tx.type === 'income');
-
-              return (
-                <button
-                  key={d.dateStr}
-                  ref={isSelected ? selectedDayPillRef : null}
-                  type="button"
-                  onClick={() => setSelectedDate(d.dateStr)}
-                  className={`flex flex-col items-center justify-center min-w-[50px] py-2.5 px-2 rounded-2xl text-center transition-all cursor-pointer shrink-0 border ${
-                    isSelected
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] shadow-sm scale-[1.02]'
-                      : d.isToday
-                      ? 'bg-[var(--surface-raised)] text-[var(--text-primary)] border-indigo-500/40'
-                      : d.isFuture
-                      ? 'bg-[var(--bg-color)]/60 text-[var(--text-muted)] border-transparent opacity-60 hover:opacity-100'
-                      : 'bg-[var(--bg-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--border-strong)]'
-                  }`}
-                >
-                  <span
-                    className={`text-[10px] font-semibold tracking-wider ${
-                      isSelected
-                        ? 'text-[var(--bg-color)]/80 font-bold'
-                        : d.isToday
-                        ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-                        : 'text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {d.isToday ? 'Idag' : d.isYesterday ? 'Igår' : d.weekdayShort}
-                  </span>
-                  <span
-                    className={`font-display text-base font-bold tabular-nums mt-0.5 ${
-                      isSelected ? 'text-[var(--bg-color)]' : 'text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {d.dayNum}
-                  </span>
-                  <span className="h-1.5 flex items-center justify-center mt-1">
-                    {hasTxs ? (
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          isSelected
-                            ? 'bg-[var(--bg-color)]'
-                            : hasIncome
-                            ? 'bg-emerald-500'
-                            : 'bg-indigo-500 dark:bg-indigo-400'
-                        }`}
-                      />
-                    ) : (
-                      <span className="w-1.5 h-1.5" />
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Selected Day Transactions List */}
-        {selectedDayTransactions.length > 0 ? (
+        {recentTransactions.length > 0 ? (
           <div className="divide-y divide-[var(--border-subtle)]">
-            {selectedDayTransactions.map((tx) => {
+            {recentTransactions.map((tx) => {
               const isIncome = tx.type === 'income';
               const recurringStatus = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
               const isFixedOrRecurring = recurringStatus.isRecurring;
@@ -578,6 +400,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 truncate mt-0.5">
                         <CategoryIcon category={tx.category} size={11} />
                         <span>{tx.category}</span>
+                        <span className="text-[10px] text-[var(--text-muted)]/70">· {tx.date}</span>
                       </div>
                     </div>
                   </div>
@@ -610,7 +433,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         ) : isInitialLoading ? (
           <div className="space-y-3 py-2 animate-pulse">
-            {[1, 2].map((n) => (
+            {[1, 2, 3].map((n) => (
               <div key={n} className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
                   <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)]" />
@@ -629,18 +452,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <CalendarBlank size={20} weight="duotone" />
             </div>
             <p className="text-xs text-[var(--text-muted)]">
-              Inga transaktioner {selectedDate === todayStr ? 'idag' : selectedDate === yesterdayStr ? 'igår' : 'denna dag'}.
+              Inga transaktioner registrerade ännu.
             </p>
-            {selectedDate !== todayStr && (
-              <button
-                type="button"
-                onClick={() => setSelectedDate(todayStr)}
-                className="mt-2.5 text-xs font-semibold text-[var(--text-primary)] hover:underline inline-flex items-center gap-1 cursor-pointer"
-              >
-                <span>Tillbaka till idag</span>
-                <ArrowRight size={12} />
-              </button>
-            )}
           </div>
         )}
       </section>

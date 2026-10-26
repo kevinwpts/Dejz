@@ -8,7 +8,6 @@ import {
   Camera,
   ShieldCheck,
   CreditCard,
-  Info,
   ArrowsLeftRight,
   Tag,
   CaretRight,
@@ -763,14 +762,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       </div>
 
       {/* App Info Footer */}
-      <div className="text-center py-2 space-y-1">
-        <p className="text-xs text-[var(--text-muted)] font-medium flex items-center justify-center gap-1">
-          <Info size={14} />
-          <span>Dejz v1.0.0 · Svensk tidszon (Europe/Stockholm)</span>
-        </p>
-        <p className="text-[10px] text-[var(--text-muted)]/70">
-          Strikt betaldatumbaserad budgetering utan framtida datum.
-        </p>
+      <div className="flex items-center justify-center py-4">
+        <img
+          src="/dejz_mork.png"
+          alt="Dejz"
+          className="h-5 w-auto object-contain opacity-70 dark:opacity-80 dark:invert"
+        />
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash, PencilSimple, Check } from '@phosphor-icons/react';
 import { IncomeItem } from '../HomeTab';
-import { ItemLogo } from '../ItemLogo';
 
 interface IncomeModalProps {
   isOpen: boolean;
@@ -99,34 +98,6 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           >
             <X size={18} />
           </button>
-        </div>
-
-        {/* Hero Card */}
-        <div className="mb-4 p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <ItemLogo
-              name={initialIncome.name}
-              category={initialIncome.category}
-              logoUrl={initialIncome.logo}
-              size="lg"
-            />
-            <div className="min-w-0">
-              <span className="font-display font-bold text-base text-[var(--text-primary)] block truncate">
-                {initialIncome.name}
-              </span>
-              <span className="text-xs text-[var(--text-muted)] block truncate">
-                Den {initialIncome.payday}:e · {initialIncome.category}
-              </span>
-            </div>
-          </div>
-          <div className="text-right shrink-0">
-            <span className="font-display font-extrabold text-xl text-emerald-600 dark:text-emerald-400 tabular-nums block">
-              +{formatKr(initialIncome.amount)}
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">
-              / månad
-            </span>
-          </div>
         </div>
 
         {/* EDIT FORM or DETAILS VIEW */}

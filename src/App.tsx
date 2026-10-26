@@ -60,6 +60,8 @@ import {
   setExcludeInternalTransfers,
   setTransactionExcludedState,
   isTransactionManuallyExcluded,
+  getMerchantAliases,
+  saveMerchantAlias,
 } from './utils/appCache';
 import { isInternalTransferTransaction } from './utils/transferDetection';
 import { checkIsRecurringTransaction } from './utils/recurring';
@@ -148,6 +150,56 @@ function sanitizeTransactionItem(item: TransactionItem): TransactionItem {
     }
   } else if (updated.title) {
     updated.title = cleanDisplayMerchantName(updated.title);
+  }
+
+  // 3. Match against merchant aliases, fixed expenses, and incomes (including keyword/partial matching)
+  const aliases = getMerchantAliases();
+  const textToCheck = combinedText.toLowerCase();
+  let matched = false;
+
+  for (const [aliasKey, info] of Object.entries(aliases)) {
+    if (aliasKey && textToCheck.includes(aliasKey)) {
+      updated.title = info.name;
+      updated.category = info.category;
+      matched = true;
+      break;
+    }
+  }
+
+  if (!matched) {
+    try {
+      const cached = localStorage.getItem('dejz_app_state_cache_v2');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const fixedList = parsed.fixedExpenses || [];
+        const incomeList = parsed.incomes || [];
+
+        for (const f of fixedList) {
+          const fName = (f.name || '').toLowerCase().trim();
+          const shortName = fName.split(' ')[0];
+          if (fName && (textToCheck.includes(fName) || (shortName.length >= 3 && textToCheck.includes(shortName)))) {
+            updated.title = f.name;
+            updated.category = f.category;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          for (const inc of incomeList) {
+            const iName = (inc.name || '').toLowerCase().trim();
+            const shortName = iName.split(' ')[0];
+            if (iName && (textToCheck.includes(iName) || (shortName.length >= 3 && textToCheck.includes(shortName)))) {
+              updated.title = inc.name;
+              updated.category = inc.category;
+              matched = true;
+              break;
+            }
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
 
   return updated;
@@ -1265,6 +1317,12 @@ export const App: React.FC = () => {
   };
 
   const handleUpdateIncome = async (updated: IncomeItem) => {
+    const existing = incomes.find((i) => i.id === updated.id);
+    if (existing && existing.name.toLowerCase().trim() !== updated.name.toLowerCase().trim()) {
+      dismissIncomeMerchant(existing.name);
+      saveMerchantAlias(existing.name, updated.name, updated.category);
+    }
+    saveMerchantAlias(updated.name, updated.name, updated.category);
     unDismissIncomeMerchant(updated.name);
     saveManualIncomeOverride(updated.name, { amount: updated.amount, payday: updated.payday });
     const logo = updated.logo || getLogoUrl(updated.name, updated.category);
@@ -1274,6 +1332,13 @@ export const App: React.FC = () => {
       saveCachedAppState({ incomes: next });
       return next;
     });
+
+    setTransactions((prev) => {
+      const next = prev.map((tx) => sanitizeTransactionItem(tx));
+      saveCachedAppState({ transactions: next });
+      return next;
+    });
+
     if (userId) {
       await dataService
         .saveIncomeSource(userId, {
@@ -1367,6 +1432,12 @@ export const App: React.FC = () => {
   }, []);
 
   const handleUpdateFixed = async (updated: FixedExpenseItem) => {
+    const existing = fixedExpenses.find((f) => f.id === updated.id);
+    if (existing && existing.name.toLowerCase().trim() !== updated.name.toLowerCase().trim()) {
+      dismissFixedMerchant(existing.name);
+      saveMerchantAlias(existing.name, updated.name, updated.category);
+    }
+    saveMerchantAlias(updated.name, updated.name, updated.category);
     unDismissFixedMerchant(updated.name);
     saveManualFixedOverride(updated.name, { amount: updated.amount, dueDay: updated.dueDay });
     const logo = updated.logo || getLogoUrl(updated.name, updated.category);
@@ -1378,6 +1449,13 @@ export const App: React.FC = () => {
       saveCachedAppState({ fixedExpenses: next });
       return next;
     });
+
+    setTransactions((prev) => {
+      const next = prev.map((tx) => sanitizeTransactionItem(tx));
+      saveCachedAppState({ transactions: next });
+      return next;
+    });
+
     if (userId) {
       await dataService
         .saveFixedExpense(userId, {

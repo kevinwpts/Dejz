@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash, PencilSimple, Check } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../HomeTab';
-import { ItemLogo } from '../ItemLogo';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -110,35 +109,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
           >
             <X size={18} />
           </button>
-        </div>
-
-        {/* Hero Card */}
-        <div className="mb-4 p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <ItemLogo
-              name={initialExpense.name}
-              category={initialExpense.category}
-              logoUrl={initialExpense.logo}
-              size="lg"
-            />
-            <div className="min-w-0">
-              <span className="font-display font-bold text-base text-[var(--text-primary)] block truncate">
-                {initialExpense.name}
-              </span>
-              <span className="text-xs text-[var(--text-muted)] block truncate">
-                Den {initialExpense.dueDay}:e · {initialExpense.category}
-                {initialExpense.paymentMethod ? ` · ${initialExpense.paymentMethod}` : ''}
-              </span>
-            </div>
-          </div>
-          <div className="text-right shrink-0">
-            <span className="font-display font-extrabold text-xl text-[var(--text-primary)] tabular-nums block">
-              -{formatKr(initialExpense.amount)}
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">
-              / månad
-            </span>
-          </div>
         </div>
 
         {/* EDIT FORM or DETAILS VIEW */}

@@ -306,3 +306,26 @@ export function saveStoredIncomeCategories(cats: Category[]): void {
   }
 }
 
+const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v1';
+
+export function getMerchantAliases(): Record<string, { name: string; category: string }> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(MERCHANT_ALIASES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveMerchantAlias(rawName: string, targetName: string, category: string): void {
+  if (typeof window === 'undefined' || !rawName) return;
+  try {
+    const map = getMerchantAliases();
+    map[normalizeMerchantKey(rawName)] = { name: targetName, category };
+    localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
+}
+
