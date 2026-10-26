@@ -185,10 +185,24 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
           time: item.time || existing.time,
           logo: item.logo || existing.logo,
           note: item.note || existing.note,
+          isHearted: item.isHearted ?? existing.isHearted,
+          isWaitingForPackage: item.isWaitingForPackage ?? existing.isWaitingForPackage,
+          paymentMethod: item.paymentMethod || existing.paymentMethod,
+          receiptUrl: item.receiptUrl || existing.receiptUrl,
+          receiptName: item.receiptName || existing.receiptName,
           // Behåll det tidigaste köpdatumet/tiden om den befintliga posten hade preliminärt datum
           date: (existing.bookingStatus === 'PDNG' || existing.bookingStatus === 'HOLD') && existing.date && existing.date <= item.date
             ? existing.date
             : item.date,
+        };
+      } else {
+        result[dupIndex] = {
+          ...existing,
+          isHearted: existing.isHearted ?? item.isHearted,
+          isWaitingForPackage: existing.isWaitingForPackage ?? item.isWaitingForPackage,
+          paymentMethod: existing.paymentMethod || item.paymentMethod,
+          receiptUrl: existing.receiptUrl || item.receiptUrl,
+          receiptName: existing.receiptName || item.receiptName,
         };
       }
       continue;

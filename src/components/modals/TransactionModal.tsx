@@ -1,24 +1,46 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
-  Bank,
   Heart,
+  Package,
   Paperclip,
   Trash,
+  PencilSimple,
   FileText,
   Eye,
   EyeSlash,
   ArrowsClockwise,
+  CaretDown,
+  Check,
+  Bank,
+  UserPlus,
+  ShareNetwork,
+  Copy,
+  ChatCircleText,
 } from '@phosphor-icons/react';
-import { TransactionItem, getTransactionTime, FixedExpenseItem, IncomeItem } from '../HomeTab';
+import { SwishLogo } from '../SwishLogo';
+import {
+  TransactionItem,
+  getTransactionTime,
+  FixedExpenseItem,
+  IncomeItem,
+  AccountItem,
+} from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
+import { CategoryIcon } from '../CategoryIcon';
 import { formatSwedishFullDate } from '../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../utils/recurring';
-import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../../constants';
+import {
+  getStoredExpenseCategories,
+  getStoredIncomeCategories,
+  getStoredPaymentMethods,
+  normalizeCategoryToValid,
+} from '../../utils/appCache';
 
 interface TransactionModalProps {
   isOpen: boolean;
   initialTransaction?: TransactionItem | null;
+  accounts?: AccountItem[];
   fixedExpenses?: FixedExpenseItem[];
   incomes?: IncomeItem[];
   onClose: () => void;
@@ -28,12 +50,52 @@ interface TransactionModalProps {
   onExclude?: (id: string, exclude: boolean) => void;
   onMarkAsFixed?: (tx: TransactionItem, kind: 'expense' | 'income') => void;
   onToggleHeart?: (id: string, isHearted: boolean) => void;
+  onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   isInternalTransfer?: boolean;
+}
+
+function getDefaultPaymentMethodForTx(tx: TransactionItem): string {
+  if (tx.paymentMethod) return tx.paymentMethod;
+  const combined = `${tx.title || ''} ${tx.category || ''} ${tx.rawDescription || ''}`.toLowerCase();
+  if (combined.includes('swish')) return 'Swish';
+  if (combined.includes('autogiro')) return 'Autogiro';
+  if (combined.includes('klarna')) return 'Klarna';
+  if (combined.includes('faktura') || combined.includes('e-faktura')) return 'Faktura';
+  if (tx.type === 'income') return 'Överföring';
+  return 'Kort';
+}
+
+interface SwishContact {
+  id: string;
+  name: string;
+  phone: string;
+}
+
+const SWISH_CONTACTS_STORAGE_KEY = 'dejz_swish_contacts';
+
+function loadSwishContacts(): SwishContact[] {
+  try {
+    const raw = localStorage.getItem(SWISH_CONTACTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSwishContacts(contacts: SwishContact[]) {
+  try {
+    localStorage.setItem(SWISH_CONTACTS_STORAGE_KEY, JSON.stringify(contacts));
+  } catch {
+    // ignore
+  }
 }
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
   isOpen,
   initialTransaction,
+  accounts = [],
   fixedExpenses = [],
   incomes = [],
   onClose,
@@ -42,26 +104,90 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onExclude,
   onMarkAsFixed,
   onToggleHeart,
-  isInternalTransfer: _propIsInternalTransfer,
+  onTogglePackage,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState('');
+  const [amount, setAmount] = useState<number | string>('');
+  const [date, setDate] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Kort');
   const [note, setNote] = useState('');
   const [category, setCategory] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Swish / Be om Swish state
+  const [isSwishOpen, setIsSwishOpen] = useState(false);
+  const [swishMode, setSwishMode] = useState<'request' | 'send'>('request');
+  const [swishAmount, setSwishAmount] = useState<number>(0);
+  const [swishPhone, setSwishPhone] = useState('');
+  const [swishRecipientName, setSwishRecipientName] = useState('');
+  const [swishMessage, setSwishMessage] = useState('');
+  const [swishContacts, setSwishContacts] = useState<SwishContact[]>(() => loadSwishContacts());
+  const [isAddingContact, setIsAddingContact] = useState(false);
+  const [newContactName, setNewContactName] = useState('');
+  const [newContactPhone, setNewContactPhone] = useState('');
+  const [swishFeedback, setSwishFeedback] = useState<string | null>(null);
+
+  const isIncome = initialTransaction?.type === 'income';
+
+  const availableCategories = useMemo(() => {
+    const list = isIncome ? getStoredIncomeCategories() : getStoredExpenseCategories();
+    return list.map((c) => c.name);
+  }, [isOpen, isIncome]);
+
+  const availablePaymentMethods = useMemo(() => {
+    const stored = getStoredPaymentMethods().map((m) => m.name);
+    if (paymentMethod && !stored.includes(paymentMethod)) {
+      return [...stored, paymentMethod];
+    }
+    return stored;
+  }, [isOpen, paymentMethod]);
 
   useEffect(() => {
     if (initialTransaction) {
+      setTitle(initialTransaction.title || '');
+      setAmount(initialTransaction.amount);
+      setDate(initialTransaction.date || '');
+      setPaymentMethod(getDefaultPaymentMethodForTx(initialTransaction));
       setNote(initialTransaction.note || '');
-      setCategory(initialTransaction.category || (initialTransaction.type === 'income' ? 'Lön' : 'Övrigt'));
+      const kind = initialTransaction.type === 'income' ? 'income' : 'expense';
+      setCategory(
+        normalizeCategoryToValid(
+          initialTransaction.category || (kind === 'income' ? 'Lön' : 'Övrigt'),
+          kind
+        )
+      );
+      setIsEditing(false);
+      setIsCatDropdownOpen(false);
+      setShowDeleteConfirm(false);
+      setIsSwishOpen(false);
+      setSwishMode('request');
+      setSwishAmount(Math.max(1, Math.round(initialTransaction.amount / 2)));
+      setSwishMessage(initialTransaction.title || '');
+      setSwishFeedback(null);
+      setIsAddingContact(false);
     }
-  }, [initialTransaction]);
+  }, [initialTransaction, isOpen]);
+
+  const resolvedAccountDisplay = useMemo(() => {
+    if (!initialTransaction) return null;
+    if (initialTransaction.bankAccountName) return initialTransaction.bankAccountName;
+
+    if (accounts.length > 0) {
+      const checking = accounts.find((a) => a.type === 'checking') || accounts[0];
+      return `${checking.bankName} · ${checking.name}`;
+    }
+
+    return null;
+  }, [initialTransaction, accounts]);
 
   if (!isOpen || !initialTransaction) return null;
 
   const formatKr = (val: number) =>
     new Intl.NumberFormat('sv-SE').format(Math.round(val)) + ' kr';
 
-  const isIncome = initialTransaction.type === 'income';
   const txTime = getTransactionTime(initialTransaction);
   const isExcluded = Boolean(initialTransaction.isExcluded);
   const recurringStatus = checkIsRecurringTransaction(
@@ -70,63 +196,87 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     incomes
   );
 
-  const availableCategories = isIncome ? DEFAULT_INCOME_CATEGORIES : DEFAULT_EXPENSE_CATEGORIES;
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    const numAmt = Math.max(0, Math.round(Number(amount) || 0));
+    if (!title.trim() || numAmt <= 0) return;
 
-  const handleNoteChange = (newNote: string) => {
-    setNote(newNote);
     if (onUpdate) {
       onUpdate({
         ...initialTransaction,
-        note: newNote,
+        title: title.trim(),
+        amount: numAmt,
+        date: date || initialTransaction.date,
         category,
+        paymentMethod,
+        note: note.trim() || undefined,
       });
     }
+    setIsEditing(false);
+    onClose();
   };
 
-  const handleCategoryChange = (newCat: string) => {
-    setCategory(newCat);
-    if (onUpdate) {
-      onUpdate({
-        ...initialTransaction,
-        note,
-        category: newCat,
-      });
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(initialTransaction.id);
     }
+    setShowDeleteConfirm(false);
+    onClose();
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 bg-black/60 backdrop-blur-xs animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg my-auto bg-[var(--surface-color)] rounded-t-3xl sm:rounded-2xl p-6 border border-[var(--border-subtle)] shadow-xl max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md mt-auto bg-[var(--surface-color)] rounded-t-3xl rounded-b-none p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-x border-[var(--border-subtle)] shadow-modal max-h-[92dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Bottom-Sheet Drag Handle */}
+        <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)] mx-auto mb-3" />
+
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] mb-5">
-          <div className="flex items-center gap-2">
-            {initialTransaction.id.startsWith('bank-') && (
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-semibold border border-blue-500/20 flex items-center gap-1">
-                <Bank size={11} />
-                Bank
-              </span>
-            )}
-          </div>
+        <div className="flex items-center justify-end pb-3.5 border-b border-[var(--border-subtle)] mb-5">
           <div className="flex items-center gap-1.5">
+            {onTogglePackage && (
+              <button
+                type="button"
+                onClick={() =>
+                  onTogglePackage(
+                    initialTransaction.id,
+                    !initialTransaction.isWaitingForPackage
+                  )
+                }
+                title="Väntar på paket"
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer border ${
+                  initialTransaction.isWaitingForPackage
+                    ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
+                    : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Package
+                  size={16}
+                  weight={initialTransaction.isWaitingForPackage ? 'fill' : 'regular'}
+                  className={initialTransaction.isWaitingForPackage ? 'text-amber-500' : ''}
+                />
+              </button>
+            )}
             {onToggleHeart && (
               <button
                 type="button"
-                onClick={() => onToggleHeart(initialTransaction.id, !initialTransaction.isHearted)}
-                className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                onClick={() =>
+                  onToggleHeart(initialTransaction.id, !initialTransaction.isHearted)
+                }
+                title="Spara köp"
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer border ${
                   initialTransaction.isHearted
-                    ? 'text-rose-500 bg-rose-500/10 hover:bg-rose-500/20'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                    ? 'text-rose-500 bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20'
+                    : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
-                title={initialTransaction.isHearted ? 'Ta bort hjärtmarkering' : 'Hjärtmarkera transaktion'}
               >
                 <Heart
-                  size={18}
+                  size={16}
                   weight={initialTransaction.isHearted ? 'fill' : 'regular'}
                   className={initialTransaction.isHearted ? 'text-rose-500' : ''}
                 />
@@ -135,15 +285,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        {/* Hero Receipt Header */}
-        <div className="text-center mb-6 pb-6 border-b border-[var(--border-subtle)]">
+        {/* Hero Receipt Header (Clean: Logo + Full Name + Amount, matching FixedExpenseModal) */}
+        <div className="text-center mb-5 pb-5 border-b border-[var(--border-subtle)]">
           <div className="flex justify-center mb-3">
             <ItemLogo
               name={initialTransaction.title}
@@ -153,15 +303,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               isRecurring={recurringStatus.isRecurring}
             />
           </div>
-          <h2 className="font-display font-bold text-xl text-[var(--text-primary)] mb-1 truncate px-2">
+          <h2 className="font-display font-bold text-lg sm:text-xl text-[var(--text-primary)] mb-2 break-words px-2">
             {initialTransaction.title}
           </h2>
-          <div className="text-xs text-[var(--text-muted)] flex items-center justify-center gap-1.5 mb-3">
-            <span>{formatSwedishFullDate(initialTransaction.date)} · kl {txTime}</span>
-          </div>
           <div
             className={`font-display font-extrabold text-3xl tabular-nums ${
-              isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'
+              isIncome
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-[var(--text-primary)]'
             }`}
           >
             {isIncome ? '+' : '-'}
@@ -169,195 +318,710 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
         </div>
 
-        {/* Editable Fields: Category & Note */}
-        <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-4 text-xs mb-5">
-          {/* Category Selector */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[var(--text-muted)] font-medium">Kategori</label>
-            <div className="relative">
-              <select
-                value={category}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                {availableCategories.map((cat) => (
-                  <option key={cat.id || cat.name} value={cat.name}>
-                    {cat.name}
-                  </option>
-                ))}
-                {!availableCategories.some((c) => c.name === category) && category && (
-                  <option value={category}>{category}</option>
-                )}
-              </select>
-            </div>
-          </div>
-
-          {/* Editable Note */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[var(--text-muted)] font-medium">Anteckning</label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => handleNoteChange(e.target.value)}
-              placeholder="Skriv en anteckning..."
-              className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* Kvitto / Bilaga Section */}
-        <div className="mb-5 p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-              <Paperclip size={14} className="text-[var(--text-secondary)]" />
-              <span>Kvitto eller bilaga</span>
-            </span>
-            {initialTransaction.receiptUrl && onUpdate && (
-              <button
-                type="button"
-                onClick={() => {
-                  onUpdate({
-                    ...initialTransaction,
-                    receiptUrl: undefined,
-                    receiptName: undefined,
-                  });
-                }}
-                className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Trash size={12} />
-                <span>Ta bort</span>
-              </button>
-            )}
-          </div>
-
-          {initialTransaction.receiptUrl ? (
-            <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)]">
-              {initialTransaction.receiptUrl.startsWith('data:image/') ? (
-                <img
-                  src={initialTransaction.receiptUrl}
-                  alt="Kvitto"
-                  className="w-10 h-10 rounded-lg object-cover border border-[var(--border-subtle)] shrink-0"
+        {/* EDIT FORM or DETAILS VIEW */}
+        {isEditing ? (
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5 text-xs">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[var(--text-muted)] font-medium">Namn</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
                 />
-              ) : (
-                <div className="w-10 h-10 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                  <FileText size={18} />
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
-                  {initialTransaction.receiptName || 'Bifogad fil'}
-                </span>
               </div>
-              <a
-                href={initialTransaction.receiptUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="px-2.5 py-1 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center gap-1 shrink-0"
-              >
-                <Eye size={12} />
-                <span>Visa</span>
-              </a>
-            </div>
-          ) : (
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,application/pdf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file || !onUpdate) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    if (typeof reader.result === 'string') {
-                      onUpdate({
-                        ...initialTransaction,
-                        receiptUrl: reader.result,
-                        receiptName: file.name,
-                      });
-                    }
-                  };
-                  reader.readAsDataURL(file);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 px-3 rounded-xl border border-dashed border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
-              >
-                <Paperclip size={13} />
-                <span>Bifoga kvitto...</span>
-              </button>
-            </div>
-          )}
-        </div>
 
-        {/* Action Buttons Row */}
-        <div className="space-y-2 mb-2">
-          <div className="grid grid-cols-2 gap-2">
-            {onExclude && (
-              <button
-                type="button"
-                onClick={() => onExclude(initialTransaction.id, !isExcluded)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border ${
-                  isExcluded
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-                }`}
-              >
-                <EyeSlash size={14} />
-                <span>{isExcluded ? 'Inkludera i budget' : 'Exkludera'}</span>
-              </button>
-            )}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[var(--text-muted)] font-medium">Belopp (kr)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] tabular-nums transition-colors"
+                />
+              </div>
 
-            {!recurringStatus.isRecurring && onMarkAsFixed && (
-              <button
-                type="button"
-                onClick={() => onMarkAsFixed(initialTransaction, isIncome ? 'income' : 'expense')}
-                className="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-              >
-                <ArrowsClockwise size={14} />
-                <span>{isIncome ? 'Gör till fast inkomst' : 'Gör till fast utgift'}</span>
-              </button>
-            )}
-          </div>
-
-          {onDelete && (
-            <div>
-              {showDeleteConfirm ? (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-3 text-xs">
-                  <span className="font-medium text-rose-700 dark:text-rose-300">Ta bort transaktion permanent?</span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
-                    >
-                      Avbryt
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(initialTransaction.id)}
-                      className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
-                    >
-                      Ja, ta bort
-                    </button>
-                  </div>
-                </div>
-              ) : (
+              {/* Custom Category Dropdown */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[var(--text-muted)] font-medium">Kategori</label>
                 <button
                   type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full py-2 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  onClick={() => setIsCatDropdownOpen((prev) => !prev)}
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-between cursor-pointer"
                 >
-                  <Trash size={14} />
-                  <span>Ta bort transaktion</span>
+                  <span className="flex items-center gap-2">
+                    <CategoryIcon category={category} size={14} />
+                    <span>{category}</span>
+                  </span>
+                  <CaretDown
+                    size={13}
+                    className={`text-[var(--text-muted)] transition-transform ${
+                      isCatDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
                 </button>
+                {isCatDropdownOpen && (
+                  <div className="grid grid-cols-2 gap-1.5 p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] mt-1 max-h-48 overflow-y-auto">
+                    {availableCategories.map((c) => {
+                      const isSel = c === category;
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => {
+                            setCategory(c);
+                            setIsCatDropdownOpen(false);
+                          }}
+                          className={`px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                            isSel
+                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
+                              : 'hover:bg-[var(--bg-color)] text-[var(--text-primary)] font-medium'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5 truncate">
+                            <CategoryIcon category={c} size={13} />
+                            <span className="truncate">{c}</span>
+                          </span>
+                          {isSel && <Check size={12} weight="bold" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[var(--text-muted)] font-medium">Datum</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[var(--text-muted)] font-medium">Betalsätt</label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
+                  >
+                    {availablePaymentMethods.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[var(--text-muted)] font-medium">Anteckning</label>
+                <input
+                  type="text"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Lägg till anteckning..."
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                />
+              </div>
+
+              {(onExclude || (!recurringStatus.isRecurring && onMarkAsFixed)) && (
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  {onExclude && (
+                    <button
+                      type="button"
+                      onClick={() => onExclude(initialTransaction.id, !isExcluded)}
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border ${
+                        isExcluded
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-[var(--surface-color)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                      }`}
+                    >
+                      <EyeSlash size={13} />
+                      <span>{isExcluded ? 'Inkludera' : 'Exkludera'}</span>
+                    </button>
+                  )}
+
+                  {!recurringStatus.isRecurring && onMarkAsFixed && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onMarkAsFixed(initialTransaction, isIncome ? 'income' : 'expense')
+                      }
+                      className="py-2 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                    >
+                      <ArrowsClockwise size={13} />
+                      <span>Gör till fast</span>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex-1 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              >
+                Avbryt
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                <Check size={14} weight="bold" />
+                <span>Spara</span>
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-xs">
+              {resolvedAccountDisplay && (
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <span className="text-[var(--text-muted)] shrink-0">Konto</span>
+                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 text-right min-w-0">
+                    <Bank size={13} className="text-[var(--text-secondary)] shrink-0" />
+                    <span className="truncate">{resolvedAccountDisplay}</span>
+                  </span>
+                </div>
+              )}
+
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <span className="text-[var(--text-muted)]">Kategori</span>
+                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <CategoryIcon category={category} size={13} />
+                  <span>{category}</span>
+                </span>
+              </div>
+
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <span className="text-[var(--text-muted)]">Datum</span>
+                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                  {formatSwedishFullDate(initialTransaction.date)} · {txTime}
+                </span>
+              </div>
+
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <span className="text-[var(--text-muted)]">Betalsätt</span>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  {paymentMethod}
+                </span>
+              </div>
+
+              {initialTransaction.note && (
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <span className="text-[var(--text-muted)] shrink-0">Anteckning</span>
+                  <span className="font-semibold text-[var(--text-primary)] text-right break-words">
+                    {initialTransaction.note}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Kvitto / Faktura Section */}
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <Paperclip size={14} className="text-[var(--text-secondary)]" />
+                  <span>Kvitto</span>
+                </span>
+                {initialTransaction.receiptUrl && onUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdate({
+                        ...initialTransaction,
+                        receiptUrl: undefined,
+                        receiptName: undefined,
+                      });
+                    }}
+                    className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash size={12} />
+                    <span>Ta bort</span>
+                  </button>
+                )}
+              </div>
+
+              {initialTransaction.receiptUrl ? (
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)]">
+                  {initialTransaction.receiptUrl.startsWith('data:image/') ? (
+                    <img
+                      src={initialTransaction.receiptUrl}
+                      alt="Kvitto"
+                      className="w-9 h-9 rounded-lg object-cover border border-[var(--border-subtle)] shrink-0"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                      <FileText size={16} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
+                      {initialTransaction.receiptName || 'Kvitto'}
+                    </span>
+                  </div>
+                  <a
+                    href={initialTransaction.receiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center gap-1 shrink-0"
+                  >
+                    <Eye size={12} />
+                    <span>Visa</span>
+                  </a>
+                </div>
+              ) : (
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !onUpdate) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          onUpdate({
+                            ...initialTransaction,
+                            receiptUrl: reader.result,
+                            receiptName: file.name,
+                          });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-2 px-3 rounded-xl border border-dashed border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Paperclip size={13} />
+                    <span>Bifoga kvitto</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Swisha / Be om Swish Section */}
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
+              <button
+                type="button"
+                onClick={() => setIsSwishOpen((prev) => !prev)}
+                className="w-full flex items-center justify-between gap-2 text-left cursor-pointer"
+              >
+                <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                  <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                    <SwishLogo size={18} />
+                  </span>
+                  <span>Swisha / Be om Swish</span>
+                </span>
+                <CaretDown
+                  size={13}
+                  weight="bold"
+                  className={`text-[var(--text-muted)] transition-transform duration-200 ${
+                    isSwishOpen ? 'rotate-180 text-[var(--text-primary)]' : ''
+                  }`}
+                />
+              </button>
+
+              {isSwishOpen && (
+                <div className="pt-2 border-t border-[var(--border-subtle)] space-y-3 animate-fade-in text-xs">
+                  {/* Växla mellan Be om Swish och Swisha */}
+                  <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)]">
+                    <button
+                      type="button"
+                      onClick={() => setSwishMode('request')}
+                      className={`py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        swishMode === 'request'
+                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      Be om Swish
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSwishMode('send')}
+                      className={`py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        swishMode === 'send'
+                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      Swisha
+                    </button>
+                  </div>
+
+                  {/* Snabbval för uppdelning av beloppet */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-medium text-[var(--text-muted)] block">
+                      Belopp att {swishMode === 'request' ? 'be om' : 'swisha'}
+                    </span>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        {
+                          label: 'Dela lika (50%)',
+                          val: Math.max(1, Math.round(initialTransaction.amount / 2)),
+                        },
+                        {
+                          label: 'En tredjedel',
+                          val: Math.max(1, Math.round(initialTransaction.amount / 3)),
+                        },
+                        {
+                          label: 'Hela (100%)',
+                          val: Math.max(1, Math.round(initialTransaction.amount)),
+                        },
+                      ].map((opt) => {
+                        const isSel = Number(swishAmount) === opt.val;
+                        return (
+                          <button
+                            key={opt.label}
+                            type="button"
+                            onClick={() => setSwishAmount(opt.val)}
+                            className={`py-2 px-2 rounded-xl border text-[11px] font-semibold transition-all cursor-pointer ${
+                              isSel
+                                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                                : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
+                            }`}
+                          >
+                            <span className="block truncate">{opt.label}</span>
+                            <span className="font-display font-bold tabular-nums block mt-0.5">
+                              {opt.val} kr
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <label className="text-[11px] text-[var(--text-muted)] block mb-1">
+                          Valfritt belopp (kr)
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={swishAmount}
+                          onChange={(e) => setSwishAmount(Math.max(0, Number(e.target.value) || 0))}
+                          className="w-full py-2 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-[var(--text-muted)] block mb-1">
+                          Meddelande
+                        </label>
+                        <input
+                          type="text"
+                          value={swishMessage}
+                          onChange={(e) => setSwishMessage(e.target.value)}
+                          placeholder={initialTransaction.title}
+                          className="w-full py-2 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sparade vänner / kontakter */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-medium text-[var(--text-muted)]">
+                        Vänner / mottagare
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingContact((prev) => !prev)}
+                        className="text-[11px] font-semibold text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1 cursor-pointer"
+                      >
+                        <UserPlus size={13} />
+                        <span>{isAddingContact ? 'Avbryt' : '+ Lägg till vän'}</span>
+                      </button>
+                    </div>
+
+                    {isAddingContact && (
+                      <div className="p-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={newContactName}
+                            onChange={(e) => setNewContactName(e.target.value)}
+                            placeholder="Namn (t.ex. Emma)"
+                            className="py-2 px-2.5 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none"
+                          />
+                          <input
+                            type="tel"
+                            value={newContactPhone}
+                            onChange={(e) => setNewContactPhone(e.target.value)}
+                            placeholder="070-123 45 67"
+                            className="py-2 px-2.5 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none tabular-nums"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newContactName.trim() || !newContactPhone.trim()) return;
+                            const next: SwishContact[] = [
+                              ...swishContacts,
+                              {
+                                id: `sc-${Date.now()}`,
+                                name: newContactName.trim(),
+                                phone: newContactPhone.trim(),
+                              },
+                            ];
+                            setSwishContacts(next);
+                            saveSwishContacts(next);
+                            setSwishPhone(newContactPhone.trim());
+                            setSwishRecipientName(newContactName.trim());
+                            setNewContactName('');
+                            setNewContactPhone('');
+                            setIsAddingContact(false);
+                          }}
+                          className="w-full py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold cursor-pointer"
+                        >
+                          Spara vän
+                        </button>
+                      </div>
+                    )}
+
+                    {swishContacts.length > 0 && (
+                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                        {swishContacts.map((c) => {
+                          const isSelected = swishPhone === c.phone;
+                          return (
+                            <div
+                              key={c.id}
+                              className={`shrink-0 pl-2.5 pr-1.5 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
+                                isSelected
+                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                                  : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSwishPhone(c.phone);
+                                  setSwishRecipientName(c.name);
+                                }}
+                                className="text-left cursor-pointer"
+                              >
+                                <span className="text-[11px] font-bold block leading-tight">
+                                  {c.name}
+                                </span>
+                                <span className="text-[10px] opacity-75 tabular-nums block leading-tight">
+                                  {c.phone}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const next = swishContacts.filter((item) => item.id !== c.id);
+                                  setSwishContacts(next);
+                                  saveSwishContacts(next);
+                                  if (swishPhone === c.phone) {
+                                    setSwishPhone('');
+                                    setSwishRecipientName('');
+                                  }
+                                }}
+                                className="p-0.5 rounded hover:opacity-70 cursor-pointer"
+                                title="Ta bort vän"
+                              >
+                                <X size={11} />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <input
+                      type="tel"
+                      value={swishPhone}
+                      onChange={(e) => {
+                        setSwishPhone(e.target.value);
+                        setSwishRecipientName('');
+                      }}
+                      placeholder="Telefonnummer (t.ex. 070-123 45 67)"
+                      className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                    />
+                  </div>
+
+                  {swishFeedback && (
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold text-center animate-fade-in">
+                      {swishFeedback}
+                    </div>
+                  )}
+
+                  {/* Knappar för Be om Swish eller Öppna Swish */}
+                  {swishMode === 'request' ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const msgText = `Hej${
+                            swishRecipientName ? ` ${swishRecipientName}` : ''
+                          }! Kan du swisha ${swishAmount} kr för ${
+                            swishMessage || initialTransaction.title
+                          }?`;
+                          const cleanPhone = swishPhone.replace(/[^\d+]/g, '');
+                          if (cleanPhone) {
+                            window.location.href = `sms:${cleanPhone}?&body=${encodeURIComponent(
+                              msgText
+                            )}`;
+                          } else if (navigator.share) {
+                            navigator
+                              .share({
+                                title: 'Be om Swish',
+                                text: msgText,
+                              })
+                              .catch(() => {});
+                          } else {
+                            navigator.clipboard?.writeText(msgText);
+                            setSwishFeedback('Swish-förfrågan kopierad!');
+                            setTimeout(() => setSwishFeedback(null), 2500);
+                          }
+                        }}
+                        className="py-2.5 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
+                      >
+                        <ChatCircleText size={14} weight="bold" />
+                        <span>Be via SMS</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const msgText = `Hej${
+                            swishRecipientName ? ` ${swishRecipientName}` : ''
+                          }! Kan du swisha ${swishAmount} kr för ${
+                            swishMessage || initialTransaction.title
+                          }?`;
+                          if (navigator.share) {
+                            navigator
+                              .share({
+                                title: 'Be om Swish',
+                                text: msgText,
+                              })
+                              .catch(() => {});
+                          } else {
+                            navigator.clipboard?.writeText(msgText);
+                            setSwishFeedback('Förfrågan kopierad till urklipp!');
+                            setTimeout(() => setSwishFeedback(null), 2500);
+                          }
+                        }}
+                        className="py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                      >
+                        {typeof navigator !== 'undefined' && 'share' in navigator ? (
+                          <>
+                            <ShareNetwork size={14} />
+                            <span>Dela förfrågan</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={14} />
+                            <span>Kopiera text</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cleanPhone = swishPhone.replace(/\D/g, '');
+                        if (cleanPhone) {
+                          navigator.clipboard?.writeText(cleanPhone);
+                        }
+                        const payload = {
+                          version: 1,
+                          payee: { value: cleanPhone, editable: true },
+                          amount: { value: Number(swishAmount) || 0, editable: true },
+                          message: {
+                            value: swishMessage || initialTransaction.title,
+                            editable: true,
+                          },
+                        };
+                        setSwishFeedback(
+                          cleanPhone
+                            ? `Nummer (${swishPhone}) kopierat – öppnar Swish...`
+                            : 'Öppnar Swish...'
+                        );
+                        setTimeout(() => setSwishFeedback(null), 3000);
+                        window.location.href = `swish://payment?data=${encodeURIComponent(
+                          JSON.stringify(payload)
+                        )}`;
+                      }}
+                      className="w-full py-2.5 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+                    >
+                      <SwishLogo size={15} />
+                      <span>Öppna Swish ({swishAmount} kr)</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Delete Confirmation Box */}
+            {showDeleteConfirm ? (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-3 text-xs animate-fade-in">
+                <span className="font-medium text-rose-700 dark:text-rose-300">
+                  Ta bort permanent?
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
+                  >
+                    Avbryt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
+                  >
+                    Ta bort
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {onUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  >
+                    <PencilSimple size={14} />
+                    <span>Redigera</span>
+                  </button>
+                )}
+
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Trash size={14} />
+                    <span>Ta bort</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

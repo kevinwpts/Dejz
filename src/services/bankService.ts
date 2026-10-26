@@ -164,20 +164,62 @@ export function saveTxReconciliationOverlay(
   writeJsonStorage(LOCAL_TX_RECONCILIATION_OVERLAY_KEY, map);
 }
 
+export function compactBankTxRawJson(raw: any): any {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const compact: Record<string, any> = {};
+  if (raw.balance_after_transaction?.amount !== undefined) {
+    compact.balance_after_transaction = {
+      amount: raw.balance_after_transaction.amount,
+    };
+  }
+  if (raw.card_transaction && typeof raw.card_transaction === 'object') {
+    compact.card_transaction = {
+      authorized_date: raw.card_transaction.authorized_date,
+      transaction_date_time: raw.card_transaction.transaction_date_time,
+      transaction_date: raw.card_transaction.transaction_date,
+      time: raw.card_transaction.time,
+    };
+  }
+  if (raw.remittance_information !== undefined) {
+    compact.remittance_information = raw.remittance_information;
+  }
+  const timeFields = [
+    'transaction_date_time',
+    'execution_date_time',
+    'acceptance_date_time',
+    'origination_date_time',
+    'origination_date',
+    'transaction_time',
+    'time',
+    'execution_time',
+    'timestamp',
+    'transaction_date',
+    'value_date',
+    'booking_date',
+  ];
+  for (const key of timeFields) {
+    if (raw[key] !== undefined && raw[key] !== null) {
+      compact[key] = raw[key];
+    }
+  }
+  return Object.keys(compact).length > 0 ? compact : undefined;
+}
+
 export function mergeTxWithReconciliationOverlay(tx: BankTransactionItem): BankTransactionItem {
-  const overlay = getTxReconciliationOverlayMap()[tx.id];
-  if (!overlay) return tx;
+  const compactedTx = tx.raw_json ? { ...tx, raw_json: compactBankTxRawJson(tx.raw_json) } : tx;
+  const overlay = getTxReconciliationOverlayMap()[compactedTx.id];
+  if (!overlay) return compactedTx;
   // Prefer DB reconciliation_status if it's already non-unprocessed and newer, otherwise merge overlay
   if (
-    tx.reconciliation_status &&
-    tx.reconciliation_status !== 'unprocessed' &&
-    tx.user_decision_at &&
+    compactedTx.reconciliation_status &&
+    compactedTx.reconciliation_status !== 'unprocessed' &&
+    compactedTx.user_decision_at &&
     overlay.user_decision_at &&
-    tx.user_decision_at >= overlay.user_decision_at
+    compactedTx.user_decision_at >= overlay.user_decision_at
   ) {
-    return tx;
+    return compactedTx;
   }
-  return { ...tx, ...overlay };
+  return { ...compactedTx, ...overlay };
 }
 
 async function invokeEnableBanking<T>(payload: Record<string, unknown>): Promise<T> {

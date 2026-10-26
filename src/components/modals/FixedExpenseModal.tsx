@@ -1,40 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { X, Trash, PencilSimple, Check, ArrowsClockwise } from '@phosphor-icons/react';
-import { FixedExpenseItem } from '../HomeTab';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import {
+  X,
+  Trash,
+  PencilSimple,
+  Check,
+  CaretDown,
+  Bank,
+  Paperclip,
+  FileText,
+  Eye,
+} from '@phosphor-icons/react';
+import { FixedExpenseItem, AccountItem, TransactionItem } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
+import { findMatchingFixedExpense } from '../../utils/recurring';
+import {
+  getStoredExpenseCategories,
+  getStoredPaymentMethods,
+  normalizeCategoryToValid,
+} from '../../utils/appCache';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
   initialExpense?: FixedExpenseItem | null;
+  accounts?: AccountItem[];
+  transactions?: TransactionItem[];
   onClose: () => void;
   onSave?: (data: Omit<FixedExpenseItem, 'id'>) => void;
   onUpdate?: (item: FixedExpenseItem) => void;
   onDelete?: (id: string) => void;
 }
 
-const CATEGORIES = [
-  'Boende',
-  'Räkningar',
-  'Abonnemang',
-  'Försäkring',
-  'Transport',
-  'Lån',
-  'Hälsa',
-  'Övrigt',
-];
-
-const PAYMENT_METHODS = [
-  'Autogiro',
-  'Kort',
-  'E-faktura',
-  'Faktura',
-  'Överföring',
-];
-
 export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   isOpen,
   initialExpense,
+  accounts = [],
+  transactions = [],
   onClose,
   onUpdate,
   onDelete,
@@ -46,18 +47,52 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [category, setCategory] = useState('Räkningar');
   const [paymentMethod, setPaymentMethod] = useState('Autogiro');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const availableCategories = useMemo(
+    () => getStoredExpenseCategories().map((c) => c.name),
+    [isOpen]
+  );
+  const availablePaymentMethods = useMemo(() => {
+    const stored = getStoredPaymentMethods().map((m) => m.name);
+    if (paymentMethod && !stored.includes(paymentMethod)) {
+      return [...stored, paymentMethod];
+    }
+    return stored;
+  }, [isOpen, paymentMethod]);
 
   useEffect(() => {
     if (initialExpense) {
       setName(initialExpense.name);
       setAmount(initialExpense.amount);
       setDueDay(initialExpense.dueDay || 27);
-      setCategory(initialExpense.category || 'Räkningar');
+      setCategory(normalizeCategoryToValid(initialExpense.category || 'Räkningar', 'expense'));
       setPaymentMethod(initialExpense.paymentMethod || 'Autogiro');
       setIsEditing(false);
       setShowDeleteConfirm(false);
+      setIsCatDropdownOpen(false);
     }
   }, [initialExpense, isOpen]);
+
+  const resolvedAccountDisplay = useMemo(() => {
+    if (!initialExpense) return null;
+    if (initialExpense.bankAccountName) return initialExpense.bankAccountName;
+
+    const matchedTx = transactions.find(
+      (tx) => tx.type !== 'income' && Boolean(findMatchingFixedExpense(tx, [initialExpense]))
+    );
+    if (matchedTx?.bankAccountName) {
+      return matchedTx.bankAccountName;
+    }
+
+    if (accounts.length > 0) {
+      const checking = accounts.find((a) => a.type === 'checking') || accounts[0];
+      return `${checking.bankName} · ${checking.name}`;
+    }
+
+    return null;
+  }, [initialExpense, transactions, accounts]);
 
   if (!isOpen || !initialExpense) return null;
 
@@ -93,32 +128,29 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 bg-black/60 backdrop-blur-xs animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg my-auto bg-[var(--surface-color)] rounded-t-3xl sm:rounded-2xl p-6 border border-[var(--border-subtle)] shadow-xl max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md mt-auto bg-[var(--surface-color)] rounded-t-3xl rounded-b-none p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-x border-[var(--border-subtle)] shadow-modal max-h-[92dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Bottom-Sheet Drag Handle */}
+        <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)] mx-auto mb-3" />
+
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] mb-5">
-          <div className="flex items-center gap-1.5">
-            <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-semibold border border-indigo-500/20 flex items-center gap-1">
-              <ArrowsClockwise size={11} />
-              Fast utgift
-            </span>
-          </div>
+        <div className="flex items-center justify-end pb-3.5 border-b border-[var(--border-subtle)] mb-5">
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Hero Receipt Header */}
-        <div className="text-center mb-6 pb-6 border-b border-[var(--border-subtle)]">
+        {/* Hero Receipt Header (Clean: Logo + Full Name + Amount) */}
+        <div className="text-center mb-5 pb-5 border-b border-[var(--border-subtle)]">
           <div className="flex justify-center mb-3">
             <ItemLogo
               name={initialExpense.name}
@@ -128,12 +160,9 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               isRecurring={true}
             />
           </div>
-          <h2 className="font-display font-bold text-xl text-[var(--text-primary)] mb-1 truncate px-2">
+          <h2 className="font-display font-bold text-lg sm:text-xl text-[var(--text-primary)] mb-2 break-words px-2">
             {initialExpense.name}
           </h2>
-          <div className="text-xs text-[var(--text-muted)] flex items-center justify-center gap-1.5 mb-3">
-            <span>Dragningsdag den {initialExpense.dueDay}:e varje månad</span>
-          </div>
           <div className="font-display font-extrabold text-3xl tabular-nums text-[var(--text-primary)]">
             -{formatKr(initialExpense.amount)}
           </div>
@@ -141,21 +170,21 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
         {/* EDIT FORM or DETAILS VIEW */}
         {isEditing ? (
-          <form onSubmit={handleSave} className="space-y-4 mb-5">
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-4 text-xs">
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5 text-xs">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[var(--text-muted)] font-medium">Namn på utgift</label>
+                <label className="text-[var(--text-muted)] font-medium">Namn</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[var(--text-muted)] font-medium">Månatligt belopp (kr)</label>
+                <label className="text-[var(--text-muted)] font-medium">Belopp (kr)</label>
                 <input
                   type="number"
                   min="0"
@@ -163,13 +192,62 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
-                  className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] tabular-nums transition-colors"
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] tabular-nums transition-colors"
                 />
+              </div>
+
+              {/* Custom Category Dropdown */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[var(--text-muted)] font-medium">Kategori</label>
+                <button
+                  type="button"
+                  onClick={() => setIsCatDropdownOpen((prev) => !prev)}
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-between cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <CategoryIcon category={category} size={14} />
+                    <span>{category}</span>
+                  </span>
+                  <CaretDown
+                    size={13}
+                    className={`text-[var(--text-muted)] transition-transform ${
+                      isCatDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                {isCatDropdownOpen && (
+                  <div className="grid grid-cols-2 gap-1.5 p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] mt-1 max-h-48 overflow-y-auto">
+                    {availableCategories.map((c) => {
+                      const isSel = c === category;
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => {
+                            setCategory(c);
+                            setIsCatDropdownOpen(false);
+                          }}
+                          className={`px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                            isSel
+                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
+                              : 'hover:bg-[var(--bg-color)] text-[var(--text-primary)] font-medium'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5 truncate">
+                            <CategoryIcon category={c} size={13} />
+                            <span className="truncate">{c}</span>
+                          </span>
+                          {isSel && <Check size={12} weight="bold" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[var(--text-muted)] font-medium">Dragningsdag</label>
+                  <label className="text-[var(--text-muted)] font-medium">Dag</label>
                   <select
                     value={dueDay}
                     onChange={(e) => setDueDay(Number(e.target.value))}
@@ -184,38 +262,23 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[var(--text-muted)] font-medium">Kategori</label>
+                  <label className="text-[var(--text-muted)] font-medium">Betalsätt</label>
                   <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
                   >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
+                    {availablePaymentMethods.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[var(--text-muted)] font-medium">Betalsätt</label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors cursor-pointer"
-                >
-                  {PAYMENT_METHODS.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
 
-            <div className="flex items-center gap-2.5 pt-1">
+            <div className="flex items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
@@ -225,17 +288,27 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                className="flex-1 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
               >
                 <Check size={14} weight="bold" />
-                <span>Spara ändringar</span>
+                <span>Spara</span>
               </button>
             </div>
           </form>
         ) : (
-          <div className="space-y-4 mb-5">
+          <div className="space-y-4">
             <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-xs">
-              <div className="px-4 py-3 flex items-center justify-between gap-4">
+              {resolvedAccountDisplay && (
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <span className="text-[var(--text-muted)] shrink-0">Konto</span>
+                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 text-right min-w-0">
+                    <Bank size={13} className="text-[var(--text-secondary)] shrink-0" />
+                    <span className="truncate">{resolvedAccountDisplay}</span>
+                  </span>
+                </div>
+              )}
+
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
                 <span className="text-[var(--text-muted)]">Kategori</span>
                 <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                   <CategoryIcon category={initialExpense.category} size={13} />
@@ -243,14 +316,14 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 </span>
               </div>
 
-              <div className="px-4 py-3 flex items-center justify-between gap-4">
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
                 <span className="text-[var(--text-muted)]">Dragningsdag</span>
                 <span className="font-semibold text-[var(--text-primary)]">
-                  Den {initialExpense.dueDay}:e varje månad
+                  Den {initialExpense.dueDay}:e
                 </span>
               </div>
 
-              <div className="px-4 py-3 flex items-center justify-between gap-4">
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
                 <span className="text-[var(--text-muted)]">Betalsätt</span>
                 <span className="font-semibold text-[var(--text-primary)]">
                   {initialExpense.paymentMethod || 'Autogiro'}
@@ -258,11 +331,101 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </div>
             </div>
 
+            {/* Kvitto / Faktura Section */}
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <Paperclip size={14} className="text-[var(--text-secondary)]" />
+                  <span>Kvitto</span>
+                </span>
+                {initialExpense.receiptUrl && onUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdate({
+                        ...initialExpense,
+                        receiptUrl: undefined,
+                        receiptName: undefined,
+                      });
+                    }}
+                    className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash size={12} />
+                    <span>Ta bort</span>
+                  </button>
+                )}
+              </div>
+
+              {initialExpense.receiptUrl ? (
+                <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)]">
+                  {initialExpense.receiptUrl.startsWith('data:image/') ? (
+                    <img
+                      src={initialExpense.receiptUrl}
+                      alt="Kvitto"
+                      className="w-9 h-9 rounded-lg object-cover border border-[var(--border-subtle)] shrink-0"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                      <FileText size={16} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
+                      {initialExpense.receiptName || 'Kvitto'}
+                    </span>
+                  </div>
+                  <a
+                    href={initialExpense.receiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-2.5 py-1 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center gap-1 shrink-0"
+                  >
+                    <Eye size={12} />
+                    <span>Visa</span>
+                  </a>
+                </div>
+              ) : (
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !onUpdate) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          onUpdate({
+                            ...initialExpense,
+                            receiptUrl: reader.result,
+                            receiptName: file.name,
+                          });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-2 px-3 rounded-xl border border-dashed border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Paperclip size={13} />
+                    <span>Bifoga kvitto</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Delete Confirmation Box */}
             {showDeleteConfirm ? (
               <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-3 text-xs animate-fade-in">
-                <span className="font-medium text-rose-700 dark:text-rose-300">Ta bort &quot;{initialExpense.name}&quot; permanent?</span>
-                <div className="flex items-center gap-1.5">
+                <span className="font-medium text-rose-700 dark:text-rose-300">
+                  Ta bort permanent?
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
@@ -275,35 +438,33 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                     onClick={handleDelete}
                     className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
                   >
-                    Ja, ta bort
+                    Ta bort
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  {onUpdate && (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                    >
-                      <PencilSimple size={14} />
-                      <span>Redigera</span>
-                    </button>
-                  )}
+              <div className="grid grid-cols-2 gap-2">
+                {onUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  >
+                    <PencilSimple size={14} />
+                    <span>Redigera</span>
+                  </button>
+                )}
 
-                  {onDelete && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Trash size={14} />
-                      <span>Ta bort</span>
-                    </button>
-                  )}
-                </div>
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Trash size={14} />
+                    <span>Ta bort</span>
+                  </button>
+                )}
               </div>
             )}
           </div>

@@ -31,6 +31,10 @@ import {
   Wrench
 } from '@phosphor-icons/react';
 import { getCategoryColor } from '../utils/categoryColors';
+import {
+  getStoredExpenseCategories,
+  getStoredIncomeCategories,
+} from '../utils/appCache';
 
 export const AVAILABLE_CATEGORY_ICONS = [
   { id: 'cart', label: 'Mat & Dagligvaror', icon: ShoppingCart },
@@ -187,8 +191,25 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   style = {},
   badge = false,
 }) => {
-  const IconComponent = resolveCategoryIconComponent(category, iconId);
-  const resolvedColor = explicitColor || getCategoryColor(category);
+  let effectiveIconId = iconId;
+  let storedColor: string | undefined;
+
+  if (category) {
+    const lower = category.toLowerCase().trim();
+    const allStored = [...getStoredExpenseCategories(), ...getStoredIncomeCategories()];
+    const matched = allStored.find((c) => c.name.toLowerCase().trim() === lower);
+    if (matched) {
+      if (!effectiveIconId && matched.icon) {
+        effectiveIconId = matched.icon;
+      }
+      if (matched.color) {
+        storedColor = matched.color;
+      }
+    }
+  }
+
+  const IconComponent = resolveCategoryIconComponent(category, effectiveIconId);
+  const resolvedColor = explicitColor || storedColor || getCategoryColor(category);
 
   if (badge) {
     return (

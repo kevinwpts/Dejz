@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Lock,
@@ -13,14 +13,20 @@ import { supabase, isSupabaseConfigured } from '../../supabaseClient';
 
 interface AuthModalProps {
   isOpen: boolean;
+  initialView?: 'login' | 'register';
   onClose: () => void;
-  onSuccess: (email: string) => void;
+  onSuccess: (email: string, mode?: 'login' | 'register') => void;
 }
 
 type AuthView = 'login' | 'register' | 'forgot_password';
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const [view, setView] = useState<AuthView>('login');
+export const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  initialView = 'login',
+  onClose,
+  onSuccess,
+}) => {
+  const [view, setView] = useState<AuthView>(initialView);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,6 +35,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setView(initialView);
+      setErrorMsg(null);
+      setSuccessMsg(null);
+    }
+  }, [isOpen, initialView]);
 
   if (!isOpen) return null;
 
@@ -122,11 +136,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         });
         if (error) throw error;
 
-        setSuccessMsg('Ditt konto har skapats! Kontrollera din e-post för bekräftelse.');
-        if (data.user?.email) {
-          onSuccess(data.user.email);
-        }
-        setTimeout(() => onClose(), 1200);
+        setSuccessMsg('Ditt konto har skapats!');
+        onSuccess(data.user?.email || cleanEmail, 'register');
+        setTimeout(() => onClose(), 600);
       } else {
         // Login
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -137,9 +149,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
         setSuccessMsg('Välkommen tillbaka!');
         if (data.user?.email) {
-          onSuccess(data.user.email);
+          onSuccess(data.user.email, 'login');
         }
-        setTimeout(() => onClose(), 600);
+        setTimeout(() => onClose(), 400);
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Ett fel inträffade. Kontrollera dina uppgifter.');
@@ -150,13 +162,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 bg-black/60 backdrop-blur-xs animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md my-auto bg-[var(--surface-color)] rounded-t-3xl sm:rounded-2xl p-6 border border-[var(--border-subtle)] shadow-xl animate-fade-in max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md mt-auto bg-[var(--surface-color)] rounded-t-3xl rounded-b-none p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-x border-[var(--border-subtle)] shadow-modal max-h-[92dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)] mx-auto mb-3" />
         {/* Top Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">

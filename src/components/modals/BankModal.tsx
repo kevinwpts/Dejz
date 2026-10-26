@@ -250,8 +250,8 @@ export const BankModal: React.FC<BankModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="w-full max-w-md max-h-[90vh] flex flex-col bg-[var(--surface-color)] rounded-t-3xl sm:rounded-2xl border border-[var(--border-subtle)] shadow-xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 bg-black/60 backdrop-blur-xs animate-fade-in">
+      <div className="w-full max-w-md mt-auto max-h-[92dvh] flex flex-col bg-[var(--surface-color)] rounded-t-3xl rounded-b-none pb-[env(safe-area-inset-bottom,0px)] border-t border-x border-[var(--border-subtle)] shadow-modal overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">

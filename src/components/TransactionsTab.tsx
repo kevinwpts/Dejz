@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { CaretRight, Receipt, MagnifyingGlass, X } from '@phosphor-icons/react';
+import { Receipt, MagnifyingGlass, X, Package, Heart, Paperclip } from '@phosphor-icons/react';
 import { TransactionItem, getTransactionTime, FixedExpenseItem, IncomeItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
@@ -14,11 +14,12 @@ interface TransactionsTabProps {
   totalVariableSpent?: number;
   onSelectTransaction: (tx: TransactionItem) => void;
   onDeleteTransaction?: (id: string) => void;
-  // Legacy props from App.tsx if any
   period?: any;
   targetPayday?: number;
   weekendHandling?: any;
 }
+
+type TxFilterMode = 'all' | 'expense' | 'income';
 
 export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   transactions,
@@ -27,78 +28,48 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   onSelectTransaction,
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filterMode, setFilterMode] = useState<TxFilterMode>('all');
 
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
-  // Sortera alla transaktioner strikt efter köpdatum och köptid, med reserverade högst upp
+  // Sortera alla transaktioner strikt efter köpdatum och köptid
   const sortedTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions);
     return deduped.sort((a, b) => {
-      const aReserved = a.bookingStatus === 'PDNG' || a.bookingStatus === 'HOLD';
-      const bReserved = b.bookingStatus === 'PDNG' || b.bookingStatus === 'HOLD';
-      if (aReserved && !bReserved) return -1;
-      if (!aReserved && bReserved) return 1;
-
       const dateCmp = (b.date || '').localeCompare(a.date || '');
       if (dateCmp !== 0) return dateCmp;
       return getTransactionTime(b).localeCompare(getTransactionTime(a));
     });
   }, [transactions]);
 
-  // Eventuell sökfiltrering
+  // Sök- och typfiltrering
   const filteredTransactions = useMemo(() => {
-    if (!searchQuery.trim()) return sortedTransactions;
-    const q = searchQuery.toLowerCase().trim();
     return sortedTransactions.filter((tx) => {
+      if (filterMode === 'expense' && tx.type === 'income') return false;
+      if (filterMode === 'income' && tx.type !== 'income') return false;
+
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase().trim();
       const titleMatch = (tx.title || '').toLowerCase().includes(q);
       const catMatch = (tx.category || '').toLowerCase().includes(q);
       const noteMatch = (tx.note || '').toLowerCase().includes(q);
       return titleMatch || catMatch || noteMatch;
     });
-  }, [sortedTransactions, searchQuery]);
+  }, [sortedTransactions, searchQuery, filterMode]);
 
-  // Gruppera per datum och reserverat
+  // Gruppera strikt per datum så varje dag enbart visar dagens händelser
   const groupedByDate = useMemo(() => {
     const groups: {
       dateKey: string;
       label: string;
       net: number;
       items: TransactionItem[];
-      isReservedGroup?: boolean;
     }[] = [];
 
-    const reservedItems: TransactionItem[] = [];
-    const regularItems: TransactionItem[] = [];
-
-    for (const tx of filteredTransactions) {
-      const status = (tx.bookingStatus || '').toUpperCase();
-      if (status === 'PDNG' || status === 'HOLD') {
-        reservedItems.push(tx);
-      } else {
-        regularItems.push(tx);
-      }
-    }
-
-    reservedItems.sort((a, b) => getTransactionTime(b).localeCompare(getTransactionTime(a)));
-
-    if (reservedItems.length > 0) {
-      const net = reservedItems.reduce((acc, item) => {
-        const amt = Number(item.amount) || 0;
-        return item.type === 'income' ? acc + amt : acc - amt;
-      }, 0);
-      groups.push({
-        dateKey: 'reserverade',
-        label: 'Reserverade',
-        net,
-        items: reservedItems,
-        isReservedGroup: true,
-      });
-    }
-
     const map = new Map<string, TransactionItem[]>();
-    for (const tx of regularItems) {
+    for (const tx of filteredTransactions) {
       const key = tx.date || 'Okänt';
       const arr = map.get(key) || [];
       arr.push(tx);
@@ -125,32 +96,59 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     return groups;
   }, [filteredTransactions]);
 
+  const filterTabs: { id: TxFilterMode; label: string }[] = [
+    { id: 'all', label: 'Alla' },
+    { id: 'expense', label: 'Utgifter' },
+    { id: 'income', label: 'Inkomster' },
+  ];
+
   return (
     <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-      {/* Sökfält */}
-      {sortedTransactions.length > 8 && (
+      {/* Sökfält & Snabbfilter i toppen */}
+      <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-3.5 space-y-2.5">
         <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none">
-            <MagnifyingGlass size={15} />
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none">
+            <MagnifyingGlass size={16} />
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Sök transaktioner..."
-            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors shadow-xs"
+            placeholder="Sök köp eller kategori..."
+            className="w-full pl-10 pr-8 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg cursor-pointer"
             >
-              <X size={13} />
+              <X size={14} />
             </button>
           )}
         </div>
-      )}
+
+        {/* Segmented Filter Control */}
+        <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+          {filterTabs.map((tab) => {
+            const isActive = filterMode === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFilterMode(tab.id)}
+                className={`py-1.5 px-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer truncate ${
+                  isActive
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ============================================================== */}
       {/* TRANSAKTIONSLISTA (GRUPPERAD PER DATUM)                        */}
@@ -160,15 +158,13 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           {groupedByDate.map((group) => (
             <section
               key={group.dateKey}
-              className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-xs"
+              className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5"
             >
-              {/* Datumgrupps-rubrik / Reserverade-rubrik */}
-              <div className="flex items-center justify-between pb-3 mb-1 border-b border-[var(--border-subtle)] text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[var(--text-secondary)]">
-                    {group.label}
-                  </span>
-                </div>
+              {/* Datumgrupps-rubrik */}
+              <div className="flex items-center justify-between pb-2.5 mb-1 border-b border-[var(--border-subtle)] text-xs">
+                <span className="font-bold text-[var(--text-secondary)]">
+                  {group.label}
+                </span>
                 <span
                   className={`font-display font-semibold tabular-nums ${
                     group.net > 0
@@ -188,15 +184,19 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               <div className="divide-y divide-[var(--border-subtle)]">
                 {group.items.map((tx) => {
                   const isIncome = tx.type === 'income';
-                  const recurringStatus = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
+                  const recurringStatus = checkIsRecurringTransaction(
+                    tx,
+                    fixedExpenses,
+                    incomes
+                  );
                   return (
                     <button
                       key={tx.id}
                       type="button"
                       onClick={() => onSelectTransaction(tx)}
-                      className="w-full py-3.5 first:pt-2.5 last:pb-0 flex items-center justify-between text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer group"
+                      className="w-full py-3 first:pt-2.5 last:pb-0 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0 pr-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <ItemLogo
                           name={tx.title}
                           category={tx.category}
@@ -204,36 +204,51 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                           size="md"
                           isRecurring={recurringStatus.isRecurring}
                         />
-                        <div className="min-w-0">
-                          <span className="font-semibold text-[var(--text-primary)] block truncate">
-                            {tx.title}
+                        <div className="min-w-0 flex-1">
+                          <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                            <span className="truncate">{tx.title}</span>
+                            {tx.isHearted && (
+                              <Heart
+                                size={13}
+                                weight="fill"
+                                className="text-rose-500 shrink-0"
+                              />
+                            )}
+                            {tx.isWaitingForPackage && (
+                              <Package
+                                size={13}
+                                weight="fill"
+                                className="text-amber-500 shrink-0"
+                              />
+                            )}
+                            {tx.receiptUrl && (
+                              <Paperclip
+                                size={13}
+                                weight="bold"
+                                className="text-[var(--text-secondary)] shrink-0"
+                              />
+                            )}
                           </span>
-                          <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 truncate mt-0.5">
-                            <CategoryIcon category={tx.category} size={11} />
-                            <span>{tx.category}</span>
-                          </div>
+                          <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
+                            <CategoryIcon category={tx.category} size={12} />
+                            <span className="truncate">{tx.category}</span>
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        <div className="text-right">
-                          <span
-                            className={`font-display font-bold tabular-nums block ${
-                              isIncome
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-[var(--text-primary)]'
-                            }`}
-                          >
-                            {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
-                          </span>
-                          <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
-                            {getTransactionTime(tx)}
-                          </span>
-                        </div>
-                        <CaretRight
-                          size={15}
-                          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-                        />
+                      <div className="text-right shrink-0">
+                        <span
+                          className={`font-display font-bold tabular-nums block ${
+                            isIncome
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        >
+                          {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                        </span>
+                        <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                          {getTransactionTime(tx)}
+                        </span>
                       </div>
                     </button>
                   );
@@ -243,17 +258,12 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           ))}
         </div>
       ) : (
-        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-8 text-center animate-fade-in shadow-xs">
-          <div className="w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-3">
-            <Receipt size={22} weight="duotone" />
+        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center animate-fade-in">
+          <div className="w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2.5">
+            <Receipt size={20} weight="duotone" />
           </div>
-          <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-            Inga transaktioner registrerade
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
-            {searchQuery
-              ? `Ingen transaktion matchade sökningen "${searchQuery}".`
-              : 'Dina transaktioner kommer att visas här så fort du synkar ditt konto.'}
+          <p className="text-xs font-semibold text-[var(--text-primary)]">
+            Inga transaktioner hittades
           </p>
         </section>
       )}

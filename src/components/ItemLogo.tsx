@@ -58,15 +58,15 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-8 rounded-lg',
-    md: 'w-9 h-9 rounded-xl',
-    lg: 'w-11 h-11 rounded-xl',
+    sm: 'w-9 h-9 rounded-xl',
+    md: 'w-11 h-11 rounded-2xl',
+    lg: 'w-14 h-14 rounded-2xl',
   }[size];
 
   const iconSize = {
-    sm: 16,
-    md: 18,
-    lg: 22,
+    sm: 18,
+    md: 22,
+    lg: 28,
   }[size];
 
   const renderCategoryIcon = () => {

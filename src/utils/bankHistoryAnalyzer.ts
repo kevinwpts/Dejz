@@ -1067,6 +1067,28 @@ export function categorizeBankTransactionForApp(
     }
   }
 
+  for (const rule of EXTENDED_FIXED_EXPENSE_RULES) {
+    if (rule.keywords.some((kw) => combined.includes(kw.toLowerCase()))) {
+      const preset = rule.presetId
+        ? SWEDISH_EXPENSE_PRESETS.find((p) => p.id === rule.presetId)
+        : undefined;
+      const isGenericHousingPreset = rule.presetId === 'hyra-bostad';
+      const cleanedRaw = cleanDisplayMerchantName(
+        tx.counterparty_name || tx.description || ''
+      );
+      const displayName =
+        isGenericHousingPreset && cleanedRaw.length >= 3
+          ? `Hyra (${cleanedRaw})`
+          : preset?.name || rule.fallbackName;
+      const category = resolveCategory([preset?.category || rule.category]);
+      return {
+        merchant: displayName,
+        category,
+        logo: getLogoUrl(displayName, category),
+      };
+    }
+  }
+
   const cleanedName = cleanDisplayMerchantName(tx.counterparty_name || tx.description || 'Kortköp');
   const category = resolveCategory(['Shopping', 'Mat & dryck', 'Övrigt']);
   return {

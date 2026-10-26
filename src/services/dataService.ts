@@ -803,6 +803,7 @@ export const dataService = {
     return (data || []).map(i => ({
       id: i.id,
       name: i.name,
+      originalName: i.period_overrides?._original_name || undefined,
       amount: Number(i.amount),
       category: i.category,
       icon: i.icon,
@@ -814,7 +815,7 @@ export const dataService = {
     }));
   },
 
-  async saveIncomeSource(userId: string, income: Income) {    if (userId === 'demo-user') {
+  async saveIncomeSource(userId: string, income: Income & { originalName?: string }) {    if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_incomes');
       const list: Income[] = saved ? JSON.parse(saved) : [];
       const targetId = income.id && income.id.startsWith('demo-') ? income.id : `demo-inc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -828,6 +829,10 @@ export const dataService = {
       localStorage.setItem('demo_incomes', JSON.stringify(list));
       return;
     }
+    const periodOverrides = {
+      ...(income.periodOverrides || {}),
+      ...(income.originalName ? { _original_name: income.originalName } : {}),
+    };
     const payload: any = {
       id: isUuid(income.id) ? income.id : undefined,
       user_id: userId,
@@ -838,7 +843,7 @@ export const dataService = {
       logo: income.logo,
       deduction_day: income.deductionDay,
       is_variable: income.isVariable,
-      period_overrides: income.periodOverrides || {},
+      period_overrides: periodOverrides,
       note: income.note && income.note.trim() ? income.note.trim() : null
     };
 
@@ -862,19 +867,29 @@ export const dataService = {
     }
   },
 
-  async deleteIncomeSource(id: string) {    if (id.startsWith('demo-')) {
+  async deleteIncomeSource(id: string, userId?: string, namesToDelete?: string[]) {    if (id.startsWith('demo-')) {
       const saved = localStorage.getItem('demo_incomes');
       const list: Income[] = saved ? JSON.parse(saved) : [];
       const filtered = list.filter(i => i.id !== id);
       localStorage.setItem('demo_incomes', JSON.stringify(filtered));
       return;
     }
-    const { error } = await supabase
-      .from('income_sources')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    if (isUuid(id)) {
+      await supabase
+        .from('income_sources')
+        .delete()
+        .eq('id', id);
+    }
+    if (userId && Array.isArray(namesToDelete) && namesToDelete.length > 0) {
+      const validNames = Array.from(new Set(namesToDelete.filter(Boolean)));
+      if (validNames.length > 0) {
+        await supabase
+          .from('income_sources')
+          .delete()
+          .eq('user_id', userId)
+          .in('name', validNames);
+      }
+    }
   },
 
   // --- Fixed Expenses ---
@@ -891,6 +906,7 @@ export const dataService = {
     return (data || []).map(e => ({
       id: e.id,
       name: e.name,
+      originalName: e.period_overrides?._original_name || undefined,
       amount: Number(e.amount),
       paymentMethod: e.payment_method,
       frequency: e.frequency,
@@ -917,7 +933,7 @@ export const dataService = {
     }));
   },
 
-  async saveFixedExpense(userId: string, expense: FixedExpense) {
+  async saveFixedExpense(userId: string, expense: FixedExpense & { originalName?: string }) {
     if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_fixed');
       const list: FixedExpense[] = saved ? JSON.parse(saved) : [];
@@ -943,6 +959,7 @@ export const dataService = {
 
     const periodOverrides = {
       ...baseOverrides,
+      ...(expense.originalName ? { _original_name: expense.originalName } : {}),
       ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {}),
       ...(expense.isCancelled
         ? {
@@ -1001,19 +1018,29 @@ export const dataService = {
     }
   },
 
-  async deleteFixedExpense(id: string) {    if (id.startsWith('demo-')) {
+  async deleteFixedExpense(id: string, userId?: string, namesToDelete?: string[]) {    if (id.startsWith('demo-')) {
       const saved = localStorage.getItem('demo_fixed');
       const list: FixedExpense[] = saved ? JSON.parse(saved) : [];
       const filtered = list.filter(e => e.id !== id);
       localStorage.setItem('demo_fixed', JSON.stringify(filtered));
       return;
     }
-    const { error } = await supabase
-      .from('fixed_expenses')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    if (isUuid(id)) {
+      await supabase
+        .from('fixed_expenses')
+        .delete()
+        .eq('id', id);
+    }
+    if (userId && Array.isArray(namesToDelete) && namesToDelete.length > 0) {
+      const validNames = Array.from(new Set(namesToDelete.filter(Boolean)));
+      if (validNames.length > 0) {
+        await supabase
+          .from('fixed_expenses')
+          .delete()
+          .eq('user_id', userId)
+          .in('name', validNames);
+      }
+    }
   },
 
   // --- Accounts ---

@@ -161,6 +161,13 @@ export function parseDateFromSwedishText(text: string, todayStr: string = getSwe
     return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
   }
 
+  // 1b. SEB kortköpsformat YY-MM-DD (t.ex. /26-10-25 eller 26-10-25)
+  const yyDashMatch = text.match(/(?:^|[\s/])(2[4-9])-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
+  if (yyDashMatch) {
+    const y = 2000 + parseInt(yyDashMatch[1], 10);
+    return `${y}-${yyDashMatch[2]}-${yyDashMatch[3]}`;
+  }
+
   const currentYear = parseInt(todayStr.slice(0, 4), 10);
 
   // 2. Kortköpsstämpel YYMMDD (t.ex. 261025)
@@ -341,33 +348,10 @@ export function getActualBankPaymentDateAndMeta(
     }
   } else if (textDate) {
     paymentDate = textDate;
-  } else if (valueDate && bookingDate && (() => {
-    const vObj = new Date(valueDate);
-    const bObj = new Date(bookingDate);
-    return !isNaN(vObj.getTime()) && !isNaN(bObj.getTime()) && vObj.getDay() === 0 && bObj.getDay() === 1;
-  })()) {
-    // Specialfall för svensk bankhistorik: om value_date är en söndag (t.ex. 2026-10-25) och booking_date är följande måndag (2026-10-26),
-    // skapades kortköpet av butiken i lördags (2026-10-24).
-    const vObj = new Date(valueDate);
-    const satDate = new Date(vObj);
-    satDate.setDate(satDate.getDate() - 1); // Söndag - 1 dag = Lördag (2026-10-24)
-    const satStr = getSwedishDateStr(satDate);
-    paymentDate = satStr <= todayStr ? satStr : valueDate;
   } else if (rawPurchaseDate) {
     paymentDate = rawPurchaseDate;
   } else if (valueDate && valueDate <= todayStr) {
     paymentDate = valueDate;
-  } else if (bookingDate && (bookingDate > todayStr || (valueDate && valueDate > todayStr))) {
-    // Om bokföringen sker en måndag (t.ex. 2026-10-26), var helgkortköpet i 95% av fallen gjort på lördagen (2026-10-24)
-    const bDateObj = new Date(bookingDate);
-    if (!isNaN(bDateObj.getTime()) && bDateObj.getDay() === 1) { // Måndag
-      const satDate = new Date(bDateObj);
-      satDate.setDate(satDate.getDate() - 2); // Måndag - 2 dagar = Lördag
-      const satStr = getSwedishDateStr(satDate);
-      paymentDate = satStr <= todayStr ? satStr : todayStr;
-    } else {
-      paymentDate = valueDate && valueDate <= todayStr ? valueDate : todayStr;
-    }
   } else if (bookingDate && bookingDate <= todayStr) {
     paymentDate = bookingDate;
   } else {

@@ -1511,7 +1511,6 @@ html, body {
 *, *::before, *::after {
   --tw-shadow: 0 0 #0000 !important;
   --tw-shadow-colored: 0 0 #0000 !important;
-  --tw-drop-shadow: none !important;
 }
 
 [class*="shadow-"]:not(.shadow-modal):not(.shadow-subtle),
@@ -1520,6 +1519,13 @@ html, body {
   box-shadow: none !important;
   filter: none !important;
   text-shadow: none !important;
+}
+
+.dark .dejz-logo,
+html.dark .dejz-logo,
+.black-theme .dejz-logo {
+  filter: brightness(0) invert(1) !important;
+  -webkit-filter: brightness(0) invert(1) !important;
 }
 
 input:not(.font-amount):not(.text-section-title)::placeholder,
