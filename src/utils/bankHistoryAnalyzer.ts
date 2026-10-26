@@ -1090,12 +1090,65 @@ export function categorizeBankTransactionForApp(
   }
 
   const cleanedName = cleanDisplayMerchantName(tx.counterparty_name || tx.description || 'Kortköp');
-  const category = resolveCategory(['Shopping', 'Mat & dryck', 'Övrigt']);
+  const category = resolveCategory(['Övrigt']);
   return {
     merchant: cleanedName,
     category,
     logo: getLogoUrl(cleanedName, category),
   };
+}
+
+/**
+ * Avgör om en banktransaktion inte kändes igen av den lokala butikslistan
+ * eller innehåller kryptiska kortterminalprefix (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, KLARNA*84920)
+ * och därför bör tvättas och kategoriseras tyst av AI i bakgrunden.
+ */
+export function needsAiMerchantCleaning(
+  rawText: string | null | undefined,
+  currentTitle?: string | null,
+  currentCategory?: string | null
+): boolean {
+  const combined = `${rawText || ''} ${currentTitle || ''}`.trim();
+  if (!combined || combined.length < 2) return false;
+  const lower = combined.toLowerCase();
+
+  // Swish hanteras redan deterministiskt med telefonnummer/mottagare
+  if (
+    lower.includes('swish') ||
+    /(467\d{8}|07\d{8}|123\d{7})/.test(lower.replace(/[\s-]/g, '')) ||
+    currentCategory === 'Swish'
+  ) {
+    return false;
+  }
+
+  // Om råtexten eller titeln har kryptiska betalväxelprefix eller asterisker (t.ex. ZETTLE*, NYX*, SUMUP*, KLARNA*84920)
+  const hasCrypticTerminalPattern =
+    /\b(zettle|izettle|iz|sumup|nyx|stripe|sq|sp|wl|bambora|nets|adyen|qck|billo)\s*[*#_-]/i.test(combined) ||
+    /[a-zA-Z0-9]\*[a-zA-Z0-9]/.test(currentTitle || '') ||
+    /\b(gbg|sthlm|kaf|kafe|kond|rest)\b/i.test(currentTitle || '');
+
+  if (hasCrypticTerminalPattern) {
+    return true;
+  }
+
+  // Kontrollera om transaktionen redan matchar vår lokala butikslista eller fasta regler
+  const matchedEveryday = EVERYDAY_MERCHANT_RULES.some((rule) =>
+    rule.keywords.some((kw) => lower.includes(kw))
+  );
+  if (matchedEveryday) return false;
+
+  const matchedFixed = EXTENDED_FIXED_EXPENSE_RULES.some((rule) =>
+    rule.keywords.some((kw) => lower.includes(kw.toLowerCase()))
+  );
+  if (matchedFixed) return false;
+
+  const titleLower = (currentTitle || '').toLowerCase().trim();
+  if (titleLower && KNOWN_MERCHANT_NAMES_MAP[titleLower]) {
+    return false;
+  }
+
+  // Om den inte kändes igen av butikslistan (eller hamnade i Övrigt), låt AI tvätta och kategorisera den
+  return true;
 }
 
 function getDayOfMonthFromIso(dateStr: string | null | undefined, fallbackDay = 27): number {

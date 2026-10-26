@@ -839,7 +839,7 @@ h6 {
   --size-icon-button-lg: 40px;
 
   /* Safe Area Insets for iPhone Dynamic Island / Status Bar */
-  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-top: max(env(safe-area-inset-top, 0px), 12px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   /* Spacing & Layout */
@@ -1097,7 +1097,6 @@ h6 {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-y: auto;                
     background-color: var(--bg-color);
     background-image: var(--bg-gradient);
     background-repeat: no-repeat;
@@ -1154,13 +1153,13 @@ h6 {
   }
 
   html.ios-standalone {
-    --safe-top: max(env(safe-area-inset-top, 0px), 54px);
+    --safe-top: max(calc(env(safe-area-inset-top, 0px) + 14px), 68px);
     --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
   }
 
   @media all and (display-mode: standalone) {
     :root {
-      --safe-top: max(env(safe-area-inset-top, 0px), 54px);
+      --safe-top: max(calc(env(safe-area-inset-top, 0px) + 14px), 68px);
       --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
     }
   }

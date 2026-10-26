@@ -139,6 +139,181 @@ async function startServer() {
     }
   });
 
+  app.post('/api/ai/clean-merchants', async (req, res) => {
+    const { items, expenseCategories, incomeCategories } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.json({ results: [] });
+    }
+
+    const validExpenseCats: string[] =
+      Array.isArray(expenseCategories) && expenseCategories.length > 0
+        ? expenseCategories
+        : ['Mat & dryck', 'Shopping', 'Boende', 'Transport', 'Nöje', 'Hälsa', 'Abonnemang', 'Försäkring', 'Räkningar', 'Swish', 'Övrigt'];
+
+    const validIncomeCats: string[] =
+      Array.isArray(incomeCategories) && incomeCategories.length > 0
+        ? incomeCategories
+        : ['Lön', 'Bidrag', 'Swish', 'Övrigt'];
+
+    const batch = items.slice(0, 40).map((it: any) => ({
+      key: String(it?.key || '').trim(),
+      rawText: String(it?.rawText || '').trim(),
+      amount: Number(it?.amount) || 0,
+      type: it?.type === 'income' ? 'income' : 'expense',
+    })).filter((it) => it.key && it.rawText);
+
+    if (batch.length === 0) {
+      return res.json({ results: [] });
+    }
+
+    const fallbackCleanItem = (it: { key: string; rawText: string; amount: number; type: string }) => {
+      const raw = it.rawText.trim();
+      const upper = raw.toUpperCase();
+
+      // Specifika betalterminaler & aggregatorer
+      if (/^KLARNA\s*[*#_-]?\s*\d*$/i.test(raw) || upper.startsWith('KLARNA*')) {
+        const after = raw.replace(/^KLARNA\s*[*#_-]\s*/i, '').trim();
+        const hasMerchantName = after && !/^\d+$/.test(after) && after.length >= 3;
+        return {
+          key: it.key,
+          cleanName: hasMerchantName ? `Klarna (${after})` : 'Klarna',
+          category: validExpenseCats.find((c) => c.toLowerCase().includes('shopping')) || 'Shopping',
+        };
+      }
+
+      if (upper.startsWith('NYX*') || upper.includes('NYX*SVENSKA')) {
+        return {
+          key: it.key,
+          cleanName: 'Varuautomat (Nyx)',
+          category: validExpenseCats.find((c) => c.toLowerCase().includes('mat')) || 'Mat & dryck',
+        };
+      }
+
+      // Rensa bort ZETTLE*, SUMUP*, IZ*, PAYPAL*, STRIPE*, SQ*, SP*, WL*, BAMBORA*, NETS*, ADYEN*
+      let stripped = raw
+        .replace(/^(ZETTLE|IZETTLE|IZ|SUMUP|PAYPAL|STRIPE|SQ|SP|WL|BAMBORA|NETS|ADYEN|TRUSTLY|QCK|BILLO)\s*[*#_-]+\s*/i, '')
+        .replace(/[*#_]+/g, ' ')
+        .replace(/\bGBG\b/gi, 'Göteborg')
+        .replace(/\bSTHLM\b/gi, 'Stockholm')
+        .replace(/\bKAF\b/gi, 'Kafé')
+        .replace(/\bKAFE\b/gi, 'Kafé')
+        .replace(/\bCOND\b/gi, 'Konditori')
+        .replace(/\bKOND\b/gi, 'Konditori')
+        .replace(/\bREST\b/gi, 'Restaurang')
+        .replace(/\s+\d{3,}\b.*$/, '')
+        .replace(/\s+(SE|SWE|SWEDEN)$/i, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (!stripped || /^\d+$/.test(stripped)) {
+        stripped = raw.replace(/[*#_]+\d+/g, '').trim() || 'Kortköp';
+      }
+
+      const titleCased = stripped
+        .split(' ')
+        .map((w) => (w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w))
+        .join(' ');
+
+      const lower = titleCased.toLowerCase();
+      let category = it.type === 'income' ? (validIncomeCats[0] || 'Övrigt') : 'Övrigt';
+      if (it.type !== 'income') {
+        if (/(kafé|kafe|cafe|coffee|bageri|konditori|restaurang|pizza|sushi|burger|krog|bar|pub|lunch|mat|livs|kiosk|automat)/.test(lower)) {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('mat')) || 'Mat & dryck';
+        } else if (/(parkering|park|taxi|cab|trafik|bil|däck|verkstad|bensin|ladd)/.test(lower)) {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('transport')) || 'Transport';
+        } else if (/(frisör|salong|barber|apotek|klinik|tand|optik|gym|hälsa|massage)/.test(lower)) {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('hälsa')) || 'Hälsa';
+        } else if (/(bio|teater|konsert|museum|bowling|padel|golf|event|biljett|spel)/.test(lower)) {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('nöje')) || 'Nöje';
+        } else if (/(butik|shop|store|design|mode|kläder|skor|blommor|optik|glas|bok|leksak)/.test(lower)) {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('shopping')) || 'Shopping';
+        } else {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('övrigt')) || validExpenseCats[validExpenseCats.length - 1] || 'Övrigt';
+        }
+      }
+
+      return {
+        key: it.key,
+        cleanName: titleCased,
+        category,
+      };
+    };
+
+    const ai = getGenAI();
+    if (!ai) {
+      return res.json({ results: batch.map(fallbackCleanItem) });
+    }
+
+    try {
+      const prompt = `Du är en expert på svenska banktransaktioner och kortterminaler (SEB, Swedbank, Nordea, Handelsbanken).
+Banker skickar ofta obegripliga eller förkortade transaktionsrader såsom:
+- "ZETTLE*GBG KAF" -> cleanName: "Göteborgs Kafé", category: "Mat & dryck"
+- "NYX*SVENSKA" -> cleanName: "Varuautomat (Nyx)", category: "Mat & dryck"
+- "KLARNA*84920" -> cleanName: "Klarna", category: "Shopping"
+- "SUMUP *SÖDER BAGERI" -> cleanName: "Söder Bageri", category: "Mat & dryck"
+- "WL * PARKSTER AB" -> cleanName: "Parkster", category: "Transport"
+
+Uppgift:
+För varje post i JSON-listan nedan:
+1. Tvätta "rawText" till ett snyggt, naturligt och läsbart svenskt butiks-/företagsnamn ("cleanName").
+   - Ta bort betalväxelprefix som ZETTLE*, IZ*, SUMUP*, NYX*, PAYPAL*, STRIPE*, WL*, SP*, SQ*, NETS*, ADYEN* (om inte själva betalväxeln är mottagaren som i "KLARNA*84920" -> "Klarna" eller "NYX*SVENSKA" -> "Varuautomat (Nyx)").
+   - Ta bort ordernummer, butiksnummer, referenskoder och landskoder (t.ex. "*84920", "1421 SE").
+   - Veckla ut vanliga svenska förkortningar naturligt (t.ex. "GBG" -> "Göteborg", "STHLM" -> "Stockholm", "KAF"/"KAFE" -> "Kafé", "REST" -> "Restaurang", "KOND" -> "Konditori").
+2. Sätt rätt kategori ("category") genom att välja EXAKT ETT av följande giltiga kategorinamn:
+   - Om type === "expense", välj bland: ${JSON.stringify(validExpenseCats)}
+   - Om type === "income", välj bland: ${JSON.stringify(validIncomeCats)}
+3. Behåll "key" exakt oförändrad så att svaret kan matchas tillbaka.
+
+Transaktioner att tvätta:
+${JSON.stringify(batch)}`;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                key: { type: Type.STRING },
+                cleanName: { type: Type.STRING },
+                category: { type: Type.STRING },
+              },
+              required: ["key", "cleanName", "category"],
+            },
+          },
+        },
+      });
+
+      const responseText = result.text?.trim() || '[]';
+      const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+
+      if (!Array.isArray(parsed)) {
+        return res.json({ results: batch.map(fallbackCleanItem) });
+      }
+
+      const byKey = new Map<string, { key: string; cleanName: string; category: string }>();
+      for (const row of parsed) {
+        if (row && typeof row.key === 'string' && typeof row.cleanName === 'string' && row.cleanName.trim()) {
+          byKey.set(row.key, {
+            key: row.key,
+            cleanName: row.cleanName.trim(),
+            category: typeof row.category === 'string' && row.category.trim() ? row.category.trim() : 'Övrigt',
+          });
+        }
+      }
+
+      const finalResults = batch.map((it) => byKey.get(it.key) || fallbackCleanItem(it));
+      return res.json({ results: finalResults });
+    } catch (error) {
+      console.error('[Gemini] clean-merchants error, using fallback:', error);
+      return res.json({ results: batch.map(fallbackCleanItem) });
+    }
+  });
+
   app.post('/api/parse-audio-expense', async (req, res) => {
     const { audioBase64, mimeType } = req.body;
     if (!audioBase64) return res.status(400).json({ error: 'Missing audio content' });

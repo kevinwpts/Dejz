@@ -58,6 +58,7 @@ import {
   getBankAccountTitle,
   getNormalizedBankTxAmount,
   isInternalTransferOrMicroSavings,
+  needsAiMerchantCleaning,
 } from './utils/bankHistoryAnalyzer';
 import { deduplicateTransactions } from './utils/transactionDedup';
 import {
@@ -100,6 +101,8 @@ import {
   getTransactionMetaMap,
   saveTransactionMeta,
   syncAllUserPreferencesToSupabase,
+  getStoredExpenseCategories,
+  getStoredIncomeCategories,
 } from './utils/appCache';
 import { isInternalTransferTransaction } from './utils/transferDetection';
 import {
@@ -1117,6 +1120,131 @@ export const App: React.FC = () => {
   const transactionsRef = useRef<TransactionItem[]>(transactions);
   useEffect(() => {
     transactionsRef.current = transactions;
+  }, [transactions]);
+
+  // Tyst AI-tvätt i bakgrunden för kryptiska/okända bankrader (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, KLARNA*84920)
+  const aiCleanedKeysRef = useRef<Set<string>>(new Set());
+  const aiCleanInFlightRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (aiCleanInFlightRef.current || transactions.length === 0) return;
+
+    const currentAliases = getMerchantAliases();
+    const candidatesByKey = new Map<
+      string,
+      { key: string; rawText: string; amount: number; type: 'expense' | 'income' }
+    >();
+
+    for (const tx of transactions) {
+      if (!tx || tx.isExcluded) continue;
+      const rawSource = (
+        tx.rawDescription ||
+        tx.counterpartyName ||
+        tx.note ||
+        tx.title ||
+        ''
+      ).trim();
+      if (!rawSource || rawSource.length < 2) continue;
+
+      const normKey = normalizeMerchantKey(rawSource);
+      if (!normKey || aiCleanedKeysRef.current.has(normKey)) continue;
+
+      // Hoppa över om användaren eller tidigare AI-körning redan har sparat ett alias
+      if (resolveMerchantAlias(rawSource, currentAliases)) {
+        aiCleanedKeysRef.current.add(normKey);
+        continue;
+      }
+
+      // Hoppa över om den matchar en fast utgift eller fast inkomst
+      if (
+        tx.type !== 'income' &&
+        fixedExpensesRef.current.length > 0 &&
+        findMatchingFixedExpense(tx, fixedExpensesRef.current)
+      ) {
+        aiCleanedKeysRef.current.add(normKey);
+        continue;
+      }
+      if (
+        tx.type === 'income' &&
+        incomesRef.current.length > 0 &&
+        findMatchingIncome(tx, incomesRef.current)
+      ) {
+        aiCleanedKeysRef.current.add(normKey);
+        continue;
+      }
+
+      if (needsAiMerchantCleaning(rawSource, tx.title, tx.category)) {
+        if (!candidatesByKey.has(normKey)) {
+          candidatesByKey.set(normKey, {
+            key: normKey,
+            rawText: rawSource,
+            amount: tx.amount,
+            type: tx.type === 'income' ? 'income' : 'expense',
+          });
+        }
+      } else {
+        aiCleanedKeysRef.current.add(normKey);
+      }
+    }
+
+    if (candidatesByKey.size === 0) return;
+
+    const batchItems = Array.from(candidatesByKey.values()).slice(0, 35);
+    for (const item of batchItems) {
+      aiCleanedKeysRef.current.add(item.key);
+    }
+
+    aiCleanInFlightRef.current = true;
+    const expenseCategories = getStoredExpenseCategories().map((c) => c.name);
+    const incomeCategories = getStoredIncomeCategories().map((c) => c.name);
+
+    fetch('/api/ai/clean-merchants', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: batchItems,
+        expenseCategories,
+        incomeCategories,
+      }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data || !Array.isArray(data.results) || data.results.length === 0) return;
+
+        let anySaved = false;
+        for (const resItem of data.results) {
+          const orig = candidatesByKey.get(resItem.key);
+          if (!orig || !resItem.cleanName) continue;
+          const validCat = normalizeCategoryToValid(
+            resItem.category,
+            orig.type
+          );
+          saveMerchantAlias(orig.rawText, resItem.cleanName.trim(), validCat);
+          anySaved = true;
+        }
+
+        if (anySaved) {
+          const updatedAliases = getMerchantAliases();
+          setTransactions((prev) => {
+            const next = prev.map((t) =>
+              sanitizeTransactionItem(
+                t,
+                fixedExpensesRef.current,
+                incomesRef.current,
+                updatedAliases
+              )
+            );
+            saveCachedAppState({ transactions: next });
+            return next;
+          });
+        }
+      })
+      .catch(() => {
+        // Ignorera nätverksfel tyst i bakgrunden
+      })
+      .finally(() => {
+        aiCleanInFlightRef.current = false;
+      });
   }, [transactions]);
 
   // Inloggad användare i Supabase
