@@ -1,7 +1,7 @@
 import React from 'react';
-import { House, Receipt, ArrowsDownUp } from '@phosphor-icons/react';
+import { House, Receipt, ChartPieSlice, ArrowsDownUp } from '@phosphor-icons/react';
 
-export type AppTab = 'home' | 'fixed' | 'transactions' | 'settings';
+export type AppTab = 'home' | 'fixed' | 'analysis' | 'transactions' | 'settings';
 
 interface BottomNavProps {
   activeTab: AppTab;
@@ -12,6 +12,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab }) 
   const tabs = [
     { id: 'home' as AppTab, label: 'Hem', icon: House },
     { id: 'fixed' as AppTab, label: 'Ekonomi', icon: Receipt },
+    { id: 'analysis' as AppTab, label: 'Analys', icon: ChartPieSlice },
     { id: 'transactions' as AppTab, label: 'Historik', icon: ArrowsDownUp },
   ];
 
@@ -26,14 +27,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab }) 
               key={tab.id}
               type="button"
               onClick={() => onChangeTab(tab.id)}
-              className={`flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 isActive
                   ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold shadow-xs scale-[1.02]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
               }`}
             >
               <Icon size={18} weight={isActive ? 'fill' : 'regular'} />
-              <span className="text-xs tracking-tight">{tab.label}</span>
+              <span className="text-[10px] tracking-tight leading-none">{tab.label}</span>
             </button>
           );
         })}

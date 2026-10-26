@@ -9,6 +9,7 @@ import { Navbar } from './components/Navbar';
 import { BottomNav, AppTab } from './components/BottomNav';
 import { HomeTab, AccountItem, IncomeItem, FixedExpenseItem, TransactionItem, getTransactionTime } from './components/HomeTab';
 import { FixedTab } from './components/FixedTab';
+import { AnalysisTab } from './components/AnalysisTab';
 import { TransactionsTab } from './components/TransactionsTab';
 import { SettingsTab } from './components/SettingsTab';
 import { BankModal } from './components/modals/BankModal';
@@ -16,6 +17,8 @@ import { IncomeModal } from './components/modals/IncomeModal';
 import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
 import { TransactionModal } from './components/modals/TransactionModal';
 import { AuthModal } from './components/modals/AuthModal';
+import { SearchModal } from './components/modals/SearchModal';
+import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
 import { supabase } from './supabaseClient';
 import { bankService, BankConnection, BankAccount, BankTransactionItem } from './services/bankService';
@@ -381,6 +384,8 @@ export const App: React.FC = () => {
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionItem | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
 
   // Borttagna genererade inkomst-ID:n
   const [dismissedTxIds, setDismissedTxIds] = useState<string[]>([]);
@@ -1704,6 +1709,8 @@ export const App: React.FC = () => {
         userAvatar={userAvatar}
         onLogoClick={() => setActiveTab('home')}
         onProfileClick={() => setActiveTab('settings')}
+        onSearchClick={() => setIsSearchModalOpen(true)}
+        onNotificationsClick={() => setIsNotificationsModalOpen(true)}
       />
 
       {/* OAuth Callback Banner */}
@@ -1770,6 +1777,18 @@ export const App: React.FC = () => {
               }}
               onDeleteIncome={handleDeleteIncome}
               onDeleteFixed={handleDeleteFixed}
+            />
+          )}
+
+          {activeTab === 'analysis' && (
+            <AnalysisTab
+              period={period}
+              incomes={incomes}
+              fixedExpenses={fixedExpenses}
+              transactions={transactions}
+              totalIncome={totalIncome}
+              totalFixedExpenses={totalFixedExpenses}
+              totalVariableSpent={totalVariableSpent}
             />
           )}
 
@@ -1891,6 +1910,34 @@ export const App: React.FC = () => {
           setUserEmail(email);
           refreshBankStatus();
         }}
+      />
+
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        transactions={periodTransactions.length > 0 ? periodTransactions : transactions}
+        fixedExpenses={fixedExpenses}
+        incomes={incomes}
+        onSelectTransaction={(tx) => {
+          setSelectedTransaction(tx);
+          setIsTxModalOpen(true);
+        }}
+        onSelectFixed={(exp) => {
+          setSelectedFixedExpense(exp);
+          setIsFixedModalOpen(true);
+        }}
+        onSelectIncome={(inc) => {
+          setSelectedIncome(inc);
+          setIsIncomeModalOpen(true);
+        }}
+      />
+
+      <NotificationsModal
+        isOpen={isNotificationsModalOpen}
+        onClose={() => setIsNotificationsModalOpen(false)}
+        period={period}
+        kvarAttSpendera={kvarAttSpendera}
+        dagsbudget={dagsbudget}
       />
     </div>
   );
