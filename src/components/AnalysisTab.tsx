@@ -430,9 +430,9 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         </div>
 
         {expenseChartSlices.length > 0 ? (
-          <div className="flex flex-col sm:flex-row items-center gap-5">
+          <div className="flex items-center justify-center py-1">
             {/* Interaktiv Cirkel / Donut */}
-            <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
+            <div className="relative w-48 h-48 flex items-center justify-center">
               <svg
                 viewBox="0 0 180 180"
                 className="w-full h-full -rotate-90 overflow-visible"
@@ -491,7 +491,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               >
                 {activeSlice ? (
                   <>
-                    <span className="text-[11px] font-semibold text-[var(--text-muted)] truncate max-w-[105px]">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)] truncate max-w-[110px]">
                       {activeSlice.category}
                     </span>
                     <span className="font-display font-extrabold text-lg text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
@@ -515,42 +515,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   </>
                 )}
               </button>
-            </div>
-
-            {/* Procentlista per kategori bredvid/under cirkeln */}
-            <div className="w-full flex-1 grid grid-cols-2 gap-2">
-              {expenseChartSlices.map((slice) => {
-                const isSelected = selectedSliceCategory === slice.category;
-                return (
-                  <button
-                    key={slice.category}
-                    type="button"
-                    onClick={() =>
-                      setSelectedSliceCategory((prev) =>
-                        prev === slice.category ? null : slice.category
-                      )
-                    }
-                    className={`p-2.5 rounded-2xl border text-left flex items-center justify-between gap-2 transition-all cursor-pointer active:scale-[0.98] ${
-                      isSelected
-                        ? 'bg-[var(--bg-color)] border-[var(--text-primary)]'
-                        : 'bg-[var(--bg-color)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: slice.color }}
-                      />
-                      <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                        {slice.category}
-                      </span>
-                    </div>
-                    <span className="font-display font-bold text-xs text-[var(--text-secondary)] tabular-nums shrink-0">
-                      {slice.percentage > 0 ? `${slice.percentage}%` : '<1%'}
-                    </span>
-                  </button>
-                );
-              })}
             </div>
           </div>
         ) : (

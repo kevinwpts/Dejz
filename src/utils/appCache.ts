@@ -3,8 +3,10 @@ import { IncomeItem, FixedExpenseItem, TransactionItem } from '../components/Hom
 import { WeekendHandlingMode } from './periodEngine';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { Category } from '../types';
+import { supabase } from '../supabaseClient';
 
 const APP_CACHE_KEY = 'dejz_app_state_cache_v2';
+const SHOW_ACCOUNTS_ON_HOME_KEY = 'dejz_show_accounts_on_home';
 
 export interface CachedAppState {
   connections: BankConnection[];
@@ -198,6 +200,7 @@ export function saveMerchantAlias(rawName: string, targetName: string, category:
     }
 
     localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -271,6 +274,7 @@ export function dismissFixedMerchant(name: string, originalName?: string): void 
       }
     }
     localStorage.setItem(DISMISSED_FIXED_KEY, JSON.stringify(Array.from(set)));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -284,6 +288,7 @@ export function unDismissFixedMerchant(name: string): void {
       set.delete(v);
     }
     localStorage.setItem(DISMISSED_FIXED_KEY, JSON.stringify(Array.from(set)));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -329,6 +334,7 @@ export function dismissIncomeMerchant(name: string, originalName?: string): void
       }
     }
     localStorage.setItem(DISMISSED_INCOME_KEY, JSON.stringify(Array.from(set)));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -342,6 +348,7 @@ export function unDismissIncomeMerchant(name: string): void {
       set.delete(v);
     }
     localStorage.setItem(DISMISSED_INCOME_KEY, JSON.stringify(Array.from(set)));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -383,6 +390,7 @@ export function saveManualFixedOverride(
       map[key] = { ...(map[key] || {}), ...override };
     }
     localStorage.setItem(MANUAL_FIXED_OVERRIDES_KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -423,6 +431,7 @@ export function saveManualIncomeOverride(
       map[key] = { ...(map[key] || {}), ...override };
     }
     localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -447,6 +456,7 @@ export function setExcludeInternalTransfers(enabled: boolean): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(EXCLUDE_INTERNAL_TRANSFERS_KEY, String(enabled));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -474,6 +484,7 @@ export function setTransactionExcludedState(id: string, isExcluded: boolean): vo
       set.delete(id);
     }
     localStorage.setItem(EXCLUDED_TX_IDS_KEY, JSON.stringify(Array.from(set)));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -607,6 +618,7 @@ export function saveStoredExpenseCategories(cats: Category[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(CUSTOM_EXPENSE_CATEGORIES_KEY, JSON.stringify(cats));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -633,6 +645,7 @@ export function saveStoredIncomeCategories(cats: Category[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(CUSTOM_INCOME_CATEGORIES_KEY, JSON.stringify(cats));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
@@ -771,8 +784,235 @@ export function saveStoredPaymentMethods(methods: PaymentMethodItem[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(CUSTOM_PAYMENT_METHODS_KEY, JSON.stringify(methods));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
 }
+
+// --- Show Accounts Eye Toggle Persistence (Totalt saldo i Hemfliken) ---
+export function getShowAccountsOnHome(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const stored = localStorage.getItem(SHOW_ACCOUNTS_ON_HOME_KEY);
+    if (stored === null) return true;
+    return stored === 'true';
+  } catch {
+    return true;
+  }
+}
+
+export function setShowAccountsOnHome(show: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(SHOW_ACCOUNTS_ON_HOME_KEY, String(show));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+const TRANSACTION_META_KEY = 'dejz_transaction_meta_v1';
+
+export interface TransactionMetaPatch {
+  isHearted?: boolean;
+  isWaitingForPackage?: boolean;
+  receiptUrl?: string;
+  receiptName?: string;
+  paymentMethod?: string;
+  note?: string;
+}
+
+export function getTransactionMetaMap(): Record<string, TransactionMetaPatch> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(TRANSACTION_META_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveTransactionMeta(id: string, patch: TransactionMetaPatch): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    const map = getTransactionMetaMap();
+    map[id] = { ...(map[id] || {}), ...patch };
+    localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+// --- Full Supabase Sync & Hydration for All User Choices ---
+export function collectAllUserPreferences(): Record<string, any> {
+  if (typeof window === 'undefined') return {};
+  const safeParse = (key: string, fallback: any) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  return {
+    showAccountsOnHome: getShowAccountsOnHome(),
+    excludeInternalTransfers: getExcludeInternalTransfers(),
+    excludedTransactionIds: Array.from(getExcludedTransactionIds()),
+    dismissedFixedMerchants: Array.from(getDismissedFixedMerchants()),
+    dismissedIncomeMerchants: Array.from(getDismissedIncomeMerchants()),
+    manualFixedOverrides: getManualFixedOverrides(),
+    manualIncomeOverrides: getManualIncomeOverrides(),
+    merchantAliases: getMerchantAliases(),
+    categoryRemap: getCategoryRemap(),
+    customExpenseCategories: getStoredExpenseCategories(),
+    customIncomeCategories: getStoredIncomeCategories(),
+    customPaymentMethods: getStoredPaymentMethods(),
+    transactionMeta: getTransactionMetaMap(),
+    mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
+    swishContacts: safeParse('dejz_swish_contacts', []),
+    weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
+    darkMode: localStorage.getItem('dejz_dark_mode') || 'light',
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+
+export function syncAllUserPreferencesToSupabase(): void {
+  if (typeof window === 'undefined') return;
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const uid = data?.session?.user?.id;
+      if (!uid) return;
+      const prefs = collectAllUserPreferences();
+      const payload: Record<string, any> = {
+        user_preferences: prefs,
+        show_accounts_on_home: prefs.showAccountsOnHome,
+        exclude_internal_transfers: prefs.excludeInternalTransfers,
+        my_swish_phone: prefs.mySwishPhone,
+        swish_contacts: prefs.swishContacts,
+        categories: prefs.customExpenseCategories,
+        income_categories: prefs.customIncomeCategories,
+      };
+      // Attempt full update; fallback to user_preferences or base columns if some columns aren't migrated yet
+      const { error } = await supabase.from('profiles').update(payload).eq('id', uid);
+      if (error) {
+        await supabase
+          .from('profiles')
+          .update({
+            user_preferences: prefs,
+          })
+          .eq('id', uid);
+      }
+    } catch {
+      // ignore offline or schema error
+    }
+  }, 300);
+}
+
+export function hydrateAllUserPreferencesFromProfile(profile: any): void {
+  if (typeof window === 'undefined' || !profile || typeof profile !== 'object') return;
+  try {
+    const prefs =
+      profile.user_preferences && typeof profile.user_preferences === 'object'
+        ? profile.user_preferences
+        : {};
+
+    const showAcc =
+      typeof profile.show_accounts_on_home === 'boolean'
+        ? profile.show_accounts_on_home
+        : typeof prefs.showAccountsOnHome === 'boolean'
+        ? prefs.showAccountsOnHome
+        : null;
+    if (showAcc !== null && localStorage.getItem(SHOW_ACCOUNTS_ON_HOME_KEY) === null) {
+      localStorage.setItem(SHOW_ACCOUNTS_ON_HOME_KEY, String(showAcc));
+    }
+
+    const exclTransfers =
+      typeof profile.exclude_internal_transfers === 'boolean'
+        ? profile.exclude_internal_transfers
+        : typeof prefs.excludeInternalTransfers === 'boolean'
+        ? prefs.excludeInternalTransfers
+        : null;
+    if (exclTransfers !== null && localStorage.getItem(EXCLUDE_INTERNAL_TRANSFERS_KEY) === null) {
+      localStorage.setItem(EXCLUDE_INTERNAL_TRANSFERS_KEY, String(exclTransfers));
+    }
+
+    const swishPhone = profile.my_swish_phone || prefs.mySwishPhone;
+    if (swishPhone && !localStorage.getItem('dejz_my_swish_phone')) {
+      localStorage.setItem('dejz_my_swish_phone', String(swishPhone));
+    }
+
+    const swishContacts = Array.isArray(profile.swish_contacts)
+      ? profile.swish_contacts
+      : Array.isArray(prefs.swishContacts)
+      ? prefs.swishContacts
+      : null;
+    if (swishContacts && swishContacts.length > 0 && !localStorage.getItem('dejz_swish_contacts')) {
+      localStorage.setItem('dejz_swish_contacts', JSON.stringify(swishContacts));
+    }
+
+    if (Array.isArray(prefs.excludedTransactionIds) && !localStorage.getItem(EXCLUDED_TX_IDS_KEY)) {
+      localStorage.setItem(EXCLUDED_TX_IDS_KEY, JSON.stringify(prefs.excludedTransactionIds));
+    }
+    if (Array.isArray(prefs.dismissedFixedMerchants) && !localStorage.getItem(DISMISSED_FIXED_KEY)) {
+      localStorage.setItem(DISMISSED_FIXED_KEY, JSON.stringify(prefs.dismissedFixedMerchants));
+    }
+    if (Array.isArray(prefs.dismissedIncomeMerchants) && !localStorage.getItem(DISMISSED_INCOME_KEY)) {
+      localStorage.setItem(DISMISSED_INCOME_KEY, JSON.stringify(prefs.dismissedIncomeMerchants));
+    }
+    if (prefs.manualFixedOverrides && !localStorage.getItem(MANUAL_FIXED_OVERRIDES_KEY)) {
+      localStorage.setItem(MANUAL_FIXED_OVERRIDES_KEY, JSON.stringify(prefs.manualFixedOverrides));
+    }
+    if (prefs.manualIncomeOverrides && !localStorage.getItem(MANUAL_INCOME_OVERRIDES_KEY)) {
+      localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(prefs.manualIncomeOverrides));
+    }
+    if (prefs.merchantAliases && !localStorage.getItem(MERCHANT_ALIASES_KEY)) {
+      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(prefs.merchantAliases));
+    }
+    if (prefs.categoryRemap && !localStorage.getItem(CATEGORY_REMAP_KEY)) {
+      localStorage.setItem(CATEGORY_REMAP_KEY, JSON.stringify(prefs.categoryRemap));
+    }
+    if (prefs.transactionMeta && !localStorage.getItem(TRANSACTION_META_KEY)) {
+      localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(prefs.transactionMeta));
+    }
+    if (
+      Array.isArray(prefs.customExpenseCategories) &&
+      prefs.customExpenseCategories.length > 0 &&
+      !localStorage.getItem(CUSTOM_EXPENSE_CATEGORIES_KEY)
+    ) {
+      localStorage.setItem(
+        CUSTOM_EXPENSE_CATEGORIES_KEY,
+        JSON.stringify(prefs.customExpenseCategories)
+      );
+    }
+    if (
+      Array.isArray(prefs.customIncomeCategories) &&
+      prefs.customIncomeCategories.length > 0 &&
+      !localStorage.getItem(CUSTOM_INCOME_CATEGORIES_KEY)
+    ) {
+      localStorage.setItem(
+        CUSTOM_INCOME_CATEGORIES_KEY,
+        JSON.stringify(prefs.customIncomeCategories)
+      );
+    }
+    if (
+      Array.isArray(prefs.customPaymentMethods) &&
+      prefs.customPaymentMethods.length > 0 &&
+      !localStorage.getItem(CUSTOM_PAYMENT_METHODS_KEY)
+    ) {
+      localStorage.setItem(
+        CUSTOM_PAYMENT_METHODS_KEY,
+        JSON.stringify(prefs.customPaymentMethods)
+      );
+    }
+  } catch {
+    // ignore
+  }
+}
+
 

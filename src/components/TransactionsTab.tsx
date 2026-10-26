@@ -154,14 +154,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       {/* TRANSAKTIONSLISTA (GRUPPERAD PER DATUM)                        */}
       {/* ============================================================== */}
       {groupedByDate.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {groupedByDate.map((group) => (
-            <section
-              key={group.dateKey}
-              className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5"
-            >
-              {/* Datumgrupps-rubrik */}
-              <div className="flex items-center justify-between pb-2.5 mb-1 border-b border-[var(--border-subtle)] text-xs">
+            <section key={group.dateKey} className="space-y-1.5">
+              {/* Datumgrupps-rubrik utanför modulen direkt på bakgrunden */}
+              <div className="flex items-center justify-between px-1 text-xs">
                 <span className="font-bold text-[var(--text-secondary)]">
                   {group.label}
                 </span>
@@ -181,7 +178,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               </div>
 
               {/* Rader i datumgruppen */}
-              <div className="divide-y divide-[var(--border-subtle)]">
+              <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-4 py-1 sm:px-5 sm:py-1.5 divide-y divide-[var(--border-subtle)]">
                 {group.items.map((tx) => {
                   const isIncome = tx.type === 'income';
                   const recurringStatus = checkIsRecurringTransaction(
@@ -194,7 +191,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                       key={tx.id}
                       type="button"
                       onClick={() => onSelectTransaction(tx)}
-                      className="w-full py-3 first:pt-2.5 last:pb-0 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                      className="w-full py-3 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <ItemLogo

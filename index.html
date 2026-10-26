@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Dejz" />
-    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="theme-color" content="#FDDAD8" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <script>
@@ -29,7 +29,7 @@
           } else {
             root.classList.add('light');
             root.classList.remove('dark');
-            root.style.backgroundColor = '#F2F0F0';
+            root.style.backgroundColor = '#F4F3F1';
           }
           var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
           var isStandalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
@@ -122,7 +122,9 @@
         background-color: #141414;
       }
       html.light, body.light, html:not(.dark), body:not(.dark) {
-        background-color: var(--bg-color, #F2F0F0);
+        background-color: var(--bg-color, #F4F3F1);
+        background-image: var(--bg-gradient);
+        background-repeat: no-repeat;
       }
     </style>
   </head>

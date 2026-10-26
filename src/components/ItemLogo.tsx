@@ -127,15 +127,11 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     lg: 11,
   }[size];
 
-  const ringClass = isRecurring
-    ? 'ring-1.5 ring-indigo-500/40 ring-offset-1 ring-offset-[var(--surface-color)]'
-    : '';
-
   const renderInnerContent = () => {
     if (isSwish) {
       return (
         <div
-          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0 p-1.5 shadow-2xs ${ringClass}`}
+          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 p-1.5`}
           title="Swish"
         >
           <SwishLogo className="w-full h-full object-contain" />
@@ -146,7 +142,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     if (currentSrc && !imgFailed) {
       return (
         <div
-          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0 p-1 ${ringClass}`}
+          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 p-1`}
         >
           <img
             src={currentSrc}
@@ -161,7 +157,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
     return (
       <div
-        className={`${sizeClasses} bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 ${ringClass}`}
+        className={`${sizeClasses} bg-[var(--surface-raised)] text-[var(--text-secondary)] flex items-center justify-center shrink-0`}
       >
         {renderCategoryIcon()}
       </div>

@@ -17,7 +17,9 @@ import {
   ShareNetwork,
   Copy,
   ChatCircleText,
+  QrCode,
 } from '@phosphor-icons/react';
+import QRCode from 'qrcode';
 import { SwishLogo } from '../SwishLogo';
 import {
   TransactionItem,
@@ -35,6 +37,7 @@ import {
   getStoredIncomeCategories,
   getStoredPaymentMethods,
   normalizeCategoryToValid,
+  syncAllUserPreferencesToSupabase,
 } from '../../utils/appCache';
 
 interface TransactionModalProps {
@@ -72,6 +75,7 @@ interface SwishContact {
 }
 
 const SWISH_CONTACTS_STORAGE_KEY = 'dejz_swish_contacts';
+const MY_SWISH_PHONE_STORAGE_KEY = 'dejz_my_swish_phone';
 
 function loadSwishContacts(): SwishContact[] {
   try {
@@ -87,9 +91,39 @@ function loadSwishContacts(): SwishContact[] {
 function saveSwishContacts(contacts: SwishContact[]) {
   try {
     localStorage.setItem(SWISH_CONTACTS_STORAGE_KEY, JSON.stringify(contacts));
+    syncAllUserPreferencesToSupabase();
   } catch {
     // ignore
   }
+}
+
+function loadMySwishPhone(): string {
+  try {
+    return localStorage.getItem(MY_SWISH_PHONE_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function saveMySwishPhone(phone: string) {
+  try {
+    localStorage.setItem(MY_SWISH_PHONE_STORAGE_KEY, phone);
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+export function normalizeSwedishSwishNumber(raw: string): string {
+  const digits = (raw || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('0046') && digits.length > 4) {
+    return '0' + digits.slice(4);
+  }
+  if (digits.startsWith('46') && digits.length >= 10) {
+    return '0' + digits.slice(2);
+  }
+  return digits;
 }
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -129,6 +163,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
   const [swishFeedback, setSwishFeedback] = useState<string | null>(null);
+  const [mySwishPhone, setMySwishPhone] = useState<string>(() => loadMySwishPhone());
+  const [isEditingMyPhone, setIsEditingMyPhone] = useState<boolean>(() => !loadMySwishPhone());
+  const [showSwishQr, setShowSwishQr] = useState<boolean>(true);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const isIncome = initialTransaction?.type === 'income';
 
@@ -168,8 +206,51 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setSwishMessage(initialTransaction.title || '');
       setSwishFeedback(null);
       setIsAddingContact(false);
+      const storedMyPhone = loadMySwishPhone();
+      setMySwishPhone(storedMyPhone);
+      setIsEditingMyPhone(!storedMyPhone);
+      setShowSwishQr(true);
     }
   }, [initialTransaction, isOpen]);
+
+  const normalizedMySwishPhone = useMemo(
+    () => normalizeSwedishSwishNumber(mySwishPhone),
+    [mySwishPhone]
+  );
+
+  const cleanSwishMessage = useMemo(() => {
+    const rawMsg = swishMessage || initialTransaction?.title || '';
+    return rawMsg.replace(/;/g, ' ').trim().slice(0, 50);
+  }, [swishMessage, initialTransaction?.title]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!isSwishOpen || swishMode !== 'request' || normalizedMySwishPhone.length < 7) {
+      setQrDataUrl(null);
+      return;
+    }
+    const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
+    // Officiellt Swish QR-format: C<mottagare>;<belopp>;<meddelande>;0 (0 = låst/100% förifyllt)
+    const swishQrPayload = `C${normalizedMySwishPhone};${amt};${cleanSwishMessage};0`;
+    QRCode.toDataURL(swishQrPayload, {
+      width: 240,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#09090B',
+        light: '#FFFFFF',
+      },
+    })
+      .then((url) => {
+        if (!cancelled) setQrDataUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setQrDataUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isSwishOpen, swishMode, normalizedMySwishPhone, swishAmount, cleanSwishMessage]);
 
   const resolvedAccountDisplay = useMemo(() => {
     if (!initialTransaction) return null;
@@ -735,11 +816,110 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </div>
                   </div>
 
+                  {/* Mitt eget Swish-nummer & QR-kod direkt på skärmen (i Be om Swish-läge) */}
+                  {swishMode === 'request' && (
+                    <div className="p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                          <QrCode size={14} weight="bold" />
+                          <span>Mitt Swish-nummer (för QR &amp; länk)</span>
+                        </span>
+                        {normalizedMySwishPhone.length >= 7 && !isEditingMyPhone && (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingMyPhone(true)}
+                            className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                          >
+                            Ändra ({mySwishPhone})
+                          </button>
+                        )}
+                      </div>
+
+                      {(isEditingMyPhone || normalizedMySwishPhone.length < 7) && (
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="tel"
+                            value={mySwishPhone}
+                            onChange={(e) => {
+                              setMySwishPhone(e.target.value);
+                              saveMySwishPhone(e.target.value.trim());
+                            }}
+                            placeholder="Ditt mobilnummer (t.ex. 070-123 45 67)"
+                            className="flex-1 py-2 px-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                          />
+                          {normalizedMySwishPhone.length >= 7 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                saveMySwishPhone(mySwishPhone.trim());
+                                setIsEditingMyPhone(false);
+                                setShowSwishQr(true);
+                              }}
+                              className="py-2 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold shrink-0 cursor-pointer"
+                            >
+                              Klar
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {normalizedMySwishPhone.length >= 7 ? (
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowSwishQr((prev) => !prev)}
+                            className="w-full py-2 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-between hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <QrCode size={14} weight="bold" />
+                              <span>
+                                {showSwishQr ? 'Dölj Swish QR-kod' : 'Visa Swish QR-kod på skärmen'}
+                              </span>
+                            </span>
+                            <span className="text-[11px] font-bold text-[var(--text-muted)] tabular-nums">
+                              {swishAmount} kr
+                            </span>
+                          </button>
+
+                          {showSwishQr && qrDataUrl && (
+                            <div className="p-3.5 rounded-2xl bg-white text-zinc-900 border border-zinc-200 flex flex-col items-center text-center space-y-2 shadow-sm animate-fade-in">
+                              <div className="flex items-center gap-1.5">
+                                <SwishLogo size={18} />
+                                <span className="text-xs font-extrabold tracking-tight text-zinc-900">
+                                  Skanna med Swish
+                                </span>
+                              </div>
+                              <img
+                                src={qrDataUrl}
+                                alt="Swish QR-kod"
+                                className="w-44 h-44 rounded-xl object-contain"
+                              />
+                              <div className="space-y-0.5">
+                                <div className="text-sm font-extrabold tabular-nums text-zinc-900">
+                                  {swishAmount} kr · {cleanSwishMessage || initialTransaction.title}
+                                </div>
+                                <div className="text-[11px] font-medium text-zinc-500 tabular-nums">
+                                  Mottagare: {mySwishPhone} (100 % förifyllt)
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-[var(--text-muted)] leading-snug">
+                          Fyll i ditt eget nummer en gång så ritar Dejz upp en riktig Swish QR-kod och skapar en förifylld Swish-länk i SMS.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {/* Sparade vänner / kontakter */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-medium text-[var(--text-muted)]">
-                        Vänner / mottagare
+                        {swishMode === 'request'
+                          ? 'Vän att be om Swish (för SMS)'
+                          : 'Vänner / mottagare'}
                       </span>
                       <button
                         type="button"
@@ -853,7 +1033,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         setSwishPhone(e.target.value);
                         setSwishRecipientName('');
                       }}
-                      placeholder="Telefonnummer (t.ex. 070-123 45 67)"
+                      placeholder={
+                        swishMode === 'request'
+                          ? 'Vännens nummer för SMS (t.ex. 070-123 45 67)'
+                          : 'Mottagarens nummer (t.ex. 070-123 45 67)'
+                      }
                       className="w-full py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
                     />
                   </div>
@@ -866,82 +1050,95 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                   {/* Knappar för Be om Swish eller Öppna Swish */}
                   {swishMode === 'request' ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const msgText = `Hej${
-                            swishRecipientName ? ` ${swishRecipientName}` : ''
-                          }! Kan du swisha ${swishAmount} kr för ${
-                            swishMessage || initialTransaction.title
-                          }?`;
-                          const cleanPhone = swishPhone.replace(/[^\d+]/g, '');
-                          if (cleanPhone) {
-                            window.location.href = `sms:${cleanPhone}?&body=${encodeURIComponent(
-                              msgText
-                            )}`;
-                          } else if (navigator.share) {
-                            navigator
-                              .share({
-                                title: 'Be om Swish',
-                                text: msgText,
-                              })
-                              .catch(() => {});
-                          } else {
-                            navigator.clipboard?.writeText(msgText);
-                            setSwishFeedback('Swish-förfrågan kopierad!');
-                            setTimeout(() => setSwishFeedback(null), 2500);
-                          }
-                        }}
-                        className="py-2.5 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
-                      >
-                        <ChatCircleText size={14} weight="bold" />
-                        <span>Be via SMS</span>
-                      </button>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <a
+                          href={(() => {
+                            const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
+                            const label = cleanSwishMessage || initialTransaction.title;
+                            const prefilledUrl =
+                              normalizedMySwishPhone.length >= 7 && typeof window !== 'undefined'
+                                ? `${window.location.origin}/?swish_pay=1&payee=${encodeURIComponent(
+                                    normalizedMySwishPhone
+                                  )}&amount=${amt}&msg=${encodeURIComponent(label)}`
+                                : '';
+                            const msgText = prefilledUrl
+                              ? `Hej${
+                                  swishRecipientName ? ` ${swishRecipientName}` : ''
+                                }! Kan du swisha ${amt} kr för ${label}?\n\nKlicka här för att öppna Swish färdigifyllt:\n${prefilledUrl}`
+                              : `Hej${
+                                  swishRecipientName ? ` ${swishRecipientName}` : ''
+                                }! Kan du swisha ${amt} kr för ${label}?`;
+                            const cleanPhone = swishPhone.replace(/[^\d+]/g, '');
+                            const isIOS =
+                              typeof navigator !== 'undefined' &&
+                              /iPad|iPhone|iPod/i.test(navigator.userAgent);
+                            const sep = isIOS ? '&' : '?';
+                            return cleanPhone
+                              ? `sms:${cleanPhone}${sep}body=${encodeURIComponent(msgText)}`
+                              : `sms:${sep}body=${encodeURIComponent(msgText)}`;
+                          })()}
+                          className="py-2.5 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
+                        >
+                          <ChatCircleText size={14} weight="bold" />
+                          <span>Skicka SMS med Swish-länk</span>
+                        </a>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const msgText = `Hej${
-                            swishRecipientName ? ` ${swishRecipientName}` : ''
-                          }! Kan du swisha ${swishAmount} kr för ${
-                            swishMessage || initialTransaction.title
-                          }?`;
-                          if (navigator.share) {
-                            navigator
-                              .share({
-                                title: 'Be om Swish',
-                                text: msgText,
-                              })
-                              .catch(() => {});
-                          } else {
-                            navigator.clipboard?.writeText(msgText);
-                            setSwishFeedback('Förfrågan kopierad till urklipp!');
-                            setTimeout(() => setSwishFeedback(null), 2500);
-                          }
-                        }}
-                        className="py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                      >
-                        {typeof navigator !== 'undefined' && 'share' in navigator ? (
-                          <>
-                            <ShareNetwork size={14} />
-                            <span>Dela förfrågan</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy size={14} />
-                            <span>Kopiera text</span>
-                          </>
-                        )}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
+                            const label = cleanSwishMessage || initialTransaction.title;
+                            const prefilledUrl =
+                              normalizedMySwishPhone.length >= 7 && typeof window !== 'undefined'
+                                ? `${window.location.origin}/?swish_pay=1&payee=${encodeURIComponent(
+                                    normalizedMySwishPhone
+                                  )}&amount=${amt}&msg=${encodeURIComponent(label)}`
+                                : '';
+                            const msgText = prefilledUrl
+                              ? `Hej${
+                                  swishRecipientName ? ` ${swishRecipientName}` : ''
+                                }! Kan du swisha ${amt} kr för ${label}?\n\nKlicka här för att öppna Swish färdigifyllt:\n${prefilledUrl}`
+                              : `Hej${
+                                  swishRecipientName ? ` ${swishRecipientName}` : ''
+                                }! Kan du swisha ${amt} kr för ${label}?`;
+                            try {
+                              await navigator.clipboard?.writeText(msgText);
+                            } catch {
+                              // ignore
+                            }
+                            if (typeof navigator !== 'undefined' && navigator.share) {
+                              try {
+                                await navigator.share({
+                                  title: `Swisha ${amt} kr för ${label}`,
+                                  text: msgText,
+                                });
+                                return;
+                              } catch {
+                                // Fallback till urklippsbekräftelse om delning avbryts eller blockeras
+                              }
+                            }
+                            setSwishFeedback(
+                              prefilledUrl
+                                ? 'Förifylld Swish-länk kopierad till urklipp!'
+                                : 'Swish-förfrågan kopierad till urklipp!'
+                            );
+                            setTimeout(() => setSwishFeedback(null), 3000);
+                          }}
+                          className="py-2.5 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                        >
+                          <Copy size={14} />
+                          <span>Kopiera Swish-länk</span>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => {
-                        const cleanPhone = swishPhone.replace(/\D/g, '');
+                        const cleanPhone = normalizeSwedishSwishNumber(swishPhone);
                         if (cleanPhone) {
-                          navigator.clipboard?.writeText(cleanPhone);
+                          navigator.clipboard?.writeText(cleanPhone).catch(() => {});
                         }
                         const payload = {
                           version: 1,

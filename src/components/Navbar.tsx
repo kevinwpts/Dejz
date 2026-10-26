@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const initialChar = (userName || userEmail || '').trim().charAt(0);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-subtle)] pt-[var(--safe-top,env(safe-area-inset-top,0px))]">
+    <header className="sticky top-0 z-40 w-full bg-[var(--bg-top-color)]/90 backdrop-blur-md pt-[var(--safe-top,env(safe-area-inset-top,0px))]">
       <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-3">
         {/* Vänster: Tillbakapil + Sidrubrik på undersidor, annars Dejz-loggan */}
         {pageTitle ? (

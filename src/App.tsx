@@ -67,7 +67,7 @@ import {
   getSwedishDateStr,
   parseDateFromSwedishText,
 } from './utils/swedishDate';
-import { SWISH_SVG_DATA_URI } from './components/SwishLogo';
+import { SWISH_SVG_DATA_URI, SwishLogo } from './components/SwishLogo';
 import {
   loadCachedAppState,
   saveCachedAppState,
@@ -96,6 +96,10 @@ import {
   isValidUuid,
   normalizeCategoryToValid,
   propagateCategoryChangeInCache,
+  hydrateAllUserPreferencesFromProfile,
+  getTransactionMetaMap,
+  saveTransactionMeta,
+  syncAllUserPreferencesToSupabase,
 } from './utils/appCache';
 import { isInternalTransferTransaction } from './utils/transferDetection';
 import {
@@ -118,7 +122,17 @@ function sanitizeTransactionItem(
   aliasesOverride?: Record<string, { name: string; category: string }>
 ): TransactionItem {
   if (!item) return item;
-  const updated = { ...item };
+  const metaMap = getTransactionMetaMap();
+  const savedMeta = item.id ? metaMap[item.id] : undefined;
+  const updated: TransactionItem = {
+    ...item,
+    isHearted: item.isHearted ?? savedMeta?.isHearted,
+    isWaitingForPackage: item.isWaitingForPackage ?? savedMeta?.isWaitingForPackage,
+    receiptUrl: item.receiptUrl ?? savedMeta?.receiptUrl,
+    receiptName: item.receiptName ?? savedMeta?.receiptName,
+    paymentMethod: item.paymentMethod ?? savedMeta?.paymentMethod,
+    note: item.note ?? savedMeta?.note,
+  };
   const todayStr = getSwedishDateStr();
 
   const combinedText = [
@@ -999,6 +1013,33 @@ function mapBankTransactionsToAppItems(
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('main');
+  const [incomingSwishRequest, setIncomingSwishRequest] = useState<{
+    payee: string;
+    amount: number;
+    msg: string;
+    deepLink: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('swish_pay') === '1') {
+      const payee = (params.get('payee') || '').replace(/\D/g, '');
+      const amount = Math.max(1, Math.round(Number(params.get('amount')) || 0));
+      const msg = (params.get('msg') || '').trim();
+      if (payee) {
+        const payload = {
+          version: 1,
+          payee: { value: payee, editable: false },
+          amount: { value: amount, editable: false },
+          message: { value: msg, editable: false },
+        };
+        const deepLink = `swish://payment?data=${encodeURIComponent(JSON.stringify(payload))}`;
+        setIncomingSwishRequest({ payee, amount, msg, deepLink });
+        window.location.href = deepLink;
+      }
+    }
+  }, []);
 
   const initialCache = useMemo(() => loadCachedAppState(), []);
 
@@ -1327,6 +1368,10 @@ export const App: React.FC = () => {
         }
         if (resolvedWeekend !== weekendHandling) {
           setWeekendHandling(resolvedWeekend);
+        }
+        if (dbProfile) {
+          hydrateAllUserPreferencesFromProfile(dbProfile);
+          setExcludeInternalTransfersState(getExcludeInternalTransfers());
         }
         if (dbProfile?.avatar_url) {
           setUserAvatar(dbProfile.avatar_url);
@@ -2206,6 +2251,7 @@ export const App: React.FC = () => {
   };
 
   const handleToggleHeart = useCallback((id: string, isHearted: boolean) => {
+    saveTransactionMeta(id, { isHearted });
     setTransactions((prev) => {
       const next = prev.map((tx) => (tx.id === id ? { ...tx, isHearted } : tx));
       transactionsRef.current = next;
@@ -2218,6 +2264,7 @@ export const App: React.FC = () => {
   }, []);
 
   const handleTogglePackage = useCallback((id: string, isWaitingForPackage: boolean) => {
+    saveTransactionMeta(id, { isWaitingForPackage });
     setTransactions((prev) => {
       const next = prev.map((tx) => (tx.id === id ? { ...tx, isWaitingForPackage } : tx));
       transactionsRef.current = next;
@@ -2419,6 +2466,14 @@ export const App: React.FC = () => {
       incomesRef.current,
       aliases
     );
+    saveTransactionMeta(itemWithLogo.id, {
+      isHearted: itemWithLogo.isHearted,
+      isWaitingForPackage: itemWithLogo.isWaitingForPackage,
+      receiptUrl: itemWithLogo.receiptUrl,
+      receiptName: itemWithLogo.receiptName,
+      paymentMethod: itemWithLogo.paymentMethod,
+      note: itemWithLogo.note,
+    });
     setTransactions((prev) => {
       const exists = prev.some((t) => t.id === itemWithLogo.id);
       const next = exists
@@ -2429,6 +2484,7 @@ export const App: React.FC = () => {
       return next;
     });
     setSelectedTransaction(itemWithLogo);
+    syncAllUserPreferencesToSupabase();
     if (userId && !itemWithLogo.id.startsWith('bank-') && !itemWithLogo.id.startsWith('inc-')) {
       await dataService
         .updateTransaction(itemWithLogo.id, {
@@ -2701,7 +2757,10 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]">
+    <div
+      style={{ backgroundImage: 'var(--bg-gradient)' }}
+      className="min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]"
+    >
       <Navbar
         userEmail={userEmail}
         userName={userName}
@@ -3406,6 +3465,63 @@ export const App: React.FC = () => {
           refreshBankStatus();
         }}
       />
+
+      {incomingSwishRequest && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-6 text-center space-y-4 shadow-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto">
+              <SwishLogo size={32} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-[var(--text-primary)]">
+                Swish-förfrågan
+              </h3>
+              <p className="text-xs text-[var(--text-muted)]">
+                Allt är 100 % förifyllt i Swish
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-1.5">
+              <div className="text-2xl font-display font-extrabold text-[var(--text-primary)] tabular-nums">
+                {incomingSwishRequest.amount} kr
+              </div>
+              {incomingSwishRequest.msg && (
+                <div className="text-xs font-bold text-[var(--text-primary)]">
+                  &ldquo;{incomingSwishRequest.msg}&rdquo;
+                </div>
+              )}
+              <div className="text-[11px] font-medium text-[var(--text-muted)] tabular-nums">
+                Till: {incomingSwishRequest.payee}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <a
+                href={incomingSwishRequest.deepLink}
+                className="w-full py-3 px-4 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                <SwishLogo size={16} />
+                <span>Öppna Swish ({incomingSwishRequest.amount} kr)</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setIncomingSwishRequest(null);
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('swish_pay');
+                    url.searchParams.delete('payee');
+                    url.searchParams.delete('amount');
+                    url.searchParams.delete('msg');
+                    window.history.replaceState({}, '', url.pathname + url.search);
+                  }
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                Stäng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

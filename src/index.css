@@ -680,11 +680,11 @@ h6 {
   --orange-900: #713800;
 
   /* Brand Gradient & Scale */
-  --brand-peach: #F2F0F0;
-  --brand-pink: #F2F0F0;
-  --brand-lavender: #F2F0F0;
-  --brand-cream: #F2F0F0;
-  --brand-gradient: none;
+  --brand-peach: #FDDAD8;
+  --brand-pink: #FCE5E1;
+  --brand-lavender: #F9ECE8;
+  --brand-cream: #F4F3F1;
+  --brand-gradient: linear-gradient(180deg, #FDDAD8 0%, #FCE5E1 140px, #F9ECE8 260px, #F4F3F1 390px, #F4F3F1 100%);
 
   /* Dejz Official Brand Logo Color */
   --logo-color: #151718;
@@ -694,10 +694,10 @@ h6 {
   --menu-content-gap: 1.5rem;
 
   /* Seamless Light Theme Background & Surfaces */
-  --bg-top-color: #F2F0F0;
-  --bg-color: #F2F0F0;
-  --bg-secondary: #F2F0F0;
-  --bg-gradient: none;
+  --bg-top-color: #FDDAD8;
+  --bg-color: #F4F3F1;
+  --bg-secondary: #F4F3F1;
+  --bg-gradient: linear-gradient(180deg, #FDDAD8 0%, #FCE5E1 140px, #F9ECE8 260px, #F4F3F1 390px, #F4F3F1 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
@@ -935,7 +935,7 @@ h6 {
   --bg-top-color: #141414;
   --bg-color: #141414;
   --bg-secondary: #141414;
-  --bg-gradient: #191919;
+  --bg-gradient: none;
 
   /* Layer 1: Surface */
   --surface-color: #1C1C1C;
@@ -1099,7 +1099,7 @@ h6 {
     padding: 0;
     overflow-y: auto;                
     background-color: var(--bg-color);
-    background-image: none;
+    background-image: var(--bg-gradient);
     background-repeat: no-repeat;
     min-height: 100%;
     min-height: 100dvh;

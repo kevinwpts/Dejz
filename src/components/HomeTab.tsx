@@ -22,6 +22,7 @@ import {
   getYesterdaySwedishDateStr,
 } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
+import { getShowAccountsOnHome, setShowAccountsOnHome } from '../utils/appCache';
 
 export interface AccountItem {
   id: string;
@@ -205,7 +206,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onSelectTransaction,
   onNavigateToTransactions,
 }) => {
-  const [showAccounts, setShowAccounts] = useState(true);
+  const [showAccounts, setShowAccounts] = useState<boolean>(() => getShowAccountsOnHome());
   const todayStr = useMemo(() => getSwedishDateStr(), []);
   const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
@@ -611,7 +612,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => setShowAccounts(!showAccounts)}
+                onClick={() => {
+                  const next = !showAccounts;
+                  setShowAccounts(next);
+                  setShowAccountsOnHome(next);
+                }}
                 className="w-7 h-7 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer"
                 title={showAccounts ? 'Dölj konton' : 'Visa konton'}
               >

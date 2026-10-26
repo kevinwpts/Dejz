@@ -91,7 +91,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
       <nav
         ref={navRef}
-        className="fixed bottom-1.5 sm:bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm"
+        className="fixed bottom-6 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm"
       >
         {/* Popover Menu for More Options */}
         {isMenuOpen && (
