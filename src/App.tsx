@@ -64,6 +64,7 @@ import { deduplicateTransactions } from './utils/transactionDedup';
 import {
   formatIsoDateStockholm,
   formatIsoTimeStockholm,
+  formatSwedishDateHeading,
   getActualBankPaymentDateAndMeta,
   getSwedishDateStr,
   parseDateFromSwedishText,
@@ -91,6 +92,7 @@ import {
   getMerchantAliases,
   saveMerchantAlias,
   resolveMerchantAlias,
+  isGenericPlaceholderMerchant,
   normalizeMerchantKey,
   extractMerchantKeyVariants,
   ensureValidUuid,
@@ -191,15 +193,10 @@ function sanitizeTransactionItem(
     updated.title = cleanDisplayMerchantName(updated.title);
   }
 
-  // 3. Deterministisk matchning mot alias, fasta utgifter och fasta inkomster
+  // 3. Deterministisk matchning mot fasta utgifter, fasta inkomster och alias
+  // Fasta utgifter och inkomster går alltid först så att en känd fast post (t.ex. Svea Fastigheter)
+  // aldrig kan döpas om till något generiskt av ett AI-alias!
   const kind = updated.type === 'income' ? 'income' : 'expense';
-  const aliasMatch = resolveMerchantAlias(combinedText, aliasesOverride);
-  if (aliasMatch) {
-    updated.title = aliasMatch.name;
-    updated.category = normalizeCategoryToValid(aliasMatch.category, kind);
-    updated.logo = getLogoUrl(aliasMatch.name, updated.category);
-    return updated;
-  }
 
   if (updated.type !== 'income' && fixedList && fixedList.length > 0) {
     const matchedFixed = findMatchingFixedExpense(updated, fixedList);
@@ -219,6 +216,14 @@ function sanitizeTransactionItem(
       updated.logo = matchedInc.logo || getLogoUrl(matchedInc.name, updated.category);
       return updated;
     }
+  }
+
+  const aliasMatch = resolveMerchantAlias(combinedText, aliasesOverride);
+  if (aliasMatch && !isGenericPlaceholderMerchant(aliasMatch.name)) {
+    updated.title = aliasMatch.name;
+    updated.category = normalizeCategoryToValid(aliasMatch.category, kind);
+    updated.logo = getLogoUrl(aliasMatch.name, updated.category);
+    return updated;
   }
 
   updated.category = normalizeCategoryToValid(updated.category, kind);
@@ -804,7 +809,13 @@ function mapBankTransactionsToAppItems(
 
   const bookedToReservationMeta = new Map<
     string,
-    { purchaseDate: string; purchaseTime: string }
+    {
+      purchaseDate: string;
+      purchaseTime: string;
+      preservedMerchant?: string;
+      preservedCategory?: string;
+      preservedDescription?: string;
+    }
   >();
   const consumedBookedIdsForPending = new Set<string>();
 
@@ -829,20 +840,24 @@ function mapBankTransactionsToAppItems(
 
       if (bt.booking_status === 'PDNG' || bt.booking_status === 'HOLD') {
         const pendingAmt = Math.round(Math.abs(rawAmt));
-        const pendingMerchant = categorizeBankTransactionForApp(bt)
-          .merchant.toLowerCase()
-          .trim();
+        const pendingCatInfo = categorizeBankTransactionForApp(bt);
+        const pendingMerchant = pendingCatInfo.merchant.toLowerCase().trim();
         const pendingDate = getActualTransactionDate(bt);
 
         const isSettledByBooked = bookedNegativeTxs.some((b) => {
           if (consumedBookedIdsForPending.has(b.id)) return false;
           const bAmt = Math.round(Math.abs(getNormalizedBankTxAmount(b)));
           if (bAmt !== pendingAmt) return false;
-          const bMerchant = categorizeBankTransactionForApp(b)
-            .merchant.toLowerCase()
-            .trim();
+          const bCatInfo = categorizeBankTransactionForApp(b);
+          const bMerchant = bCatInfo.merchant.toLowerCase().trim();
+
+          const pendingIsGeneric = isGenericPlaceholderMerchant(pendingMerchant);
+          const bookedIsGeneric = isGenericPlaceholderMerchant(bMerchant);
+
           const merchantsMatch =
             bMerchant === pendingMerchant ||
+            pendingIsGeneric ||
+            bookedIsGeneric ||
             (bt.description && bt.description.toLowerCase().includes(bMerchant)) ||
             (b.description && b.description.toLowerCase().includes(pendingMerchant));
           if (!merchantsMatch) return false;
@@ -852,7 +867,7 @@ function mapBankTransactionsToAppItems(
             const dayDiff =
               Math.abs(new Date(bDate).getTime() - new Date(pendingDate).getTime()) /
               (1000 * 60 * 60 * 24);
-            if (dayDiff <= 4) {
+            if (dayDiff <= 7) {
               consumedBookedIdsForPending.add(b.id);
               const purchaseDate = pendingDate;
               const purchaseTime = extractBankTxTime(
@@ -862,7 +877,17 @@ function mapBankTransactionsToAppItems(
                 pendingMerchant,
                 pendingMerchant
               );
-              bookedToReservationMeta.set(b.id, { purchaseDate, purchaseTime });
+              bookedToReservationMeta.set(b.id, {
+                purchaseDate,
+                purchaseTime,
+                preservedMerchant: !pendingIsGeneric ? pendingCatInfo.merchant : undefined,
+                preservedCategory:
+                  !pendingIsGeneric && pendingCatInfo.category !== 'Övrigt'
+                    ? pendingCatInfo.category
+                    : undefined,
+                preservedDescription:
+                  !isGenericPlaceholderMerchant(bt.description) ? bt.description : undefined,
+              });
               return true;
             }
           }
@@ -881,6 +906,20 @@ function mapBankTransactionsToAppItems(
       const isIncome = rawAmt > 0;
       const normAmt = Math.abs(rawAmt);
       let catInfo = categorizeBankTransactionForApp(bt);
+      const reservationMeta = bookedToReservationMeta.get(bt.id);
+      if (
+        reservationMeta?.preservedMerchant &&
+        isGenericPlaceholderMerchant(catInfo.merchant)
+      ) {
+        catInfo = {
+          merchant: reservationMeta.preservedMerchant,
+          category: reservationMeta.preservedCategory || catInfo.category,
+          logo: getLogoUrl(
+            reservationMeta.preservedMerchant,
+            reservationMeta.preservedCategory || catInfo.category
+          ),
+        };
+      }
 
       if (isIncome) {
         const combinedDesc = `${bt.description || ''} ${bt.counterparty_name || ''}`.toLowerCase();
@@ -928,7 +967,6 @@ function mapBankTransactionsToAppItems(
         };
       }
 
-      const reservationMeta = bookedToReservationMeta.get(bt.id);
       const dateMeta = getActualBankPaymentDateAndMeta(
         bt,
         reservationMeta?.purchaseDate,
@@ -966,6 +1004,11 @@ function mapBankTransactionsToAppItems(
           })()
         : undefined;
 
+      const effectiveRawDesc =
+        (!isGenericPlaceholderMerchant(bt.description)
+          ? bt.description
+          : reservationMeta?.preservedDescription) || bt.description;
+
       return sanitizeTransactionItem(
         {
           id: `bank-${bt.id}`,
@@ -980,13 +1023,14 @@ function mapBankTransactionsToAppItems(
           reconciliationStatus: bt.reconciliation_status,
           isExcluded: bt.reconciliation_status === 'excluded' || isManuallyExcluded,
           note:
-            bt.description &&
-            bt.description.toLowerCase() !== catInfo.merchant.toLowerCase()
-              ? bt.description
+            effectiveRawDesc &&
+            effectiveRawDesc.toLowerCase() !== catInfo.merchant.toLowerCase() &&
+            !isGenericPlaceholderMerchant(effectiveRawDesc)
+              ? effectiveRawDesc
               : undefined,
           logo: catInfo.logo || getLogoUrl(catInfo.merchant, catInfo.category),
 
-          rawDescription: bt.description,
+          rawDescription: effectiveRawDesc,
           counterpartyName: bt.counterparty_name || undefined,
           currency: bt.currency || 'SEK',
           creditDebitIndicator:
@@ -1132,7 +1176,7 @@ export const App: React.FC = () => {
     const currentAliases = getMerchantAliases();
     const candidatesByKey = new Map<
       string,
-      { key: string; rawText: string; amount: number; type: 'expense' | 'income' }
+      { key: string; rawText: string; amount: number; time: string; type: 'expense' | 'income' }
     >();
 
     for (const tx of transactions) {
@@ -1179,6 +1223,7 @@ export const App: React.FC = () => {
             key: normKey,
             rawText: rawSource,
             amount: tx.amount,
+            time: getTransactionTime(tx),
             type: tx.type === 'income' ? 'income' : 'expense',
           });
         }
@@ -1215,23 +1260,33 @@ export const App: React.FC = () => {
         for (const resItem of data.results) {
           const orig = candidatesByKey.get(resItem.key);
           if (!orig || !resItem.cleanName) continue;
+          const cleanTrimmed = String(resItem.cleanName).trim();
+          if (
+            !cleanTrimmed ||
+            isGenericPlaceholderMerchant(cleanTrimmed) ||
+            isGenericPlaceholderMerchant(orig.rawText)
+          ) {
+            continue;
+          }
           const validCat = normalizeCategoryToValid(
             resItem.category,
             orig.type
           );
-          saveMerchantAlias(orig.rawText, resItem.cleanName.trim(), validCat);
+          saveMerchantAlias(orig.rawText, cleanTrimmed, validCat);
           anySaved = true;
         }
 
         if (anySaved) {
           const updatedAliases = getMerchantAliases();
           setTransactions((prev) => {
-            const next = prev.map((t) =>
-              sanitizeTransactionItem(
-                t,
-                fixedExpensesRef.current,
-                incomesRef.current,
-                updatedAliases
+            const next = deduplicateTransactions(
+              prev.map((t) =>
+                sanitizeTransactionItem(
+                  t,
+                  fixedExpensesRef.current,
+                  incomesRef.current,
+                  updatedAliases
+                )
               )
             );
             saveCachedAppState({ transactions: next });
@@ -1744,6 +1799,25 @@ export const App: React.FC = () => {
         null;
       if (metaAvatar) setUserAvatar(metaAvatar);
 
+      const metaFullName =
+        sessionUser.user_metadata?.full_name ||
+        sessionUser.user_metadata?.name ||
+        '';
+      if (metaFullName && typeof metaFullName === 'string') {
+        const firstName = metaFullName.trim().split(/\s+/)[0];
+        if (firstName) {
+          setUserName((prev) => {
+            if (prev) return prev;
+            try {
+              localStorage.setItem('dejz_user_name', firstName);
+            } catch {
+              // ignore
+            }
+            return firstName;
+          });
+        }
+      }
+
       // Förhindra att getSession och onAuthStateChange kör dubbla parallella hydreringar vid mount
       if (hydrationInFlightRef.current === uid) {
         return;
@@ -2031,7 +2105,7 @@ export const App: React.FC = () => {
   // Transaktioner som tillhör den aktuella löneperioden (från lönedag till dagen innan nästa lön)
   const periodTransactions = useMemo(() => {
     const aliases = getMerchantAliases();
-    const list = deduplicateTransactions(transactions)
+    const sanitized = transactions
       .filter((t) => {
         if (!isDateInPeriod(t.date, period)) return false;
         if (t.isExcluded) return false;
@@ -2045,6 +2119,8 @@ export const App: React.FC = () => {
         return true;
       })
       .map((t) => sanitizeTransactionItem(t, fixedExpenses, incomes, aliases));
+
+    const list = deduplicateTransactions(sanitized);
 
     list.sort((a, b) => {
       const dCmp = (b.date || '').localeCompare(a.date || '');
@@ -2842,14 +2918,18 @@ export const App: React.FC = () => {
       <>
         <OnboardingFlow
           initialName={userName || ''}
+          targetPayday={targetPayday}
           connections={connections}
           incomes={incomes}
           fixedExpenses={fixedExpenses}
           onSaveName={handleUpdateName}
+          onUpdatePayday={handleUpdatePayday}
           onOpenBankModal={() => setIsBankModalOpen(true)}
           onAddIncome={handleAddIncome}
+          onUpdateIncome={handleUpdateIncome}
           onDeleteIncome={handleDeleteIncome}
           onAddFixed={handleAddFixed}
+          onUpdateFixed={handleUpdateFixed}
           onDeleteFixed={handleDeleteFixed}
           onBackToLanding={() => {
             setIsOnboardingActive(false);
@@ -2965,6 +3045,7 @@ export const App: React.FC = () => {
               transactions={displayTransactions}
               fixedExpenses={fixedExpenses}
               incomes={incomes}
+              period={period}
               onSelectTransaction={(tx) => {
                 setSelectedTransaction(tx);
                 setIsTxModalOpen(true);
@@ -2985,6 +3066,17 @@ export const App: React.FC = () => {
               period={period}
               kvarAttSpendera={kvarAttSpendera}
               dagsbudget={dagsbudget}
+              fixedExpenses={fixedExpenses}
+              incomes={incomes}
+              transactions={displayTransactions}
+              onSelectFixed={(exp) => {
+                setSelectedFixedExpense(exp);
+                setIsFixedModalOpen(true);
+              }}
+              onSelectTransaction={(tx) => {
+                setSelectedTransaction(tx);
+                setIsTxModalOpen(true);
+              }}
             />
           ) : (
             <>
@@ -3086,67 +3178,110 @@ export const App: React.FC = () => {
               )}
 
               {activeTab === 'saved' && (
-                <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-                  {displayTransactions.filter((t) => t.isHearted).length > 0 ? (
-                    <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
-                      <div className="divide-y divide-[var(--border-subtle)]">
-                        {displayTransactions
-                          .filter((t) => t.isHearted)
-                          .map((tx) => {
-                            const isIncome = tx.type === 'income';
-                            const formattedAmt =
-                              new Intl.NumberFormat('sv-SE').format(Math.round(tx.amount)) + ' kr';
-                            return (
-                              <button
-                                key={tx.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedTransaction(tx);
-                                  setIsTxModalOpen(true);
-                                }}
-                                className="w-full py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
-                              >
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  <ItemLogo
-                                    name={tx.title}
-                                    category={tx.category}
-                                    logoUrl={tx.logo}
-                                    size="md"
-                                    isRecurring={false}
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                      <span className="truncate">{tx.title}</span>
-                                      {tx.isHearted && (
-                                        <Heart
-                                          size={13}
-                                          weight="fill"
-                                          className="text-rose-500 shrink-0"
-                                        />
-                                      )}
-                                      {tx.isWaitingForPackage && (
-                                        <Package
-                                          size={13}
-                                          weight="fill"
-                                          className="text-amber-500 shrink-0"
-                                        />
-                                      )}
-                                      {tx.receiptUrl && (
-                                        <Paperclip
-                                          size={13}
-                                          weight="bold"
-                                          className="text-[var(--text-secondary)] shrink-0"
-                                        />
-                                      )}
-                                    </span>
-                                    <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                                      <CategoryIcon category={tx.category} size={12} />
-                                      <span className="truncate">{tx.category}</span>
-                                    </span>
+                <div className="space-y-5 pb-36 sm:pb-40 animate-fade-in">
+                  {(() => {
+                    const heartedList = displayTransactions.filter((t) => t.isHearted);
+                    if (heartedList.length === 0) {
+                      return (
+                        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
+                          <Heart size={22} className="text-[var(--text-muted)] mx-auto mb-2" />
+                          <p className="text-xs font-semibold text-[var(--text-primary)]">
+                            Inga sparade köp
+                          </p>
+                        </section>
+                      );
+                    }
+
+                    const map = new Map<string, TransactionItem[]>();
+                    for (const tx of heartedList) {
+                      const key = tx.date || 'Okänt';
+                      const arr = map.get(key) || [];
+                      arr.push(tx);
+                      map.set(key, arr);
+                    }
+                    const sortedKeys = Array.from(map.keys()).sort((a, b) => b.localeCompare(a));
+
+                    return sortedKeys.map((dateKey) => {
+                      const dayItems = map.get(dateKey)!;
+                      const net = dayItems.reduce((acc, item) => {
+                        const amt = Number(item.amount) || 0;
+                        return item.type === 'income' ? acc + amt : acc - amt;
+                      }, 0);
+                      const netStr =
+                        new Intl.NumberFormat('sv-SE').format(Math.round(Math.abs(net))) + ' kr';
+
+                      return (
+                        <section key={`saved-${dateKey}`} className="space-y-2">
+                          <div className="flex items-center justify-between px-1">
+                            <h3 className="font-display font-bold text-xs text-[var(--text-muted)]">
+                              {formatSwedishDateHeading(dateKey)}
+                            </h3>
+                            <span
+                              className={`text-xs font-semibold tabular-nums ${
+                                net > 0
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : 'text-[var(--text-muted)]'
+                              }`}
+                            >
+                              {net > 0 ? `+${netStr}` : `-${netStr}`}
+                            </span>
+                          </div>
+
+                          <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-4 py-1 sm:px-5 sm:py-1.5 divide-y divide-[var(--border-subtle)]">
+                            {dayItems.map((tx) => {
+                              const isIncome = tx.type === 'income';
+                              const formattedAmt =
+                                new Intl.NumberFormat('sv-SE').format(Math.round(tx.amount)) + ' kr';
+                              return (
+                                <button
+                                  key={tx.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedTransaction(tx);
+                                    setIsTxModalOpen(true);
+                                  }}
+                                  className="w-full py-3 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <ItemLogo
+                                      name={tx.title}
+                                      category={tx.category}
+                                      logoUrl={tx.logo}
+                                      size="md"
+                                      isRecurring={false}
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                                        <span className="truncate">{tx.title}</span>
+                                        {tx.isHearted && (
+                                          <Heart
+                                            size={13}
+                                            weight="fill"
+                                            className="text-rose-500 shrink-0"
+                                          />
+                                        )}
+                                        {tx.isWaitingForPackage && (
+                                          <Package
+                                            size={13}
+                                            weight="fill"
+                                            className="text-amber-500 shrink-0"
+                                          />
+                                        )}
+                                        {tx.receiptUrl && (
+                                          <Paperclip
+                                            size={13}
+                                            weight="bold"
+                                            className="text-[var(--text-secondary)] shrink-0"
+                                          />
+                                        )}
+                                      </span>
+                                      <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
+                                        <CategoryIcon category={tx.category} size={12} />
+                                        <span className="truncate">{tx.category}</span>
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2.5 shrink-0">
-                                  <div className="text-right">
+                                  <div className="text-right shrink-0">
                                     <span
                                       className={`font-display font-bold tabular-nums block ${
                                         isIncome
@@ -3160,125 +3295,158 @@ export const App: React.FC = () => {
                                       {getTransactionTime(tx)}
                                     </span>
                                   </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                      </div>
-                    </section>
-                  ) : (
-                    <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
-                      <Heart size={22} className="text-[var(--text-muted)] mx-auto mb-2" />
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">
-                        Inga sparade köp
-                      </p>
-                    </section>
-                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </section>
+                      );
+                    });
+                  })()}
                 </div>
               )}
 
               {activeTab === 'packages' && (
-                <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-                  {displayTransactions.filter((t) => t.isWaitingForPackage).length > 0 ? (
-                    <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
-                      <div className="divide-y divide-[var(--border-subtle)]">
-                        {displayTransactions
-                          .filter((t) => t.isWaitingForPackage)
-                          .map((tx) => {
-                            const isIncome = tx.type === 'income';
-                            const formattedAmt =
-                              new Intl.NumberFormat('sv-SE').format(Math.round(tx.amount)) + ' kr';
-                            return (
-                              <div
-                                key={tx.id}
-                                className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 text-sm"
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedTransaction(tx);
-                                    setIsTxModalOpen(true);
-                                  }}
-                                  className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                <div className="space-y-5 pb-36 sm:pb-40 animate-fade-in">
+                  {(() => {
+                    const packageList = displayTransactions.filter((t) => t.isWaitingForPackage);
+                    if (packageList.length === 0) {
+                      return (
+                        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
+                          <Package size={22} className="text-[var(--text-muted)] mx-auto mb-2" />
+                          <p className="text-xs font-semibold text-[var(--text-primary)]">
+                            Inga paket på väg
+                          </p>
+                          <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                            Öppna en transaktion och tryck på paketsymbolen för att hålla koll på beställningar du väntar på.
+                          </p>
+                        </section>
+                      );
+                    }
+
+                    const map = new Map<string, TransactionItem[]>();
+                    for (const tx of packageList) {
+                      const key = tx.date || 'Okänt';
+                      const arr = map.get(key) || [];
+                      arr.push(tx);
+                      map.set(key, arr);
+                    }
+                    const sortedKeys = Array.from(map.keys()).sort((a, b) => b.localeCompare(a));
+
+                    return sortedKeys.map((dateKey) => {
+                      const dayItems = map.get(dateKey)!;
+                      const net = dayItems.reduce((acc, item) => {
+                        const amt = Number(item.amount) || 0;
+                        return item.type === 'income' ? acc + amt : acc - amt;
+                      }, 0);
+                      const netStr =
+                        new Intl.NumberFormat('sv-SE').format(Math.round(Math.abs(net))) + ' kr';
+
+                      return (
+                        <section key={`pkg-${dateKey}`} className="space-y-2">
+                          <div className="flex items-center justify-between px-1">
+                            <h3 className="font-display font-bold text-xs text-[var(--text-muted)]">
+                              {formatSwedishDateHeading(dateKey)}
+                            </h3>
+                            <span
+                              className={`text-xs font-semibold tabular-nums ${
+                                net > 0
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : 'text-[var(--text-muted)]'
+                              }`}
+                            >
+                              {net > 0 ? `+${netStr}` : `-${netStr}`}
+                            </span>
+                          </div>
+
+                          <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-4 py-1 sm:px-5 sm:py-1.5 divide-y divide-[var(--border-subtle)]">
+                            {dayItems.map((tx) => {
+                              const isIncome = tx.type === 'income';
+                              const formattedAmt =
+                                new Intl.NumberFormat('sv-SE').format(Math.round(tx.amount)) + ' kr';
+                              return (
+                                <div
+                                  key={tx.id}
+                                  className="py-3 flex items-center justify-between gap-3 text-sm"
                                 >
-                                  <ItemLogo
-                                    name={tx.title}
-                                    category={tx.category}
-                                    logoUrl={tx.logo}
-                                    size="md"
-                                    isRecurring={false}
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                      <span className="truncate">{tx.title}</span>
-                                      {tx.isHearted && (
-                                        <Heart
-                                          size={13}
-                                          weight="fill"
-                                          className="text-rose-500 shrink-0"
-                                        />
-                                      )}
-                                      {tx.isWaitingForPackage && (
-                                        <Package
-                                          size={13}
-                                          weight="fill"
-                                          className="text-amber-500 shrink-0"
-                                        />
-                                      )}
-                                      {tx.receiptUrl && (
-                                        <Paperclip
-                                          size={13}
-                                          weight="bold"
-                                          className="text-[var(--text-secondary)] shrink-0"
-                                        />
-                                      )}
-                                    </span>
-                                    <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                                      <CategoryIcon category={tx.category} size={12} />
-                                      <span className="truncate">{tx.category}</span>
-                                    </span>
-                                  </div>
-                                </button>
-                                <div className="flex items-center gap-2.5 shrink-0">
-                                  <div className="text-right">
-                                    <span
-                                      className={`font-display font-bold tabular-nums block ${
-                                        isIncome
-                                          ? 'text-emerald-600 dark:text-emerald-400'
-                                          : 'text-[var(--text-primary)]'
-                                      }`}
-                                    >
-                                      {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
-                                    </span>
-                                    <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
-                                      {tx.date}
-                                    </span>
-                                  </div>
                                   <button
                                     type="button"
-                                    onClick={() => handleTogglePackage(tx.id, false)}
-                                    title="Markera som mottaget"
-                                    className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                    onClick={() => {
+                                      setSelectedTransaction(tx);
+                                      setIsTxModalOpen(true);
+                                    }}
+                                    className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
                                   >
-                                    <Package size={15} weight="fill" />
+                                    <ItemLogo
+                                      name={tx.title}
+                                      category={tx.category}
+                                      logoUrl={tx.logo}
+                                      size="md"
+                                      isRecurring={false}
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                                        <span className="truncate">{tx.title}</span>
+                                        {tx.isHearted && (
+                                          <Heart
+                                            size={13}
+                                            weight="fill"
+                                            className="text-rose-500 shrink-0"
+                                          />
+                                        )}
+                                        {tx.isWaitingForPackage && (
+                                          <Package
+                                            size={13}
+                                            weight="fill"
+                                            className="text-amber-500 shrink-0"
+                                          />
+                                        )}
+                                        {tx.receiptUrl && (
+                                          <Paperclip
+                                            size={13}
+                                            weight="bold"
+                                            className="text-[var(--text-secondary)] shrink-0"
+                                          />
+                                        )}
+                                      </span>
+                                      <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
+                                        <CategoryIcon category={tx.category} size={12} />
+                                        <span className="truncate">{tx.category}</span>
+                                      </span>
+                                    </div>
                                   </button>
+                                  <div className="flex items-center gap-2.5 shrink-0">
+                                    <div className="text-right">
+                                      <span
+                                        className={`font-display font-bold tabular-nums block ${
+                                          isIncome
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-[var(--text-primary)]'
+                                        }`}
+                                      >
+                                        {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
+                                      </span>
+                                      <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                                        {getTransactionTime(tx)}
+                                      </span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleTogglePackage(tx.id, false)}
+                                      title="Markera som mottaget"
+                                      className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                    >
+                                      <Package size={15} weight="fill" />
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </section>
-                  ) : (
-                    <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
-                      <Package size={22} className="text-[var(--text-muted)] mx-auto mb-2" />
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">
-                        Inga paket på väg
-                      </p>
-                      <p className="text-[11px] text-[var(--text-muted)] mt-1">
-                        Öppna en transaktion och tryck på paketsymbolen för att hålla koll på beställningar du väntar på.
-                      </p>
-                    </section>
-                  )}
+                              );
+                            })}
+                          </div>
+                        </section>
+                      );
+                    });
+                  })()}
                 </div>
               )}
 

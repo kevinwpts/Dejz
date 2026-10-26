@@ -1,5 +1,39 @@
 import { TransactionItem } from '../components/HomeTab';
 
+const GENERIC_DEDUP_TITLES = new Set([
+  '',
+  'banktransaktion',
+  'kortköp',
+  'kortkop',
+  'betalning',
+  'autogiro',
+  'bankgiro',
+  'plusgiro',
+  'bg',
+  'pg',
+  'insättning',
+  'insattning',
+  'utbetalning',
+  'inbetalning',
+  'utgift',
+  'inkomst',
+  'köp',
+  'kop',
+  'reserverat',
+  'reservation',
+  'överföring',
+  'overforing',
+  'okänd',
+  'okand',
+  'övrigt',
+  'ovrigt',
+]);
+
+export function isGenericDedupTitle(normTitle: string | null | undefined): boolean {
+  const t = (normTitle || '').toLowerCase().trim();
+  return !t || GENERIC_DEDUP_TITLES.has(t);
+}
+
 export function normalizeMerchantForDedup(rawName: unknown): string {
   if (typeof rawName !== 'string') return '';
   const str = rawName.toLowerCase();
@@ -49,7 +83,8 @@ function getDaysDiff(d1Str: string, d2Str: string): number {
  * 2. Identiska dubblettrader från återkommande bank- eller kontosynkningar (som har samma saldo,
  *    samma bank-ID eller samma fysiska ledger-post) slås ihop.
  * 3. Preliminära reservationer (PDNG/HOLD) som blivit slutgiltigt bokförda (BOOK) slås ihop
- *    så att inte både reservationen och den bokförda posten visas.
+ *    så att inte både reservationen och den bokförda posten visas — även om den ena posten
+ *    fått ett generiskt namn som "Banktransaktion" av banken.
  * 4. Manuellt inlagda köp i appen slås ihop med motsvarande banktransaktion när banken synkas.
  */
 export function deduplicateTransactions(items: TransactionItem[]): TransactionItem[] {
@@ -85,18 +120,10 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
 
       // 2. Om BÅDA transaktionerna kommer från banken:
       if (isItemBank && isExistBank) {
-        // A. Om båda har bankens saldo efter transaktionen:
-        if (itemBal !== null && existBal !== null) {
-          if (Math.abs(itemBal - existBal) > 0.005) {
-            // Olika saldo -> detta är två separata verkliga transaktioner!
-            // (T.ex. tre Swish samma dag – saldot ändras efter varje transaktion)
-            return false;
-          }
-          // Exakt samma saldo efter transaktionen -> detta är 100% samma transaktion som synkats två gånger!
-          return true;
-        }
+        const isItemPending = item.bookingStatus === 'PDNG' || item.bookingStatus === 'HOLD';
+        const isExistPending = existing.bookingStatus === 'PDNG' || existing.bookingStatus === 'HOLD';
 
-        // B. Om de delar samma transactionId eller entryReference
+        // A. Om de delar samma transactionId eller entryReference
         if (
           (item.transactionId && existing.transactionId && item.transactionId === existing.transactionId) ||
           (item.entryReference && existing.entryReference && item.entryReference === existing.entryReference)
@@ -104,12 +131,10 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
           return true;
         }
 
-        // C. Om en är preliminär reservation (PDNG/HOLD) och en är slutgiltigt bokförd (BOOK)
-        const isItemPending = item.bookingStatus === 'PDNG' || item.bookingStatus === 'HOLD';
-        const isExistPending = existing.bookingStatus === 'PDNG' || existing.bookingStatus === 'HOLD';
+        // B. Om en är preliminär reservation (PDNG/HOLD) och en är slutgiltigt bokförd (BOOK)
         if (isItemPending !== isExistPending) {
           const diff = getDaysDiff(itemDate, existDate);
-          if (diff <= 4) {
+          if (diff <= 7) {
             const tokens1 = (itemTitleNorm || '').split(' ').filter((t) => t.length >= 2);
             const tokens2 = (existTitleNorm || '').split(' ').filter((t) => t.length >= 2);
             const hasCommonToken = tokens1.some(
@@ -119,21 +144,48 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
               itemTitleNorm === existTitleNorm ||
               (itemTitleNorm && existTitleNorm && (itemTitleNorm.includes(existTitleNorm) || existTitleNorm.includes(itemTitleNorm))) ||
               hasCommonToken ||
-              !itemTitleNorm ||
-              !existTitleNorm;
+              isGenericDedupTitle(itemTitleNorm) ||
+              isGenericDedupTitle(existTitleNorm) ||
+              isGenericDedupTitle(item.title) ||
+              isGenericDedupTitle(existing.title);
             if (titlesMatch) return true;
           }
         }
 
-        // D. Om båda saknar särskiljande saldo:
-        // För Swish ska vi INTE slå ihop dem automatiskt om saldot saknas, för att inte riskera att radera en legitim betalning
+        // C. Om båda har bankens slutgiltiga saldo efter transaktionen (och samma bokningsstatus):
+        if (itemBal !== null && existBal !== null && isItemPending === isExistPending) {
+          if (Math.abs(itemBal - existBal) > 0.005) {
+            // Olika saldo -> detta är två separata verkliga transaktioner!
+            // (T.ex. tre Swish samma dag – saldot ändras efter varje transaktion)
+            return false;
+          }
+          // Exakt samma saldo efter transaktionen -> detta är 100% samma transaktion som synkats två gånger!
+          return true;
+        }
+
+        // D. För Swish ska vi INTE slå ihop dem automatiskt om saldot saknas, för att inte riskera att radera en legitim betalning
         if (item.category?.toLowerCase() === 'swish' || existing.category?.toLowerCase() === 'swish') {
           return false;
         }
 
-        // För vanliga kortköp/räkningar: om datum och butiksnamn är identiska
-        if (itemDate === existDate && itemTitleNorm && itemTitleNorm === existTitleNorm) {
+        const diff = getDaysDiff(itemDate, existDate);
+
+        // E. Om den ena posten har ett generiskt namn ("Banktransaktion", "Betalning", "Autogiro") och den andra har ett riktigt namn
+        // med exakt samma belopp inom 5 dagar (och minst en saknar särskiljande saldo):
+        const itemIsGeneric = isGenericDedupTitle(itemTitleNorm) || isGenericDedupTitle(item.title);
+        const existIsGeneric = isGenericDedupTitle(existTitleNorm) || isGenericDedupTitle(existing.title);
+        if (itemIsGeneric !== existIsGeneric && diff <= 5) {
           return true;
+        }
+
+        // F. För vanliga kortköp/räkningar: om datum och butiksnamn är identiska, eller samma räkning/hyra (>= 150 kr) inom 5 dagar
+        if (itemTitleNorm && itemTitleNorm === existTitleNorm) {
+          if (itemDate === existDate) {
+            return true;
+          }
+          if (itemAmt >= 150 && diff <= 5 && (itemBal === null || existBal === null)) {
+            return true;
+          }
         }
 
         return false;
@@ -142,7 +194,12 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
       // 3. Om EN transaktion är manuell/lokal och EN kommer från banken:
       // (Användaren har registrerat ett köp i appen, och banken har nu synkat in samma köp)
       const daysDiff = getDaysDiff(itemDate, existDate);
-      if (daysDiff <= 3.5) {
+      if (daysDiff <= 4.5) {
+        const itemIsGeneric = isGenericDedupTitle(itemTitleNorm) || isGenericDedupTitle(item.title);
+        const existIsGeneric = isGenericDedupTitle(existTitleNorm) || isGenericDedupTitle(existing.title);
+        if (itemIsGeneric || existIsGeneric) {
+          return true;
+        }
         if (itemTitleNorm && existTitleNorm) {
           if (itemTitleNorm === existTitleNorm || itemTitleNorm.includes(existTitleNorm) || existTitleNorm.includes(itemTitleNorm)) {
             return true;
@@ -171,20 +228,49 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
       const isItemBooked = item.bookingStatus === 'BOOK' || (!item.bookingStatus && isItemBank);
       const isExistBooked = existing.bookingStatus === 'BOOK' || (!existing.bookingStatus && existing.id.startsWith('bank-'));
 
+      const itemHasRealTitle = !isGenericDedupTitle(itemTitleNorm) && !isGenericDedupTitle(item.title);
+      const existHasRealTitle = !isGenericDedupTitle(normalizeMerchantForDedup(existing.title)) && !isGenericDedupTitle(existing.title);
+
+      const bestTitle = itemHasRealTitle
+        ? item.title
+        : existHasRealTitle
+        ? existing.title
+        : item.title || existing.title;
+      const bestCategory =
+        itemHasRealTitle && item.category && item.category !== 'Övrigt'
+          ? item.category
+          : existHasRealTitle && existing.category && existing.category !== 'Övrigt'
+          ? existing.category
+          : item.category !== 'Övrigt'
+          ? item.category
+          : existing.category || item.category;
+      const bestLogo =
+        (itemHasRealTitle ? item.logo : undefined) ||
+        (existHasRealTitle ? existing.logo : undefined) ||
+        item.logo ||
+        existing.logo;
+
       const preferCurrent =
         (isItemBooked && !isExistBooked) ||
         (!existing.id.startsWith('bank-') && isItemBank) ||
         (!existing.rawJson && Boolean(item.rawJson)) ||
-        (!existing.logo && Boolean(item.logo));
+        (!existHasRealTitle && itemHasRealTitle);
 
       if (preferCurrent) {
         seenIds.delete(existing.id);
         seenIds.add(item.id);
         result[dupIndex] = {
           ...item,
+          title: bestTitle,
+          category: bestCategory,
+          logo: bestLogo,
           time: item.time || existing.time,
-          logo: item.logo || existing.logo,
           note: item.note || existing.note,
+          rawDescription:
+            (!isGenericDedupTitle(item.rawDescription) ? item.rawDescription : existing.rawDescription) ||
+            item.rawDescription ||
+            existing.rawDescription,
+          counterpartyName: item.counterpartyName || existing.counterpartyName,
           isHearted: item.isHearted ?? existing.isHearted,
           isWaitingForPackage: item.isWaitingForPackage ?? existing.isWaitingForPackage,
           paymentMethod: item.paymentMethod || existing.paymentMethod,
@@ -198,6 +284,14 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
       } else {
         result[dupIndex] = {
           ...existing,
+          title: bestTitle,
+          category: bestCategory,
+          logo: bestLogo,
+          rawDescription:
+            (!isGenericDedupTitle(existing.rawDescription) ? existing.rawDescription : item.rawDescription) ||
+            existing.rawDescription ||
+            item.rawDescription,
+          counterpartyName: existing.counterpartyName || item.counterpartyName,
           isHearted: existing.isHearted ?? item.isHearted,
           isWaitingForPackage: existing.isWaitingForPackage ?? item.isWaitingForPackage,
           paymentMethod: existing.paymentMethod || item.paymentMethod,

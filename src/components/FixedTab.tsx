@@ -3,6 +3,7 @@ import {
   Coins,
   Receipt,
   CheckCircle,
+  TrendUp,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
@@ -77,16 +78,30 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   }, [incomes, transactions, period, primaryAccountLabel]);
 
   const enrichedExpenses = useMemo(() => {
-    const allExpenseTxs = (transactions || []).filter((tx) => tx.type !== 'income');
+    const allExpenseTxs = (transactions || [])
+      .filter((tx) => tx.type !== 'income' && !tx.isExcluded)
+      .sort((a, b) => b.date.localeCompare(a.date));
     const periodExpenseTxs = allExpenseTxs.filter((tx) => isDateInPeriod(tx.date, period));
 
     return fixedExpenses
       .map((exp) => {
         const dueDateInPeriod = getDueDateInPeriod(exp.dueDay, period);
 
+        const matchedHistory = allExpenseTxs.filter((tx) =>
+          Boolean(findMatchingFixedExpense(tx, [exp]))
+        );
         const matchedTx =
           periodExpenseTxs.find((tx) => Boolean(findMatchingFixedExpense(tx, [exp]))) ||
-          allExpenseTxs.find((tx) => Boolean(findMatchingFixedExpense(tx, [exp])));
+          matchedHistory[0];
+
+        let priceIncreaseDiff = 0;
+        if (matchedHistory.length >= 2) {
+          const latestAmt = Math.round(Number(matchedHistory[0].amount) || 0);
+          const prevAmt = Math.round(Number(matchedHistory[1].amount) || 0);
+          if (latestAmt - prevAmt >= 5) {
+            priceIncreaseDiff = latestAmt - prevAmt;
+          }
+        }
 
         const isPaidInPeriod =
           periodExpenseTxs.some((tx) => Boolean(findMatchingFixedExpense(tx, [exp]))) ||
@@ -102,12 +117,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           isPaid: isPaidInPeriod,
           displayAmount: exp.amount,
           matchedTxDate: matchedTx?.date,
+          priceIncreaseDiff,
         };
       })
       .sort((a, b) => a.dueDateInPeriod.getTime() - b.dueDateInPeriod.getTime());
   }, [fixedExpenses, transactions, period, primaryAccountLabel]);
-
-  const paidExpensesCount = enrichedExpenses.filter((e) => e.isPaid).length;
 
   return (
     <div className="space-y-6 pb-36 sm:pb-40 animate-fade-in">
@@ -230,6 +244,15 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                           <span className="text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 shrink-0">
                             <CheckCircle size={12} weight="fill" />
                             <span>Betald</span>
+                          </span>
+                        </>
+                      )}
+                      {exp.priceIncreaseDiff > 0 && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="text-amber-600 dark:text-amber-400 font-semibold inline-flex items-center gap-0.5 shrink-0 tabular-nums">
+                            <TrendUp size={11} weight="bold" />
+                            <span>+{formatKr(exp.priceIncreaseDiff)}</span>
                           </span>
                         </>
                       )}

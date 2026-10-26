@@ -167,11 +167,79 @@ const MANUAL_FIXED_OVERRIDES_KEY = 'dejz_manual_fixed_overrides_v1';
 const MANUAL_INCOME_OVERRIDES_KEY = 'dejz_manual_income_overrides_v1';
 const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v1';
 
+const GENERIC_PLACEHOLDER_MERCHANTS = new Set([
+  'banktransaktion',
+  'kortköp',
+  'kortkop',
+  'betalning',
+  'autogiro',
+  'bankgiro',
+  'plusgiro',
+  'bg',
+  'pg',
+  'insättning',
+  'insattning',
+  'utbetalning',
+  'inbetalning',
+  'utgift',
+  'inkomst',
+  'köp',
+  'kop',
+  'reserverat',
+  'reservation',
+  'överföring',
+  'overforing',
+  'okänd',
+  'okand',
+  'okänd butik',
+  'okand butik',
+  'övrigt',
+  'ovrigt',
+]);
+
+export function isGenericPlaceholderMerchant(name: string | null | undefined): boolean {
+  if (!name) return true;
+  const cleaned = String(name).toLowerCase().trim();
+  if (!cleaned) return true;
+  if (GENERIC_PLACEHOLDER_MERCHANTS.has(cleaned)) return true;
+  const norm = normalizeMerchantKey(cleaned);
+  if (!norm || GENERIC_PLACEHOLDER_MERCHANTS.has(norm)) return true;
+  return false;
+}
+
 export function getMerchantAliases(): Record<string, { name: string; category: string }> {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(MERCHANT_ALIASES_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return {};
+
+    let dirty = false;
+    const cleanedMap: Record<string, { name: string; category: string }> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      const val = v as { name?: string; category?: string } | null;
+      if (
+        !val ||
+        typeof val.name !== 'string' ||
+        isGenericPlaceholderMerchant(k) ||
+        isGenericPlaceholderMerchant(val.name)
+      ) {
+        dirty = true;
+        continue;
+      }
+      cleanedMap[k] = { name: val.name, category: val.category || 'Övrigt' };
+    }
+
+    if (dirty) {
+      try {
+        localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(cleanedMap));
+      } catch {
+        // ignore
+      }
+    }
+
+    return cleanedMap;
   } catch {
     return {};
   }
@@ -179,10 +247,16 @@ export function getMerchantAliases(): Record<string, { name: string; category: s
 
 export function saveMerchantAlias(rawName: string, targetName: string, category: string): void {
   if (typeof window === 'undefined' || !rawName || !targetName) return;
+  if (isGenericPlaceholderMerchant(rawName) || isGenericPlaceholderMerchant(targetName)) return;
   try {
     const map = getMerchantAliases();
-    const sourceVariants = extractMerchantKeyVariants(rawName);
-    const targetVariants = extractMerchantKeyVariants(targetName);
+    const sourceVariants = extractMerchantKeyVariants(rawName).filter(
+      (v) => !isGenericPlaceholderMerchant(v)
+    );
+    const targetVariants = extractMerchantKeyVariants(targetName).filter(
+      (v) => !isGenericPlaceholderMerchant(v)
+    );
+    if (sourceVariants.length === 0 && targetVariants.length === 0) return;
 
     // Flatten alias chains: any existing alias pointing to rawName now points to targetName
     for (const [k, v] of Object.entries(map)) {
@@ -210,17 +284,24 @@ export function resolveMerchantAlias(
   rawText: string,
   aliasesOverride?: Record<string, { name: string; category: string }>
 ): { name: string; category: string } | null {
-  if (!rawText) return null;
+  if (!rawText || isGenericPlaceholderMerchant(rawText)) return null;
   const aliases = aliasesOverride || getMerchantAliases();
-  const entries = Object.entries(aliases);
+  const entries = Object.entries(aliases).filter(
+    ([k, v]) => !isGenericPlaceholderMerchant(k) && !isGenericPlaceholderMerchant(v?.name)
+  );
   if (entries.length === 0) return null;
 
-  const variants = extractMerchantKeyVariants(rawText);
+  const variants = extractMerchantKeyVariants(rawText).filter(
+    (v) => !isGenericPlaceholderMerchant(v)
+  );
   for (const v of variants) {
-    if (aliases[v]) return aliases[v];
+    if (aliases[v] && !isGenericPlaceholderMerchant(aliases[v].name)) {
+      return aliases[v];
+    }
   }
 
   const normText = normalizeMerchantKey(rawText);
+  if (!normText || isGenericPlaceholderMerchant(normText)) return null;
   // Sort longer keys first for most specific match
   const sortedEntries = [...entries].sort((a, b) => b[0].length - a[0].length);
   for (const [aliasKey, info] of sortedEntries) {

@@ -1,5 +1,9 @@
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../components/HomeTab';
-import { extractMerchantKeyVariants, normalizeMerchantKey } from './appCache';
+import {
+  extractMerchantKeyVariants,
+  isGenericPlaceholderMerchant,
+  normalizeMerchantKey,
+} from './appCache';
 
 export interface RecurringMatchResult {
   isRecurring: boolean;
@@ -120,45 +124,67 @@ export function findMatchingFixedExpense(
       : [tx.title, tx.rawDescription, tx.counterpartyName, tx.note].filter(Boolean).join(' ')
   );
 
-  if (!combinedNorm) return null;
+  const isGrocery = combinedNorm ? isEverydayGroceryPurchase(combinedNorm) : false;
 
-  const isGrocery = isEverydayGroceryPurchase(combinedNorm);
+  if (combinedNorm) {
+    for (const exp of fixedExpenses) {
+      const expNameNorm = normalizeMerchantKey(exp.name);
+      const expOrigNorm = exp.originalName ? normalizeMerchantKey(exp.originalName) : '';
+      if (!expNameNorm) continue;
 
-  for (const exp of fixedExpenses) {
-    const expNameNorm = normalizeMerchantKey(exp.name);
-    const expOrigNorm = exp.originalName ? normalizeMerchantKey(exp.originalName) : '';
-    if (!expNameNorm) continue;
-
-    // Exact match on normalized title or originalName always wins
-    if (
-      txTitleNorm === expNameNorm ||
-      (expOrigNorm && txTitleNorm === expOrigNorm)
-    ) {
-      return exp;
-    }
-
-    // Never let an everyday grocery/restaurant trip fuzzy-match a fixed expense
-    if (isGrocery && !isEverydayGroceryPurchase(expNameNorm)) {
-      continue;
-    }
-
-    const candidateNames = [exp.name, exp.originalName].filter(Boolean) as string[];
-    for (const candName of candidateNames) {
-      const variants = extractMerchantKeyVariants(candName);
-      for (const v of variants) {
-        if (v.length >= 3 && (combinedNorm.includes(v) || (txTitleNorm.length >= 4 && v.includes(txTitleNorm)))) {
-          return exp;
-        }
+      // Exact match on normalized title or originalName always wins
+      if (
+        txTitleNorm === expNameNorm ||
+        (expOrigNorm && txTitleNorm === expOrigNorm)
+      ) {
+        return exp;
       }
 
-      const brandTokens = extractSpecificBrandTokens(candName);
-      for (const token of brandTokens) {
-        // Guard against "max" matching "max burgers" or "ica" matching "ica kvantum"
-        if (token === 'max' || token === 'ica' || token === 'coop' || token === 'apple') {
-          continue;
+      // Never let an everyday grocery/restaurant trip fuzzy-match a fixed expense
+      if (isGrocery && !isEverydayGroceryPurchase(expNameNorm)) {
+        continue;
+      }
+
+      const candidateNames = [exp.name, exp.originalName].filter(Boolean) as string[];
+      for (const candName of candidateNames) {
+        const variants = extractMerchantKeyVariants(candName);
+        for (const v of variants) {
+          if (v.length >= 3 && (combinedNorm.includes(v) || (txTitleNorm.length >= 4 && v.includes(txTitleNorm)))) {
+            return exp;
+          }
         }
-        if (token.length >= 5 && combinedNorm.includes(token)) {
-          return exp;
+
+        const brandTokens = extractSpecificBrandTokens(candName);
+        for (const token of brandTokens) {
+          // Guard against "max" matching "max burgers" or "ica" matching "ica kvantum"
+          if (token === 'max' || token === 'ica' || token === 'coop' || token === 'apple') {
+            continue;
+          }
+          if (token.length >= 5 && combinedNorm.includes(token)) {
+            return exp;
+          }
+        }
+      }
+    }
+  }
+
+  // Fallback för anonyma bankrader (t.ex. "Banktransaktion", "Betalning", "Autogiro" där banken tappat mottagarnamnet
+  // när en reserverad hyra eller räkning övergått till bokförd post):
+  // Om beloppet på kronan matchar en registrerad fast utgift (>= 150 kr), koppla den till rätt fast utgift!
+  if (!isStr && !isGrocery && tx.type !== 'income') {
+    const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
+    if (txAmt >= 150) {
+      const hasGenericTitle =
+        isGenericPlaceholderMerchant(tx.title) &&
+        isGenericPlaceholderMerchant(tx.counterpartyName) &&
+        isGenericPlaceholderMerchant(tx.rawDescription);
+
+      if (hasGenericTitle) {
+        const exactAmountMatch = fixedExpenses.find(
+          (exp) => Math.round(Math.abs(Number(exp.amount) || 0)) === txAmt
+        );
+        if (exactAmountMatch) {
+          return exactAmountMatch;
         }
       }
     }
@@ -181,33 +207,52 @@ export function findMatchingIncome(
       : [tx.title, tx.rawDescription, tx.counterpartyName, tx.note].filter(Boolean).join(' ')
   );
 
-  if (!combinedNorm) return null;
+  if (combinedNorm) {
+    for (const inc of incomes) {
+      const incNameNorm = normalizeMerchantKey(inc.name);
+      const incOrigNorm = inc.originalName ? normalizeMerchantKey(inc.originalName) : '';
+      if (!incNameNorm) continue;
 
-  for (const inc of incomes) {
-    const incNameNorm = normalizeMerchantKey(inc.name);
-    const incOrigNorm = inc.originalName ? normalizeMerchantKey(inc.originalName) : '';
-    if (!incNameNorm) continue;
-
-    if (
-      txTitleNorm === incNameNorm ||
-      (incOrigNorm && txTitleNorm === incOrigNorm)
-    ) {
-      return inc;
-    }
-
-    const candidateNames = [inc.name, inc.originalName].filter(Boolean) as string[];
-    for (const candName of candidateNames) {
-      const variants = extractMerchantKeyVariants(candName);
-      for (const v of variants) {
-        if (v.length >= 3 && (combinedNorm.includes(v) || (txTitleNorm.length >= 3 && v.includes(txTitleNorm)))) {
-          return inc;
-        }
+      if (
+        txTitleNorm === incNameNorm ||
+        (incOrigNorm && txTitleNorm === incOrigNorm)
+      ) {
+        return inc;
       }
 
-      const brandTokens = extractSpecificBrandTokens(candName);
-      for (const token of brandTokens) {
-        if (token.length >= 4 && combinedNorm.includes(token)) {
-          return inc;
+      const candidateNames = [inc.name, inc.originalName].filter(Boolean) as string[];
+      for (const candName of candidateNames) {
+        const variants = extractMerchantKeyVariants(candName);
+        for (const v of variants) {
+          if (v.length >= 3 && (combinedNorm.includes(v) || (txTitleNorm.length >= 3 && v.includes(txTitleNorm)))) {
+            return inc;
+          }
+        }
+
+        const brandTokens = extractSpecificBrandTokens(candName);
+        for (const token of brandTokens) {
+          if (token.length >= 4 && combinedNorm.includes(token)) {
+            return inc;
+          }
+        }
+      }
+    }
+  }
+
+  if (!isStr && tx.type === 'income') {
+    const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
+    if (txAmt >= 500) {
+      const hasGenericTitle =
+        isGenericPlaceholderMerchant(tx.title) &&
+        isGenericPlaceholderMerchant(tx.counterpartyName) &&
+        isGenericPlaceholderMerchant(tx.rawDescription);
+
+      if (hasGenericTitle) {
+        const exactAmountMatch = incomes.find(
+          (inc) => Math.round(Math.abs(Number(inc.amount) || 0)) === txAmt
+        );
+        if (exactAmountMatch) {
+          return exactAmountMatch;
         }
       }
     }

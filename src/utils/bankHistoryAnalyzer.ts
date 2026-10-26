@@ -938,21 +938,21 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
   let cleaned = String(rawText || '').trim();
   if (!cleaned) return 'Banktransaktion';
 
-  // 1. Rensa bort tekniska prefix från banker och kortterminaler
+  // 1. Rensa bort tekniska prefix och inledande BG/PG/referensnummer från banker och kortterminaler
   cleaned = cleaned
-    .replace(/^\d{5,}\s+/, '') // Rensa bort inledande referensnummer
-    .replace(/^(AUTOGIRO|BG|PG|KORTKÖP|KORTKOP|BETALNING|RESERVATION|KÖP|INBETALNING|UTBETALNING|ÖVERFÖRING|OVERFORING)\s+/i, '')
+    .replace(/^(AUTOGIRO|BG|PG|BANKGIRO|PLUSGIRO|KORTKÖP|KORTKOP|BETALNING|RESERVATION|KÖP|INBETALNING|UTBETALNING|ÖVERFÖRING|OVERFORING)\s*[:#-]?\s*(\d[\d\s-]{2,}\s+)?/i, '')
+    .replace(/^\d[\d\s-]{4,}\s+/, '') // Rensa bort inledande referensnummer om det följs av text
     .replace(/^[*#._-]+\s*/, '')
     .trim();
 
-  // 2. Rensa bort terminalsuffix som butiksnummer, ortkoder och landskod i slutet
+  // 2. Rensa bort terminalsuffix som butiksnummer, ortkoder och landskod i slutet (utan att kapa bort ord som kommer efter ett nummer i mitten)
   cleaned = cleaned
-    .replace(/\s+\d{3,}\b.*$/, '') // T.ex. " 1421", " 0124"
     .replace(/\s+(SE|SWE|SWEDEN)$/i, '')
     .replace(/\s+(STOCKHOLM|GÖTEBORG|GOTEBORG|MALMÖ|MALMO|UPPSALA|LUND|HELSINGBORG)\s*(SE)?$/i, '')
+    .replace(/\s+\d{3,}\s*$/, '') // T.ex. " 1421", " 0124" endast allra sist på raden
     .trim();
 
-  if (!cleaned) return 'Banktransaktion';
+  if (!cleaned || /^[\d\s*-]+$/.test(cleaned)) return 'Banktransaktion';
 
   const lower = cleaned.toLowerCase().trim();
 
@@ -1014,12 +1014,35 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
   return formattedWords.join(' ');
 }
 
+function extractRawJsonFallbackText(rawJson: any): string {
+  if (!rawJson || typeof rawJson !== 'object') return '';
+  const parts: string[] = [];
+  if (typeof rawJson.creditor?.name === 'string') parts.push(rawJson.creditor.name);
+  if (typeof rawJson.debtor?.name === 'string') parts.push(rawJson.debtor.name);
+  if (typeof rawJson.merchant_name === 'string') parts.push(rawJson.merchant_name);
+  if (typeof rawJson.additional_information === 'string') parts.push(rawJson.additional_information);
+  if (Array.isArray(rawJson.remittance_information)) {
+    for (const item of rawJson.remittance_information) {
+      if (typeof item === 'string') parts.push(item);
+      else if (item && typeof item.unstructured === 'string') parts.push(item.unstructured);
+    }
+  } else if (typeof rawJson.remittance_information === 'string') {
+    parts.push(rawJson.remittance_information);
+  }
+  return parts.map((p) => p.trim()).filter(Boolean).join(' ');
+}
+
 export function categorizeBankTransactionForApp(
   tx: BankTransactionItem,
   availableCategories: Array<string | { name?: string }> = [],
   _incomeCategories?: Array<string | { name?: string }>
 ): { merchant: string; category: string; logo?: string } {
-  const combined = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+  const rawFallback = extractRawJsonFallbackText(tx.raw_json);
+  const effectiveDesc =
+    tx.description && tx.description.toLowerCase().trim() !== 'banktransaktion'
+      ? tx.description
+      : rawFallback || tx.description || '';
+  const combined = `${effectiveDesc} ${tx.counterparty_name || ''} ${rawFallback}`.toLowerCase();
   const categoryNames = (availableCategories || [])
     .map((c) => (typeof c === 'string' ? c : c?.name || ''))
     .filter((name): name is string => typeof name === 'string' && name.trim().length > 0);
@@ -1048,7 +1071,7 @@ export function categorizeBankTransactionForApp(
     /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, ''));
 
   if (isSwishTx) {
-    const swishTitle = formatSwishTitle(tx.description, tx.counterparty_name);
+    const swishTitle = formatSwishTitle(effectiveDesc, tx.counterparty_name);
     return {
       merchant: swishTitle,
       category: 'Swish',
@@ -1074,10 +1097,10 @@ export function categorizeBankTransactionForApp(
         : undefined;
       const isGenericHousingPreset = rule.presetId === 'hyra-bostad';
       const cleanedRaw = cleanDisplayMerchantName(
-        tx.counterparty_name || tx.description || ''
+        tx.counterparty_name || effectiveDesc || ''
       );
       const displayName =
-        isGenericHousingPreset && cleanedRaw.length >= 3
+        isGenericHousingPreset && cleanedRaw.length >= 3 && cleanedRaw !== 'Banktransaktion'
           ? `Hyra (${cleanedRaw})`
           : preset?.name || rule.fallbackName;
       const category = resolveCategory([preset?.category || rule.category]);
@@ -1089,7 +1112,7 @@ export function categorizeBankTransactionForApp(
     }
   }
 
-  const cleanedName = cleanDisplayMerchantName(tx.counterparty_name || tx.description || 'Kortköp');
+  const cleanedName = cleanDisplayMerchantName(tx.counterparty_name || effectiveDesc || 'Kortköp');
   const category = resolveCategory(['Övrigt']);
   return {
     merchant: cleanedName,
@@ -1097,6 +1120,32 @@ export function categorizeBankTransactionForApp(
     logo: getLogoUrl(cleanedName, category),
   };
 }
+
+const AI_SKIP_GENERIC_PLACEHOLDERS = new Set([
+  'banktransaktion',
+  'kortköp',
+  'kortkop',
+  'betalning',
+  'autogiro',
+  'bankgiro',
+  'plusgiro',
+  'bg',
+  'pg',
+  'insättning',
+  'insattning',
+  'utgift',
+  'inkomst',
+  'köp',
+  'kop',
+  'reserverat',
+  'reservation',
+  'överföring',
+  'overforing',
+  'okänd',
+  'okand',
+  'övrigt',
+  'ovrigt',
+]);
 
 /**
  * Avgör om en banktransaktion inte kändes igen av den lokala butikslistan
@@ -1108,9 +1157,21 @@ export function needsAiMerchantCleaning(
   currentTitle?: string | null,
   currentCategory?: string | null
 ): boolean {
-  const combined = `${rawText || ''} ${currentTitle || ''}`.trim();
+  const rawTrimmed = (rawText || '').trim();
+  const titleTrimmed = (currentTitle || '').trim();
+  const combined = `${rawTrimmed} ${titleTrimmed}`.trim();
   if (!combined || combined.length < 2) return false;
   const lower = combined.toLowerCase();
+
+  // Skicka aldrig generiska bankplatshållare (t.ex. "Banktransaktion" eller enbart siffror) till AI
+  const rawLower = rawTrimmed.toLowerCase();
+  const titleLower = titleTrimmed.toLowerCase();
+  if (
+    (!rawLower || AI_SKIP_GENERIC_PLACEHOLDERS.has(rawLower) || /^[\d\s*-]+$/.test(rawLower)) &&
+    (!titleLower || AI_SKIP_GENERIC_PLACEHOLDERS.has(titleLower) || /^[\d\s*-]+$/.test(titleLower))
+  ) {
+    return false;
+  }
 
   // Swish hanteras redan deterministiskt med telefonnummer/mottagare
   if (
@@ -1142,7 +1203,6 @@ export function needsAiMerchantCleaning(
   );
   if (matchedFixed) return false;
 
-  const titleLower = (currentTitle || '').toLowerCase().trim();
   if (titleLower && KNOWN_MERCHANT_NAMES_MAP[titleLower]) {
     return false;
   }

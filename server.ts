@@ -159,6 +159,7 @@ async function startServer() {
       key: String(it?.key || '').trim(),
       rawText: String(it?.rawText || '').trim(),
       amount: Number(it?.amount) || 0,
+      time: String(it?.time || '').trim(),
       type: it?.type === 'income' ? 'income' : 'expense',
     })).filter((it) => it.key && it.rawText);
 
@@ -166,7 +167,7 @@ async function startServer() {
       return res.json({ results: [] });
     }
 
-    const fallbackCleanItem = (it: { key: string; rawText: string; amount: number; type: string }) => {
+    const fallbackCleanItem = (it: { key: string; rawText: string; amount: number; time?: string; type: string }) => {
       const raw = it.rawText.trim();
       const upper = raw.toUpperCase();
 
@@ -259,7 +260,7 @@ För varje post i JSON-listan nedan:
    - Ta bort betalväxelprefix som ZETTLE*, IZ*, SUMUP*, NYX*, PAYPAL*, STRIPE*, WL*, SP*, SQ*, NETS*, ADYEN* (om inte själva betalväxeln är mottagaren som i "KLARNA*84920" -> "Klarna" eller "NYX*SVENSKA" -> "Varuautomat (Nyx)").
    - Ta bort ordernummer, butiksnummer, referenskoder och landskoder (t.ex. "*84920", "1421 SE").
    - Veckla ut vanliga svenska förkortningar naturligt (t.ex. "GBG" -> "Göteborg", "STHLM" -> "Stockholm", "KAF"/"KAFE" -> "Kafé", "REST" -> "Restaurang", "KOND" -> "Konditori").
-2. Sätt rätt kategori ("category") genom att välja EXAKT ETT av följande giltiga kategorinamn:
+2. Sätt rätt kategori ("category") genom att använda BÅDE butiksnamnet, beloppet ("amount") och klockslaget ("time") för att avgöra köpets karaktär (t.ex. ~115-165 kr runt kl 11:30-13:30 på en okänd kortterminal är nästan alltid lunch -> "Mat & dryck"; småbelopp 15-45 kr på automat/terminal är ofta kaffe/snacks -> "Mat & dryck"). Välj EXAKT ETT av följande giltiga kategorinamn:
    - Om type === "expense", välj bland: ${JSON.stringify(validExpenseCats)}
    - Om type === "income", välj bland: ${JSON.stringify(validIncomeCats)}
 3. Behåll "key" exakt oförändrad så att svaret kan matchas tillbaka.

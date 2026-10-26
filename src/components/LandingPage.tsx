@@ -4,6 +4,8 @@ import {
   CaretLeft,
   Envelope,
   Lock,
+  Eye,
+  EyeSlash,
   SpinnerGap,
   CheckCircle,
   WarningCircle,
@@ -27,6 +29,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [view, setView] = useState<AuthViewMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -271,14 +274,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
                   />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minst 6 tecken"
-                    className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                    className="w-full pl-10 pr-10 py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer"
+                    aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
+                  >
+                    {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
               </div>
             )}

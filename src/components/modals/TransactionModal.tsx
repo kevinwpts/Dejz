@@ -1131,6 +1131,44 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           <span>Kopiera Swish-länk</span>
                         </button>
                       </div>
+
+                      {onUpdate &&
+                        initialTransaction.type !== 'income' &&
+                        Number(swishAmount) > 0 &&
+                        Number(swishAmount) < initialTransaction.amount && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const requested = Math.round(Number(swishAmount) || 0);
+                              const remaining = Math.max(
+                                0,
+                                Math.round(initialTransaction.amount - requested)
+                              );
+                              const origTotal = Math.round(initialTransaction.amount);
+                              const splitNote = `Delat utlägg (totalt ${origTotal} kr, bad om ${requested} kr via Swish)`;
+                              onUpdate({
+                                ...initialTransaction,
+                                amount: remaining,
+                                note: initialTransaction.note
+                                  ? `${initialTransaction.note} · ${splitNote}`
+                                  : splitNote,
+                              });
+                              setAmountStr(String(remaining));
+                              setSwishFeedback(
+                                `Ditt utlägg är nu satt till ${remaining} kr i budgeten!`
+                              );
+                              setTimeout(() => setSwishFeedback(null), 3500);
+                            }}
+                            className="w-full py-2 px-3 rounded-xl bg-[var(--surface-color)] border border-dashed border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-muted)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Check size={13} weight="bold" />
+                            <span>
+                              Räkna bort {Math.round(Number(swishAmount))} kr från mitt utlägg (sätt till{' '}
+                              {Math.max(0, Math.round(initialTransaction.amount - Number(swishAmount)))}{' '}
+                              kr)
+                            </span>
+                          </button>
+                        )}
                     </div>
                   ) : (
                     <button

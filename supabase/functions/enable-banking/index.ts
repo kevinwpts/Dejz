@@ -1147,10 +1147,11 @@ serve(async (req: Request) => {
       }
 
       // Heal any legacy positive reserved (PDNG/HOLD) card purchase rows on this account
+      // and mark disappeared reservations as reserved_replaced so they never duplicate booked rows
       try {
         const { data: pendingRows } = await adminClient
           .from("bank_transactions")
-          .select("id, external_key, amount, description, counterparty_name, booking_status, transaction_date, booking_date")
+          .select("id, external_key, amount, description, counterparty_name, booking_status, reconciliation_status, transaction_date, booking_date")
           .eq("bank_account_id", acc.id)
           .eq("user_id", user.id)
           .in("booking_status", ["PDNG", "HOLD"]);
@@ -1161,6 +1162,22 @@ serve(async (req: Request) => {
             await adminClient
               .from("bank_transactions")
               .update({ amount: -Math.abs(numAmt) })
+              .eq("id", pRow.id);
+          }
+
+          if (
+            !resumeFromSavedKey &&
+            pagesFetched > 0 &&
+            pRow.external_key &&
+            !seenActivePendingKeys.has(pRow.external_key) &&
+            pRow.reconciliation_status !== "reserved_replaced"
+          ) {
+            await adminClient
+              .from("bank_transactions")
+              .update({
+                reconciliation_status: "reserved_replaced",
+                reservation_disappeared_at: new Date().toISOString(),
+              })
               .eq("id", pRow.id);
           }
         }

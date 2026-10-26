@@ -29,7 +29,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [view, setView] = useState<AuthView>(initialView);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -121,11 +120,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (view === 'register') {
         if (password.length < 6) {
           setErrorMsg('Lösenordet måste bestå av minst 6 tecken.');
-          setLoading(false);
-          return;
-        }
-        if (password !== confirmPassword) {
-          setErrorMsg('Lösenorden matchar inte.');
           setLoading(false);
           return;
         }
@@ -367,28 +361,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 >
                   {showPassword ? <EyeSlash size={15} /> : <Eye size={15} />}
                 </button>
-              </div>
-            </div>
-          )}
-
-          {view === 'register' && (
-            <div className="animate-fade-in">
-              <label className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">
-                Upprepa lösenord
-              </label>
-              <div className="relative">
-                <Lock
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-                />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="Upprepa ditt lösenord"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                />
               </div>
             </div>
           )}
