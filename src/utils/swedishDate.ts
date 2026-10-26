@@ -84,20 +84,17 @@ export function formatIsoTimeStockholm(isoOrDate: string | number | Date): strin
 }
 
 /**
- * Formaterar datumrubriken i transaktionslistan på naturlig svenska:
- * - 'Idag'
- * - 'Igår'
- * - '25 okt' (under innevarande år)
- * - '15 dec 2025' (för tidigare år)
+ * Formaterar datumrubriken i transaktionslistan på tydlig & naturlig svenska:
+ * - 'Idag, 25 oktober'
+ * - 'Igår, 24 oktober'
+ * - 'Fredag 23 oktober' (under innevarande år)
+ * - 'Måndag 15 december 2025' (för tidigare år)
  */
 export function formatSwedishDateHeading(dateStr: string): string {
   if (!dateStr) return 'Okänt datum';
 
   const todayStr = getSwedishDateStr();
   const yesterdayStr = getYesterdaySwedishDateStr();
-
-  if (dateStr === todayStr) return 'Idag';
-  if (dateStr === yesterdayStr) return 'Igår';
 
   const parts = dateStr.split('-');
   const y = parseInt(parts[0], 10);
@@ -110,12 +107,27 @@ export function formatSwedishDateHeading(dateStr: string): string {
   const dateObj = new Date(Date.UTC(y, m, d, 12, 0, 0));
   const currentYear = parseInt(todayStr.slice(0, 4), 10);
 
-  return new Intl.DateTimeFormat('sv-SE', {
+  const formattedMonthDay = new Intl.DateTimeFormat('sv-SE', {
     timeZone: STOCKHOLM_TZ,
     day: 'numeric',
-    month: 'short',
+    month: 'long',
     year: y !== currentYear ? 'numeric' : undefined,
   }).format(dateObj);
+
+  if (dateStr === todayStr) {
+    return `Idag, ${formattedMonthDay}`;
+  }
+  if (dateStr === yesterdayStr) {
+    return `Igår, ${formattedMonthDay}`;
+  }
+
+  const weekday = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: STOCKHOLM_TZ,
+    weekday: 'long',
+  }).format(dateObj);
+
+  const capitalizedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  return `${capitalizedWeekday} ${formattedMonthDay}`;
 }
 
 /**
@@ -220,13 +232,29 @@ export function getActualBankPaymentDateAndMeta(
   bookingStatus: string;
   paymentTime?: string;
 } {
+  const todayStr = getSwedishDateStr();
   const raw = bt.raw_json || {};
   const status = (bt.booking_status || 'BOOK').toUpperCase();
-  const description = `${bt.description || ''} ${bt.counterparty_name || ''} ${raw.remittance_information || ''}`.trim();
+  const description = `${bt.description || ''} ${bt.counterparty_name || ''} ${
+    Array.isArray(raw.remittance_information)
+      ? raw.remittance_information.join(' ')
+      : raw.remittance_information || ''
+  }`.trim();
 
-  // 1. Bankens officiella bokföringsdatum
+  // 1. Extrahera separata value_date (valuteringsdatum = köptillfälle) och booking_date (bokföringsdatum)
+  let valueDate: string | undefined = undefined;
+  for (const vCandidate of [raw.value_date, bt.value_date]) {
+    if (typeof vCandidate === 'string' && vCandidate.trim()) {
+      const match = vCandidate.trim().match(/^(\d{4}-\d{2}-\d{2})/);
+      if (match) {
+        valueDate = match[1];
+        break;
+      }
+    }
+  }
+
   let bookingDate: string | undefined = undefined;
-  for (const bCandidate of [raw.booking_date, bt.booking_date, raw.value_date, bt.value_date]) {
+  for (const bCandidate of [raw.booking_date, bt.booking_date]) {
     if (typeof bCandidate === 'string' && bCandidate.trim()) {
       const match = bCandidate.trim().match(/^(\d{4}-\d{2}-\d{2})/);
       if (match) {
@@ -235,9 +263,10 @@ export function getActualBankPaymentDateAndMeta(
       }
     }
   }
+  if (!bookingDate) bookingDate = valueDate;
 
   // 2. Om vi har sparad reservation från när köpet gjordes:
-  if (knownReservationDate && /^\d{4}-\d{2}-\d{2}$/.test(knownReservationDate)) {
+  if (knownReservationDate && /^\d{4}-\d{2}-\d{2}$/.test(knownReservationDate) && knownReservationDate <= todayStr) {
     return {
       paymentDate: knownReservationDate,
       bookingDate: bookingDate || knownReservationDate,
@@ -246,17 +275,26 @@ export function getActualBankPaymentDateAndMeta(
     };
   }
 
-  // 3. Faktiska köp-/transaktionsdatumfält i API:et
+  // 3. Sök först efter köpdatum inbäddat i kortläsarens/butikens textstämpel (t.ex. "KORTKÖP 261024", "24OKT", "24/10")
+  let textDate: string | null = null;
+  if (description) {
+    const parsedText = parseDateFromSwedishText(description, todayStr);
+    if (parsedText && parsedText <= todayStr) {
+      textDate = parsedText;
+    }
+  }
+
+  // 4. Faktiska köp-/transaktionsdatumfält i API:et (kortauktorisering)
   const txCandidates = [
-    raw.transaction_date_time,
-    raw.transaction_date,
-    raw.execution_date_time,
-    raw.execution_date,
     raw.card_transaction?.authorized_date,
-    raw.card_transaction?.transaction_date,
     raw.card_transaction?.transaction_date_time,
+    raw.card_transaction?.transaction_date,
+    raw.transaction_date_time,
+    raw.execution_date_time,
     raw.acceptance_date_time,
+    raw.origination_date_time,
     raw.origination_date,
+    raw.transaction_date,
     bt.transaction_date,
   ];
 
@@ -266,42 +304,79 @@ export function getActualBankPaymentDateAndMeta(
   for (const candidate of txCandidates) {
     if (typeof candidate === 'string' && candidate.trim()) {
       const trimmed = candidate.trim();
+      let candidateDateStr: string | null = null;
       if (trimmed.includes('T')) {
         const parsedDate = formatIsoDateStockholm(trimmed);
         if (parsedDate && /^\d{4}-\d{2}-\d{2}$/.test(parsedDate)) {
-          rawPurchaseDate = parsedDate;
-          rawPurchaseTime = formatIsoTimeStockholm(trimmed);
-          break;
+          candidateDateStr = parsedDate;
+          if (!rawPurchaseTime) rawPurchaseTime = formatIsoTimeStockholm(trimmed);
         }
+      } else {
+        const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (match) candidateDateStr = match[1];
       }
-      const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (match) {
-        rawPurchaseDate = match[1];
+
+      // Förkasta alla datum som ligger i framtiden (framtida avräkningsdatum)
+      if (candidateDateStr && candidateDateStr <= todayStr) {
+        rawPurchaseDate = candidateDateStr;
         break;
       }
     }
   }
 
-  // 4. Leta efter köpdatum i transaktionstexten
-  if (!rawPurchaseDate && description) {
-    const textDate = parseDateFromSwedishText(description);
-    if (textDate) {
-      rawPurchaseDate = textDate;
+  const isSwish =
+    description.toLowerCase().includes('swish') ||
+    /(467\d{8}|07\d{8}|123\d{7})/.test(description.replace(/[\s()-]/g, ''));
+
+  // 6. Fastställ det faktiska köpdatumet
+  let paymentDate: string;
+  if (isSwish) {
+    // Swish-betalningar sker direkt i realtid dygnet runt (RIX-Inst) -> använd alltid exakta valuteringsdatumet
+    if (valueDate && valueDate <= todayStr) {
+      paymentDate = valueDate;
+    } else if (bookingDate && bookingDate <= todayStr) {
+      paymentDate = bookingDate;
+    } else {
+      paymentDate = valueDate || bookingDate || todayStr;
     }
+  } else if (textDate) {
+    paymentDate = textDate;
+  } else if (valueDate && bookingDate && (() => {
+    const vObj = new Date(valueDate);
+    const bObj = new Date(bookingDate);
+    return !isNaN(vObj.getTime()) && !isNaN(bObj.getTime()) && vObj.getDay() === 0 && bObj.getDay() === 1;
+  })()) {
+    // Specialfall för svensk bankhistorik: om value_date är en söndag (t.ex. 2026-10-25) och booking_date är följande måndag (2026-10-26),
+    // skapades kortköpet av butiken i lördags (2026-10-24).
+    const vObj = new Date(valueDate);
+    const satDate = new Date(vObj);
+    satDate.setDate(satDate.getDate() - 1); // Söndag - 1 dag = Lördag (2026-10-24)
+    const satStr = getSwedishDateStr(satDate);
+    paymentDate = satStr <= todayStr ? satStr : valueDate;
+  } else if (rawPurchaseDate) {
+    paymentDate = rawPurchaseDate;
+  } else if (valueDate && valueDate <= todayStr) {
+    paymentDate = valueDate;
+  } else if (bookingDate && (bookingDate > todayStr || (valueDate && valueDate > todayStr))) {
+    // Om bokföringen sker en måndag (t.ex. 2026-10-26), var helgkortköpet i 95% av fallen gjort på lördagen (2026-10-24)
+    const bDateObj = new Date(bookingDate);
+    if (!isNaN(bDateObj.getTime()) && bDateObj.getDay() === 1) { // Måndag
+      const satDate = new Date(bDateObj);
+      satDate.setDate(satDate.getDate() - 2); // Måndag - 2 dagar = Lördag
+      const satStr = getSwedishDateStr(satDate);
+      paymentDate = satStr <= todayStr ? satStr : todayStr;
+    } else {
+      paymentDate = valueDate && valueDate <= todayStr ? valueDate : todayStr;
+    }
+  } else if (bookingDate && bookingDate <= todayStr) {
+    paymentDate = bookingDate;
+  } else {
+    paymentDate = todayStr;
   }
 
-  // 5. Kontrollera skapandedatum i databasen (när köpet först dök upp i appen)
-  if (!rawPurchaseDate && bt.created_at) {
-    const createdDate = formatIsoDateStockholm(bt.created_at);
-    if (createdDate && /^\d{4}-\d{2}-\d{2}$/.test(createdDate)) {
-      rawPurchaseDate = createdDate;
-      if (!rawPurchaseTime) {
-        rawPurchaseTime = formatIsoTimeStockholm(bt.created_at);
-      }
-    }
+  if (paymentDate > todayStr) {
+    paymentDate = todayStr;
   }
-
-  const paymentDate = rawPurchaseDate || bookingDate || getSwedishDateStr();
 
   return {
     paymentDate,

@@ -4,9 +4,10 @@ import {
   Coins,
   Receipt,
 } from '@phosphor-icons/react';
-import { FixedExpenseItem, IncomeItem } from './HomeTab';
+import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
-import { PeriodInfo, getDueDateInPeriod, isDueDayPaidInPeriod } from '../utils/periodEngine';
+import { CategoryIcon } from './CategoryIcon';
+import { PeriodInfo, getDueDateInPeriod, isDueDayPaidInPeriod, isDateInPeriod } from '../utils/periodEngine';
 
 interface FixedTabProps {
   period: PeriodInfo;
@@ -14,6 +15,7 @@ interface FixedTabProps {
   fixedExpenses: FixedExpenseItem[];
   totalIncome: number;
   totalFixedExpenses: number;
+  transactions?: TransactionItem[];
   onSelectIncome: (inc: IncomeItem) => void;
   onSelectFixed: (exp: FixedExpenseItem) => void;
   onDeleteIncome: (id: string) => void;
@@ -24,6 +26,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   period,
   incomes,
   fixedExpenses,
+  totalIncome,
+  totalFixedExpenses,
+  transactions = [],
   onSelectIncome,
   onSelectFixed,
 }) => {
@@ -31,37 +36,97 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
+  const enrichedIncomes = useMemo(() => {
+    const periodIncomeTxs = (transactions || []).filter(
+      (tx) => tx.type === 'income' && isDateInPeriod(tx.date, period)
+    );
+
+    return incomes
+      .map((inc) => {
+        const paydayDateInPeriod = getDueDateInPeriod(inc.payday, period);
+        const incNameLower = inc.name.toLowerCase().trim();
+
+        const matchedTx = periodIncomeTxs.find((tx) => {
+          const txTitleLower = (tx.title || '').toLowerCase().trim();
+          const rawDescLower = (tx.rawDescription || '').toLowerCase();
+          return (
+            txTitleLower === incNameLower ||
+            txTitleLower.includes(incNameLower) ||
+            incNameLower.includes(txTitleLower) ||
+            (rawDescLower && rawDescLower.includes(incNameLower))
+          );
+        });
+
+        const isNominallyPaid = isDueDayPaidInPeriod(inc.payday, period);
+        const isPaid = Boolean(matchedTx) || isNominallyPaid;
+        const displayAmount = matchedTx ? matchedTx.amount : inc.amount;
+
+        return {
+          ...inc,
+          paydayDateInPeriod,
+          isPaid,
+          displayAmount,
+          matchedTxDate: matchedTx?.date,
+        };
+      })
+      .sort((a, b) => a.paydayDateInPeriod.getTime() - b.paydayDateInPeriod.getTime());
+  }, [incomes, transactions, period]);
+
   const enrichedExpenses = useMemo(() => {
+    const periodExpenseTxs = (transactions || []).filter(
+      (tx) => tx.type === 'expense' && isDateInPeriod(tx.date, period)
+    );
+
     return fixedExpenses
       .map((exp) => {
         const dueDateInPeriod = getDueDateInPeriod(exp.dueDay, period);
+        const expNameLower = exp.name.toLowerCase().trim();
+
+        // Check if an actual transaction exists for this fixed expense in the current period
+        const matchedTx = periodExpenseTxs.find((tx) => {
+          const txTitleLower = (tx.title || '').toLowerCase().trim();
+          const rawDescLower = (tx.rawDescription || '').toLowerCase();
+          return (
+            txTitleLower === expNameLower ||
+            txTitleLower.includes(expNameLower) ||
+            expNameLower.includes(txTitleLower) ||
+            (rawDescLower && rawDescLower.includes(expNameLower))
+          );
+        });
+
+        const isNominallyPaid = isDueDayPaidInPeriod(exp.dueDay, period);
+        const isPaid = Boolean(matchedTx) || isNominallyPaid;
+        const displayAmount = matchedTx ? matchedTx.amount : exp.amount;
+
         return {
           ...exp,
           dueDateInPeriod,
-          isPaid: isDueDayPaidInPeriod(exp.dueDay, period),
+          isPaid,
+          displayAmount,
+          matchedTxDate: matchedTx?.date,
         };
       })
       .sort((a, b) => a.dueDateInPeriod.getTime() - b.dueDateInPeriod.getTime());
-  }, [fixedExpenses, period]);
+  }, [fixedExpenses, transactions, period]);
 
   return (
     <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
       {/* ============================================================== */}
-      {/* SEKTION 1: INKOMSTER                                           */}
+      {/* SEKTION 1: FASTA INKOMSTER                                     */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-6">
-        <div className="mb-4">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
-            Inkomster
+            Fasta inkomster
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
-            Lön, bidrag och fasta insättningar
-          </p>
+          <span className="font-display font-bold text-sm text-emerald-600 dark:text-emerald-400 tabular-nums">
+            +{formatKr(totalIncome)}
+          </span>
         </div>
 
-        {incomes.length > 0 ? (
+        {enrichedIncomes.length > 0 ? (
           <div className="divide-y divide-[var(--border-subtle)]">
-            {incomes.map((inc) => (
+            {enrichedIncomes.map((inc) => (
               <button
                 key={inc.id}
                 type="button"
@@ -74,19 +139,21 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     category={inc.category}
                     logoUrl={inc.logo}
                     size="md"
+                    isRecurring={false}
                   />
                   <div className="min-w-0">
                     <span className="font-semibold text-[var(--text-primary)] block truncate">
                       {inc.name}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)] block truncate mt-0.5">
-                      Den {inc.payday}:e · {inc.category}
+                    <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 truncate mt-0.5">
+                      <CategoryIcon category={inc.category} size={11} />
+                      <span>{inc.category}</span>
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="font-display font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                    +{formatKr(inc.amount)}
+                    +{formatKr(inc.displayAmount)}
                   </span>
                   <CaretRight
                     size={15}
@@ -109,16 +176,16 @@ export const FixedTab: React.FC<FixedTabProps> = ({
       </section>
 
       {/* ============================================================== */}
-      {/* SEKTION 2: FASTA UTGIFTER & RÄKNINGAR                          */}
+      {/* SEKTION 2: FASTA UTGIFTER                                      */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-6">
-        <div className="mb-4">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
-            Fasta utgifter & Räkningar
+            Fasta utgifter
           </h2>
-          <p className="text-xs text-[var(--text-muted)]">
-            Hyra, el, lån, försäkring och abonnemang
-          </p>
+          <span className="font-display font-bold text-sm text-[var(--text-primary)] tabular-nums">
+            -{formatKr(totalFixedExpenses)}
+          </span>
         </div>
 
         {/* Fixed Expenses List */}
@@ -137,26 +204,23 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     category={exp.category}
                     logoUrl={exp.logo}
                     size="md"
+                    isRecurring={false}
                   />
                   <div className="min-w-0">
                     <span className="font-semibold text-[var(--text-primary)] block truncate">
                       {exp.name}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)] block truncate mt-0.5">
-                      {exp.category}
+                    <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 truncate mt-0.5">
+                      <CategoryIcon category={exp.category} size={11} />
+                      <span>{exp.category}</span>
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0">
-                  <div className="text-right">
-                    <span className="font-display font-bold text-[var(--text-primary)] tabular-nums block">
-                      -{formatKr(exp.amount)}
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
-                      Den {exp.dueDay}:e{exp.paymentMethod ? ` · ${exp.paymentMethod}` : ''}
-                    </span>
-                  </div>
+                  <span className="font-display font-bold text-[var(--text-primary)] tabular-nums">
+                    -{formatKr(exp.displayAmount)}
+                  </span>
                   <CaretRight
                     size={15}
                     className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"

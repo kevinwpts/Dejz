@@ -669,12 +669,13 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['hemköp', 'hemkop'], cleanName: 'Hemköp', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['lidl'], cleanName: 'Lidl', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['city gross'], cleanName: 'City Gross', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
-  { keywords: ['systembolaget'], cleanName: 'Systembolaget', preferredCategories: ['Mat & dryck', 'Nöjen', 'Uteliv'] },
+  { keywords: ['systembolaget', 'systembolag', 'systembolage', 'sys.bolaget', 'sysbolaget'], cleanName: 'Systembolaget', preferredCategories: ['Mat & dryck', 'Nöjen', 'Uteliv'] },
+  { keywords: ['öresundskraft', 'oresundskraft'], cleanName: 'Öresundskraft AB', preferredCategories: ['Boende', 'Räkningar'] },
   { keywords: ['mcdonalds', 'mcdonald'], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['max burgers', 'max hamburger'], cleanName: 'MAX Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['burger king'], cleanName: 'Burger King', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['espresso house'], cleanName: 'Espresso House', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
-  { keywords: ['pressbyrån', 'pressbyran'], cleanName: 'Pressbyrån', preferredCategories: ['Mat & dryck', 'Uteliv'] },
+  { keywords: ['pressbyrån', 'pressbyran', 'pressbyra'], cleanName: 'Pressbyrån', preferredCategories: ['Mat & dryck', 'Uteliv'] },
   { keywords: ['7-eleven'], cleanName: '7-Eleven', preferredCategories: ['Mat & dryck', 'Uteliv'] },
   { keywords: ['foodora'], cleanName: 'Foodora', preferredCategories: ['Uteliv', 'Mat & dryck'] },
   { keywords: ['wolt'], cleanName: 'Wolt', preferredCategories: ['Uteliv', 'Mat & dryck'] },
@@ -709,14 +710,30 @@ function normalizeMerchantKey(rawText: string | null | undefined): string {
     .trim();
 }
 
+export function formatSwishPhone(rawNumber: string): string {
+  const digits = rawNumber.replace(/\D/g, '');
+  let swedishDigits = digits;
+  if (digits.startsWith('467')) {
+    swedishDigits = '07' + digits.slice(3);
+  }
+  if (/^07\d{8}$/.test(swedishDigits)) {
+    return `${swedishDigits.slice(0, 3)}-${swedishDigits.slice(3, 6)} ${swedishDigits.slice(6, 8)} ${swedishDigits.slice(8, 10)}`;
+  }
+  if (/^123\d{7}$/.test(digits)) {
+    return `123-${digits.slice(3, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
+  }
+  return rawNumber;
+}
+
 export function formatSwishTitle(
   description: string | null | undefined,
   counterpartyName: string | null | undefined
 ): string {
-  // 1. Om banken redan har ett separat motpartsnamn som inte bara är "Swish"
+  // 1. Om banken redan har ett separat motpartsnamn som inte bara är "Swish" eller ett telefonnummer
   if (counterpartyName && counterpartyName.trim().length > 0) {
     const cp = counterpartyName.trim();
-    if (!/^swish$/i.test(cp)) {
+    const cpDigits = cp.replace(/[\s()-]/g, '');
+    if (!/^swish$/i.test(cp) && !/^(467\d{8,10}|07\d{8,9}|123\d{7})$/.test(cpDigits)) {
       return cleanDisplayMerchantName(cp);
     }
   }
@@ -724,44 +741,277 @@ export function formatSwishTitle(
   const raw = String(description || '').trim();
   if (!raw) return 'Swish';
 
-  // 2. Extrahera personens namn från typiska svenska Swish-beskrivningar:
-  // t.ex. "Swish mottagen 0701234567 Anna Svensson"
-  // "SWISH 1234567890 ERIK NILSSON"
-  // "Swish inbetalning Karin Larsson"
-  // "Swish från Olof"
+  // 2. Extrahera och formatera eventuellt telefonnummer (t.ex. 46722162125 -> 072-216 21 25)
+  const rawDigits = raw.replace(/[\s()-]/g, '');
+  const phoneMatch = rawDigits.match(/(467\d{8}|07\d{8}|123\d{7})/);
+  let formattedPhone = '';
+  if (phoneMatch) {
+    formattedPhone = formatSwishPhone(phoneMatch[1]);
+  }
+
+  // 3. Extrahera personens/företagets namn från typiska svenska Swish-beskrivningar:
   let cleaned = raw
     .replace(/^swish\s*(mottagen|inbetalning|inb\.?|skickad|betalning|från|fran|till)?\s*/i, '')
     .trim();
 
-  // Rensa bort telefonnummer (t.ex. 07XXXXXXXX, 467XXXXXXXX) eller Swish-nummer (123XXXXXXX)
-  cleaned = cleaned.replace(/^(07\d{8}|467\d{8}|123\d{7}|\d{9,12})\s*/i, '').trim();
-
-  // Rensa bort ledande datum/referensnummer
+  // Rensa bort telefonnummer
+  cleaned = cleaned.replace(/(467\d{8}|07\d{8}|123\d{7})/g, '').trim();
   cleaned = cleaned.replace(/^\d+[\s/-]+/, '').trim();
 
-  if (cleaned.length >= 2 && !/^\d+$/.test(cleaned)) {
+  // Rensa bort allt utom faktiska bokstäver för att kontrollera om ett riktigt namn finns
+  const remainingLetters = cleaned.replace(/[^a-zA-ZåäöÅÄÖ]/g, '').trim();
+
+  if (remainingLetters.length >= 2 && !/^swish$/i.test(remainingLetters)) {
     return cleanDisplayMerchantName(cleaned);
+  }
+
+  if (formattedPhone) {
+    return `Swish (${formattedPhone})`;
   }
 
   return 'Swish';
 }
 
+const KNOWN_MERCHANT_NAMES_MAP: Record<string, string> = {
+  systembolaget: 'Systembolaget',
+  systembolage: 'Systembolaget',
+  systembolag: 'Systembolaget',
+  'sys.bolaget': 'Systembolaget',
+  sysbolaget: 'Systembolaget',
+  öresundskraft: 'Öresundskraft AB',
+  oresundskraft: 'Öresundskraft AB',
+  'öresundskraft ab': 'Öresundskraft AB',
+  'oresundskraft ab': 'Öresundskraft AB',
+  pressbyrån: 'Pressbyrån',
+  pressbyran: 'Pressbyrån',
+  pressbyra: 'Pressbyrån',
+  hemköp: 'Hemköp',
+  hemkop: 'Hemköp',
+  hemko: 'Hemköp',
+  willys: 'Willys',
+  apotea: 'Apotea',
+  apoteket: 'Apoteket',
+  'apotek hjärtat': 'Apotek Hjärtat',
+  'apotek hjartat': 'Apotek Hjärtat',
+  'apoteket hjärtat': 'Apotek Hjärtat',
+  'apotek hjart': 'Apotek Hjärtat',
+  'apoteket hjar': 'Apotek Hjärtat',
+  'kronans apotek': 'Kronans Apotek',
+  'kronans apote': 'Kronans Apotek',
+  elgiganten: 'Elgiganten',
+  netonnet: 'NetOnNet',
+  webhallen: 'Webhallen',
+  biltema: 'Biltema',
+  rusta: 'Rusta',
+  jula: 'Jula',
+  ikea: 'IKEA',
+  'clas ohlson': 'Clas Ohlson',
+  'clas ohlso': 'Clas Ohlson',
+  'kjell & company': 'Kjell & Company',
+  'kjell & co': 'Kjell & Company',
+  'kjell o co': 'Kjell & Company',
+  stabelo: 'Stabelo',
+  sbab: 'SBAB',
+  klarna: 'Klarna',
+  'klarna bank ab': 'Klarna',
+  'klarna bank': 'Klarna',
+  'klarna ab': 'Klarna',
+  spotify: 'Spotify',
+  'spotify ab': 'Spotify',
+  netflix: 'Netflix',
+  'netflix com': 'Netflix',
+  'netflix.com': 'Netflix',
+  'apple.com/bill': 'Apple',
+  'itunes.com/bill': 'Apple',
+  sl: 'SL',
+  'ab sl': 'SL',
+  västtrafik: 'Västtrafik',
+  vasttrafik: 'Västtrafik',
+  skånetrafiken: 'Skånetrafiken',
+  skanetrafiken: 'Skånetrafiken',
+  hallandstrafiken: 'Hallandstrafiken',
+  sj: 'SJ',
+  'sj ab': 'SJ',
+  mcdonalds: "McDonald's",
+  'max burgers': 'MAX Burgers',
+  'max hamburger': 'MAX Burgers',
+  'burger king': 'Burger King',
+  'espresso house': 'Espresso House',
+  'waynes coffee': 'Wayne’s Coffee',
+  foodora: 'Foodora',
+  wolt: 'Wolt',
+  'circle k': 'Circle K',
+  okq8: 'OKQ8',
+  preem: 'Preem',
+  st1: 'St1',
+  ingo: 'INGO',
+  easypark: 'EasyPark',
+  parkster: 'Parkster',
+  'aimo park': 'Aimo Park',
+  sats: 'SATS',
+  'nordic wellness': 'Nordic Wellness',
+  fitness24seven: 'Fitness24Seven',
+  'friskis & svettis': 'Friskis & Svettis',
+  'friskis och svettis': 'Friskis & Svettis',
+  stc: 'STC',
+  actic: 'Actic',
+  tele2: 'Tele2',
+  telia: 'Telia',
+  telenor: 'Telenor',
+  'tre sverige': 'Tre (3)',
+  vimla: 'Vimla',
+  hallon: 'Hallon',
+  bahnhof: 'Bahnhof',
+  halebop: 'Halebop',
+  fello: 'Fello',
+  comviq: 'Comviq',
+  ownit: 'Ownit',
+  bredband2: 'Bredband2',
+  tibber: 'Tibber',
+  vattenfall: 'Vattenfall',
+  fortum: 'Fortum',
+  ellevio: 'Ellevio',
+  'e.on': 'E.ON',
+  eon: 'E.ON',
+  hedvig: 'Hedvig',
+  folksam: 'Folksam',
+  länsförsäkringar: 'Länsförsäkringar',
+  lansforsakringar: 'Länsförsäkringar',
+  'trygg-hansa': 'Trygg-Hansa',
+  trygghansa: 'Trygg-Hansa',
+  'if skadeförsäkring': 'If Skadeförsäkring',
+  'if skadeforsakring': 'If Skadeförsäkring',
+  agria: 'Agria Djurförsäkring',
+  lassie: 'Lassie',
+  'ica banken': 'ICA Banken',
+  'ica försäkring': 'ICA Försäkring',
+  csn: 'CSN',
+  försäkringskassan: 'Försäkringskassan',
+  forsakringskassan: 'Försäkringskassan',
+  pensionsmyndigheten: 'Pensionsmyndigheten',
+  pensionsmynd: 'Pensionsmyndigheten',
+  skatteverket: 'Skatteverket',
+  transportstyrelsen: 'Transportstyrelsen',
+  kronofogden: 'Kronofogden',
+  unionen: 'Unionen',
+  kommunal: 'Kommunal',
+  vision: 'Vision',
+  'akademikernas a-kassa': 'Akademikernas a-kassa',
+  'alfa-kassan': 'Alfa-kassan',
+  alfakassan: 'Alfa-kassan',
+};
+
+const CORPORATE_SUFFIXES = new Set([
+  'AB',
+  'HB',
+  'KB',
+  'AS',
+  'OY',
+  'GMBH',
+  'LLC',
+  'LTD',
+  'INC',
+  'PLC',
+  'PUBL',
+]);
+
+const ACRONYM_BRANDS: Record<string, string> = {
+  ica: 'ICA',
+  coop: 'Coop',
+  ikea: 'IKEA',
+  csn: 'CSN',
+  sl: 'SL',
+  sj: 'SJ',
+  sats: 'SATS',
+  stc: 'STC',
+  okq8: 'OKQ8',
+  'h&m': 'H&M',
+  hm: 'H&M',
+  bmw: 'BMW',
+  dnb: 'DNB',
+  se: 'SE',
+};
+
+const LOWERCASE_JOINERS = new Set(['och', 'i', 'på', 'av', 'af', 'von', 'de', 'la', 'the', 'of', 'and']);
+
 export function cleanDisplayMerchantName(rawText: string | null | undefined): string {
-  const cleaned = String(rawText || '')
-    .replace(/^\d{5,}\s+/, '') // Strip leading reference numbers like "916601517227 SVEAFASTIGHETER"
-    .replace(/^(AUTOGIRO|BG|PG|KORTKÖP|KORTKOP|BETALNING)\s+/i, '')
-    .replace(/\s+\d{4,}$/, '') // Strip trailing store numbers (e.g. "ICA MAXI 1421" -> "ICA MAXI")
-    .trim();
+  let cleaned = String(rawText || '').trim();
   if (!cleaned) return 'Banktransaktion';
-  // Convert ALL CAPS to clean Title Case if longer than 3 chars
-  if (cleaned === cleaned.toUpperCase() && cleaned.length > 3) {
-    return cleaned
-      .toLowerCase()
-      .split(/\s+/)
-      .map((w) => (w.length <= 2 && w !== 'ab' ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)))
-      .join(' ');
+
+  // 1. Rensa bort tekniska prefix från banker och kortterminaler
+  cleaned = cleaned
+    .replace(/^\d{5,}\s+/, '') // Rensa bort inledande referensnummer
+    .replace(/^(AUTOGIRO|BG|PG|KORTKÖP|KORTKOP|BETALNING|RESERVATION|KÖP|INBETALNING|UTBETALNING|ÖVERFÖRING|OVERFORING)\s+/i, '')
+    .replace(/^[*#._-]+\s*/, '')
+    .trim();
+
+  // 2. Rensa bort terminalsuffix som butiksnummer, ortkoder och landskod i slutet
+  cleaned = cleaned
+    .replace(/\s+\d{3,}\b.*$/, '') // T.ex. " 1421", " 0124"
+    .replace(/\s+(SE|SWE|SWEDEN)$/i, '')
+    .replace(/\s+(STOCKHOLM|GÖTEBORG|GOTEBORG|MALMÖ|MALMO|UPPSALA|LUND|HELSINGBORG)\s*(SE)?$/i, '')
+    .trim();
+
+  if (!cleaned) return 'Banktransaktion';
+
+  const lower = cleaned.toLowerCase().trim();
+
+  // 3. Kontrollera mot ordbok för avhuggna och kända butiksnamn (t.ex. systembolag -> Systembolaget)
+  if (KNOWN_MERCHANT_NAMES_MAP[lower]) {
+    return KNOWN_MERCHANT_NAMES_MAP[lower];
   }
-  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+
+  for (const [key, cleanName] of Object.entries(KNOWN_MERCHANT_NAMES_MAP)) {
+    if (lower === key || lower.startsWith(key + ' ') || lower.startsWith(key + '-')) {
+      return cleanName;
+    }
+    // Avhuggna namn med minst 6 tecken (t.ex. "systembolag" i "systembolag 0124")
+    if (key.length >= 6 && (lower.includes(key) || key.startsWith(lower))) {
+      return cleanName;
+    }
+  }
+
+  // 4. Universell svensk Title Case & bolagsändelser (t.ex. Öresundskraft AB)
+  const words = cleaned.split(/\s+/);
+  const formattedWords = words.map((w, idx) => {
+    // Behåll eventuella skiljetecken runt ordet
+    const punctuationMatch = w.match(/^([^a-zA-ZåäöÅÄÖ0-9]*)(.*?)([^a-zA-ZåäöÅÄÖ0-9]*)$/);
+    const prefix = punctuationMatch ? punctuationMatch[1] : '';
+    const core = punctuationMatch ? punctuationMatch[2] : w;
+    const suffix = punctuationMatch ? punctuationMatch[3] : '';
+
+    const coreLower = core.toLowerCase();
+
+    // Kontrollera kända akronymer (ICA, IKEA, etc.)
+    if (ACRONYM_BRANDS[coreLower]) {
+      return `${prefix}${ACRONYM_BRANDS[coreLower]}${suffix}`;
+    }
+
+    // Bolagsformer (AB, HB, KB, etc.)
+    if (
+      CORPORATE_SUFFIXES.has(coreLower.toUpperCase()) ||
+      coreLower === 'ab' ||
+      coreLower === 'a.b.' ||
+      coreLower === 'a/b'
+    ) {
+      return `${prefix}AB${suffix}`;
+    }
+
+    // Små sammanbindande ord i mitten av ett namn (och, i, på, etc.)
+    if (idx > 0 && LOWERCASE_JOINERS.has(coreLower)) {
+      return `${prefix}${coreLower}${suffix}`;
+    }
+
+    // Normal svensk Title Case
+    if (core.length > 0) {
+      const titleCased = core.charAt(0).toUpperCase() + core.slice(1).toLowerCase();
+      return `${prefix}${titleCased}${suffix}`;
+    }
+
+    return w;
+  });
+
+  return formattedWords.join(' ');
 }
 
 export function categorizeBankTransactionForApp(
@@ -793,7 +1043,11 @@ export function categorizeBankTransactionForApp(
     return preferredList[0] || 'Övrigt';
   };
 
-  if (combined.includes('swish')) {
+  const isSwishTx =
+    combined.includes('swish') ||
+    /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, ''));
+
+  if (isSwishTx) {
     const swishTitle = formatSwishTitle(tx.description, tx.counterparty_name);
     return {
       merchant: swishTitle,
@@ -1272,6 +1526,13 @@ function runCoreBankDetection(
       rawText.includes('försäkringskassan') || rawText.includes('forsakringskassan');
     const isBarnbidrag = rawText.includes('barnbidrag');
     const isPension = rawText.includes('pension');
+    const isAkassa =
+      rawText.includes('a-kassa') ||
+      rawText.includes('akassa') ||
+      rawText.includes('arbetslöshetsersättning') ||
+      rawText.includes('arbetsloshetsersattning') ||
+      rawText.includes('alfakassan') ||
+      rawText.includes('unionen');
 
     if (
       !isExplicitSalary &&
@@ -1279,6 +1540,7 @@ function runCoreBankDetection(
       !isFk &&
       !isBarnbidrag &&
       !isPension &&
+      !isAkassa &&
       amt < 12000
     ) {
       continue;
@@ -1287,7 +1549,7 @@ function runCoreBankDetection(
     let groupKey = 'salary';
     let incomeName = 'Lön';
     let incomeCategory = 'Lön';
-    let isPrimarySalary = true;
+    let isPrimarySalary = isExplicitSalary;
 
     if (isBarnbidrag) {
       groupKey = 'barnbidrag';
@@ -1298,21 +1560,28 @@ function runCoreBankDetection(
       groupKey = 'csn';
       incomeName = 'CSN';
       incomeCategory = 'CSN';
-      isPrimarySalary = amt >= 8000;
+      isPrimarySalary = false;
     } else if (isFk) {
       groupKey = 'fk';
       incomeName = 'Försäkringskassan';
       incomeCategory = 'Bidrag';
-      isPrimarySalary = amt >= 10000;
+      isPrimarySalary = false;
     } else if (isPension) {
       groupKey = 'pension';
       incomeName = 'Pension';
       incomeCategory = 'Pension';
-      isPrimarySalary = true;
+      isPrimarySalary = false;
+    } else if (isAkassa) {
+      groupKey = 'akassa';
+      const cleanAcc = tx.counterparty_name ? cleanDisplayMerchantName(tx.counterparty_name) : 'A-kassa';
+      incomeName = cleanAcc.toLowerCase().includes('kassa') || cleanAcc.toLowerCase().includes('unionen') ? cleanAcc : 'A-kassa';
+      incomeCategory = 'Ersättning';
+      isPrimarySalary = false;
     } else if (tx.counterparty_name) {
       const cleanEmp = cleanDisplayMerchantName(tx.counterparty_name);
       groupKey = `salary_${normalizeMerchantKey(cleanEmp)}`;
       incomeName = `Lön (${cleanEmp})`;
+      isPrimarySalary = true;
     }
 
     const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
@@ -1346,7 +1615,10 @@ function runCoreBankDetection(
       firstText.includes('försäkringskassan') ||
       firstText.includes('forsakringskassan') ||
       firstText.includes('barnbidrag') ||
-      firstText.includes('pension');
+      firstText.includes('pension') ||
+      firstText.includes('a-kassa') ||
+      firstText.includes('akassa') ||
+      firstText.includes('arbetslös');
 
     if (!hasExplicitIncomeKeyword && grp.txs.length < 2) {
       continue;

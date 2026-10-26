@@ -1392,5 +1392,21 @@ export const dataService = {
       console.error('Error renaming category in Supabase:', err);
       throw err;
     }
+  },
+
+  async deleteAllUserData(userId: string) {
+    if (userId === 'demo-user') {
+      localStorage.clear();
+      return;
+    }
+    try {
+      await supabase.from('transactions').delete().eq('user_id', userId);
+      await supabase.from('fixed_expenses').delete().eq('user_id', userId);
+      await supabase.from('income_sources').delete().eq('user_id', userId);
+      await supabase.from('bank_connections').delete().eq('user_id', userId);
+      await supabase.from('profiles').delete().eq('id', userId);
+    } catch (err) {
+      console.error('Error deleting user data from Supabase:', err);
+    }
   }
 };

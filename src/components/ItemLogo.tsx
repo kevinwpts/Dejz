@@ -12,15 +12,18 @@ import {
   CreditCard,
   Broadcast,
   Coins,
-  Tag
+  Tag,
+  ArrowsClockwise
 } from '@phosphor-icons/react';
 import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
+import { SwishLogo } from './SwishLogo';
 
 interface ItemLogoProps {
   name: string;
   category?: string;
   logoUrl?: string;
   size?: 'sm' | 'md' | 'lg';
+  isRecurring?: boolean;
 }
 
 export const ItemLogo: React.FC<ItemLogoProps> = ({
@@ -28,7 +31,13 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   category,
   logoUrl,
   size = 'md',
+  isRecurring = false,
 }) => {
+  const isSwish =
+    (category || '').toLowerCase() === 'swish' ||
+    (name || '').toLowerCase().includes('swish') ||
+    Boolean(logoUrl && (logoUrl.includes('swish') || logoUrl.includes('getswish')));
+
   const initialSrc = sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(initialSrc);
   const [imgFailed, setImgFailed] = useState(false);
@@ -100,30 +109,78 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     if (cat.includes('räkning')) {
       return <Receipt size={iconSize} weight="duotone" />;
     }
+    if (cat.includes('swish') || titleLower.includes('swish')) {
+      return <SwishLogo size={iconSize} />;
+    }
     return <Tag size={iconSize} weight="duotone" />;
   };
 
-  if (currentSrc && !imgFailed) {
+  const badgeSizeClasses = {
+    sm: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
+    md: 'w-4 h-4 -bottom-1 -right-1',
+    lg: 'w-4.5 h-4.5 -bottom-1 -right-1',
+  }[size];
+
+  const badgeIconSize = {
+    sm: 8,
+    md: 9,
+    lg: 11,
+  }[size];
+
+  const ringClass = isRecurring
+    ? 'ring-1.5 ring-indigo-500/40 ring-offset-1 ring-offset-[var(--surface-color)]'
+    : '';
+
+  const renderInnerContent = () => {
+    if (isSwish) {
+      return (
+        <div
+          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0 p-1.5 shadow-2xs ${ringClass}`}
+          title="Swish"
+        >
+          <SwishLogo className="w-full h-full object-contain" />
+        </div>
+      );
+    }
+
+    if (currentSrc && !imgFailed) {
+      return (
+        <div
+          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0 p-1 ${ringClass}`}
+        >
+          <img
+            src={currentSrc}
+            alt={name}
+            onError={handleError}
+            className="w-full h-full object-contain rounded-md"
+            loading="lazy"
+          />
+        </div>
+      );
+    }
+
     return (
       <div
-        className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0 p-1`}
+        className={`${sizeClasses} bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 ${ringClass}`}
       >
-        <img
-          src={currentSrc}
-          alt={name}
-          onError={handleError}
-          className="w-full h-full object-contain rounded-md"
-          loading="lazy"
-        />
+        {renderCategoryIcon()}
       </div>
     );
+  };
+
+  if (!isRecurring) {
+    return renderInnerContent();
   }
 
   return (
-    <div
-      className={`${sizeClasses} bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center shrink-0`}
-    >
-      {renderCategoryIcon()}
+    <div className="relative inline-flex shrink-0" title="Återkommande fast post">
+      {renderInnerContent()}
+      <span
+        aria-label="Återkommande"
+        className={`absolute ${badgeSizeClasses} rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center ring-2 ring-[var(--surface-color)] shadow-xs pointer-events-none`}
+      >
+        <ArrowsClockwise size={badgeIconSize} weight="bold" />
+      </span>
     </div>
   );
 };

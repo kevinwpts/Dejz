@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
-export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined);
+const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {} as any;
+const procEnv = typeof process !== 'undefined' && process.env ? process.env : {} as any;
+
+export const supabaseUrl = metaEnv.VITE_SUPABASE_URL || procEnv.VITE_SUPABASE_URL || procEnv.SUPABASE_URL || undefined;
+export const supabaseAnonKey = metaEnv.VITE_SUPABASE_ANON_KEY || procEnv.VITE_SUPABASE_ANON_KEY || procEnv.SUPABASE_ANON_KEY || undefined;
 
 const isValidUrl = (url: string | undefined): boolean => {
   if (!url) return false;

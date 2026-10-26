@@ -207,6 +207,92 @@ async function invokeEnableBanking<T>(payload: Record<string, unknown>): Promise
   return data as T;
 }
 
+export function deduplicateBankSyncRows(rows: BankTransactionItem[]): BankTransactionItem[] {
+  if (!Array.isArray(rows) || rows.length <= 1) return rows || [];
+
+  const chosenByCompositeKey = new Map<string, BankTransactionItem>();
+  const batchOccurrenceCounts = new Map<string, number>();
+
+  // Sortera med äldsta skapandedatum först så att stabil ordning bevaras
+  const sorted = [...rows].sort((a, b) => {
+    const tA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const tB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    if (tA !== tB) return tA - tB;
+    return (a.id || '').localeCompare(b.id || '');
+  });
+
+  // Identifiera synkbatcher (inom 30 sekunder från varandra)
+  const rowBatchMap = new Map<string, number>();
+  let currentBatchId = 0;
+  let lastCreatedMs = -Infinity;
+
+  for (const r of sorted) {
+    const createdMs = r.created_at ? new Date(r.created_at).getTime() : 0;
+    if (Math.abs(createdMs - lastCreatedMs) > 30_000) {
+      currentBatchId += 1;
+    }
+    lastCreatedMs = createdMs;
+    rowBatchMap.set(r.id, currentBatchId);
+  }
+
+  for (const r of sorted) {
+    const rawBal = r.raw_json?.balance_after_transaction?.amount;
+    const parsedBal =
+      rawBal !== undefined && rawBal !== null && String(rawBal).trim() !== ''
+        ? Number(String(rawBal).replace(/\s/g, '').replace(',', '.'))
+        : NaN;
+    const hasBalance = Number.isFinite(parsedBal);
+    const balanceAfterStr = hasBalance ? parsedBal.toFixed(2) : '';
+
+    // Normalisera beskrivning och telefonnummer
+    const descRaw = (r.description || '').trim().toLowerCase();
+    const phoneMatch = descRaw.replace(/[\s()-]/g, '').match(/(467\d{8}|07\d{8}|123\d{7})/);
+    const normDesc = phoneMatch
+      ? (phoneMatch[1].startsWith('467') ? '07' + phoneMatch[1].slice(3) : phoneMatch[1])
+      : descRaw.replace(/\s+/g, ' ');
+
+    const dateAnchor = r.booking_date || r.value_date || r.transaction_date || '';
+    const valAnchor = r.value_date || '';
+    const numAmt = Number(r.amount || 0).toFixed(2);
+    const curr = (r.currency || 'SEK').toUpperCase();
+
+    let compKey: string;
+    if (hasBalance) {
+      // När saldot efter transaktionen finns (som hos SEB) är kombinationen av
+      // bokföringsstatus, datum, belopp, valuta, beskrivning och saldo unikt per fysiskt köp.
+      // Då bevaras ALLA verkliga upprepade transaktioner när man swishar samma belopp flera gånger samma dag
+      // (de har olika saldo efter köpet), medan identiska dubblettrader från upprepade synkningar
+      // (som har exakt samma saldo) slås ihop till en enda post.
+      compKey = `${r.booking_status || 'BOOK'}|${dateAnchor}|${valAnchor}|${numAmt}|${curr}|${normDesc}|${balanceAfterStr}`;
+    } else {
+      // Om saldot saknas, använd batch-scoped förekomstnummer så att upprepade transaktioner
+      // i samma synkkörning bevaras som #1, #2, men matchas mot motsvarande i andra synkkörningar
+      const baseKey = `${r.booking_status || 'BOOK'}|${dateAnchor}|${valAnchor}|${numAmt}|${curr}|${normDesc}`;
+      const batchId = rowBatchMap.get(r.id) || 0;
+      const batchKey = `${batchId}::${baseKey}`;
+      const occurrence = (batchOccurrenceCounts.get(batchKey) || 0) + 1;
+      batchOccurrenceCounts.set(batchKey, occurrence);
+      compKey = `${baseKey}#${occurrence}`;
+    }
+
+    const existing = chosenByCompositeKey.get(compKey);
+    if (!existing) {
+      chosenByCompositeKey.set(compKey, r);
+    } else {
+      // Föredra transaktion som har en användardecision/reconciliation
+      const existingHasDecision =
+        existing.reconciliation_status && existing.reconciliation_status !== 'unprocessed';
+      const currentHasDecision =
+        r.reconciliation_status && r.reconciliation_status !== 'unprocessed';
+      if (!existingHasDecision && currentHasDecision) {
+        chosenByCompositeKey.set(compKey, r);
+      }
+    }
+  }
+
+  return Array.from(chosenByCompositeKey.values());
+}
+
 export const bankService = {
   async listBanks(country = 'SE', environment: BankEnvironment = 'production'): Promise<BankAspsp[]> {
     const res = await invokeEnableBanking<{ aspsps: BankAspsp[] }>({
@@ -515,7 +601,7 @@ export const bankService = {
     });
     return {
       ...res,
-      transactions: (res.transactions || []).map(mergeTxWithReconciliationOverlay),
+      transactions: deduplicateBankSyncRows((res.transactions || []).map(mergeTxWithReconciliationOverlay)),
     };
   },
 
@@ -529,10 +615,17 @@ export const bankService = {
     const maxRows =
       typeof bankAccountIdOrLimit === 'number' && bankAccountIdOrLimit > 0
         ? bankAccountIdOrLimit
-        : 1000;
+        : 5000;
 
     // First try direct query on public.bank_transactions for speed and full fields
     try {
+      // First get selected bank account IDs to avoid loading dead/unselected accounts
+      const { data: selectedAccs } = await supabase
+        .from('bank_accounts')
+        .select('id')
+        .eq('is_selected', true);
+      const selectedIds = (selectedAccs || []).map((a) => a.id);
+
       let query = supabase
         .from('bank_transactions')
         .select('*')
@@ -542,11 +635,15 @@ export const bankService = {
 
       if (bankAccountId) {
         query = query.eq('bank_account_id', bankAccountId);
+      } else if (selectedIds.length > 0) {
+        query = query.in('bank_account_id', selectedIds);
       }
 
       const { data, error } = await query;
       if (!error && Array.isArray(data) && data.length > 0) {
-        return (data as BankTransactionItem[]).map(mergeTxWithReconciliationOverlay);
+        return deduplicateBankSyncRows(
+          (data as BankTransactionItem[]).map(mergeTxWithReconciliationOverlay)
+        );
       }
     } catch {
       // Fallback to Edge Function pagination below
@@ -567,7 +664,7 @@ export const bankService = {
       hasMore = Boolean(res.hasMorePages);
       page += 1;
     }
-    return all;
+    return deduplicateBankSyncRows(all);
   },
 
   async disconnect(connectionId: string): Promise<{

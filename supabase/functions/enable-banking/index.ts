@@ -390,10 +390,30 @@ function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
     tx?.internal_transaction_id ||
     null;
 
+  let stableId = rawId ? String(rawId).trim() : null;
+  if (stableId) {
+    // SEB generates an ephemeral AES-encrypted entry_reference (<22-char IV>_<22-char ciphertext>)
+    // on every API request, and transaction_id is just Base64(entry_reference).
+    // Do not use volatile SEB tokens as stableId across syncs.
+    const isSebVolatileRef = /^[A-Za-z0-9_-]{20,24}_[A-Za-z0-9_-]{16,}$/.test(stableId);
+    const isSebBase64Ref = /^aGxk[A-Za-z0-9+/=_-]{30,}$/.test(stableId);
+    if (isSebVolatileRef || isSebBase64Ref) {
+      stableId = null;
+    }
+  }
+
+  const rawBalAfter = tx?.balance_after_transaction?.amount;
+  const parsedBalAfter =
+    rawBalAfter !== undefined && rawBalAfter !== null && String(rawBalAfter).trim() !== ""
+      ? Number(String(rawBalAfter).replace(/\s/g, "").replace(",", "."))
+      : NaN;
+  const balAfterStr = Number.isFinite(parsedBalAfter) ? parsedBalAfter.toFixed(2) : "nobal";
+
   const dateAnchor = bookingDate || transactionDate || valueDate || "nodate";
-  const baseExternalKey = rawId
-    ? `${String(rawId).trim()}_${bookingStatus}`
-    : `${bookingStatus}_${dateAnchor}_${numericAmount.toFixed(2)}_${currency}_${description.slice(0, 64)}`;
+  const valAnchor = valueDate || "noval";
+  const baseExternalKey = stableId
+    ? `${stableId}_${bookingStatus}`
+    : `${bookingStatus}_${dateAnchor}_${valAnchor}_${numericAmount.toFixed(2)}_${currency}_${balAfterStr}_${description.slice(0, 64)}`;
 
   const externalKey = occurrenceIndex > 1 ? `${baseExternalKey}#${occurrenceIndex}` : baseExternalKey;
 
@@ -894,12 +914,11 @@ serve(async (req: Request) => {
         .update({ connection_id: connectionId })
         .eq("id", stateRecord.id);
 
-      // Load existing accounts for this user+connection so we can match by stable identity (IBAN / BBAN / UID)
+      // Load existing accounts for this user so we can match by stable identity (IBAN / BBAN / UID)
       // and NEVER create duplicate copies of the same account when renewing consent or reconnecting.
       const { data: existingConnAccounts } = await adminClient
         .from("bank_accounts")
         .select("*")
-        .eq("connection_id", connectionId)
         .eq("user_id", user.id);
 
       const rawAccounts = Array.isArray(sessionData?.accounts) ? sessionData.accounts : [];
@@ -956,6 +975,7 @@ serve(async (req: Request) => {
 
         if (matchedExisting) {
           const updatePayload: Record<string, any> = {
+            connection_id: connectionId,
             provider_account_uid: uid,
             name,
             product: product || matchedExisting.product,

@@ -40,12 +40,16 @@ export const checkImage = (url: string, timeoutMs = 2500): Promise<boolean> => {
     });
 };
 
+import { SWISH_SVG_DATA_URI } from '../components/SwishLogo';
+
 /**
  * Domains where img.logo.dev serves a scraped og:image photograph instead of a logo,
  * or where a specific high-resolution favicon/logo endpoint is verified superior.
  */
 export const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
     'folksam.se': 'https://www.google.com/s2/favicons?domain=https://www.folksam.se&sz=128',
+    'getswish.se': SWISH_SVG_DATA_URI,
+    'swish.nu': SWISH_SVG_DATA_URI,
 };
 
 /**
@@ -53,6 +57,13 @@ export const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
  * Sorted by length descending during lookup so specific multi-word phrases match first.
  */
 export const KNOWN_BRANDS: Record<string, string> = {
+    // --- SWISH & BETALNINGAR ---
+    'swish': 'getswish.se',
+    'swish betalning': 'getswish.se',
+    'swishbetalning': 'getswish.se',
+    'getswish': 'getswish.se',
+    'swish inbetalning': 'getswish.se',
+    'swish utbetalning': 'getswish.se',
     // --- DATING, SOCIALS & APPS ---
     'tinder': 'tinder.com',
     'tinder plus': 'tinder.com',
@@ -757,7 +768,6 @@ export const KNOWN_BRANDS: Record<string, string> = {
     'lysa': 'lysa.se',
     'opti': 'opti.se',
     'klarna': 'klarna.com',
-    'swish': 'swish.nu',
     'qliro': 'qliro.com',
     'walley': 'walley.se',
     'svea bank': 'svea.com',
@@ -1497,14 +1507,20 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
     return candidates;
 }
 
-/**
- * Finds a matching domain from the known brands dictionary with Swedish-aware word boundaries,
- * compound-word (särskrivning/ihopskrivning) support, and parenthetical/modifier stripping.
- */
 export function findKnownBrandDomain(name: string, category?: string): string | undefined {
     if (!name || name.trim().length < 2) return undefined;
     const lower = name.toLowerCase().trim();
     const catLower = (category || '').toLowerCase();
+
+    // Swish-identifiering för alla Swish-namn, Swish-kategorier eller telefonnummer
+    const compactNum = lower.replace(/[\s-]/g, '');
+    if (
+        lower.includes('swish') ||
+        catLower === 'swish' ||
+        /^(467\d{8,10}|07\d{8,9}|123\d{7})$/.test(compactNum)
+    ) {
+        return 'getswish.se';
+    }
 
     // Disambiguate "Max" (HBO streaming vs Max Burgers vs ICA Maxi)
     if (
@@ -1720,6 +1736,10 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
     // If it's already a full URL or data URI, sanitize & return it directly
     if (title.startsWith('http') || title.startsWith('data:image')) {
         return sanitizeLogoUrl(title, undefined, category);
+    }
+
+    if (title.toLowerCase().includes('swish') || category?.toLowerCase() === 'swish') {
+        return SWISH_SVG_DATA_URI;
     }
 
     // Check known brand domains (including parenthetical/modifier-stripped candidates like "Svea Fastigheter(Hyra)")

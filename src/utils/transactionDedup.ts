@@ -2,8 +2,19 @@ import { TransactionItem } from '../components/HomeTab';
 
 export function normalizeMerchantForDedup(rawName: unknown): string {
   if (typeof rawName !== 'string') return '';
-  return rawName
-    .toLowerCase()
+  const str = rawName.toLowerCase();
+
+  // Om titeln innehåller ett telefonnummer (t.ex. 46722162125, 0722162125, 072-216 21 25, 1234567890)
+  const phoneMatch = str.replace(/[\s()-]/g, '').match(/(467\d{8}|07\d{8}|123\d{7})/);
+  if (phoneMatch) {
+    let digits = phoneMatch[1];
+    if (digits.startsWith('467')) {
+      digits = '07' + digits.slice(3);
+    }
+    return `swish ${digits}`;
+  }
+
+  return str
     .replace(/\b(ab|aktiebolag|sverige|sweden|se|inc|ltd|gmbh|as|oy|aps)\b/gi, ' ')
     .replace(/\b(kortköp|kortkop|betalning|köp|kop|autogiro|bg|pg|bankgiro|plusgiro)\b/gi, ' ')
     .replace(/[0-9*#/_.,:-]+/g, ' ')
@@ -11,13 +22,35 @@ export function normalizeMerchantForDedup(rawName: unknown): string {
     .trim();
 }
 
+function extractTxBalance(tx: TransactionItem): number | null {
+  const b = tx.rawJson?.balance_after_transaction?.amount;
+  if (b !== undefined && b !== null && String(b).trim() !== '') {
+    const n = Number(String(b).replace(/\s/g, '').replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function getDaysDiff(d1Str: string, d2Str: string): number {
+  if (!d1Str || !d2Str) return 999;
+  const d1 = new Date(d1Str).getTime();
+  const d2 = new Date(d2Str).getTime();
+  if (isNaN(d1) || isNaN(d2)) return 999;
+  return Math.abs(d1 - d2) / (1000 * 60 * 60 * 24);
+}
+
 /**
- * Strikt avduplicering av transaktioner.
- * Förhindrar dubbletter och trippletter orsakade av:
- * - Dubbla bankkonton som synkar samma köp
- * - Bokföringsfördröjning där både reservation (PDNG) och bokförd (BOOK) post finns
- * - Både manuell/DB-transaktion och Enable Banking-transaktion
- * - Återupprepad banksynk eller localStorage-cache
+ * Smart och robust avduplicering av transaktioner.
+ * 
+ * Regler:
+ * 1. Äkta upprepade transaktioner (t.ex. användaren swishar samma belopp flera gånger samma dag)
+ *    bevaras ALLTID tack vare att bankens saldo efter varje transaktion (balance_after_transaction)
+ *    skiljer sig åt mellan varje köp.
+ * 2. Identiska dubblettrader från återkommande bank- eller kontosynkningar (som har samma saldo,
+ *    samma bank-ID eller samma fysiska ledger-post) slås ihop.
+ * 3. Preliminära reservationer (PDNG/HOLD) som blivit slutgiltigt bokförda (BOOK) slås ihop
+ *    så att inte både reservationen och den bokförda posten visas.
+ * 4. Manuellt inlagda köp i appen slås ihop med motsvarande banktransaktion när banken synkas.
  */
 export function deduplicateTransactions(items: TransactionItem[]): TransactionItem[] {
   if (!Array.isArray(items) || items.length === 0) return [];
@@ -33,116 +66,116 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
     const itemType = item.type || 'expense';
     const itemDate = item.date || '';
     const itemTitleNorm = normalizeMerchantForDedup(item.title);
+    const itemBal = extractTxBalance(item);
+    const isItemBank = item.id.startsWith('bank-');
 
+    // Sök efter en befintlig post i resultatet som representerar SAMMA fysiska köp
     const dupIndex = result.findIndex((existing) => {
+      if (item.id === existing.id) return true;
+
       const existAmt = Math.round(Number(existing.amount) || 0);
       const existType = existing.type || 'expense';
+      const existDate = existing.date || '';
+      const existTitleNorm = normalizeMerchantForDedup(existing.title);
+      const existBal = extractTxBalance(existing);
+      const isExistBank = existing.id.startsWith('bank-');
+
+      // 1. Belopp och typ (utgift/inkomst) måste stämma överens
       if (itemAmt !== existAmt || itemType !== existType) return false;
 
-      const bothAreBankTxs = item.id.startsWith('bank-') && existing.id.startsWith('bank-');
+      // 2. Om BÅDA transaktionerna kommer från banken:
+      if (isItemBank && isExistBank) {
+        // A. Om båda har bankens saldo efter transaktionen:
+        if (itemBal !== null && existBal !== null) {
+          if (Math.abs(itemBal - existBal) > 0.005) {
+            // Olika saldo -> detta är två separata verkliga transaktioner!
+            // (T.ex. tre Swish samma dag – saldot ändras efter varje transaktion)
+            return false;
+          }
+          // Exakt samma saldo efter transaktionen -> detta är 100% samma transaktion som synkats två gånger!
+          return true;
+        }
 
-      // REGEL 1: Inkomster från banken (Swish, insättningar, småinkomster)
-      // Banken tilldelar varje inbetalning ett eget unikt transaktions-ID. Två bankinbetalningar med olika ID
-      // är två separata inkomster (t.ex. flera personer som swishar samma belopp). De ska ALDRIG slås ihop!
-      if (bothAreBankTxs && itemType === 'income') {
+        // B. Om de delar samma transactionId eller entryReference
+        if (
+          (item.transactionId && existing.transactionId && item.transactionId === existing.transactionId) ||
+          (item.entryReference && existing.entryReference && item.entryReference === existing.entryReference)
+        ) {
+          return true;
+        }
+
+        // C. Om en är preliminär reservation (PDNG/HOLD) och en är slutgiltigt bokförd (BOOK)
+        const isItemPending = item.bookingStatus === 'PDNG' || item.bookingStatus === 'HOLD';
+        const isExistPending = existing.bookingStatus === 'PDNG' || existing.bookingStatus === 'HOLD';
+        if (isItemPending !== isExistPending) {
+          const diff = getDaysDiff(itemDate, existDate);
+          if (diff <= 4) {
+            const tokens1 = (itemTitleNorm || '').split(' ').filter((t) => t.length >= 2);
+            const tokens2 = (existTitleNorm || '').split(' ').filter((t) => t.length >= 2);
+            const hasCommonToken = tokens1.some(
+              (t1) => t1.length >= 3 && tokens2.some((t2) => t2.length >= 3 && (t1 === t2 || t1.includes(t2) || t2.includes(t1)))
+            );
+            const titlesMatch =
+              itemTitleNorm === existTitleNorm ||
+              (itemTitleNorm && existTitleNorm && (itemTitleNorm.includes(existTitleNorm) || existTitleNorm.includes(itemTitleNorm))) ||
+              hasCommonToken ||
+              !itemTitleNorm ||
+              !existTitleNorm;
+            if (titlesMatch) return true;
+          }
+        }
+
+        // D. Om båda saknar särskiljande saldo:
+        // För Swish ska vi INTE slå ihop dem automatiskt om saldot saknas, för att inte riskera att radera en legitim betalning
+        if (item.category?.toLowerCase() === 'swish' || existing.category?.toLowerCase() === 'swish') {
+          return false;
+        }
+
+        // För vanliga kortköp/räkningar: om datum och butiksnamn är identiska
+        if (itemDate === existDate && itemTitleNorm && itemTitleNorm === existTitleNorm) {
+          return true;
+        }
+
         return false;
       }
 
-      // REGEL 2: Swish-transaktioner
-      // Om två Swish-poster har olika bank-ID eller olika klockslag/avsändare, är de separata transaktioner.
-      const isItemSwish = item.category === 'Swish' || itemTitleNorm.includes('swish');
-      const isExistSwish =
-        existing.category === 'Swish' ||
-        normalizeMerchantForDedup(existing.title).includes('swish');
-      if (isItemSwish || isExistSwish) {
-        if (bothAreBankTxs) return false;
-      }
-
-      // REGEL 3: För bankutgifter med samma belopp och datum och numerisk/generisk eller identisk titel (t.ex. testpings/dubbletter):
-      if (bothAreBankTxs && itemAmt === existAmt && itemDate === existDate && itemType !== 'income') {
-        if (
-          itemTitleNorm === existTitleNorm ||
-          /^\d+$/.test(itemTitleNorm) ||
-          /^\d+$/.test(existTitleNorm) ||
-          !itemTitleNorm ||
-          !existTitleNorm
-        ) {
-          return true;
-        }
-      }
-
-      if (bothAreBankTxs) {
-        const itemTime = item.time?.trim();
-        const existTime = existing.time?.trim();
-        if (itemTime && existTime && itemTime !== existTime) {
-          return false;
-        }
-      }
-
-      // 1. Datumkontroll: Samma datum eller inom 2.5 dagar (för att fånga helg/bokföringsfördröjning mellan manuell och bankpost)
-      const existDate = existing.date || '';
-      let dateMatch = itemDate === existDate;
-      if (!dateMatch && itemDate && existDate) {
-        const d1 = new Date(itemDate).getTime();
-        const d2 = new Date(existDate).getTime();
-        if (!isNaN(d1) && !isNaN(d2)) {
-          const daysDiff = Math.abs(d1 - d2) / (1000 * 60 * 60 * 24);
-          dateMatch = daysDiff <= 2.5;
-        }
-      }
-      if (!dateMatch) return false;
-
-      // 2. Butiks-/Mottagarmatchning
-      const existTitleNorm = normalizeMerchantForDedup(existing.title);
-      if (itemTitleNorm && existTitleNorm) {
-        if (itemTitleNorm === existTitleNorm) return true;
-        if (itemTitleNorm.includes(existTitleNorm) || existTitleNorm.includes(itemTitleNorm)) {
-          return true;
-        }
-
-        // Första signifikanta ordet (t.ex. "ica", "coop", "sl", "spotify", "elgiganten")
-        const tokens1 = itemTitleNorm.split(' ').filter((t) => t.length >= 2);
-        const tokens2 = existTitleNorm.split(' ').filter((t) => t.length >= 2);
-        if (
-          tokens1.length > 0 &&
-          tokens2.length > 0 &&
-          tokens1[0] === tokens2[0] &&
-          tokens1[0].length >= 3
-        ) {
-          return true;
-        }
-      }
-
-      // 3. Om båda har samma kategori, exakt samma datum och belopp, och generiska titlar
-      if (
-        itemDate === existDate &&
-        item.category &&
-        existing.category &&
-        item.category.toLowerCase().trim() === existing.category.toLowerCase().trim()
-      ) {
-        const isGeneric1 =
-          !itemTitleNorm ||
-          /^(kortköp|kortkop|banktransaktion|utgift|inkomst|överföring|overforing)$/i.test(
-            itemTitleNorm
+      // 3. Om EN transaktion är manuell/lokal och EN kommer från banken:
+      // (Användaren har registrerat ett köp i appen, och banken har nu synkat in samma köp)
+      const daysDiff = getDaysDiff(itemDate, existDate);
+      if (daysDiff <= 3.5) {
+        if (itemTitleNorm && existTitleNorm) {
+          if (itemTitleNorm === existTitleNorm || itemTitleNorm.includes(existTitleNorm) || existTitleNorm.includes(itemTitleNorm)) {
+            return true;
+          }
+          const tokens1 = itemTitleNorm.split(' ').filter((t) => t.length >= 2);
+          const tokens2 = existTitleNorm.split(' ').filter((t) => t.length >= 2);
+          const hasCommonToken = tokens1.some(
+            (t1) => t1.length >= 3 && tokens2.some((t2) => t2.length >= 3 && (t1 === t2 || t1.includes(t2) || t2.includes(t1)))
           );
-        const isGeneric2 =
-          !existTitleNorm ||
-          /^(kortköp|kortkop|banktransaktion|utgift|inkomst|överföring|overforing)$/i.test(
-            existTitleNorm
-          );
-        if (isGeneric1 || isGeneric2) return true;
+          if (hasCommonToken) {
+            return true;
+          }
+        } else if (itemDate === existDate) {
+          return true;
+        }
       }
 
       return false;
     });
 
     if (dupIndex >= 0) {
-      // Dubblett hittad! Föredra bankverifierad post eller post med logga/tid
+      // Dubblett / reservationspar hittat!
       const existing = result[dupIndex];
+
+      // Föredra slutgiltigt bokförd post, bankpost eller post med mer komplett metadata
+      const isItemBooked = item.bookingStatus === 'BOOK' || (!item.bookingStatus && isItemBank);
+      const isExistBooked = existing.bookingStatus === 'BOOK' || (!existing.bookingStatus && existing.id.startsWith('bank-'));
+
       const preferCurrent =
-        (!existing.id.startsWith('bank-') && item.id.startsWith('bank-')) ||
-        (!existing.logo && Boolean(item.logo)) ||
-        (!existing.time && Boolean(item.time));
+        (isItemBooked && !isExistBooked) ||
+        (!existing.id.startsWith('bank-') && isItemBank) ||
+        (!existing.rawJson && Boolean(item.rawJson)) ||
+        (!existing.logo && Boolean(item.logo));
 
       if (preferCurrent) {
         seenIds.delete(existing.id);
@@ -152,6 +185,10 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
           time: item.time || existing.time,
           logo: item.logo || existing.logo,
           note: item.note || existing.note,
+          // Behåll det tidigaste köpdatumet/tiden om den befintliga posten hade preliminärt datum
+          date: (existing.bookingStatus === 'PDNG' || existing.bookingStatus === 'HOLD') && existing.date && existing.date <= item.date
+            ? existing.date
+            : item.date,
         };
       }
       continue;
