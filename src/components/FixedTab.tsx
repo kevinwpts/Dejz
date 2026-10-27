@@ -124,30 +124,30 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   }, [fixedExpenses, transactions, period, primaryAccountLabel]);
 
   return (
-    <div className="space-y-6 pb-36 sm:pb-40 animate-fade-in">
+    <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
       {/* ============================================================== */}
       {/* SEKTION 1: INKOMSTER                                           */}
       {/* ============================================================== */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
+          <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
             Inkomster
           </h2>
-          <span className="font-display font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400 tabular-nums">
+          <span className="font-display font-bold text-xs sm:text-[13px] text-emerald-600 dark:text-emerald-400 tabular-nums">
             +{formatKr(totalIncome)}
           </span>
         </div>
 
         {enrichedIncomes.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {enrichedIncomes.map((inc) => (
               <button
                 key={inc.id}
                 type="button"
                 onClick={() => onSelectIncome(inc)}
-                className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <ItemLogo
                     name={inc.name}
                     category={inc.category}
@@ -159,16 +159,16 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     <span className="font-semibold text-[var(--text-primary)] block truncate">
                       {inc.name}
                     </span>
-                    <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
+                    <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
                       <span className="inline-flex items-center gap-1 truncate">
-                        <CategoryIcon category={inc.category || 'Lön'} size={12} />
+                        <CategoryIcon category={inc.category || 'Lön'} size={11} />
                         <span className="truncate">{inc.category || 'Lön'}</span>
                       </span>
                       {inc.isPaid && (
                         <>
                           <span aria-hidden="true">·</span>
                           <span className="text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 shrink-0">
-                            <CheckCircle size={12} weight="fill" />
+                            <CheckCircle size={11} weight="fill" />
                             <span>Mottagen</span>
                           </span>
                         </>
@@ -180,7 +180,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                   <span className="font-display font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block">
                     +{formatKr(inc.displayAmount)}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                  <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                     Den {inc.payday}:e
                   </span>
                 </div>
@@ -189,8 +189,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           </div>
         ) : (
           <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl py-6 text-center">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2">
-              <Coins size={18} weight="duotone" />
+            <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2">
+              <Coins size={16} weight="duotone" />
             </div>
             <p className="text-xs text-[var(--text-muted)]">
               Inga inkomster
@@ -202,26 +202,26 @@ export const FixedTab: React.FC<FixedTabProps> = ({
       {/* ============================================================== */}
       {/* SEKTION 2: FASTA UTGIFTER                                      */}
       {/* ============================================================== */}
-      <section className="space-y-2">
+      <section className="space-y-1.5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
+          <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
             Fasta utgifter
           </h2>
-          <span className="font-display font-bold text-sm sm:text-base text-[var(--text-primary)] tabular-nums">
+          <span className="font-display font-bold text-xs sm:text-[13px] text-[var(--text-primary)] tabular-nums">
             -{formatKr(totalFixedExpenses)}
           </span>
         </div>
 
         {enrichedExpenses.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {enrichedExpenses.map((exp) => (
               <button
                 key={exp.id}
                 type="button"
                 onClick={() => onSelectFixed(exp)}
-                className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <ItemLogo
                     name={exp.name}
                     category={exp.category}
@@ -233,16 +233,16 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     <span className="font-semibold text-[var(--text-primary)] block truncate">
                       {exp.name}
                     </span>
-                    <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
+                    <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
                       <span className="inline-flex items-center gap-1 truncate">
-                        <CategoryIcon category={exp.category || 'Räkningar'} size={12} />
+                        <CategoryIcon category={exp.category || 'Räkningar'} size={11} />
                         <span className="truncate">{exp.category || 'Räkningar'}</span>
                       </span>
                       {exp.isPaid && (
                         <>
                           <span aria-hidden="true">·</span>
                           <span className="text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 shrink-0">
-                            <CheckCircle size={12} weight="fill" />
+                            <CheckCircle size={11} weight="fill" />
                             <span>Betald</span>
                           </span>
                         </>
@@ -251,7 +251,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         <>
                           <span aria-hidden="true">·</span>
                           <span className="text-amber-600 dark:text-amber-400 font-semibold inline-flex items-center gap-0.5 shrink-0 tabular-nums">
-                            <TrendUp size={11} weight="bold" />
+                            <TrendUp size={10} weight="bold" />
                             <span>+{formatKr(exp.priceIncreaseDiff)}</span>
                           </span>
                         </>
@@ -264,7 +264,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                   <span className="font-display font-bold text-[var(--text-primary)] tabular-nums block">
                     -{formatKr(exp.displayAmount)}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                  <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                     Den {exp.dueDay}:e
                   </span>
                 </div>
@@ -273,8 +273,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           </div>
         ) : (
           <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl py-6 text-center">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2">
-              <Receipt size={18} weight="duotone" />
+            <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2">
+              <Receipt size={16} weight="duotone" />
             </div>
             <p className="text-xs text-[var(--text-muted)]">
               Inga fasta utgifter

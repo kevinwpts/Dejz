@@ -154,7 +154,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       {/* TRANSAKTIONSLISTA (GRUPPERAD PER DATUM)                        */}
       {/* ============================================================== */}
       {groupedByDate.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           {groupedByDate.map((group) => (
             <section key={group.dateKey} className="space-y-1.5">
               {/* Datumgrupps-rubrik utanför modulen direkt på bakgrunden */}
@@ -178,7 +178,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               </div>
 
               {/* Rader i datumgruppen */}
-              <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-4 py-1 sm:px-5 sm:py-1.5 divide-y divide-[var(--border-subtle)]">
+              <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-3.5 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)]">
                 {group.items.map((tx) => {
                   const isIncome = tx.type === 'income';
                   const recurringStatus = checkIsRecurringTransaction(
@@ -191,9 +191,9 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                       key={tx.id}
                       type="button"
                       onClick={() => onSelectTransaction(tx)}
-                      className="w-full py-3 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                      className="w-full py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <ItemLogo
                           name={tx.title}
                           category={tx.category}
@@ -206,28 +206,28 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                             <span className="truncate">{tx.title}</span>
                             {tx.isHearted && (
                               <Heart
-                                size={13}
+                                size={12}
                                 weight="fill"
                                 className="text-rose-500 shrink-0"
                               />
                             )}
                             {tx.isWaitingForPackage && (
                               <Package
-                                size={13}
+                                size={12}
                                 weight="fill"
                                 className="text-amber-500 shrink-0"
                               />
                             )}
                             {tx.receiptUrl && (
                               <Paperclip
-                                size={13}
+                                size={12}
                                 weight="bold"
                                 className="text-[var(--text-secondary)] shrink-0"
                               />
                             )}
                           </span>
-                          <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                            <CategoryIcon category={tx.category} size={12} />
+                          <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
+                            <CategoryIcon category={tx.category} size={11} />
                             <span className="truncate">{tx.category}</span>
                           </span>
                         </div>
@@ -243,7 +243,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                         >
                           {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
                         </span>
-                        <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                        <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                           {getTransactionTime(tx)}
                         </span>
                       </div>
@@ -256,8 +256,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
         </div>
       ) : (
         <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center animate-fade-in">
-          <div className="w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2.5">
-            <Receipt size={20} weight="duotone" />
+          <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2">
+            <Receipt size={18} weight="duotone" />
           </div>
           <p className="text-xs font-semibold text-[var(--text-primary)]">
             Inga transaktioner hittades

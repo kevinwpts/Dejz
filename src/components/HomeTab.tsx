@@ -648,13 +648,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         >
           <div className="overflow-hidden">
             {accounts.length > 0 ? (
-              <div className="pt-3.5 border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+              <div className="pt-3 border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
                 {accounts.map((acc) => (
                   <div
                     key={acc.id}
-                    className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3 text-sm"
+                    className="py-2 first:pt-0 last:pb-0 flex items-center justify-between gap-2.5 text-xs sm:text-[13px]"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <ItemLogo
                         name={acc.bankName || acc.name}
                         category="Bank"
@@ -674,20 +674,20 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 ))}
               </div>
             ) : isInitialLoading ? (
-              <div className="pt-3.5 border-t border-[var(--border-subtle)] space-y-3 animate-pulse">
+              <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2.5 animate-pulse">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)]" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--surface-raised)]" />
                     <div className="space-y-1.5">
                       <div className="w-24 h-3 rounded bg-[var(--surface-raised)]" />
                       <div className="w-16 h-2 rounded bg-[var(--surface-raised)]" />
                     </div>
                   </div>
-                  <div className="w-20 h-4 rounded bg-[var(--surface-raised)]" />
+                  <div className="w-20 h-3.5 rounded bg-[var(--surface-raised)]" />
                 </div>
               </div>
             ) : (
-              <div className="pt-3.5 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
                 <span className="text-xs text-[var(--text-muted)]">
                   Ingen bank ansluten
                 </span>
@@ -708,10 +708,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* MODUL 3: HORISONTELL TIDSLINJE PER DAG (Direkt mot bakgrunden) */}
       {/* ============================================================== */}
-      <section className="pt-2">
-        <div className="flex items-center justify-between mb-3">
+      <section className="pt-1">
+        <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
-            <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
+            <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
               Händelser
             </h2>
             {selectedDateKey !== todayStr && (
@@ -767,7 +767,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
           onWheel={handleWheel}
-          className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 select-none cursor-grab active:cursor-grabbing"
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2.5 select-none cursor-grab active:cursor-grabbing"
         >
           {timelineDays.map((day) => {
             const isSelected = day.dateKey === selectedDateKey;
@@ -784,7 +784,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     setSelectedDateKey(day.dateKey);
                   }
                 }}
-                className={`shrink-0 min-w-[48px] py-2.5 px-2.5 rounded-2xl border transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
+                className={`shrink-0 min-w-[44px] py-2 px-2 rounded-2xl border transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
                   isSelected
                     ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
                     : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
@@ -797,7 +797,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 >
                   {day.topLabel}
                 </span>
-                <span className="font-display font-bold text-sm tabular-nums leading-tight">
+                <span className="font-display font-bold text-xs tabular-nums leading-tight">
                   {day.dayNum}
                 </span>
               </button>
@@ -806,7 +806,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </div>
 
         {/* Vald dags rubrik & summering */}
-        <div className="flex items-center justify-between pt-2 pb-2.5 text-xs">
+        <div className="flex items-center justify-between pt-1.5 pb-2 text-xs">
           <span className="font-bold text-[var(--text-secondary)]">
             {formatSwedishDateHeading(selectedDateKey)}
           </span>
@@ -829,7 +829,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
         {/* Enbart den valda dagens händelser som separata kort */}
         {selectedDayItems.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {selectedDayItems.map((tx) => {
               const isIncome = tx.type === 'income';
               const recurringStatus = checkIsRecurringTransaction(
@@ -843,9 +843,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   key={tx.id}
                   type="button"
                   onClick={() => onSelectTransaction(tx)}
-                  className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:border-[var(--text-muted)] flex items-center justify-between gap-3 text-sm text-left active:scale-[0.99] transition-all cursor-pointer"
+                  className="w-full p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:border-[var(--text-muted)] flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left active:scale-[0.99] transition-all cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <ItemLogo
                       name={tx.title}
                       category={tx.category}
@@ -858,28 +858,28 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         <span className="truncate">{tx.title}</span>
                         {tx.isHearted && (
                           <Heart
-                            size={13}
+                            size={12}
                             weight="fill"
                             className="text-rose-500 shrink-0"
                           />
                         )}
                         {tx.isWaitingForPackage && (
                           <Package
-                            size={13}
+                            size={12}
                             weight="fill"
                             className="text-amber-500 shrink-0"
                           />
                         )}
                         {tx.receiptUrl && (
                           <Paperclip
-                            size={13}
+                            size={12}
                             weight="bold"
                             className="text-[var(--text-secondary)] shrink-0"
                           />
                         )}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                        <CategoryIcon category={tx.category} size={12} />
+                      <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
+                        <CategoryIcon category={tx.category} size={11} />
                         <span className="truncate">{tx.category}</span>
                       </span>
                     </div>
@@ -895,7 +895,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     >
                       {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                    <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                       {tx.time === 'Planerad' ? 'Planerad' : getTransactionTime(tx)}
                     </span>
                   </div>
@@ -904,27 +904,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             })}
           </div>
         ) : isInitialLoading ? (
-          <div className="space-y-2 animate-pulse">
+          <div className="space-y-1.5 animate-pulse">
             {[1, 2].map((n) => (
               <div
                 key={n}
-                className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between"
+                className="p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-[var(--surface-raised)]" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)]" />
                   <div className="space-y-1.5">
-                    <div className="w-28 h-3.5 rounded bg-[var(--surface-raised)]" />
+                    <div className="w-28 h-3 rounded bg-[var(--surface-raised)]" />
                     <div className="w-20 h-2.5 rounded bg-[var(--surface-raised)]" />
                   </div>
                 </div>
-                <div className="w-16 h-4 rounded bg-[var(--surface-raised)]" />
+                <div className="w-16 h-3.5 rounded bg-[var(--surface-raised)]" />
               </div>
             ))}
           </div>
         ) : (
           <div className="py-6 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-center">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] flex items-center justify-center mx-auto mb-2">
-              <CalendarBlank size={18} weight="duotone" />
+            <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] flex items-center justify-center mx-auto mb-2">
+              <CalendarBlank size={16} weight="duotone" />
             </div>
             <p className="text-xs text-[var(--text-muted)]">
               Inga händelser denna dag

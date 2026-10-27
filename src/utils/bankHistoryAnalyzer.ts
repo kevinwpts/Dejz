@@ -419,7 +419,32 @@ export function isInternalTransferOrMicroSavings(
   tx: BankTransactionItem,
   userAccounts: BankAccount[] = []
 ): boolean {
-  const combined = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase().trim();
+  const rawJson = tx.raw_json || {};
+  const remittanceText = Array.isArray(rawJson?.remittance_information)
+    ? rawJson.remittance_information
+        .map((r: any) => (typeof r === 'string' ? r : r?.unstructured || ''))
+        .join(' ')
+    : typeof rawJson?.remittance_information === 'string'
+    ? rawJson.remittance_information
+    : '';
+
+  const combined = `${tx.description || ''} ${tx.counterparty_name || ''} ${remittanceText}`
+    .toLowerCase()
+    .trim();
+
+  if (
+    rawJson?.card_transaction ||
+    combined.includes('kortköp') ||
+    combined.includes('kortkop') ||
+    combined.includes('autogiro') ||
+    combined.includes('bankgiro') ||
+    combined.includes('plusgiro') ||
+    combined.includes('fakturabetalning') ||
+    combined.includes('swish') ||
+    /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, ''))
+  ) {
+    return false;
+  }
 
   if (
     combined.includes('enkla vardagen') ||
@@ -428,20 +453,226 @@ export function isInternalTransferOrMicroSavings(
     combined.includes('egen överföring') ||
     combined.includes('egen overforing') ||
     combined.includes('mellan egna') ||
-    combined.includes('sparkonto')
+    combined.includes('intern överföring') ||
+    combined.includes('intern overforing') ||
+    combined.includes('kontoöverföring') ||
+    combined.includes('kontooverforing') ||
+    combined.includes('överf via internet') ||
+    combined.includes('overf via internet') ||
+    combined.includes('överföring via internet') ||
+    combined.includes('overforing via internet') ||
+    combined.includes('överföring mobil') ||
+    combined.includes('overforing mobil') ||
+    combined.includes('sparkonto') ||
+    combined.includes('framtidskonto') ||
+    combined.includes('placeringskonto') ||
+    combined.includes('kapitalkonto') ||
+    combined.includes('fasträntekonto') ||
+    combined.includes('buffertkonto')
   ) {
     return true;
   }
 
-  // Check if the description is just an account number belonging to one of the user's own accounts
+  const descTrimmed = (tx.description || '').toLowerCase().trim();
+  if (
+    descTrimmed === 'överföring' ||
+    descTrimmed === 'overforing' ||
+    descTrimmed === 'insättning' ||
+    descTrimmed === 'insattning' ||
+    /^(överföring|overforing|överf\.?|overf\.?)\b/i.test(descTrimmed)
+  ) {
+    return true;
+  }
+
+  // Om beskrivningen enbart är ett bankkontonummer (t.ex. "5196 00 507 53")
+  const rawAcctCandidate = (tx.description || tx.counterparty_name || '')
+    .replace(/^(från|fran|till|överföring|overforing|insättning|insattning)\s+/i, '')
+    .trim();
+  const rawAcctDigits = rawAcctCandidate.replace(/\D+/g, '');
+  if (
+    rawAcctCandidate.length >= 7 &&
+    /^[\d\s.,-]+$/.test(rawAcctCandidate) &&
+    rawAcctDigits.length >= 7 &&
+    rawAcctDigits.length <= 16
+  ) {
+    return true;
+  }
+
+  const combinedDigits = combined.replace(/\D+/g, '');
+  const creditorBban = (rawJson?.creditor_account?.other?.identification || '').replace(/\D+/g, '');
+  const debtorBban = (rawJson?.debtor_account?.other?.identification || '').replace(/\D+/g, '');
+  const creditorIban = (rawJson?.creditor_account?.iban || '').replace(/\s+/g, '').toUpperCase();
+  const debtorIban = (rawJson?.debtor_account?.iban || '').replace(/\s+/g, '').toUpperCase();
+
   for (const acc of userAccounts) {
     const bbanDigits = (acc.bban || '').replace(/\D+/g, '');
-    if (bbanDigits.length >= 7 && combined.replace(/\D+/g, '').includes(bbanDigits)) {
+    if (bbanDigits.length >= 6) {
+      const variants = [bbanDigits];
+      if (bbanDigits.length >= 10) {
+        if (bbanDigits.slice(4).length >= 6) variants.push(bbanDigits.slice(4));
+        if (bbanDigits.slice(-7).length === 7) variants.push(bbanDigits.slice(-7));
+      }
+      if (
+        variants.some(
+          (v) =>
+            (combinedDigits.length >= 6 && combinedDigits.includes(v)) ||
+            (creditorBban && (creditorBban.includes(v) || v.includes(creditorBban))) ||
+            (debtorBban && (debtorBban.includes(v) || v.includes(debtorBban)))
+        )
+      ) {
+        return true;
+      }
+    }
+
+    const aIban = (acc.iban || '').replace(/\s+/g, '').toUpperCase();
+    if (
+      aIban.length >= 10 &&
+      (creditorIban === aIban ||
+        debtorIban === aIban ||
+        combined.toUpperCase().replace(/\s+/g, '').includes(aIban))
+    ) {
       return true;
+    }
+
+    for (const label of [acc.custom_name, acc.product, acc.name]) {
+      const cleanLabel = (label || '').trim().toLowerCase();
+      if (
+        cleanLabel.length >= 4 &&
+        cleanLabel !== 'konto' &&
+        cleanLabel !== 'bank' &&
+        combined.includes(cleanLabel)
+      ) {
+        return true;
+      }
     }
   }
 
   return false;
+}
+
+/**
+ * Identifierar både enskilda och parvisa interna överföringar (utflöde på Konto A + inflöde på Konto B
+ * med samma belopp inom <= 3 dagar) direkt i råa banktransaktioner.
+ */
+export function findRawBankInternalTransferIds(
+  transactions: BankTransactionItem[],
+  userAccounts: BankAccount[] = []
+): Set<string> {
+  const internalIds = new Set<string>();
+  if (!Array.isArray(transactions) || transactions.length === 0) {
+    return internalIds;
+  }
+
+  for (const tx of transactions) {
+    if (!tx || !tx.id) continue;
+    if (
+      tx.reconciliation_status === 'internal_transfer' ||
+      isInternalTransferOrMicroSavings(tx, userAccounts)
+    ) {
+      internalIds.add(tx.id);
+    }
+  }
+
+  const activeTxs = transactions.filter((tx) => {
+    if (!tx || !tx.id) return false;
+    if (tx.booking_status === 'CNCL' || tx.booking_status === 'RJCT') return false;
+    if (
+      tx.reconciliation_status === 'reserved_replaced' ||
+      tx.replaced_by_bank_tx_id ||
+      tx.reconciliation_status === 'excluded'
+    ) {
+      return false;
+    }
+    const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    if (
+      text.includes('swish') ||
+      /(467\d{8}|07\d{8}|123\d{7})/.test(text.replace(/[\s-]/g, ''))
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  const outflows = activeTxs.filter((t) => getNormalizedBankTxAmount(t) < 0);
+  const inflows = activeTxs.filter((t) => {
+    const amt = getNormalizedBankTxAmount(t);
+    if (amt <= 0) return false;
+    const text = `${t.description || ''} ${t.counterparty_name || ''}`.toLowerCase();
+    if (
+      text.includes('lön') ||
+      text.includes('lon ') ||
+      text.includes('salary') ||
+      text.includes('löneutbetalning') ||
+      text.includes('csn') ||
+      text.includes('försäkringskassan') ||
+      text.includes('barnbidrag') ||
+      text.includes('pension') ||
+      text.includes('a-kassa') ||
+      text.includes('skatteverket') ||
+      text.includes('återköp') ||
+      text.includes('retur') ||
+      text.includes('refund') ||
+      text.includes('kreditering') ||
+      text.includes('återbetalning')
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  const consumedInflowIds = new Set<string>();
+
+  for (const outTx of outflows) {
+    const outAmt = Math.round(Math.abs(getNormalizedBankTxAmount(outTx)));
+    if (outAmt <= 0) continue;
+    const outDate = outTx.booking_date || outTx.transaction_date || outTx.value_date || '';
+    const outMs = Date.parse(`${outDate}T12:00:00`);
+
+    let bestIn: BankTransactionItem | null = null;
+    let bestScore = -1;
+
+    for (const inTx of inflows) {
+      if (consumedInflowIds.has(inTx.id)) continue;
+      if (inTx.id === outTx.id) continue;
+
+      const inAmt = Math.round(Math.abs(getNormalizedBankTxAmount(inTx)));
+      if (inAmt !== outAmt) continue;
+
+      const inDate = inTx.booking_date || inTx.transaction_date || inTx.value_date || '';
+      const inMs = Date.parse(`${inDate}T12:00:00`);
+      const dayDiff =
+        Number.isFinite(outMs) && Number.isFinite(inMs)
+          ? Math.abs(outMs - inMs) / (1000 * 60 * 60 * 24)
+          : outDate === inDate
+          ? 0
+          : 999;
+
+      if (dayDiff > 3) continue;
+
+      const diffAcc =
+        Boolean(outTx.bank_account_id && inTx.bank_account_id) &&
+        outTx.bank_account_id !== inTx.bank_account_id;
+      const oneFlagged = internalIds.has(outTx.id) || internalIds.has(inTx.id);
+      const neitherCard =
+        !outTx.raw_json?.card_transaction && !inTx.raw_json?.card_transaction;
+
+      if (diffAcc || oneFlagged || neitherCard) {
+        const score = (diffAcc ? 100 : 0) + (oneFlagged ? 50 : 0) - dayDiff * 10;
+        if (score > bestScore) {
+          bestScore = score;
+          bestIn = inTx;
+        }
+      }
+    }
+
+    if (bestIn) {
+      consumedInflowIds.add(bestIn.id);
+      internalIds.add(outTx.id);
+      internalIds.add(bestIn.id);
+    }
+  }
+
+  return internalIds;
 }
 
 // ---------------------------------------------------------------------------
@@ -938,6 +1169,14 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
   let cleaned = String(rawText || '').trim();
   if (!cleaned) return 'Banktransaktion';
 
+  const origLower = cleaned.toLowerCase();
+  const isExplicitTransferText =
+    origLower.includes('egen överföring') ||
+    origLower.includes('egen overforing') ||
+    origLower.includes('intern överföring') ||
+    origLower.includes('intern overforing') ||
+    /^(överföring|overforing|överf\.?|overf\.?)\b/i.test(origLower);
+
   // 1. Rensa bort tekniska prefix och inledande BG/PG/referensnummer från banker och kortterminaler
   cleaned = cleaned
     .replace(/^(AUTOGIRO|BG|PG|BANKGIRO|PLUSGIRO|KORTKÖP|KORTKOP|BETALNING|RESERVATION|KÖP|INBETALNING|UTBETALNING|ÖVERFÖRING|OVERFORING)\s*[:#-]?\s*(\d[\d\s-]{2,}\s+)?/i, '')
@@ -952,7 +1191,9 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
     .replace(/\s+\d{3,}\s*$/, '') // T.ex. " 1421", " 0124" endast allra sist på raden
     .trim();
 
-  if (!cleaned || /^[\d\s*-]+$/.test(cleaned)) return 'Banktransaktion';
+  if (!cleaned || /^[\d\s*-]+$/.test(cleaned)) {
+    return isExplicitTransferText ? 'Överföring' : 'Banktransaktion';
+  }
 
   const lower = cleaned.toLowerCase().trim();
 
@@ -1290,12 +1531,7 @@ function runCoreBankDetection(
     return dB.localeCompare(dA);
   });
 
-  const internalTransferIds = new Set<string>();
-  for (const tx of sorted) {
-    if (isInternalTransferOrMicroSavings(tx, userAccounts)) {
-      internalTransferIds.add(tx.id);
-    }
-  }
+  const internalTransferIds = findRawBankInternalTransferIds(sorted, userAccounts);
 
   const outflows = sorted.filter(
     (t) =>
@@ -1834,7 +2070,8 @@ function runCoreBankDetection(
 export function analyzeBankTransactionsForOnboarding(
   transactions: BankTransactionItem[],
   currentPayday = 25,
-  paydayBeforeWeekend = true
+  paydayBeforeWeekend = true,
+  userAccounts: BankAccount[] = []
 ): AnalyzedBankOnboardingData {
   if (!Array.isArray(transactions) || transactions.length === 0) {
     return {
@@ -1846,7 +2083,12 @@ export function analyzeBankTransactionsForOnboarding(
     };
   }
 
-  const core = runCoreBankDetection(transactions, currentPayday, paydayBeforeWeekend);
+  const core = runCoreBankDetection(
+    transactions,
+    currentPayday,
+    paydayBeforeWeekend,
+    userAccounts
+  );
 
   let calculatedSpentSincePayday = 0;
   for (const tx of core.outflows) {

@@ -96,10 +96,10 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
     Boolean(period);
 
   return (
-    <div className="space-y-5 pb-36 sm:pb-40 animate-fade-in">
+    <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
       {/* Period & Dagsbudget Status */}
       {period && (
-        <section className="space-y-2">
+        <section className="space-y-1.5">
           <div className="flex items-center justify-between px-1">
             <h2 className="font-display font-bold text-xs text-[var(--text-muted)]">
               Status för löneperioden
@@ -109,16 +109,16 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             </span>
           </div>
 
-          <div className="p-4 rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Sparkle size={18} weight="fill" />
+          <div className="p-3.5 rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Sparkle size={16} weight="fill" />
               </div>
               <div className="min-w-0">
-                <span className="font-semibold text-sm text-[var(--text-primary)] block truncate">
+                <span className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
                   {formatKr(dagsbudget)} / dag kvar
                 </span>
-                <span className="text-xs text-[var(--text-muted)] block truncate mt-0.5">
+                <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
                   Totalt {formatKr(kvarAttSpendera)} kvar att spendera
                 </span>
               </div>
@@ -129,7 +129,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
       {/* Prishöjningsvakt */}
       {priceIncreasedFixed.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-1.5">
           <div className="flex items-center justify-between px-1">
             <h2 className="font-display font-bold text-xs text-[var(--text-muted)] flex items-center gap-1.5">
               <TrendUp size={13} className="text-amber-500" />
@@ -137,15 +137,15 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             </h2>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {priceIncreasedFixed.map(({ exp, diff, prevAmt, latestAmt }) => (
               <button
                 key={`price-inc-${exp.id}`}
                 type="button"
                 onClick={() => onSelectFixed && onSelectFixed(exp)}
-                className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <ItemLogo
                     name={exp.name}
                     category={exp.category}
@@ -157,7 +157,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                     <span className="font-semibold text-[var(--text-primary)] block truncate">
                       {exp.name}
                     </span>
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium block truncate mt-0.5 tabular-nums">
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium block truncate mt-0.5 tabular-nums">
                       Höjd från {formatKr(prevAmt)} till {formatKr(latestAmt)}
                     </span>
                   </div>
@@ -166,7 +166,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   <span className="font-display font-bold text-amber-600 dark:text-amber-400 tabular-nums block">
                     +{formatKr(diff)}/mån
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                  <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                     Den {exp.dueDay}:e
                   </span>
                 </div>
@@ -178,7 +178,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
       {/* Kommande obetalda fasta utgifter */}
       {upcomingUnpaidFixed.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-1.5">
           <div className="flex items-center justify-between px-1">
             <h2 className="font-display font-bold text-xs text-[var(--text-muted)] flex items-center gap-1.5">
               <CalendarBlank size={13} />
@@ -189,15 +189,15 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {upcomingUnpaidFixed.map(({ exp }) => (
               <button
                 key={`unpaid-${exp.id}`}
                 type="button"
                 onClick={() => onSelectFixed && onSelectFixed(exp)}
-                className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <ItemLogo
                     name={exp.name}
                     category={exp.category}
@@ -209,8 +209,8 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                     <span className="font-semibold text-[var(--text-primary)] block truncate">
                       {exp.name}
                     </span>
-                    <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
-                      <CategoryIcon category={exp.category || 'Räkningar'} size={12} />
+                    <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
+                      <CategoryIcon category={exp.category || 'Räkningar'} size={11} />
                       <span className="truncate">{exp.category || 'Räkningar'}</span>
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   <span className="font-display font-bold text-[var(--text-primary)] tabular-nums block">
                     -{formatKr(exp.amount)}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                  <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                     Den {exp.dueDay}:e
                   </span>
                 </div>
@@ -231,7 +231,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
       {/* Paket på väg */}
       {waitingPackages.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-1.5">
           <div className="flex items-center justify-between px-1">
             <h2 className="font-display font-bold text-xs text-[var(--text-muted)] flex items-center gap-1.5">
               <Package size={13} className="text-amber-500" weight="fill" />
@@ -239,15 +239,15 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             </h2>
           </div>
 
-          <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-4 py-1 sm:px-5 sm:py-1.5 divide-y divide-[var(--border-subtle)]">
+          <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-3.5 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)]">
             {waitingPackages.map((tx) => (
               <button
                 key={`pkg-${tx.id}`}
                 type="button"
                 onClick={() => onSelectTransaction && onSelectTransaction(tx)}
-                className="w-full py-3 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <ItemLogo
                     name={tx.title}
                     category={tx.category}
@@ -258,10 +258,10 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   <div className="min-w-0 flex-1">
                     <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
                       <span className="truncate">{tx.title}</span>
-                      <Package size={13} weight="fill" className="text-amber-500 shrink-0" />
+                      <Package size={12} weight="fill" className="text-amber-500 shrink-0" />
                     </span>
-                    <span className="text-xs text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                      <CategoryIcon category={tx.category} size={12} />
+                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
+                      <CategoryIcon category={tx.category} size={11} />
                       <span className="truncate">{tx.category}</span>
                     </span>
                   </div>
@@ -270,7 +270,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   <span className="font-display font-bold text-[var(--text-primary)] tabular-nums block">
                     -{formatKr(tx.amount)}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                  <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                     {getTransactionTime(tx)}
                   </span>
                 </div>
@@ -282,7 +282,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
       {!hasAnyNotifications && (
         <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
-          <Bell size={22} className="text-[var(--text-muted)] mx-auto mb-2" />
+          <Bell size={20} className="text-[var(--text-muted)] mx-auto mb-2" />
           <p className="text-xs font-semibold text-[var(--text-primary)]">
             Inga nya notiser
           </p>

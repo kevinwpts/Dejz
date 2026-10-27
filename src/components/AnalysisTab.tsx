@@ -25,7 +25,10 @@ import { ItemLogo } from './ItemLogo';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import { isTransactionManuallyExcluded } from '../utils/appCache';
 import { checkIsRecurringTransaction } from '../utils/recurring';
-import { isInternalTransferTransaction } from '../utils/transferDetection';
+import {
+  findInternalTransferIds,
+  isInternalTransferTransaction,
+} from '../utils/transferDetection';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
 
 interface AnalysisTabProps {
@@ -41,6 +44,7 @@ interface AnalysisTabProps {
   excludeInternalTransfers?: boolean;
   bankAccounts?: any[];
   userEmail?: string | null;
+  userName?: string | null;
   onSelectTransaction?: (tx: TransactionItem) => void;
   onSelectFixed?: (exp: FixedExpenseItem) => void;
   onSelectIncome?: (inc: IncomeItem) => void;
@@ -55,6 +59,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   excludeInternalTransfers = true,
   bankAccounts = [],
   userEmail = null,
+  userName = null,
   onSelectTransaction,
   onSelectFixed,
   onSelectIncome,
@@ -107,6 +112,11 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     return calculateCurrentPeriod(refDate, targetPayday, weekendHandling);
   }, [periodOffset, targetPayday, weekendHandling]);
 
+  const internalTransferIds = useMemo(() => {
+    if (!excludeInternalTransfers) return new Set<string>();
+    return findInternalTransferIds(transactions, bankAccounts, userEmail, userName);
+  }, [transactions, excludeInternalTransfers, bankAccounts, userEmail, userName]);
+
   // Filter transactions for computedPeriod
   const periodTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions);
@@ -115,13 +125,22 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       if (isTransactionManuallyExcluded(t.id)) return false;
       if (
         excludeInternalTransfers &&
-        isInternalTransferTransaction(t, bankAccounts, userEmail)
+        (internalTransferIds.has(t.id) ||
+          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
       ) {
         return false;
       }
       return isDateInPeriod(t.date, computedPeriod);
     });
-  }, [transactions, computedPeriod, excludeInternalTransfers, bankAccounts, userEmail]);
+  }, [
+    transactions,
+    computedPeriod,
+    excludeInternalTransfers,
+    internalTransferIds,
+    bankAccounts,
+    userEmail,
+    userName,
+  ]);
 
   const periodIncomesList = useMemo(() => {
     return incomes.map((inc) => ({
@@ -360,7 +379,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       {/* Sektion 1: Översikt (Ren 3-kolumns Bento utan överflödig text) */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
+          <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
             Översikt
           </h2>
           <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
@@ -415,7 +434,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       {/* Sektion 1.5: Kategorifördelning i cirkel (% per kategori) */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
+          <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
             Fördelning
           </h2>
           {activeSlice && (
@@ -432,7 +451,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         {expenseChartSlices.length > 0 ? (
           <div className="flex items-center justify-center py-1">
             {/* Interaktiv Cirkel / Donut */}
-            <div className="relative w-48 h-48 flex items-center justify-center">
+            <div className="relative w-44 h-44 flex items-center justify-center">
               <svg
                 viewBox="0 0 180 180"
                 className="w-full h-full -rotate-90 overflow-visible"
@@ -494,7 +513,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <span className="text-[11px] font-semibold text-[var(--text-muted)] truncate max-w-[110px]">
                       {activeSlice.category}
                     </span>
-                    <span className="font-display font-extrabold text-lg text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                    <span className="font-display font-extrabold text-base text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                       {activeSlice.percentage}%
                     </span>
                     <span className="text-[11px] font-semibold text-[var(--text-secondary)] tabular-nums mt-0.5">
@@ -506,7 +525,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <span className="text-[11px] font-medium text-[var(--text-muted)]">
                       Utgifter
                     </span>
-                    <span className="font-display font-extrabold text-sm sm:text-base text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                    <span className="font-display font-extrabold text-sm text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                       {formatKr(totalSpent)}
                     </span>
                     <span className="text-[10px] font-semibold text-[var(--text-muted)] tabular-nums mt-0.5">
@@ -529,7 +548,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       {/* Sektion 2: Kategorier (Platt lista utan modul-i-modul) */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-display font-bold text-sm text-[var(--text-primary)]">
+          <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
             Kategorier
           </h2>
         </div>
@@ -538,17 +557,11 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           <div className="divide-y divide-[var(--border-subtle)]">
             {categoryBreakdown.map((item) => {
               const isExpanded = Boolean(expandedCategories[item.category]);
-              const pct =
-                !item.isIncomeCategory && totalSpent > 0
-                  ? Math.round((item.amount / totalSpent) * 100)
-                  : item.isIncomeCategory && periodIncomeTotal > 0
-                  ? Math.round((item.amount / periodIncomeTotal) * 100)
-                  : 0;
 
               return (
                 <div
                   key={item.category}
-                  className="py-3.5 first:pt-1 last:pb-0"
+                  className="py-2.5 first:pt-1 last:pb-0"
                 >
                   {/* Category Header Button */}
                   <button
@@ -557,16 +570,16 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     aria-expanded={isExpanded}
                     className="w-full text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer group"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                          <CategoryIcon category={item.category} size={17} />
+                    <div className="flex items-center justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                          <CategoryIcon category={item.category} size={16} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="font-semibold text-sm text-[var(--text-primary)] block truncate">
+                          <span className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
                             {item.category}
                           </span>
-                          <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
+                          <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
                             {item.items.length} st
                           </span>
                         </div>
@@ -574,7 +587,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
                       <div className="flex items-center gap-2 shrink-0">
                         <span
-                          className={`font-display font-bold text-sm tabular-nums ${
+                          className={`font-display font-bold text-xs sm:text-[13px] tabular-nums ${
                             item.isIncomeCategory
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : 'text-[var(--text-primary)]'
@@ -587,7 +600,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                             : formatKr(0)}
                         </span>
                         <CaretDown
-                          size={13}
+                          size={12}
                           weight="bold"
                           className={`text-[var(--text-muted)] transition-transform duration-200 ${
                             isExpanded ? 'rotate-180 text-[var(--text-primary)]' : ''
@@ -600,7 +613,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   {/* Smooth Accordion Dropdown Content */}
                   <div
                     className={`grid transition-all duration-200 ease-out ${
-                      isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2.5' : 'grid-rows-[0fr] opacity-0 mt-0'
+                      isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'
                     }`}
                   >
                     <div className="overflow-hidden">
@@ -623,7 +636,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                   onSelectFixed(subItem);
                                 }
                               }}
-                              className="w-full py-2.5 first:pt-2 last:pb-0.5 flex items-center justify-between gap-3 text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                              className="w-full py-2 first:pt-1.5 last:pb-0.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
                             >
                               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 <ItemLogo
@@ -634,7 +647,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                   isRecurring={isFixedItem}
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
                                     <span className="truncate">{itemName}</span>
                                     {subItem.isHearted && (
                                       <Heart
@@ -671,7 +684,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                               </div>
 
                               <span
-                                className={`font-display font-bold text-xs sm:text-sm tabular-nums shrink-0 ${
+                                className={`font-display font-bold tabular-nums shrink-0 ${
                                   isIncome
                                     ? 'text-emerald-600 dark:text-emerald-400'
                                     : 'text-[var(--text-primary)]'

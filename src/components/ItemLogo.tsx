@@ -58,15 +58,15 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-9 h-9 rounded-xl',
-    md: 'w-11 h-11 rounded-2xl',
-    lg: 'w-14 h-14 rounded-2xl',
+    sm: 'w-8 h-8 rounded-xl',
+    md: 'w-9 h-9 rounded-xl',
+    lg: 'w-12 h-12 rounded-2xl',
   }[size];
 
   const iconSize = {
-    sm: 18,
-    md: 22,
-    lg: 28,
+    sm: 16,
+    md: 18,
+    lg: 24,
   }[size];
 
   const renderCategoryIcon = () => {
@@ -117,14 +117,14 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
   const badgeSizeClasses = {
     sm: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
-    md: 'w-4 h-4 -bottom-1 -right-1',
-    lg: 'w-4.5 h-4.5 -bottom-1 -right-1',
+    md: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
+    lg: 'w-4 h-4 -bottom-1 -right-1',
   }[size];
 
   const badgeIconSize = {
     sm: 8,
-    md: 9,
-    lg: 11,
+    md: 8,
+    lg: 10,
   }[size];
 
   const renderInnerContent = () => {
