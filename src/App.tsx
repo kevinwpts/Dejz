@@ -1509,15 +1509,39 @@ export const App: React.FC = () => {
   );
 
   // Landningssida & Onboarding
+  const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(() => {
+    try {
+      if (localStorage.getItem('dejz_onboarding_v2_done') === 'true') {
+        return false;
+      }
+      if (localStorage.getItem('dejz_onboarding_in_progress') === 'true') {
+        return true;
+      }
+      if (initialCache?.userId && localStorage.getItem('dejz_onboarding_v2_done') !== 'true') {
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
+
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     try {
-      if (initialCache?.userId) return false;
-      return localStorage.getItem('dejz_onboarding_v2_done') !== 'true';
+      if (localStorage.getItem('dejz_onboarding_in_progress') === 'true') {
+        return false;
+      }
+      if (localStorage.getItem('dejz_onboarding_v2_done') === 'true') {
+        return false;
+      }
+      if (initialCache?.userId) {
+        return false;
+      }
+      return true;
     } catch {
       return true;
     }
   });
-  const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(false);
 
   const userIdRef = useRef<string | null>(userId);
   const isDeletingAccountRef = useRef<boolean>(false);
@@ -3449,6 +3473,14 @@ export const App: React.FC = () => {
         });
       }
 
+      try {
+        localStorage.setItem('dejz_onboarding_v2_done', 'true');
+        localStorage.removeItem('dejz_onboarding_in_progress');
+        localStorage.removeItem('dejz_onboarding_step');
+      } catch {
+        // ignore
+      }
+
       setSettingsSubView('main');
       setActiveTab('home');
       setCallbackStatusMsg('Kontot har nollställts och du kan börja om på nytt.');
@@ -3474,6 +3506,14 @@ export const App: React.FC = () => {
           if (mode === 'register') {
             cancelPendingPreferenceSync();
             clearAllLocalAppData(true);
+            try {
+              localStorage.setItem('dejz_onboarding_in_progress', 'true');
+              localStorage.setItem('dejz_onboarding_step', '1');
+              localStorage.removeItem('dejz_onboarding_v2_done');
+              localStorage.removeItem('dejz_onboarding_completed');
+            } catch {
+              // ignore
+            }
             incomesRef.current = [];
             fixedExpensesRef.current = [];
             transactionsRef.current = [];
@@ -3502,6 +3542,8 @@ export const App: React.FC = () => {
             try {
               localStorage.setItem('dejz_onboarding_v2_done', 'true');
               localStorage.setItem('dejz_onboarding_completed', 'true');
+              localStorage.removeItem('dejz_onboarding_in_progress');
+              localStorage.removeItem('dejz_onboarding_step');
             } catch {
               // ignore
             }
@@ -3518,7 +3560,15 @@ export const App: React.FC = () => {
         <OnboardingFlow
           initialName={userName || ''}
           targetPayday={targetPayday}
+          initialWeekendHandling={weekendHandling}
+          onUpdateWeekendHandling={handleUpdateWeekendHandling}
           connections={connections}
+          bankAccounts={bankAccounts}
+          onBankStateUpdated={(conns, accs) => {
+            setConnections(conns);
+            setBankAccounts(accs);
+            refreshBankStatus();
+          }}
           incomes={incomes}
           fixedExpenses={fixedExpenses}
           onSaveName={handleUpdateName}
@@ -3534,6 +3584,12 @@ export const App: React.FC = () => {
           onUpdateFixed={handleUpdateFixed}
           onDeleteFixed={handleDeleteFixed}
           onBackToLanding={() => {
+            try {
+              localStorage.removeItem('dejz_onboarding_in_progress');
+              localStorage.removeItem('dejz_onboarding_step');
+            } catch {
+              // ignore
+            }
             setIsOnboardingActive(false);
             setShowLanding(true);
           }}
@@ -3541,6 +3597,8 @@ export const App: React.FC = () => {
             try {
               localStorage.setItem('dejz_onboarding_v2_done', 'true');
               localStorage.setItem('dejz_onboarding_completed', 'true');
+              localStorage.removeItem('dejz_onboarding_in_progress');
+              localStorage.removeItem('dejz_onboarding_step');
             } catch {
               // ignore
             }
