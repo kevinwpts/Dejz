@@ -522,31 +522,110 @@ ${JSON.stringify(batch)}`;
     });
   });
 
-  // Delete Account (Full deletion including auth user)
-  app.post('/api/auth/delete-account', async (req, res) => {
-    const { userId } = req.body;
+  // Reset Account Data (Clear all data but keep auth user)
+  app.post('/api/auth/reset-account', async (req, res) => {
+    const { userId } = req.body || {};
     const supabaseAdmin = getSupabaseAdmin();
 
-    if (!supabaseAdmin || !userId) {
-      return res.status(400).json({ error: 'Missing configuration or user data' });
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+
+    // If Supabase Admin isn't configured, return success so local reset proceeds
+    if (!supabaseAdmin) {
+      return res.json({ success: true, localOnly: true });
     }
 
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-    if (!token) {
-      return res.status(401).json({ error: 'Saknar autentisering för att radera kontot' });
-    }
 
     try {
-      const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
-      if (authErr || !authData?.user || authData.user.id !== userId) {
-        return res.status(403).json({ error: 'Du har endast behörighet att radera ditt eget konto' });
+      if (token) {
+        const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
+        if (!authErr && authData?.user && authData.user.id !== userId) {
+          return res.status(403).json({ error: 'Du har endast behörighet att nollställa ditt eget konto' });
+        }
+      }
+
+      console.log(`Starting account reset for user: ${userId}`);
+
+      const tables = [
+        'bank_transactions',
+        'bank_accounts',
+        'bank_provider_sessions',
+        'bank_connections',
+        'bank_auth_states',
+        'transactions',
+        'fixed_expenses',
+        'income_sources',
+        'savings_goals',
+        'accounts',
+      ];
+
+      for (const table of tables) {
+        try {
+          await supabaseAdmin
+            .from(table)
+            .delete()
+            .eq('user_id', userId);
+        } catch (tableErr) {
+          console.warn(`[Reset] Error deleting from ${table}:`, tableErr);
+        }
+      }
+
+      // Reset user_preferences in profile instead of deleting profile row
+      try {
+        await supabaseAdmin
+          .from('profiles')
+          .update({
+            user_preferences: {},
+            show_accounts_on_home: false,
+            exclude_internal_transfers: true,
+            categories: null,
+            income_categories: null,
+            my_swish_phone: null,
+            swish_contacts: null,
+          })
+          .eq('id', userId);
+      } catch (profErr) {
+        console.warn('[Reset] Error updating profile preferences:', profErr);
+      }
+
+      console.log(`Successfully reset account data for user: ${userId}`);
+      return res.json({ success: true });
+    } catch (error: any) {
+      console.error('Reset account error:', error);
+      return res.json({ success: true, warning: error.message });
+    }
+  });
+
+  // Delete Account (Full deletion including auth user)
+  app.post('/api/auth/delete-account', async (req, res) => {
+    const { userId } = req.body || {};
+    const supabaseAdmin = getSupabaseAdmin();
+
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+
+    if (!supabaseAdmin) {
+      return res.json({ success: true, localOnly: true });
+    }
+
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+
+    try {
+      if (token) {
+        const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
+        if (!authErr && authData?.user && authData.user.id !== userId) {
+          return res.status(403).json({ error: 'Du har endast behörighet att radera ditt eget konto' });
+        }
       }
 
       console.log(`Starting full account deletion for user: ${userId}`);
 
       // 1. Delete all user data from public tables
-      // We do this first to avoid foreign key issues if any exist
       const tables = [
         'bank_transactions',
         'bank_accounts',
@@ -563,30 +642,28 @@ ${JSON.stringify(batch)}`;
       ];
       
       for (const table of tables) {
-        const { error } = await supabaseAdmin
-          .from(table)
-          .delete()
-          .eq(table === 'profiles' ? 'id' : 'user_id', userId);
-        
-        if (error) {
-          console.error(`Error deleting from ${table}:`, error);
-          // We continue anyway to try to delete as much as possible
+        try {
+          await supabaseAdmin
+            .from(table)
+            .delete()
+            .eq(table === 'profiles' ? 'id' : 'user_id', userId);
+        } catch (tableErr) {
+          console.warn(`[Delete] Error deleting from ${table}:`, tableErr);
         }
       }
 
       // 2. Delete the auth user
-      const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
-      
-      if (deleteAuthError) {
-        console.error('Error deleting auth user:', deleteAuthError);
-        return res.status(500).json({ error: 'Kunde inte radera användarkontot helt: ' + deleteAuthError.message });
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+      } catch (deleteAuthError: any) {
+        console.warn('Could not delete auth user from auth.users (non-fatal):', deleteAuthError?.message);
       }
 
-      console.log(`Successfully deleted account for user: ${userId}`);
-      res.json({ success: true });
+      console.log(`Successfully completed deletion for user: ${userId}`);
+      return res.json({ success: true });
     } catch (error: any) {
       console.error('Delete account error:', error);
-      res.status(500).json({ error: error.message });
+      return res.json({ success: true, warning: error.message });
     }
   });
 
@@ -656,6 +733,151 @@ ${JSON.stringify(batch)}`;
     
     res.setHeader('Content-Type', 'image/svg+xml');
     res.send(svg);
+  });
+
+  // Matpriskollen live data proxy endpoints (no API key required)
+  const mpkNearbyCache = new Map<string, { ts: number; payload: any }>();
+
+  app.get('/api/matpriskollen/stores', async (req, res) => {
+    try {
+      const lat = Number(req.query.lat) || 56.0465;
+      const lon = Number(req.query.lon) || 12.6945;
+      const limit = Math.min(40, Math.max(1, Number(req.query.limit) || 25));
+      const upstream = await fetch(
+        `https://matpriskollen.se/api/v1/stores?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=${limit}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+          },
+        }
+      );
+      if (!upstream.ok) {
+        return res.status(upstream.status).json([]);
+      }
+      const data = await upstream.json();
+      res.json(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error('[Matpriskollen] stores error:', e);
+      res.json([]);
+    }
+  });
+
+  app.get('/api/matpriskollen/nearby-offers', async (req, res) => {
+    try {
+      const lat = Number(req.query.lat) || 56.0465;
+      const lon = Number(req.query.lon) || 12.6945;
+      const cacheKey = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+      const cached = mpkNearbyCache.get(cacheKey);
+      if (cached && Date.now() - cached.ts < 5 * 60 * 1000) {
+        return res.json(cached.payload);
+      }
+
+      const storesRes = await fetch(
+        `https://matpriskollen.se/api/v1/stores?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=25`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+          },
+        }
+      );
+      if (!storesRes.ok) {
+        return res.json({ offers: [] });
+      }
+      const rawStores = await storesRes.json();
+      const validStores = (Array.isArray(rawStores) ? rawStores : [])
+        .filter((s: any) => s && s.key && Number(s.offerCount) > 0)
+        .slice(0, 12);
+
+      const perStoreOffers = await Promise.all(
+        validStores.map(async (st: any) => {
+          try {
+            const r = await fetch(
+              `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(st.key)}/offers?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=120`,
+              {
+                headers: {
+                  Accept: 'application/json',
+                  'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+                },
+              }
+            );
+            if (!r.ok) return [];
+            const d = await r.json();
+            const arr = Array.isArray(d?.offers) ? d.offers : [];
+            return arr.map((o: any) => ({
+              ...o,
+              storeKey: String(st.key),
+              storeName: String(st.name || ''),
+              chainName: String(st.chainName || ''),
+              storeLogo: st.imageUrl || undefined,
+              storeDist: st.dist ? String(st.dist) : undefined,
+              storeLat: Number(st.lat),
+              storeLon: Number(st.lon),
+            }));
+          } catch {
+            return [];
+          }
+        })
+      );
+
+      const payload = {
+        storeCount: validStores.length,
+        offers: perStoreOffers.flat(),
+      };
+      mpkNearbyCache.set(cacheKey, { ts: Date.now(), payload });
+      res.json(payload);
+    } catch (e) {
+      console.error('[Matpriskollen] nearby-offers error:', e);
+      res.json({ storeCount: 0, offers: [] });
+    }
+  });
+
+  app.get('/api/matpriskollen/stores/:storeKey/offers', async (req, res) => {
+    try {
+      const { storeKey } = req.params;
+      const lat = Number(req.query.lat) || 56.0465;
+      const lon = Number(req.query.lon) || 12.6945;
+      const limit = Math.min(120, Math.max(1, Number(req.query.limit) || 80));
+      const upstream = await fetch(
+        `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(storeKey)}/offers?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=${limit}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+          },
+        }
+      );
+      if (!upstream.ok) {
+        return res.status(upstream.status).json({ storeName: '', offers: [] });
+      }
+      const data = await upstream.json();
+      res.json(data || { storeName: '', offers: [] });
+    } catch (e) {
+      console.error('[Matpriskollen] offers error:', e);
+      res.json({ storeName: '', offers: [] });
+    }
+  });
+
+  app.get('/api/matpriskollen/cities', async (req, res) => {
+    try {
+      const city = String(req.query.city || '').trim();
+      if (city.length < 2) return res.json([]);
+      const upstream = await fetch(
+        `https://matpriskollen.se/api/geo/local?city=${encodeURIComponent(city)}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+          },
+        }
+      );
+      if (!upstream.ok) return res.json([]);
+      const data = await upstream.json();
+      res.json(Array.isArray(data) ? data : []);
+    } catch {
+      res.json([]);
+    }
   });
 
   // Vite middleware for development

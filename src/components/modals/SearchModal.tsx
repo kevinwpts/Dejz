@@ -15,6 +15,7 @@ import {
   getTransactionTime,
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
+import { CategoryIcon } from '../CategoryIcon';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import {
@@ -290,23 +291,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               )}
             </div>
           </div>
-
-          {/* Interactive Quick Filter Bar */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-            {filterButtons.map((btn) => {
-              const active = quickFilter === btn.id;
-              return (
-                <button
-                  key={btn.id}
-                  type="button"
-                  onClick={() => setQuickFilter(btn.id)}
-                  className={active ? 'ui-chip-active' : 'ui-chip'}
-                >
-                  {btn.label}
-                </button>
-              );
-            })}
-          </div>
         </div>
       </header>
 
@@ -357,8 +341,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                             <span className="ui-row-title">
                               {inc.name}
                             </span>
-                            <span className="ui-row-subtitle">
-                              {inc.category || 'Lön'}
+                            <span className="ui-row-subtitle flex items-center gap-1">
+                              <CategoryIcon
+                                category={inc.category || 'Lön'}
+                                size={11}
+                                className="shrink-0 text-[var(--text-secondary)]"
+                              />
+                              <span className="truncate">{inc.category || 'Lön'}</span>
                             </span>
                           </div>
                         </div>
@@ -366,20 +355,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           <span className="ui-row-amount-income">
                             +{formatKr(inc.amount)}
                           </span>
-                          <span
-                            className={`text-xs tabular-nums block mt-0.5 ${
-                              inc.isPaid
-                                ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                                : inc.isAwaitingBank
-                                ? 'text-amber-600 dark:text-amber-400 font-medium'
-                                : 'text-[var(--text-muted)]'
-                            }`}
-                          >
-                            {inc.isPaid
-                              ? 'Mottagen'
-                              : inc.isAwaitingBank
-                              ? 'Inväntar insättning'
-                              : `Den ${inc.payday}:e`}
+                          <span className="ui-row-meta">
+                            Den {inc.payday}:e
                           </span>
                         </div>
                       </button>
@@ -423,8 +400,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                             <span className="ui-row-title">
                               {exp.name}
                             </span>
-                            <span className="ui-row-subtitle">
-                              {exp.category || 'Räkningar'}
+                            <span className="ui-row-subtitle flex items-center gap-1">
+                              <CategoryIcon
+                                category={exp.category || 'Räkningar'}
+                                size={11}
+                                className="shrink-0 text-[var(--text-secondary)]"
+                              />
+                              <span className="truncate">{exp.category || 'Räkningar'}</span>
                             </span>
                           </div>
                         </div>
@@ -433,20 +415,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           <span className="ui-row-amount">
                             -{formatKr(exp.amount)}
                           </span>
-                          <span
-                            className={`text-xs tabular-nums block mt-0.5 ${
-                              exp.isPaid
-                                ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                                : exp.isAwaitingBank
-                                ? 'text-amber-600 dark:text-amber-400 font-medium'
-                                : 'text-[var(--text-muted)]'
-                            }`}
-                          >
-                            {exp.isPaid
-                              ? 'Betald'
-                              : exp.isAwaitingBank
-                              ? 'Inväntar dragning'
-                              : `Den ${exp.dueDay}:e`}
+                          <span className="ui-row-meta">
+                            Den {exp.dueDay}:e
                           </span>
                         </div>
                       </button>
@@ -457,15 +427,15 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
               {/* Transactions - Grupperade per datum */}
               {groupedTransactionsByDate.length > 0 && (
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {groupedTransactionsByDate.map((group) => (
-                    <section key={group.dateKey} className="ui-section">
-                      <div className="ui-section-header">
-                        <span className="ui-section-title">
+                    <section key={group.dateKey} className="ui-list-card">
+                      <div className="pt-3 pb-2 flex items-center justify-between gap-2 border-b border-[var(--border-subtle)]">
+                        <span className="text-xs font-semibold text-[var(--text-secondary)]">
                           {group.label}
                         </span>
                         <span
-                          className={`text-xs font-semibold tabular-nums ${
+                          className={`text-xs font-display font-medium tabular-nums ${
                             group.net > 0
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : 'text-[var(--text-muted)]'
@@ -479,103 +449,104 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                         </span>
                       </div>
 
-                      <div className="ui-list-card">
-                        {group.items.map((tx) => {
-                          const isIncome = tx.type === 'income';
-                          const recurringStatus = checkIsRecurringTransaction(
-                            tx,
-                            fixedExpenses,
-                            incomes
-                          );
-                          const isSplit =
-                            tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
-                          const realTime = getTransactionTime(tx);
-                          const statusSub =
-                            realTime ||
-                            (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
-                              ? 'Reserverat'
-                              : '');
+                      {group.items.map((tx) => {
+                        const isIncome = tx.type === 'income';
+                        const recurringStatus = checkIsRecurringTransaction(
+                          tx,
+                          fixedExpenses,
+                          incomes
+                        );
+                        const isSplit =
+                          tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
+                        const statusSub =
+                          tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                            ? 'Reserverat'
+                            : getTransactionTime(tx);
 
-                          return (
-                            <button
-                              key={tx.id}
-                              type="button"
-                              onClick={() => {
-                                onClose();
-                                onSelectTransaction(tx);
-                              }}
-                              className="ui-tx-row"
-                            >
-                              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                                <ItemLogo
-                                  name={tx.title}
-                                  category={tx.category}
-                                  logoUrl={tx.logo}
-                                  size="md"
-                                  isRecurring={recurringStatus.isRecurring}
-                                />
-                                <div className="min-w-0 flex-1">
-                                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                    <span className="truncate">{tx.title}</span>
-                                    {tx.isHearted && (
-                                      <Heart
-                                        size={13}
-                                        weight="fill"
-                                        className="text-rose-500 shrink-0"
-                                      />
-                                    )}
-                                    {tx.isWaitingForPackage && (
-                                      <Package
-                                        size={13}
-                                        weight="fill"
-                                        className="text-amber-500 shrink-0"
-                                      />
-                                    )}
-                                    {tx.receiptUrl && (
-                                      <Paperclip
-                                        size={13}
-                                        weight="bold"
-                                        className="text-[var(--text-secondary)] shrink-0"
-                                      />
-                                    )}
-                                    {isSplit && (
-                                      <Users
-                                        size={13}
-                                        weight="fill"
-                                        className="text-emerald-500 shrink-0"
-                                        title="Delad utgift"
-                                      />
-                                    )}
-                                  </span>
-                                  <span className="ui-row-subtitle">
-                                    <span className="truncate">{tx.category}</span>
-                                    {isSplit && tx.originalAmount && (
-                                      <span className="text-[11px] opacity-75 shrink-0">
-                                        · av {formatKr(tx.originalAmount)}
-                                      </span>
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="text-right shrink-0">
-                                <span
-                                  className={
-                                    isIncome ? 'ui-row-amount-income' : 'ui-row-amount'
-                                  }
-                                >
-                                  {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                        return (
+                          <button
+                            key={tx.id}
+                            type="button"
+                            onClick={() => {
+                              onClose();
+                              onSelectTransaction(tx);
+                            }}
+                            className="ui-tx-row"
+                          >
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                              <ItemLogo
+                                name={tx.title}
+                                category={tx.category}
+                                logoUrl={tx.logo}
+                                size="md"
+                                isRecurring={recurringStatus.isRecurring}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                                  <span className="truncate">{tx.title}</span>
+                                  {tx.isHearted && (
+                                    <Heart
+                                      size={13}
+                                      weight="fill"
+                                      className="text-rose-500 shrink-0"
+                                    />
+                                  )}
+                                  {tx.isWaitingForPackage && (
+                                    <Package
+                                      size={13}
+                                      weight="fill"
+                                      className="text-amber-500 shrink-0"
+                                    />
+                                  )}
+                                  {tx.receiptUrl && (
+                                    <Paperclip
+                                      size={13}
+                                      weight="bold"
+                                      className="text-[var(--text-secondary)] shrink-0"
+                                    />
+                                  )}
+                                  {isSplit && (
+                                    <Users
+                                      size={13}
+                                      weight="fill"
+                                      className="text-emerald-500 shrink-0"
+                                      title="Delad utgift"
+                                    />
+                                  )}
                                 </span>
-                                {statusSub ? (
-                                  <span className="ui-row-meta">
-                                    {statusSub}
-                                  </span>
-                                ) : null}
+                                <span className="ui-row-subtitle flex items-center gap-1">
+                                  <CategoryIcon
+                                    category={tx.category}
+                                    size={11}
+                                    className="shrink-0 text-[var(--text-secondary)]"
+                                  />
+                                  <span className="truncate">{tx.category}</span>
+                                  {isSplit && tx.originalAmount && (
+                                    <span className="text-[11px] opacity-75 shrink-0">
+                                      · av {formatKr(tx.originalAmount)}
+                                    </span>
+                                  )}
+                                </span>
                               </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <span
+                                className={
+                                  isIncome ? 'ui-row-amount-income' : 'ui-row-amount'
+                                }
+                              >
+                                {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                              </span>
+                              {statusSub ? (
+                                <span className="ui-row-meta">
+                                  {statusSub}
+                                </span>
+                              ) : null}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </section>
                   ))}
                 </div>

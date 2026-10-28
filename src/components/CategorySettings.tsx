@@ -9,6 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { Category } from '../types';
 import { BottomSheet } from './ui/BottomSheet';
+import { ConfirmDialog } from './ui/ConfirmDialog';
 import {
   DEFAULT_EXPENSE_CATEGORIES,
   DEFAULT_INCOME_CATEGORIES,
@@ -249,7 +250,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           type="button"
           onClick={() => setActiveTab('expense')}
           className={`ui-segmented-tab py-2 ${
-            activeTab === 'expense' ? 'ui-segmented-tab-active font-bold' : ''
+            activeTab === 'expense' ? 'ui-segmented-tab-active' : ''
           }`}
         >
           Utgifter
@@ -258,15 +259,15 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           type="button"
           onClick={() => setActiveTab('income')}
           className={`ui-segmented-tab py-2 ${
-            activeTab === 'income' ? 'ui-segmented-tab-active font-bold' : ''
+            activeTab === 'income' ? 'ui-segmented-tab-active' : ''
           }`}
         >
           Inkomster
         </button>
       </div>
 
-      {/* Clean Divided List of Categories */}
-      <div className="ui-group-card">
+      {/* Spacious Divided List of Categories with Inset Dividers */}
+      <div className="ui-admin-card">
         {currentList.map((cat) => {
           const count = usageCounts[cat.name.toLowerCase().trim()] || 0;
           return (
@@ -274,29 +275,31 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
               key={cat.id}
               type="button"
               onClick={() => openEditSheet(cat)}
-              className="ui-row-btn"
+              className="ui-admin-row"
             >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <CategoryIcon category={cat.name} iconId={cat.icon} size={15} badge={true} />
-                <span className="ui-row-title">
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <CategoryIcon category={cat.name} iconId={cat.icon} size={17} badge={false} />
+                </span>
+                <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
                   {cat.name}
                 </span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {count > 0 && (
-                  <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
-                    {count}
-                  </span>
-                )}
-                <CaretRight size={14} className="text-[var(--text-muted)]" />
+              <div className="ui-admin-right">
+                <span className="ui-admin-value">
+                  {count > 0 ? count : ''}
+                </span>
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
               </div>
             </button>
           );
         })}
       </div>
 
-      {/* Bottom Action Bar: Ny kategori + Återställ */}
-      <div className="space-y-2.5">
+      {/* Bottom Action Bar: Ny kategori + Diskret återställning */}
+      <div className="space-y-2 pt-1">
         <button
           type="button"
           onClick={openNewSheet}
@@ -306,40 +309,26 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           <span>Ny kategori</span>
         </button>
 
-        {showResetConfirm ? (
-          <div className="ui-confirm-neutral">
-            <span className="font-medium text-[var(--text-secondary)]">
-              Återställa standardkategorier?
-            </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowResetConfirm(false)}
-                className="ui-btn-sm"
-              >
-                Avbryt
-              </button>
-              <button
-                type="button"
-                onClick={handleResetToDefaults}
-                className="ui-btn-sm-primary"
-              >
-                Återställ
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() => setShowResetConfirm(true)}
-              className="py-1.5 px-3 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <ArrowCounterClockwise size={13} />
-              <span>Återställ standardkategorier</span>
-            </button>
-          </div>
-        )}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => setShowResetConfirm(true)}
+            className="ui-reset-btn"
+          >
+            <ArrowCounterClockwise size={13} />
+            <span>Återställ standardkategorier</span>
+          </button>
+        </div>
+
+        <ConfirmDialog
+          isOpen={showResetConfirm}
+          title="Återställ standardkategorier?"
+          description="Dina egna kategorier ersätts med standarduppsättningen."
+          confirmLabel="Återställ"
+          variant="primary"
+          onConfirm={handleResetToDefaults}
+          onCancel={() => setShowResetConfirm(false)}
+        />
       </div>
 
       {/* ============================================================== */}
@@ -347,7 +336,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
       {/* ============================================================== */}
       <BottomSheet isOpen={sheetMode !== null} onClose={closeSheet}>
         {/* Top Header */}
-        <div className="ui-sheet-header mb-5">
+        <div className="ui-sheet-header mb-4">
           <span className="ui-sheet-title">
             {sheetMode === 'new' ? 'Ny kategori' : 'Redigera kategori'}
           </span>
@@ -360,43 +349,51 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           </button>
         </div>
 
-        {/* Hero 64x64 Live Preview */}
-        <div className="ui-hero-header">
+        {/* Hero Live Preview */}
+        <div className="ui-hero-header mb-4">
           <div className="ui-hero-icon">
             <CategoryIcon
               category={formName || 'Kategori'}
               iconId={formIcon}
-              size={28}
+              size={26}
               badge={false}
             />
           </div>
-          <h2 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
+          <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] truncate px-4">
             {formName.trim() || 'Namnlös kategori'}
           </h2>
         </div>
 
         <form onSubmit={handleSaveSheet} className="space-y-4">
           <div className="ui-sheet-group">
-            <label className="ui-input-row">
-              <span className="text-[var(--text-muted)] shrink-0">Namn</span>
-              <input
-                type="text"
-                value={formName}
-                disabled={isProtectedOvrigt}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="Ange namn..."
-                required
-                className="ui-inline-input disabled:opacity-60"
-              />
-            </label>
+            {isProtectedOvrigt ? (
+              <div className="ui-locked-row">
+                <span className="ui-info-label">Namn</span>
+                <span className="ui-info-value text-[var(--text-secondary)]">
+                  {formName} (standard)
+                </span>
+              </div>
+            ) : (
+              <label className="ui-input-row">
+                <span className="ui-info-label">Namn</span>
+                <input
+                  type="text"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="Ange namn..."
+                  required
+                  className="ui-inline-input"
+                />
+              </label>
+            )}
           </div>
 
-          {/* Ikonväljare */}
+          {/* Ikonväljare utan dubbelramar */}
           <div className="space-y-1.5">
-            <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            <span className="px-1 text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)] block">
               Ikon
             </span>
-            <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] max-h-52 overflow-y-auto">
+            <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] max-h-56 overflow-y-auto">
               {AVAILABLE_CATEGORY_ICONS.map((item) => {
                 const IconComponent = item.icon;
                 const isSelected = formIcon === item.id;
@@ -405,69 +402,56 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                     key={item.id}
                     type="button"
                     onClick={() => setFormIcon(item.id)}
-                    className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+                    className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                       isSelected
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                        : 'bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[1.03]'
+                        : 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <IconComponent size={17} />
+                    <IconComponent size={18} />
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {showDeleteConfirm ? (
-            <div className="ui-confirm-danger">
-              <span className="font-medium text-rose-700 dark:text-rose-300">
-                {selectedUsageCount > 0
-                  ? `Flytta ${selectedUsageCount} poster till Övrigt?`
-                  : 'Ta bort kategorin?'}
-              </span>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
-                >
-                  Avbryt
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
-                >
-                  Ta bort
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div
-              className={`grid gap-2 ${
-                sheetMode === 'edit' && !isProtectedOvrigt ? 'grid-cols-2' : 'grid-cols-1'
-              }`}
-            >
-              {sheetMode === 'edit' && !isProtectedOvrigt && (
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="ui-btn-danger"
-                >
-                  <Trash size={14} />
-                  <span>Ta bort</span>
-                </button>
-              )}
-
+          <div
+            className={`grid gap-2 ${
+              sheetMode === 'edit' && !isProtectedOvrigt ? 'grid-cols-2' : 'grid-cols-1'
+            }`}
+          >
+            {sheetMode === 'edit' && !isProtectedOvrigt && (
               <button
-                type="submit"
-                className="ui-btn-primary"
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="ui-btn-danger"
               >
-                <Check size={14} weight="bold" />
-                <span>Spara</span>
+                <Trash size={14} />
+                <span>Ta bort</span>
               </button>
-            </div>
-          )}
+            )}
+
+            <button
+              type="submit"
+              className="ui-btn-primary"
+            >
+              <Check size={14} weight="bold" />
+              <span>Spara</span>
+            </button>
+          </div>
+
+          <ConfirmDialog
+            isOpen={showDeleteConfirm}
+            title="Ta bort kategori?"
+            description={
+              selectedUsageCount > 0
+                ? `${selectedUsageCount} poster kommer att flyttas till Övrigt.`
+                : `Vill du ta bort kategorin ${formName}?`
+            }
+            confirmLabel="Ta bort"
+            onConfirm={handleDelete}
+            onCancel={() => setShowDeleteConfirm(false)}
+          />
         </form>
       </BottomSheet>
     </div>

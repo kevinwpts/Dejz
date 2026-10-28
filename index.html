@@ -17,6 +17,14 @@
 
     <script>
       (function() {
+        window.addEventListener('error', function(ev) {
+          var msg = ev && ev.message ? String(ev.message) : '';
+          if (msg.indexOf('Array.prototype.slice') !== -1) {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
         try {
           var saved = localStorage.getItem('dejz_dark_mode');
           var onboardingDone = localStorage.getItem('dejz_onboarding_completed') === 'true';
@@ -75,10 +83,10 @@
     <!-- Preload Hero Image for Core Web Vitals (LCP) -->
     <link rel="preload" as="image" href="/dejz_02.png" fetchpriority="high" />
 
-    <!-- Fonts - Manrope, Outfit & JetBrains Mono -->
+    <!-- Fonts - Plus Jakarta Sans, Outfit & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">

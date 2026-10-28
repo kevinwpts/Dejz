@@ -6,8 +6,8 @@ import {
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
-import { PeriodInfo, getDueDateInPeriod, isDueDayPaidInPeriod, isDateInPeriod } from '../utils/periodEngine';
-import { findMatchingFixedExpense, findMatchingIncome } from '../utils/recurring';
+import { CategoryIcon } from './CategoryIcon';
+import { PeriodInfo } from '../utils/periodEngine';
 
 interface FixedTabProps {
   period: PeriodInfo;
@@ -32,128 +32,22 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   fixedExpenses,
   totalIncome,
   totalFixedExpenses,
-  transactions = [],
-  accounts = [],
   onSelectIncome,
   onSelectFixed,
   onAddIncome,
   onAddFixed,
-  onUpdateFixed,
 }) => {
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
-  const primaryAccountLabel = useMemo(() => {
-    if (!accounts || accounts.length === 0) return undefined;
-    const checking = accounts.find((a) => a.type === 'checking') || accounts[0];
-    return `${checking.bankName} · ${checking.name}`;
-  }, [accounts]);
+  const sortedIncomes = useMemo(() => {
+    return [...incomes].sort((a, b) => (a.payday || 25) - (b.payday || 25));
+  }, [incomes]);
 
-  const hasBankConnected = useMemo(() => {
-    return (
-      (accounts && accounts.length > 0) ||
-      (transactions &&
-        transactions.some((tx) => tx.id?.startsWith('bank-') || Boolean(tx.bankAccountName)))
-    );
-  }, [accounts, transactions]);
-
-  const enrichedIncomes = useMemo(() => {
-    const allIncomeTxs = (transactions || []).filter((tx) => tx.type === 'income');
-    const periodIncomeTxs = allIncomeTxs.filter((tx) => isDateInPeriod(tx.date, period));
-
-    return incomes
-      .map((inc) => {
-        const paydayDateInPeriod = getDueDateInPeriod(inc.payday, period);
-
-        const matchedInPeriod = periodIncomeTxs.some((tx) =>
-          Boolean(findMatchingIncome(tx, [inc]))
-        );
-        const matchedTx =
-          periodIncomeTxs.find((tx) => Boolean(findMatchingIncome(tx, [inc]))) ||
-          allIncomeTxs.find((tx) => Boolean(findMatchingIncome(tx, [inc])));
-
-        const dueDatePassed = isDueDayPaidInPeriod(inc.payday, period);
-        const isPaidInPeriod = hasBankConnected
-          ? matchedInPeriod
-          : matchedInPeriod || dueDatePassed;
-        const isAwaitingBank = hasBankConnected && !matchedInPeriod && dueDatePassed;
-
-        const resolvedAccount =
-          inc.bankAccountName || matchedTx?.bankAccountName || primaryAccountLabel;
-
-        return {
-          ...inc,
-          bankAccountName: resolvedAccount,
-          paydayDateInPeriod,
-          isPaid: isPaidInPeriod,
-          isAwaitingBank,
-          displayAmount: inc.amount,
-          matchedTxDate: matchedTx?.date,
-        };
-      })
-      .sort((a, b) => a.paydayDateInPeriod.getTime() - b.paydayDateInPeriod.getTime());
-  }, [incomes, transactions, period, primaryAccountLabel, hasBankConnected]);
-
-  const enrichedExpenses = useMemo(() => {
-    const allExpenseTxs = (transactions || [])
-      .filter((tx) => tx.type !== 'income' && !tx.isExcluded)
-      .sort((a, b) => b.date.localeCompare(a.date));
-    const periodExpenseTxs = allExpenseTxs.filter((tx) => isDateInPeriod(tx.date, period));
-
-    return fixedExpenses
-      .map((exp) => {
-        const dueDateInPeriod = getDueDateInPeriod(exp.dueDay, period);
-
-        const matchedHistory = allExpenseTxs.filter((tx) =>
-          Boolean(findMatchingFixedExpense(tx, [exp]))
-        );
-        const periodMatchTx = periodExpenseTxs.find((tx) =>
-          Boolean(findMatchingFixedExpense(tx, [exp]))
-        );
-        const matchedInPeriod = Boolean(periodMatchTx);
-        const matchedTx = periodMatchTx || matchedHistory[0];
-
-        const dueDatePassed = isDueDayPaidInPeriod(exp.dueDay, period);
-        const isPaidInPeriod = hasBankConnected
-          ? matchedInPeriod
-          : matchedInPeriod || dueDatePassed;
-        const isAwaitingBank = hasBankConnected && !matchedInPeriod && dueDatePassed;
-
-        const resolvedAccount =
-          exp.bankAccountName || matchedTx?.bankAccountName || primaryAccountLabel;
-
-        const actualChargedAmount = matchedTx ? Math.round(Math.abs(Number(matchedTx.amount) || 0)) : null;
-        const plannedAmt = Math.round(Math.abs(Number(exp.amount) || 0));
-        const hasPriceChange =
-          !exp.isShared &&
-          actualChargedAmount !== null &&
-          actualChargedAmount > 0 &&
-          plannedAmt > 0 &&
-          Math.abs(actualChargedAmount - plannedAmt) >= 5 &&
-          Math.abs(actualChargedAmount - plannedAmt) / plannedAmt <= 0.4;
-
-        return {
-          ...exp,
-          bankAccountName: resolvedAccount,
-          dueDateInPeriod,
-          isPaid: isPaidInPeriod,
-          isAwaitingBank,
-          displayAmount: exp.amount,
-          matchedTxDate: matchedTx?.date,
-          priceChangedTo: hasPriceChange ? actualChargedAmount : null,
-        };
-      })
-      .sort((a, b) => a.dueDateInPeriod.getTime() - b.dueDateInPeriod.getTime());
-  }, [fixedExpenses, transactions, period, primaryAccountLabel, hasBankConnected]);
-
-  const unpaidTotal = useMemo(
-    () =>
-      enrichedExpenses
-        .filter((e) => !e.isPaid)
-        .reduce((acc, e) => acc + (Number(e.displayAmount) || 0), 0),
-    [enrichedExpenses]
-  );
+  const sortedExpenses = useMemo(() => {
+    return [...fixedExpenses].sort((a, b) => (a.dueDay || 27) - (b.dueDay || 27));
+  }, [fixedExpenses]);
 
   const netAfterFixed = totalIncome - totalFixedExpenses;
 
@@ -207,17 +101,22 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           <h2 className="ui-section-title">
             Inkomster
           </h2>
+          {onAddIncome && (
+            <button
+              type="button"
+              onClick={onAddIncome}
+              className="ui-section-action"
+            >
+              <Plus size={13} weight="bold" />
+              <span>Lägg till</span>
+            </button>
+          )}
         </div>
 
         <div className="ui-list-card">
-          {enrichedIncomes.length > 0 ? (
-            enrichedIncomes.map((inc) => {
+          {sortedIncomes.length > 0 ? (
+            sortedIncomes.map((inc) => {
               const catLabel = inc.category || 'Lön';
-              const isSameAsName =
-                inc.name.trim().toLowerCase() === catLabel.trim().toLowerCase();
-              const subtitleText = isSameAsName
-                ? `Den ${inc.payday}:e varje månad`
-                : `${catLabel} · Den ${inc.payday}:e`;
 
               return (
                 <button
@@ -238,166 +137,111 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       <span className="ui-row-title">
                         {inc.name}
                       </span>
-                      <span className="ui-row-subtitle">
-                        {subtitleText}
+                      <span className="ui-row-subtitle flex items-center gap-1">
+                        <CategoryIcon
+                          category={catLabel}
+                          size={11}
+                          className="shrink-0 text-[var(--text-secondary)]"
+                        />
+                        <span className="truncate">{catLabel}</span>
                       </span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <span className="ui-row-amount-income">
-                      +{formatKr(inc.displayAmount)}
+                      +{formatKr(inc.amount)}
                     </span>
-                    <span
-                      className={`ui-row-meta ${
-                        inc.isPaid
-                          ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                          : inc.isAwaitingBank
-                          ? 'text-amber-600 dark:text-amber-400 font-medium'
-                          : ''
-                      }`}
-                    >
-                      {inc.isPaid
-                        ? 'Mottagen'
-                        : inc.isAwaitingBank
-                        ? 'Inväntar insättning'
-                        : `Den ${inc.payday}:e`}
+                    <span className="ui-row-meta">
+                      Den {inc.payday}:e
                     </span>
                   </div>
                 </button>
               );
             })
           ) : (
-            <div className="py-8 text-center">
-              <Coins size={32} weight="light" className="ui-empty-icon mb-2" />
-              <p className="ui-empty-sub mt-0">Inga inkomster</p>
+            <div className="py-10 text-center">
+              <Coins size={34} weight="light" className="ui-empty-icon mb-2" />
+              <p className="ui-empty-sub mt-0">Inga inkomster tillagda</p>
             </div>
-          )}
-
-          {onAddIncome && (
-            <button
-              type="button"
-              onClick={onAddIncome}
-              className="w-full py-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-            >
-              <Plus size={13} weight="bold" />
-              <span>Lägg till</span>
-            </button>
           )}
         </div>
       </section>
 
       {/* ============================================================== */}
-      {/* SEKTION 2: FASTA UTGIFTER & ABONNEMANG                         */}
+      {/* SEKTION 2: FASTA UTGIFTER                                      */}
       {/* ============================================================== */}
       <section className="ui-section">
         <div className="ui-section-header">
           <h2 className="ui-section-title">
             Fasta utgifter
           </h2>
-        </div>
-
-        <div className="ui-list-card">
-          {enrichedExpenses.length > 0 ? (
-            enrichedExpenses.map((exp) => (
-              <div key={exp.id} className="border-b border-[var(--border-color)] last:border-b-0">
-                <button
-                  type="button"
-                  onClick={() => onSelectFixed(exp)}
-                  className="ui-tx-row !border-b-0"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <ItemLogo
-                      name={exp.name}
-                      category={exp.category}
-                      logoUrl={exp.logo}
-                      size="md"
-                      isRecurring={false}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="ui-row-title">
-                        {exp.name}
-                      </span>
-                      <span className="ui-row-subtitle">
-                        {exp.category || 'Räkningar'}
-                        {exp.isShared && exp.fullAmount && exp.fullAmount > exp.amount
-                          ? ` · Delad (av ${formatKr(exp.fullAmount)})`
-                          : ''}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <span className="ui-row-amount">
-                      -{formatKr(exp.displayAmount)}
-                    </span>
-                    <span
-                      className={`ui-row-meta ${
-                        exp.isPaid
-                          ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                          : exp.isAwaitingBank
-                          ? 'text-amber-600 dark:text-amber-400 font-medium'
-                          : ''
-                      }`}
-                    >
-                      {exp.isPaid
-                        ? 'Betald'
-                        : exp.isAwaitingBank
-                        ? 'Inväntar dragning'
-                        : `Den ${exp.dueDay}:e`}
-                    </span>
-                  </div>
-                </button>
-                {exp.priceChangedTo && onUpdateFixed && (
-                  <div className="px-4 pb-3 -mt-1 flex items-center justify-between gap-2">
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                      Prisändring upptäckt: drogs med {formatKr(exp.priceChangedTo)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUpdateFixed({
-                          id: exp.id,
-                          name: exp.name,
-                          originalName: exp.originalName,
-                          amount: exp.priceChangedTo!,
-                          isShared: exp.isShared,
-                          fullAmount: exp.fullAmount,
-                          dueDay: exp.dueDay,
-                          category: exp.category,
-                          paymentMethod: exp.paymentMethod,
-                          logo: exp.logo,
-                          bankAccountName: exp.bankAccountName,
-                        });
-                      }}
-                      className="text-xs font-semibold text-[var(--accent-primary)] hover:underline cursor-pointer shrink-0"
-                    >
-                      Uppdatera till {formatKr(exp.priceChangedTo)}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="py-8 text-center">
-              <Receipt size={32} weight="light" className="ui-empty-icon mb-2" />
-              <p className="ui-empty-sub mt-0">Inga fasta utgifter</p>
-            </div>
-          )}
-
           {onAddFixed && (
             <button
               type="button"
               onClick={onAddFixed}
-              className="w-full py-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              className="ui-section-action"
             >
               <Plus size={13} weight="bold" />
               <span>Lägg till</span>
             </button>
           )}
         </div>
+
+        <div className="ui-list-card">
+          {sortedExpenses.length > 0 ? (
+            sortedExpenses.map((exp) => (
+              <button
+                key={exp.id}
+                type="button"
+                onClick={() => onSelectFixed(exp)}
+                className="ui-tx-row"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <ItemLogo
+                    name={exp.name}
+                    category={exp.category}
+                    logoUrl={exp.logo}
+                    size="md"
+                    isRecurring={false}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="ui-row-title">
+                      {exp.name}
+                    </span>
+                    <span className="ui-row-subtitle flex items-center gap-1">
+                      <CategoryIcon
+                        category={exp.category || 'Räkningar'}
+                        size={11}
+                        className="shrink-0 text-[var(--text-secondary)]"
+                      />
+                      <span className="truncate">
+                        {exp.category || 'Räkningar'}
+                        {exp.isShared && exp.fullAmount && exp.fullAmount > exp.amount
+                          ? ` · Delad (av ${formatKr(exp.fullAmount)})`
+                          : ''}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="ui-row-amount">
+                    -{formatKr(exp.amount)}
+                  </span>
+                  <span className="ui-row-meta">
+                    Den {exp.dueDay}:e
+                  </span>
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="py-10 text-center">
+              <Receipt size={34} weight="light" className="ui-empty-icon mb-2" />
+              <p className="ui-empty-sub mt-0">Inga fasta utgifter tillagda</p>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
 };
-

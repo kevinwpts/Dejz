@@ -1,14 +1,48 @@
 import React, { useMemo, useState } from 'react';
-import { Receipt, MagnifyingGlass, X, Package, Heart, Paperclip, Users, Plus } from '@phosphor-icons/react';
-import { TransactionItem, getTransactionTime, FixedExpenseItem, IncomeItem } from './HomeTab';
+import {
+  Receipt,
+  MagnifyingGlass,
+  X,
+  Package,
+  Heart,
+  Paperclip,
+  Users,
+  Plus,
+  SlidersHorizontal,
+  Check,
+  ArrowsClockwise,
+  Bank,
+  CalendarBlank,
+  Wallet,
+  Sparkle,
+} from '@phosphor-icons/react';
+import {
+  TransactionItem,
+  AccountItem,
+  getTransactionTime,
+  FixedExpenseItem,
+  IncomeItem,
+  doesTransactionMatchAccount,
+} from './HomeTab';
 import { ItemLogo } from './ItemLogo';
+import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
+import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
-import { formatSwedishDateHeading } from '../utils/swedishDate';
+import { formatSwedishDateHeading, getSwedishDateStr } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
+import { isDateInPeriod, PeriodInfo } from '../utils/periodEngine';
+import {
+  getStoredExpenseCategories,
+  getStoredIncomeCategories,
+  getStoredPaymentMethods,
+} from '../utils/appCache';
 
 interface TransactionsTabProps {
   transactions: TransactionItem[];
+  accounts?: AccountItem[];
+  selectedAccountId?: string | null;
+  onSelectAccount?: (accountId: string | null) => void;
   fixedExpenses?: FixedExpenseItem[];
   incomes?: IncomeItem[];
   totalVariableSpent?: number;
@@ -18,15 +52,31 @@ interface TransactionsTabProps {
   onToggleHeart?: (id: string, isHearted: boolean) => void;
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   onExcludeTransaction?: (id: string, exclude: boolean) => void;
-  period?: any;
+  period?: PeriodInfo;
   targetPayday?: number;
   weekendHandling?: any;
 }
 
-type TxFilterMode = 'all' | 'expense' | 'income' | 'saved' | 'packages' | 'receipts';
+type TxTypeTab = 'all' | 'expense' | 'income';
+type DateRangeFilter = 'all' | 'period' | 'last30' | 'thisMonth';
+type SpecialAttributeFilter = 'saved' | 'packages' | 'receipts' | 'recurring' | 'large';
+
+function inferPaymentMethodForTx(tx: TransactionItem): string {
+  if (tx.paymentMethod) return tx.paymentMethod;
+  const combined = `${tx.title || ''} ${tx.category || ''} ${tx.rawDescription || ''}`.toLowerCase();
+  if (combined.includes('swish')) return 'Swish';
+  if (combined.includes('autogiro')) return 'Autogiro';
+  if (combined.includes('klarna')) return 'Klarna';
+  if (combined.includes('faktura') || combined.includes('e-faktura')) return 'Faktura';
+  if (tx.type === 'income') return 'Överföring';
+  return 'Kort';
+}
 
 export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   transactions,
+  accounts = [],
+  selectedAccountId = null,
+  onSelectAccount,
   fixedExpenses = [],
   incomes = [],
   onSelectTransaction,
@@ -34,13 +84,50 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   onToggleHeart,
   onTogglePackage,
   onExcludeTransaction,
+  period,
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [filterMode, setFilterMode] = useState<TxFilterMode>('all');
+  const [typeTab, setTypeTab] = useState<TxTypeTab>('all');
+  const [localAccountId, setLocalAccountId] = useState<string | null>(selectedAccountId);
+  const [dateRange, setDateRange] = useState<DateRangeFilter>('all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedAttributes, setSelectedAttributes] = useState<SpecialAttributeFilter[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const effectiveAccountId =
+    onSelectAccount !== undefined ? selectedAccountId : localAccountId;
+
+  const handleSetAccount = (accId: string | null) => {
+    if (onSelectAccount) {
+      onSelectAccount(accId);
+    } else {
+      setLocalAccountId(accId);
+    }
+  };
 
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
+
+  const todayStr = useMemo(() => getSwedishDateStr(), []);
+  const thirtyDaysAgoStr = useMemo(() => {
+    const parts = todayStr.split('-');
+    const d = new Date(
+      Date.UTC(
+        parseInt(parts[0], 10),
+        parseInt(parts[1], 10) - 1,
+        parseInt(parts[2], 10) - 30,
+        12,
+        0,
+        0
+      )
+    );
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(
+      d.getUTCDate()
+    ).padStart(2, '0')}`;
+  }, [todayStr]);
+  const thisMonthPrefix = useMemo(() => todayStr.slice(0, 7), [todayStr]);
 
   // Sortera alla transaktioner strikt efter köpdatum och köptid
   const sortedTransactions = useMemo(() => {
@@ -52,15 +139,102 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     });
   }, [transactions]);
 
-  // Sök- och typfiltrering (inklusive belopp)
+  const activeAccount = useMemo(
+    () =>
+      effectiveAccountId
+        ? accounts.find((a) => a.id === effectiveAccountId) || null
+        : null,
+    [accounts, effectiveAccountId]
+  );
+
+  // Kategorier med antal transaktioner
+  const categoryOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const tx of sortedTransactions) {
+      const cat = tx.category || 'Övrigt';
+      counts.set(cat, (counts.get(cat) || 0) + 1);
+    }
+    const storedExp = getStoredExpenseCategories()
+      .map((c: any) => (typeof c === 'string' ? c : c?.name))
+      .filter(Boolean);
+    const storedInc = getStoredIncomeCategories()
+      .map((c: any) => (typeof c === 'string' ? c : c?.name))
+      .filter(Boolean);
+    const allNames = Array.from(
+      new Set([...Array.from(counts.keys()), ...storedExp, ...storedInc])
+    );
+    return allNames
+      .map((name) => ({
+        name: String(name),
+        count: counts.get(String(name)) || 0,
+      }))
+      .sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.name.localeCompare(b.name, 'sv');
+      });
+  }, [sortedTransactions]);
+
+  const paymentMethodOptions = useMemo(() => {
+    const storedNames = getStoredPaymentMethods()
+      .map((p: any) => (typeof p === 'string' ? p : p?.name))
+      .filter((n): n is string => Boolean(n && typeof n === 'string'));
+    const counts = new Map<string, number>();
+    for (const tx of sortedTransactions) {
+      const pm = inferPaymentMethodForTx(tx);
+      counts.set(pm, (counts.get(pm) || 0) + 1);
+    }
+    const all = Array.from(new Set([...storedNames, ...Array.from(counts.keys())]));
+    return all.filter((m) => (counts.get(m) || 0) > 0 || storedNames.includes(m));
+  }, [sortedTransactions]);
+
+  // Sök- och kombinerad filtrering
   const filteredTransactions = useMemo(() => {
     return sortedTransactions.filter((tx) => {
-      if (filterMode === 'expense' && tx.type === 'income') return false;
-      if (filterMode === 'income' && tx.type !== 'income') return false;
-      if (filterMode === 'saved' && !tx.isHearted) return false;
-      if (filterMode === 'packages' && !tx.isWaitingForPackage) return false;
-      if (filterMode === 'receipts' && !tx.receiptUrl) return false;
+      // 1. Typ (Alla / Utgifter / Inkomster)
+      if (typeTab === 'expense' && tx.type === 'income') return false;
+      if (typeTab === 'income' && tx.type !== 'income') return false;
 
+      // 2. Konto
+      if (activeAccount && !doesTransactionMatchAccount(tx, activeAccount)) {
+        return false;
+      }
+
+      // 3. Tidsperiod
+      if (dateRange === 'period' && period && !isDateInPeriod(tx.date, period)) {
+        return false;
+      }
+      if (dateRange === 'last30' && (tx.date || '') < thirtyDaysAgoStr) {
+        return false;
+      }
+      if (dateRange === 'thisMonth' && !(tx.date || '').startsWith(thisMonthPrefix)) {
+        return false;
+      }
+
+      // 4. Kategorier
+      if (
+        selectedCategories.length > 0 &&
+        !selectedCategories.includes(tx.category || 'Övrigt')
+      ) {
+        return false;
+      }
+
+      // 5. Egenskaper & markeringar
+      if (selectedAttributes.includes('saved') && !tx.isHearted) return false;
+      if (selectedAttributes.includes('packages') && !tx.isWaitingForPackage) return false;
+      if (selectedAttributes.includes('receipts') && !tx.receiptUrl) return false;
+      if (selectedAttributes.includes('large') && Number(tx.amount) < 500) return false;
+      if (selectedAttributes.includes('recurring')) {
+        const rec = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
+        if (!rec.isRecurring) return false;
+      }
+
+      // 6. Betalsätt
+      if (selectedPaymentMethod) {
+        const pm = inferPaymentMethodForTx(tx);
+        if (pm.toLowerCase() !== selectedPaymentMethod.toLowerCase()) return false;
+      }
+
+      // 7. Fritextsökning (inklusive belopp)
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase().trim();
       const qDigits = q.replace(/\s+/g, '');
@@ -75,7 +249,21 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
         (qDigits.length > 0 && amtStr.includes(qDigits)) || formattedAmt.includes(q);
       return titleMatch || catMatch || noteMatch || amountMatch;
     });
-  }, [sortedTransactions, searchQuery, filterMode]);
+  }, [
+    sortedTransactions,
+    typeTab,
+    activeAccount,
+    dateRange,
+    period,
+    thirtyDaysAgoStr,
+    thisMonthPrefix,
+    selectedCategories,
+    selectedAttributes,
+    selectedPaymentMethod,
+    searchQuery,
+    fixedExpenses,
+    incomes,
+  ]);
 
   const savedCount = useMemo(
     () => sortedTransactions.filter((tx) => tx.isHearted).length,
@@ -87,6 +275,17 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   );
   const receiptsCount = useMemo(
     () => sortedTransactions.filter((tx) => Boolean(tx.receiptUrl)).length,
+    [sortedTransactions]
+  );
+  const recurringCount = useMemo(
+    () =>
+      sortedTransactions.filter(
+        (tx) => checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
+      ).length,
+    [sortedTransactions, fixedExpenses, incomes]
+  );
+  const largeCount = useMemo(
+    () => sortedTransactions.filter((tx) => Number(tx.amount) >= 500).length,
     [sortedTransactions]
   );
 
@@ -127,32 +326,72 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     return groups;
   }, [filteredTransactions]);
 
-  const filterTabs: { id: TxFilterMode; label: string }[] = [
+  const filterTabs: { id: TxTypeTab; label: string }[] = [
     { id: 'all', label: 'Alla' },
     { id: 'expense', label: 'Utgifter' },
     { id: 'income', label: 'Inkomster' },
   ];
 
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const toggleAttribute = (attr: SpecialAttributeFilter) => {
+    setSelectedAttributes((prev) =>
+      prev.includes(attr) ? prev.filter((a) => a !== attr) : [...prev, attr]
+    );
+  };
+
+  const activeFilterCount =
+    (activeAccount ? 1 : 0) +
+    (dateRange !== 'all' ? 1 : 0) +
+    selectedCategories.length +
+    selectedAttributes.length +
+    (selectedPaymentMethod ? 1 : 0);
+
+  const resetAllFilters = () => {
+    handleSetAccount(null);
+    setDateRange('all');
+    setSelectedCategories([]);
+    setSelectedAttributes([]);
+    setSelectedPaymentMethod(null);
+  };
+
+  const formatAccountShortLabel = (acc: AccountItem) => {
+    const hasDuplicateName =
+      accounts.filter(
+        (other) => other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
+      ).length > 1;
+    const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+    const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+    if (hasDuplicateName && last4) {
+      return `${acc.name} (${last4})`;
+    }
+    return acc.name;
+  };
+
   return (
     <div className="ui-page">
-      {/* Sökfält, Nytt köp & Snabbfilter i toppen */}
-      <div className="ui-card p-3.5 space-y-2.5">
+      {/* Sökfält, Filterknapp (Bottom Sheet) & Segmented Control */}
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2">
           <div className="ui-search-box flex-1 min-w-0">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none">
-              <MagnifyingGlass size={16} />
-            </div>
+            <MagnifyingGlass size={16} className="text-[var(--text-muted)] shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Sök köp, belopp eller kategori..."
+              placeholder="Sök transaktioner"
+              aria-label="Sök transaktioner"
               className="ui-search-input"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
+                aria-label="Rensa sökning"
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg cursor-pointer"
               >
                 <X size={14} />
@@ -160,28 +399,50 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
             )}
           </div>
 
+          {/* Kompakt filterikon som öppnar Filter Bottom Sheet */}
+          <button
+            type="button"
+            onClick={() => setIsFilterOpen(true)}
+            title="Filtrera transaktioner"
+            aria-label={`Filtrera transaktioner${
+              activeFilterCount > 0 ? ` (${activeFilterCount} aktiva)` : ''
+            }`}
+            className={`w-[38px] h-[38px] rounded-xl border flex items-center justify-center relative transition-all cursor-pointer shrink-0 ${
+              activeFilterCount > 0
+                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
+            }`}
+          >
+            <SlidersHorizontal size={15} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
           {onAddTransaction && (
             <button
               type="button"
               onClick={onAddTransaction}
               title="Lägg till manuellt köp eller inkomst"
-              className="h-[38px] px-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center gap-1.5 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
+              className="h-[38px] px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
             >
-              <Plus size={14} weight="bold" />
+              <Plus size={13} weight="bold" />
               <span>Nytt</span>
             </button>
           )}
         </div>
 
-        {/* Segmented Filter Control */}
-        <div className="ui-segmented grid-cols-3">
+        {/* Segmented Filter Control (Alla / Utgifter / Inkomster) */}
+        <div className="ui-segmented-surface grid-cols-3">
           {filterTabs.map((tab) => {
-            const isActive = filterMode === tab.id;
+            const isActive = typeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setFilterMode(tab.id)}
+                onClick={() => setTypeTab(tab.id)}
                 className={`ui-segmented-tab ${isActive ? 'ui-segmented-tab-active' : ''}`}
               >
                 {tab.label}
@@ -190,39 +451,137 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           })}
         </div>
 
-        {/* Snabbfilter för Sparade, Paket & Kvitton direkt i samma vy */}
-        {(savedCount > 0 || packagesCount > 0 || receiptsCount > 0 || filterMode === 'saved' || filterMode === 'packages' || filterMode === 'receipts') && (
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-            {(savedCount > 0 || filterMode === 'saved') && (
+        {/* Snabb kontoväljare om flera konton är kopplade */}
+        {accounts.length > 1 && (
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+            <button
+              type="button"
+              onClick={() => handleSetAccount(null)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                !activeAccount
+                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
+              }`}
+            >
+              Alla konton
+            </button>
+            {accounts.map((acc) => {
+              const isSelected = activeAccount?.id === acc.id;
+              return (
+                <button
+                  key={acc.id}
+                  type="button"
+                  onClick={() => handleSetAccount(isSelected ? null : acc.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                      : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
+                  }`}
+                >
+                  <span>{formatAccountShortLabel(acc)}</span>
+                  <span
+                    className={`font-display tabular-nums ${
+                      isSelected ? 'opacity-85' : 'text-[var(--text-muted)]'
+                    }`}
+                  >
+                    · {formatKr(acc.balance)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Aktiva filter-brickor (när filter utöver konto eller enkla konto-val är aktiva) */}
+        {(dateRange !== 'all' ||
+          selectedCategories.length > 0 ||
+          selectedAttributes.length > 0 ||
+          selectedPaymentMethod ||
+          (activeAccount && accounts.length <= 1)) && (
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+            {activeAccount && accounts.length <= 1 && (
               <button
                 type="button"
-                onClick={() => setFilterMode(filterMode === 'saved' ? 'all' : 'saved')}
-                className={`ui-chip ${filterMode === 'saved' ? 'ui-chip-active' : ''}`}
+                onClick={() => handleSetAccount(null)}
+                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
               >
-                <Heart size={13} weight={filterMode === 'saved' ? 'fill' : 'bold'} className={filterMode === 'saved' ? 'text-rose-400' : 'text-rose-500'} />
-                <span>Sparade</span>
+                <span>{formatAccountShortLabel(activeAccount)}</span>
+                <X size={11} weight="bold" className="text-[var(--text-muted)]" />
               </button>
             )}
 
-            {(packagesCount > 0 || filterMode === 'packages') && (
+            {dateRange !== 'all' && (
               <button
                 type="button"
-                onClick={() => setFilterMode(filterMode === 'packages' ? 'all' : 'packages')}
-                className={`ui-chip ${filterMode === 'packages' ? 'ui-chip-active' : ''}`}
+                onClick={() => setDateRange('all')}
+                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
               >
-                <Package size={13} weight={filterMode === 'packages' ? 'fill' : 'bold'} className={filterMode === 'packages' ? 'text-amber-400' : 'text-amber-500'} />
-                <span>Paket</span>
+                <span>
+                  {dateRange === 'period'
+                    ? 'Denna löneperiod'
+                    : dateRange === 'last30'
+                    ? 'Senaste 30 dagarna'
+                    : 'Denna månad'}
+                </span>
+                <X size={11} weight="bold" className="text-[var(--text-muted)]" />
               </button>
             )}
 
-            {(receiptsCount > 0 || filterMode === 'receipts') && (
+            {selectedCategories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => toggleCategory(cat)}
+                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+              >
+                <CategoryIcon category={cat} size={11} />
+                <span>{cat}</span>
+                <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              </button>
+            ))}
+
+            {selectedAttributes.map((attr) => {
+              const label =
+                attr === 'saved'
+                  ? 'Sparade köp'
+                  : attr === 'packages'
+                  ? 'Paket'
+                  : attr === 'receipts'
+                  ? 'Kvitton'
+                  : attr === 'recurring'
+                  ? 'Fasta & abonnemang'
+                  : 'Stora köp (> 500 kr)';
+              return (
+                <button
+                  key={attr}
+                  type="button"
+                  onClick={() => toggleAttribute(attr)}
+                  className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
+                >
+                  <span>{label}</span>
+                  <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+                </button>
+              );
+            })}
+
+            {selectedPaymentMethod && (
               <button
                 type="button"
-                onClick={() => setFilterMode(filterMode === 'receipts' ? 'all' : 'receipts')}
-                className={`ui-chip ${filterMode === 'receipts' ? 'ui-chip-active' : ''}`}
+                onClick={() => setSelectedPaymentMethod(null)}
+                className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] cursor-pointer"
               >
-                <Paperclip size={13} weight="bold" />
-                <span>Kvitton</span>
+                <span>{selectedPaymentMethod}</span>
+                <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              </button>
+            )}
+
+            {activeFilterCount > 1 && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="px-2 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                Rensa alla
               </button>
             )}
           </div>
@@ -230,22 +589,355 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       </div>
 
       {/* ============================================================== */}
+      {/* FILTER BOTTOM SHEET MODAL                                      */}
+      {/* ============================================================== */}
+      <BottomSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        title="Filtrera transaktioner"
+        subtitle={
+          activeFilterCount > 0
+            ? `${activeFilterCount} filter aktiva · ${filteredTransactions.length} träffar`
+            : `${filteredTransactions.length} transaktioner`
+        }
+        footer={
+          <div className="flex items-center gap-2">
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="ui-btn-secondary flex-1 py-3"
+              >
+                Nollställ
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(false)}
+              className="ui-btn-primary flex-[2] py-3"
+            >
+              Visa {filteredTransactions.length} transaktioner
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-5">
+          {/* 1. BANKKONTO */}
+          {accounts.length > 0 && (
+            <div className="space-y-2">
+              <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
+                <Bank size={13} />
+                <span>Bankkonto</span>
+              </span>
+              <div className="ui-sheet-group">
+                <button
+                  type="button"
+                  onClick={() => handleSetAccount(null)}
+                  className="ui-row-btn"
+                >
+                  <span
+                    className={
+                      !activeAccount
+                        ? 'font-medium text-[var(--text-primary)]'
+                        : 'font-normal text-[var(--text-primary)]'
+                    }
+                  >
+                    Alla anslutna konton
+                  </span>
+                  {!activeAccount && (
+                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  )}
+                </button>
+
+                {accounts.map((acc) => {
+                  const isSel = activeAccount?.id === acc.id;
+                  const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+                  const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+                  const accTxCount = sortedTransactions.filter((t) =>
+                    doesTransactionMatchAccount(t, acc)
+                  ).length;
+
+                  return (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => handleSetAccount(isSel ? null : acc.id)}
+                      className="ui-row-btn"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <ItemLogo
+                          name={acc.bankName || acc.name}
+                          category="Bank"
+                          logoUrl={acc.logo}
+                          size="sm"
+                        />
+                        <div className="min-w-0 flex-1 text-left">
+                          <span
+                            className={`block truncate ${
+                              isSel
+                                ? 'font-medium text-[var(--text-primary)]'
+                                : 'font-normal text-[var(--text-primary)]'
+                            }`}
+                          >
+                            {acc.name}
+                          </span>
+                          <span className="text-[11px] text-[var(--text-secondary)] block truncate tabular-nums">
+                            {acc.bankName}
+                            {last4 ? ` · •••• ${last4}` : ''} · {accTxCount} händelser
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-display font-medium text-xs text-[var(--text-secondary)] tabular-nums">
+                          {formatKr(acc.balance)}
+                        </span>
+                        {isSel && (
+                          <Check
+                            size={14}
+                            weight="bold"
+                            className="text-[var(--text-primary)] shrink-0"
+                          />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 2. TIDSPERIOD */}
+          <div className="space-y-2">
+            <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
+              <CalendarBlank size={13} />
+              <span>Tidsperiod</span>
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'all' as DateRangeFilter, label: 'Alla datum' },
+                {
+                  id: 'period' as DateRangeFilter,
+                  label: period
+                    ? `Löneperiod (${period.startLabel}–${period.endLabel})`
+                    : 'Denna löneperiod',
+                },
+                { id: 'last30' as DateRangeFilter, label: 'Senaste 30 dagarna' },
+                { id: 'thisMonth' as DateRangeFilter, label: 'Denna kalendermånad' },
+              ].map((opt) => {
+                const isSel = dateRange === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setDateRange(opt.id)}
+                    className={`px-3 py-2.5 rounded-xl border text-xs text-left transition-all cursor-pointer flex items-center justify-between gap-1.5 ${
+                      isSel
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
+                        : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                    }`}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSel && <Check size={12} weight="bold" className="shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3. KATEGORIER */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                Kategorier
+              </span>
+              {selectedCategories.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategories([])}
+                  className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                >
+                  Rensa ({selectedCategories.length})
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {categoryOptions.map(({ name: catName, count }) => {
+                const isSel = selectedCategories.includes(catName);
+                const catColor = resolveCategoryColor(catName);
+                return (
+                  <button
+                    key={catName}
+                    type="button"
+                    onClick={() => toggleCategory(catName)}
+                    className={`px-2.5 py-2 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                      isSel
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
+                        : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                    }`}
+                  >
+                    <CategoryIcon
+                      category={catName}
+                      size={13}
+                      color={isSel ? 'currentColor' : catColor}
+                    />
+                    <span>{catName}</span>
+                    {count > 0 && (
+                      <span
+                        className={`text-[10.5px] tabular-nums ${
+                          isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4. EGENSKAPER & MARKERINGAR */}
+          <div className="space-y-2">
+            <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
+              <Sparkle size={13} />
+              <span>Markeringar & typ</span>
+            </span>
+            <div className="ui-sheet-group">
+              {[
+                {
+                  id: 'saved' as SpecialAttributeFilter,
+                  label: 'Sparade köp',
+                  icon: Heart,
+                  iconColor: 'text-rose-500',
+                  count: savedCount,
+                },
+                {
+                  id: 'packages' as SpecialAttributeFilter,
+                  label: 'Väntar på paket',
+                  icon: Package,
+                  iconColor: 'text-amber-500',
+                  count: packagesCount,
+                },
+                {
+                  id: 'receipts' as SpecialAttributeFilter,
+                  label: 'Har bifogat kvitto',
+                  icon: Paperclip,
+                  iconColor: 'text-[var(--text-secondary)]',
+                  count: receiptsCount,
+                },
+                {
+                  id: 'recurring' as SpecialAttributeFilter,
+                  label: 'Fasta utgifter & abonnemang',
+                  icon: ArrowsClockwise,
+                  iconColor: 'text-[var(--text-secondary)]',
+                  count: recurringCount,
+                },
+                {
+                  id: 'large' as SpecialAttributeFilter,
+                  label: 'Stora belopp (> 500 kr)',
+                  icon: Receipt,
+                  iconColor: 'text-[var(--text-secondary)]',
+                  count: largeCount,
+                },
+              ].map((opt) => {
+                const Icon = opt.icon;
+                const isSel = selectedAttributes.includes(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => toggleAttribute(opt.id)}
+                    className="ui-row-btn"
+                  >
+                    <span className="flex items-center gap-2.5 min-w-0">
+                      <Icon
+                        size={15}
+                        weight={opt.id === 'saved' || opt.id === 'packages' ? 'fill' : 'regular'}
+                        className={opt.iconColor}
+                      />
+                      <span
+                        className={
+                          isSel
+                            ? 'font-medium text-[var(--text-primary)]'
+                            : 'font-normal text-[var(--text-primary)]'
+                        }
+                      >
+                        {opt.label}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 text-xs text-[var(--text-secondary)] tabular-nums shrink-0">
+                      <span>{opt.count}</span>
+                      {isSel && (
+                        <Check
+                          size={14}
+                          weight="bold"
+                          className="text-[var(--text-primary)]"
+                        />
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 5. BETALSÄTT */}
+          <div className="space-y-2">
+            <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
+              <Wallet size={13} />
+              <span>Betalsätt</span>
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedPaymentMethod(null)}
+                className={`px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer ${
+                  !selectedPaymentMethod
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
+                    : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                }`}
+              >
+                Alla
+              </button>
+              {paymentMethodOptions.map((pm) => {
+                const isSel = selectedPaymentMethod === pm;
+                return (
+                  <button
+                    key={pm}
+                    type="button"
+                    onClick={() => setSelectedPaymentMethod(isSel ? null : pm)}
+                    className={`px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer ${
+                      isSel
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
+                        : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
+                    }`}
+                  >
+                    {pm}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </BottomSheet>
+
+      {/* ============================================================== */}
       {/* TRANSAKTIONSLISTA (GRUPPERAD PER DATUM)                        */}
       {/* ============================================================== */}
       {groupedByDate.length > 0 ? (
-        <div className="space-y-3.5">
+        <div className="space-y-4">
           {groupedByDate.map((group) => (
-            <section key={group.dateKey} className="ui-section">
-              {/* Datumgrupps-rubrik utanför modulen direkt på bakgrunden */}
-              <div className="ui-section-header">
-                <span className="ui-section-title">
+            <div key={group.dateKey}>
+              {/* Datumrubrik och dagssummering utanför listkortet */}
+              <div className="ui-date-header">
+                <span className="font-medium text-[var(--text-secondary)]">
                   {group.label}
                 </span>
                 <span
-                  className={`ui-section-meta ${
+                  className={`font-display font-medium tabular-nums ${
                     group.net > 0
-                      ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
-                      : ''
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-[var(--text-secondary)]'
                   }`}
                 >
                   {group.net > 0
@@ -256,8 +948,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 </span>
               </div>
 
-              {/* Rader i datumgruppen */}
-              <div className="ui-list-card">
+              <section className="ui-list-card">
                 {group.items.map((tx) => {
                   const isIncome = tx.type === 'income';
                   const recurringStatus = checkIsRecurringTransaction(
@@ -293,7 +984,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                         onClick={() => onSelectTransaction(tx)}
                         className="ui-tx-row bg-[var(--surface-color)]"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <ItemLogo
                             name={tx.title}
                             category={tx.category}
@@ -302,44 +993,49 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                             isRecurring={recurringStatus.isRecurring}
                           />
                           <div className="min-w-0 flex-1">
-                            <span className="ui-row-title flex items-center gap-1.5">
-                              <span className="truncate">{tx.title}</span>
+                            <span className="ui-row-title">
+                              {tx.title}
+                            </span>
+                            <span className="ui-row-subtitle">
+                              <CategoryIcon
+                                category={tx.category}
+                                size={11}
+                                className="shrink-0"
+                              />
+                              <span className="truncate">{tx.category}</span>
+                              {isSplit && tx.originalAmount && (
+                                <span className="text-[11px] opacity-80 shrink-0">
+                                  · av {formatKr(tx.originalAmount)}
+                                </span>
+                              )}
                               {tx.isHearted && (
                                 <Heart
-                                  size={13}
+                                  size={11}
                                   weight="fill"
-                                  className="text-rose-500 shrink-0"
+                                  className="text-rose-500 shrink-0 ml-0.5"
                                 />
                               )}
                               {tx.isWaitingForPackage && (
                                 <Package
-                                  size={13}
+                                  size={11}
                                   weight="fill"
-                                  className="text-amber-500 shrink-0"
+                                  className="text-amber-500 shrink-0 ml-0.5"
                                 />
                               )}
                               {tx.receiptUrl && (
                                 <Paperclip
-                                  size={13}
+                                  size={11}
                                   weight="bold"
-                                  className="text-[var(--text-secondary)] shrink-0"
+                                  className="text-[var(--text-secondary)] shrink-0 ml-0.5"
                                 />
                               )}
                               {isSplit && (
                                 <Users
-                                  size={13}
+                                  size={11}
                                   weight="fill"
-                                  className="text-emerald-500 shrink-0"
+                                  className="text-emerald-500 shrink-0 ml-0.5"
                                   title="Delad utgift"
                                 />
-                              )}
-                            </span>
-                            <span className="ui-row-subtitle flex items-center gap-1">
-                              <span className="truncate">{tx.category}</span>
-                              {isSplit && tx.originalAmount && (
-                                <span className="text-[11px] opacity-75 shrink-0">
-                                  · av {formatKr(tx.originalAmount)}
-                                </span>
                               )}
                             </span>
                           </div>
@@ -352,13 +1048,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                             {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
                           </span>
                           {(() => {
-                            const realTime = getTransactionTime(tx);
                             const isPending =
                               tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
-                            const statusSub =
-                              realTime && isPending
-                                ? `${realTime} · Reserverat`
-                                : realTime || (isPending ? 'Reserverat' : '');
+                            const statusSub = isPending
+                              ? 'Reserverat'
+                              : getTransactionTime(tx);
                             return statusSub ? (
                               <span className="ui-row-meta">
                                 {statusSub}
@@ -370,8 +1064,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     </SwipeableTxRow>
                   );
                 })}
-              </div>
-            </section>
+              </section>
+            </div>
           ))}
         </div>
       ) : (
@@ -385,4 +1079,5 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     </div>
   );
 };
+
 

@@ -183,7 +183,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Main Auth Form with directional transition */}
         <main key={`auth-${view}`} className={`my-auto py-8 space-y-6 ${pageAnimClass}`}>
           <div className="space-y-1.5">
-            <h1 className="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-[var(--text-primary)]">
+            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               {title}
             </h1>
             <p className="text-sm text-[var(--text-secondary)]">
@@ -366,56 +366,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           alt="Dejz"
           className="dejz-logo h-6 w-auto object-contain dark:invert"
         />
-        <button
-          type="button"
-          onClick={() => openAuthPage('login')}
-          className="text-xs font-bold text-[var(--text-primary)] hover:opacity-70 transition-opacity cursor-pointer px-2 py-1.5"
-        >
-          Logga in
-        </button>
       </header>
 
       {/* Main Focal Content */}
       <main
         key="landing-main"
-        className={`my-auto py-8 space-y-7 ${
+        className={`my-auto py-8 space-y-6 ${
           slideDir === 'back' ? 'animate-page-back' : 'animate-fade-in'
         }`}
       >
-        {/* Minimalist Live Card Preview */}
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)]">
-              Kvar att spendera
-            </span>
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-              950 kr / dag
-            </span>
-          </div>
-
-          <div className="font-display font-extrabold text-4xl tracking-tight text-[var(--text-primary)] tabular-nums">
-            14 250 kr
-          </div>
-
-          <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--text-secondary)] font-medium">Lön</span>
-              <span className="font-display font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                +32 500 kr
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--text-secondary)] font-medium">Fasta utgifter</span>
-              <span className="font-display font-bold text-[var(--text-primary)] tabular-nums">
-                -11 400 kr
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Minimal Copy */}
-        <div className="space-y-2 text-center px-2">
-          <h1 className="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-[var(--text-primary)] leading-tight">
+        <div className="space-y-2.5 text-center px-2">
+          <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)] leading-tight">
             Koll på pengarna.
             <br />
             Från lön till lön.

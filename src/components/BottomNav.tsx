@@ -8,6 +8,8 @@ import {
   Heart,
   Package,
   Paperclip,
+  PiggyBank,
+  ShoppingCart,
   CaretRight,
 } from '@phosphor-icons/react';
 
@@ -17,13 +19,16 @@ export type AppTab =
   | 'analysis'
   | 'fixed'
   | 'settings'
+  | 'goals'
   | 'saved'
   | 'packages'
-  | 'receipts';
+  | 'receipts'
+  | 'matpriskollen';
 
 interface BottomNavProps {
   activeTab: AppTab;
   onChangeTab: (tab: AppTab) => void;
+  goalsCount?: number;
   savedCount?: number;
   packagesCount?: number;
   receiptsCount?: number;
@@ -32,6 +37,7 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onChangeTab,
+  goalsCount = 0,
   savedCount = 0,
   packagesCount = 0,
   receiptsCount = 0,
@@ -47,6 +53,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   ];
 
   const menuItems = [
+    {
+      id: 'matpriskollen' as AppTab,
+      label: 'Matpriskollen',
+      icon: ShoppingCart,
+      badge: undefined,
+    },
+    {
+      id: 'goals' as AppTab,
+      label: 'Sparmål & buffert',
+      icon: PiggyBank,
+      badge: goalsCount > 0 ? goalsCount : undefined,
+    },
     {
       id: 'saved' as AppTab,
       label: 'Sparade köp',
@@ -95,7 +113,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       >
         {/* Popover Menu for More Options */}
         {isMenuOpen && (
-          <div className="mb-2.5 ml-auto w-56 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-3xl shadow-modal p-2 animate-scale-in origin-bottom-right space-y-1">
+          <div className="mb-2.5 ml-auto w-56 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-2xl shadow-nav p-1.5 animate-scale-in origin-bottom-right space-y-0.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isSelected = activeTab === item.id;
@@ -107,47 +125,37 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                     setIsMenuOpen(false);
                     onChangeTab(item.id);
                   }}
-                  className={`w-full px-3.5 py-3 rounded-2xl flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
+                  className={`w-full px-3 py-2.5 rounded-xl flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
                     isSelected
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
-                      : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-semibold'
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold'
+                      : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon
                       size={17}
-                      weight={
-                        item.id === 'saved' || item.id === 'packages'
-                          ? 'fill'
-                          : isSelected
-                          ? 'bold'
-                          : 'regular'
-                      }
+                      weight={isSelected ? 'fill' : 'regular'}
                       className={
-                        !isSelected
-                          ? item.id === 'saved'
-                            ? 'text-rose-500'
-                            : item.id === 'packages'
-                            ? 'text-amber-500'
-                            : undefined
-                          : undefined
+                        isSelected
+                          ? 'text-[var(--bg-color)]'
+                          : 'text-[var(--text-secondary)]'
                       }
                     />
-                    <span className="text-xs">{item.label}</span>
+                    <span className="text-[13px]">{item.label}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     {item.badge !== undefined && (
                       <span
                         className={`text-xs tabular-nums ${
-                          isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'
+                          isSelected ? 'opacity-80' : 'text-[var(--text-secondary)]'
                         }`}
                       >
                         {item.badge}
                       </span>
                     )}
                     <CaretRight
-                      size={14}
+                      size={13}
                       className={isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'}
                     />
                   </div>
@@ -159,7 +167,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
         {/* Split Dock: Main Footer Pill + Detached "Mer" Button Outside */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-[var(--surface-color)]/90 dark:bg-[var(--surface-color)]/90 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-[22px] shadow-modal p-1 flex items-center justify-around">
+          <div className="flex-1 bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-2xl shadow-nav p-1 flex items-center justify-around">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id && !isMenuOpen;
@@ -171,14 +179,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                     setIsMenuOpen(false);
                     onChangeTab(tab.id);
                   }}
-                  className={`flex-1 py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+                  className={`flex-1 py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
                     isActive
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
                   }`}
                 >
                   <Icon size={17} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-[10px] tracking-tight leading-none whitespace-nowrap">
+                  <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
                     {tab.label}
                   </span>
                 </button>
@@ -191,14 +199,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
             aria-label="Mer"
-            className={`shrink-0 w-[52px] self-stretch rounded-[22px] backdrop-blur-2xl border border-[var(--border-subtle)] shadow-modal p-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+            className={`shrink-0 w-[52px] self-stretch rounded-2xl backdrop-blur-2xl border border-[var(--border-subtle)] shadow-nav p-1 flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
               isMoreActive
-                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold border-transparent'
-                : 'bg-[var(--surface-color)]/90 dark:bg-[var(--surface-color)]/90 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
+                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold border-transparent'
+                : 'bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
             }`}
           >
             <SquaresFour size={17} weight={isMoreActive ? 'fill' : 'regular'} />
-            <span className="text-[10px] tracking-tight leading-none whitespace-nowrap">Mer</span>
+            <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">Mer</span>
           </button>
         </div>
       </nav>

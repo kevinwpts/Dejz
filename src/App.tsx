@@ -23,6 +23,8 @@ import {
   SettingsSubView,
   SETTINGS_SUBVIEW_TITLES,
 } from './components/SettingsTab';
+import { SavingsGoalsView } from './components/SavingsGoalsView';
+import { MatpriskollenView } from './components/MatpriskollenView';
 import { LandingPage } from './components/LandingPage';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { ItemLogo } from './components/ItemLogo';
@@ -59,7 +61,6 @@ import {
   formatSwishTitle,
   getBankAccountTitle,
   getNormalizedBankTxAmount,
-  isInternalTransferOrMicroSavings,
   isLikelyCreditCardInvoiceBankTx,
   needsAiMerchantCleaning,
   resolveBankTxSekAmount,
@@ -85,6 +86,12 @@ import {
   getDismissedIncomeMerchants,
   dismissIncomeMerchant,
   unDismissIncomeMerchant,
+  getDeletedFixedIds,
+  markFixedIdDeleted,
+  unmarkFixedIdDeleted,
+  getDeletedIncomeIds,
+  markIncomeIdDeleted,
+  unmarkIncomeIdDeleted,
   getManualFixedOverrides,
   saveManualFixedOverride,
   getManualIncomeOverrides,
@@ -98,12 +105,13 @@ import {
   resolveMerchantAlias,
   isGenericPlaceholderMerchant,
   normalizeMerchantKey,
-  extractMerchantKeyVariants,
   ensureValidUuid,
   isValidUuid,
   normalizeCategoryToValid,
   propagateCategoryChangeInCache,
   hydrateAllUserPreferencesFromProfile,
+  extractSavedFixedFromProfile,
+  extractSavedIncomesFromProfile,
   getTransactionMetaMap,
   saveTransactionMeta,
   syncAllUserPreferencesToSupabase,
@@ -163,6 +171,9 @@ function sanitizeTransactionItem(
       item.linkedSwishTxId !== undefined ? item.linkedSwishTxId : savedMeta?.linkedSwishTxId,
     isHearted: item.isHearted ?? savedMeta?.isHearted,
     isWaitingForPackage: item.isWaitingForPackage ?? savedMeta?.isWaitingForPackage,
+    isWaitingForSwish: item.isWaitingForSwish ?? savedMeta?.isWaitingForSwish,
+    pendingSwishAmount: item.pendingSwishAmount ?? savedMeta?.pendingSwishAmount,
+    pendingSwishRecipient: item.pendingSwishRecipient ?? savedMeta?.pendingSwishRecipient,
     receiptUrl: item.receiptUrl ?? savedMeta?.receiptUrl,
     receiptName: item.receiptName ?? savedMeta?.receiptName,
     paymentMethod: item.paymentMethod ?? savedMeta?.paymentMethod,
@@ -422,6 +433,10 @@ function getPayDatesForIncome(
  * Reconciles Fixed Expenses from DB, local state/cache, and bank detection
  * into a single deterministic, deduplicated list with valid UUIDs.
  */
+/**
+ * Reconciles Fixed Expenses from DB, local state/cache, and (only on empty initial setup) bank detection
+ * into a single deterministic, static list where user-added items never disappear or get dynamically overwritten.
+ */
 function reconcileFixedExpensesList(params: {
   currentList: FixedExpenseItem[];
   dbList?: any[] | null;
@@ -433,135 +448,56 @@ function reconcileFixedExpensesList(params: {
 } {
   const { currentList, dbList, detectedList, uid } = params;
   const dismissed = getDismissedFixedMerchants();
+  const deletedIds = getDeletedFixedIds();
   const overrides = getManualFixedOverrides();
-  const aliases = getMerchantAliases();
-
-  const resolveItemIdentity = (rawName: string, rawCategory: string, rawOriginal?: string) => {
-    const orig = rawOriginal || rawName;
-    const aliased = resolveMerchantAlias(rawName, aliases) || (rawOriginal ? resolveMerchantAlias(rawOriginal, aliases) : null);
-    const effectiveName = aliased ? aliased.name : rawName;
-    const effectiveCategory = aliased?.category || rawCategory;
-    const normEffective = normalizeMerchantKey(effectiveName);
-    const normOrig = normalizeMerchantKey(orig);
-    const isDismissed =
-      dismissed.has(normEffective) &&
-      (!aliased || dismissed.has( normalizeMerchantKey(aliased.name) ));
-    return {
-      effectiveName,
-      effectiveCategory,
-      originalName: orig,
-      normEffective,
-      normOrig,
-      isDismissed,
-    };
-  };
 
   const unified: FixedExpenseItem[] = [];
   const toPersist: FixedExpenseItem[] = [];
   const dbIds = new Set<string>();
 
-  const findExistingIndex = (
-    candidate: { id?: string; name: string; originalName?: string; amount?: number },
-    requireAmountMatch = true
-  ) => {
+  const findExactSavedMatchIndex = (candidate: FixedExpenseItem) => {
     if (candidate.id) {
       const byIdIdx = unified.findIndex((u) => u.id === candidate.id);
       if (byIdIdx !== -1) return byIdIdx;
     }
-
+    const candNameNorm = normalizeMerchantKey(candidate.name);
     const candAmt = Math.round(Math.abs(Number(candidate.amount) || 0));
-    const allMatches = findAllMatchingFixedExpensesByMerchant(
-      {
-        title: candidate.name,
-        rawDescription: candidate.originalName,
-        amount: candAmt,
-      },
-      unified
+    const candDue = Number(candidate.dueDay) || 27;
+    return unified.findIndex(
+      (u) =>
+        normalizeMerchantKey(u.name) === candNameNorm &&
+        Math.round(Math.abs(Number(u.amount) || 0)) === candAmt &&
+        (Number(u.dueDay) || 27) === candDue
     );
-
-    if (allMatches.length > 0) {
-      for (const m of allMatches) {
-        if (!requireAmountMatch || candAmt <= 0 || isFixedExpenseAmountMatch(m, candAmt)) {
-          return unified.findIndex((u) => u.id === m.id);
-        }
-      }
-      return -1;
-    }
-
-    const normName = normalizeMerchantKey(candidate.name);
-    const normOrig = candidate.originalName ? normalizeMerchantKey(candidate.originalName) : '';
-    return unified.findIndex((u) => {
-      const uNorm = normalizeMerchantKey(u.name);
-      const uOrig = u.originalName ? normalizeMerchantKey(u.originalName) : '';
-      const sameName =
-        uNorm === normName ||
-        (normOrig && (uNorm === normOrig || uOrig === normOrig)) ||
-        (uOrig && uOrig === normName);
-      if (!sameName) return false;
-      if (requireAmountMatch && candAmt > 0 && u.amount > 0) {
-        return isFixedExpenseAmountMatch(u, candAmt);
-      }
-      return true;
-    });
   };
 
-  const resolveManualOverrideForItem = (
-    itemId: string | undefined,
-    ident: { normEffective: string; normOrig: string },
-    itemAmount: number,
-    totalSameMerchantCount: number
-  ) => {
-    if (itemId && overrides[`id:${itemId}`]) {
-      return overrides[`id:${itemId}`];
-    }
-    const byName = overrides[ident.normEffective] || overrides[ident.normOrig];
-    if (!byName) return undefined;
-    // Om det finns flera fasta utgifter hos samma aktör (t.ex. 3 försäkringar hos Folksam),
-    // applicera inte ett generiskt namn-override på en annan försäkring med helt annat belopp!
-    if (
-      totalSameMerchantCount > 1 &&
-      byName.amount !== undefined &&
-      itemAmount > 0 &&
-      Math.abs(byName.amount - itemAmount) > Math.max(15, Math.round(itemAmount * 0.1))
-    ) {
-      return undefined;
-    }
-    return byName;
-  };
-
-  // 1. Start from DB items if provided
+  // 1. Load items from Supabase fixed_expenses table
   if (Array.isArray(dbList)) {
     for (const f of dbList) {
-      if (f.isCancelled) continue;
-      const ident = resolveItemIdentity(f.name || '', f.category || 'Boende', f.originalName);
-      if (ident.isDismissed) continue;
+      if (!f || f.isCancelled) continue;
+      if (f.id && deletedIds.has(String(f.id))) continue;
 
       const rawDbAmt = Math.round(Number(f.amount) || 0);
-      const sameMerchantInDbCount = dbList.filter((other) => {
-        const oNorm = normalizeMerchantKey(other.originalName || other.name || '');
-        return oNorm && (oNorm === ident.normOrig || oNorm === ident.normEffective);
-      }).length;
-
+      const origName = f.originalName || f.name || 'Fast utgift';
       const validId = ensureValidUuid(
         f.id,
-        sameMerchantInDbCount > 1
-          ? `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}:${rawDbAmt}`
-          : `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
+        `fixed:${uid || 'local'}:${normalizeMerchantKey(origName)}:${rawDbAmt}:${f.deductionDay || 27}`
       );
-      const manual = resolveManualOverrideForItem(
-        validId,
-        ident,
-        rawDbAmt,
-        sameMerchantInDbCount
-      );
-      const finalName = manual?.name || (sameMerchantInDbCount > 1 ? f.name : ident.effectiveName);
+      if (deletedIds.has(validId)) continue;
+
+      const idOverride = overrides[`id:${validId}`];
+      const finalName = (idOverride?.name || f.name || origName).trim();
       const finalCat = normalizeCategoryToValid(
-        manual?.category || ident.effectiveCategory || 'Boende',
+        idOverride?.category || f.category || 'Räkningar',
         'expense'
       );
-      const finalAmt = manual?.amount !== undefined ? manual.amount : rawDbAmt;
-      const finalDue = manual?.dueDay || f.deductionDay || 27;
-      const finalMethod = manual?.paymentMethod || f.paymentMethod || 'Autogiro';
+      const finalAmt = idOverride?.amount !== undefined ? idOverride.amount : rawDbAmt;
+      const finalIsShared =
+        idOverride?.isShared !== undefined ? idOverride.isShared : f.isShared;
+      const finalFullAmt =
+        idOverride?.fullAmount !== undefined ? idOverride.fullAmount : f.fullAmount;
+      const finalDue = idOverride?.dueDay || f.deductionDay || f.dueDay || 27;
+      const finalMethod = idOverride?.paymentMethod || f.paymentMethod || 'Autogiro';
 
       if (isValidUuid(f.id)) {
         dbIds.add(f.id);
@@ -570,61 +506,56 @@ function reconcileFixedExpensesList(params: {
       const item: FixedExpenseItem = {
         id: validId,
         name: finalName,
-        originalName: ident.originalName,
+        originalName: origName,
         amount: finalAmt,
-        isShared: manual?.isShared,
-        fullAmount: manual?.fullAmount,
+        isShared: finalIsShared,
+        fullAmount: finalFullAmt,
         dueDay: finalDue,
         category: finalCat,
         paymentMethod: finalMethod,
         logo: f.logo || getLogoUrl(finalName, finalCat),
+        receiptUrl: f.receiptUrl,
+        receiptName: f.receiptName,
       };
 
-      const existingIdx = findExistingIndex(item, true);
+      const existingIdx = findExactSavedMatchIndex(item);
       if (existingIdx === -1) {
         unified.push(item);
       }
     }
   }
 
-  // 2. Merge with current/cached items so cached items are never lost before bank detection
+  // 2. Merge with current/cached/profile items so user-added or edited items are ALWAYS preserved
   for (const curr of currentList) {
-    const ident = resolveItemIdentity(curr.name, curr.category || 'Räkningar', curr.originalName);
-    if (ident.isDismissed) continue;
+    if (!curr || !curr.name) continue;
+    if (curr.id && deletedIds.has(String(curr.id))) continue;
 
     const rawCurrAmt = Math.round(Number(curr.amount) || 0);
-    const sameMerchantInCurrCount = currentList.filter((other) => {
-      const oNorm = normalizeMerchantKey(other.originalName || other.name || '');
-      return oNorm && (oNorm === ident.normOrig || oNorm === ident.normEffective);
-    }).length;
-
+    const origName = curr.originalName || curr.name;
     const validId = ensureValidUuid(
       curr.id,
-      sameMerchantInCurrCount > 1
-        ? `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}:${rawCurrAmt}`
-        : `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
+      `fixed:${uid || 'local'}:${normalizeMerchantKey(origName)}:${rawCurrAmt}:${curr.dueDay || 27}`
     );
-    const manual = resolveManualOverrideForItem(
-      validId,
-      ident,
-      rawCurrAmt,
-      sameMerchantInCurrCount
-    );
-    const finalName = manual?.name || (sameMerchantInCurrCount > 1 ? curr.name : ident.effectiveName);
+    if (deletedIds.has(validId)) continue;
+
+    const idOverride = overrides[`id:${validId}`];
+    const finalName = (curr.name || idOverride?.name || origName).trim();
     const finalCat = normalizeCategoryToValid(
-      manual?.category || ident.effectiveCategory || 'Räkningar',
+      curr.category || idOverride?.category || 'Räkningar',
       'expense'
     );
-    const finalAmt = manual?.amount !== undefined ? manual.amount : rawCurrAmt;
-    const finalIsShared = manual?.isShared !== undefined ? manual.isShared : curr.isShared;
-    const finalFullAmt = manual?.fullAmount !== undefined ? manual.fullAmount : curr.fullAmount;
-    const finalDue = manual?.dueDay || curr.dueDay || 27;
-    const finalMethod = manual?.paymentMethod || curr.paymentMethod || 'Autogiro';
+    const finalAmt = rawCurrAmt > 0 ? rawCurrAmt : idOverride?.amount || 0;
+    const finalIsShared =
+      curr.isShared !== undefined ? curr.isShared : idOverride?.isShared;
+    const finalFullAmt =
+      curr.fullAmount !== undefined ? curr.fullAmount : idOverride?.fullAmount;
+    const finalDue = curr.dueDay || idOverride?.dueDay || 27;
+    const finalMethod = curr.paymentMethod || idOverride?.paymentMethod || 'Autogiro';
 
     const candidate: FixedExpenseItem = {
       id: validId,
       name: finalName,
-      originalName: ident.originalName,
+      originalName: origName,
       amount: finalAmt,
       isShared: finalIsShared,
       fullAmount: finalFullAmt,
@@ -636,129 +567,70 @@ function reconcileFixedExpensesList(params: {
       receiptName: curr.receiptName,
     };
 
-    const existingIdx = findExistingIndex(candidate, true);
+    const existingIdx = findExactSavedMatchIndex(candidate);
     if (existingIdx === -1) {
       unified.push(candidate);
       if (uid && !dbIds.has(validId)) {
         toPersist.push(candidate);
       }
     } else {
-      unified[existingIdx] = {
-        ...unified[existingIdx],
-        ...(manual
-          ? {
-              name: finalName,
-              category: finalCat,
-              amount: finalAmt,
-              isShared: finalIsShared,
-              fullAmount: finalFullAmt,
-              dueDay: finalDue,
-              paymentMethod: finalMethod,
-              logo: getLogoUrl(finalName, finalCat),
-            }
-          : {}),
-        isShared: finalIsShared ?? unified[existingIdx].isShared,
-        fullAmount: finalFullAmt ?? unified[existingIdx].fullAmount,
-        receiptUrl: curr.receiptUrl || unified[existingIdx].receiptUrl,
-        receiptName: curr.receiptName || unified[existingIdx].receiptName,
+      const existing = unified[existingIdx];
+      const merged: FixedExpenseItem = {
+        ...existing,
+        ...candidate,
+        id: existing.id,
+        logo: candidate.logo || existing.logo || getLogoUrl(finalName, finalCat),
+        receiptUrl: candidate.receiptUrl || existing.receiptUrl,
+        receiptName: candidate.receiptName || existing.receiptName,
       };
+      unified[existingIdx] = merged;
+      if (
+        uid &&
+        (!dbIds.has(merged.id) ||
+          existing.name !== merged.name ||
+          existing.amount !== merged.amount ||
+          existing.dueDay !== merged.dueDay ||
+          existing.category !== merged.category)
+      ) {
+        if (!toPersist.some((p) => p.id === merged.id)) {
+          toPersist.push(merged);
+        }
+      }
     }
   }
 
-  // 3. Reconcile with bank-detected fixed expenses
-  if (Array.isArray(detectedList)) {
+  // 3. Only use automatic bank-detected fixed expenses if the user has NO fixed expenses yet
+  // (e.g. initial onboarding). Once the user has fixed expenses, keep their list 100% static!
+  const hasPriorHistory =
+    unified.length > 0 || deletedIds.size > 0 || dismissed.size > 0;
+  if (!hasPriorHistory && Array.isArray(detectedList)) {
     for (const det of detectedList) {
-      const ident = resolveItemIdentity(det.name, det.category || 'Räkningar', det.name);
-      if (ident.isDismissed) continue;
+      const normName = normalizeMerchantKey(det.name);
+      if (!normName || dismissed.has(normName)) continue;
 
       const detAmt = Math.round(Number(det.amount) || 0);
-      const existingMerchantMatches = findAllMatchingFixedExpensesByMerchant(
-        { title: det.name, amount: detAmt },
-        unified
-      );
-      const manual = resolveManualOverrideForItem(
+      const validId = ensureValidUuid(
         undefined,
-        ident,
-        detAmt,
-        existingMerchantMatches.length
+        `fixed:${uid || 'local'}:${normName}:${detAmt}`
       );
-      const finalName = manual?.name || ident.effectiveName;
-      const finalCat = normalizeCategoryToValid(
-        manual?.category || ident.effectiveCategory || 'Räkningar',
-        'expense'
-      );
-      const finalAmt = manual?.amount !== undefined ? manual.amount : detAmt;
-      const finalDue = manual?.dueDay || det.deductionDay || 27;
-      const finalMethod = manual?.paymentMethod || det.paymentMethod || 'Autogiro';
+      if (deletedIds.has(validId)) continue;
 
-      // Om vi redan har registrerade fasta utgifter för denna aktör i unified, matcha mot rätt belopp (eller första om endast 1 finns)
-      let existingIdx = findExistingIndex(
-        {
-          name: finalName,
-          originalName: det.name,
-          amount: detAmt,
-        },
-        true
-      );
-      if (existingIdx === -1 && existingMerchantMatches.length === 1) {
-        existingIdx = unified.findIndex((u) => u.id === existingMerchantMatches[0].id);
-      }
+      const finalName = det.name.trim();
+      const finalCat = normalizeCategoryToValid(det.category || 'Räkningar', 'expense');
+      const finalDue = det.deductionDay || 27;
+      const finalMethod = det.paymentMethod || 'Autogiro';
 
-      if (existingIdx !== -1) {
-        const existing = unified[existingIdx];
-        const existingManual =
-          overrides[`id:${existing.id}`] ||
-          (existingMerchantMatches.length <= 1
-            ? overrides[normalizeMerchantKey(existing.name)] ||
-              (existing.originalName
-                ? overrides[normalizeMerchantKey(existing.originalName)]
-                : undefined) ||
-              manual
-            : undefined);
-
-        const nextAmt =
-          existingManual?.amount !== undefined
-            ? existingManual.amount
-            : existing.isShared
-            ? existing.amount
-            : dbIds.has(existing.id) && existing.amount > 0
-            ? existing.amount
-            : existingMerchantMatches.length > 1 && existing.amount > 0
-            ? existing.amount
-            : detAmt > 0
-            ? detAmt
-            : existing.amount;
-        const nextDue =
-          existingManual?.dueDay || det.deductionDay || existing.dueDay;
-
-        unified[existingIdx] = {
-          ...existing,
-          originalName: existing.originalName || det.name,
-          amount: nextAmt,
-          isShared: existingManual?.isShared ?? existing.isShared,
-          fullAmount:
-            existingManual?.fullAmount ??
-            existing.fullAmount ??
-            (existing.isShared && detAmt > nextAmt ? detAmt : undefined),
-          dueDay: nextDue,
-        };
-      } else if (existingMerchantMatches.length === 0) {
-        const validId = ensureValidUuid(
-          undefined,
-          `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
-        );
-        const newItem: FixedExpenseItem = {
-          id: validId,
-          name: finalName,
-          originalName: det.name,
-          amount: finalAmt,
-          isShared: manual?.isShared,
-          fullAmount: manual?.fullAmount,
-          dueDay: finalDue,
-          category: finalCat,
-          paymentMethod: finalMethod,
-          logo: det.logo || getLogoUrl(finalName, finalCat),
-        };
+      const newItem: FixedExpenseItem = {
+        id: validId,
+        name: finalName,
+        originalName: det.name,
+        amount: detAmt,
+        dueDay: finalDue,
+        category: finalCat,
+        paymentMethod: finalMethod,
+        logo: det.logo || getLogoUrl(finalName, finalCat),
+      };
+      if (findExactSavedMatchIndex(newItem) === -1) {
         unified.push(newItem);
         if (uid && !dbIds.has(validId)) {
           toPersist.push(newItem);
@@ -772,8 +644,8 @@ function reconcileFixedExpensesList(params: {
 }
 
 /**
- * Reconciles Incomes from DB, local state/cache, and bank detection
- * into a single deterministic, deduplicated list with valid UUIDs.
+ * Reconciles Incomes from DB, local state/cache, and (only on empty initial setup) bank detection
+ * into a single deterministic, static list.
  */
 function reconcileIncomesList(params: {
   currentList: IncomeItem[];
@@ -787,74 +659,44 @@ function reconcileIncomesList(params: {
 } {
   const { currentList, dbList, detectedList, targetPayday, uid } = params;
   const dismissed = getDismissedIncomeMerchants();
+  const deletedIds = getDeletedIncomeIds();
   const overrides = getManualIncomeOverrides();
-  const aliases = getMerchantAliases();
-
-  const resolveItemIdentity = (rawName: string, rawCategory: string, rawOriginal?: string) => {
-    const orig = rawOriginal || rawName;
-    const aliased =
-      resolveMerchantAlias(rawName, aliases) ||
-      (rawOriginal ? resolveMerchantAlias(rawOriginal, aliases) : null);
-    const effectiveName = aliased ? aliased.name : rawName;
-    const effectiveCategory = aliased?.category || rawCategory;
-    const normEffective = normalizeMerchantKey(effectiveName);
-    const normOrig = normalizeMerchantKey(orig);
-    const isDismissed =
-      dismissed.has(normEffective) &&
-      (!aliased || dismissed.has(normalizeMerchantKey(aliased.name)));
-    return {
-      effectiveName,
-      effectiveCategory,
-      originalName: orig,
-      normEffective,
-      normOrig,
-      isDismissed,
-    };
-  };
 
   const unified: IncomeItem[] = [];
   const toPersist: IncomeItem[] = [];
   const dbIds = new Set<string>();
 
-  const findExistingIndex = (candidate: { name: string; originalName?: string }) => {
-    const matched = findMatchingIncome(
-      { title: candidate.name, rawDescription: candidate.originalName, type: 'income' },
-      unified
-    );
-    if (matched) {
-      return unified.findIndex((u) => u.id === matched.id);
+  const findExactSavedIncomeIndex = (candidate: IncomeItem) => {
+    if (candidate.id) {
+      const byIdIdx = unified.findIndex((u) => u.id === candidate.id);
+      if (byIdIdx !== -1) return byIdIdx;
     }
-    const normName = normalizeMerchantKey(candidate.name);
-    const normOrig = candidate.originalName ? normalizeMerchantKey(candidate.originalName) : '';
-    return unified.findIndex((u) => {
-      const uNorm = normalizeMerchantKey(u.name);
-      const uOrig = u.originalName ? normalizeMerchantKey(u.originalName) : '';
-      return (
-        uNorm === normName ||
-        (normOrig && (uNorm === normOrig || uOrig === normOrig)) ||
-        (uOrig && uOrig === normName)
-      );
-    });
+    const candNameNorm = normalizeMerchantKey(candidate.name);
+    const candAmt = Math.round(Math.abs(Number(candidate.amount) || 0));
+    return unified.findIndex(
+      (u) =>
+        normalizeMerchantKey(u.name) === candNameNorm &&
+        Math.round(Math.abs(Number(u.amount) || 0)) === candAmt
+    );
   };
 
   if (Array.isArray(dbList)) {
     for (const i of dbList) {
-      const ident = resolveItemIdentity(i.name || '', i.category || 'Lön', i.originalName);
-      if (ident.isDismissed) continue;
+      if (!i) continue;
+      if (i.id && deletedIds.has(String(i.id))) continue;
 
-      const manual = overrides[ident.normEffective] || overrides[ident.normOrig];
-      const finalName = manual?.name || ident.effectiveName;
-      const finalCat = normalizeCategoryToValid(
-        manual?.category || ident.effectiveCategory || 'Lön',
-        'income'
-      );
-      const finalAmt =
-        manual?.amount !== undefined ? manual.amount : Math.round(Number(i.amount) || 0);
-      const finalPayday = manual?.payday || i.deductionDay || targetPayday || 25;
+      const rawAmt = Math.round(Number(i.amount) || 0);
+      const origName = i.originalName || i.name || 'Inkomst';
       const validId = ensureValidUuid(
         i.id,
-        `income:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
+        `income:${uid || 'local'}:${normalizeMerchantKey(origName)}:${rawAmt}`
       );
+      if (deletedIds.has(validId)) continue;
+
+      const finalName = (i.name || origName).trim();
+      const finalCat = normalizeCategoryToValid(i.category || 'Lön', 'income');
+      const finalPayday = i.deductionDay || i.payday || targetPayday || 25;
+
       if (isValidUuid(i.id)) {
         dbIds.add(i.id);
       }
@@ -862,121 +704,108 @@ function reconcileIncomesList(params: {
       const item: IncomeItem = {
         id: validId,
         name: finalName,
-        originalName: ident.originalName,
-        amount: finalAmt,
+        originalName: origName,
+        amount: rawAmt,
         payday: finalPayday,
         category: finalCat,
         logo: i.logo || getLogoUrl(finalName, finalCat),
       };
 
-      if (findExistingIndex(item) === -1) {
+      if (findExactSavedIncomeIndex(item) === -1) {
         unified.push(item);
       }
     }
   }
 
   for (const curr of currentList) {
-    const ident = resolveItemIdentity(curr.name, curr.category || 'Lön', curr.originalName);
-    if (ident.isDismissed) continue;
+    if (!curr || !curr.name) continue;
+    if (curr.id && deletedIds.has(String(curr.id))) continue;
 
-    const manual = overrides[ident.normEffective] || overrides[ident.normOrig];
-    const finalName = manual?.name || ident.effectiveName;
-    const finalCat = normalizeCategoryToValid(
-      manual?.category || ident.effectiveCategory || 'Lön',
-      'income'
-    );
-    const finalAmt =
-      manual?.amount !== undefined ? manual.amount : Math.round(Number(curr.amount) || 0);
-    const finalPayday = manual?.payday || curr.payday || targetPayday || 25;
+    const rawAmt = Math.round(Number(curr.amount) || 0);
+    const origName = curr.originalName || curr.name;
     const validId = ensureValidUuid(
       curr.id,
-      `income:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
+      `income:${uid || 'local'}:${normalizeMerchantKey(origName)}:${rawAmt}`
     );
+    if (deletedIds.has(validId)) continue;
+
+    const finalName = curr.name.trim();
+    const finalCat = normalizeCategoryToValid(curr.category || 'Lön', 'income');
+    const finalPayday = curr.payday || targetPayday || 25;
 
     const candidate: IncomeItem = {
       id: validId,
       name: finalName,
-      originalName: ident.originalName,
-      amount: finalAmt,
+      originalName: origName,
+      amount: rawAmt,
       payday: finalPayday,
       category: finalCat,
       logo: curr.logo || getLogoUrl(finalName, finalCat),
     };
 
-    const existingIdx = findExistingIndex(candidate);
+    const existingIdx = findExactSavedIncomeIndex(candidate);
     if (existingIdx === -1) {
       unified.push(candidate);
       if (uid && !dbIds.has(validId)) {
         toPersist.push(candidate);
       }
-    } else if (manual) {
-      unified[existingIdx] = {
-        ...unified[existingIdx],
-        name: finalName,
-        category: finalCat,
-        amount: finalAmt,
-        payday: finalPayday,
-        logo: getLogoUrl(finalName, finalCat),
+    } else {
+      const existing = unified[existingIdx];
+      const merged: IncomeItem = {
+        ...existing,
+        ...candidate,
+        id: existing.id,
+        logo: candidate.logo || existing.logo || getLogoUrl(finalName, finalCat),
       };
+      unified[existingIdx] = merged;
+      if (
+        uid &&
+        (!dbIds.has(merged.id) ||
+          existing.name !== merged.name ||
+          existing.amount !== merged.amount ||
+          existing.payday !== merged.payday ||
+          existing.category !== merged.category)
+      ) {
+        if (!toPersist.some((p) => p.id === merged.id)) {
+          toPersist.push(merged);
+        }
+      }
     }
   }
 
-  if (Array.isArray(detectedList)) {
+  const hasPriorIncomeHistory =
+    unified.length > 0 || deletedIds.size > 0 || dismissed.size > 0;
+  if (!hasPriorIncomeHistory && Array.isArray(detectedList)) {
     for (const det of detectedList) {
-      const ident = resolveItemIdentity(det.name, det.category || 'Lön', det.name);
-      if (ident.isDismissed) continue;
+      const normName = normalizeMerchantKey(det.name);
+      if (!normName || dismissed.has(normName)) continue;
 
-      const manual = overrides[ident.normEffective] || overrides[ident.normOrig];
-      const finalName = manual?.name || ident.effectiveName;
+      const manual = overrides[normName];
+      const finalName = (manual?.name || det.name).trim();
       const finalCat = normalizeCategoryToValid(
-        manual?.category || ident.effectiveCategory || 'Lön',
+        manual?.category || det.category || 'Lön',
         'income'
       );
       const detAmt = Math.round(Number(det.amount) || 0);
       const finalAmt = manual?.amount !== undefined ? manual.amount : detAmt;
       const finalPayday = manual?.payday || det.deductionDay || targetPayday || 25;
 
-      const existingIdx = findExistingIndex({
+      const validId = ensureValidUuid(
+        undefined,
+        `income:${uid || 'local'}:${normName}:${finalAmt}`
+      );
+      if (deletedIds.has(validId)) continue;
+
+      const newItem: IncomeItem = {
+        id: validId,
         name: finalName,
         originalName: det.name,
-      });
-
-      if (existingIdx !== -1) {
-        const existing = unified[existingIdx];
-        const existingManual =
-          overrides[normalizeMerchantKey(existing.name)] ||
-          (existing.originalName ? overrides[normalizeMerchantKey(existing.originalName)] : undefined) ||
-          manual;
-
-        const nextAmt =
-          existingManual?.amount !== undefined
-            ? existingManual.amount
-            : detAmt > 0
-            ? detAmt
-            : existing.amount;
-        const nextPayday =
-          existingManual?.payday || det.deductionDay || existing.payday;
-
-        unified[existingIdx] = {
-          ...existing,
-          originalName: existing.originalName || det.name,
-          amount: nextAmt,
-          payday: nextPayday,
-        };
-      } else {
-        const validId = ensureValidUuid(
-          undefined,
-          `income:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
-        );
-        const newItem: IncomeItem = {
-          id: validId,
-          name: finalName,
-          originalName: det.name,
-          amount: finalAmt,
-          payday: finalPayday,
-          category: finalCat,
-          logo: det.logo || getLogoUrl(finalName, finalCat),
-        };
+        amount: finalAmt,
+        payday: finalPayday,
+        category: finalCat,
+        logo: det.logo || getLogoUrl(finalName, finalCat),
+      };
+      if (findExactSavedIncomeIndex(newItem) === -1) {
         unified.push(newItem);
         if (uid && !dbIds.has(validId)) {
           toPersist.push(newItem);
@@ -1356,6 +1185,7 @@ function mapBankTransactionsToAppItems(
           transactionId: bt.transaction_id || undefined,
           entryReference: bt.entry_reference || undefined,
           valueDate: bt.value_date || undefined,
+          bankAccountId: bt.bank_account_id || undefined,
           bankAccountName,
           rawJson:
             bt.raw_json || rawInternalTransferIds.has(bt.id)
@@ -1402,6 +1232,7 @@ function mapBankTransactionsToAppItems(
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
+  const [selectedHistoryAccountId, setSelectedHistoryAccountId] = useState<string | null>(null);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('main');
   const [incomingSwishRequest, setIncomingSwishRequest] = useState<{
     payee: string;
@@ -1991,18 +1822,27 @@ export const App: React.FC = () => {
               )
             : null;
 
-        // Använd aldrig lokalt cachade inkomster/utgifter om användaren inte har vare sig DB-rader eller aktiva banktransaktioner
-        const canMergeLocalIncomes =
-          !isDifferentUser &&
-          cachedState?.userId === uid &&
-          (dbIncomes.length > 0 || Boolean(analyzed));
-        const canMergeLocalFixed =
-          !isDifferentUser &&
-          cachedState?.userId === uid &&
-          (dbFixed.length > 0 || Boolean(analyzed));
+        const profileSavedFixed = extractSavedFixedFromProfile(dbProfile);
+        const profileSavedIncomes = extractSavedIncomesFromProfile(dbProfile);
+
+        const localIncomesToMerge = !isDifferentUser
+          ? [
+              ...profileSavedIncomes,
+              ...(cachedState?.incomes || []),
+              ...incomesRef.current,
+            ]
+          : [...profileSavedIncomes];
+
+        const localFixedToMerge = !isDifferentUser
+          ? [
+              ...profileSavedFixed,
+              ...(cachedState?.fixedExpenses || []),
+              ...fixedExpensesRef.current,
+            ]
+          : [...profileSavedFixed];
 
         const reconciledInc = reconcileIncomesList({
-          currentList: canMergeLocalIncomes ? incomesRef.current : [],
+          currentList: localIncomesToMerge,
           dbList: dbIncomes,
           detectedList: analyzed?.detectedIncomes || null,
           targetPayday: resolvedPayday,
@@ -2010,7 +1850,7 @@ export const App: React.FC = () => {
         });
 
         const reconciledFix = reconcileFixedExpensesList({
-          currentList: canMergeLocalFixed ? fixedExpensesRef.current : [],
+          currentList: localFixedToMerge,
           dbList: dbFixed,
           detectedList: analyzed?.detectedFixedExpenses || null,
           uid,
@@ -2125,6 +1965,10 @@ export const App: React.FC = () => {
                 name: item.name,
                 originalName: item.originalName,
                 amount: item.amount,
+                isShared: item.isShared,
+                fullAmount: item.fullAmount,
+                receiptUrl: item.receiptUrl,
+                receiptName: item.receiptName,
                 deductionDay: item.dueDay,
                 category: item.category,
                 paymentMethod: item.paymentMethod || 'Autogiro',
@@ -2748,31 +2592,39 @@ export const App: React.FC = () => {
   };
 
   const handleAddIncome = async (data: Omit<IncomeItem, 'id'>) => {
-    unDismissIncomeMerchant(data.name);
-    saveManualIncomeOverride(data.name, {
-      amount: data.amount,
-      payday: data.payday,
-      category: data.category,
-      name: data.name,
-    });
+    unDismissIncomeMerchant(data.name, data.originalName);
     const logo = data.logo || getLogoUrl(data.name, data.category);
     const validId = ensureValidUuid(
       undefined,
-      `income:${userId || 'local'}:${normalizeMerchantKey(data.name)}:${Date.now()}`
+      `income:${userId || 'local'}:${normalizeMerchantKey(data.name)}:${data.amount}:${Date.now()}`
+    );
+    unmarkIncomeIdDeleted(validId);
+    saveManualIncomeOverride(
+      data.name,
+      {
+        amount: data.amount,
+        payday: data.payday,
+        category: data.category,
+        name: data.name,
+      },
+      data.originalName || data.name,
+      validId,
+      true
     );
     const newItem: IncomeItem = {
       ...data,
-      originalName: data.name,
+      originalName: data.originalName || data.name,
       logo,
       id: validId,
     };
     const nextIncomes = [...incomesRef.current, newItem];
     incomesRef.current = nextIncomes;
     setIncomes(nextIncomes);
-    saveCachedAppState({ incomes: nextIncomes });
+    saveCachedAppState({ userId: userIdRef.current, incomes: nextIncomes });
+    syncAllUserPreferencesToSupabase(true);
 
     if (userId) {
-      await dataService
+      dataService
         .saveIncomeSource(userId, {
           id: newItem.id,
           name: newItem.name,
@@ -2791,13 +2643,13 @@ export const App: React.FC = () => {
     const existing = incomesRef.current.find((i) => i.id === updated.id);
     const rootOriginalName = existing?.originalName || existing?.name || updated.name;
 
-    if (existing && existing.name.toLowerCase().trim() !== updated.name.toLowerCase().trim()) {
-      dismissIncomeMerchant(existing.name, rootOriginalName);
-      saveMerchantAlias(existing.name, updated.name, updated.category);
-      saveMerchantAlias(rootOriginalName, updated.name, updated.category);
-    }
-    saveMerchantAlias(updated.name, updated.name, updated.category);
-    unDismissIncomeMerchant(updated.name);
+    unDismissIncomeMerchant(updated.name, rootOriginalName);
+    const logo = updated.logo || getLogoUrl(updated.name, updated.category);
+    const validId = ensureValidUuid(
+      updated.id,
+      `income:${userId || 'local'}:${normalizeMerchantKey(rootOriginalName)}`
+    );
+    unmarkIncomeIdDeleted(validId);
     saveManualIncomeOverride(
       updated.name,
       {
@@ -2806,14 +2658,11 @@ export const App: React.FC = () => {
         category: updated.category,
         name: updated.name,
       },
-      rootOriginalName
+      rootOriginalName,
+      validId,
+      true
     );
 
-    const logo = updated.logo || getLogoUrl(updated.name, updated.category);
-    const validId = ensureValidUuid(
-      updated.id,
-      `income:${userId || 'local'}:${normalizeMerchantKey(rootOriginalName)}`
-    );
     const itemWithLogo: IncomeItem = {
       ...updated,
       id: validId,
@@ -2834,15 +2683,11 @@ export const App: React.FC = () => {
     transactionsRef.current = nextTxs;
     setTransactions(nextTxs);
 
-    saveCachedAppState({ incomes: nextIncomes, transactions: nextTxs });
+    saveCachedAppState({ userId: userIdRef.current, incomes: nextIncomes, transactions: nextTxs });
+    syncAllUserPreferencesToSupabase(true);
 
     if (userId) {
-      if (existing && existing.name !== itemWithLogo.name) {
-        await dataService
-          .deleteIncomeSource('', userId, [existing.name, rootOriginalName].filter((n) => n !== itemWithLogo.name))
-          .catch(() => {});
-      }
-      await dataService
+      dataService
         .saveIncomeSource(userId, {
           id: itemWithLogo.id,
           name: itemWithLogo.name,
@@ -2859,35 +2704,36 @@ export const App: React.FC = () => {
 
   const handleDeleteIncome = async (id: string) => {
     const item = incomesRef.current.find((i) => i.id === id);
-    const namesToDelete: string[] = [];
+    markIncomeIdDeleted(id);
     if (item) {
-      dismissIncomeMerchant(item.name, item.originalName);
-      namesToDelete.push(item.name);
-      if (item.originalName) namesToDelete.push(item.originalName);
+      const sameMerchantRemaining = incomesRef.current.filter(
+        (i) => i.id !== id && normalizeMerchantKey(i.name) === normalizeMerchantKey(item.name)
+      );
+      if (sameMerchantRemaining.length === 0) {
+        dismissIncomeMerchant(item.name, item.originalName);
+      }
     }
     const nextIncomes = incomesRef.current.filter((i) => i.id !== id);
     incomesRef.current = nextIncomes;
     setIncomes(nextIncomes);
-    saveCachedAppState({ incomes: nextIncomes });
+    saveCachedAppState({ userId: userIdRef.current, incomes: nextIncomes });
+    syncAllUserPreferencesToSupabase(true);
 
     if (userId) {
-      await dataService.deleteIncomeSource(id, userId, namesToDelete).catch(() => {});
+      dataService.deleteIncomeSource(id, userId, []).catch(() => {});
     }
   };
 
   const handleAddFixed = async (
     data: Omit<FixedExpenseItem, 'id'>
   ): Promise<FixedExpenseItem> => {
-    unDismissFixedMerchant(data.name);
+    unDismissFixedMerchant(data.name, data.originalName);
     const logo = data.logo || getLogoUrl(data.name, data.category);
     const validId = ensureValidUuid(
       undefined,
       `fixed:${userId || 'local'}:${normalizeMerchantKey(data.name)}:${data.amount}:${Date.now()}`
     );
-    const existingSameMerchant = findAllMatchingFixedExpensesByMerchant(
-      { title: data.name, amount: data.amount },
-      fixedExpensesRef.current
-    );
+    unmarkFixedIdDeleted(validId);
     saveManualFixedOverride(
       data.name,
       {
@@ -2899,9 +2745,9 @@ export const App: React.FC = () => {
         paymentMethod: data.paymentMethod,
         name: data.name,
       },
-      data.name,
+      data.originalName || data.name,
       validId,
-      existingSameMerchant.length > 0
+      true
     );
     const newItem: FixedExpenseItem = {
       ...data,
@@ -2914,10 +2760,11 @@ export const App: React.FC = () => {
     );
     fixedExpensesRef.current = nextFixed;
     setFixedExpenses(nextFixed);
-    saveCachedAppState({ fixedExpenses: nextFixed });
+    saveCachedAppState({ userId: userIdRef.current, fixedExpenses: nextFixed });
+    syncAllUserPreferencesToSupabase(true);
 
     if (userId) {
-      await dataService
+      dataService
         .saveFixedExpense(userId, {
           id: newItem.id,
           name: newItem.name,
@@ -2928,6 +2775,10 @@ export const App: React.FC = () => {
           paymentMethod: newItem.paymentMethod || 'Autogiro',
           frequency: Frequency.MONTHLY,
           logo,
+          isShared: newItem.isShared,
+          fullAmount: newItem.fullAmount,
+          receiptUrl: newItem.receiptUrl,
+          receiptName: newItem.receiptName,
         })
         .catch(() => {});
     }
@@ -2936,6 +2787,31 @@ export const App: React.FC = () => {
 
   const handleMarkAsFixed = async (tx: TransactionItem, kind: 'expense' | 'income') => {
     const day = parseInt(tx.date.slice(8, 10), 10) || (kind === 'expense' ? 27 : 25);
+
+    // Save any edited transaction metadata (title, category, paymentMethod, note) so the transaction itself keeps the edits
+    saveTransactionMeta(tx.id, {
+      title: tx.title,
+      category: tx.category,
+      paymentMethod: tx.paymentMethod,
+      note: tx.note,
+    });
+    setTransactions((prev) => {
+      const next = prev.map((item) =>
+        item.id === tx.id
+          ? {
+              ...item,
+              title: tx.title,
+              category: tx.category,
+              paymentMethod: tx.paymentMethod,
+              note: tx.note,
+            }
+          : item
+      );
+      transactionsRef.current = next;
+      saveCachedAppState({ userId: userIdRef.current, transactions: next });
+      return next;
+    });
+
     setIsTxModalOpen(false);
     setSelectedTransaction(null);
     setActiveTab('fixed');
@@ -2955,6 +2831,7 @@ export const App: React.FC = () => {
     } else {
       await handleAddIncome({
         name: tx.title,
+        originalName: tx.counterpartyName || tx.rawDescription || tx.title,
         amount: tx.amount,
         payday: day,
         category: tx.category || 'Lön',
@@ -3037,39 +2914,16 @@ export const App: React.FC = () => {
   const handleUpdateFixed = async (updated: FixedExpenseItem) => {
     const existing = fixedExpensesRef.current.find((f) => f.id === updated.id);
     const rootOriginalName = existing?.originalName || existing?.name || updated.name;
-    const otherSameMerchantItems = fixedExpensesRef.current.filter(
-      (f) =>
-        f.id !== updated.id &&
-        findAllMatchingFixedExpensesByMerchant(
-          { title: rootOriginalName, rawDescription: existing?.name },
-          [f]
-        ).length > 0
-    );
-    const hasOtherSameMerchant = otherSameMerchantItems.length > 0;
 
-    if (
-      existing &&
-      existing.name.toLowerCase().trim() !== updated.name.toLowerCase().trim() &&
-      !hasOtherSameMerchant
-    ) {
-      dismissFixedMerchant(existing.name, rootOriginalName);
-      for (const variant of extractMerchantKeyVariants(existing.name)) {
-        saveMerchantAlias(variant, updated.name, updated.category);
-      }
-      for (const variant of extractMerchantKeyVariants(rootOriginalName)) {
-        saveMerchantAlias(variant, updated.name, updated.category);
-      }
-    }
-    if (!hasOtherSameMerchant) {
-      saveMerchantAlias(updated.name, updated.name, updated.category);
-    }
-    unDismissFixedMerchant(updated.name);
+    unDismissFixedMerchant(updated.name, rootOriginalName);
 
     const logo = updated.logo || getLogoUrl(updated.name, updated.category);
     const validId = ensureValidUuid(
       updated.id,
-      `fixed:${userId || 'local'}:${normalizeMerchantKey(rootOriginalName)}:${updated.amount}`
+      `fixed:${userId || userIdRef.current || 'local'}:${normalizeMerchantKey(rootOriginalName)}:${updated.amount}`
     );
+    unmarkFixedIdDeleted(validId);
+
     saveManualFixedOverride(
       updated.name,
       {
@@ -3083,7 +2937,7 @@ export const App: React.FC = () => {
       },
       rootOriginalName,
       validId,
-      hasOtherSameMerchant
+      true
     );
 
     const itemWithLogo: FixedExpenseItem = {
@@ -3098,6 +2952,9 @@ export const App: React.FC = () => {
       .sort((a, b) => a.dueDay - b.dueDay);
     fixedExpensesRef.current = nextFixed;
     setFixedExpenses(nextFixed);
+    setSelectedFixedExpense((prev) =>
+      prev && prev.id === updated.id ? itemWithLogo : prev
+    );
 
     const aliases = getMerchantAliases();
     const nextTxs = transactionsRef.current.map((tx) =>
@@ -3106,24 +2963,25 @@ export const App: React.FC = () => {
     transactionsRef.current = nextTxs;
     setTransactions(nextTxs);
 
-    saveCachedAppState({ fixedExpenses: nextFixed, transactions: nextTxs });
+    saveCachedAppState({
+      ...(userIdRef.current ? { userId: userIdRef.current } : {}),
+      fixedExpenses: nextFixed,
+      transactions: nextTxs,
+    });
+    syncAllUserPreferencesToSupabase(true);
 
-    if (userId) {
-      if (existing && existing.name !== itemWithLogo.name && !hasOtherSameMerchant) {
-        await dataService
-          .deleteFixedExpense(
-            '',
-            userId,
-            [existing.name, rootOriginalName].filter((n) => n !== itemWithLogo.name)
-          )
-          .catch(() => {});
-      }
-      await dataService
-        .saveFixedExpense(userId, {
+    const activeUid = userId || userIdRef.current;
+    if (activeUid) {
+      void dataService
+        .saveFixedExpense(activeUid, {
           id: itemWithLogo.id,
           name: itemWithLogo.name,
           originalName: itemWithLogo.originalName,
           amount: itemWithLogo.amount,
+          isShared: itemWithLogo.isShared,
+          fullAmount: itemWithLogo.fullAmount,
+          receiptUrl: itemWithLogo.receiptUrl,
+          receiptName: itemWithLogo.receiptName,
           deductionDay: itemWithLogo.dueDay,
           category: itemWithLogo.category,
           paymentMethod: itemWithLogo.paymentMethod || 'Autogiro',
@@ -3136,6 +2994,7 @@ export const App: React.FC = () => {
 
   const handleDeleteFixed = async (id: string) => {
     const item = fixedExpensesRef.current.find((f) => f.id === id);
+    markFixedIdDeleted(id);
     const nextFixed = fixedExpensesRef.current.filter((f) => f.id !== id);
     const hasRemainingSameMerchant = item
       ? findAllMatchingFixedExpensesByMerchant(
@@ -3152,10 +3011,15 @@ export const App: React.FC = () => {
     }
     fixedExpensesRef.current = nextFixed;
     setFixedExpenses(nextFixed);
-    saveCachedAppState({ fixedExpenses: nextFixed });
+    saveCachedAppState({
+      ...(userIdRef.current ? { userId: userIdRef.current } : {}),
+      fixedExpenses: nextFixed,
+    });
+    syncAllUserPreferencesToSupabase(true);
 
-    if (userId) {
-      await dataService.deleteFixedExpense(id, userId, namesToDelete).catch(() => {});
+    const activeUid = userId || userIdRef.current;
+    if (activeUid) {
+      void dataService.deleteFixedExpense(id, activeUid, namesToDelete).catch(() => {});
     }
   };
 
@@ -3280,6 +3144,9 @@ export const App: React.FC = () => {
       ...(nextCustomCategory ? { customCategory: nextCustomCategory } : {}),
       isHearted: updated.isHearted,
       isWaitingForPackage: updated.isWaitingForPackage,
+      isWaitingForSwish: updated.isWaitingForSwish,
+      pendingSwishAmount: updated.pendingSwishAmount,
+      pendingSwishRecipient: updated.pendingSwishRecipient,
       receiptUrl: updated.receiptUrl,
       receiptName: updated.receiptName,
       paymentMethod: updated.paymentMethod,
@@ -3441,33 +3308,14 @@ export const App: React.FC = () => {
     const uidToDelete = userId || userIdRef.current;
     const connsToDisconnect = [...connections];
 
-    // 1. Stoppa omedelbart alla pågående bakgrundssynkningar och rensa refs/state synkront
+    // 1. Stoppa omedelbart alla pågående bakgrundssynkningar och förhindra återskapande
     isDeletingAccountRef.current = true;
     pendingRefreshRef.current = false;
     cancelPendingPreferenceSync();
-    userIdRef.current = null;
-    lastHydratedUserIdRef.current = null;
-    incomesRef.current = [];
-    fixedExpensesRef.current = [];
-    transactionsRef.current = [];
-    aiCleanAttemptedRef.current.clear();
-
-    setUserId(null);
-    setUserEmail(null);
-    setUserName('');
-    setUserAvatar(null);
-    setConnections([]);
-    setBankAccounts([]);
-    setIncomes([]);
-    setFixedExpenses([]);
-    setTransactions([]);
-    setDismissedTxIds([]);
-
-    // Rensa localStorage direkt så ingen lyssnare kan läsa gammal cache under raderingen
-    clearAllLocalAppData(false);
 
     try {
       if (uidToDelete && uidToDelete !== 'demo-user' && uidToDelete !== 'preview-user') {
+        // Hämta session och Bearer-token FÖRST innan localStorage rensas eller signOut körs!
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -3485,9 +3333,9 @@ export const App: React.FC = () => {
         // Radera alla rader i samtliga Supabase-tabeller via klienten (RLS)
         await dataService.deleteAllUserData(uidToDelete).catch(() => {});
 
-        // Anropa både Edge Function (adminClient) och server-endpoint för garanterad fullständig radering inkl. auth.users
+        // Anropa både Edge Function (adminClient) och server-endpoint för fullständig radering inkl. auth.users
         await Promise.allSettled([
-          bankService.deleteAccount(),
+          bankService.deleteAccount().catch(() => {}),
           fetch('/api/auth/delete-account', {
             method: 'POST',
             headers: {
@@ -3495,7 +3343,7 @@ export const App: React.FC = () => {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({ userId: uidToDelete }),
-          }),
+          }).catch((err) => console.error('delete-account error:', err)),
         ]);
       } else if (uidToDelete) {
         await dataService.deleteAllUserData(uidToDelete).catch(() => {});
@@ -3503,12 +3351,27 @@ export const App: React.FC = () => {
     } catch (err) {
       console.error('Error during account deletion:', err);
     } finally {
+      // Logga ut och rensa all lokal lagring först efter att nätverksanropen är klara
       await supabase.auth.signOut().catch(() => {});
       clearAllLocalAppData(false);
 
+      userIdRef.current = null;
+      lastHydratedUserIdRef.current = null;
       incomesRef.current = [];
       fixedExpensesRef.current = [];
       transactionsRef.current = [];
+      aiCleanAttemptedRef.current.clear();
+
+      setUserId(null);
+      setUserEmail(null);
+      setUserName('');
+      setUserAvatar(null);
+      setConnections([]);
+      setBankAccounts([]);
+      setIncomes([]);
+      setFixedExpenses([]);
+      setTransactions([]);
+      setDismissedTxIds([]);
       setTargetPayday(25);
       setWeekendHandling('before');
       setSettingsSubView('main');
@@ -3524,35 +3387,72 @@ export const App: React.FC = () => {
     const connsToDisconnect = [...connections];
 
     cancelPendingPreferenceSync();
-    clearAllLocalAppData(true);
 
-    incomesRef.current = [];
-    fixedExpensesRef.current = [];
-    transactionsRef.current = [];
-    aiCleanAttemptedRef.current.clear();
+    try {
+      if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
+        // Hämta session och token FÖRST innan lokal data nollställs
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const token = session?.access_token;
 
-    setIncomes([]);
-    setFixedExpenses([]);
-    setTransactions([]);
-    setDismissedTxIds([]);
-    setConnections([]);
-    setBankAccounts([]);
-    setSettingsSubView('main');
-    setActiveTab('home');
+        if (connsToDisconnect.length > 0) {
+          await Promise.allSettled(
+            connsToDisconnect
+              .filter((c) => c.status !== 'revoked')
+              .map((c) => bankService.disconnect(c.id))
+          );
+        }
 
-    if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
-      if (connsToDisconnect.length > 0) {
-        await Promise.allSettled(
-          connsToDisconnect
-            .filter((c) => c.status !== 'revoked')
-            .map((c) => bankService.disconnect(c.id))
-        );
+        // Anropa dedikerad server-endpoint som raderar all data i samtliga 10 tabeller via Supabase admin
+        await Promise.allSettled([
+          fetch('/api/auth/reset-account', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ userId: activeUid }),
+          }).catch((err) => console.error('reset-account error:', err)),
+          dataService.deleteAllUserData(activeUid).catch(() => {}),
+        ]);
+      } else if (activeUid) {
+        await dataService.deleteAllUserData(activeUid).catch(() => {});
       }
-      await dataService.deleteAllUserData(activeUid).catch(() => {});
-    }
+    } catch (err) {
+      console.error('Error during account reset:', err);
+    } finally {
+      clearAllLocalAppData(true); // Behåll tema och inloggningssession
 
-    setCallbackStatusMsg('Kontot har nollställts och du kan börja om på nytt.');
-    setTimeout(() => setCallbackStatusMsg(null), 4000);
+      incomesRef.current = [];
+      fixedExpensesRef.current = [];
+      transactionsRef.current = [];
+      aiCleanAttemptedRef.current.clear();
+
+      setIncomes([]);
+      setFixedExpenses([]);
+      setTransactions([]);
+      setDismissedTxIds([]);
+      setConnections([]);
+      setBankAccounts([]);
+
+      // Skriv över app-cachen med tom data så den inte återuppstår vid refresh
+      if (activeUid) {
+        saveCachedAppState({
+          userId: activeUid,
+          incomes: [],
+          fixedExpenses: [],
+          transactions: [],
+          connections: [],
+          bankAccounts: [],
+        });
+      }
+
+      setSettingsSubView('main');
+      setActiveTab('home');
+      setCallbackStatusMsg('Kontot har nollställts och du kan börja om på nytt.');
+      setTimeout(() => setCallbackStatusMsg(null), 4000);
+    }
   };
 
   if (showLanding || (!userId && !isInitialLoading && !isOnboardingActive)) {
@@ -3673,17 +3573,23 @@ export const App: React.FC = () => {
         userName={userName}
         userAvatar={userAvatar}
         hasUnreadNotifications={displayTransactions.some((t) => Boolean(t.isWaitingForPackage))}
+        hideActions={activeTab === 'settings'}
+        hideSearch={activeTab === 'transactions'}
         pageTitle={
           activeTab === 'settings'
             ? settingsSubView === 'main'
               ? 'Inställningar'
               : SETTINGS_SUBVIEW_TITLES[settingsSubView]
+            : activeTab === 'goals'
+            ? 'Sparmål & buffert'
             : activeTab === 'saved'
             ? 'Sparade köp'
             : activeTab === 'packages'
             ? 'Väntar på paket'
             : activeTab === 'receipts'
             ? 'Kvitton'
+            : activeTab === 'matpriskollen'
+            ? 'Matpriskollen'
             : null
         }
         onBack={() => {
@@ -3797,9 +3703,14 @@ export const App: React.FC = () => {
                   }}
                   onNavigateToFixed={() => setActiveTab('fixed')}
                   onNavigateToTransactions={() => setActiveTab('transactions')}
+                  onSelectAccount={(accountId) => {
+                    setSelectedHistoryAccountId(accountId);
+                    setActiveTab('transactions');
+                  }}
                   onToggleHeart={handleToggleHeart}
                   onTogglePackage={handleTogglePackage}
                   onExcludeTransaction={handleExcludeTransaction}
+                  onUpdateTransaction={handleUpdateTransaction}
                 />
               )}
 
@@ -3873,6 +3784,9 @@ export const App: React.FC = () => {
                   period={period}
                   targetPayday={targetPayday}
                   weekendHandling={weekendHandling}
+                  accounts={accounts}
+                  selectedAccountId={selectedHistoryAccountId}
+                  onSelectAccount={setSelectedHistoryAccountId}
                   onSelectTransaction={(tx) => {
                     setSelectedTransaction(tx);
                     setIsTxModalOpen(true);
@@ -3887,6 +3801,10 @@ export const App: React.FC = () => {
                   onExcludeTransaction={handleExcludeTransaction}
                 />
               )}
+
+              {activeTab === 'goals' && <SavingsGoalsView />}
+
+              {activeTab === 'matpriskollen' && <MatpriskollenView />}
 
               {activeTab === 'saved' && (
                 <div className="ui-page">
@@ -3923,13 +3841,13 @@ export const App: React.FC = () => {
 
                       return (
                         <section key={`saved-${dateKey}`} className="ui-section">
-                          <div className="ui-section-header">
-                            <h3 className="ui-section-title">
+                          <div className="ui-date-header">
+                            <span className="ui-date-header-title">
                               {formatSwedishDateHeading(dateKey)}
-                            </h3>
+                            </span>
                             <span
-                              className={`ui-section-meta ${
-                                net > 0 ? 'ui-row-amount-income' : ''
+                              className={`ui-date-header-sum ${
+                                net > 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
                               }`}
                             >
                               {net > 0 ? `+${netStr}` : `-${netStr}`}
@@ -3960,32 +3878,37 @@ export const App: React.FC = () => {
                                       isRecurring={false}
                                     />
                                     <div className="min-w-0 flex-1">
-                                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                        <span className="truncate">{tx.title}</span>
+                                      <span className="ui-row-title">
+                                        {tx.title}
+                                      </span>
+                                      <span className="ui-row-subtitle flex items-center gap-1.5">
+                                        <CategoryIcon
+                                          category={tx.category}
+                                          size={11}
+                                          className="shrink-0 text-[var(--text-secondary)]"
+                                        />
+                                        <span className="truncate">{tx.category}</span>
                                         {tx.isHearted && (
                                           <Heart
-                                            size={13}
+                                            size={11}
                                             weight="fill"
                                             className="text-rose-500 shrink-0"
                                           />
                                         )}
                                         {tx.isWaitingForPackage && (
                                           <Package
-                                            size={13}
+                                            size={11}
                                             weight="fill"
                                             className="text-amber-500 shrink-0"
                                           />
                                         )}
                                         {tx.receiptUrl && (
                                           <Paperclip
-                                            size={13}
+                                            size={11}
                                             weight="bold"
                                             className="text-[var(--text-secondary)] shrink-0"
                                           />
                                         )}
-                                      </span>
-                                      <span className="ui-row-subtitle flex items-center gap-1">
-                                        <span className="truncate">{tx.category}</span>
                                       </span>
                                     </div>
                                   </div>
@@ -3997,11 +3920,11 @@ export const App: React.FC = () => {
                                     >
                                       {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
                                     </span>
-                                    {getTransactionTime(tx) && (
-                                      <span className="ui-row-meta">
-                                        {getTransactionTime(tx)}
-                                      </span>
-                                    )}
+                                    <span className="ui-row-meta">
+                                      {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                                        ? 'Reserverat'
+                                        : getTransactionTime(tx)}
+                                    </span>
                                   </div>
                                 </button>
                               );
@@ -4049,13 +3972,13 @@ export const App: React.FC = () => {
 
                       return (
                         <section key={`pkg-${dateKey}`} className="ui-section">
-                          <div className="ui-section-header">
-                            <h3 className="ui-section-title">
+                          <div className="ui-date-header">
+                            <span className="ui-date-header-title">
                               {formatSwedishDateHeading(dateKey)}
-                            </h3>
+                            </span>
                             <span
-                              className={`ui-section-meta ${
-                                net > 0 ? 'ui-row-amount-income' : ''
+                              className={`ui-date-header-sum ${
+                                net > 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
                               }`}
                             >
                               {net > 0 ? `+${netStr}` : `-${netStr}`}
@@ -4088,32 +4011,37 @@ export const App: React.FC = () => {
                                       isRecurring={false}
                                     />
                                     <div className="min-w-0 flex-1">
-                                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                        <span className="truncate">{tx.title}</span>
+                                      <span className="ui-row-title">
+                                        {tx.title}
+                                      </span>
+                                      <span className="ui-row-subtitle flex items-center gap-1.5">
+                                        <CategoryIcon
+                                          category={tx.category}
+                                          size={11}
+                                          className="shrink-0 text-[var(--text-secondary)]"
+                                        />
+                                        <span className="truncate">{tx.category}</span>
                                         {tx.isHearted && (
                                           <Heart
-                                            size={13}
+                                            size={11}
                                             weight="fill"
                                             className="text-rose-500 shrink-0"
                                           />
                                         )}
                                         {tx.isWaitingForPackage && (
                                           <Package
-                                            size={13}
+                                            size={11}
                                             weight="fill"
                                             className="text-amber-500 shrink-0"
                                           />
                                         )}
                                         {tx.receiptUrl && (
                                           <Paperclip
-                                            size={13}
+                                            size={11}
                                             weight="bold"
                                             className="text-[var(--text-secondary)] shrink-0"
                                           />
                                         )}
-                                      </span>
-                                      <span className="ui-row-subtitle flex items-center gap-1">
-                                        <span className="truncate">{tx.category}</span>
                                       </span>
                                     </div>
                                   </button>
@@ -4126,11 +4054,11 @@ export const App: React.FC = () => {
                                       >
                                         {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
                                       </span>
-                                      {getTransactionTime(tx) && (
-                                        <span className="ui-row-meta">
-                                          {getTransactionTime(tx)}
-                                        </span>
-                                      )}
+                                      <span className="ui-row-meta">
+                                        {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                                          ? 'Reserverat'
+                                          : getTransactionTime(tx)}
+                                      </span>
                                     </div>
                                     <button
                                       type="button"
@@ -4154,7 +4082,6 @@ export const App: React.FC = () => {
 
               {activeTab === 'receipts' && (
                 <div className="ui-page">
-
                   {displayTransactions.filter((t) => Boolean(t.receiptUrl)).length > 0 ||
                   fixedExpenses.filter((f) => Boolean(f.receiptUrl)).length > 0 ? (
                     <section className="ui-list-card">
@@ -4189,8 +4116,18 @@ export const App: React.FC = () => {
                                     <span className="ui-row-title">
                                       {exp.name}
                                     </span>
-                                    <span className="ui-row-subtitle flex items-center gap-1">
+                                    <span className="ui-row-subtitle flex items-center gap-1.5">
+                                      <CategoryIcon
+                                        category={exp.category || 'Räkningar'}
+                                        size={11}
+                                        className="shrink-0 text-[var(--text-secondary)]"
+                                      />
                                       <span className="truncate">{exp.category}</span>
+                                      <Paperclip
+                                        size={11}
+                                        weight="bold"
+                                        className="text-[var(--text-secondary)] shrink-0"
+                                      />
                                     </span>
                                   </div>
                                 </button>
@@ -4256,32 +4193,40 @@ export const App: React.FC = () => {
                                     isRecurring={false}
                                   />
                                   <div className="min-w-0 flex-1">
-                                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                      <span className="truncate">{tx.title}</span>
+                                    <span className="ui-row-title">
+                                      {tx.title}
+                                    </span>
+                                    <span className="ui-row-subtitle flex items-center gap-1.5">
+                                      <CategoryIcon
+                                        category={tx.category}
+                                        size={11}
+                                        className="shrink-0 text-[var(--text-secondary)]"
+                                      />
+                                      <span className="truncate">{tx.category}</span>
                                       {tx.isHearted && (
                                         <Heart
-                                          size={13}
+                                          size={11}
                                           weight="fill"
                                           className="text-rose-500 shrink-0"
                                         />
                                       )}
                                       {tx.isWaitingForPackage && (
                                         <Package
-                                          size={13}
+                                          size={11}
                                           weight="fill"
                                           className="text-amber-500 shrink-0"
                                         />
                                       )}
                                       {tx.receiptUrl && (
                                         <Paperclip
-                                          size={13}
+                                          size={11}
                                           weight="bold"
                                           className="text-[var(--text-secondary)] shrink-0"
                                         />
                                       )}
-                                    </span>
-                                    <span className="ui-row-subtitle flex items-center gap-1">
-                                      <span className="truncate">{tx.category}</span>
+                                      {tx.receiptName && (
+                                        <span className="truncate">· {tx.receiptName}</span>
+                                      )}
                                     </span>
                                   </div>
                                 </button>
@@ -4295,8 +4240,10 @@ export const App: React.FC = () => {
                                     >
                                       {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
                                     </span>
-                                    <span className="ui-row-meta truncate max-w-[110px]">
-                                      {tx.receiptName || tx.date}
+                                    <span className="ui-row-meta">
+                                      {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                                        ? 'Reserverat'
+                                        : getTransactionTime(tx)}
                                     </span>
                                   </div>
                                   {tx.receiptUrl && (
@@ -4341,7 +4288,9 @@ export const App: React.FC = () => {
                   period={period}
                   connectedBank={connectedBank}
                   connections={connections}
+                  bankAccounts={bankAccounts}
                   accounts={accounts}
+                  onRefreshBankStatus={refreshBankStatus}
                   syncingBank={syncingBank}
                   targetPayday={targetPayday}
                   weekendHandling={weekendHandling}
@@ -4367,6 +4316,10 @@ export const App: React.FC = () => {
                     setSelectedTransaction(tx);
                     setIsTxModalOpen(true);
                   }}
+                  onAddIncome={handleAddIncome}
+                  onAddFixed={handleAddFixed}
+                  onUpdateIncome={handleUpdateIncome}
+                  onUpdateFixed={handleUpdateFixed}
                   onUpdateEmail={handleUpdateEmail}
                   onUpdateName={handleUpdateName}
                   onStartOnboarding={() => setIsOnboardingActive(true)}

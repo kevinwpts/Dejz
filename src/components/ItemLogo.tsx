@@ -1,22 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-  ShoppingCart,
-  Coffee,
-  Car,
-  House,
-  FilmSlate,
-  ShoppingBag,
-  Heartbeat,
-  ShieldCheck,
-  Receipt,
-  CreditCard,
-  Broadcast,
-  Coins,
-  Tag,
-  ArrowsClockwise
-} from '@phosphor-icons/react';
+import { ArrowsClockwise } from '@phosphor-icons/react';
 import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
-import { getCategoryColor } from '../utils/categoryColors';
+import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 
 interface ItemLogoProps {
@@ -59,64 +44,18 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-9 h-9 rounded-xl',
-    md: 'w-10 h-10 sm:w-11 sm:h-11 rounded-2xl',
-    lg: 'w-12 h-12 rounded-2xl',
-    xl: 'w-16 h-16 rounded-[20px]',
+    sm: 'w-8 h-8 rounded-xl',
+    md: 'w-9 h-9 rounded-xl',
+    lg: 'w-11 h-11 rounded-2xl',
+    xl: 'w-14 h-14 rounded-2xl',
   }[size];
 
   const iconSize = {
-    sm: 18,
-    md: 20,
-    lg: 24,
-    xl: 30,
+    sm: 16,
+    md: 18,
+    lg: 22,
+    xl: 26,
   }[size];
-
-  const renderCategoryIcon = () => {
-    const cat = (category || '').toLowerCase();
-    const titleLower = (name || '').toLowerCase();
-
-    if (cat.includes('mat') || titleLower.includes('ica') || titleLower.includes('coop') || titleLower.includes('hemköp') || titleLower.includes('willys')) {
-      return <ShoppingCart size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('fika') || cat.includes('restaurang') || titleLower.includes('kaffe') || titleLower.includes('lunch')) {
-      return <Coffee size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('transport') || titleLower.includes('bensin') || titleLower.includes('parkering') || titleLower.includes('buss') || titleLower.includes('tåg')) {
-      return <Car size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('boende') || titleLower.includes('hyra') || titleLower.includes('el')) {
-      return <House size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('nöje') || titleLower.includes('bio') || titleLower.includes('spel')) {
-      return <FilmSlate size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('shopping') || cat.includes('hem')) {
-      return <ShoppingBag size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('hälsa') || titleLower.includes('gym') || titleLower.includes('apotek')) {
-      return <Heartbeat size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('försäkring')) {
-      return <ShieldCheck size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('lån') || cat.includes('kredit')) {
-      return <CreditCard size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('abonnemang') || titleLower.includes('bredband') || titleLower.includes('mobil')) {
-      return <Broadcast size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('lön') || cat.includes('inkomst') || cat.includes('bidrag')) {
-      return <Coins size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('räkning')) {
-      return <Receipt size={iconSize} weight="duotone" />;
-    }
-    if (cat.includes('swish') || titleLower.includes('swish')) {
-      return <SwishLogo size={iconSize} />;
-    }
-    return <Tag size={iconSize} weight="duotone" />;
-  };
 
   const badgeSizeClasses = {
     sm: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
@@ -132,31 +71,36 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     xl: 11,
   }[size];
 
-  const tintColor = getCategoryColor(category || name);
-  const imgPadding = size === 'xl' ? 'p-2' : 'p-1';
+  const tintColor = resolveCategoryColor(category || name);
 
   const renderInnerContent = () => {
     if (isSwish) {
       return (
         <div
-          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 ${size === 'xl' ? 'p-2.5' : 'p-1.5'}`}
+          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0`}
           title="Swish"
         >
-          <SwishLogo className="w-full h-full object-contain" />
+          <SwishLogo className="w-[66%] h-[66%] object-contain" />
         </div>
       );
     }
 
     if (currentSrc && !imgFailed) {
+      const isFullBleedTile =
+        currentSrc.includes('img.logo.dev/') || currentSrc.startsWith('data:image/jpeg');
       return (
         <div
-          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 ${imgPadding}`}
+          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0`}
         >
           <img
             src={currentSrc}
             alt={name}
             onError={handleError}
-            className="w-full h-full object-contain rounded-md"
+            className={
+              isFullBleedTile
+                ? 'w-full h-full object-cover'
+                : 'w-[68%] h-[68%] object-contain'
+            }
             loading="lazy"
           />
         </div>
@@ -165,13 +109,13 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
     return (
       <div
-        className={`${sizeClasses} flex items-center justify-center shrink-0`}
+        className={`${sizeClasses} border border-transparent flex items-center justify-center shrink-0`}
         style={{
           backgroundColor: `${tintColor}18`,
           color: tintColor,
         }}
       >
-        {renderCategoryIcon()}
+        <CategoryIcon category={category || name} size={iconSize} color={tintColor} />
       </div>
     );
   };

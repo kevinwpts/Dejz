@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   CalendarBlank,
   CaretRight,
@@ -8,7 +8,6 @@ import {
   Heart,
   Package,
   Paperclip,
-  SlidersHorizontal,
 } from '@phosphor-icons/react';
 import {
   PeriodInfo,
@@ -20,16 +19,14 @@ import {
   TransactionItem,
   FixedExpenseItem,
   IncomeItem,
+  getTransactionTime,
 } from './HomeTab';
-import { CategoryIcon } from './CategoryIcon';
+import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { ItemLogo } from './ItemLogo';
 import { BottomSheet } from './ui/BottomSheet';
-import { getCategoryColor } from '../utils/categoryColors';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   isTransactionManuallyExcluded,
-  getCategoryBudgets,
-  saveCategoryBudget,
 } from '../utils/appCache';
 import { checkIsRecurringTransaction } from '../utils/recurring';
 import {
@@ -238,12 +235,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   const spentPercentage =
     periodIncomeTotal > 0 ? Math.min(100, Math.round((totalSpent / periodIncomeTotal) * 100)) : 0;
 
-  const [categoryBudgets, setCategoryBudgets] = useState<Record<string, number>>(() =>
-    getCategoryBudgets()
-  );
-  const [isEditingBudgetCap, setIsEditingBudgetCap] = useState(false);
-  const [budgetCapInput, setBudgetCapInput] = useState('');
-
   // Previous period for Spend Pace & month-over-month comparison
   const prevComputedPeriod = useMemo(() => {
     const refDate = new Date();
@@ -394,21 +385,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
   const [selectedSliceCategory, setSelectedSliceCategory] = useState<string | null>(null);
 
-  // Harmonisk färgpalett för kategoricirkeln
-  const CATEGORY_COLORS = [
-    '#3b82f6', // Blå
-    '#10b981', // Smaragdgrön
-    '#f59e0b', // Bärnsten
-    '#8b5cf6', // Violett
-    '#ec4899', // Rosa
-    '#06b6d4', // Cyan
-    '#f97316', // Orange
-    '#6366f1', // Indigo
-    '#14b8a6', // Kricka
-    '#eab308', // Gul
-  ];
-
-  // Utgiftskategorier med procentandel för cirkeldiagrammet
+  // Utgiftskategorier med procentandel för cirkeldiagrammet (alltid samma kategorifärg som i övriga appen)
   const expenseChartSlices = useMemo(() => {
     const expenseCats = categoryBreakdown.filter(
       (c) => !c.isIncomeCategory && c.amount > 0
@@ -417,7 +394,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     if (sum <= 0) return [];
 
     let cumulativeFraction = 0;
-    return expenseCats.map((cat, idx) => {
+    return expenseCats.map((cat) => {
       const fraction = cat.amount / sum;
       const startFraction = cumulativeFraction;
       cumulativeFraction += fraction;
@@ -428,7 +405,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         percentage: Math.round(fraction * 100),
         exactPercentage: (fraction * 100).toFixed(1),
         startFraction,
-        color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
+        color: resolveCategoryColor(cat.category),
       };
     });
   }, [categoryBreakdown]);
@@ -540,23 +517,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
       {/* Sektion 1: Översikt (Ren 3-kolumns Bento utan överflödig text) */}
       <section className="ui-card-p">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="ui-section-title">
-            Översikt
-          </h2>
-          <span className="ui-section-meta">
-            {spentPercentage}% nyttjat
-          </span>
-        </div>
-
-        {/* Visuell balans-indikator */}
-        <div className="w-full h-2 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden mb-4">
-          <div
-            className="h-full bg-[var(--text-primary)] rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${spentPercentage}%` }}
-          />
-        </div>
-
         <div className="ui-stat-grid">
           <div className="pr-3 min-w-0">
             <span className="ui-stat-label">
@@ -578,7 +538,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
           <div className="pl-3 min-w-0">
             <span className="ui-stat-label">
-              Netto
+              Kvar
             </span>
             <span
               className={`ui-stat-value ${
@@ -594,109 +554,108 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       </section>
 
       {/* Sektion 1.5: Kategorifördelning i cirkel (% per kategori) */}
-      <section className="ui-card-p">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="ui-section-title">
-            Fördelning
-          </h2>
-          {activeSlice && (
+      <section className="ui-card p-3.5 sm:p-4">
+        {activeSlice && (
+          <div className="flex justify-end mb-1">
             <button
               type="button"
               onClick={() => setSelectedSliceCategory(null)}
-              className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
             >
               Visa alla
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {expenseChartSlices.length > 0 ? (
-          <div className="flex items-center justify-center py-1">
-            {/* Interaktiv Cirkel / Donut */}
-            <div className="relative w-44 h-44 flex items-center justify-center">
-              <svg
-                viewBox="0 0 180 180"
-                className="w-full h-full -rotate-90 overflow-visible"
-              >
-                {/* Bakgrundsring */}
-                <circle
-                  cx="90"
-                  cy="90"
-                  r={donutRadius}
-                  fill="transparent"
-                  stroke="var(--border-subtle)"
-                  strokeWidth="20"
-                />
+          <div>
+            <div className="flex items-center justify-center">
+              {/* Interaktiv Cirkel / Donut */}
+              <div className="relative w-40 h-40 flex items-center justify-center">
+                <svg
+                  viewBox="0 0 180 180"
+                  className="w-full h-full -rotate-90 overflow-visible"
+                >
+                  {/* Bakgrundsring */}
+                  <circle
+                    cx="90"
+                    cy="90"
+                    r={donutRadius}
+                    fill="transparent"
+                    stroke="var(--border-subtle)"
+                    strokeWidth="20"
+                  />
 
-                {expenseChartSlices.map((slice) => {
-                  const isSelected = selectedSliceCategory === slice.category;
-                  const isDimmed =
-                    selectedSliceCategory !== null && !isSelected;
-                  const gap = expenseChartSlices.length > 1 ? 2.5 : 0;
-                  const sliceLength = Math.max(
-                    0,
-                    slice.fraction * donutCircumference - gap
-                  );
-                  const dashOffset = -slice.startFraction * donutCircumference;
+                  {expenseChartSlices.map((slice) => {
+                    const isSelected = selectedSliceCategory === slice.category;
+                    const isDimmed =
+                      selectedSliceCategory !== null && !isSelected;
+                    const gap = expenseChartSlices.length > 1 ? 2.5 : 0;
+                    const sliceLength = Math.max(
+                      0,
+                      slice.fraction * donutCircumference - gap
+                    );
+                    const dashOffset = -slice.startFraction * donutCircumference;
 
-                  return (
-                    <circle
-                      key={slice.category}
-                      cx="90"
-                      cy="90"
-                      r={donutRadius}
-                      fill="transparent"
-                      stroke={slice.color}
-                      strokeWidth={isSelected ? 24 : 20}
-                      strokeDasharray={`${sliceLength} ${donutCircumference}`}
-                      strokeDashoffset={dashOffset}
-                      strokeLinecap="butt"
-                      onClick={() =>
-                        setSelectedSliceCategory((prev) =>
-                          prev === slice.category ? null : slice.category
-                        )
-                      }
-                      className={`cursor-pointer transition-all duration-300 ${
-                        isDimmed ? 'opacity-30' : 'opacity-100'
-                      }`}
-                    />
-                  );
-                })}
-              </svg>
+                    return (
+                      <circle
+                        key={slice.category}
+                        cx="90"
+                        cy="90"
+                        r={donutRadius}
+                        fill="transparent"
+                        stroke={slice.color}
+                        strokeWidth={isSelected ? 24 : 20}
+                        strokeDasharray={`${sliceLength} ${donutCircumference}`}
+                        strokeDashoffset={dashOffset}
+                        strokeLinecap="butt"
+                        onClick={() =>
+                          setSelectedSliceCategory((prev) =>
+                            prev === slice.category ? null : slice.category
+                          )
+                        }
+                        className={`cursor-pointer transition-all duration-300 ${
+                          isDimmed ? 'opacity-30' : 'opacity-100'
+                        }`}
+                      />
+                    );
+                  })}
+                </svg>
 
-              {/* Center-info i cirkeln */}
-              <button
-                type="button"
-                onClick={() => setSelectedSliceCategory(null)}
-                className="absolute inset-6 rounded-full flex flex-col items-center justify-center text-center px-2 cursor-pointer"
-              >
-                {activeSlice ? (
-                  <>
-                    <span className="text-[11px] font-semibold text-[var(--text-muted)] truncate max-w-[110px]">
-                      {activeSlice.category}
-                    </span>
-                    <span className="font-display font-extrabold text-base text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
-                      {activeSlice.percentage}%
-                    </span>
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tabular-nums mt-0.5">
-                      {formatKr(activeSlice.amount)}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-[11px] font-medium text-[var(--text-muted)]">
-                      Utgifter
-                    </span>
-                    <span className="font-display font-extrabold text-sm text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
-                      {formatKr(totalSpent)}
-                    </span>
-                  </>
-                )}
-              </button>
+                {/* Center-info i cirkeln */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedSliceCategory(null)}
+                  className="absolute inset-6 rounded-full flex flex-col items-center justify-center text-center px-2 cursor-pointer"
+                >
+                  {activeSlice ? (
+                    <>
+                      <span className="text-[11px] font-medium text-[var(--text-secondary)] truncate max-w-[105px]">
+                        {activeSlice.category}
+                      </span>
+                      <span className="font-display font-semibold text-lg text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                        {activeSlice.percentage}%
+                      </span>
+                      <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums mt-0.5">
+                        {formatKr(activeSlice.amount)}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[11px] font-medium text-[var(--text-secondary)]">
+                        Utgifter
+                      </span>
+                      <span className="font-display font-semibold text-base text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                        {formatKr(totalSpent)}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="py-6 text-center">
+          <div className="py-5 text-center">
             <p className="ui-empty-sub">
               Inga utgifter att visa i perioden
             </p>
@@ -704,23 +663,12 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         )}
       </section>
 
-      {/* Sektion 2: Kategorier (Inline Dropdown / Accordion) */}
-      <section className="ui-card overflow-hidden">
-        <div className="px-4 sm:px-5 pt-4 pb-2 flex items-center justify-between">
-          <h2 className="ui-section-title">
-            Kategorier
-          </h2>
-        </div>
-
+      {/* Sektion 2: Kategorier (Inline Dropdown / Accordion utan nästlade kort) */}
+      <section className="ui-list-card px-0">
         {categoryBreakdown.length > 0 ? (
           <div className="divide-y divide-[var(--border-subtle)]">
             {categoryBreakdown.map((item) => {
-              const sliceInfo = expenseChartSlices.find((s) => s.category === item.category);
-              const catColor = sliceInfo?.color || getCategoryColor(item.category);
-              const budgetCap = !item.isIncomeCategory ? categoryBudgets[item.category] || 0 : 0;
-              const budgetPct =
-                budgetCap > 0 ? Math.min(100, Math.round((item.amount / budgetCap) * 100)) : 0;
-              const isOverBudget = budgetCap > 0 && item.amount > budgetCap;
+              const catColor = resolveCategoryColor(item.category);
               const isExpanded = inspectedCategory === item.category;
 
               return (
@@ -731,12 +679,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     onClick={() => {
                       const nextCat = isExpanded ? null : item.category;
                       setInspectedCategory(nextCat);
-                      setIsEditingBudgetCap(false);
-                      setBudgetCapInput(
-                        categoryBudgets[item.category]
-                          ? String(categoryBudgets[item.category])
-                          : ''
-                      );
                       if (!item.isIncomeCategory) {
                         setSelectedSliceCategory(nextCat);
                       }
@@ -757,12 +699,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                           <CategoryIcon category={item.category} size={18} color={catColor} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="ui-row-title text-[13px] sm:text-sm">
+                          <span className="ui-row-title">
                             {item.category}
-                          </span>
-                          <span className="ui-row-subtitle tabular-nums">
-                            {item.items.length} {item.items.length === 1 ? 'post' : 'poster'}
-                            {budgetCap > 0 ? ` · Tak ${formatKr(budgetCap)}` : ''}
                           </span>
                         </div>
                       </div>
@@ -770,11 +708,9 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                       <div className="flex items-center gap-2.5 shrink-0">
                         <div className="text-right">
                           <span
-                            className={`font-display font-bold text-[13px] sm:text-sm tabular-nums block ${
+                            className={`font-display font-semibold text-[14.5px] sm:text-[15px] tabular-nums block ${
                               item.isIncomeCategory
                                 ? 'text-emerald-600 dark:text-emerald-400'
-                                : isOverBudget
-                                ? 'text-rose-600 dark:text-rose-400'
                                 : 'text-[var(--text-primary)]'
                             }`}
                           >
@@ -784,11 +720,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                               ? `-${formatKr(item.amount)}`
                               : formatKr(0)}
                           </span>
-                          {sliceInfo && (
-                            <span className="ui-row-meta">
-                              {sliceInfo.percentage}%
-                            </span>
-                          )}
                         </div>
                         <CaretDown
                           size={14}
@@ -799,204 +730,52 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                         />
                       </div>
                     </div>
-
-                    {budgetCap > 0 && (
-                      <div className="w-full pl-[52px]">
-                        <div className="w-full h-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isOverBudget
-                                ? 'bg-rose-500'
-                                : budgetPct >= 85
-                                ? 'bg-amber-500'
-                                : 'bg-emerald-500'
-                            }`}
-                            style={{ width: `${budgetPct}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
                   </button>
 
-                  {/* Smooth Inline Dropdown Panel */}
+                  {/* Smooth Inline Dropdown Panel (Indented child rows with subtle background contrast) */}
                   <div
                     className={`grid transition-all duration-200 ease-out ${
                       isExpanded
-                        ? 'grid-rows-[1fr] opacity-100 border-t border-[var(--border-subtle)] bg-[var(--bg-color)]/35'
+                        ? 'grid-rows-[1fr] opacity-100 border-t border-[var(--border-subtle)] bg-[var(--bg-color)]/65 dark:bg-[var(--bg-color)]/40'
                         : 'grid-rows-[0fr] opacity-0'
                     }`}
                   >
                     <div className="overflow-hidden">
                       {isExpanded && (
-                        <div className="px-4 sm:px-5 py-3 space-y-2.5">
-                          {/* Inline Budget Cap Control for Expense Categories */}
-                          {!item.isIncomeCategory && (
-                            <div className="rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-3">
-                              {!isEditingBudgetCap ? (
-                                <div className="flex items-center justify-between gap-2 text-xs">
-                                  <span className="text-[var(--text-muted)] font-medium">
-                                    Budgettak per period
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setBudgetCapInput(
-                                        budgetCap > 0 ? String(budgetCap) : ''
-                                      );
-                                      setIsEditingBudgetCap(true);
-                                    }}
-                                    className="font-semibold text-[var(--text-primary)] hover:opacity-80 flex items-center gap-1.5 tabular-nums cursor-pointer"
-                                  >
-                                    <SlidersHorizontal
-                                      size={12}
-                                      className="text-[var(--text-secondary)]"
-                                    />
-                                    <span>
-                                      {budgetCap > 0
-                                        ? formatKr(budgetCap)
-                                        : 'Sätt budgettak'}
+                        <div className="divide-y divide-[var(--border-subtle)]">
+                          {item.items.map((subItem: any, idx: number) => {
+                            const isIncome = subItem.type === 'income';
+                            const itemName = subItem.title || subItem.name;
+
+                            return (
+                              <button
+                                key={subItem.id || `${item.category}-${idx}`}
+                                type="button"
+                                onClick={() => {
+                                  if (subItem.date && onSelectTransaction) {
+                                    onSelectTransaction(subItem);
+                                  } else if (subItem.payday && onSelectIncome) {
+                                    onSelectIncome(subItem);
+                                  } else if (subItem.dueDay && onSelectFixed) {
+                                    onSelectFixed(subItem);
+                                  }
+                                }}
+                                className="w-full pl-7 sm:pl-9 pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"
+                              >
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                  <ItemLogo
+                                    name={itemName}
+                                    category={subItem.category || item.category}
+                                    logoUrl={subItem.logo}
+                                    size="sm"
+                                    isRecurring={false}
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <span className="ui-row-title text-[13px] sm:text-[13.5px]">
+                                      {itemName}
                                     </span>
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="space-y-2.5">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="text-xs font-medium text-[var(--text-muted)]">
-                                      Budgettak (kr)
-                                    </span>
-                                    <div className="flex items-center gap-1.5">
-                                      <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        autoFocus
-                                        placeholder="0"
-                                        value={budgetCapInput}
-                                        onChange={(e) =>
-                                          setBudgetCapInput(
-                                            e.target.value.replace(/[^\d]/g, '')
-                                          )
-                                        }
-                                        className="w-24 px-2.5 py-1 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-display font-bold text-xs text-right text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
-                                      />
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const parsed = Math.max(
-                                            0,
-                                            Math.round(Number(budgetCapInput) || 0)
-                                          );
-                                          saveCategoryBudget(
-                                            item.category,
-                                            parsed > 0 ? parsed : null
-                                          );
-                                          setCategoryBudgets(getCategoryBudgets());
-                                          setIsEditingBudgetCap(false);
-                                        }}
-                                        className="ui-btn-sm-primary"
-                                      >
-                                        Spara
-                                      </button>
-                                      {budgetCap > 0 && (
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            saveCategoryBudget(item.category, null);
-                                            setCategoryBudgets(getCategoryBudgets());
-                                            setBudgetCapInput('');
-                                            setIsEditingBudgetCap(false);
-                                          }}
-                                          className="ui-btn-sm text-rose-500"
-                                        >
-                                          Ta bort
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-4 gap-1.5">
-                                    {[1500, 3000, 5000, 8000].map((preset) => {
-                                      const isSel = Number(budgetCapInput) === preset;
-                                      return (
-                                        <button
-                                          key={preset}
-                                          type="button"
-                                          onClick={() =>
-                                            setBudgetCapInput(String(preset))
-                                          }
-                                          className={`py-1.5 rounded-xl text-[11px] font-display font-bold tabular-nums transition-all cursor-pointer border ${
-                                            isSel
-                                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                                              : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                                          }`}
-                                        >
-                                          {new Intl.NumberFormat('sv-SE').format(
-                                            preset
-                                          )}{' '}
-                                          kr
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Category Items List */}
-                          <div className="divide-y divide-[var(--border-subtle)] rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] overflow-hidden">
-                            {item.items.map((subItem: any, idx: number) => {
-                              const isIncome = subItem.type === 'income';
-                              const itemName = subItem.title || subItem.name;
-
-                              return (
-                                <button
-                                  key={subItem.id || `${item.category}-${idx}`}
-                                  type="button"
-                                  onClick={() => {
-                                    if (subItem.date && onSelectTransaction) {
-                                      onSelectTransaction(subItem);
-                                    } else if (subItem.payday && onSelectIncome) {
-                                      onSelectIncome(subItem);
-                                    } else if (subItem.dueDay && onSelectFixed) {
-                                      onSelectFixed(subItem);
-                                    }
-                                  }}
-                                  className="w-full px-3.5 py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"
-                                >
-                                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                                    <ItemLogo
-                                      name={itemName}
-                                      category={subItem.category || item.category}
-                                      logoUrl={subItem.logo}
-                                      size="sm"
-                                      isRecurring={false}
-                                    />
-                                    <div className="min-w-0 flex-1">
-                                      <span className="ui-row-title text-xs sm:text-[13px] flex items-center gap-1.5">
-                                        <span className="truncate">{itemName}</span>
-                                        {subItem.isHearted && (
-                                          <Heart
-                                            size={12}
-                                            weight="fill"
-                                            className="text-rose-500 shrink-0"
-                                          />
-                                        )}
-                                        {subItem.isWaitingForPackage && (
-                                          <Package
-                                            size={12}
-                                            weight="fill"
-                                            className="text-amber-500 shrink-0"
-                                          />
-                                        )}
-                                        {subItem.receiptUrl && (
-                                          <Paperclip
-                                            size={12}
-                                            weight="bold"
-                                            className="text-[var(--text-secondary)] shrink-0"
-                                          />
-                                        )}
-                                      </span>
-                                      <span className="ui-row-subtitle">
+                                    <span className="ui-row-subtitle flex items-center gap-1.5">
+                                      <span className="truncate">
                                         {subItem.date
                                           ? formatSwedishDateHeading(subItem.date)
                                           : subItem.payday
@@ -1005,31 +784,71 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                           ? `Den ${subItem.dueDay}:e`
                                           : ''}
                                       </span>
-                                    </div>
+                                      {subItem.isHearted && (
+                                        <Heart
+                                          size={11}
+                                          weight="fill"
+                                          className="text-rose-500 shrink-0"
+                                        />
+                                      )}
+                                      {subItem.isWaitingForPackage && (
+                                        <Package
+                                          size={11}
+                                          weight="fill"
+                                          className="text-amber-500 shrink-0"
+                                        />
+                                      )}
+                                      {subItem.receiptUrl && (
+                                        <Paperclip
+                                          size={11}
+                                          weight="bold"
+                                          className="text-[var(--text-secondary)] shrink-0"
+                                        />
+                                      )}
+                                    </span>
                                   </div>
+                                </div>
 
-                                  <div className="flex items-center gap-2 shrink-0">
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <div className="text-right">
                                     <span
                                       className={
                                         isIncome
-                                          ? 'ui-row-amount-income text-xs sm:text-[13px]'
-                                          : 'ui-row-amount text-xs sm:text-[13px]'
+                                          ? 'ui-row-amount-income text-[13.5px]'
+                                          : 'ui-row-amount text-[13.5px]'
                                       }
                                     >
                                       {isIncome
                                         ? `+${formatKr(subItem.amount)}`
                                         : `-${formatKr(subItem.amount)}`}
                                     </span>
-                                    <CaretRight
-                                      size={12}
-                                      weight="bold"
-                                      className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-                                    />
+                                    {subItem.date && (
+                                      <span className="ui-row-meta">
+                                        {subItem.bookingStatus === 'PDNG' ||
+                                        subItem.bookingStatus === 'HOLD'
+                                          ? 'Reserverat'
+                                          : getTransactionTime({
+                                              id: subItem.id,
+                                              title: subItem.title,
+                                              category: item.category,
+                                              date: subItem.date,
+                                              time: subItem.time,
+                                              note: subItem.note,
+                                              amount: subItem.amount,
+                                              bookingStatus: subItem.bookingStatus,
+                                            })}
+                                      </span>
+                                    )}
                                   </div>
-                                </button>
-                              );
-                            })}
-                          </div>
+                                  <CaretRight
+                                    size={12}
+                                    weight="bold"
+                                    className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                                  />
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

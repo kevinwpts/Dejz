@@ -18,6 +18,7 @@ interface BottomSheetProps {
   contentClassName?: string;
   zIndexClass?: string;
   disablePadding?: boolean;
+  fullScreen?: boolean;
 }
 
 export interface BottomSheetOptionProps {
@@ -49,11 +50,11 @@ export const BottomSheetOption: React.FC<BottomSheetOptionProps> = ({
     <div className="flex items-center gap-3 min-w-0 flex-1">
       {icon && <div className="shrink-0 text-[var(--text-secondary)]">{icon}</div>}
       <div className="min-w-0 flex-1">
-        <span className={`text-[13px] sm:text-sm block truncate ${isSelected ? 'font-bold' : 'font-semibold'}`}>
+        <span className={`text-[14px] sm:text-[14.5px] block truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
           {label}
         </span>
         {subtitle && (
-          <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+          <span className="text-[11.5px] text-[var(--text-muted)] block truncate mt-0.5">
             {subtitle}
           </span>
         )}
@@ -75,7 +76,6 @@ let openSheetsCount = 0;
 function incrementSheetLock() {
   if (typeof document === 'undefined') return;
   openSheetsCount += 1;
-  document.documentElement.setAttribute('data-sheet-open', 'true');
   document.body.style.overflow = 'hidden';
 }
 
@@ -97,23 +97,22 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   bodyClassName,
   footer,
   maxWidthClass = 'max-w-md',
-  maxHeightClass = 'max-h-[92dvh]',
+  maxHeightClass = 'max-h-[90dvh]',
   surfaceClass = 'bg-[var(--surface-color)]',
-  paddingClass = 'p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+  paddingClass = 'px-5 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]',
   contentClassName,
   zIndexClass = 'z-[110]',
   disablePadding = false,
+  fullScreen = false,
 }) => {
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
-  const [dragY, setDragY] = useState(0);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
   const sheetRef = useRef<HTMLDivElement>(null);
-  const dragStartYRef = useRef<number | null>(null);
-  const dragStartTimeRef = useRef<number>(0);
-  const canDragCurrentGestureRef = useRef<boolean>(false);
   const closeTimeoutRef = useRef<number | null>(null);
+  const dragStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -123,14 +122,16 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       }
       setIsRendered(true);
       setIsClosing(false);
-      setDragY(0);
+      setDragOffsetY(0);
+      setIsDragging(false);
     } else if (isRendered) {
       setIsClosing(true);
       closeTimeoutRef.current = window.setTimeout(() => {
         setIsRendered(false);
         setIsClosing(false);
-        setDragY(0);
-      }, 240);
+        setDragOffsetY(0);
+        setIsDragging(false);
+      }, 200);
     }
     return () => {
       if (closeTimeoutRef.current) {
@@ -149,9 +150,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
   const triggerAnimatedClose = useCallback(() => {
     setIsClosing(true);
+    setIsDragging(false);
     closeTimeoutRef.current = window.setTimeout(() => {
       onClose();
-    }, 220);
+    }, 180);
   }, [onClose]);
 
   useEffect(() => {
@@ -165,130 +167,46 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, triggerAnimatedClose]);
 
-  const isInteractiveTarget = (target: EventTarget | null): boolean => {
-    if (!(target instanceof HTMLElement)) return false;
-    return Boolean(
-      target.closest('input, textarea, select, [data-no-sheet-drag="true"]')
-    );
-  };
-
-  const findScrollableParent = (target: EventTarget | null): HTMLElement | null => {
-    let el = target instanceof HTMLElement ? target : null;
-    while (el && el !== sheetRef.current) {
-      const style = window.getComputedStyle(el);
-      const overflowY = style.overflowY;
-      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
-        return el;
-      }
-      el = el.parentElement;
-    }
-    if (
-      sheetRef.current &&
-      sheetRef.current.scrollHeight > sheetRef.current.clientHeight
-    ) {
-      return sheetRef.current;
-    }
-    return null;
-  };
-
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (isClosing || e.touches.length !== 1) return;
-    if (isInteractiveTarget(e.target)) {
-      canDragCurrentGestureRef.current = false;
-      return;
-    }
-
-    const scrollable = findScrollableParent(e.target);
-    const isOnDragHandle =
-      e.target instanceof HTMLElement && Boolean(e.target.closest('[data-sheet-handle="true"]'));
-
-    if (!isOnDragHandle && scrollable && scrollable.scrollTop > 2) {
-      canDragCurrentGestureRef.current = false;
-      return;
-    }
-
+    if (fullScreen) return;
+    const sheetEl = sheetRef.current;
+    if (sheetEl && sheetEl.scrollTop > 2) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('input, textarea, select')) return;
     dragStartYRef.current = e.touches[0].clientY;
-    dragStartTimeRef.current = performance.now();
-    canDragCurrentGestureRef.current = true;
+    setIsDragging(false);
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!canDragCurrentGestureRef.current || dragStartYRef.current === null) return;
-    const currentY = e.touches[0].clientY;
-    const deltaY = currentY - dragStartYRef.current;
-
-    if (!isDragging) {
-      if (deltaY > 6) {
-        setIsDragging(true);
-      } else if (deltaY < -6) {
-        // User is scrolling down inside the sheet
-        canDragCurrentGestureRef.current = false;
-        dragStartYRef.current = null;
-        return;
-      } else {
-        return;
-      }
-    }
-
-    if (deltaY > 0) {
-      setDragY(deltaY);
-    } else {
-      // Subtle upward rubber-banding
-      setDragY(deltaY * 0.16);
-    }
-  };
-
-  const finishDrag = () => {
-    if (!isDragging || dragStartYRef.current === null) {
+    if (fullScreen || dragStartYRef.current === null) return;
+    const sheetEl = sheetRef.current;
+    if (sheetEl && sheetEl.scrollTop > 2) {
       dragStartYRef.current = null;
-      canDragCurrentGestureRef.current = false;
+      setDragOffsetY(0);
       setIsDragging(false);
       return;
     }
+    const deltaY = e.touches[0].clientY - dragStartYRef.current;
+    if (deltaY > 6) {
+      setIsDragging(true);
+      setDragOffsetY(deltaY);
+    } else if (deltaY < 0) {
+      setDragOffsetY(0);
+    }
+  };
 
-    const elapsed = Math.max(1, performance.now() - dragStartTimeRef.current);
-    const velocity = dragY / elapsed; // px per ms
-
-    setIsDragging(false);
+  const handleTouchEnd = () => {
+    if (dragStartYRef.current === null) return;
     dragStartYRef.current = null;
-    canDragCurrentGestureRef.current = false;
-
-    if (dragY > 95 || (dragY > 35 && velocity > 0.48)) {
+    if (dragOffsetY > 95) {
       triggerAnimatedClose();
     } else {
-      setDragY(0);
+      setIsDragging(false);
+      setDragOffsetY(0);
     }
-  };
-
-  // Pointer events for desktop drag on the handle bar
-  const handleHandlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'touch' || isClosing) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dragStartYRef.current = e.clientY;
-    dragStartTimeRef.current = performance.now();
-    canDragCurrentGestureRef.current = true;
-    setIsDragging(true);
-  };
-
-  const handleHandlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'touch' || !isDragging || dragStartYRef.current === null) return;
-    const deltaY = e.clientY - dragStartYRef.current;
-    if (deltaY > 0) {
-      setDragY(deltaY);
-    } else {
-      setDragY(deltaY * 0.16);
-    }
-  };
-
-  const handleHandlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'touch') return;
-    finishDrag();
   };
 
   if (!isRendered) return null;
-
-  const backdropProgress = Math.max(0, Math.min(1, 1 - Math.max(0, dragY) / 340));
-  const computedBackdropOpacity = isClosing ? 0 : backdropProgress;
 
   const effectivePaddingClass = contentClassName
     ? contentClassName
@@ -298,57 +216,63 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
   const sheetElement = (
     <div
-      className={`fixed inset-0 ${zIndexClass} flex items-end justify-center p-0`}
+      className={`fixed inset-0 ${zIndexClass} flex ${
+        fullScreen ? 'items-stretch' : 'items-end'
+      } justify-center p-0`}
       onClick={triggerAnimatedClose}
     >
       {/* Dynamic Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs pointer-events-none"
+        className="fixed inset-0 bg-black/45 backdrop-blur-xs pointer-events-none"
         style={{
-          opacity: computedBackdropOpacity,
-          transition: isDragging ? 'none' : 'opacity 240ms cubic-bezier(0.22, 1, 0.36, 1)',
+          opacity: isClosing ? 0 : Math.max(0.2, 1 - dragOffsetY / 380),
+          transition: isDragging
+            ? 'none'
+            : 'opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       />
 
-      {/* Sheet Container */}
+      {/* Bottom Sheet / Fullscreen Container */}
       <div
         ref={sheetRef}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
-        onTouchEnd={finishDrag}
-        onTouchCancel={finishDrag}
+        onTouchEnd={handleTouchEnd}
         style={{
           transform: isClosing
-            ? 'translateY(105%)'
-            : dragY !== 0
-            ? `translateY(${dragY}px)`
+            ? 'translateY(100%)'
+            : dragOffsetY > 0
+            ? `translateY(${dragOffsetY}px)`
             : undefined,
+          opacity: isClosing ? 0 : 1,
           transition: isDragging
             ? 'none'
-            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), height 240ms cubic-bezier(0.22, 1, 0.36, 1)',
+            : 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
-        className={`relative z-10 w-full ${maxWidthClass} mt-auto ${surfaceClass} rounded-t-[28px] rounded-b-none ${effectivePaddingClass} border-t border-x border-[var(--border-subtle)] shadow-modal ${maxHeightClass} overflow-y-auto overflow-x-hidden ${
-          !isClosing && dragY === 0 ? 'animate-sheet-up' : ''
+        className={`relative z-10 w-full ${maxWidthClass} ${
+          fullScreen
+            ? 'h-[100dvh] max-h-[100dvh] rounded-none border-x border-[var(--border-subtle)]'
+            : `mt-auto rounded-t-[28px] rounded-b-none border-t border-x border-[var(--border-subtle)] ${maxHeightClass}`
+        } ${surfaceClass} ${effectivePaddingClass} shadow-modal overflow-y-auto overflow-x-hidden ${
+          !isClosing && dragOffsetY === 0 ? 'animate-sheet-up' : ''
         }`}
       >
-        {/* Interactive Drag Handle Area */}
+        {/* Top Handle / Safe Area Spacer */}
         <div
-          data-sheet-handle="true"
-          onPointerDown={handleHandlePointerDown}
-          onPointerMove={handleHandlePointerMove}
-          onPointerUp={handleHandlePointerUp}
-          onPointerCancel={handleHandlePointerUp}
-          className={`w-full flex justify-center cursor-grab active:cursor-grabbing select-none touch-none ${
-            disablePadding || contentClassName ? 'pt-3 pb-1.5' : '-mt-2 pt-2 pb-3'
-          }`}
-          title="Svep nedåt för att stänga"
+          className={
+            fullScreen
+              ? 'pt-[max(0.5rem,env(safe-area-inset-top,0.5rem))]'
+              : 'w-full flex justify-center pt-2 pb-3 cursor-grab active:cursor-grabbing'
+          }
         >
-          <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)] transition-transform active:scale-x-110" />
+          {!fullScreen && (
+            <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)]" />
+          )}
         </div>
 
         {title && (
-          <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-3">
+          <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-4">
             <div className="min-w-0">
               <span className="ui-sheet-title block">
                 {title}

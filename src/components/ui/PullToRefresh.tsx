@@ -61,14 +61,13 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({ onRefresh, childre
           height: `${pullDistance}px`,
           opacity: pullDistance > 10 ? Math.min(pullDistance / 60, 1) : 0,
         }}
-        className="overflow-hidden transition-all duration-200 flex items-center justify-center text-xs font-semibold text-[var(--text-secondary)] gap-2 bg-[var(--surface-raised)]/30"
+        className="overflow-hidden transition-all duration-200 flex items-center justify-center text-xs font-semibold text-[var(--text-secondary)] gap-2"
       >
         <ArrowClockwise
           size={18}
           className={`text-[var(--text-primary)] ${refreshing ? 'animate-spin' : ''}`}
           style={{ transform: !refreshing ? `rotate(${pullDistance * 3}deg)` : undefined }}
         />
-        <span>{refreshing ? 'Uppdaterar bank & data...' : pullDistance > 60 ? 'Släpp för att uppdatera' : 'Dra ner för att uppdatera'}</span>
       </div>
 
       <div>{children}</div>

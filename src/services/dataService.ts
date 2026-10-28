@@ -908,6 +908,13 @@ export const dataService = {
       name: e.name,
       originalName: e.period_overrides?._original_name || undefined,
       amount: Number(e.amount),
+      isShared: Boolean(e.period_overrides?._is_shared),
+      fullAmount:
+        e.period_overrides?._full_amount !== undefined && e.period_overrides?._full_amount !== null
+          ? Number(e.period_overrides._full_amount)
+          : undefined,
+      receiptUrl: e.period_overrides?._receipt_url || undefined,
+      receiptName: e.period_overrides?._receipt_name || undefined,
       paymentMethod: e.payment_method,
       frequency: e.frequency,
       icon: e.icon,
@@ -933,7 +940,16 @@ export const dataService = {
     }));
   },
 
-  async saveFixedExpense(userId: string, expense: FixedExpense & { originalName?: string }) {
+  async saveFixedExpense(
+    userId: string,
+    expense: FixedExpense & {
+      originalName?: string;
+      isShared?: boolean;
+      fullAmount?: number;
+      receiptUrl?: string;
+      receiptName?: string;
+    }
+  ) {
     if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_fixed');
       const list: FixedExpense[] = saved ? JSON.parse(saved) : [];
@@ -956,10 +972,20 @@ export const dataService = {
     delete (baseOverrides as any)._last_payment_date;
     delete (baseOverrides as any)._has_no_more_payments;
     delete (baseOverrides as any)._cancellation_scenario;
+    delete (baseOverrides as any)._is_shared;
+    delete (baseOverrides as any)._full_amount;
+    delete (baseOverrides as any)._receipt_url;
+    delete (baseOverrides as any)._receipt_name;
 
     const periodOverrides = {
       ...baseOverrides,
       ...(expense.originalName ? { _original_name: expense.originalName } : {}),
+      ...(expense.isShared ? { _is_shared: true } : {}),
+      ...(expense.fullAmount !== undefined && expense.fullAmount !== null
+        ? { _full_amount: expense.fullAmount }
+        : {}),
+      ...(expense.receiptUrl ? { _receipt_url: expense.receiptUrl } : {}),
+      ...(expense.receiptName ? { _receipt_name: expense.receiptName } : {}),
       ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {}),
       ...(expense.isCancelled
         ? {
@@ -980,20 +1006,24 @@ export const dataService = {
       amount: expense.amount,
       payment_method: expense.paymentMethod,
       frequency: expense.frequency,
-      icon: expense.icon,
+      ...(expense.icon ? { icon: expense.icon } : {}),
       category: expense.category,
       logo: expense.logo,
       deduction_day: expense.deductionDay,
-      start_month: expense.startMonth !== undefined ? expense.startMonth : null,
-      is_variable: expense.isVariable,
+      ...(expense.startMonth !== undefined ? { start_month: expense.startMonth } : {}),
+      ...(expense.isVariable !== undefined ? { is_variable: expense.isVariable } : {}),
       period_overrides: periodOverrides,
-      note: expense.note && expense.note.trim() ? expense.note.trim() : null,
-      is_cancelled: expense.isCancelled || false,
-      cancellation_date: expense.isCancelled && expense.cancellationDate ? expense.cancellationDate : null,
-      cancelled_at: expense.isCancelled && expense.cancelledAt ? expense.cancelledAt : null,
-      last_payment_date: expense.isCancelled && expense.lastPaymentDate ? expense.lastPaymentDate : null,
-      has_no_more_payments: expense.isCancelled ? Boolean(expense.hasNoMorePayments) : false,
-      cancellation_scenario: expense.isCancelled && expense.cancellationScenario ? expense.cancellationScenario : null,
+      ...(expense.note && expense.note.trim() ? { note: expense.note.trim() } : {}),
+      ...(expense.isCancelled
+        ? {
+            is_cancelled: true,
+            ...(expense.cancellationDate ? { cancellation_date: expense.cancellationDate } : {}),
+            ...(expense.cancelledAt ? { cancelled_at: expense.cancelledAt } : {}),
+            ...(expense.lastPaymentDate ? { last_payment_date: expense.lastPaymentDate } : {}),
+            has_no_more_payments: Boolean(expense.hasNoMorePayments),
+            ...(expense.cancellationScenario ? { cancellation_scenario: expense.cancellationScenario } : {}),
+          }
+        : {}),
     };
 
     const currentPayload = { ...payload };

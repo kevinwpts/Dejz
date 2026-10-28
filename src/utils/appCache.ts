@@ -163,6 +163,8 @@ export function extractMerchantKeyVariants(name: string): string[] {
 // --- Permanent Ignored / Blacklisted Merchants for Fixed Items ---
 const DISMISSED_FIXED_KEY = 'dejz_dismissed_fixed_merchants_v1';
 const DISMISSED_INCOME_KEY = 'dejz_dismissed_income_merchants_v1';
+const DELETED_FIXED_IDS_KEY = 'dejz_deleted_fixed_ids_v1';
+const DELETED_INCOME_IDS_KEY = 'dejz_deleted_income_ids_v1';
 const MANUAL_FIXED_OVERRIDES_KEY = 'dejz_manual_fixed_overrides_v1';
 const MANUAL_INCOME_OVERRIDES_KEY = 'dejz_manual_income_overrides_v1';
 const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v3';
@@ -340,12 +342,24 @@ export function dismissFixedMerchant(name: string, originalName?: string): void 
   }
 }
 
-export function unDismissFixedMerchant(name: string): void {
+export function unDismissFixedMerchant(name: string, originalName?: string): void {
   if (typeof window === 'undefined' || !name) return;
   try {
     const set = getDismissedFixedMerchants();
     for (const v of extractMerchantKeyVariants(name)) {
       set.delete(v);
+    }
+    if (originalName) {
+      for (const v of extractMerchantKeyVariants(originalName)) {
+        set.delete(v);
+      }
+    }
+    const aliases = getMerchantAliases();
+    const targetNorm = normalizeMerchantKey(name);
+    for (const [k, info] of Object.entries(aliases)) {
+      if (normalizeMerchantKey(info.name) === targetNorm) {
+        set.delete(k);
+      }
     }
     localStorage.setItem(DISMISSED_FIXED_KEY, JSON.stringify(Array.from(set)));
     syncAllUserPreferencesToSupabase();
@@ -400,15 +414,97 @@ export function dismissIncomeMerchant(name: string, originalName?: string): void
   }
 }
 
-export function unDismissIncomeMerchant(name: string): void {
+export function unDismissIncomeMerchant(name: string, originalName?: string): void {
   if (typeof window === 'undefined' || !name) return;
   try {
     const set = getDismissedIncomeMerchants();
     for (const v of extractMerchantKeyVariants(name)) {
       set.delete(v);
     }
+    if (originalName) {
+      for (const v of extractMerchantKeyVariants(originalName)) {
+        set.delete(v);
+      }
+    }
+    const aliases = getMerchantAliases();
+    const targetNorm = normalizeMerchantKey(name);
+    for (const [k, info] of Object.entries(aliases)) {
+      if (normalizeMerchantKey(info.name) === targetNorm) {
+        set.delete(k);
+      }
+    }
     localStorage.setItem(DISMISSED_INCOME_KEY, JSON.stringify(Array.from(set)));
     syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+export function getDeletedFixedIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(DELETED_FIXED_IDS_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function markFixedIdDeleted(id: string): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    const set = getDeletedFixedIds();
+    set.add(id);
+    localStorage.setItem(DELETED_FIXED_IDS_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    // ignore
+  }
+}
+
+export function unmarkFixedIdDeleted(id: string): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    const set = getDeletedFixedIds();
+    if (set.delete(id)) {
+      localStorage.setItem(DELETED_FIXED_IDS_KEY, JSON.stringify(Array.from(set)));
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function getDeletedIncomeIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(DELETED_INCOME_IDS_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function markIncomeIdDeleted(id: string): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    const set = getDeletedIncomeIds();
+    set.add(id);
+    localStorage.setItem(DELETED_INCOME_IDS_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    // ignore
+  }
+}
+
+export function unmarkIncomeIdDeleted(id: string): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    const set = getDeletedIncomeIds();
+    if (set.delete(id)) {
+      localStorage.setItem(DELETED_INCOME_IDS_KEY, JSON.stringify(Array.from(set)));
+    }
   } catch {
     // ignore
   }
@@ -958,14 +1054,48 @@ export function setShowAccountsOnHome(show: boolean): void {
 
 const TRANSACTION_META_KEY = 'dejz_transaction_meta_v1';
 const CATEGORY_BUDGETS_KEY = 'dejz_category_budgets_v1';
+const SAVINGS_GOALS_KEY = 'dejz_savings_goals_v1';
 const REVIEWED_TX_IDS_KEY = 'dejz_reviewed_tx_ids_v1';
 const PRIVACY_BLUR_KEY = 'dejz_privacy_blur_v1';
+
+export interface SavingsGoalItem {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  monthlyContribution?: number;
+}
+
+export function getSavingsGoals(): SavingsGoalItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(SAVINGS_GOALS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveSavingsGoals(goals: SavingsGoalItem[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(SAVINGS_GOALS_KEY, JSON.stringify(goals));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
 
 export interface TransactionMetaPatch {
   customTitle?: string;
   customCategory?: string;
   isHearted?: boolean;
   isWaitingForPackage?: boolean;
+  isWaitingForSwish?: boolean;
+  pendingSwishAmount?: number;
+  pendingSwishRecipient?: string;
   receiptUrl?: string;
   receiptName?: string;
   paymentMethod?: string;
@@ -1088,12 +1218,17 @@ export function collectAllUserPreferences(): Record<string, any> {
       return fallback;
     }
   };
+  const cachedApp = loadCachedAppState();
   return {
     showAccountsOnHome: getShowAccountsOnHome(),
     excludeInternalTransfers: getExcludeInternalTransfers(),
     excludedTransactionIds: Array.from(getExcludedTransactionIds()),
     dismissedFixedMerchants: Array.from(getDismissedFixedMerchants()),
     dismissedIncomeMerchants: Array.from(getDismissedIncomeMerchants()),
+    deletedFixedIds: Array.from(getDeletedFixedIds()),
+    deletedIncomeIds: Array.from(getDeletedIncomeIds()),
+    savedFixedExpenses: Array.isArray(cachedApp?.fixedExpenses) ? cachedApp!.fixedExpenses : [],
+    savedIncomes: Array.isArray(cachedApp?.incomes) ? cachedApp!.incomes : [],
     manualFixedOverrides: getManualFixedOverrides(),
     manualIncomeOverrides: getManualIncomeOverrides(),
     merchantAliasesV3: getMerchantAliases(),
@@ -1103,6 +1238,7 @@ export function collectAllUserPreferences(): Record<string, any> {
     customPaymentMethods: getStoredPaymentMethods(),
     transactionMeta: getTransactionMetaMap(),
     categoryBudgets: getCategoryBudgets(),
+    savingsGoals: getSavingsGoals(),
     reviewedTransactionIds: Array.from(getReviewedTransactionIds()),
     mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
     swishContacts: safeParse('dejz_swish_contacts', []),
@@ -1148,10 +1284,14 @@ export function clearAllLocalAppData(preserveTheme = false): void {
   }
 }
 
-export function syncAllUserPreferencesToSupabase(): void {
+export function syncAllUserPreferencesToSupabase(immediate = false): void {
   if (typeof window === 'undefined') return;
-  if (syncTimeout) clearTimeout(syncTimeout);
-  syncTimeout = setTimeout(async () => {
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+    syncTimeout = null;
+  }
+
+  const performSync = async () => {
     try {
       const { data } = await supabase.auth.getSession();
       const uid = data?.session?.user?.id;
@@ -1179,7 +1319,34 @@ export function syncAllUserPreferencesToSupabase(): void {
     } catch {
       // ignore offline or schema error
     }
-  }, 300);
+  };
+
+  if (immediate) {
+    void performSync();
+  } else {
+    syncTimeout = setTimeout(() => {
+      syncTimeout = null;
+      void performSync();
+    }, 300);
+  }
+}
+
+export function extractSavedFixedFromProfile(profile: any): FixedExpenseItem[] {
+  if (!profile || typeof profile !== 'object') return [];
+  const prefs =
+    profile.user_preferences && typeof profile.user_preferences === 'object'
+      ? profile.user_preferences
+      : {};
+  return Array.isArray(prefs.savedFixedExpenses) ? prefs.savedFixedExpenses : [];
+}
+
+export function extractSavedIncomesFromProfile(profile: any): IncomeItem[] {
+  if (!profile || typeof profile !== 'object') return [];
+  const prefs =
+    profile.user_preferences && typeof profile.user_preferences === 'object'
+      ? profile.user_preferences
+      : {};
+  return Array.isArray(prefs.savedIncomes) ? prefs.savedIncomes : [];
 }
 
 export function hydrateAllUserPreferencesFromProfile(profile: any): void {
@@ -1233,6 +1400,12 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     if (Array.isArray(prefs.dismissedIncomeMerchants) && !localStorage.getItem(DISMISSED_INCOME_KEY)) {
       localStorage.setItem(DISMISSED_INCOME_KEY, JSON.stringify(prefs.dismissedIncomeMerchants));
     }
+    if (Array.isArray(prefs.deletedFixedIds) && !localStorage.getItem(DELETED_FIXED_IDS_KEY)) {
+      localStorage.setItem(DELETED_FIXED_IDS_KEY, JSON.stringify(prefs.deletedFixedIds));
+    }
+    if (Array.isArray(prefs.deletedIncomeIds) && !localStorage.getItem(DELETED_INCOME_IDS_KEY)) {
+      localStorage.setItem(DELETED_INCOME_IDS_KEY, JSON.stringify(prefs.deletedIncomeIds));
+    }
     if (prefs.manualFixedOverrides && !localStorage.getItem(MANUAL_FIXED_OVERRIDES_KEY)) {
       localStorage.setItem(MANUAL_FIXED_OVERRIDES_KEY, JSON.stringify(prefs.manualFixedOverrides));
     }
@@ -1250,6 +1423,9 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     }
     if (prefs.categoryBudgets && !localStorage.getItem(CATEGORY_BUDGETS_KEY)) {
       localStorage.setItem(CATEGORY_BUDGETS_KEY, JSON.stringify(prefs.categoryBudgets));
+    }
+    if (Array.isArray(prefs.savingsGoals) && !localStorage.getItem(SAVINGS_GOALS_KEY)) {
+      localStorage.setItem(SAVINGS_GOALS_KEY, JSON.stringify(prefs.savingsGoals));
     }
     if (Array.isArray(prefs.reviewedTransactionIds) && !localStorage.getItem(REVIEWED_TX_IDS_KEY)) {
       localStorage.setItem(REVIEWED_TX_IDS_KEY, JSON.stringify(prefs.reviewedTransactionIds));

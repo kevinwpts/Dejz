@@ -8,6 +8,8 @@ interface NavbarProps {
   userAvatar?: string | null;
   pageTitle?: string | null;
   hasUnreadNotifications?: boolean;
+  hideActions?: boolean;
+  hideSearch?: boolean;
   onBack?: (() => void) | null;
   onLogoClick?: () => void;
   onProfileClick: () => void;
@@ -21,6 +23,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   userAvatar,
   pageTitle,
   hasUnreadNotifications = false,
+  hideActions = false,
+  hideSearch = false,
   onBack,
   onLogoClick,
   onProfileClick,
@@ -144,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         }`}
       >
         <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-3">
-          {/* Vänster: Tillbakapil + Sidrubrik på undersidor, annars Dejz-loggan */}
+          {/* Vänster: Tillbakapil + Sidrubrik på undersidor, annars Profilbild */}
           {pageTitle ? (
             <button
               type="button"
@@ -152,90 +156,86 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-2.5 min-w-0 py-1 pr-2 focus:outline-none hover:opacity-85 active:scale-95 transition-all cursor-pointer text-[var(--text-primary)]"
               aria-label="Tillbaka"
             >
-              <span className="w-8 h-8 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
+              <span className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex items-center justify-center shrink-0">
                 <CaretLeft size={15} weight="bold" />
               </span>
-              <span className="font-display font-bold text-base tracking-tight truncate">
+              <span className="font-display font-semibold text-[17px] tracking-[-0.005em] truncate">
                 {pageTitle}
               </span>
             </button>
           ) : (
             <button
               type="button"
-              onClick={onLogoClick}
-              className="flex items-center py-1.5 pr-2 focus:outline-none hover:opacity-80 active:scale-95 transition-all cursor-pointer"
-              aria-label="Dejz Hem"
+              onClick={onProfileClick}
+              title={userName || userEmail || 'Profil & inställningar'}
+              aria-label="Profil & inställningar"
+              className="flex items-center gap-2.5 py-1 pr-2 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group"
             >
-              <img
-                src="/dejz_mork.png"
-                alt="dejz"
-                className="dejz-logo h-6 w-auto object-contain dark:invert"
-              />
+              <span className="w-10 h-10 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
+                {userAvatar && !imgError ? (
+                  <img
+                    src={userAvatar}
+                    alt="Profilbild"
+                    className="w-full h-full object-cover"
+                    onError={() => setImgError(true)}
+                  />
+                ) : initialChar ? (
+                  <span className="font-display font-semibold text-sm uppercase text-[var(--text-primary)]">
+                    {initialChar}
+                  </span>
+                ) : (
+                  <UserCircle size={24} weight="duotone" className="text-[var(--text-secondary)]" />
+                )}
+              </span>
             </button>
           )}
 
-          {/* Höger: Sekretessläge, Sök, Notiser och Profilbild */}
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={togglePrivacyBlur}
-              title={privacyBlur ? 'Visa belopp (Sekretessläge aktivt)' : 'Dölj belopp (Sekretessläge)'}
-              aria-label="Sekretessläge"
-              className={`w-9 h-9 rounded-full hover:bg-[var(--surface-color)]/60 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0 ${
-                privacyBlur ? 'text-amber-500 bg-amber-500/10' : 'text-[var(--text-primary)]'
-              }`}
-            >
-              {privacyBlur ? <EyeSlash size={20} weight="fill" /> : <Eye size={20} weight="regular" />}
-            </button>
+          {/* Höger: Sekretessläge, Sök och Notiser i runda ytor (döljs i Profil & Inställningar) */}
+          {!hideActions && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={togglePrivacyBlur}
+                title={privacyBlur ? 'Visa belopp (Sekretessläge aktivt)' : 'Dölj belopp (Sekretessläge)'}
+                aria-label="Sekretessläge"
+                className={`w-9 h-9 rounded-full border border-[var(--border-subtle)] shadow-subtle active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0 ${
+                  privacyBlur
+                    ? 'text-amber-500 bg-amber-500/12 border-amber-500/20'
+                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                }`}
+              >
+                {privacyBlur ? <EyeSlash size={18} weight="fill" /> : <Eye size={18} weight="regular" />}
+              </button>
 
-            <button
-              type="button"
-              onClick={onSearchClick}
-              title="Sök i Dejz"
-              aria-label="Sök"
-              className="w-9 h-9 rounded-full text-[var(--text-primary)] hover:bg-[var(--surface-color)]/60 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            >
-              <MagnifyingGlass size={20} weight="regular" />
-            </button>
-
-            <button
-              type="button"
-              onClick={onNotificationsClick}
-              title="Notiser & insikter"
-              aria-label="Notiser"
-              className="relative w-9 h-9 rounded-full text-[var(--text-primary)] hover:bg-[var(--surface-color)]/60 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            >
-              <Bell size={20} weight="regular" />
-              {hasUnreadNotifications && (
-                <span
-                  aria-hidden="true"
-                  className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-[var(--bg-color)]"
-                />
+              {!hideSearch && (
+                <button
+                  type="button"
+                  onClick={onSearchClick}
+                  title="Sök"
+                  aria-label="Sök"
+                  className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+                >
+                  <MagnifyingGlass size={18} weight="regular" />
+                </button>
               )}
-            </button>
 
-            <button
-              type="button"
-              onClick={onProfileClick}
-              title={userName || userEmail || 'Profil & konto'}
-              className="w-9 h-9 rounded-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:border-[var(--text-muted)] text-[var(--text-primary)] flex items-center justify-center overflow-hidden transition-all active:scale-95 cursor-pointer shrink-0 ml-1"
-            >
-              {userAvatar && !imgError ? (
-                <img
-                  src={userAvatar}
-                  alt="Profilbild"
-                  className="w-full h-full object-cover"
-                  onError={() => setImgError(true)}
-                />
-              ) : initialChar ? (
-                <span className="font-display font-bold text-xs uppercase text-[var(--text-primary)]">
-                  {initialChar}
-                </span>
-              ) : (
-                <UserCircle size={22} weight="duotone" className="text-[var(--text-secondary)]" />
-              )}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={onNotificationsClick}
+                title="Notiser & insikter"
+                aria-label="Notiser"
+                className="relative w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+              >
+                <Bell size={18} weight="regular" />
+                {hasUnreadNotifications && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-[var(--surface-color)]"
+                  />
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </header>
     </>

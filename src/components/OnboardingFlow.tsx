@@ -8,15 +8,14 @@ import {
   Plus,
   Trash,
   Check,
-  CalendarBlank,
   PencilSimple,
   X,
 } from '@phosphor-icons/react';
 import { IncomeItem, FixedExpenseItem } from './HomeTab';
 import { BankConnection } from '../services/bankService';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon } from './CategoryIcon';
 import { BottomSheet } from './ui/BottomSheet';
+import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
 
 interface OnboardingFlowProps {
   initialName: string;
@@ -279,17 +278,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
         >
           <div className="my-auto space-y-8">
-            <div className="space-y-2">
-              <h1 className="font-display font-extrabold text-3xl tracking-tight text-[var(--text-primary)]">
+            <div>
+              <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 Vad heter du?
               </h1>
-              <p className="text-sm text-[var(--text-secondary)]">
-                Så att vi kan anpassa Dejz för dig.
-              </p>
             </div>
 
             <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
-              <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
+              <span className="text-[11.5px] font-medium text-[var(--text-muted)] block mb-1">
                 Tilltalsnamn
               </span>
               <input
@@ -299,7 +295,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 placeholder="Skriv ditt förnamn..."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-transparent border-0 p-0 font-display font-extrabold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
+                className="w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
               />
             </div>
           </div>
@@ -307,7 +303,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <button
             type="submit"
             disabled={!name.trim()}
-            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />
@@ -321,98 +317,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {step === 2 && (
         <div
           key="step-2"
-          className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
+          className={`flex-1 flex flex-col justify-between py-6 ${pageAnimClass}`}
         >
-          <div className="my-auto space-y-6">
-            <div className="space-y-2">
-              <h1 className="font-display font-extrabold text-3xl tracking-tight text-[var(--text-primary)]">
+          <div className="my-auto space-y-5">
+            <div>
+              <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 När får du lön?
               </h1>
-              <p className="text-sm text-[var(--text-secondary)]">
-                Vi räknar ut vad du har kvar att spendera från lön till lön.
-              </p>
             </div>
 
-            {/* Vanligaste lönedagarna som stora valkort */}
-            <div className="grid grid-cols-3 gap-2.5">
-              {[
-                { day: 25, label: 'Den 25:e', sub: 'Vanligast' },
-                { day: 27, label: 'Den 27:e', sub: 'Kommun / stat' },
-                { day: 18, label: 'Den 18:e', sub: 'Pension / bidrag' },
-              ].map((opt) => {
-                const active = payday === opt.day;
-                return (
-                  <button
-                    key={opt.day}
-                    type="button"
-                    onClick={() => setPayday(opt.day)}
-                    className={`p-4 rounded-3xl text-left transition-all cursor-pointer border flex flex-col justify-between min-h-[88px] active:scale-[0.98] ${
-                      active
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                        : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
-                    }`}
-                  >
-                    <span className="font-display font-extrabold text-base tabular-nums block">
-                      {opt.label}
-                    </span>
-                    <span
-                      className={`text-[11px] font-medium block mt-2 ${
-                        active ? 'opacity-80' : 'text-[var(--text-muted)]'
-                      }`}
-                    >
-                      {opt.sub}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Annan dag i månaden (7-kolumners kalenderrutnät, aldrig <select>) */}
-            <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setShowAllPaydays((prev) => !prev)}
-                className="w-full px-4 py-3.5 flex items-center justify-between text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  <CalendarBlank size={15} className="text-[var(--text-secondary)]" />
-                  <span>Annan dag i månaden</span>
-                </span>
-                <span className="font-display font-bold tabular-nums text-[var(--text-secondary)]">
-                  Den {payday}:e
-                </span>
-              </button>
-
-              {showAllPaydays && (
-                <div className="p-3.5 pt-2 border-t border-[var(--border-subtle)]">
-                  <div className="grid grid-cols-7 gap-1.5">
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
-                      const isSel = payday === d;
-                      return (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => setPayday(d)}
-                          className={`h-9 rounded-xl font-display text-xs tabular-nums transition-all cursor-pointer flex items-center justify-center border ${
-                            isSel
-                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-bold'
-                              : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] font-semibold'
-                          }`}
-                        >
-                          {d}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
+            <DayOfMonthPicker
+              selectedDay={payday}
+              onSelectDay={setPayday}
+              mode="payday"
+              title="Ordinarie lönedag"
+            />
           </div>
 
           <button
             type="button"
             onClick={handleNextFromStep2}
-            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
           >
             <span>Fortsätt med den {payday}:e</span>
             <ArrowRight size={16} weight="bold" />
@@ -429,13 +354,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
         >
           <div className="my-auto space-y-6">
-            <div className="space-y-2">
-              <h1 className="font-display font-extrabold text-3xl tracking-tight text-[var(--text-primary)]">
+            <div>
+              <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 Koppla din bank
               </h1>
-              <p className="text-sm text-[var(--text-secondary)]">
-                Hämta konton, lön och fasta utgifter automatiskt med BankID.
-              </p>
             </div>
 
             {hasConnectedBank ? (
@@ -447,7 +369,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         <CheckCircle size={20} weight="fill" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-display font-bold text-sm text-[var(--text-primary)] block truncate">
+                        <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
                           {conn.aspsp_name}
                         </span>
                         <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
@@ -461,7 +383,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <button
                   type="button"
                   onClick={onOpenBankModal}
-                  className="w-full py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  className="w-full py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
                 >
                   Hantera eller lägg till bank
                 </button>
@@ -477,7 +399,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     <Bank size={22} weight="duotone" />
                   </div>
                   <div>
-                    <span className="font-display font-bold text-sm text-[var(--text-primary)] block">
+                    <span className="font-display font-semibold text-[15px] text-[var(--text-primary)] block">
                       Välj din bank
                     </span>
                     <span className="text-xs text-[var(--text-muted)]">
@@ -494,7 +416,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <button
               type="button"
               onClick={() => navigateStep(4, 'forward')}
-              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all cursor-pointer"
             >
               <span>Fortsätt</span>
               <ArrowRight size={16} weight="bold" />
@@ -504,7 +426,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               <button
                 type="button"
                 onClick={() => navigateStep(4, 'forward')}
-                className="w-full py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="w-full py-2 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 Hoppa över just nu
               </button>
@@ -522,13 +444,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           className={`flex-1 flex flex-col justify-between py-5 min-h-0 ${pageAnimClass}`}
         >
           <div className="space-y-5 overflow-y-auto pr-0.5 pb-4">
-            <div className="space-y-1">
-              <h1 className="font-display font-extrabold text-2xl tracking-tight text-[var(--text-primary)]">
+            <div>
+              <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
                 Stämmer din översikt?
               </h1>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Tryck på en post för att justera belopp eller datum.
-              </p>
             </div>
 
             {/* Live Kvar att spendera-sammanfattning */}
@@ -537,7 +456,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <span className="ui-stat-label">
                   Kvar efter fasta räkningar
                 </span>
-                <span className="font-display font-extrabold text-2xl text-[var(--text-primary)] tabular-nums">
+                <span className="font-display font-semibold text-2xl text-[var(--text-primary)] tabular-nums">
                   {formatKr(kvarAttSpendera)}
                 </span>
               </div>
@@ -560,7 +479,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <button
                   type="button"
                   onClick={() => openAddSheet('income')}
-                  className="text-xs font-bold text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1 cursor-pointer"
+                  className="ui-section-action"
                 >
                   <Plus size={12} weight="bold" />
                   <span>Lägg till</span>
@@ -628,7 +547,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 <button
                   type="button"
                   onClick={() => openAddSheet('fixed')}
-                  className="text-xs font-bold text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1 cursor-pointer"
+                  className="ui-section-action"
                 >
                   <Plus size={12} weight="bold" />
                   <span>Lägg till</span>
@@ -738,34 +657,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   </button>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
-                  <span className="text-[11px] font-medium text-[var(--text-muted)] block text-center">
-                    Vilken dag i månaden?
-                  </span>
-                  <div className="grid grid-cols-7 gap-1.5">
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
-                      const isSel = sheetEditor.day === d;
-                      return (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => {
-                            setSheetEditor({ ...sheetEditor, day: d });
-                            setSheetNavDir('back');
-                            setSheetSubView('main');
-                          }}
-                          className={`h-10 rounded-xl font-display text-xs tabular-nums transition-all cursor-pointer flex items-center justify-center border ${
-                            isSel
-                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-bold'
-                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] font-semibold'
-                          }`}
-                        >
-                          {d}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <DayOfMonthPicker
+                  selectedDay={sheetEditor.day}
+                  onSelectDay={(d) => {
+                    setSheetEditor({ ...sheetEditor, day: d });
+                    setSheetNavDir('back');
+                    setSheetSubView('main');
+                  }}
+                  mode={sheetEditor.type === 'income' ? 'payday' : 'dueday'}
+                  title={
+                    sheetEditor.type === 'income'
+                      ? 'Utbetalningsdag i månaden'
+                      : 'Dragningsdag i månaden'
+                  }
+                />
               </div>
             ) : (
               <form

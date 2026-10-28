@@ -172,6 +172,18 @@ export function resolveCategoryIconComponent(
   return Tag;
 }
 
+export function resolveCategoryColor(category?: string): string {
+  if (category) {
+    const lower = category.toLowerCase().trim();
+    const allStored = [...getStoredExpenseCategories(), ...getStoredIncomeCategories()];
+    const matched = allStored.find((c) => c.name.toLowerCase().trim() === lower);
+    if (matched?.color) {
+      return matched.color;
+    }
+  }
+  return getCategoryColor(category);
+}
+
 interface CategoryIconProps {
   category?: string;
   iconId?: string;

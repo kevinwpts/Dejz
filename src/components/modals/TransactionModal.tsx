@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Heart,
@@ -10,17 +11,19 @@ import {
   CaretRight,
   CaretLeft,
   Check,
-  Bank,
   UserPlus,
   Copy,
   ChatCircleText,
   QrCode,
   ClockCounterClockwise,
   PencilSimple,
+  CalendarBlank,
+  Sparkle,
 } from '@phosphor-icons/react';
 import QRCode from 'qrcode';
 import { SwishLogo } from '../SwishLogo';
 import { BottomSheet } from '../ui/BottomSheet';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import {
   TransactionItem,
   getTransactionTime,
@@ -30,7 +33,7 @@ import {
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
-import { formatSwedishFullDate } from '../../utils/swedishDate';
+import { formatSwedishFullDate, formatSwedishDateHeading } from '../../utils/swedishDate';
 import {
   checkIsRecurringTransaction,
   findSimilarTransactionsForTransaction,
@@ -73,8 +76,10 @@ interface TransactionModalProps {
 
 type ModalSubView =
   | 'details'
+  | 'edit'
   | 'category-picker'
   | 'payment-picker'
+  | 'date-picker'
   | 'similar'
   | 'swish'
   | 'receipt-preview';
@@ -183,9 +188,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState('Kort');
   const [note, setNote] = useState('');
   const [category, setCategory] = useState('');
-  const [applyToAllSimilar, setApplyToAllSimilar] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [pendingRenameTitle, setPendingRenameTitle] = useState<string | null>(null);
+  const [showSimilarPopup, setShowSimilarPopup] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Swish / Be om Swish / Dela i budget state
@@ -205,6 +209,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isEditingMyPhone, setIsEditingMyPhone] = useState<boolean>(() => !loadMySwishPhone());
   const [showSwishQr, setShowSwishQr] = useState<boolean>(true);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [trackPendingSwish, setTrackPendingSwish] = useState<boolean>(true);
+  const [simulatedScanState, setSimulatedScanState] = useState<'idle' | 'scanning' | 'success'>('idle');
+  const scanTimerRef = useRef<number | null>(null);
+  const [pickerYearMonth, setPickerYearMonth] = useState<{ year: number; month: number }>(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+  const [showFullAccount, setShowFullAccount] = useState(false);
 
   const navigateSubView = (next: ModalSubView, dir: 'forward' | 'back' = 'forward') => {
     setNavDirection(dir);
@@ -248,16 +260,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           kind
         )
       );
-      setApplyToAllSimilar(true);
       setSubView('details');
       setNavDirection('forward');
       setShowDeleteConfirm(false);
-      setPendingRenameTitle(null);
+      setShowSimilarPopup(false);
+      setShowFullAccount(false);
       setSwishMode('request');
       const fullOriginalAmt = initialTransaction.originalAmount || initialTransaction.amount;
-      setSwishAmount(Math.max(1, Math.round(fullOriginalAmt / 2)));
+      setSwishAmount(
+        initialTransaction.pendingSwishAmount || Math.max(1, Math.round(fullOriginalAmt / 2))
+      );
       setMyBudgetShareAmount(Math.round(initialTransaction.amount));
       setSelectedLinkedSwishId(initialTransaction.linkedSwishTxId);
+      setSwishRecipientName(initialTransaction.pendingSwishRecipient || '');
+      setTrackPendingSwish(
+        initialTransaction.isWaitingForSwish !== undefined
+          ? initialTransaction.isWaitingForSwish
+          : true
+      );
       setSwishMessage(initialTransaction.title || '');
       setSwishFeedback(null);
       setIsAddingContact(false);
@@ -265,17 +285,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setMySwishPhone(storedMyPhone);
       setIsEditingMyPhone(!storedMyPhone);
       setShowSwishQr(true);
+      setSimulatedScanState('idle');
     } else {
+      const todayIso = new Date().toISOString().slice(0, 10);
       setTxType('expense');
       setTitle('');
       setAmount('');
-      setDate(new Date().toISOString().slice(0, 10));
+      setDate(todayIso);
+      setPickerYearMonth({
+        year: parseInt(todayIso.slice(0, 4), 10),
+        month: parseInt(todayIso.slice(5, 7), 10) - 1,
+      });
       setPaymentMethod('Kort');
       setNote('');
       setCategory('Mat & dryck');
-      setSubView('details');
+      setSubView('edit');
       setNavDirection('forward');
       setShowDeleteConfirm(false);
+      setShowSimilarPopup(false);
     }
   }, [initialTransaction, isOpen]);
 
@@ -291,12 +318,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    if (subView !== 'swish' || swishMode !== 'request' || normalizedMySwishPhone.length < 7) {
+    if (subView !== 'swish' || swishMode !== 'request') {
       setQrDataUrl(null);
       return;
     }
+    const phoneToUse =
+      normalizedMySwishPhone.length >= 7 ? normalizedMySwishPhone : '0701234567';
     const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
-    const swishQrPayload = `C${normalizedMySwishPhone};${amt};${cleanSwishMessage};0`;
+    const swishQrPayload = `C${phoneToUse};${amt};${cleanSwishMessage};0`;
     QRCode.toDataURL(swishQrPayload, {
       width: 240,
       margin: 1,
@@ -317,16 +346,114 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     };
   }, [subView, swishMode, normalizedMySwishPhone, swishAmount, cleanSwishMessage]);
 
-  const resolvedAccountDisplay = useMemo(() => {
-    if (!activeTx) return null;
-    if (activeTx.bankAccountName) return activeTx.bankAccountName;
+  useEffect(() => {
+    return () => {
+      if (scanTimerRef.current) window.clearTimeout(scanTimerRef.current);
+    };
+  }, []);
 
-    if (accounts.length > 0) {
-      const checking = accounts.find((a) => a.type === 'checking') || accounts[0];
-      return `${checking.bankName} · ${checking.name}`;
+  const handleSimulateScan = () => {
+    if (simulatedScanState !== 'idle' || !activeTx) return;
+    setSimulatedScanState('scanning');
+    if (scanTimerRef.current) window.clearTimeout(scanTimerRef.current);
+    scanTimerRef.current = window.setTimeout(() => {
+      setSimulatedScanState('success');
+      const fullAmt = Math.round(activeTx.originalAmount || activeTx.amount);
+      const reqAmt = Math.max(1, Math.min(fullAmt, Math.round(Number(swishAmount) || 0)));
+      const nextMyShare = Math.max(0, fullAmt - reqAmt);
+      const payerName = (swishRecipientName || 'Vän').trim();
+
+      // 1. Skapa en inkommen Swish-transaktion i historiken
+      if (onSave) {
+        const currentTime = new Intl.DateTimeFormat('sv-SE', {
+          timeZone: 'Europe/Stockholm',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+          .format(new Date())
+          .replace('.', ':');
+        onSave({
+          title: `Swish från ${payerName}`,
+          amount: reqAmt,
+          date: activeTx.date || new Date().toISOString().slice(0, 10),
+          time: currentTime,
+          category: 'Swish',
+          type: 'income',
+          paymentMethod: 'Swish',
+          note: `Avräknat för ${cleanSwishMessage || activeTx.title}`,
+        });
+      }
+
+      // 2. Uppdatera utlägget så din budgetandel sänks och bevakningen markeras som klar
+      if (onUpdate) {
+        onUpdate({
+          ...activeTx,
+          amount: nextMyShare,
+          originalAmount: fullAmt,
+          isWaitingForSwish: false,
+          pendingSwishAmount: undefined,
+          pendingSwishRecipient: undefined,
+        });
+      }
+
+      setSwishFeedback(
+        `✓ Swish på ${formatKr(reqAmt)} mottagen! Beloppet har dragits av från ditt utlägg och lagts till i historiken.`
+      );
+    }, 650);
+  };
+
+  const handleResetSimulation = () => {
+    setSimulatedScanState('idle');
+    setSwishFeedback(null);
+  };
+
+  const resolvedAccountInfo = useMemo(() => {
+    if (!activeTx) return null;
+    const raw = activeTx.bankAccountName || '';
+    const checking =
+      (activeTx.bankAccountId
+        ? accounts.find((a) => a.id === activeTx.bankAccountId)
+        : undefined) ||
+      accounts.find(
+        (a) =>
+          raw &&
+          (raw.toLowerCase().includes(a.name.toLowerCase()) ||
+            raw.toLowerCase().includes(a.bankName.toLowerCase()))
+      ) ||
+      accounts.find((a) => a.type === 'checking') ||
+      accounts[0];
+
+    const baseLabel = (raw || (checking ? `${checking.bankName} · ${checking.name}` : 'Lönekonto'))
+      .replace(/\s*·\s*[•*·\d\s-]{4,}$/g, '')
+      .replace(/\b\d[\d\s-]{5,}\b/g, '')
+      .replace(/\s*·\s*$/, '')
+      .trim() || 'Lönekonto';
+
+    const rawAccNum = (checking?.accountNumber || '').trim();
+    const digitsInRaw = (raw.match(/\d[\d\s-]{3,}\d/)?.[0] || '').trim();
+    const sourceNum = rawAccNum || digitsInRaw;
+    const digitsOnly = sourceNum.replace(/\D/g, '');
+
+    let fullNumber = '';
+    let maskedNumber = '';
+    if (digitsOnly.length >= 7) {
+      fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
+      maskedNumber = `•••• ${digitsOnly.slice(-4)}`;
+    } else if (digitsOnly.length >= 4) {
+      const last4 = digitsOnly.slice(-4);
+      fullNumber = `5231-00 ${last4.slice(0, 2)} ${last4.slice(2)}`;
+      maskedNumber = `•••• ${last4}`;
+    } else {
+      fullNumber = '5231-00 482 19';
+      maskedNumber = '•••• 8219';
     }
 
-    return null;
+    return {
+      label: baseLabel,
+      fullNumber,
+      maskedNumber,
+    };
   }, [activeTx, accounts]);
 
   const similarInfo = useMemo(
@@ -376,38 +503,31 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         activeTx.bankAccountName)
   );
 
-  const commitInlineChanges = (
-    overrides?: Partial<TransactionItem>,
-    renameOptions?: {
-      renameScope?: 'single' | 'same-merchant' | 'chain';
-      renameTargetIds?: string[];
-      categoryTargetIds?: string[];
-    }
-  ) => {
+  const commitEditChanges = (applyScope: 'single' | 'same-merchant' | 'chain') => {
     if (isCreateMode || !onUpdate || !activeTx) return;
-    const nextTitle =
-      (overrides?.title !== undefined ? overrides.title : title).trim() || activeTx.title;
-    const nextCategory = overrides?.category !== undefined ? overrides.category : category;
-    const nextNote = (overrides?.note !== undefined ? overrides.note : note).trim();
-    const nextPaymentMethod =
-      overrides?.paymentMethod !== undefined ? overrides.paymentMethod : paymentMethod;
-    const nextDate = overrides?.date !== undefined ? overrides.date : date || activeTx.date;
+    const nextTitle = title.trim() || activeTx.title;
+    const nextCategory = category || activeTx.category;
+    const nextNote = note.trim();
+    const nextPaymentMethod = paymentMethod || getDefaultPaymentMethodForTx(activeTx);
+    const nextDate = date || activeTx.date;
     const nextAmount = isBankSynced
       ? activeTx.amount
-      : Math.max(
-          1,
-          Math.round(
-            Number(overrides?.amount !== undefined ? overrides.amount : amount) || activeTx.amount
-          )
-        );
+      : Math.max(1, Math.round(Number(amount) || activeTx.amount));
 
-    const isCategoryChange = overrides?.category !== undefined && overrides.category !== activeTx.category;
-    const categoryTargetIds =
-      renameOptions?.categoryTargetIds !== undefined
-        ? renameOptions.categoryTargetIds
-        : isCategoryChange && applyToAllSimilar && similarInfo.transactions.length > 1
+    const isTitleChanged = nextTitle !== activeTx.title;
+    const isCategoryChanged = nextCategory !== activeTx.category;
+
+    const targetIds =
+      applyScope === 'chain'
         ? similarInfo.transactions.map((t) => t.id)
+        : applyScope === 'same-merchant'
+        ? similarInfo.sameMerchantTransactions.map((t) => t.id)
         : undefined;
+
+    const categoryTargetIds =
+      applyScope !== 'single' && isCategoryChanged ? targetIds : undefined;
+    const renameTargetIds =
+      applyScope !== 'single' && isTitleChanged ? targetIds : undefined;
 
     onUpdate(
       {
@@ -421,30 +541,25 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       },
       categoryTargetIds,
       {
-        renameScope: renameOptions?.renameScope || 'single',
-        renameTargetIds: renameOptions?.renameTargetIds,
+        renameScope: isTitleChanged ? applyScope : 'single',
+        renameTargetIds,
         categoryTargetIds,
       }
     );
+    setShowSimilarPopup(false);
+    navigateSubView('details', 'back');
   };
 
-  const triggerRenameFlow = (rawNewTitle: string) => {
+  const handleSaveEditClick = () => {
     if (isCreateMode || !activeTx) return;
-    const cleanNewTitle = rawNewTitle.trim();
-    if (!cleanNewTitle) {
-      setTitle(activeTx.title);
-      setPendingRenameTitle(null);
-      return;
-    }
-    if (cleanNewTitle === activeTx.title) {
-      setPendingRenameTitle(null);
-      return;
-    }
-    // Om det finns andra liknande transaktioner (antingen samma butik eller i samma kedja), visa bekräftelse-popup!
-    if (similarInfo.transactions.length > 1) {
-      setPendingRenameTitle(cleanNewTitle);
+    const nextTitle = title.trim() || activeTx.title;
+    const isTitleChanged = nextTitle !== activeTx.title;
+    const isCategoryChanged = category !== activeTx.category;
+
+    if ((isTitleChanged || isCategoryChanged) && similarInfo.transactions.length > 1) {
+      setShowSimilarPopup(true);
     } else {
-      commitInlineChanges({ title: cleanNewTitle }, { renameScope: 'single' });
+      commitEditChanges('single');
     }
   };
 
@@ -453,10 +568,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const cleanAmt = Math.max(1, Math.round(Number(amount) || 0));
     if (!cleanTitle || cleanAmt <= 0) return;
     if (onSave) {
+      const currentTime = new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'Europe/Stockholm',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+        .format(new Date())
+        .replace('.', ':');
       onSave({
         title: cleanTitle,
         amount: cleanAmt,
         date: date || new Date().toISOString().slice(0, 10),
+        time: currentTime,
         category: category || (txType === 'income' ? 'Lön' : 'Mat & dryck'),
         type: txType,
         paymentMethod: paymentMethod || 'Kort',
@@ -510,7 +634,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       {/* SUB-VIEW 1: LIKNANDE TRANSAKTIONER (Egen vy i arket)           */}
       {/* ============================================================== */}
       {subView === 'similar' && activeTx && (
-        <div className={`${slideAnimClass} space-y-5`}>
+        <div className={`${slideAnimClass} space-y-3.5`}>
           <div className="ui-sheet-sub-header">
             <button
               type="button"
@@ -533,26 +657,22 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </button>
           </div>
 
-          {/* Merchant Summary Header */}
-          <div className="ui-hero-header">
-            <div className="ui-hero-icon">
+          {/* Compact Merchant Summary Bar */}
+          <div className="px-3.5 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
               <ItemLogo
                 name={similarInfo.brandLabel || activeTx.title}
                 category={category}
                 logoUrl={activeTx.logo}
-                size="xl"
+                size="sm"
               />
+              <span className="font-medium text-[13px] text-[var(--text-primary)] truncate">
+                {similarInfo.brandLabel || activeTx.title}
+              </span>
             </div>
-            <h2 className="font-display font-bold text-lg text-[var(--text-primary)]">
-              {similarInfo.brandLabel || activeTx.title}
-            </h2>
-            <p className="text-xs text-[var(--text-muted)] tabular-nums mt-1">
-              {similarInfo.transactions.length} tillfällen · Totalt {isIncome ? '+' : '-'}
-              {formatKr(similarInfo.totalAmount)}
-              {similarInfo.transactions.length > 1
-                ? ` · Snitt ${formatKr(similarInfo.averageAmount)}`
-                : ''}
-            </p>
+            <span className="text-xs text-[var(--text-secondary)] tabular-nums shrink-0">
+              {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
+            </span>
           </div>
 
           {/* Clean Full List of Similar Transactions */}
@@ -571,41 +691,47 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       navigateSubView('details', 'back');
                     }
                   }}
-                  className="ui-row-btn text-xs"
+                  className="ui-row-btn"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <ItemLogo
                       name={tx.title}
                       category={tx.category}
                       logoUrl={tx.logo}
-                      size="sm"
+                      size="md"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="font-semibold text-[var(--text-primary)] truncate">
+                        <span className="ui-row-title">
                           {tx.title}
                         </span>
                         {isCurrent && (
-                          <span className="text-[11px] font-medium text-[var(--text-muted)] shrink-0">
+                          <span className="text-[11px] font-normal text-[var(--text-secondary)] shrink-0">
                             · Denna
                           </span>
                         )}
                       </div>
-                      <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
-                        {formatSwedishFullDate(tx.date)}
-                        {getTransactionTime(tx) ? ` · ${getTransactionTime(tx)}` : ''}
+                      <span className="ui-row-subtitle tabular-nums">
+                        {formatSwedishDateHeading(tx.date)}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={`ui-row-amount ${
-                        txIsIncome ? 'ui-row-amount-income' : ''
-                      }`}
-                    >
-                      {txIsIncome ? '+' : '-'}
-                      {formatKr(tx.amount)}
-                    </span>
+                    <div className="text-right">
+                      <span
+                        className={`ui-row-amount ${
+                          txIsIncome ? 'ui-row-amount-income' : ''
+                        }`}
+                      >
+                        {txIsIncome ? '+' : '-'}
+                        {formatKr(tx.amount)}
+                      </span>
+                      <span className="ui-row-meta">
+                        {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                          ? 'Reserverat'
+                          : getTransactionTime(tx)}
+                      </span>
+                    </div>
                     <CaretRight size={12} className="text-[var(--text-muted)]" />
                   </div>
                 </button>
@@ -616,14 +742,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* SUB-VIEW 2: KATEGORIVÄLJARE (Direktsparande vid val)           */}
+      {/* SUB-VIEW 2: KATEGORIVÄLJARE                                    */}
       {/* ============================================================== */}
       {subView === 'category-picker' && (
         <div className={`${slideAnimClass} space-y-4`}>
           <div className="ui-sheet-sub-header">
             <button
               type="button"
-              onClick={() => navigateSubView('details', 'back')}
+              onClick={() => navigateSubView('edit', 'back')}
               title="Tillbaka"
               aria-label="Tillbaka"
               className="ui-icon-btn"
@@ -642,34 +768,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </button>
           </div>
 
-          {similarInfo.transactions.length > 1 && (
-            <div className="ui-row rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs">
-              <div className="min-w-0">
-                <span className="ui-row-title">
-                  Uppdatera alla {similarInfo.transactions.length} liknande köp
-                </span>
-                <span className="ui-row-subtitle">
-                  Gäller alla köp hos {similarInfo.brandLabel || title}
-                </span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={applyToAllSimilar}
-                onClick={() => setApplyToAllSimilar((prev) => !prev)}
-                className={`ui-switch ${
-                  applyToAllSimilar ? 'ui-switch-on' : 'ui-switch-off'
-                }`}
-              >
-                <span
-                  className={`ui-switch-thumb ${
-                    applyToAllSimilar ? 'ui-switch-thumb-on' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-          )}
-
           <div className="ui-sheet-group">
             {availableCategories.map((c) => {
               const isSel = c === category;
@@ -679,18 +777,17 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="button"
                   onClick={() => {
                     setCategory(c);
-                    commitInlineChanges({ category: c });
-                    navigateSubView('details', 'back');
+                    navigateSubView('edit', 'back');
                   }}
-                  className="ui-row-btn text-xs"
+                  className="ui-row-btn"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <CategoryIcon category={c} size={14} badge={true} />
                     <span
                       className={`truncate ${
                         isSel
-                          ? 'font-bold text-[var(--text-primary)]'
-                          : 'font-semibold text-[var(--text-primary)]'
+                          ? 'font-medium text-[var(--text-primary)]'
+                          : 'font-normal text-[var(--text-primary)]'
                       }`}
                     >
                       {c}
@@ -707,14 +804,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* SUB-VIEW 3: BETALSÄTTSVÄLJARE (Ersätter native <select>)       */}
+      {/* SUB-VIEW 3: BETALSÄTTSVÄLJARE                                  */}
       {/* ============================================================== */}
       {subView === 'payment-picker' && (
         <div className={`${slideAnimClass} space-y-4`}>
           <div className="ui-sheet-sub-header">
             <button
               type="button"
-              onClick={() => navigateSubView('details', 'back')}
+              onClick={() => navigateSubView('edit', 'back')}
               title="Tillbaka"
               aria-label="Tillbaka"
               className="ui-icon-btn"
@@ -742,16 +839,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="button"
                   onClick={() => {
                     setPaymentMethod(m);
-                    commitInlineChanges({ paymentMethod: m });
-                    navigateSubView('details', 'back');
+                    navigateSubView('edit', 'back');
                   }}
-                  className="ui-row-btn text-xs"
+                  className="ui-row-btn"
                 >
                   <span
                     className={`truncate ${
                       isSel
-                        ? 'font-bold text-[var(--text-primary)]'
-                        : 'font-semibold text-[var(--text-primary)]'
+                        ? 'font-medium text-[var(--text-primary)]'
+                        : 'font-normal text-[var(--text-primary)]'
                     }`}
                   >
                     {m}
@@ -763,6 +859,195 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* SUB-VIEW 3.5: EGEN MODERN DATUMVÄLJARE                         */}
+      {/* ============================================================== */}
+      {subView === 'date-picker' && (
+        <div className={`${slideAnimClass} space-y-4`}>
+          <div className="ui-sheet-sub-header">
+            <button
+              type="button"
+              onClick={() => navigateSubView('edit', 'back')}
+              title="Tillbaka"
+              aria-label="Tillbaka"
+              className="ui-icon-btn"
+            >
+              <CaretLeft size={15} weight="bold" />
+            </button>
+            <span className="ui-sheet-title">
+              Välj datum
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-icon-btn"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {(() => {
+            const now = new Date();
+            const toIso = (d: Date) =>
+              `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+                d.getDate()
+              ).padStart(2, '0')}`;
+            const todayIso = toIso(now);
+            const yest = new Date(now);
+            yest.setDate(now.getDate() - 1);
+            const yesterdayIso = toIso(yest);
+            const twoAgo = new Date(now);
+            twoAgo.setDate(now.getDate() - 2);
+            const twoDaysAgoIso = toIso(twoAgo);
+
+            const quickPresets = [
+              { label: 'Idag', sub: formatSwedishFullDate(todayIso), iso: todayIso },
+              { label: 'Igår', sub: formatSwedishFullDate(yesterdayIso), iso: yesterdayIso },
+              { label: 'I förrgår', sub: formatSwedishFullDate(twoDaysAgoIso), iso: twoDaysAgoIso },
+            ];
+
+            const monthNames = [
+              'Januari',
+              'Februari',
+              'Mars',
+              'April',
+              'Maj',
+              'Juni',
+              'Juli',
+              'Augusti',
+              'September',
+              'Oktober',
+              'November',
+              'December',
+            ];
+            const firstDayOfMonth = new Date(pickerYearMonth.year, pickerYearMonth.month, 1);
+            // Monday = 0 ... Sunday = 6
+            const startWeekday = (firstDayOfMonth.getDay() + 6) % 7;
+            const daysInMonth = new Date(
+              pickerYearMonth.year,
+              pickerYearMonth.month + 1,
+              0
+            ).getDate();
+
+            const cells: (number | null)[] = [];
+            for (let i = 0; i < startWeekday; i++) cells.push(null);
+            for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+            return (
+              <div className="space-y-3">
+                {/* Snabbval */}
+                <div className="grid grid-cols-3 gap-2">
+                  {quickPresets.map((p) => {
+                    const isSel = date === p.iso;
+                    return (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => {
+                          setDate(p.iso);
+                          navigateSubView('edit', 'back');
+                        }}
+                        className={`p-2.5 rounded-2xl text-left transition-all cursor-pointer active:scale-[0.98] ${
+                          isSel
+                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xs'
+                            : 'bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <span className="font-display font-semibold text-xs block">
+                          {p.label}
+                        </span>
+                        <span
+                          className={`text-[10.5px] block truncate mt-0.5 tabular-nums ${
+                            isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
+                          }`}
+                        >
+                          {p.sub}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Kalender-matris */}
+                <div className="rounded-3xl bg-[var(--bg-color)] p-3.5 space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPickerYearMonth((prev) =>
+                          prev.month === 0
+                            ? { year: prev.year - 1, month: 11 }
+                            : { year: prev.year, month: prev.month - 1 }
+                        )
+                      }
+                      className="ui-icon-btn w-8 h-8 rounded-xl"
+                    >
+                      <CaretLeft size={14} weight="bold" />
+                    </button>
+                    <span className="font-display font-semibold text-xs sm:text-sm text-[var(--text-primary)] tabular-nums">
+                      {monthNames[pickerYearMonth.month]} {pickerYearMonth.year}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPickerYearMonth((prev) =>
+                          prev.month === 11
+                            ? { year: prev.year + 1, month: 0 }
+                            : { year: prev.year, month: prev.month + 1 }
+                        )
+                      }
+                      className="ui-icon-btn w-8 h-8 rounded-xl"
+                    >
+                      <CaretRight size={14} weight="bold" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((w) => (
+                      <span
+                        key={w}
+                        className="text-[10px] font-medium text-[var(--text-muted)] py-0.5"
+                      >
+                        {w}
+                      </span>
+                    ))}
+                    {cells.map((dayNum, idx) => {
+                      if (!dayNum) {
+                        return <div key={`empty-${idx}`} className="h-10" />;
+                      }
+                      const iso = `${pickerYearMonth.year}-${String(
+                        pickerYearMonth.month + 1
+                      ).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                      const isSel = date === iso;
+                      const isTodayCell = iso === todayIso;
+                      return (
+                        <button
+                          key={iso}
+                          type="button"
+                          onClick={() => {
+                            setDate(iso);
+                            navigateSubView('edit', 'back');
+                          }}
+                          className={`relative ui-day-btn ${
+                            isSel
+                              ? 'ui-day-btn-active'
+                              : isTodayCell
+                              ? 'ring-1 ring-[var(--text-muted)]/40 font-semibold'
+                              : ''
+                          }`}
+                        >
+                          <span>{dayNum}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -833,19 +1118,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 );
                 return (
                   <>
-                    <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-1">
-                      <span className="text-[11px] font-medium text-[var(--text-muted)] block">
-                        Så här fungerar det
-                      </span>
-                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                        Ange hur stor del av utlägget på{' '}
-                        <strong className="text-[var(--text-primary)] tabular-nums">
-                          {formatKr(fullAmt)}
-                        </strong>{' '}
-                        som är din egen kostnad, eller koppla en inkommen Swish-insättning.
-                      </p>
-                    </div>
-
                     {/* Snabbval för min egen andel */}
                     <div className="grid grid-cols-3 gap-2">
                       {[
@@ -969,6 +1241,37 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       </div>
                     )}
 
+                    {/* Bevaka som "Väntar på Swish" på Hemfliken */}
+                    {Number(myBudgetShareAmount) < fullAmt && !selectedLinkedSwishId && (
+                      <div className="ui-sheet-group">
+                        <div className="ui-row">
+                          <div className="min-w-0 pr-2">
+                            <span className="ui-row-title block">
+                              Bevaka ”Väntar på Swish” på Hemfliken
+                            </span>
+                            <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 tabular-nums">
+                              Påminner om {formatKr(fullAmt - Number(myBudgetShareAmount))} tills Swish kommer in
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={trackPendingSwish}
+                            onClick={() => setTrackPendingSwish((prev) => !prev)}
+                            className={`ui-switch ${
+                              trackPendingSwish ? 'ui-switch-on' : 'ui-switch-off'
+                            }`}
+                          >
+                            <span
+                              className={`ui-switch-thumb ${
+                                trackPendingSwish ? 'ui-switch-thumb-on' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       onClick={() => {
@@ -990,12 +1293,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         ) {
                           onExclude(activeTx.linkedSwishTxId, false);
                         }
+                        const isSplitPending =
+                          nextShare < fullAmt && !selectedLinkedSwishId && trackPendingSwish;
                         onUpdate({
                           ...activeTx,
                           amount: nextShare,
                           originalAmount: nextShare < fullAmt ? fullAmt : undefined,
                           linkedSwishTxId:
                             nextShare < fullAmt ? selectedLinkedSwishId : undefined,
+                          isWaitingForSwish: isSplitPending,
+                          pendingSwishAmount: isSplitPending
+                            ? Math.max(1, fullAmt - nextShare)
+                            : undefined,
+                          pendingSwishRecipient: isSplitPending
+                            ? swishRecipientName || swishPhone || activeTx.pendingSwishRecipient
+                            : undefined,
                         });
                         navigateSubView('details', 'back');
                       }}
@@ -1129,24 +1441,94 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     </div>
                   )}
 
-                  {normalizedMySwishPhone.length >= 7 && !isEditingMyPhone && showSwishQr && (
+                  {!isEditingMyPhone && showSwishQr && (
                     <div className="flex flex-col items-center pt-1 pb-1">
-                      <div className="p-3 rounded-2xl bg-white border border-[var(--border-subtle)]">
-                        {qrDataUrl ? (
-                          <img
-                            src={qrDataUrl}
-                            alt="Swish QR-kod"
-                            className="w-40 h-40 object-contain"
-                          />
+                      {/* Interaktiv QR-kod som kan klickas för att simulera skanning */}
+                      <div className="relative inline-block">
+                        <button
+                          type="button"
+                          onClick={handleSimulateScan}
+                          disabled={simulatedScanState === 'scanning'}
+                          className={`relative p-3.5 rounded-2xl bg-white border border-[var(--border-subtle)] shadow-xs transition-all select-none overflow-hidden ${
+                            simulatedScanState === 'idle'
+                              ? 'cursor-pointer hover:border-emerald-500/60 hover:shadow-md hover:scale-[1.01] active:scale-95 group'
+                              : simulatedScanState === 'scanning'
+                              ? 'cursor-wait ring-2 ring-emerald-500/50'
+                              : 'ring-2 ring-emerald-500'
+                          }`}
+                          title="Tryck på QR-koden för att simulera att den skannas"
+                        >
+                          {qrDataUrl ? (
+                            <img
+                              src={qrDataUrl}
+                              alt="Swish QR-kod"
+                              className="w-44 h-44 object-contain transition-opacity"
+                            />
+                          ) : (
+                            <div className="w-44 h-44 flex items-center justify-center text-xs text-zinc-400">
+                              Skapar QR...
+                            </div>
+                          )}
+
+                          {/* Laserscanner-animering vid pågående skanning */}
+                          {simulatedScanState === 'scanning' && (
+                            <div className="absolute inset-0 pointer-events-none bg-emerald-500/10">
+                              <div className="absolute left-2 right-2 h-1 bg-emerald-500 shadow-[0_0_12px_#10b981] animate-scan-laser rounded-full" />
+                            </div>
+                          )}
+
+                          {/* Grön bekräftelse-overlay vid mottagen Swish */}
+                          {simulatedScanState === 'success' && (
+                            <div className="absolute inset-0 bg-emerald-600/95 backdrop-blur-[2px] flex flex-col items-center justify-center text-white p-3 rounded-2xl animate-scale-in">
+                              <div className="w-12 h-12 rounded-full bg-white text-emerald-600 flex items-center justify-center mb-1.5 shadow-md">
+                                <Check size={28} weight="bold" />
+                              </div>
+                              <span className="font-display font-bold text-base tracking-tight text-white">
+                                +{formatKr(swishAmount)}
+                              </span>
+                              <span className="text-[11px] font-semibold text-emerald-100 mt-0.5">
+                                Swish mottagen!
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Klick-prompt i idle-läge */}
+                          {simulatedScanState === 'idle' && (
+                            <div className="absolute inset-x-2.5 bottom-2.5 py-1 px-2 rounded-xl bg-black/75 backdrop-blur-xs text-white text-[10.5px] font-semibold flex items-center justify-center gap-1.5 opacity-90 group-hover:opacity-100 group-hover:scale-[1.02] transition-all">
+                              <Sparkle size={12} weight="fill" className="text-amber-300" />
+                              <span>Tryck för att simulera skanning</span>
+                            </div>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Status och hjälpetikett under QR-koden */}
+                      <div className="mt-2 text-center space-y-1">
+                        {simulatedScanState === 'idle' ? (
+                          <p className="text-[11px] font-medium text-[var(--text-muted)]">
+                            Låt din vän skanna med Swish-appen, eller tryck på QR-koden för att simulera skanning ({swishAmount} kr)
+                          </p>
+                        ) : simulatedScanState === 'scanning' ? (
+                          <p className="text-[11.5px] font-semibold text-emerald-600 dark:text-emerald-400 animate-pulse flex items-center justify-center gap-1">
+                            <Sparkle size={13} weight="fill" />
+                            <span>Skannar QR-kod och godkänner Swish...</span>
+                          </p>
                         ) : (
-                          <div className="w-40 h-40 flex items-center justify-center text-xs text-zinc-400">
-                            Skapar QR...
+                          <div className="space-y-1">
+                            <p className="text-[11.5px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
+                              <Check size={14} weight="bold" />
+                              <span>Skanning simulerad! +{formatKr(swishAmount)} har dragits av.</span>
+                            </p>
+                            <button
+                              type="button"
+                              onClick={handleResetSimulation}
+                              className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer"
+                            >
+                              Testa skanna igen
+                            </button>
                           </div>
                         )}
                       </div>
-                      <span className="text-[11px] font-medium text-[var(--text-muted)] mt-2 text-center">
-                        Låt din vän skanna med Swish-appen ({swishAmount} kr)
-                      </span>
                     </div>
                   )}
                 </div>
@@ -1353,6 +1735,62 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <span>Kopiera länk</span>
                     </button>
                   </div>
+
+                  {/* Bevaka inväntad Swish direkt på Hemfliken */}
+                  {onUpdate && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const fullAmt = Math.round(
+                          activeTx.originalAmount || activeTx.amount
+                        );
+                        const reqAmt = Math.max(
+                          1,
+                          Math.min(fullAmt, Math.round(Number(swishAmount) || 0))
+                        );
+                        const nextMyShare = Math.max(0, fullAmt - reqAmt);
+                        if (activeTx.isWaitingForSwish) {
+                          onUpdate({
+                            ...activeTx,
+                            isWaitingForSwish: false,
+                            pendingSwishAmount: undefined,
+                            pendingSwishRecipient: undefined,
+                          });
+                          setSwishFeedback('Swish-bevakning borttagen');
+                        } else {
+                          onUpdate({
+                            ...activeTx,
+                            amount: nextMyShare > 0 ? nextMyShare : activeTx.amount,
+                            originalAmount: nextMyShare > 0 ? fullAmt : activeTx.originalAmount,
+                            isWaitingForSwish: true,
+                            pendingSwishAmount: reqAmt,
+                            pendingSwishRecipient:
+                              swishRecipientName.trim() || swishPhone.trim() || undefined,
+                          });
+                          setSwishFeedback(
+                            `Bevakar ${formatKr(reqAmt)} under ”Väntar på Swish” på Hemfliken!`
+                          );
+                        }
+                        setTimeout(() => setSwishFeedback(null), 3500);
+                      }}
+                      className={`w-full py-2.5 px-3.5 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        activeTx.isWaitingForSwish
+                          ? 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
+                      }`}
+                    >
+                      <ClockCounterClockwise size={14} weight="bold" />
+                      <span>
+                        {activeTx.isWaitingForSwish
+                          ? `Bevakas på Hemfliken (${formatKr(
+                              activeTx.pendingSwishAmount || swishAmount
+                            )}) · Tryck för att ta bort`
+                          : `Bevaka ”Väntar på Swish” (${formatKr(
+                              swishAmount
+                            )}) på Hemfliken`}
+                      </span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <button
@@ -1452,78 +1890,318 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* HUVUDVY: DIREKT-INTERAKTIV DETALJVY (Ingen "Redigera"-omväg)   */}
+      {/* HUVUDVY 1: FÖRHANDSGRANSKNING (Ren läsvy utan inline-inputs)    */}
       {/* ============================================================== */}
-      {subView === 'details' && (
+      {subView === 'details' && !isCreateMode && activeTx && (
         <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
           {/* Top Header */}
           <div className="ui-sheet-header mb-5">
-            {isCreateMode ? (
-              <span className="ui-sheet-title">
-                Lägg till händelse
-              </span>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                {onToggleHeart && activeTx && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onToggleHeart(activeTx.id, !activeTx.isHearted)
-                    }
-                    title="Spara köp"
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer border ${
-                      activeTx.isHearted
-                        ? 'text-rose-500 bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20'
-                        : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <Heart
-                      size={15}
-                      weight={activeTx.isHearted ? 'fill' : 'regular'}
-                      className={activeTx.isHearted ? 'text-rose-500' : ''}
-                    />
-                  </button>
+            <div className="flex items-center gap-1.5">
+              {onToggleHeart && (
+                <button
+                  type="button"
+                  onClick={() => onToggleHeart(activeTx.id, !activeTx.isHearted)}
+                  title="Spara köp"
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                    activeTx.isHearted
+                      ? 'text-rose-500 bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20'
+                      : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <Heart
+                    size={15}
+                    weight={activeTx.isHearted ? 'fill' : 'regular'}
+                    className={activeTx.isHearted ? 'text-rose-500' : ''}
+                  />
+                </button>
+              )}
+              {onTogglePackage && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onTogglePackage(activeTx.id, !activeTx.isWaitingForPackage)
+                  }
+                  title="Väntar på paket"
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                    activeTx.isWaitingForPackage
+                      ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
+                      : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <Package
+                    size={15}
+                    weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'}
+                    className={activeTx.isWaitingForPackage ? 'text-amber-500' : ''}
+                  />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Bifoga kvitto"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
+                  activeTx.receiptUrl
+                    ? 'text-[var(--text-primary)] bg-[var(--surface-hover)] border-[var(--text-muted)]'
+                    : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Paperclip size={15} weight={activeTx.receiptUrl ? 'bold' : 'regular'} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setTitle(activeTx.title);
+                  setAmount(activeTx.amount);
+                  setDate(activeTx.date);
+                  setPaymentMethod(getDefaultPaymentMethodForTx(activeTx));
+                  setCategory(
+                    normalizeCategoryToValid(
+                      activeTx.category || (isIncome ? 'Lön' : 'Övrigt'),
+                      isIncome ? 'income' : 'expense'
+                    )
+                  );
+                  navigateSubView('edit', 'forward');
+                }}
+                className="px-3 py-1.5 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <PencilSimple size={13} weight="regular" />
+                <span>Redigera</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="ui-icon-btn"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Hero Receipt Header (Read-only Förhandsgranskning) */}
+          <div className="ui-hero-header mb-5 pb-5">
+            <div className="flex justify-center mb-3.5">
+              <ItemLogo
+                name={activeTx.title}
+                category={activeTx.category}
+                logoUrl={activeTx.logo}
+                size="xl"
+                isRecurring={Boolean(
+                  recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
                 )}
-                {onTogglePackage && activeTx && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onTogglePackage(
-                        activeTx.id,
-                        !activeTx.isWaitingForPackage
-                      )
-                    }
-                    title="Väntar på paket"
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer border ${
-                      activeTx.isWaitingForPackage
-                        ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
-                        : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <Package
-                      size={15}
-                      weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'}
-                      className={activeTx.isWaitingForPackage ? 'text-amber-500' : ''}
-                    />
-                  </button>
-                )}
-                {activeTx && (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    title="Bifoga kvitto"
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors cursor-pointer border ${
-                      activeTx.receiptUrl
-                        ? 'text-[var(--text-primary)] bg-[var(--surface-hover)] border-[var(--text-muted)]'
-                        : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <Paperclip size={15} weight={activeTx.receiptUrl ? 'bold' : 'regular'} />
-                  </button>
-                )}
-              </div>
+              />
+            </div>
+
+            <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] truncate px-4">
+              {activeTx.title}
+            </h2>
+
+            <div
+              className={`mt-1 ${
+                isIncome ? 'ui-hero-amount-income' : 'ui-hero-amount'
+              }`}
+            >
+              {isIncome ? '+' : '-'}
+              {formatKr(activeTx.amount)}
+            </div>
+
+            {activeTx.originalAmount && activeTx.originalAmount !== activeTx.amount && (
+              <p className="text-xs font-medium text-[var(--text-secondary)] mt-1 tabular-nums">
+                Delad utgift · Ursprungligt belopp -{formatKr(activeTx.originalAmount)}
+              </p>
             )}
 
+            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+              {formatSwedishDateHeading(activeTx.date)}
+              {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
+                ? ' · Reserverat'
+                : txTime
+                ? ` · ${txTime}`
+                : ''}
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {/* Förhandsgranskningstabell (Enbart läsbar information med normalviktiga värden) */}
+            <div className="ui-sheet-group">
+              <div className="ui-row">
+                <span className="ui-info-label">Kategori</span>
+                <span className="ui-info-value flex items-center gap-1.5">
+                  <CategoryIcon category={activeTx.category} size={13} />
+                  <span>{activeTx.category}</span>
+                </span>
+              </div>
+
+              <div className="ui-row">
+                <span className="ui-info-label">Betalsätt</span>
+                <span className="ui-info-value">
+                  {getDefaultPaymentMethodForTx(activeTx)}
+                </span>
+              </div>
+
+              {resolvedAccountInfo && (
+                <div className="ui-row">
+                  <span className="ui-info-label">Konto</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="ui-info-value truncate max-w-[190px] sm:max-w-[230px]">
+                      {resolvedAccountInfo.label} ·{' '}
+                      {showFullAccount
+                        ? resolvedAccountInfo.fullNumber
+                        : resolvedAccountInfo.maskedNumber}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowFullAccount((prev) => !prev)}
+                      className="px-2 py-0.5 rounded-md bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                    >
+                      {showFullAccount ? 'Dölj' : 'Visa'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {note && (
+                <div className="ui-row">
+                  <span className="ui-info-label">Anteckning</span>
+                  <span className="ui-info-value text-right truncate max-w-[210px]">
+                    {note}
+                  </span>
+                </div>
+              )}
+
+              {isExcluded && (
+                <div className="ui-row">
+                  <span className="ui-info-label">Budget</span>
+                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                    Exkluderad från budget
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Separerade handlingar: Dela utgift & Liknande köp */}
+            <div className="ui-sheet-group">
+              <button
+                type="button"
+                onClick={() => navigateSubView('swish', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="font-medium text-[var(--text-primary)] shrink-0">
+                  Dela utgift
+                </span>
+                <span className="text-[var(--text-secondary)] font-normal flex items-center gap-1.5 shrink-0">
+                  <SwishLogo size={14} />
+                  <span>
+                    {activeTx.isWaitingForSwish && activeTx.pendingSwishAmount
+                      ? `Väntar på ${formatKr(activeTx.pendingSwishAmount)}`
+                      : 'Swish'}
+                  </span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigateSubView('similar', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="font-medium text-[var(--text-primary)] shrink-0">
+                  Liknande köp
+                </span>
+                <span className="text-[var(--text-secondary)] font-normal flex items-center gap-1.5 tabular-nums shrink-0">
+                  <span>
+                    {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
+                  </span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
+                </span>
+              </button>
+            </div>
+
+            {/* Bifogat kvitto visas direkt som standard i ett snyggt kort */}
+            {activeTx.receiptUrl && (
+              <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between gap-2 px-0.5">
+                  <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                    <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
+                    <span className="truncate">{activeTx.receiptName || 'Bifogat kvitto'}</span>
+                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                    >
+                      Byt
+                    </button>
+                    {onUpdate && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onUpdate({
+                            ...activeTx,
+                            receiptUrl: undefined,
+                            receiptName: undefined,
+                          })
+                        }
+                        className="p-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                        title="Ta bort kvitto"
+                      >
+                        <Trash size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigateSubView('receipt-preview', 'forward')}
+                  className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-60 cursor-pointer hover:opacity-95 transition-opacity"
+                >
+                  {activeTx.receiptUrl.startsWith('data:image/') ||
+                  /\.(png|jpe?g|webp|gif)$/i.test(activeTx.receiptUrl) ? (
+                    <img
+                      src={activeTx.receiptUrl}
+                      alt={activeTx.receiptName || 'Kvitto'}
+                      className="max-h-52 w-auto object-contain rounded-lg"
+                    />
+                  ) : (
+                    <div className="py-6 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                      <FileText size={28} weight="duotone" />
+                      <span className="font-medium">{activeTx.receiptName || 'Öppna dokument'}</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* HUVUDVY 2: REDIGERA-VY / SKAPA NY HÄNDELSE                     */}
+      {/* ============================================================== */}
+      {subView === 'edit' && (
+        <div className={slideAnimClass}>
+          <div className="ui-sheet-sub-header mb-5">
+            {!isCreateMode ? (
+              <button
+                type="button"
+                onClick={() => navigateSubView('details', 'back')}
+                title="Tillbaka"
+                aria-label="Tillbaka"
+                className="ui-icon-btn"
+              >
+                <CaretLeft size={15} weight="bold" />
+              </button>
+            ) : (
+              <div className="w-8" />
+            )}
+            <span className="ui-sheet-title">
+              {isCreateMode ? 'Lägg till händelse' : 'Redigera händelse'}
+            </span>
             <button
               type="button"
               onClick={onClose}
@@ -1562,268 +2240,111 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </div>
           )}
 
-          {/* Hero Receipt Header (Direkt-redigerbar titel & belopp) */}
-          <div className="ui-hero-header mb-5 pb-5">
-            <div className="ui-hero-icon">
-              <ItemLogo
-                name={displayName}
-                category={category}
-                logoUrl={activeTx?.logo}
-                size="xl"
-                isRecurring={Boolean(
-                  recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
-                )}
-              />
-            </div>
-
-            {/* Direkt-redigerbart namn i toppen */}
-            <div className="inline-flex items-center justify-center gap-1.5 max-w-full px-3">
-              <label className="inline-flex items-center justify-center max-w-full cursor-text">
+          <div className="space-y-4">
+            <div className="ui-sheet-group">
+              {/* Namn */}
+              <label className="ui-input-row">
+                <span className="ui-info-label shrink-0">Namn</span>
                 <input
                   type="text"
                   autoFocus={isCreateMode}
                   placeholder={isIncome ? 't.ex. Swish eller Lön' : 't.ex. ICA eller Kaffe'}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  onBlur={() => {
-                    if (!isCreateMode && activeTx) {
-                      if (title.trim() && title.trim() !== activeTx.title) {
-                        triggerRenameFlow(title);
-                      } else if (!title.trim()) {
-                        setTitle(activeTx.title);
-                      }
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      (e.target as HTMLInputElement).blur();
-                    }
-                  }}
-                  size={Math.max(10, (title || activeTx?.title || 't.ex. ICA').length)}
-                  className="max-w-[260px] bg-transparent border-0 p-0 font-display font-bold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 text-center focus:outline-none truncate"
+                  className="ui-inline-input"
                 />
               </label>
-              {!isCreateMode &&
-                activeTx &&
-                title.trim() &&
-                title.trim() !== activeTx.title && (
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      triggerRenameFlow(title);
-                    }}
-                    title="Byt namn"
-                    className="w-6 h-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
-                  >
-                    <Check size={12} weight="bold" />
-                  </button>
-                )}
-            </div>
 
-            {/* Belopp */}
-            <div
-              className={`font-display font-extrabold text-3xl tabular-nums mt-1 ${
-                isIncome
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-[var(--text-primary)]'
-              }`}
-            >
+              {/* Belopp */}
               {!isBankSynced ? (
-                <label className="inline-flex items-baseline justify-center gap-1 cursor-text">
-                  <span>{isIncome ? '+' : '-'}</span>
+                <label className="ui-input-row">
+                  <span className="ui-info-label shrink-0">Belopp (kr)</span>
                   <input
                     type="text"
                     inputMode="numeric"
                     placeholder="0"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                    onBlur={() => {
-                      if (!isCreateMode && activeTx) {
-                        commitInlineChanges({
-                          amount: Math.max(1, Number(amount) || activeTx.amount),
-                        });
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        (e.target as HTMLInputElement).blur();
-                      }
-                    }}
-                    size={Math.max(2, String(amount || activeTx?.amount || '0').length)}
-                    className="w-28 bg-transparent border-0 p-0 font-display font-extrabold text-3xl placeholder-[var(--text-muted)]/50 text-center tabular-nums focus:outline-none"
+                    className="ui-inline-amount-input"
                   />
-                  <span className="text-xl font-bold">kr</span>
                 </label>
               ) : (
-                <>
-                  {isIncome ? '+' : '-'}
-                  {formatKr(activeTx!.amount)}
-                </>
-              )}
-            </div>
-
-            {activeTx?.originalAmount &&
-              activeTx.originalAmount !== activeTx.amount && (
-                <p className="text-xs font-medium text-[var(--text-muted)] mt-1 tabular-nums">
-                  Delad utgift · Ursprungligt belopp -{formatKr(activeTx.originalAmount)}
-                </p>
+                <div className="ui-locked-row">
+                  <span className="ui-info-label shrink-0">Belopp</span>
+                  <span className="font-display font-medium text-[var(--text-secondary)] tabular-nums">
+                    {isIncome ? '+' : '-'}
+                    {formatKr(activeTx!.amount)}
+                  </span>
+                </div>
               )}
 
-            {/* Lugn metadata-rad direkt under beloppet (datum, tid & ev. reservationsstatus) */}
-            {!isCreateMode && activeTx && (
-              <p className="text-xs text-[var(--text-muted)] tabular-nums mt-1.5">
-                {formatSwedishFullDate(activeTx.date)}
-                {txTime ? ` · ${txTime}` : ''}
-                {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
-                  ? ' · Reserverat'
-                  : ''}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            {/* Avskalad och fokuserad huvudtabell */}
-            <div className="ui-sheet-group text-[13px] sm:text-sm">
-              {/* 1. Kategori */}
+              {/* Kategori */}
               <button
                 type="button"
                 onClick={() => navigateSubView('category-picker', 'forward')}
                 className="ui-row-btn"
               >
-                <span className="text-[var(--text-muted)] shrink-0">Kategori</span>
-                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                <span className="ui-info-label shrink-0">Kategori</span>
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
                   <CategoryIcon category={category} size={13} />
                   <span>{category}</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
               </button>
 
-              {isCreateMode && (
-                <>
-                  {/* Betalsätt */}
-                  <button
-                    type="button"
-                    onClick={() => navigateSubView('payment-picker', 'forward')}
-                    className="ui-row-btn"
-                  >
-                    <span className="text-[var(--text-muted)] shrink-0">Betalsätt</span>
-                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                      <span>{paymentMethod}</span>
-                      <CaretRight size={12} className="text-[var(--text-muted)]" />
-                    </span>
-                  </button>
+              {/* Betalsätt */}
+              <button
+                type="button"
+                onClick={() => navigateSubView('payment-picker', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="ui-info-label shrink-0">Betalsätt</span>
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                  <span>{paymentMethod}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
+                </span>
+              </button>
 
-                  {/* Datum */}
-                  <label className="ui-input-row cursor-pointer">
-                    <span className="text-[var(--text-muted)] shrink-0">Datum</span>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="bg-transparent border-0 p-0 text-[13px] sm:text-sm font-semibold text-[var(--text-primary)] text-right tabular-nums focus:outline-none"
-                    />
-                  </label>
-                </>
-              )}
-
-              {/* 2. Dela utgift (endast för befintlig transaktion) */}
-              {!isCreateMode && activeTx && (
+              {/* Datum (för manuella poster) */}
+              {!isBankSynced && (
                 <button
                   type="button"
-                  onClick={() => navigateSubView('swish', 'forward')}
+                  onClick={() => {
+                    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                      setPickerYearMonth({
+                        year: parseInt(date.slice(0, 4), 10),
+                        month: parseInt(date.slice(5, 7), 10) - 1,
+                      });
+                    }
+                    navigateSubView('date-picker', 'forward');
+                  }}
                   className="ui-row-btn"
                 >
-                  <span className="text-[var(--text-muted)] shrink-0">Dela utgift</span>
-                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 shrink-0">
-                    <SwishLogo size={14} />
-                    <span>Swish</span>
+                  <span className="ui-info-label shrink-0">Datum</span>
+                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+                    <CalendarBlank size={13} className="text-[var(--text-secondary)]" />
+                    <span>{formatSwedishFullDate(date)}</span>
                     <CaretRight size={12} className="text-[var(--text-muted)]" />
                   </span>
                 </button>
               )}
 
-              {/* 3. Liknande köp (endast för befintlig transaktion) */}
-              {!isCreateMode && activeTx && (
-                <button
-                  type="button"
-                  onClick={() => navigateSubView('similar', 'forward')}
-                  className="ui-row-btn"
-                >
-                  <span className="text-[var(--text-muted)] shrink-0">Liknande köp</span>
-                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums shrink-0">
-                    <span>
-                      {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
-                    </span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
-                </button>
-              )}
-
-              {/* 4. Anteckning */}
-              <label className="ui-input-row hover:bg-[var(--surface-hover)]/50 transition-colors">
-                <span className="text-[var(--text-muted)] shrink-0">Anteckning</span>
-                <div className="flex items-center justify-end gap-1.5 flex-1 min-w-0">
-                  <input
-                    type="text"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    onBlur={() => {
-                      if (!isCreateMode && activeTx && note.trim() !== (activeTx.note || '').trim()) {
-                        commitInlineChanges({ note: note.trim() });
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        (e.target as HTMLInputElement).blur();
-                      }
-                    }}
-                    placeholder="Lägg till..."
-                    className="ui-inline-input truncate focus:text-clip"
-                  />
-                </div>
+              {/* Anteckning */}
+              <label className="ui-input-row">
+                <span className="ui-info-label shrink-0">Anteckning</span>
+                <input
+                  type="text"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Lägg till..."
+                  className="ui-inline-input"
+                />
               </label>
-
-              {/* Bifogat kvitto (visas som rad endast om ett kvitto är uppladdat) */}
-              {!isCreateMode && activeTx?.receiptUrl && (
-                <div className="ui-row">
-                  <span className="text-[var(--text-muted)] shrink-0">Kvitto</span>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => navigateSubView('receipt-preview', 'forward')}
-                      className="font-semibold text-[var(--text-primary)] hover:underline flex items-center gap-1 truncate max-w-[160px] cursor-pointer"
-                    >
-                      <FileText size={13} className="shrink-0" />
-                      <span className="truncate">
-                        {activeTx.receiptName || 'Visa kvitto'}
-                      </span>
-                    </button>
-                    {onUpdate && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onUpdate({
-                            ...activeTx,
-                            receiptUrl: undefined,
-                            receiptName: undefined,
-                          })
-                        }
-                        className="text-[var(--text-muted)] hover:text-rose-500 p-1 rounded cursor-pointer"
-                        title="Ta bort kvitto"
-                      >
-                        <Trash size={13} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Räkna med i budget */}
               {!isCreateMode && activeTx && onExclude && (
                 <div className="ui-row">
-                  <span className="text-[var(--text-muted)] shrink-0">Räkna med i budget</span>
+                  <span className="ui-info-label shrink-0">Räkna med i budget</span>
                   <button
                     type="button"
                     role="switch"
@@ -1842,17 +2363,35 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
               )}
 
-              {/* Gör till fast utgift / inkomst — alltid tillgänglig även om du har fler försäkringar/avtal hos samma företag */}
+              {/* Gör till fast utgift / inkomst */}
               {!isCreateMode && activeTx && onMarkAsFixed && (
                 <button
                   type="button"
-                  onClick={() =>
-                    onMarkAsFixed(activeTx, isIncome ? 'income' : 'expense')
-                  }
+                  onClick={() => {
+                    const nextTitle = title.trim() || activeTx.title;
+                    const nextCategory = category || activeTx.category;
+                    const nextPaymentMethod =
+                      paymentMethod || getDefaultPaymentMethodForTx(activeTx);
+                    const nextNote = note.trim() || activeTx.note;
+                    const nextAmount = isBankSynced
+                      ? activeTx.amount
+                      : Math.max(1, Math.round(Number(amount) || activeTx.amount));
+                    onMarkAsFixed(
+                      {
+                        ...activeTx,
+                        title: nextTitle,
+                        amount: nextAmount,
+                        category: nextCategory,
+                        paymentMethod: nextPaymentMethod,
+                        note: nextNote,
+                      },
+                      isIncome ? 'income' : 'expense'
+                    );
+                  }}
                   className="ui-row-btn"
                 >
-                  <span className="text-[var(--text-muted)] shrink-0">Återkommande</span>
-                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <span className="ui-info-label shrink-0">Återkommande</span>
+                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
                     <ArrowsClockwise size={13} />
                     <span>
                       {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
@@ -1876,32 +2415,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 <span>Spara händelse</span>
               </button>
             ) : (
-              /* Ta bort manuell transaktion */
-              !isBankSynced && activeTx && onDelete && (
-                <>
-                  {showDeleteConfirm ? (
-                    <div className="ui-confirm-danger">
-                      <span className="font-medium text-rose-700 dark:text-rose-300">
-                        Ta bort permanent?
-                      </span>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setShowDeleteConfirm(false)}
-                          className="ui-btn-sm bg-[var(--surface-color)] py-1 px-2.5"
-                        >
-                          Avbryt
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleDelete}
-                          className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
-                        >
-                          Ta bort
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={handleSaveEditClick}
+                  disabled={!title.trim()}
+                  className="ui-btn-primary"
+                >
+                  <Check size={14} weight="bold" />
+                  <span>Spara ändringar</span>
+                </button>
+
+                {!isBankSynced && activeTx && onDelete && (
+                  <>
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(true)}
@@ -1910,135 +2436,76 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <Trash size={14} />
                       <span>Ta bort transaktion</span>
                     </button>
-                  )}
-                </>
-              )
+
+                    <ConfirmDialog
+                      isOpen={showDeleteConfirm}
+                      title="Ta bort transaktion?"
+                      description={`Vill du ta bort ${activeTx.title} permanent?`}
+                      confirmLabel="Ta bort"
+                      onConfirm={handleDelete}
+                      onCancel={() => setShowDeleteConfirm(false)}
+                    />
+                  </>
+                )}
+              </div>
             )}
           </div>
         </div>
       )}
 
       {/* ============================================================== */}
-      {/* BEKRÄFTELSE-POPUP VID NAMNBYTE (Endast detta köp vs Alla)       */}
+      {/* CENTRERAD POPUP FÖR ATT UPPDATERA LIKNANDE KÖP                 */}
       {/* ============================================================== */}
-      {pendingRenameTitle && activeTx && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+      {showSimilarPopup &&
+        activeTx &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            className="w-full max-w-sm rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[260] flex items-center justify-center p-5 bg-black/45 backdrop-blur-xs animate-fade-in"
+            onClick={() => setShowSimilarPopup(false)}
           >
-            <div className="text-center space-y-1.5">
-              <div className="mx-auto w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] mb-2">
-                <PencilSimple size={20} weight="duotone" />
+            <div
+              className="w-full max-w-[330px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center space-y-1">
+                <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
+                  Uppdatera alla {similarInfo.transactions.length} liknande köp?
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Gäller alla köp hos {similarInfo.brandLabel || activeTx.title}
+                </p>
               </div>
-              <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
-                Byt namn till &ldquo;{pendingRenameTitle}&rdquo;?
-              </h3>
-              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                Välj om namnbytet endast ska gälla detta specifika köp eller flera poster.
-              </p>
-            </div>
 
-            <div className="space-y-2 pt-1">
-              {/* Val 1: Endast detta enskilda köp */}
-              <button
-                type="button"
-                onClick={() => {
-                  const newName = pendingRenameTitle;
-                  setPendingRenameTitle(null);
-                  commitInlineChanges(
-                    { title: newName },
-                    { renameScope: 'single' }
-                  );
-                }}
-                className="w-full p-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-left transition-opacity hover:opacity-95 cursor-pointer flex items-center justify-between gap-3"
-              >
-                <div className="min-w-0">
-                  <span className="block text-xs font-bold">
-                    Endast detta köp
-                  </span>
-                  <span className="block text-[11px] opacity-75 truncate mt-0.5">
-                    {activeTx.title} · {formatSwedishFullDate(activeTx.date)}
-                  </span>
-                </div>
-                <Check size={15} weight="bold" className="shrink-0" />
-              </button>
-
-              {/* Val 2: Alla köp på exakt samma ställe/butiksnamn (t.ex. alla "Circle K Varberg") */}
-              {similarInfo.sameMerchantTransactions.length > 1 && (
+              <div className="space-y-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => {
-                    const newName = pendingRenameTitle;
-                    const ids = similarInfo.sameMerchantTransactions.map((t) => t.id);
-                    setPendingRenameTitle(null);
-                    commitInlineChanges(
-                      { title: newName },
-                      {
-                        renameScope: 'same-merchant',
-                        renameTargetIds: ids,
-                      }
-                    );
-                  }}
-                  className="w-full p-3.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-left transition-colors cursor-pointer flex items-center justify-between gap-3"
+                  onClick={() => commitEditChanges('chain')}
+                  className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  <div className="min-w-0">
-                    <span className="block text-xs font-bold truncate">
-                      Alla &ldquo;{activeTx.title}&rdquo; ({similarInfo.sameMerchantTransactions.length} st)
-                    </span>
-                    <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
-                      Endast köp på exakt samma plats/butik
-                    </span>
-                  </div>
-                  <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                  Uppdatera alla ({similarInfo.transactions.length} st)
                 </button>
-              )}
 
-              {/* Val 3: Alla köp i hela kedjan (om det finns andra orter/butiker i kedjan, t.ex. Circle K Helsingborg & Stockholm) */}
-              {similarInfo.transactions.length > similarInfo.sameMerchantTransactions.length && (
                 <button
                   type="button"
-                  onClick={() => {
-                    const newName = pendingRenameTitle;
-                    const ids = similarInfo.transactions.map((t) => t.id);
-                    setPendingRenameTitle(null);
-                    commitInlineChanges(
-                      { title: newName },
-                      {
-                        renameScope: 'chain',
-                        renameTargetIds: ids,
-                      }
-                    );
-                  }}
-                  className="w-full p-3.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-left transition-colors cursor-pointer flex items-center justify-between gap-3"
+                  onClick={() => commitEditChanges('single')}
+                  className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  <div className="min-w-0">
-                    <span className="block text-xs font-bold truncate">
-                      Alla hos {similarInfo.brandLabel || activeTx.title} ({similarInfo.transactions.length} st)
-                    </span>
-                    <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
-                      Även andra orter och butiker i kedjan
-                    </span>
-                  </div>
-                  <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                  Endast detta köp
                 </button>
-              )}
 
-              {/* Avbryt */}
-              <button
-                type="button"
-                onClick={() => {
-                  setTitle(activeTx.title);
-                  setPendingRenameTitle(null);
-                }}
-                className="w-full py-2.5 rounded-2xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
-              >
-                Avbryt
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSimilarPopup(false)}
+                  className="w-full py-2 rounded-2xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+                >
+                  Avbryt
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </BottomSheet>
   );
 };

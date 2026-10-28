@@ -27,25 +27,34 @@ import {
   LockKey,
   Cookie,
   DownloadSimple,
+  PiggyBank,
+  Sparkle,
 } from '@phosphor-icons/react';
-import { BankConnection } from '../services/bankService';
+import { bankService, BankConnection, BankAccount } from '../services/bankService';
 import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
+import { SavingsGoalsView } from './SavingsGoalsView';
+import { RecurringDiscoveryView } from './RecurringDiscoveryView';
 import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
   saveStoredPaymentMethods,
   compressImageFileToDataUrl,
+  getSavingsGoals,
 } from '../utils/appCache';
 import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../constants';
 import { BottomSheet } from './ui/BottomSheet';
+import { ConfirmDialog } from './ui/ConfirmDialog';
+import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
 import { ItemLogo } from './ItemLogo';
 
 interface SettingsTabProps {
   period: PeriodInfo;
   connectedBank: string | null;
   connections: BankConnection[];
+  bankAccounts?: BankAccount[];
   accounts?: AccountItem[];
+  onRefreshBankStatus?: () => void;
   syncingBank: boolean;
   targetPayday: number;
   weekendHandling: WeekendHandlingMode;
@@ -68,6 +77,10 @@ interface SettingsTabProps {
   onDeleteAccount: () => void;
   onResetAccount: () => void;
   onSelectTransaction?: (tx: TransactionItem) => void;
+  onAddIncome?: (data: Omit<IncomeItem, 'id'>) => Promise<any> | void;
+  onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<any> | void;
+  onUpdateIncome?: (item: IncomeItem) => Promise<any> | void;
+  onUpdateFixed?: (item: FixedExpenseItem) => Promise<any> | void;
   onUpdateEmail?: (email: string) => void;
   onUpdateName?: (name: string) => void;
   onStartOnboarding?: () => void;
@@ -82,10 +95,13 @@ interface SettingsTabProps {
 
 export type SettingsSubView =
   | 'main'
+  | 'discover'
   | 'categories'
+  | 'goals'
   | 'paymentMethods'
   | 'period'
   | 'bank'
+  | 'appearance'
   | 'security'
   | 'preferences'
   | 'profile'
@@ -97,10 +113,13 @@ export type SettingsSubView =
 
 export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, string> = {
   profile: 'Profil',
+  discover: 'Hitta fasta poster',
   categories: 'Kategorier',
+  goals: 'Sparmål & buffert',
   paymentMethods: 'Betalsätt',
   period: 'Lönedag',
   bank: 'Bankkonton',
+  appearance: 'Utseende',
   preferences: 'Överföringar',
   security: 'Data & säkerhet',
   feedback: 'Skicka feedback',
@@ -122,7 +141,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   period,
   connectedBank,
   connections,
+  bankAccounts = [],
   accounts = [],
+  onRefreshBankStatus,
   syncingBank,
   targetPayday,
   weekendHandling,
@@ -144,6 +165,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onSignOut,
   onDeleteAccount,
   onResetAccount,
+  onAddIncome,
+  onAddFixed,
+  onUpdateIncome,
+  onUpdateFixed,
   onUpdateEmail,
   onUpdateName,
   onStartOnboarding,
@@ -171,10 +196,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [pmDeleteConfirm, setPmDeleteConfirm] = useState(false);
   const [pmResetConfirm, setPmResetConfirm] = useState(false);
 
-  // Security confirmation sheet
+  // Bank account edit sheet & disconnect confirm state
+  const [editingAccount, setEditingAccount] = useState<AccountItem | null>(null);
+  const [accountNameInput, setAccountNameInput] = useState('');
+  const [accountIncludedInput, setAccountIncludedInput] = useState(true);
+  const [savingAccountEdit, setSavingAccountEdit] = useState(false);
+  const [disconnectConfirmConnId, setDisconnectConfirmConnId] = useState<string | null>(null);
+
+  // Security confirmation dialog & loading state
   const [securityConfirmAction, setSecurityConfirmAction] = useState<'reset' | 'delete' | null>(
     null
   );
+  const [securityProcessing, setSecurityProcessing] = useState(false);
 
   // Feedback state
   const [feedbackType, setFeedbackType] = useState<'idea' | 'bug' | 'praise'>('idea');
@@ -182,12 +215,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [feedbackSending, setFeedbackSending] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
 
-  // Theme state
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => {
-    if (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) {
-      return 'dark';
-    }
+  // Theme state ('light' | 'dark' | 'system')
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>(() => {
     try {
+      const savedPref = localStorage.getItem('dejz_theme_pref');
+      if (savedPref === 'light' || savedPref === 'dark' || savedPref === 'system') {
+        return savedPref;
+      }
       return localStorage.getItem('dejz_dark_mode') === 'dark' ? 'dark' : 'light';
     } catch {
       return 'light';
@@ -202,20 +236,27 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     setEditEmail(userEmail || '');
   }, [userEmail]);
 
-  const applyTheme = (mode: 'light' | 'dark') => {
+  const applyTheme = (mode: 'light' | 'dark' | 'system') => {
     setThemeMode(mode);
     const root = document.documentElement;
-    if (mode === 'dark') {
+    const prefersDark =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effectiveMode = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
+
+    if (effectiveMode === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
-      root.style.backgroundColor = '#141414';
+      root.style.backgroundColor = '#0B0F17';
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
-      root.style.backgroundColor = '#F4F3F1';
+      root.style.backgroundColor = '#F3F8FC';
     }
     try {
-      localStorage.setItem('dejz_dark_mode', mode);
+      localStorage.setItem('dejz_theme_pref', mode);
+      localStorage.setItem('dejz_dark_mode', effectiveMode);
       localStorage.setItem('dejz_onboarding_completed', 'true');
     } catch {
       // ignore
@@ -296,10 +337,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <div className="ui-page animate-slide-in-right">
         {hiddenAvatarInput}
         <div className="ui-card p-5 space-y-5">
-          {/* Centered 64x64 Hero Avatar */}
-          <div className="text-center pb-5 border-b border-[var(--border-subtle)]">
-            <div className="relative inline-block mb-3">
-              <div className="w-16 h-16 rounded-[20px] bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
+          {/* Profilbild med samlade bildåtgärder (utan dubblerad namn/e-posttext) */}
+          <div className="flex items-center gap-4 pb-5 border-b border-[var(--border-subtle)]">
+            <div className="relative shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
                 {userAvatar ? (
                   <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
                 ) : initialChar ? (
@@ -310,53 +351,59 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   <UserCircle size={34} weight="duotone" className="text-[var(--text-secondary)]" />
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] border-2 border-[var(--surface-color)] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
-                title="Byt profilbild"
-              >
-                <Camera size={12} weight="bold" />
-              </button>
             </div>
 
-            <h3 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
-              {editName.trim() || userName || userEmail || 'Gästkonto'}
-            </h3>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate px-4">
-              {userEmail || 'Lokalt läge'}
-            </p>
-            {userAvatar && onUpdateAvatar && (
-              <button
-                type="button"
-                onClick={() => onUpdateAvatar(null)}
-                className="mt-2 text-[11px] font-semibold text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-              >
-                Ta bort bild
-              </button>
-            )}
+            <div className="min-w-0 flex-1 space-y-2">
+              <span className="block text-xs font-medium text-[var(--text-secondary)]">
+                Profilbild
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-control)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Camera size={13} weight="regular" />
+                  <span>{userAvatar ? 'Byt bild' : 'Välj bild'}</span>
+                </button>
+                {userAvatar && onUpdateAvatar && (
+                  <button
+                    type="button"
+                    onClick={() => onUpdateAvatar(null)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/8 transition-colors cursor-pointer"
+                  >
+                    Ta bort
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="ui-sheet-group">
-              <label className="ui-input-row">
-                <span className="text-[var(--text-muted)] shrink-0">Namn</span>
+            <div className="space-y-3.5">
+              <label className="block space-y-1.5">
+                <span className="block text-xs font-medium text-[var(--text-secondary)] px-0.5">
+                  Namn
+                </span>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Ditt förnamn"
-                  className="ui-inline-input"
+                  className="ui-input"
                 />
               </label>
-              <label className="ui-input-row">
-                <span className="text-[var(--text-muted)] shrink-0">E-post</span>
+
+              <label className="block space-y-1.5">
+                <span className="block text-xs font-medium text-[var(--text-secondary)] px-0.5">
+                  E-postadress
+                </span>
                 <input
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
                   placeholder="namn@exempel.se"
-                  className="ui-inline-input"
+                  className="ui-input"
                 />
               </label>
             </div>
@@ -371,10 +418,32 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               type="submit"
               className="w-full ui-btn-primary"
             >
-              Spara
+              Spara ändringar
             </button>
           </form>
         </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // SUB-VIEW: HITTA INKOMSTER & FASTA UTGIFTER
+  // ==========================================
+  if (subView === 'discover') {
+    return (
+      <div className="animate-slide-in-right">
+        <RecurringDiscoveryView
+          transactions={transactions}
+          incomes={incomes}
+          fixedExpenses={fixedExpenses}
+          bankAccounts={bankAccounts}
+          targetPayday={targetPayday}
+          paydayBeforeWeekend={weekendHandling === 'before'}
+          onAddIncome={onAddIncome || (() => {})}
+          onAddFixed={onAddFixed || (() => {})}
+          onUpdateIncome={onUpdateIncome}
+          onUpdateFixed={onUpdateFixed}
+        />
       </div>
     );
   }
@@ -391,6 +460,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           incomes={incomes}
           onCategoryMutated={onCategoryMutated}
         />
+      </div>
+    );
+  }
+
+
+  // ==========================================
+  // SUB-VIEW: SPARMÅL & BUFFERT
+  // ==========================================
+  if (subView === 'goals') {
+    return (
+      <div className="animate-slide-in-right">
+        <SavingsGoalsView />
       </div>
     );
   }
@@ -449,35 +530,55 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       setPmResetConfirm(false);
     };
 
+    const pmUsageCounts: Record<string, number> = {};
+    for (const tx of transactions) {
+      const m = (tx.paymentMethod || '').toLowerCase().trim();
+      if (m) pmUsageCounts[m] = (pmUsageCounts[m] || 0) + 1;
+    }
+    for (const f of fixedExpenses) {
+      const m = (f.paymentMethod || 'Autogiro').toLowerCase().trim();
+      if (m) pmUsageCounts[m] = (pmUsageCounts[m] || 0) + 1;
+    }
+
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card">
-          {paymentMethods.map((method) => (
-            <button
-              key={method.id}
-              type="button"
-              onClick={() => {
-                setSelectedPm(method);
-                setPmFormName(method.name);
-                setPmDeleteConfirm(false);
-                setPmSheetMode('edit');
-              }}
-              className="ui-row-btn"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="ui-icon-badge">
-                  <Wallet size={15} />
+        <div className="ui-admin-card">
+          {paymentMethods.map((method) => {
+            const count = pmUsageCounts[method.name.toLowerCase().trim()] || 0;
+            return (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => {
+                  setSelectedPm(method);
+                  setPmFormName(method.name);
+                  setPmDeleteConfirm(false);
+                  setPmSheetMode('edit');
+                }}
+                className="ui-admin-row"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <span className="ui-admin-icon-slot">
+                    <Wallet size={17} weight="regular" />
+                  </span>
+                  <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                    {method.name}
+                  </span>
                 </div>
-                <span className="ui-row-title">
-                  {method.name}
-                </span>
-              </div>
-              <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
-            </button>
-          ))}
+                <div className="ui-admin-right">
+                  <span className="ui-admin-value">
+                    {count > 0 ? count : ''}
+                  </span>
+                  <span className="ui-admin-chevron">
+                    <CaretRight size={13} />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2 pt-1">
           <button
             type="button"
             onClick={() => {
@@ -492,40 +593,26 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <span>Nytt betalsätt</span>
           </button>
 
-          {pmResetConfirm ? (
-            <div className="ui-confirm-neutral">
-              <span className="font-medium text-[var(--text-secondary)]">
-                Återställa standardbetalsätt?
-              </span>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setPmResetConfirm(false)}
-                  className="ui-btn-sm"
-                >
-                  Avbryt
-                </button>
-                <button
-                  type="button"
-                  onClick={handleResetMethods}
-                  className="ui-btn-sm-primary"
-                >
-                  Återställ
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={() => setPmResetConfirm(true)}
-                className="py-1.5 px-3 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <ArrowCounterClockwise size={13} />
-                <span>Återställ standardbetalsätt</span>
-              </button>
-            </div>
-          )}
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => setPmResetConfirm(true)}
+              className="ui-reset-btn"
+            >
+              <ArrowCounterClockwise size={13} />
+              <span>Återställ standardbetalsätt</span>
+            </button>
+          </div>
+
+          <ConfirmDialog
+            isOpen={pmResetConfirm}
+            title="Återställ standardbetalsätt?"
+            description="Dina egna betalsätt ersätts med standardvalen."
+            confirmLabel="Återställ"
+            variant="primary"
+            onConfirm={handleResetMethods}
+            onCancel={() => setPmResetConfirm(false)}
+          />
         </div>
 
         <BottomSheet
@@ -533,7 +620,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           onClose={closePmSheet}
           contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
         >
-          <div className="ui-sheet-header mb-5">
+          <div className="ui-sheet-header mb-4">
             <span className="ui-sheet-title">
               {pmSheetMode === 'new' ? 'Nytt betalsätt' : 'Redigera betalsätt'}
             </span>
@@ -546,11 +633,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </button>
           </div>
 
-          <div className="ui-hero-header">
+          <div className="ui-hero-header mb-4">
             <div className="ui-hero-icon">
-              <Wallet size={28} />
+              <Wallet size={26} />
             </div>
-            <h2 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
+            <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] truncate px-4">
               {pmFormName.trim() || 'Namnlöst betalsätt'}
             </h2>
           </div>
@@ -558,7 +645,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <form onSubmit={handleSavePmSheet} className="space-y-4">
             <div className="ui-sheet-group">
               <label className="ui-input-row">
-                <span className="text-[var(--text-muted)] shrink-0">Namn</span>
+                <span className="ui-info-label">Namn</span>
                 <input
                   type="text"
                   value={pmFormName}
@@ -570,56 +657,41 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </label>
             </div>
 
-            {pmDeleteConfirm ? (
-              <div className="ui-confirm-danger">
-                <span className="font-medium text-rose-700 dark:text-rose-300">
-                  Ta bort betalsättet?
-                </span>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setPmDeleteConfirm(false)}
-                    className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
-                  >
-                    Avbryt
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteMethod}
-                    className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
-                  >
-                    Ta bort
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`grid gap-2 ${
-                  pmSheetMode === 'edit' && paymentMethods.length > 1
-                    ? 'grid-cols-2'
-                    : 'grid-cols-1'
-                }`}
-              >
-                {pmSheetMode === 'edit' && paymentMethods.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setPmDeleteConfirm(true)}
-                    className="ui-btn-danger"
-                  >
-                    <Trash size={14} />
-                    <span>Ta bort</span>
-                  </button>
-                )}
-
+            <div
+              className={`grid gap-2 ${
+                pmSheetMode === 'edit' && paymentMethods.length > 1
+                  ? 'grid-cols-2'
+                  : 'grid-cols-1'
+              }`}
+            >
+              {pmSheetMode === 'edit' && paymentMethods.length > 1 && (
                 <button
-                  type="submit"
-                  className="ui-btn-primary"
+                  type="button"
+                  onClick={() => setPmDeleteConfirm(true)}
+                  className="ui-btn-danger"
                 >
-                  <Check size={14} weight="bold" />
-                  <span>Spara</span>
+                  <Trash size={14} />
+                  <span>Ta bort</span>
                 </button>
-              </div>
-            )}
+              )}
+
+              <button
+                type="submit"
+                className="ui-btn-primary"
+              >
+                <Check size={14} weight="bold" />
+                <span>Spara</span>
+              </button>
+            </div>
+
+            <ConfirmDialog
+              isOpen={pmDeleteConfirm}
+              title="Ta bort betalsätt?"
+              description={`Vill du ta bort ${pmFormName || 'betalsättet'}?`}
+              confirmLabel="Ta bort"
+              onConfirm={handleDeleteMethod}
+              onCancel={() => setPmDeleteConfirm(false)}
+            />
           </form>
         </BottomSheet>
       </div>
@@ -630,88 +702,43 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // SUB-VIEW: LÖNEDAG
   // ==========================================
   if (subView === 'period') {
+    const isWeekendBeforeEnabled = weekendHandling !== 'none';
+
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card">
-          <div className="p-4 space-y-3.5">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[var(--text-muted)]">Ordinarie lönedag</span>
-              <span className="font-display font-bold text-[var(--text-primary)] tabular-nums">
-                Den {targetPayday}:e
+        <DayOfMonthPicker
+          selectedDay={targetPayday}
+          onSelectDay={onUpdatePayday}
+          mode="payday"
+        />
+
+        <div className="ui-card-p">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <span className="ui-row-title text-[13.5px] sm:text-sm">
+                Helghantering
               </span>
+              <p className="ui-row-subtitle">
+                Fredagen före om lönedagen infaller på helg
+              </p>
             </div>
-
-            <div className="grid grid-cols-7 gap-1.5">
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
-                const isSelected = targetPayday === d;
-                return (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => onUpdatePayday(d)}
-                    className={`py-2 rounded-xl text-xs font-display font-bold tabular-nums transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[1.03]'
-                        : 'bg-[var(--bg-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
-                    }`}
-                  >
-                    {d}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="ui-row">
-            <span className="text-[var(--text-muted)]">Aktuell period</span>
-            <span className="font-display font-bold text-[var(--text-primary)] tabular-nums">
-              {period.startLabel} – {period.endLabel}
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-            Om lönedag infaller på helg
-          </span>
-          <div className="ui-group-card">
-            {[
-              {
-                mode: 'before' as WeekendHandlingMode,
-                title: 'Fredagen före',
-              },
-              {
-                mode: 'after' as WeekendHandlingMode,
-                title: 'Måndagen efter',
-              },
-              {
-                mode: 'none' as WeekendHandlingMode,
-                title: 'Ingen justering',
-              },
-            ].map((option) => {
-              const isSelected = weekendHandling === option.mode;
-              return (
-                <button
-                  key={option.mode}
-                  type="button"
-                  onClick={() => onUpdateWeekendHandling(option.mode)}
-                  className="ui-row-btn"
-                >
-                  <span
-                    className={
-                      isSelected
-                        ? 'font-bold text-[var(--text-primary)]'
-                        : 'font-semibold text-[var(--text-primary)]'
-                    }
-                  >
-                    {option.title}
-                  </span>
-                  {isSelected && (
-                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
-                  )}
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isWeekendBeforeEnabled}
+              onClick={() =>
+                onUpdateWeekendHandling(isWeekendBeforeEnabled ? 'none' : 'before')
+              }
+              className={`ui-switch ${
+                isWeekendBeforeEnabled ? 'ui-switch-on' : 'ui-switch-off'
+              }`}
+            >
+              <span
+                className={`ui-switch-thumb ${
+                  isWeekendBeforeEnabled ? 'ui-switch-thumb-on' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -724,6 +751,72 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'bank') {
     const formatKr = (amount: number) =>
       `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
+
+    const displayAccountItems: AccountItem[] =
+      bankAccounts.length > 0
+        ? bankAccounts.map((ba, idx) => {
+            const conn = connections.find((c) => c.id === ba.connection_id);
+            const bName = conn?.aspsp_name || connectedBank || 'Bank';
+            const cleanName =
+              ba.custom_name?.trim() ||
+              stripRawAccountDigits(ba.product || ba.name || '') ||
+              (idx === 0 ? 'Lönekonto' : 'Sparkonto');
+            return {
+              id: ba.id,
+              name: cleanName,
+              accountNumber: ba.bban || ba.iban || undefined,
+              bankName: bName,
+              balance: Number(ba.balance_amount) || 0,
+              type: 'checking',
+              logo: conn?.aspsp_logo || undefined,
+            };
+          })
+        : accounts;
+
+    const handleOpenAccountDetail = (acc: AccountItem) => {
+      const rawBa = bankAccounts.find((b) => b.id === acc.id);
+      setEditingAccount(acc);
+      setAccountNameInput(rawBa?.custom_name || stripRawAccountDigits(acc.name) || 'Bankkonto');
+      setAccountIncludedInput(rawBa ? rawBa.is_selected !== false : true);
+    };
+
+    const handleSaveAccountDetail = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!editingAccount) return;
+      setSavingAccountEdit(true);
+      try {
+        const cleanName = accountNameInput.trim() || 'Bankkonto';
+        bankService.saveAccountOverlay(editingAccount.id, {
+          custom_name: cleanName,
+          is_selected: accountIncludedInput,
+          include_in_budget: accountIncludedInput,
+        });
+
+        const rawBa = bankAccounts.find((b) => b.id === editingAccount.id);
+        if (rawBa?.connection_id) {
+          const connAccs = bankAccounts.filter((b) => b.connection_id === rawBa.connection_id);
+          const nextSelectedIds = connAccs
+            .filter((b) =>
+              b.id === editingAccount.id ? accountIncludedInput : b.is_selected !== false
+            )
+            .map((b) => b.id);
+          if (nextSelectedIds.length > 0) {
+            await bankService
+              .selectAccounts({
+                connectionId: rawBa.connection_id,
+                selectedAccountIds: nextSelectedIds,
+              })
+              .catch(() => {});
+          }
+        }
+        if (onRefreshBankStatus) {
+          onRefreshBankStatus();
+        }
+      } finally {
+        setSavingAccountEdit(false);
+        setEditingAccount(null);
+      }
+    };
 
     return (
       <div className="ui-page animate-slide-in-right">
@@ -753,10 +846,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                         (computedDaysLeft !== null && computedDaysLeft <= 14));
 
                     return (
-                      <div
-                        key={conn.id}
-                        className="ui-row"
-                      >
+                      <div key={conn.id} className="ui-row">
                         <div className="flex items-center gap-3 min-w-0">
                           <ItemLogo
                             name={conn.aspsp_name}
@@ -764,16 +854,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                             size="md"
                           />
                           <div className="min-w-0">
-                            <span className="ui-row-title">
-                              {conn.aspsp_name}
-                            </span>
+                            <span className="ui-row-title">{conn.aspsp_name}</span>
                             {isExpired ? (
                               <span className="text-xs text-rose-600 dark:text-rose-400 font-medium block">
                                 Samtycket har gått ut · Förnya åtkomst
                               </span>
                             ) : isExpiringSoon ? (
                               <span className="text-xs text-amber-600 dark:text-amber-400 font-medium block">
-                                Samtycke går ut om {computedDaysLeft} {computedDaysLeft === 1 ? 'dag' : 'dagar'}
+                                Samtycke går ut om {computedDaysLeft}{' '}
+                                {computedDaysLeft === 1 ? 'dag' : 'dagar'}
                               </span>
                             ) : (
                               <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
@@ -794,7 +883,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                           )}
                           <button
                             type="button"
-                            onClick={() => onDisconnectBank(conn.id)}
+                            onClick={() => setDisconnectConfirmConnId(conn.id)}
                             className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
                           >
                             Koppla från
@@ -808,9 +897,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     <div className="flex items-center gap-3 min-w-0">
                       <ItemLogo name={connectedBank || 'Bank'} size="md" />
                       <div className="min-w-0">
-                        <span className="ui-row-title">
-                          {connectedBank}
-                        </span>
+                        <span className="ui-row-title">{connectedBank}</span>
                         <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
                           Ansluten
                         </span>
@@ -818,7 +905,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     </div>
                     <button
                       type="button"
-                      onClick={() => onDisconnectBank()}
+                      onClick={() => setDisconnectConfirmConnId('__default__')}
                       className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
                     >
                       Koppla från
@@ -828,37 +915,42 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </div>
             </div>
 
-            {/* Kontolista utan råa kontonummer */}
-            {accounts.length > 0 && (
+            {/* Kontolista där varje konto öppnar kontoinställningar/detaljer */}
+            {displayAccountItems.length > 0 && (
               <div className="space-y-1.5">
                 <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
                   Konton
                 </span>
                 <div className="ui-group-card">
-                  {accounts.map((acc) => {
+                  {displayAccountItems.map((acc) => {
                     const cleanName = stripRawAccountDigits(acc.name) || 'Bankkonto';
-                    const cleanBank = stripRawAccountDigits(acc.bank || connectedBank || 'Bank');
+                    const cleanBank = stripRawAccountDigits(
+                      acc.bankName || acc.bank || connectedBank || 'Bank'
+                    );
+                    const rawBa = bankAccounts.find((b) => b.id === acc.id);
+                    const isHidden = rawBa && rawBa.is_selected === false;
+
                     return (
                       <button
                         key={acc.id}
                         type="button"
-                        onClick={onOpenBank}
-                        className="ui-row-btn"
+                        onClick={() => handleOpenAccountDetail(acc)}
+                        className={`ui-row-btn ${isHidden ? 'opacity-55' : ''}`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <ItemLogo name={cleanBank} size="md" />
+                          <ItemLogo name={cleanBank} logoUrl={acc.logo} size="md" />
                           <div className="min-w-0 flex-1">
-                            <span className="ui-row-title">
-                              {cleanName}
-                            </span>
+                            <span className="ui-row-title">{cleanName}</span>
                             <span className="ui-row-subtitle">
                               {cleanBank}
+                              {isHidden ? ' · Dold i översikt' : ''}
                             </span>
                           </div>
                         </div>
-                        <span className="ui-row-amount shrink-0">
-                          {formatKr(acc.balance)}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="ui-row-amount">{formatKr(acc.balance)}</span>
+                          <CaretRight size={14} className="text-[var(--text-muted)]" />
+                        </div>
                       </button>
                     );
                   })}
@@ -883,17 +975,124 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 onClick={onOpenBank}
                 className="ui-btn-primary"
               >
-                <Bank size={15} />
-                <span>Hantera konton</span>
+                <Plus size={15} weight="bold" />
+                <span>Lägg till bank</span>
               </button>
             </div>
+
+            {/* Kontodetaljer / Redigera konto */}
+            <BottomSheet
+              isOpen={editingAccount !== null}
+              onClose={() => setEditingAccount(null)}
+              title="Kontoinställningar"
+            >
+              {editingAccount && (
+                <form onSubmit={handleSaveAccountDetail} className="space-y-5">
+                  <div className="ui-hero-header">
+                    <div className="flex justify-center mb-3">
+                      <ItemLogo
+                        name={editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
+                        logoUrl={editingAccount.logo}
+                        size="xl"
+                      />
+                    </div>
+                    <h2 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
+                      {accountNameInput.trim() || 'Bankkonto'}
+                    </h2>
+                    <div className="ui-hero-amount mt-1">
+                      {formatKr(editingAccount.balance)}
+                    </div>
+                  </div>
+
+                  <div className="ui-sheet-group">
+                    <label className="ui-input-row">
+                      <span className="text-[var(--text-muted)] shrink-0">Kontonamn</span>
+                      <input
+                        type="text"
+                        value={accountNameInput}
+                        onChange={(e) => setAccountNameInput(e.target.value)}
+                        placeholder="T.ex. Lönekonto, Sparkonto..."
+                        required
+                        className="ui-inline-input"
+                      />
+                    </label>
+
+                    <div className="ui-row">
+                      <span className="text-[var(--text-muted)] shrink-0">Bank</span>
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
+                      </span>
+                    </div>
+
+                    {editingAccount.accountNumber && (
+                      <div className="ui-row">
+                        <span className="text-[var(--text-muted)] shrink-0">Kontonummer</span>
+                        <span className="font-display font-medium text-xs text-[var(--text-secondary)] tabular-nums">
+                          {editingAccount.accountNumber}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="ui-row">
+                      <div className="min-w-0 pr-3">
+                        <span className="text-[var(--text-primary)] font-medium block">
+                          Visa i appens översikt
+                        </span>
+                        <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+                          Räkna med saldo och händelser från detta konto
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={accountIncludedInput}
+                        onClick={() => setAccountIncludedInput((prev) => !prev)}
+                        className={`ui-switch ${
+                          accountIncludedInput ? 'ui-switch-on' : 'ui-switch-off'
+                        }`}
+                      >
+                        <span
+                          className={`ui-switch-thumb ${
+                            accountIncludedInput ? 'ui-switch-thumb-on' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={savingAccountEdit || !accountNameInput.trim()}
+                    className="ui-btn-primary"
+                  >
+                    <Check size={14} weight="bold" />
+                    <span>{savingAccountEdit ? 'Sparar...' : 'Spara'}</span>
+                  </button>
+                </form>
+              )}
+            </BottomSheet>
+
+            <ConfirmDialog
+              isOpen={disconnectConfirmConnId !== null}
+              title="Koppla från bank?"
+              description="Vill du koppla från banken och sluta synka konton?"
+              confirmLabel="Koppla från"
+              onConfirm={() => {
+                const id = disconnectConfirmConnId;
+                setDisconnectConfirmConnId(null);
+                if (id === '__default__') {
+                  onDisconnectBank();
+                } else if (id) {
+                  onDisconnectBank(id);
+                }
+              }}
+              onCancel={() => setDisconnectConfirmConnId(null)}
+            />
           </>
         ) : (
           <section className="ui-empty-state-page">
             <Bank size={52} weight="light" className="ui-empty-icon" />
-            <h3 className="ui-empty-title">
-              Ingen bank ansluten
-            </h3>
+            <h3 className="ui-empty-title">Ingen bank ansluten</h3>
             <p className="ui-empty-sub mb-6">
               Anslut din bank med Mobilt BankID för att hämta konton och köp automatiskt.
             </p>
@@ -912,45 +1111,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
-  // SUB-VIEW: ÖVERFÖRINGAR
-  // ==========================================
-  if (subView === 'preferences') {
-    return (
-      <div className="ui-page animate-slide-in-right">
-        <div className="ui-card-p">
-          <div className="flex items-center justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <span className="ui-row-title text-[13px] sm:text-sm">
-                Dölj egna överföringar
-              </span>
-              <p className="ui-row-subtitle">
-                Räknas inte med i utgifter eller inkomster.
-              </p>
-            </div>
-            {onToggleExcludeInternalTransfers && (
-              <button
-                type="button"
-                role="switch"
-                aria-checked={excludeInternalTransfers}
-                onClick={() => onToggleExcludeInternalTransfers(!excludeInternalTransfers)}
-                className={`ui-switch ${
-                  excludeInternalTransfers ? 'ui-switch-on' : 'ui-switch-off'
-                }`}
-              >
-                <span
-                  className={`ui-switch-thumb ${
-                    excludeInternalTransfers ? 'ui-switch-thumb-on' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
   // SUB-VIEW: DATA & SÄKERHET
   // ==========================================
   if (subView === 'security') {
@@ -958,7 +1118,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <div className="ui-page animate-slide-in-right">
         <div className="ui-group-card">
           <div className="ui-row">
-            <div className="min-w-0">
+            <div className="min-w-0 pr-3">
               <span className="ui-row-title text-[13px] sm:text-sm">
                 Exportera data
               </span>
@@ -977,120 +1137,78 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
 
           <div className="ui-row">
-            <div className="min-w-0">
+            <div className="min-w-0 pr-3">
               <span className="ui-row-title text-[13px] sm:text-sm">
-                Prisvarningar
+                Nollställ data & historik
               </span>
               <span className="ui-row-subtitle">
-                Visa dolda varningar igen
+                Rensa alla poster, bankkopplingar och börja om
               </span>
             </div>
             <button
               type="button"
-              onClick={() => {
-                try {
-                  localStorage.removeItem('dejz_dismissed_price_alerts');
-                } catch {
-                  // ignore
-                }
-                setSavedMsg(true);
-                setTimeout(() => setSavedMsg(false), 2000);
-              }}
-              className="ui-btn-sm shrink-0"
-            >
-              {savedMsg ? 'Återställt!' : 'Återställ'}
-            </button>
-          </div>
-
-          <div className="ui-row">
-            <div className="min-w-0">
-              <span className="ui-row-title text-[13px] sm:text-sm">
-                Nollställ data
-              </span>
-              <span className="ui-row-subtitle">
-                Rensa alla poster och börja om
-              </span>
-            </div>
-            <button
-              type="button"
+              disabled={securityProcessing}
               onClick={() => setSecurityConfirmAction('reset')}
-              className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-semibold hover:bg-amber-500/20 transition-colors cursor-pointer shrink-0"
+              className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-semibold hover:bg-amber-500/20 disabled:opacity-50 transition-colors cursor-pointer shrink-0"
             >
               Nollställ
             </button>
           </div>
 
           <div className="ui-row">
-            <div className="min-w-0">
-              <span className="ui-row-title text-[13px] sm:text-sm">
+            <div className="min-w-0 pr-3">
+              <span className="ui-row-title text-[13px] sm:text-sm text-rose-600 dark:text-rose-400">
                 Radera konto
               </span>
               <span className="ui-row-subtitle">
-                Ta bort konto och all data permanent
+                Ta bort konto, bankkopplingar och all data permanent
               </span>
             </div>
             <button
               type="button"
+              disabled={securityProcessing}
               onClick={() => setSecurityConfirmAction('delete')}
-              className="px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-500/20 transition-colors cursor-pointer shrink-0"
+              className="px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-500/20 disabled:opacity-50 transition-colors cursor-pointer shrink-0"
             >
               Radera
             </button>
           </div>
         </div>
 
-        <BottomSheet
+        <ConfirmDialog
           isOpen={securityConfirmAction !== null}
-          onClose={() => setSecurityConfirmAction(null)}
-          contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
-        >
-          <div className="ui-sheet-header">
-            <span className="ui-sheet-title">
-              {securityConfirmAction === 'delete' ? 'Radera konto' : 'Nollställ data'}
-            </span>
-            <button
-              type="button"
-              onClick={() => setSecurityConfirmAction(null)}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="space-y-4 text-xs">
-            <p className="text-[var(--text-secondary)] leading-relaxed">
-              {securityConfirmAction === 'delete'
-                ? 'Detta raderar ditt konto och all tillhörande data permanent. Åtgärden går inte att ångra.'
-                : 'Detta rensar dina sparade transaktioner, fasta utgifter, inkomster och bankkopplingar.'}
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setSecurityConfirmAction(null)}
-                className="ui-btn-secondary"
-              >
-                Avbryt
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const action = securityConfirmAction;
-                  setSecurityConfirmAction(null);
-                  if (action === 'delete') {
-                    onDeleteAccount();
-                  } else if (action === 'reset') {
-                    onResetAccount();
-                  }
-                }}
-                className={`py-2.5 px-3 rounded-xl font-bold text-white cursor-pointer ${
-                  securityConfirmAction === 'delete' ? 'bg-rose-600' : 'bg-amber-600'
-                }`}
-              >
-                {securityConfirmAction === 'delete' ? 'Radera permanent' : 'Nollställ'}
-              </button>
-            </div>
-          </div>
-        </BottomSheet>
+          loading={securityProcessing}
+          title={securityConfirmAction === 'delete' ? 'Radera konto permanent?' : 'Nollställ data & historik?'}
+          description={
+            securityConfirmAction === 'delete'
+              ? 'Detta raderar ditt konto och all tillhörande data permanent från servern. Åtgärden går inte att ångra och du loggas ut.'
+              : 'Detta rensar alla dina sparade transaktioner, fasta utgifter, inkomster och bankanslutningar så att du kan börja om från början.'
+          }
+          confirmLabel={securityConfirmAction === 'delete' ? 'Radera permanent' : 'Nollställ allt'}
+          variant="danger"
+          onConfirm={async () => {
+            const action = securityConfirmAction;
+            if (!action || securityProcessing) return;
+            setSecurityProcessing(true);
+            try {
+              if (action === 'delete') {
+                await onDeleteAccount();
+              } else if (action === 'reset') {
+                await onResetAccount();
+              }
+            } catch (err) {
+              console.error('Kunde inte utföra säkerhetsåtgärd:', err);
+            } finally {
+              setSecurityProcessing(false);
+              setSecurityConfirmAction(null);
+            }
+          }}
+          onCancel={() => {
+            if (!securityProcessing) {
+              setSecurityConfirmAction(null);
+            }
+          }}
+        />
       </div>
     );
   }
@@ -1362,88 +1480,204 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
-  // MAIN SETTINGS & PROFILE MENU
+  // SUB-VIEW: UTSEENDE
+  // ==========================================
+  if (subView === 'appearance') {
+    const themeOptions: {
+      id: 'light' | 'dark' | 'system';
+      label: string;
+    }[] = [
+      { id: 'light', label: 'Ljust' },
+      { id: 'dark', label: 'Mörkt' },
+      { id: 'system', label: 'System' },
+    ];
+
+    return (
+      <div className="ui-page animate-slide-in-right">
+        {/* Visual Preview Cards (like iOS / Revolut / Instagram) */}
+        <div className="ui-card-p">
+          <div className="grid grid-cols-3 gap-3">
+            {themeOptions.map((opt) => {
+              const isSelected = themeMode === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => applyTheme(opt.id)}
+                  className="flex flex-col items-center gap-2.5 cursor-pointer group"
+                >
+                  <div
+                    className={`w-full aspect-[4/5] rounded-2xl p-2.5 border-2 transition-all overflow-hidden relative flex flex-col justify-between ${
+                      isSelected
+                        ? 'border-[var(--text-primary)] shadow-sm scale-[1.02]'
+                        : 'border-[var(--border-subtle)] opacity-80 group-hover:opacity-100'
+                    } ${
+                      opt.id === 'light'
+                        ? 'bg-[#EEF4FA]'
+                        : opt.id === 'dark'
+                        ? 'bg-[#0B0F17]'
+                        : 'bg-gradient-to-br from-[#EEF4FA] from-50% to-[#0B0F17] to-50%'
+                    }`}
+                  >
+                    {opt.id === 'system' ? (
+                      <>
+                        <div className="w-full h-5 rounded-lg bg-white/90 border border-slate-900/5 px-1.5 flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-slate-800" />
+                          <div className="h-1.5 w-8 rounded-full bg-slate-300" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="w-full h-3.5 rounded-md bg-[#131B26] border border-white/10" />
+                          <div className="w-3/4 h-3.5 rounded-md bg-[#131B26] border border-white/10" />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          className={`w-full h-5 rounded-lg px-1.5 flex items-center gap-1 ${
+                            opt.id === 'light'
+                              ? 'bg-white border border-slate-900/5'
+                              : 'bg-[#131B26] border border-white/10'
+                          }`}
+                        >
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              opt.id === 'light' ? 'bg-slate-900' : 'bg-slate-100'
+                            }`}
+                          />
+                          <div
+                            className={`h-1.5 w-8 rounded-full ${
+                              opt.id === 'light' ? 'bg-slate-200' : 'bg-slate-700'
+                            }`}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div
+                            className={`w-full h-3.5 rounded-md ${
+                              opt.id === 'light'
+                                ? 'bg-white border border-slate-900/5'
+                                : 'bg-[#131B26] border border-white/10'
+                            }`}
+                          />
+                          <div
+                            className={`w-3/4 h-3.5 rounded-md ${
+                              opt.id === 'light'
+                                ? 'bg-white border border-slate-900/5'
+                                : 'bg-[#131B26] border border-white/10'
+                            }`}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <span
+                    className={`text-xs ${
+                      isSelected
+                        ? 'font-semibold text-[var(--text-primary)]'
+                        : 'font-medium text-[var(--text-muted)]'
+                    }`}
+                  >
+                    {opt.label}
+                  </span>
+
+                  <div
+                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                      isSelected
+                        ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                        : 'border-[var(--border-control)] bg-transparent'
+                    }`}
+                  >
+                    {isSelected && <Check size={11} weight="bold" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // MAIN SETTINGS & PROFILE MENU (Clean grouped layout with generous breathing room)
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
+  const rowTitleClass =
+    'font-medium text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-[1.3] text-[var(--text-primary)] block truncate';
+  const rowSubClass =
+    'font-normal text-[11.5px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
+  const sectionLabelClass =
+    'px-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)] block';
+
+  const savingsGoalsCount = getSavingsGoals().length;
 
   return (
-    <div className="ui-page animate-slide-in-left">
+    <div className="space-y-4 pb-40 sm:pb-44 animate-slide-in-left">
       {hiddenAvatarInput}
 
-      {/* 1. Clean Profile Header Card */}
-      <button
-        type="button"
-        onClick={() => setSubView('profile')}
-        className="w-full ui-card p-4 sm:p-5 flex items-center justify-between gap-3.5 text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
-      >
-        <div className="flex items-center gap-3.5 min-w-0 flex-1">
-          <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
-            <div className="w-12 h-12 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
+      {/* 1. Konto / Profil */}
+      <div className="ui-admin-card">
+        <button
+          type="button"
+          onClick={() => setSubView('profile')}
+          className="ui-admin-row py-3.5"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="w-10 h-10 rounded-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center shrink-0">
               {userAvatar ? (
                 <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
               ) : initialChar ? (
-                <span className="font-display font-bold text-base uppercase text-[var(--text-primary)]">
+                <span className="font-display font-semibold text-xs uppercase text-[var(--text-primary)]">
                   {initialChar}
                 </span>
               ) : (
-                <UserCircle size={26} weight="duotone" className="text-[var(--text-secondary)]" />
+                <UserCircle size={20} weight="regular" className="text-[var(--text-secondary)]" />
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] border-2 border-[var(--surface-color)] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
-              title="Byt profilbild"
-            >
-              <Camera size={11} weight="bold" />
-            </button>
+
+            <div className="min-w-0 flex-1">
+              <span className={rowTitleClass}>{userName || 'Konto'}</span>
+              <span className={rowSubClass}>
+                {userEmail || 'Profil, namn och e-post'}
+              </span>
+            </div>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <h2 className="font-display font-bold text-sm sm:text-base text-[var(--text-primary)] truncate">
-              {userName || userEmail || 'Gästkonto'}
-            </h2>
-            <span className="ui-row-subtitle truncate">
-              {userName && userEmail ? userEmail : 'Redigera profil'}
-            </span>
-          </div>
-        </div>
-
-        <CaretRight
-          size={15}
-          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors shrink-0"
-        />
-      </button>
+          <span className="ui-admin-chevron">
+            <CaretRight size={14} />
+          </span>
+        </button>
+      </div>
 
       {/* 2. Ekonomi */}
-      <div className="ui-section">
-        <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-          Ekonomi
-        </span>
-        <div className="ui-group-card">
+      <section className="space-y-1.5">
+        <span className={sectionLabelClass}>Ekonomi</span>
+        <div className="ui-admin-card">
           {/* Bankkonton */}
           <button
             type="button"
             onClick={() => setSubView('bank')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <CreditCard size={16} />
-              </div>
-              <span className="ui-row-title">Bankkonton</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <CreditCard size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Bankkonton</span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="ui-admin-right">
               <span
-                className={`text-xs font-medium ${
+                className={`ui-admin-value ${
                   hasActiveBank
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-[var(--text-muted)]'
+                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                    : ''
                 }`}
               >
-                {hasActiveBank ? 'Ansluten' : 'Ej ansluten'}
+                {hasActiveBank ? 'Ansluten' : 'Anslut'}
               </span>
-              <CaretRight size={14} className="text-[var(--text-muted)]" />
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
             </div>
           </button>
 
@@ -1451,19 +1685,38 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('period')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <CalendarBlank size={16} />
-              </div>
-              <span className="ui-row-title">Lönedag</span>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
-                Den {targetPayday}:e
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <CalendarBlank size={18} weight="regular" />
               </span>
-              <CaretRight size={14} className="text-[var(--text-muted)]" />
+              <span className={rowTitleClass}>Lönedag</span>
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-value">Den {targetPayday}:e</span>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
+          </button>
+
+          {/* Hitta fasta poster (kortad rubrik med bevarad betydelse) */}
+          <button
+            type="button"
+            onClick={() => setSubView('discover')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Sparkle size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Hitta fasta poster</span>
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
             </div>
           </button>
 
@@ -1471,90 +1724,142 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('categories')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <Tag size={16} />
-              </div>
-              <span className="ui-row-title">Kategorier</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Tag size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Kategorier</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
+          </button>
+
+          {/* Sparmål & buffert */}
+          <button
+            type="button"
+            onClick={() => setSubView('goals')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <PiggyBank size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Sparmål & buffert</span>
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-value">
+                {savingsGoalsCount > 0 ? `${savingsGoalsCount} st` : ''}
+              </span>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
           {/* Betalsätt */}
           <button
             type="button"
             onClick={() => setSubView('paymentMethods')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <Wallet size={16} />
-              </div>
-              <span className="ui-row-title">Betalsätt</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Wallet size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Betalsätt</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
-          {/* Överföringar */}
-          <button
-            type="button"
-            onClick={() => setSubView('preferences')}
-            className="ui-row-btn"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <ArrowsLeftRight size={16} />
-              </div>
-              <span className="ui-row-title">Överföringar</span>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
-                {excludeInternalTransfers ? 'Dolda' : 'Visas'}
+          {/* Dölj överföringar */}
+          <div className="ui-admin-row-static">
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <ArrowsLeftRight size={18} weight="regular" />
               </span>
-              <CaretRight size={14} className="text-[var(--text-muted)]" />
+              <span className={rowTitleClass}>Dölj överföringar</span>
             </div>
-          </button>
+            {onToggleExcludeInternalTransfers && (
+              <button
+                type="button"
+                role="switch"
+                aria-checked={excludeInternalTransfers}
+                onClick={() => onToggleExcludeInternalTransfers(!excludeInternalTransfers)}
+                className={`ui-switch ${
+                  excludeInternalTransfers ? 'ui-switch-on' : 'ui-switch-off'
+                }`}
+              >
+                <span
+                  className={`ui-switch-thumb ${
+                    excludeInternalTransfers ? 'ui-switch-thumb-on' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* 3. Konto & app */}
-      <div className="ui-section">
-        <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-          Konto & app
-        </span>
-        <div className="ui-group-card">
+      <section className="space-y-1.5">
+        <span className={sectionLabelClass}>Konto & app</span>
+        <div className="ui-admin-card">
           {/* Utseende */}
           <button
             type="button"
-            onClick={() => applyTheme(themeMode === 'dark' ? 'light' : 'dark')}
-            className="ui-row-btn"
+            onClick={() => setSubView('appearance')}
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                {themeMode === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
-              </div>
-              <span className="ui-row-title">Utseende</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                {themeMode === 'dark' ? (
+                  <Moon size={18} weight="regular" />
+                ) : (
+                  <Sun size={18} weight="regular" />
+                )}
+              </span>
+              <span className={rowTitleClass}>Utseende</span>
             </div>
-            <span className="text-xs font-medium text-[var(--text-muted)]">
-              {themeMode === 'dark' ? 'Mörkt' : 'Ljust'}
-            </span>
+            <div className="ui-admin-right">
+              <span className="ui-admin-value">
+                {themeMode === 'system'
+                  ? 'System'
+                  : themeMode === 'dark'
+                  ? 'Mörkt'
+                  : 'Ljust'}
+              </span>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
           {/* Skicka feedback */}
           <button
             type="button"
             onClick={() => setSubView('feedback')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <ChatCircleText size={16} />
-              </div>
-              <span className="ui-row-title">Skicka feedback</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <ChatCircleText size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Skicka feedback</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
           {/* Introduktion */}
@@ -1562,15 +1867,19 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <button
               type="button"
               onClick={onStartOnboarding}
-              className="ui-row-btn"
+              className="ui-admin-row"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="ui-icon-badge">
-                  <Compass size={16} />
-                </div>
-                <span className="ui-row-title">Introduktion</span>
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <Compass size={18} weight="regular" />
+                </span>
+                <span className={rowTitleClass}>Introduktion</span>
               </div>
-              <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+              <div className="ui-admin-right">
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
+              </div>
             </button>
           )}
 
@@ -1578,122 +1887,140 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('security')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <ShieldCheck size={16} />
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <ShieldCheck size={18} weight="regular" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className={rowTitleClass}>Data & säkerhet</span>
+                <span className={rowSubClass}>Nollställ data, radera konto & export</span>
               </div>
-              <span className="ui-row-title">Data & säkerhet</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
-
-          {/* Logga in / Logga ut */}
-          {userEmail ? (
-            <button
-              type="button"
-              onClick={onSignOut}
-              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-rose-500/5 active:scale-[0.995] transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                  <SignOut size={16} />
-                </div>
-                <span className="text-[13px] sm:text-sm font-semibold text-rose-600 dark:text-rose-400">
-                  Logga ut
-                </span>
-              </div>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenAuth}
-              className="ui-row-btn"
-            >
-              <div className="flex items-center gap-3">
-                <div className="ui-icon-badge">
-                  <UserCircle size={16} />
-                </div>
-                <span className="ui-row-title">Logga in</span>
-              </div>
-              <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
-            </button>
-          )}
         </div>
-      </div>
+      </section>
 
       {/* 4. Juridik & integritet */}
-      <div className="ui-section">
-        <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-          Juridik & integritet
-        </span>
-        <div className="ui-group-card">
+      <section className="space-y-1.5">
+        <span className={sectionLabelClass}>Juridik & integritet</span>
+        <div className="ui-admin-card">
           <button
             type="button"
             onClick={() => setSubView('privacy')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <LockKey size={16} />
-              </div>
-              <span className="ui-row-title">Integritetspolicy</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <LockKey size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Integritetspolicy</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
           <button
             type="button"
             onClick={() => setSubView('terms')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <FileText size={16} />
-              </div>
-              <span className="ui-row-title">Användarvillkor</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <FileText size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Användarvillkor</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
           <button
             type="button"
             onClick={() => setSubView('psd2')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <Scales size={16} />
-              </div>
-              <span className="ui-row-title">Open Banking</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Scales size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Open Banking</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
 
           <button
             type="button"
             onClick={() => setSubView('cookies')}
-            className="ui-row-btn"
+            className="ui-admin-row"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="ui-icon-badge">
-                <Cookie size={16} />
-              </div>
-              <span className="ui-row-title">Cookies & lagring</span>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Cookie size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Cookies & lagring</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* App Info Footer */}
-      <div className="flex items-center justify-center pt-6 pb-4">
-        <img
-          src="/dejz_mork.png"
-          alt="Dejz"
-          className="h-5 w-auto object-contain opacity-60 dark:opacity-75 dark:invert"
-        />
+      {/* 5. Logga ut / Logga in */}
+      <div className="ui-admin-card">
+        {userEmail ? (
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="ui-admin-row hover:bg-rose-500/5"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-5 h-5 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                <SignOut size={18} weight="regular" />
+              </div>
+              <span className="text-[13px] sm:text-[13.5px] font-medium text-rose-600 dark:text-rose-400">
+                Logga ut
+              </span>
+            </div>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onOpenAuth}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5">
+              <span className="ui-admin-icon-slot">
+                <UserCircle size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Logga in</span>
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );
