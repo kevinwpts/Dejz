@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
   CaretLeft,
+  CaretRight,
   Bank,
   CheckCircle,
   Plus,
@@ -15,6 +16,7 @@ import { IncomeItem, FixedExpenseItem } from './HomeTab';
 import { BankConnection } from '../services/bankService';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
+import { BottomSheet } from './ui/BottomSheet';
 
 interface OnboardingFlowProps {
   initialName: string;
@@ -35,6 +37,20 @@ interface OnboardingFlowProps {
   onBackToLanding?: () => void;
 }
 
+type OnboardingStep = 1 | 2 | 3 | 4;
+
+interface SheetEditorState {
+  mode: 'add' | 'edit';
+  type: 'income' | 'fixed';
+  id?: string;
+  name: string;
+  amount: string;
+  day: number;
+  category: string;
+  paymentMethod?: string;
+  logo?: string;
+}
+
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   initialName,
   targetPayday = 25,
@@ -53,9 +69,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   onComplete,
   onBackToLanding,
 }) => {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<OnboardingStep>(1);
+  const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
   const [name, setName] = useState(initialName || '');
   const [payday, setPayday] = useState<number>(targetPayday || 25);
+  const [showAllPaydays, setShowAllPaydays] = useState<boolean>(
+    () => ![25, 27, 18].includes(targetPayday || 25)
+  );
+
+  // BottomSheet editor state for Step 4 (replaces cramped inline forms)
+  const [sheetEditor, setSheetEditor] = useState<SheetEditorState | null>(null);
+  const [sheetSubView, setSheetSubView] = useState<'main' | 'day-picker'>('main');
+  const [sheetNavDir, setSheetNavDir] = useState<'forward' | 'back'>('forward');
 
   useEffect(() => {
     if (initialName && !name) {
@@ -63,111 +88,149 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   }, [initialName, name]);
 
-  // Quick-add states for Step 3
-  const [addingType, setAddingType] = useState<'income' | 'fixed' | null>(null);
-  const [newItemName, setNewItemName] = useState('');
-  const [newItemAmount, setNewItemAmount] = useState('');
-
-  // Inline edit state for Step 3
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editAmount, setEditAmount] = useState('');
-  const [editDay, setEditDay] = useState<number>(25);
-
   const hasConnectedBank = connections.length > 0;
 
   const formatKr = (val: number) =>
     new Intl.NumberFormat('sv-SE').format(Math.round(val)) + ' kr';
+
+  const navigateStep = (next: OnboardingStep, dir: 'forward' | 'back') => {
+    setSlideDir(dir);
+    setStep(next);
+  };
 
   const handleNextFromStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
     onSaveName(trimmed);
+    navigateStep(2, 'forward');
+  };
+
+  const handleNextFromStep2 = () => {
     if (onUpdatePayday) {
       onUpdatePayday(payday);
     }
-    setStep(2);
+    navigateStep(3, 'forward');
   };
 
-  const handleQuickAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    const title = newItemName.trim();
-    const amt = Math.max(0, Math.round(Number(newItemAmount) || 0));
-    if (!title || amt <= 0) return;
+  const openAddSheet = (type: 'income' | 'fixed') => {
+    setSheetSubView('main');
+    setSheetNavDir('forward');
+    setSheetEditor({
+      mode: 'add',
+      type,
+      name: '',
+      amount: '',
+      day: type === 'income' ? payday || 25 : 27,
+      category: type === 'income' ? 'Lön' : 'Räkningar',
+      paymentMethod: type === 'fixed' ? 'Autogiro' : undefined,
+    });
+  };
 
-    if (addingType === 'income') {
-      onAddIncome({
-        name: title,
-        amount: amt,
-        payday: payday || 25,
-        category: 'Lön',
-      });
-    } else if (addingType === 'fixed') {
-      onAddFixed({
-        name: title,
-        amount: amt,
-        dueDay: 27,
-        category: 'Räkningar',
-        paymentMethod: 'Autogiro',
-      });
+  const openEditIncomeSheet = (inc: IncomeItem) => {
+    setSheetSubView('main');
+    setSheetNavDir('forward');
+    setSheetEditor({
+      mode: 'edit',
+      type: 'income',
+      id: inc.id,
+      name: inc.name,
+      amount: String(Math.round(inc.amount)),
+      day: inc.payday || payday || 25,
+      category: inc.category || 'Lön',
+      logo: inc.logo,
+    });
+  };
+
+  const openEditFixedSheet = (exp: FixedExpenseItem) => {
+    setSheetSubView('main');
+    setSheetNavDir('forward');
+    setSheetEditor({
+      mode: 'edit',
+      type: 'fixed',
+      id: exp.id,
+      name: exp.name,
+      amount: String(Math.round(exp.amount)),
+      day: exp.dueDay || 27,
+      category: exp.category || 'Räkningar',
+      paymentMethod: exp.paymentMethod || 'Autogiro',
+      logo: exp.logo,
+    });
+  };
+
+  const handleSaveSheet = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!sheetEditor) return;
+
+    const cleanTitle = sheetEditor.name.trim();
+    const cleanAmt = Math.max(0, Math.round(Number(sheetEditor.amount) || 0));
+    const cleanDay = Math.min(31, Math.max(1, Number(sheetEditor.day) || 25));
+
+    if (!cleanTitle || cleanAmt <= 0) return;
+
+    if (sheetEditor.type === 'income') {
+      if (sheetEditor.mode === 'add') {
+        onAddIncome({
+          name: cleanTitle,
+          amount: cleanAmt,
+          payday: cleanDay,
+          category: sheetEditor.category || 'Lön',
+        });
+      } else if (sheetEditor.id && onUpdateIncome) {
+        const existing = incomes.find((i) => i.id === sheetEditor.id);
+        if (existing) {
+          onUpdateIncome({
+            ...existing,
+            name: cleanTitle,
+            amount: cleanAmt,
+            payday: cleanDay,
+          });
+        }
+      }
+    } else {
+      if (sheetEditor.mode === 'add') {
+        onAddFixed({
+          name: cleanTitle,
+          amount: cleanAmt,
+          dueDay: cleanDay,
+          category: sheetEditor.category || 'Räkningar',
+          paymentMethod: sheetEditor.paymentMethod || 'Autogiro',
+        });
+      } else if (sheetEditor.id && onUpdateFixed) {
+        const existing = fixedExpenses.find((f) => f.id === sheetEditor.id);
+        if (existing) {
+          onUpdateFixed({
+            ...existing,
+            name: cleanTitle,
+            amount: cleanAmt,
+            dueDay: cleanDay,
+          });
+        }
+      }
     }
 
-    setNewItemName('');
-    setNewItemAmount('');
-    setAddingType(null);
+    setSheetEditor(null);
   };
 
-  const startEditingIncome = (inc: IncomeItem) => {
-    setEditingId(inc.id);
-    setEditName(inc.name);
-    setEditAmount(String(Math.round(inc.amount)));
-    setEditDay(inc.payday || payday || 25);
-  };
-
-  const startEditingFixed = (exp: FixedExpenseItem) => {
-    setEditingId(exp.id);
-    setEditName(exp.name);
-    setEditAmount(String(Math.round(exp.amount)));
-    setEditDay(exp.dueDay || 27);
-  };
-
-  const saveEditIncome = (inc: IncomeItem) => {
-    const cleanTitle = editName.trim() || inc.name;
-    const cleanAmt = Math.max(0, Math.round(Number(editAmount) || 0));
-    const cleanDay = Math.min(31, Math.max(1, Number(editDay) || 25));
-    if (onUpdateIncome && cleanAmt > 0) {
-      onUpdateIncome({
-        ...inc,
-        name: cleanTitle,
-        amount: cleanAmt,
-        payday: cleanDay,
-      });
+  const handleDeleteFromSheet = () => {
+    if (!sheetEditor || !sheetEditor.id) return;
+    if (sheetEditor.type === 'income') {
+      onDeleteIncome(sheetEditor.id);
+    } else {
+      onDeleteFixed(sheetEditor.id);
     }
-    setEditingId(null);
-  };
-
-  const saveEditFixed = (exp: FixedExpenseItem) => {
-    const cleanTitle = editName.trim() || exp.name;
-    const cleanAmt = Math.max(0, Math.round(Number(editAmount) || 0));
-    const cleanDay = Math.min(31, Math.max(1, Number(editDay) || 27));
-    if (onUpdateFixed && cleanAmt > 0) {
-      onUpdateFixed({
-        ...exp,
-        name: cleanTitle,
-        amount: cleanAmt,
-        dueDay: cleanDay,
-      });
-    }
-    setEditingId(null);
+    setSheetEditor(null);
   };
 
   const totalInc = incomes.reduce((sum, i) => sum + i.amount, 0);
   const totalFix = fixedExpenses.reduce((sum, f) => sum + f.amount, 0);
   const kvarAttSpendera = Math.max(0, totalInc - totalFix);
 
+  const pageAnimClass =
+    slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
+
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans">
+    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans overflow-x-hidden">
       {/* Top Progress Header */}
       <header className="space-y-4">
         <div className="flex items-center justify-between h-10">
@@ -175,7 +238,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             type="button"
             onClick={() => {
               if (step > 1) {
-                setStep((prev) => (prev - 1) as 1 | 2 | 3);
+                navigateStep((step - 1) as OnboardingStep, 'back');
               } else if (onBackToLanding) {
                 onBackToLanding();
               }
@@ -187,18 +250,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           </button>
 
           <span className="text-xs font-semibold text-[var(--text-muted)] tabular-nums">
-            Steg {step} av 3
+            Steg {step} av 4
           </span>
 
           <div className="w-6" />
         </div>
 
-        {/* Minimal 3-step bar */}
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((s) => (
+        {/* Minimal 4-step bar */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
-              className={`h-1 rounded-full transition-colors ${
+              className={`h-1 rounded-full transition-colors duration-300 ${
                 s <= step ? 'bg-[var(--text-primary)]' : 'bg-[var(--border-subtle)]'
               }`}
             />
@@ -206,88 +269,45 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         </div>
       </header>
 
-      {/* STEP 1: NAMN & LÖNEDAG */}
+      {/* ============================================================== */}
+      {/* STEG 1: ENDAST FÖRNAMN ("One question per screen")             */}
+      {/* ============================================================== */}
       {step === 1 && (
         <form
+          key="step-1"
           onSubmit={handleNextFromStep1}
-          className="flex-1 flex flex-col justify-between py-8 animate-fade-in"
+          className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
         >
-          <div className="my-auto space-y-6">
-            <div className="space-y-1.5">
-              <h1 className="font-display font-extrabold text-2xl tracking-tight text-[var(--text-primary)]">
+          <div className="my-auto space-y-8">
+            <div className="space-y-2">
+              <h1 className="font-display font-extrabold text-3xl tracking-tight text-[var(--text-primary)]">
                 Vad heter du?
               </h1>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Så vi vet vem vi hälsar på och när din lön brukar komma.
+              <p className="text-sm text-[var(--text-secondary)]">
+                Så att vi kan anpassa Dejz för dig.
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1.5">
-                  Förnamn
-                </label>
-                <input
-                  type="text"
-                  autoFocus
-                  required
-                  placeholder="Ditt förnamn"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] font-display font-bold text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-                />
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                    <CalendarBlank size={15} className="text-[var(--text-secondary)]" />
-                    <span>Ordinarie lönedag</span>
-                  </span>
-                  <select
-                    value={payday}
-                    onChange={(e) => setPayday(Number(e.target.value) || 25)}
-                    className="py-1 px-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] tabular-nums focus:outline-none cursor-pointer"
-                  >
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                      <option key={d} value={d}>
-                        Den {d}:e
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5">
-                  {[
-                    { day: 25, label: 'Den 25:e' },
-                    { day: 27, label: 'Den 27:e' },
-                    { day: 18, label: 'Den 18:e' },
-                  ].map((opt) => {
-                    const active = payday === opt.day;
-                    return (
-                      <button
-                        key={opt.day}
-                        type="button"
-                        onClick={() => setPayday(opt.day)}
-                        className={`py-2 px-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                          active
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-bold'
-                            : 'bg-[var(--bg-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
+                Tilltalsnamn
+              </span>
+              <input
+                type="text"
+                autoFocus
+                required
+                placeholder="Skriv ditt förnamn..."
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-transparent border-0 p-0 font-display font-extrabold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
+              />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={!name.trim()}
-            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40 transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />
@@ -295,16 +315,126 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         </form>
       )}
 
-      {/* STEP 2: ENABLE BANKING */}
+      {/* ============================================================== */}
+      {/* STEG 2: ENDAST LÖNEDAG (Ingen <select>, ren visuell väljare)   */}
+      {/* ============================================================== */}
       {step === 2 && (
-        <div className="flex-1 flex flex-col justify-between py-8 animate-fade-in">
+        <div
+          key="step-2"
+          className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
+        >
           <div className="my-auto space-y-6">
-            <div className="space-y-1.5">
-              <h1 className="font-display font-extrabold text-2xl tracking-tight text-[var(--text-primary)]">
+            <div className="space-y-2">
+              <h1 className="font-display font-extrabold text-3xl tracking-tight text-[var(--text-primary)]">
+                När får du lön?
+              </h1>
+              <p className="text-sm text-[var(--text-secondary)]">
+                Vi räknar ut vad du har kvar att spendera från lön till lön.
+              </p>
+            </div>
+
+            {/* Vanligaste lönedagarna som stora valkort */}
+            <div className="grid grid-cols-3 gap-2.5">
+              {[
+                { day: 25, label: 'Den 25:e', sub: 'Vanligast' },
+                { day: 27, label: 'Den 27:e', sub: 'Kommun / stat' },
+                { day: 18, label: 'Den 18:e', sub: 'Pension / bidrag' },
+              ].map((opt) => {
+                const active = payday === opt.day;
+                return (
+                  <button
+                    key={opt.day}
+                    type="button"
+                    onClick={() => setPayday(opt.day)}
+                    className={`p-4 rounded-3xl text-left transition-all cursor-pointer border flex flex-col justify-between min-h-[88px] active:scale-[0.98] ${
+                      active
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                        : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
+                    }`}
+                  >
+                    <span className="font-display font-extrabold text-base tabular-nums block">
+                      {opt.label}
+                    </span>
+                    <span
+                      className={`text-[11px] font-medium block mt-2 ${
+                        active ? 'opacity-80' : 'text-[var(--text-muted)]'
+                      }`}
+                    >
+                      {opt.sub}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Annan dag i månaden (7-kolumners kalenderrutnät, aldrig <select>) */}
+            <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowAllPaydays((prev) => !prev)}
+                className="w-full px-4 py-3.5 flex items-center justify-between text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <CalendarBlank size={15} className="text-[var(--text-secondary)]" />
+                  <span>Annan dag i månaden</span>
+                </span>
+                <span className="font-display font-bold tabular-nums text-[var(--text-secondary)]">
+                  Den {payday}:e
+                </span>
+              </button>
+
+              {showAllPaydays && (
+                <div className="p-3.5 pt-2 border-t border-[var(--border-subtle)]">
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
+                      const isSel = payday === d;
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setPayday(d)}
+                          className={`h-9 rounded-xl font-display text-xs tabular-nums transition-all cursor-pointer flex items-center justify-center border ${
+                            isSel
+                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-bold'
+                              : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] font-semibold'
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleNextFromStep2}
+            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+          >
+            <span>Fortsätt med den {payday}:e</span>
+            <ArrowRight size={16} weight="bold" />
+          </button>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* STEG 3: ENABLE BANKING                                         */}
+      {/* ============================================================== */}
+      {step === 3 && (
+        <div
+          key="step-3"
+          className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
+        >
+          <div className="my-auto space-y-6">
+            <div className="space-y-2">
+              <h1 className="font-display font-extrabold text-3xl tracking-tight text-[var(--text-primary)]">
                 Koppla din bank
               </h1>
-              <p className="text-xs text-[var(--text-secondary)]">
-                Hämta konton, lön och fasta utgifter automatiskt via Enable Banking.
+              <p className="text-sm text-[var(--text-secondary)]">
+                Hämta konton, lön och fasta utgifter automatiskt med BankID.
               </p>
             </div>
 
@@ -351,7 +481,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       Välj din bank
                     </span>
                     <span className="text-xs text-[var(--text-muted)]">
-                      Säker koppling med BankID
+                      Säker koppling via Enable Banking
                     </span>
                   </div>
                 </div>
@@ -363,7 +493,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <div className="space-y-2.5">
             <button
               type="button"
-              onClick={() => setStep(3)}
+              onClick={() => navigateStep(4, 'forward')}
               className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all cursor-pointer"
             >
               <span>Fortsätt</span>
@@ -373,7 +503,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             {!hasConnectedBank && (
               <button
                 type="button"
-                onClick={() => setStep(3)}
+                onClick={() => navigateStep(4, 'forward')}
                 className="w-full py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 Hoppa över just nu
@@ -383,23 +513,28 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         </div>
       )}
 
-      {/* STEP 3: INKOMSTER & FASTA UTGIFTER */}
-      {step === 3 && (
-        <div className="flex-1 flex flex-col justify-between py-5 animate-fade-in min-h-0">
+      {/* ============================================================== */}
+      {/* STEG 4: INKOMSTER & FASTA UTGIFTER (Öppnas i riktiga Sheets)   */}
+      {/* ============================================================== */}
+      {step === 4 && (
+        <div
+          key="step-4"
+          className={`flex-1 flex flex-col justify-between py-5 min-h-0 ${pageAnimClass}`}
+        >
           <div className="space-y-5 overflow-y-auto pr-0.5 pb-4">
             <div className="space-y-1">
               <h1 className="font-display font-extrabold text-2xl tracking-tight text-[var(--text-primary)]">
-                Inkomster & fasta utgifter
+                Stämmer din översikt?
               </h1>
               <p className="text-xs text-[var(--text-secondary)]">
-                Tryck på en rad om du vill justera belopp eller datum.
+                Tryck på en post för att justera belopp eller datum.
               </p>
             </div>
 
             {/* Live Kvar att spendera-sammanfattning */}
-            <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 flex items-center justify-between gap-3">
+            <div className="ui-card p-4 flex items-center justify-between gap-3">
               <div>
-                <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
+                <span className="ui-stat-label">
                   Kvar efter fasta räkningar
                 </span>
                 <span className="font-display font-extrabold text-2xl text-[var(--text-primary)] tabular-nums">
@@ -416,371 +551,137 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </div>
             </div>
 
-            {/* Inkomster (Samma kortdesign som Fasta-fliken) */}
-            <section className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="font-display font-bold text-xs text-[var(--text-muted)]">
+            {/* Inkomster (Enhetlig grupperad lista som i Ekonomi-fliken) */}
+            <section className="ui-section">
+              <div className="ui-section-header">
+                <h2 className="ui-section-title">
                   Inkomster ({incomes.length})
                 </h2>
-                <span className="font-display font-bold text-xs text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  +{formatKr(totalInc)}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => openAddSheet('income')}
+                  className="text-xs font-bold text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus size={12} weight="bold" />
+                  <span>Lägg till</span>
+                </button>
               </div>
 
               {incomes.length > 0 ? (
-                <div className="space-y-2">
-                  {incomes.map((inc) => {
-                    const isEditing = editingId === inc.id;
-                    if (isEditing) {
-                      return (
-                        <div
-                          key={inc.id}
-                          className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--text-primary)] space-y-2.5 text-xs"
-                        >
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-semibold text-[var(--text-primary)] focus:outline-none"
-                              placeholder="Namn"
-                            />
-                            <input
-                              type="number"
-                              value={editAmount}
-                              onChange={(e) => setEditAmount(e.target.value)}
-                              className="w-24 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-bold text-[var(--text-primary)] tabular-nums focus:outline-none"
-                              placeholder="Belopp"
-                            />
-                          </div>
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[var(--text-muted)]">Lönedag:</span>
-                              <input
-                                type="number"
-                                min={1}
-                                max={31}
-                                value={editDay}
-                                onChange={(e) => setEditDay(Number(e.target.value) || 25)}
-                                className="w-14 px-2 py-1 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] font-bold text-center tabular-nums"
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => onDeleteIncome(inc.id)}
-                                className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"
-                                title="Ta bort"
-                              >
-                                <Trash size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingId(null)}
-                                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
-                              >
-                                <X size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => saveEditIncome(inc)}
-                                className="px-3 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Check size={13} weight="bold" />
-                                <span>Spara</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={inc.id}
-                        className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-sm"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => startEditingIncome(inc)}
-                          className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
-                        >
-                          <ItemLogo
-                            name={inc.name}
-                            category={inc.category}
-                            logoUrl={inc.logo}
-                            size="md"
-                            isRecurring={false}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                              <span className="truncate">{inc.name}</span>
-                              <PencilSimple size={11} className="text-[var(--text-muted)] shrink-0" />
-                            </span>
-                            <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
-                              <span className="inline-flex items-center gap-1 truncate">
-                                <CategoryIcon category={inc.category || 'Lön'} size={12} />
-                                <span className="truncate">{inc.category || 'Lön'}</span>
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                        <div className="flex items-center gap-2.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => startEditingIncome(inc)}
-                            className="text-right cursor-pointer"
-                          >
-                            <span className="font-display font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block">
-                              +{formatKr(inc.amount)}
-                            </span>
-                            <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
-                              Den {inc.payday || payday}:e
-                            </span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onDeleteIncome(inc.id)}
-                            className="p-1.5 text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                            title="Ta bort"
-                          >
-                            <Trash size={14} />
-                          </button>
+                <div className="ui-list-card">
+                  {incomes.map((inc) => (
+                    <button
+                      key={inc.id}
+                      type="button"
+                      onClick={() => openEditIncomeSheet(inc)}
+                      className="ui-tx-row"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <ItemLogo
+                          name={inc.name}
+                          category={inc.category}
+                          logoUrl={inc.logo}
+                          size="md"
+                          isRecurring={false}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="ui-row-title">
+                            {inc.name}
+                          </span>
+                          <span className="ui-row-subtitle flex items-center gap-1">
+                            <span className="truncate">{inc.category || 'Lön'}</span>
+                          </span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-xs text-[var(--text-muted)] px-1">Ingen inkomst tillagd än.</p>
-              )}
-
-              {addingType === 'income' ? (
-                <form
-                  onSubmit={handleQuickAdd}
-                  className="p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2"
-                >
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="T.ex. Lön"
-                      autoFocus
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                      className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Belopp"
-                      value={newItemAmount}
-                      onChange={(e) => setNewItemAmount(e.target.value)}
-                      className="w-24 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="px-3 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold cursor-pointer"
-                    >
-                      <Check size={14} weight="bold" />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="text-right">
+                          <span className="ui-row-amount ui-row-amount-income">
+                            +{formatKr(inc.amount)}
+                          </span>
+                          <span className="ui-row-meta">
+                            Den {inc.payday || payday}:e
+                          </span>
+                        </div>
+                        <CaretRight size={13} className="text-[var(--text-muted)]" />
+                      </div>
                     </button>
-                  </div>
-                </form>
+                  ))}
+                </div>
               ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    setAddingType('income');
-                    setNewItemName('');
-                    setNewItemAmount('');
-                  }}
-                  className="w-full py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  onClick={() => openAddSheet('income')}
+                  className="w-full py-4 ui-card text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Plus size={13} weight="bold" />
-                  <span>Lägg till inkomst</span>
+                  <Plus size={14} weight="bold" />
+                  <span>Lägg till din inkomst</span>
                 </button>
               )}
             </section>
 
-            {/* Fasta utgifter (Samma kortdesign som Fasta-fliken) */}
-            <section className="space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="font-display font-bold text-xs text-[var(--text-muted)]">
+            {/* Fasta utgifter (Enhetlig grupperad lista som i Ekonomi-fliken) */}
+            <section className="ui-section">
+              <div className="ui-section-header">
+                <h2 className="ui-section-title">
                   Fasta utgifter ({fixedExpenses.length})
                 </h2>
-                <span className="font-display font-bold text-xs text-[var(--text-primary)] tabular-nums">
-                  -{formatKr(totalFix)}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => openAddSheet('fixed')}
+                  className="text-xs font-bold text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus size={12} weight="bold" />
+                  <span>Lägg till</span>
+                </button>
               </div>
 
               {fixedExpenses.length > 0 ? (
-                <div className="space-y-2">
-                  {fixedExpenses.map((exp) => {
-                    const isEditing = editingId === exp.id;
-                    if (isEditing) {
-                      return (
-                        <div
-                          key={exp.id}
-                          className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--text-primary)] space-y-2.5 text-xs"
-                        >
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-semibold text-[var(--text-primary)] focus:outline-none"
-                              placeholder="Namn"
-                            />
-                            <input
-                              type="number"
-                              value={editAmount}
-                              onChange={(e) => setEditAmount(e.target.value)}
-                              className="w-24 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-bold text-[var(--text-primary)] tabular-nums focus:outline-none"
-                              placeholder="Belopp"
-                            />
-                          </div>
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[var(--text-muted)]">Förfallodag:</span>
-                              <input
-                                type="number"
-                                min={1}
-                                max={31}
-                                value={editDay}
-                                onChange={(e) => setEditDay(Number(e.target.value) || 27)}
-                                className="w-14 px-2 py-1 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] font-bold text-center tabular-nums"
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => onDeleteFixed(exp.id)}
-                                className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"
-                                title="Ta bort"
-                              >
-                                <Trash size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingId(null)}
-                                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
-                              >
-                                <X size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => saveEditFixed(exp)}
-                                className="px-3 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Check size={13} weight="bold" />
-                                <span>Spara</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={exp.id}
-                        className="w-full p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-sm"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => startEditingFixed(exp)}
-                          className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
-                        >
-                          <ItemLogo
-                            name={exp.name}
-                            category={exp.category}
-                            logoUrl={exp.logo}
-                            size="md"
-                            isRecurring={false}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                              <span className="truncate">{exp.name}</span>
-                              <PencilSimple size={11} className="text-[var(--text-muted)] shrink-0" />
-                            </span>
-                            <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate">
-                              <span className="inline-flex items-center gap-1 truncate">
-                                <CategoryIcon category={exp.category || 'Räkningar'} size={12} />
-                                <span className="truncate">{exp.category || 'Räkningar'}</span>
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                        <div className="flex items-center gap-2.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => startEditingFixed(exp)}
-                            className="text-right cursor-pointer"
-                          >
-                            <span className="font-display font-bold text-[var(--text-primary)] tabular-nums block">
-                              -{formatKr(exp.amount)}
-                            </span>
-                            <span className="text-xs text-[var(--text-muted)] tabular-nums block mt-0.5">
-                              Den {exp.dueDay}:e
-                            </span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onDeleteFixed(exp.id)}
-                            className="p-1.5 text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                            title="Ta bort"
-                          >
-                            <Trash size={14} />
-                          </button>
+                <div className="ui-list-card">
+                  {fixedExpenses.map((exp) => (
+                    <button
+                      key={exp.id}
+                      type="button"
+                      onClick={() => openEditFixedSheet(exp)}
+                      className="ui-tx-row"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <ItemLogo
+                          name={exp.name}
+                          category={exp.category}
+                          logoUrl={exp.logo}
+                          size="md"
+                          isRecurring={false}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="ui-row-title">
+                            {exp.name}
+                          </span>
+                          <span className="ui-row-subtitle flex items-center gap-1">
+                            <span className="truncate">{exp.category || 'Räkningar'}</span>
+                          </span>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-xs text-[var(--text-muted)] px-1">
-                  Inga fasta utgifter tillagda än.
-                </p>
-              )}
-
-              {addingType === 'fixed' ? (
-                <form
-                  onSubmit={handleQuickAdd}
-                  className="p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2"
-                >
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="T.ex. Hyra"
-                      autoFocus
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                      className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Belopp"
-                      value={newItemAmount}
-                      onChange={(e) => setNewItemAmount(e.target.value)}
-                      className="w-24 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="px-3 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold cursor-pointer"
-                    >
-                      <Check size={14} weight="bold" />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="text-right">
+                          <span className="ui-row-amount">
+                            -{formatKr(exp.amount)}
+                          </span>
+                          <span className="ui-row-meta">
+                            Den {exp.dueDay}:e
+                          </span>
+                        </div>
+                        <CaretRight size={13} className="text-[var(--text-muted)]" />
+                      </div>
                     </button>
-                  </div>
-                </form>
+                  ))}
+                </div>
               ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    setAddingType('fixed');
-                    setNewItemName('');
-                    setNewItemAmount('');
-                  }}
-                  className="w-full py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  onClick={() => openAddSheet('fixed')}
+                  className="w-full py-4 ui-card text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Plus size={13} weight="bold" />
+                  <Plus size={14} weight="bold" />
                   <span>Lägg till fast utgift</span>
                 </button>
               )}
@@ -790,13 +691,224 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <button
             type="button"
             onClick={onComplete}
-            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all cursor-pointer shrink-0"
+            className="ui-btn-primary py-3.5 text-sm shrink-0"
           >
-            <span>Klar</span>
+            <span>Öppna Dejz</span>
             <Check size={16} weight="bold" />
           </button>
         </div>
       )}
+
+      {/* ============================================================== */}
+      {/* RIKTIGT BOTTOM-SHEET FÖR ATT LÄGGA TILL / ÄNDRA I STEG 4       */}
+      {/* ============================================================== */}
+      <BottomSheet
+        isOpen={Boolean(sheetEditor)}
+        onClose={() => setSheetEditor(null)}
+      >
+        {sheetEditor && (
+          <div>
+            {sheetSubView === 'day-picker' ? (
+              <div
+                key="sheet-day-picker"
+                className="animate-page-forward space-y-4"
+              >
+                <div className="ui-sheet-sub-header">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetNavDir('back');
+                      setSheetSubView('main');
+                    }}
+                    title="Tillbaka"
+                    aria-label="Tillbaka"
+                    className="ui-icon-btn"
+                  >
+                    <CaretLeft size={15} weight="bold" />
+                  </button>
+                  <span className="ui-sheet-title">
+                    {sheetEditor.type === 'income' ? 'Välj lönedag' : 'Välj förfallodag'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSheetEditor(null)}
+                    className="ui-icon-btn"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
+                  <span className="text-[11px] font-medium text-[var(--text-muted)] block text-center">
+                    Vilken dag i månaden?
+                  </span>
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
+                      const isSel = sheetEditor.day === d;
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => {
+                            setSheetEditor({ ...sheetEditor, day: d });
+                            setSheetNavDir('back');
+                            setSheetSubView('main');
+                          }}
+                          className={`h-10 rounded-xl font-display text-xs tabular-nums transition-all cursor-pointer flex items-center justify-center border ${
+                            isSel
+                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-bold'
+                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] font-semibold'
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <form
+                key="sheet-main"
+                onSubmit={handleSaveSheet}
+                className={`space-y-5 ${
+                  sheetNavDir === 'back' ? 'animate-page-back' : ''
+                }`}
+              >
+                <div className="ui-sheet-sub-header">
+                  <span className="ui-sheet-title">
+                    {sheetEditor.mode === 'add'
+                      ? sheetEditor.type === 'income'
+                        ? 'Lägg till inkomst'
+                        : 'Lägg till fast utgift'
+                      : sheetEditor.type === 'income'
+                      ? 'Redigera inkomst'
+                      : 'Redigera fast utgift'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSheetEditor(null)}
+                    className="ui-icon-btn"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Hero Amount & Logo Preview */}
+                <div className="ui-hero-header">
+                  <div className="ui-hero-icon">
+                    <ItemLogo
+                      name={
+                        sheetEditor.name ||
+                        (sheetEditor.type === 'income' ? 'Lön' : 'Fast utgift')
+                      }
+                      category={sheetEditor.category}
+                      logoUrl={sheetEditor.logo}
+                      size="xl"
+                      isRecurring={true}
+                    />
+                  </div>
+                  <div
+                    className={`font-display font-extrabold text-3xl tabular-nums ${
+                      sheetEditor.type === 'income'
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {sheetEditor.type === 'income' ? '+' : '-'}
+                    {formatKr(Math.max(0, Math.round(Number(sheetEditor.amount) || 0)))}
+                  </div>
+                </div>
+
+                {/* Hairline-Divided Direct Manipulation Fields */}
+                <div className="ui-sheet-group text-[13px] sm:text-sm">
+                  <label className="ui-input-row">
+                    <span className="text-[var(--text-muted)] shrink-0">Namn</span>
+                    <div className="flex items-center justify-end gap-1.5 flex-1 min-w-0">
+                      <input
+                        type="text"
+                        required
+                        autoFocus={sheetEditor.mode === 'add'}
+                        placeholder={
+                          sheetEditor.type === 'income' ? 't.ex. Lön' : 't.ex. Hyra'
+                        }
+                        value={sheetEditor.name}
+                        onChange={(e) =>
+                          setSheetEditor({ ...sheetEditor, name: e.target.value })
+                        }
+                        className="ui-inline-input"
+                      />
+                      <PencilSimple size={12} className="text-[var(--text-muted)] shrink-0 opacity-60" />
+                    </div>
+                  </label>
+
+                  <label className="ui-input-row">
+                    <span className="text-[var(--text-muted)] shrink-0">Belopp (kr)</span>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        required
+                        placeholder="0"
+                        value={sheetEditor.amount}
+                        onChange={(e) =>
+                          setSheetEditor({
+                            ...sheetEditor,
+                            amount: e.target.value.replace(/[^\d]/g, ''),
+                          })
+                        }
+                        className="w-28 bg-transparent border-0 p-0 text-xs font-display font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] text-right tabular-nums focus:outline-none"
+                      />
+                      <PencilSimple size={12} className="text-[var(--text-muted)] shrink-0 opacity-60" />
+                    </div>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetNavDir('forward');
+                      setSheetSubView('day-picker');
+                    }}
+                    className="ui-row-btn"
+                  >
+                    <span className="text-[var(--text-muted)] shrink-0">
+                      {sheetEditor.type === 'income' ? 'Utbetalningsdag' : 'Förfallodag'}
+                    </span>
+                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+                      <span>Den {sheetEditor.day}:e</span>
+                      <CaretRight size={12} className="text-[var(--text-muted)]" />
+                    </span>
+                  </button>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-2">
+                  <button
+                    type="submit"
+                    disabled={!sheetEditor.name.trim() || !(Number(sheetEditor.amount) > 0)}
+                    className="ui-btn-primary"
+                  >
+                    <Check size={14} weight="bold" />
+                    <span>Spara</span>
+                  </button>
+
+                  {sheetEditor.mode === 'edit' && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteFromSheet}
+                      className="ui-btn-danger"
+                    >
+                      <Trash size={14} />
+                      <span>Ta bort</span>
+                    </button>
+                  )}
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 };
+

@@ -95,7 +95,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       >
         {/* Popover Menu for More Options */}
         {isMenuOpen && (
-          <div className="mb-2.5 ml-auto w-56 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-3xl shadow-modal p-2 animate-slide-up space-y-1">
+          <div className="mb-2.5 ml-auto w-56 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-3xl shadow-modal p-2 animate-scale-in origin-bottom-right space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isSelected = activeTab === item.id;
@@ -107,7 +107,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                     setIsMenuOpen(false);
                     onChangeTab(item.id);
                   }}
-                  className={`w-full px-3.5 py-3 rounded-2xl flex items-center justify-between transition-colors cursor-pointer ${
+                  className={`w-full px-3.5 py-3 rounded-2xl flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
                     isSelected
                       ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
                       : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-semibold'
@@ -171,14 +171,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                     setIsMenuOpen(false);
                     onChangeTab(tab.id);
                   }}
-                  className={`flex-1 py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 cursor-pointer active:scale-95 ${
+                  className={`flex-1 py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
                     isActive
                       ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
                   }`}
                 >
                   <Icon size={17} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-[10px] tracking-tight leading-none">
+                  <span className="text-[10px] tracking-tight leading-none whitespace-nowrap">
                     {tab.label}
                   </span>
                 </button>
@@ -191,14 +191,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
             aria-label="Mer"
-            className={`shrink-0 w-[52px] self-stretch rounded-[22px] backdrop-blur-2xl border border-[var(--border-subtle)] shadow-modal p-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-200 cursor-pointer active:scale-95 ${
+            className={`shrink-0 w-[52px] self-stretch rounded-[22px] backdrop-blur-2xl border border-[var(--border-subtle)] shadow-modal p-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
               isMoreActive
                 ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold border-transparent'
                 : 'bg-[var(--surface-color)]/90 dark:bg-[var(--surface-color)]/90 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
             }`}
           >
             <SquaresFour size={17} weight={isMoreActive ? 'fill' : 'regular'} />
-            <span className="text-[10px] tracking-tight leading-none">Mer</span>
+            <span className="text-[10px] tracking-tight leading-none whitespace-nowrap">Mer</span>
           </button>
         </div>
       </nav>

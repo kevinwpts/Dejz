@@ -1069,10 +1069,25 @@ serve(async (req: Request) => {
       conn: any;
       envToUse: "production" | "sandbox";
       loadMoreOnly: boolean;
+      fullSync?: boolean;
       maxPages?: number;
     }) => {
-      const { acc, conn, envToUse, loadMoreOnly, maxPages = 12 } = params;
-      const dateFrom = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+      const { acc, conn, envToUse, loadMoreOnly, fullSync = false } = params;
+      const ninetyFiveDaysAgoMs = Date.now() - 95 * 24 * 60 * 60 * 1000;
+      const lastSyncedMs = acc.last_synced_at ? new Date(acc.last_synced_at).getTime() : NaN;
+      const isIncrementalSync =
+        !loadMoreOnly &&
+        !fullSync &&
+        !Number.isNaN(lastSyncedMs) &&
+        !acc.has_incomplete_history;
+
+      // Incremental sync fetches a 14-day rolling overlap window (clipped to max 95 days)
+      // to catch late-booked reservations without exhausting PSD2 rate limits on every sync.
+      const effectiveFromMs = isIncrementalSync
+        ? Math.max(ninetyFiveDaysAgoMs, lastSyncedMs - 14 * 24 * 60 * 60 * 1000)
+        : ninetyFiveDaysAgoMs;
+      const dateFrom = new Date(effectiveFromMs).toISOString().split("T")[0];
+      const maxPages = params.maxPages ?? (isIncrementalSync ? 4 : 12);
 
       let currentContinuationKey: string | null = loadMoreOnly && acc.continuation_key ? acc.continuation_key : null;
       let pagesFetched = 0;
@@ -1166,7 +1181,7 @@ serve(async (req: Request) => {
           }
 
           if (
-            !resumeFromSavedKey &&
+            !loadMoreOnly &&
             pagesFetched > 0 &&
             pRow.external_key &&
             !seenActivePendingKeys.has(pRow.external_key) &&
@@ -1246,6 +1261,7 @@ serve(async (req: Request) => {
             conn,
             envToUse,
             loadMoreOnly: false,
+            fullSync: true,
             maxPages: 12,
           });
         } catch (syncErr: any) {
@@ -1345,7 +1361,15 @@ serve(async (req: Request) => {
       const nowMs = Date.now();
       const updatedConnections = [];
       for (const conn of connections || []) {
-        if (conn.status === "active" && conn.valid_until && new Date(conn.valid_until).getTime() <= nowMs) {
+        const validUntilMs = conn.valid_until ? new Date(conn.valid_until).getTime() : null;
+        const daysUntilExpiry =
+          validUntilMs !== null && !Number.isNaN(validUntilMs)
+            ? Math.ceil((validUntilMs - nowMs) / (24 * 60 * 60 * 1000))
+            : null;
+        const expiringSoon =
+          daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 14;
+
+        if (conn.status === "active" && validUntilMs !== null && validUntilMs <= nowMs) {
           const { data: expiredConn } = await adminClient
             .from("bank_connections")
             .update({
@@ -1356,9 +1380,17 @@ serve(async (req: Request) => {
             .eq("id", conn.id)
             .select("*")
             .single();
-          updatedConnections.push(expiredConn || { ...conn, status: "expired" });
+          updatedConnections.push({
+            ...(expiredConn || { ...conn, status: "expired" }),
+            days_until_expiry: 0,
+            expiring_soon: false,
+          });
         } else {
-          updatedConnections.push(conn);
+          updatedConnections.push({
+            ...conn,
+            days_until_expiry: daysUntilExpiry,
+            expiring_soon: expiringSoon,
+          });
         }
       }
 
@@ -1394,6 +1426,7 @@ serve(async (req: Request) => {
       const targetConnectionId = body?.connectionId ? String(body.connectionId) : null;
       const targetAccountId = body?.bankAccountId ? String(body.bankAccountId) : null;
       const loadMoreOnly = Boolean(body?.loadMore);
+      const fullSync = Boolean(body?.fullSync);
 
       let connQuery = adminClient
         .from("bank_connections")
@@ -1483,7 +1516,7 @@ serve(async (req: Request) => {
               conn,
               envToUse,
               loadMoreOnly,
-              maxPages: 12,
+              fullSync,
             });
           } catch (err: any) {
             const status = err?.status;

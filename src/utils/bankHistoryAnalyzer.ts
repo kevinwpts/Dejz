@@ -4,6 +4,7 @@ import { Config, FixedExpense, Frequency, Income, PaydayType, Transaction, Weeke
 import { getLogoUrl } from './logo';
 import { getPeriodBoundaries } from './date';
 import { getActualBankPaymentDateAndMeta } from './swedishDate';
+import { resolveMerchantAlias } from './appCache';
 
 export type DetectedFixedExpenseWithEvidence = Omit<FixedExpense, 'id'> & {
   detectedOccurrences: number;
@@ -133,7 +134,7 @@ export function getBankAccountTitle(
   aspspName?: string | null
 ): string {
   const custom = (acc.custom_name || '').trim();
-  if (custom) return custom;
+  if (custom && !isRawAccountNumberOrIban(custom)) return custom;
 
   const product = (acc.product || '').trim();
   const rawName = (acc.name || '').trim();
@@ -148,9 +149,7 @@ export function getBankAccountTitle(
 
   const bankPrefix = (aspspName || acc.aspsp_name || '').trim() || 'SEB';
   const shortBank = bankPrefix.toUpperCase().includes('SEB') ? 'SEB' : bankPrefix;
-  const rawNum = (acc.bban || acc.iban || acc.provider_account_uid || '').replace(/\D+/g, '');
-  const last4 = rawNum.length >= 4 ? rawNum.slice(-4) : '';
-  return last4 ? `${shortBank}-konto · ${last4}` : `${shortBank}-konto`;
+  return `${shortBank} · Privatkonto`;
 }
 
 export function getBankAccountShortLabel(
@@ -160,18 +159,11 @@ export function getBankAccountShortLabel(
   aspspName?: string | null
 ): string {
   const custom = (acc.custom_name || '').trim();
-  const rawNum = (acc.bban || acc.iban || acc.provider_account_uid || '').replace(/\D+/g, '');
-  const last4 = rawNum.length >= 4 ? rawNum.slice(-4) : '';
-
-  if (custom) {
-    return last4 && !custom.endsWith(last4) ? `${custom} · ${last4}` : custom;
+  if (custom && !isRawAccountNumberOrIban(custom)) {
+    return custom;
   }
 
-  const title = getBankAccountTitle(acc, aspspName);
-  if (last4 && !title.endsWith(last4)) {
-    return `${title} · ${last4}`;
-  }
-  return title;
+  return getBankAccountTitle(acc, aspspName);
 }
 
 export function formatCleanBalanceLabel(rawLabel: string | null | undefined): string {
@@ -306,7 +298,7 @@ export function isExplicitInflowTransaction(
     return true;
   }
 
-  // Återbetalning & returer
+  // Återbetalning, returer & försäkrings-/företagsutbetalningar
   if (
     combined.includes('återbetalning') ||
     combined.includes('aterbetalning') ||
@@ -314,7 +306,14 @@ export function isExplicitInflowTransaction(
     combined.includes('aterkop') ||
     combined.includes('retur') ||
     combined.includes('refund') ||
-    combined.includes('kreditering')
+    combined.includes('kreditering') ||
+    combined.includes('skadeersättning') ||
+    combined.includes('skadeersattning') ||
+    combined.includes('försäkringsersättning') ||
+    combined.includes('forsakringsersattning') ||
+    combined.includes('utbetalning') ||
+    combined.includes('återbäring') ||
+    combined.includes('aterbaring')
   ) {
     return true;
   }
@@ -346,6 +345,164 @@ export function isExplicitInflowTransaction(
     return true;
   }
 
+  return false;
+}
+
+const APPROX_FX_RATES_TO_SEK: Record<string, number> = {
+  SEK: 1,
+  EUR: 11.45,
+  USD: 10.65,
+  NOK: 0.98,
+  DKK: 1.53,
+  GBP: 13.5,
+  CHF: 12.1,
+  PLN: 2.65,
+  THB: 0.31,
+  JPY: 0.071,
+  CAD: 7.75,
+  AUD: 6.95,
+};
+
+/**
+ * Resolves the SEK amount for a bank transaction.
+ * If the transaction currency is not SEK, inspects raw_json for instructed_amount / exchange_rate
+ * or applies fallback FX rates to SEK so foreign purchases (e.g. 50 EUR) are not treated as 50 SEK.
+ */
+export function resolveBankTxSekAmount(tx: BankTransactionItem): {
+  signedSekAmount: number;
+  absSekAmount: number;
+  isForeignCurrency: boolean;
+  originalCurrency: string;
+  originalAmount: number;
+} {
+  const signedRaw = getNormalizedBankTxAmount(tx);
+  const absRaw = Math.abs(signedRaw);
+  const sign = signedRaw < 0 ? -1 : 1;
+  const currency = String(tx.currency || 'SEK').toUpperCase().trim();
+
+  if (!currency || currency === 'SEK') {
+    const rawJson = tx.raw_json || {};
+    const instrCurrency = String(
+      rawJson?.instructed_amount?.currency ||
+        rawJson?.currency_exchange?.source_currency ||
+        'SEK'
+    )
+      .toUpperCase()
+      .trim();
+    const instrAmt = Number(rawJson?.instructed_amount?.amount);
+    if (instrCurrency && instrCurrency !== 'SEK' && Number.isFinite(instrAmt) && instrAmt > 0) {
+      return {
+        signedSekAmount: signedRaw,
+        absSekAmount: Math.round(absRaw * 100) / 100,
+        isForeignCurrency: true,
+        originalCurrency: instrCurrency,
+        originalAmount: Math.abs(instrAmt),
+      };
+    }
+    return {
+      signedSekAmount: signedRaw,
+      absSekAmount: Math.round(absRaw * 100) / 100,
+      isForeignCurrency: false,
+      originalCurrency: 'SEK',
+      originalAmount: absRaw,
+    };
+  }
+
+  const rawJson = tx.raw_json || {};
+  // Check if raw_json contains a SEK instructed/billing amount or explicit exchange_rate
+  const instrCurr = String(rawJson?.instructed_amount?.currency || '').toUpperCase().trim();
+  const instrVal = Number(rawJson?.instructed_amount?.amount);
+  if (instrCurr === 'SEK' && Number.isFinite(instrVal) && instrVal !== 0) {
+    const absSek = Math.round(Math.abs(instrVal) * 100) / 100;
+    return {
+      signedSekAmount: sign * absSek,
+      absSekAmount: absSek,
+      isForeignCurrency: true,
+      originalCurrency: currency,
+      originalAmount: absRaw,
+    };
+  }
+
+  const fxRate = Number(
+    rawJson?.exchange_rate ||
+      rawJson?.currency_exchange?.exchange_rate ||
+      APPROX_FX_RATES_TO_SEK[currency] ||
+      1
+  );
+  const validRate = Number.isFinite(fxRate) && fxRate > 0 ? fxRate : 1;
+  const absSek = Math.round(absRaw * validRate * 100) / 100;
+
+  return {
+    signedSekAmount: sign * absSek,
+    absSekAmount: absSek,
+    isForeignCurrency: true,
+    originalCurrency: currency,
+    originalAmount: absRaw,
+  };
+}
+
+export function isLikelyCreditCardInvoiceBankTx(tx: BankTransactionItem): boolean {
+  const signedAmt = getNormalizedBankTxAmount(tx);
+  const absAmt = Math.abs(signedAmt);
+  if (signedAmt >= 0 || absAmt < 800) return false;
+  const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+  const keywords = [
+    'entercard',
+    'remember card',
+    'bank norwegian',
+    'morrow bank',
+    'amex',
+    'american express',
+    'seb kort',
+    'eurocard',
+    'mastercard faktura',
+    'kreditkortsfaktura',
+    'resurs bank',
+    'ikano bank',
+    'marginalen bank',
+    'collector bank',
+    'walley',
+    'qliro',
+  ];
+  if (keywords.some((kw) => text.includes(kw))) return true;
+  if (text.includes('klarna') && absAmt >= 1500 && !tx.raw_json?.card_transaction) {
+    return true;
+  }
+  return false;
+}
+
+export function isLikelyMerchantRefundBankTx(tx: BankTransactionItem): boolean {
+  const signedAmt = getNormalizedBankTxAmount(tx);
+  if (signedAmt <= 0) return false;
+  const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+  if (
+    text.includes('lön') ||
+    text.includes('salary') ||
+    text.includes('csn') ||
+    text.includes('försäkringskassan') ||
+    text.includes('forsakringskassan') ||
+    text.includes('pension') ||
+    text.includes('barnbidrag') ||
+    text.includes('skatteverket') ||
+    text.includes('swish')
+  ) {
+    return false;
+  }
+  if (
+    text.includes('retur') ||
+    text.includes('återköp') ||
+    text.includes('aterkop') ||
+    text.includes('refund') ||
+    text.includes('kreditering') ||
+    text.includes('återbetalning') ||
+    text.includes('aterbetalning')
+  ) {
+    return true;
+  }
+  // Positive card transaction at a retail merchant is a card refund
+  if (tx.raw_json?.card_transaction && tx.credit_debit_indicator === 'CRDT') {
+    return true;
+  }
   return false;
 }
 
@@ -653,10 +810,8 @@ export function findRawBankInternalTransferIds(
         Boolean(outTx.bank_account_id && inTx.bank_account_id) &&
         outTx.bank_account_id !== inTx.bank_account_id;
       const oneFlagged = internalIds.has(outTx.id) || internalIds.has(inTx.id);
-      const neitherCard =
-        !outTx.raw_json?.card_transaction && !inTx.raw_json?.card_transaction;
 
-      if (diffAcc || oneFlagged || neitherCard) {
+      if (diffAcc || oneFlagged) {
         const score = (diffAcc ? 100 : 0) + (oneFlagged ? 50 : 0) - dayDiff * 10;
         if (score > bestScore) {
           bestScore = score;
@@ -1165,6 +1320,99 @@ const ACRONYM_BRANDS: Record<string, string> = {
 
 const LOWERCASE_JOINERS = new Set(['och', 'i', 'på', 'av', 'af', 'von', 'de', 'la', 'the', 'of', 'and']);
 
+const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {
+  rydeback: 'Rydebäck',
+  malmo: 'Malmö',
+  goteborg: 'Göteborg',
+  vasteras: 'Västerås',
+  orebro: 'Örebro',
+  linkoping: 'Linköping',
+  norrkoping: 'Norrköping',
+  jonkoping: 'Jönköping',
+  angelholm: 'Ängelholm',
+  vala: 'Väla',
+  hoor: 'Höör',
+  bjarred: 'Bjärred',
+  solvesborg: 'Sölvesborg',
+  koping: 'Köping',
+  nykoping: 'Nyköping',
+  enkoping: 'Enköping',
+  lidkoping: 'Lidköping',
+  falkoping: 'Falköping',
+  soderkoping: 'Söderköping',
+  umea: 'Umeå',
+  lulea: 'Luleå',
+  pitea: 'Piteå',
+  skelleftea: 'Skellefteå',
+  boras: 'Borås',
+  gavle: 'Gävle',
+  skovde: 'Skövde',
+  vaxjo: 'Växjö',
+  kalmar: 'Kalmar',
+   Kristianstad: 'Kristianstad',
+  hassleholm: 'Hässleholm',
+  landskrona: 'Landskrona',
+  trelleborg: 'Trelleborg',
+  hoganas: 'Höganäs',
+  bastad: 'Båstad',
+  laholm: 'Laholm',
+  varberg: 'Varberg',
+  kungsbacka: 'Kungsbacka',
+  molndal: 'Mölndal',
+  partille: 'Partille',
+  kungalv: 'Kungälv',
+  uddevalla: 'Uddevalla',
+  trollhattan: 'Trollhättan',
+  vanersborg: 'Vänersborg',
+  amal: 'Åmål',
+  karlstad: 'Karlstad',
+  kristinehamn: 'Kristinehamn',
+  eskilstuna: 'Eskilstuna',
+  strangnas: 'Strängnäs',
+  katrineholm: 'Katrineholm',
+  nynashamn: 'Nynäshamn',
+  sodertalje: 'Södertälje',
+  taby: 'Täby',
+  lidingo: 'Lidingö',
+  solna: 'Solna',
+  sundbyberg: 'Sundbyberg',
+  jarfalla: 'Järfälla',
+  upplands: 'Upplands',
+  vasby: 'Väsby',
+  akersberga: 'Åkersberga',
+  norrtalje: 'Norrtälje',
+  varmdo: 'Värmdö',
+  haninge: 'Haninge',
+  tyreso: 'Tyresö',
+  huddinge: 'Huddinge',
+  botkyrka: 'Botkyrka',
+  salem: 'Salem',
+  ekero: 'Ekerö',
+  danderyd: 'Danderyd',
+  vallentuna: 'Vallentuna',
+  osteraker: 'Österskär',
+  ostermalm: 'Östermalm',
+  sodermalm: 'Södermalm',
+  vasastan: 'Vasastan',
+  kungsholmen: 'Kungsholmen',
+  bromma: 'Bromma',
+  hagersten: 'Hägersten',
+  vallingby: 'Vällingby',
+  farsta: 'Farsta',
+  skarpnack: 'Skarpnäck',
+  enskededalen: 'Enskededalen',
+  sollentuna: 'Sollentuna',
+  frolunda: 'Frölunda',
+  hisingen: 'Hisingen',
+  limhamn: 'Limhamn',
+  hyllie: 'Hyllie',
+  jagersro: 'Jägersro',
+  mobilia: 'Mobilia',
+  emporia: 'Emporia',
+  triangeln: 'Triangeln',
+  center: 'Center',
+};
+
 export function cleanDisplayMerchantName(rawText: string | null | undefined): string {
   let cleaned = String(rawText || '').trim();
   if (!cleaned) return 'Banktransaktion';
@@ -1184,10 +1432,9 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
     .replace(/^[*#._-]+\s*/, '')
     .trim();
 
-  // 2. Rensa bort terminalsuffix som butiksnummer, ortkoder och landskod i slutet (utan att kapa bort ord som kommer efter ett nummer i mitten)
+  // 2. Rensa bort terminalsuffix som landskod och slutsiffror allra sist på raden
   cleaned = cleaned
     .replace(/\s+(SE|SWE|SWEDEN)$/i, '')
-    .replace(/\s+(STOCKHOLM|GÖTEBORG|GOTEBORG|MALMÖ|MALMO|UPPSALA|LUND|HELSINGBORG)\s*(SE)?$/i, '')
     .replace(/\s+\d{3,}\s*$/, '') // T.ex. " 1421", " 0124" endast allra sist på raden
     .trim();
 
@@ -1197,25 +1444,33 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
 
   const lower = cleaned.toLowerCase().trim();
 
-  // 3. Kontrollera mot ordbok för avhuggna och kända butiksnamn (t.ex. systembolag -> Systembolaget)
+  // 3. Kontrollera mot ordbok ENBART om hela raden exakt motsvarar ett avhugget/kort butiksnamn
   if (KNOWN_MERCHANT_NAMES_MAP[lower]) {
     return KNOWN_MERCHANT_NAMES_MAP[lower];
   }
 
-  for (const [key, cleanName] of Object.entries(KNOWN_MERCHANT_NAMES_MAP)) {
-    if (lower === key || lower.startsWith(key + ' ') || lower.startsWith(key + '-')) {
-      return cleanName;
+  // 4. Ta bort avhuggna enbokstavsrester mitt i banksträngar när nästa ord börjar på samma bokstav
+  // (t.ex. "HEMKOP HELSINGBORG R RYDEBACK" -> där "R" är slutet på det 20-teckenstrunkerade fältet före ortfältet "RYDEBACK")
+  const rawWords = cleaned.split(/\s+/);
+  const dedupedWords: string[] = [];
+  for (let i = 0; i < rawWords.length; i++) {
+    const curr = rawWords[i];
+    const next = rawWords[i + 1];
+    if (
+      i > 0 &&
+      curr.length === 1 &&
+      /^[a-zA-ZåäöÅÄÖ]$/.test(curr) &&
+      next &&
+      next.length >= 2 &&
+      next.charAt(0).toLowerCase() === curr.toLowerCase()
+    ) {
+      continue;
     }
-    // Avhuggna namn med minst 6 tecken (t.ex. "systembolag" i "systembolag 0124")
-    if (key.length >= 6 && (lower.includes(key) || key.startsWith(lower))) {
-      return cleanName;
-    }
+    dedupedWords.push(curr);
   }
 
-  // 4. Universell svensk Title Case & bolagsändelser (t.ex. Öresundskraft AB)
-  const words = cleaned.split(/\s+/);
-  const formattedWords = words.map((w, idx) => {
-    // Behåll eventuella skiljetecken runt ordet
+  // 5. Universell svensk Title Case, ortsnamnsåterställning & bolagsändelser
+  const formattedWords = dedupedWords.map((w, idx) => {
     const punctuationMatch = w.match(/^([^a-zA-ZåäöÅÄÖ0-9]*)(.*?)([^a-zA-ZåäöÅÄÖ0-9]*)$/);
     const prefix = punctuationMatch ? punctuationMatch[1] : '';
     const core = punctuationMatch ? punctuationMatch[2] : w;
@@ -1223,12 +1478,16 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
 
     const coreLower = core.toLowerCase();
 
-    // Kontrollera kända akronymer (ICA, IKEA, etc.)
     if (ACRONYM_BRANDS[coreLower]) {
       return `${prefix}${ACRONYM_BRANDS[coreLower]}${suffix}`;
     }
+    if (SWEDISH_ASCII_PLACE_AND_WORD_MAP[coreLower]) {
+      return `${prefix}${SWEDISH_ASCII_PLACE_AND_WORD_MAP[coreLower]}${suffix}`;
+    }
+    if (KNOWN_MERCHANT_NAMES_MAP[coreLower] && !KNOWN_MERCHANT_NAMES_MAP[coreLower].includes(' ')) {
+      return `${prefix}${KNOWN_MERCHANT_NAMES_MAP[coreLower]}${suffix}`;
+    }
 
-    // Bolagsformer (AB, HB, KB, etc.)
     if (
       CORPORATE_SUFFIXES.has(coreLower.toUpperCase()) ||
       coreLower === 'ab' ||
@@ -1238,12 +1497,10 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
       return `${prefix}AB${suffix}`;
     }
 
-    // Små sammanbindande ord i mitten av ett namn (och, i, på, etc.)
     if (idx > 0 && LOWERCASE_JOINERS.has(coreLower)) {
       return `${prefix}${coreLower}${suffix}`;
     }
 
-    // Normal svensk Title Case
     if (core.length > 0) {
       const titleCased = core.charAt(0).toUpperCase() + core.slice(1).toLowerCase();
       return `${prefix}${titleCased}${suffix}`;
@@ -1320,13 +1577,37 @@ export function categorizeBankTransactionForApp(
     };
   }
 
+  // Behåll bankens faktiska butiksnamn (t.ex. "Hemköp Rydebäck") istället för att skriva över det
+  const cleanedBankName = cleanDisplayMerchantName(
+    tx.counterparty_name || effectiveDesc || 'Kortköp'
+  );
+  const hasReadableBankName =
+    cleanedBankName &&
+    cleanedBankName !== 'Banktransaktion' &&
+    cleanedBankName !== 'Kortköp';
+
+  // Kontrollera användarens sparade merchant-alias / regler först (Merchant Memory)
+  const userAlias =
+    resolveMerchantAlias(cleanedBankName) ||
+    resolveMerchantAlias(tx.counterparty_name || '') ||
+    resolveMerchantAlias(effectiveDesc);
+  if (userAlias) {
+    const resolvedCat = resolveCategory([userAlias.category]);
+    return {
+      merchant: userAlias.name,
+      category: resolvedCat,
+      logo: getLogoUrl(userAlias.name, resolvedCat),
+    };
+  }
+
   for (const rule of EVERYDAY_MERCHANT_RULES) {
     if (rule.keywords.some((kw) => combined.includes(kw))) {
       const category = resolveCategory(rule.preferredCategories);
+      const displayMerchant = hasReadableBankName ? cleanedBankName : rule.cleanName;
       return {
-        merchant: rule.cleanName,
+        merchant: displayMerchant,
         category,
-        logo: getLogoUrl(rule.cleanName, category),
+        logo: getLogoUrl(rule.cleanName, category) || getLogoUrl(displayMerchant, category),
       };
     }
   }
@@ -1336,29 +1617,22 @@ export function categorizeBankTransactionForApp(
       const preset = rule.presetId
         ? SWEDISH_EXPENSE_PRESETS.find((p) => p.id === rule.presetId)
         : undefined;
-      const isGenericHousingPreset = rule.presetId === 'hyra-bostad';
-      const cleanedRaw = cleanDisplayMerchantName(
-        tx.counterparty_name || effectiveDesc || ''
-      );
-      const displayName =
-        isGenericHousingPreset && cleanedRaw.length >= 3 && cleanedRaw !== 'Banktransaktion'
-          ? `Hyra (${cleanedRaw})`
-          : preset?.name || rule.fallbackName;
+      const fallbackDisplay = preset?.name || rule.fallbackName;
+      const displayName = hasReadableBankName ? cleanedBankName : fallbackDisplay;
       const category = resolveCategory([preset?.category || rule.category]);
       return {
         merchant: displayName,
         category,
-        logo: getLogoUrl(displayName, category),
+        logo: getLogoUrl(fallbackDisplay, category) || getLogoUrl(displayName, category),
       };
     }
   }
 
-  const cleanedName = cleanDisplayMerchantName(tx.counterparty_name || effectiveDesc || 'Kortköp');
   const category = resolveCategory(['Övrigt']);
   return {
-    merchant: cleanedName,
+    merchant: cleanedBankName,
     category,
-    logo: getLogoUrl(cleanedName, category),
+    logo: getLogoUrl(cleanedBankName, category),
   };
 }
 
@@ -1389,9 +1663,9 @@ const AI_SKIP_GENERIC_PLACEHOLDERS = new Set([
 ]);
 
 /**
- * Avgör om en banktransaktion inte kändes igen av den lokala butikslistan
- * eller innehåller kryptiska kortterminalprefix (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, KLARNA*84920)
- * och därför bör tvättas och kategoriseras tyst av AI i bakgrunden.
+ * Avgör om en banktransaktion innehåller kryptiska kortterminalprefix
+ * (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, SUMUP*..., KLARNA*84920).
+ * Vanliga läsbara bankrader (t.ex. "Hemköp Rydebäck") ska ALDRIG skrivas om av AI!
  */
 export function needsAiMerchantCleaning(
   rawText: string | null | undefined,
@@ -1404,7 +1678,6 @@ export function needsAiMerchantCleaning(
   if (!combined || combined.length < 2) return false;
   const lower = combined.toLowerCase();
 
-  // Skicka aldrig generiska bankplatshållare (t.ex. "Banktransaktion" eller enbart siffror) till AI
   const rawLower = rawTrimmed.toLowerCase();
   const titleLower = titleTrimmed.toLowerCase();
   if (
@@ -1414,7 +1687,6 @@ export function needsAiMerchantCleaning(
     return false;
   }
 
-  // Swish hanteras redan deterministiskt med telefonnummer/mottagare
   if (
     lower.includes('swish') ||
     /(467\d{8}|07\d{8}|123\d{7})/.test(lower.replace(/[\s-]/g, '')) ||
@@ -1423,33 +1695,13 @@ export function needsAiMerchantCleaning(
     return false;
   }
 
-  // Om råtexten eller titeln har kryptiska betalväxelprefix eller asterisker (t.ex. ZETTLE*, NYX*, SUMUP*, KLARNA*84920)
+  // Trigger ENBART på kryptiska betalväxelprefix med asterisk/brädgård (t.ex. ZETTLE*, NYX*, SUMUP*, STRIPE*, KLARNA*84920)
   const hasCrypticTerminalPattern =
-    /\b(zettle|izettle|iz|sumup|nyx|stripe|sq|sp|wl|bambora|nets|adyen|qck|billo)\s*[*#_-]/i.test(combined) ||
-    /[a-zA-Z0-9]\*[a-zA-Z0-9]/.test(currentTitle || '') ||
-    /\b(gbg|sthlm|kaf|kafe|kond|rest)\b/i.test(currentTitle || '');
+    /\b(zettle|izettle|iz|sumup|nyx|stripe|sq|sp|wl|bambora|nets|adyen|qck|billo|klarna)\s*[*#]/i.test(
+      combined
+    ) || /[a-zA-Z0-9]\*[a-zA-Z0-9]/.test(combined);
 
-  if (hasCrypticTerminalPattern) {
-    return true;
-  }
-
-  // Kontrollera om transaktionen redan matchar vår lokala butikslista eller fasta regler
-  const matchedEveryday = EVERYDAY_MERCHANT_RULES.some((rule) =>
-    rule.keywords.some((kw) => lower.includes(kw))
-  );
-  if (matchedEveryday) return false;
-
-  const matchedFixed = EXTENDED_FIXED_EXPENSE_RULES.some((rule) =>
-    rule.keywords.some((kw) => lower.includes(kw.toLowerCase()))
-  );
-  if (matchedFixed) return false;
-
-  if (titleLower && KNOWN_MERCHANT_NAMES_MAP[titleLower]) {
-    return false;
-  }
-
-  // Om den inte kändes igen av butikslistan (eller hamnade i Övrigt), låt AI tvätta och kategorisera den
-  return true;
+  return hasCrypticTerminalPattern;
 }
 
 function getDayOfMonthFromIso(dateStr: string | null | undefined, fallbackDay = 27): number {
@@ -2172,14 +2424,12 @@ export function analyzeBankForExistingBudget(params: {
   const cancelledExistingFixed = existingFixedExpenses.filter((e) => Boolean(e.isCancelled));
 
   const matchesExistingUserFixed = (tx: BankTransactionItem): boolean => {
-    const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     for (const fixed of activeExistingFixed) {
       const fixedName = String(fixed.name || '').toLowerCase().trim();
       if (fixedName.length >= 3 && text.includes(fixedName)) return true;
-      if (fixed.amount >= 1500 && Math.abs(fixed.amount - absAmt) / fixed.amount <= 0.05) {
-        return true;
-      }
+      const cleanedFixed = fixedName.replace(/^hyra\s*\(|\)$/g, '').trim();
+      if (cleanedFixed.length >= 3 && text.includes(cleanedFixed)) return true;
     }
     return false;
   };
@@ -2427,16 +2677,12 @@ export function getAutoImportableBankTransactions(
   const activeExistingFixed = existingFixedExpenses.filter((e) => !e.isCancelled);
 
   const matchesExistingUserFixed = (tx: BankTransactionItem): boolean => {
-    const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     for (const fixed of activeExistingFixed) {
       const fixedName = String(fixed.name || '').toLowerCase().trim();
       if (fixedName.length >= 3 && text.includes(fixedName)) return true;
       const cleanedFixed = fixedName.replace(/^hyra\s*\(|\)$/g, '').trim();
       if (cleanedFixed.length >= 3 && text.includes(cleanedFixed)) return true;
-      if (fixed.amount >= 1500 && Math.abs(fixed.amount - absAmt) / fixed.amount <= 0.05) {
-        return true;
-      }
     }
     return false;
   };
@@ -2478,17 +2724,24 @@ export function getAutoImportableBankTransactions(
       continue;
     }
 
-    const signedAmt = getNormalizedBankTxAmount(tx);
-    // Only auto-import outgoing variable purchases (incomes and fixed expenses are handled in Inkomster & Fasta utgifter)
-    if (signedAmt >= 0) {
+    // Skip large monthly credit card / collector invoices so they don't double-count card purchases
+    if (isLikelyCreditCardInvoiceBankTx(tx)) {
       continue;
     }
 
-    if (core.fixedTransactionIds.has(tx.id) || matchesExistingUserFixed(tx)) {
+    const { signedSekAmount: signedAmt, absSekAmount: absAmount, originalCurrency, originalAmount } =
+      resolveBankTxSekAmount(tx);
+    const isMerchantRefund = signedAmt > 0 && isLikelyMerchantRefundBankTx(tx);
+
+    // Only auto-import outgoing variable purchases or verified store refunds
+    if (signedAmt >= 0 && !isMerchantRefund) {
       continue;
     }
 
-    const absAmount = Math.round(Math.abs(signedAmt) * 100) / 100;
+    if (!isMerchantRefund && (core.fixedTransactionIds.has(tx.id) || matchesExistingUserFixed(tx))) {
+      continue;
+    }
+
     if (absAmount <= 0) continue;
 
     const { paymentDate } = getActualBankPaymentDateAndMeta(tx);
@@ -2502,7 +2755,7 @@ export function getAutoImportableBankTransactions(
     // If this is a PDNG/HOLD reservation and we already imported a BOOK transaction with same amount & merchant within 4 days, skip it
     if (isReserved) {
       const hasMatchingBookedInBatch = toImport.some((imp) => {
-        const sameAmt = Math.abs(Number(imp.amount) - absAmount) < 0.5;
+        const sameAmt = Math.abs(Math.abs(Number(imp.amount)) - absAmount) < 0.5;
         const dayDiff = Math.abs(Number(imp.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
         const sameMerch =
           String(imp.merchant || '').toLowerCase().trim() ===
@@ -2525,7 +2778,7 @@ export function getAutoImportableBankTransactions(
         }
       }
       // Also guard against manual/reservation duplicate on same day with same amount and merchant
-      const sameAmount = Math.abs(Number(appTx.amount) - absAmount) < 0.5;
+      const sameAmount = Math.abs(Math.abs(Number(appTx.amount)) - absAmount) < 0.5;
       const dayDiff = Math.abs(Number(appTx.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
       const sameMerchant =
         String(appTx.merchant || '').toLowerCase().trim() ===
@@ -2543,9 +2796,10 @@ export function getAutoImportableBankTransactions(
     const tags = [`bank_tx:${tx.id}`];
     if (tx.external_key) tags.push(`bank_key:${tx.external_key}`);
     if (tx.bank_account_id) tags.push(`bank_acc:${tx.bank_account_id}`);
+    if (isMerchantRefund) tags.push('bank_refund');
 
     toImport.push({
-      amount: absAmount,
+      amount: isMerchantRefund ? -absAmount : absAmount,
       type: 'expense',
       category: categorized.category,
       merchant: categorized.merchant,
@@ -2558,8 +2812,8 @@ export function getAutoImportableBankTransactions(
       bankTransactionId: tx.id,
       bankAccountId: tx.bank_account_id,
       originalBankDescription: tx.description,
-      originalBankAmount: signedAmt,
-      originalBankCurrency: tx.currency || 'SEK',
+      originalBankAmount: originalCurrency !== 'SEK' ? originalAmount : signedAmt,
+      originalBankCurrency: originalCurrency,
     });
   }
 

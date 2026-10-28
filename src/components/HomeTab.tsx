@@ -1,19 +1,22 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Bank,
-  ArrowRight,
   CalendarBlank,
-  CaretLeft,
   CaretRight,
+  Check,
   Eye,
   EyeSlash,
   Heart,
   Package,
   Paperclip,
+  Sparkle,
+  Users,
+  X,
 } from '@phosphor-icons/react';
 import { PeriodInfo } from '../utils/periodEngine';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon } from './CategoryIcon';
+import { SwipeableTxRow } from './ui/SwipeableTxRow';
+import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatIsoTimeStockholm,
@@ -22,7 +25,13 @@ import {
   getYesterdaySwedishDateStr,
 } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
-import { getShowAccountsOnHome, setShowAccountsOnHome } from '../utils/appCache';
+import {
+  getShowAccountsOnHome,
+  setShowAccountsOnHome,
+  getReviewedTransactionIds,
+  hasInitializedReviewedTransactions,
+  markTransactionsReviewed,
+} from '../utils/appCache';
 
 export interface AccountItem {
   id: string;
@@ -50,6 +59,8 @@ export interface FixedExpenseItem {
   name: string;
   originalName?: string;
   amount: number;
+  fullAmount?: number;
+  isShared?: boolean;
   dueDay: number;
   category: string;
   paymentMethod?: string;
@@ -63,6 +74,8 @@ export interface TransactionItem {
   id: string;
   title: string;
   amount: number;
+  originalAmount?: number;
+  linkedSwishTxId?: string;
   category: string;
   date: string;
   time?: string;
@@ -96,7 +109,7 @@ export function getTransactionTime(
     amount?: number;
   }
 ): string {
-  // 1. Om tx.time redan är ett klockslag "HH:MM"
+  // 1. Om tx.time redan är ett faktiskt klockslag "HH:MM"
   if (tx.time && typeof tx.time === 'string') {
     const trimmed = tx.time.trim();
     if (
@@ -106,10 +119,16 @@ export function getTransactionTime(
     ) {
       return trimmed;
     }
-    // Om tx.time är en ISO-sträng
-    if (trimmed.includes('T')) {
+    // Om tx.time är en ISO-sträng med faktisk tid
+    if (
+      trimmed.includes('T') &&
+      !trimmed.includes('T00:00') &&
+      !trimmed.includes('T12:00')
+    ) {
       const parsedStockholm = formatIsoTimeStockholm(trimmed);
-      if (parsedStockholm) return parsedStockholm;
+      if (parsedStockholm && parsedStockholm !== '00:00' && parsedStockholm !== '12:00') {
+        return parsedStockholm;
+      }
     }
   }
 
@@ -124,48 +143,8 @@ export function getTransactionTime(
     }
   }
 
-  // 3. Deterministiskt klockslag i svensk lokal tid anpassat efter butikskategori
-  const amtStr =
-    (tx as any).amount !== undefined
-      ? String(Math.round(Number((tx as any).amount)))
-      : '';
-  const seedStr = `${tx.title || ''}|${tx.date || ''}|${amtStr}`;
-  let hash = 2166136261;
-  for (let i = 0; i < seedStr.length; i++) {
-    hash ^= seedStr.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  const absHash = Math.abs(hash);
-
-  const cat = (tx.category || '').toLowerCase();
-  if (
-    cat.includes('lön') ||
-    cat.includes('csn') ||
-    cat.includes('bidrag') ||
-    cat.includes('pension')
-  ) {
-    return '08:00';
-  }
-
-  let startHour = 8;
-  let hourSpan = 12; // 08:00 - 19:59
-  if (cat.includes('fika') || cat.includes('restaurang') || cat.includes('nöje')) {
-    startHour = 11;
-    hourSpan = 10;
-  } else if (cat.includes('transport')) {
-    startHour = 7;
-    hourSpan = 12;
-  } else if (cat.includes('mat')) {
-    startHour = 9;
-    hourSpan = 12;
-  } else if (cat.includes('swish')) {
-    startHour = 10;
-    hourSpan = 12;
-  }
-
-  const hour = startHour + (absHash % hourSpan);
-  const minute = Math.floor(absHash / 31) % 60;
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  // Returnera tom sträng om banken inte levererat en riktig tidsstämpel (hitta aldrig på klockslag)
+  return '';
 }
 
 interface HomeTabProps {
@@ -187,6 +166,9 @@ interface HomeTabProps {
   onSelectFixed?: (exp: FixedExpenseItem) => void;
   onNavigateToFixed: () => void;
   onNavigateToTransactions: () => void;
+  onToggleHeart?: (id: string, isHearted: boolean) => void;
+  onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
+  onExcludeTransaction?: (id: string, exclude: boolean) => void;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -204,7 +186,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   isInitialLoading = false,
   onOpenBank,
   onSelectTransaction,
-  onNavigateToTransactions,
+  onToggleHeart,
+  onTogglePackage,
+  onExcludeTransaction,
 }) => {
   const [showAccounts, setShowAccounts] = useState<boolean>(() => getShowAccountsOnHome());
   const todayStr = useMemo(() => getSwedishDateStr(), []);
@@ -212,6 +196,42 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
   const [daysBackToLoad, setDaysBackToLoad] = useState<number>(365);
   const [daysForwardToLoad, setDaysForwardToLoad] = useState<number>(365);
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
+
+  // Initialize reviewed IDs on first run so only transactions from the last 3 days appear as new
+  useEffect(() => {
+    if (!transactions || transactions.length === 0) return;
+    if (!hasInitializedReviewedTransactions()) {
+      const parts = todayStr.split('-');
+      const d = new Date(
+        Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10) - 3, 12, 0, 0)
+      );
+      const cutoffStr = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(
+        d.getUTCDate()
+      ).padStart(2, '0')}`;
+      const olderIds = transactions.filter((t) => (t.date || '') < cutoffStr).map((t) => t.id);
+      markTransactionsReviewed(olderIds);
+      setReviewedIds(getReviewedTransactionIds());
+    }
+  }, [transactions, todayStr]);
+
+  const unreviewedTransactions = useMemo(() => {
+    const deduped = deduplicateTransactions(transactions || []);
+    return deduped
+      .filter((tx) => !tx.isExcluded && !reviewedIds.has(tx.id))
+      .sort((a, b) => {
+        const dCmp = (b.date || '').localeCompare(a.date || '');
+        if (dCmp !== 0) return dCmp;
+        return getTransactionTime(b).localeCompare(getTransactionTime(a));
+      })
+      .slice(0, 20);
+  }, [transactions, reviewedIds]);
+
+  const handleMarkReviewed = (ids: string[]) => {
+    markTransactionsReviewed(ids);
+    setReviewedIds(getReviewedTransactionIds());
+  };
 
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -403,26 +423,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     centerSelectedButton('smooth');
   }, [selectedDateKey]);
 
-  const stepSelectedDate = (daysDelta: number) => {
-    const parts = selectedDateKey.split('-');
-    const dObj = new Date(
-      Date.UTC(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10) - 1,
-        parseInt(parts[2], 10),
-        12,
-        0,
-        0
-      )
-    );
-    dObj.setUTCDate(dObj.getUTCDate() + daysDelta);
-    const yyyy = dObj.getUTCFullYear();
-    const mm = String(dObj.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(dObj.getUTCDate()).padStart(2, '0');
-    const nextKey = `${yyyy}-${mm}-${dd}`;
-    setSelectedDateKey(nextKey);
-  };
-
   const handleTimelineScroll = () => {
     const el = timelineScrollRef.current;
     if (!el) return;
@@ -529,11 +529,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   }, [selectedDayItems]);
 
   return (
-    <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
+    <div className="ui-page">
       {/* ============================================================== */}
       {/* MODUL 1: KVAR ATT SPENDERA (Hero Bento Card)                   */}
       {/* ============================================================== */}
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
+      <section className="ui-card-p">
         <div>
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-[var(--text-muted)] font-medium">
@@ -557,42 +557,42 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
 
-        {/* 3-Column Bento Breakdown */}
-        <div className="grid grid-cols-3 gap-2 mt-5">
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-left min-w-0">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
+        {/* 3-Column Hairline Breakdown (No nested boxes) */}
+        <div className="ui-stat-grid pt-4 mt-4 border-t border-[var(--border-subtle)]">
+          <div className="pr-3 text-left min-w-0">
+            <span className="ui-stat-label">
               Inkomst
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <span className="font-display font-bold text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 tabular-nums block tracking-tight">
+              <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
                 +{formatKr(totalIncome)}
               </span>
             )}
           </div>
 
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-left min-w-0">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
+          <div className="px-3 text-left min-w-0">
+            <span className="ui-stat-label">
               Fasta
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <span className="font-display font-bold text-xs sm:text-sm text-[var(--text-primary)] tabular-nums block tracking-tight">
+              <span className="ui-stat-value">
                 -{formatKr(totalFixedExpenses)}
               </span>
             )}
           </div>
 
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-left min-w-0">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium block mb-0.5">
+          <div className="pl-3 text-left min-w-0">
+            <span className="ui-stat-label">
               Rörligt
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <span className="font-display font-bold text-xs sm:text-sm text-[var(--text-primary)] tabular-nums block tracking-tight">
+              <span className="ui-stat-value">
                 -{formatKr(totalVariableSpent)}
               </span>
             )}
@@ -603,7 +603,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO MED MJUK KONTO-ACCORDION                 */}
       {/* ============================================================== */}
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5">
+      <section className="ui-card-p">
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
@@ -617,16 +617,16 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   setShowAccounts(next);
                   setShowAccountsOnHome(next);
                 }}
-                className="w-7 h-7 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer"
+                className="ui-icon-btn"
                 title={showAccounts ? 'Dölj konton' : 'Visa konton'}
               >
-                {showAccounts ? <Eye size={14} /> : <EyeSlash size={14} />}
+                {showAccounts ? <Eye size={15} /> : <EyeSlash size={15} />}
               </button>
             </div>
             <button
               type="button"
               onClick={onOpenBank}
-              className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 transition-opacity cursor-pointer"
+              className="py-1.5 px-2.5 -mr-1.5 rounded-xl text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-color)] transition-colors cursor-pointer"
             >
               {connectedBank ? 'Hantera' : isInitialLoading ? '' : '+ Anslut'}
             </button>
@@ -694,7 +694,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 <button
                   type="button"
                   onClick={onOpenBank}
-                  className="px-3.5 py-2 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 hover:opacity-90 shrink-0 cursor-pointer"
+                  className="ui-btn-sm-primary"
                 >
                   <Bank size={14} />
                   <span>Anslut</span>
@@ -706,58 +706,46 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* ============================================================== */}
+      {/* MODUL 2.5: GRANSKA NYA KÖP (Inbox-flöde)                       */}
+      {/* ============================================================== */}
+      {unreviewedTransactions.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setIsInboxOpen(true)}
+          className="w-full ui-card hover:border-[var(--text-muted)] px-4 py-3.5 flex items-center justify-between gap-3 transition-all active:scale-[0.99] cursor-pointer group"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shrink-0">
+              <Sparkle size={16} weight="fill" />
+            </div>
+            <div className="text-left min-w-0">
+              <span className="text-xs sm:text-[13px] font-bold text-[var(--text-primary)] block truncate">
+                {unreviewedTransactions.length === 1
+                  ? '1 ny händelse att granska'
+                  : `${unreviewedTransactions.length} nya händelser att granska`}
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+                Kontrollera kategori eller markera som klara
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="px-2.5 py-1 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[11px] font-bold text-[var(--text-primary)]">
+              Granska
+            </span>
+            <CaretRight
+              size={14}
+              weight="bold"
+              className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+            />
+          </div>
+        </button>
+      )}
+
+      {/* ============================================================== */}
       {/* MODUL 3: HORISONTELL TIDSLINJE PER DAG (Direkt mot bakgrunden) */}
       {/* ============================================================== */}
       <section className="pt-1">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2">
-            <h2 className="font-display font-bold text-xs text-[var(--text-primary)]">
-              Händelser
-            </h2>
-            {selectedDateKey !== todayStr && (
-              <button
-                type="button"
-                onClick={() => setSelectedDateKey(todayStr)}
-                className="px-2 py-0.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                Idag
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => stepSelectedDate(-1)}
-                className="w-7 h-7 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer"
-                title="En dag bakåt i tiden"
-              >
-                <CaretLeft size={13} weight="bold" />
-              </button>
-              <button
-                type="button"
-                onClick={() => stepSelectedDate(1)}
-                className="w-7 h-7 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer"
-                title="En dag framåt i tiden"
-              >
-                <CaretRight size={13} weight="bold" />
-              </button>
-            </div>
-
-            {transactions.length > 0 && (
-              <button
-                type="button"
-                onClick={onNavigateToTransactions}
-                className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer ml-1"
-              >
-                <span>Alla</span>
-                <ArrowRight size={12} />
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Horisontell scrollbar tidslinje där varje dag kan väljas */}
         <div
           ref={timelineScrollRef}
@@ -767,10 +755,36 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
           onWheel={handleWheel}
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2.5 select-none cursor-grab active:cursor-grabbing"
+          className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 select-none cursor-grab active:cursor-grabbing"
         >
           {timelineDays.map((day) => {
             const isSelected = day.dateKey === selectedDateKey;
+            const isToday = day.dateKey === todayStr;
+            const dayTxs = transactionsByDate.get(day.dateKey) || [];
+            let hasActivity = dayTxs.length > 0;
+            let hasIncomeActivity = dayTxs.some((t) => t.type === 'income');
+
+            if (day.dateKey > todayStr) {
+              const parts = day.dateKey.split('-');
+              const year = parseInt(parts[0], 10);
+              const month = parseInt(parts[1], 10);
+              const dayOfMonth = parseInt(parts[2], 10);
+              const lastDayOfMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+              const hasPlannedIncome = incomes.some(
+                (inc) => Math.min(Number(inc.payday) || 25, lastDayOfMonth) === dayOfMonth
+              );
+              const hasPlannedExpense = fixedExpenses.some(
+                (exp) => Math.min(Number(exp.dueDay) || 28, lastDayOfMonth) === dayOfMonth
+              );
+
+              if (hasPlannedIncome) {
+                hasActivity = true;
+                hasIncomeActivity = true;
+              } else if (hasPlannedExpense) {
+                hasActivity = true;
+              }
+            }
 
             return (
               <button
@@ -784,38 +798,59 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     setSelectedDateKey(day.dateKey);
                   }
                 }}
-                className={`shrink-0 min-w-[44px] py-2 px-2 rounded-2xl border transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer active:scale-95 ${
+                className={`shrink-0 w-[56px] sm:w-[60px] h-[68px] sm:h-[72px] rounded-2xl border transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 ${
                   isSelected
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] shadow-sm'
+                    : isToday
+                    ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--text-muted)]/60 hover:border-[var(--text-primary)]'
                     : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
                 }`}
               >
                 <span
-                  className={`text-[10px] font-semibold leading-tight ${
-                    isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'
+                  className={`text-[11px] font-semibold tracking-tight leading-none ${
+                    isSelected
+                      ? 'opacity-80'
+                      : isToday
+                      ? 'text-[var(--text-primary)] font-bold'
+                      : 'text-[var(--text-muted)]'
                   }`}
                 >
                   {day.topLabel}
                 </span>
-                <span className="font-display font-bold text-xs tabular-nums leading-tight">
+                <span className="font-display font-bold text-sm sm:text-[15px] tabular-nums leading-none mt-1.5 no-privacy-blur">
                   {day.dayNum}
                 </span>
+                <div className="h-1.5 flex items-center justify-center mt-1.5">
+                  {hasActivity && (
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                        hasIncomeActivity
+                          ? isSelected
+                            ? 'bg-emerald-400'
+                            : 'bg-emerald-500'
+                          : isSelected
+                          ? 'bg-[var(--bg-color)]/75'
+                          : 'bg-[var(--text-muted)]/60'
+                      }`}
+                    />
+                  )}
+                </div>
               </button>
             );
           })}
         </div>
 
         {/* Vald dags rubrik & summering */}
-        <div className="flex items-center justify-between pt-1.5 pb-2 text-xs">
-          <span className="font-bold text-[var(--text-secondary)]">
+        <div className="ui-section-header pt-1.5 pb-2.5">
+          <span className="ui-section-title">
             {formatSwedishDateHeading(selectedDateKey)}
           </span>
           {selectedDayItems.length > 0 && (
             <span
-              className={`font-display font-semibold tabular-nums ${
+              className={`ui-section-meta ${
                 selectedDayNet > 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-[var(--text-muted)]'
+                  ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                  : ''
               }`}
             >
               {selectedDayNet > 0
@@ -827,25 +862,30 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           )}
         </div>
 
-        {/* Enbart den valda dagens händelser som separata kort */}
+        {/* Vald dags händelser samlade i ett enhetligt kort med tunna skiljelinjer */}
         {selectedDayItems.length > 0 ? (
-          <div className="space-y-1.5">
+          <div className="ui-list-card">
             {selectedDayItems.map((tx) => {
               const isIncome = tx.type === 'income';
+              const isPlanned = tx.id.startsWith('planned-');
               const recurringStatus = checkIsRecurringTransaction(
                 tx,
                 fixedExpenses,
                 incomes
               );
+              const isSplit =
+                tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
 
-              return (
+              const rowContent = (
                 <button
-                  key={tx.id}
                   type="button"
-                  onClick={() => onSelectTransaction(tx)}
-                  className="w-full p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:border-[var(--text-muted)] flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left active:scale-[0.99] transition-all cursor-pointer"
+                  onClick={() => {
+                    handleMarkReviewed([tx.id]);
+                    onSelectTransaction(tx);
+                  }}
+                  className="ui-tx-row"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
                     <ItemLogo
                       name={tx.title}
                       category={tx.category}
@@ -854,61 +894,108 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       isRecurring={recurringStatus.isRecurring}
                     />
                     <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                      <span className="ui-row-title flex items-center gap-1.5">
                         <span className="truncate">{tx.title}</span>
                         {tx.isHearted && (
                           <Heart
-                            size={12}
+                            size={13}
                             weight="fill"
                             className="text-rose-500 shrink-0"
                           />
                         )}
                         {tx.isWaitingForPackage && (
                           <Package
-                            size={12}
+                            size={13}
                             weight="fill"
                             className="text-amber-500 shrink-0"
                           />
                         )}
                         {tx.receiptUrl && (
                           <Paperclip
-                            size={12}
+                            size={13}
                             weight="bold"
                             className="text-[var(--text-secondary)] shrink-0"
                           />
                         )}
+                        {isSplit && (
+                          <Users
+                            size={13}
+                            weight="fill"
+                            className="text-emerald-500 shrink-0"
+                            title="Delad utgift"
+                          />
+                        )}
                       </span>
-                      <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                        <CategoryIcon category={tx.category} size={11} />
+                      <span className="ui-row-subtitle flex items-center gap-1">
                         <span className="truncate">{tx.category}</span>
+                        {isSplit && tx.originalAmount && (
+                          <span className="text-[11px] opacity-75 shrink-0">
+                            · av {formatKr(tx.originalAmount)}
+                          </span>
+                        )}
                       </span>
                     </div>
                   </div>
 
                   <div className="text-right shrink-0">
                     <span
-                      className={`font-display font-bold tabular-nums block ${
-                        isIncome
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-[var(--text-primary)]'
-                      }`}
+                      className={isIncome ? 'ui-row-amount-income' : 'ui-row-amount'}
                     >
                       {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
                     </span>
-                    <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
-                      {tx.time === 'Planerad' ? 'Planerad' : getTransactionTime(tx)}
-                    </span>
+                    {(() => {
+                      const realTime =
+                        tx.time === 'Planerad' ? 'Planerad' : getTransactionTime(tx);
+                      const statusSub =
+                        realTime ||
+                        (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                          ? 'Reserverat'
+                          : '');
+                      return statusSub ? (
+                        <span className="ui-row-meta">
+                          {statusSub}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                 </button>
+              );
+
+              if (isPlanned) {
+                return <div key={tx.id}>{rowContent}</div>;
+              }
+
+              return (
+                <SwipeableTxRow
+                  key={tx.id}
+                  isHearted={tx.isHearted}
+                  isWaitingForPackage={tx.isWaitingForPackage}
+                  isExcluded={tx.isExcluded}
+                  onToggleHeart={
+                    onToggleHeart ? () => onToggleHeart(tx.id, !tx.isHearted) : undefined
+                  }
+                  onTogglePackage={
+                    onTogglePackage
+                      ? () => onTogglePackage(tx.id, !tx.isWaitingForPackage)
+                      : undefined
+                  }
+                  onToggleExclude={
+                    onExcludeTransaction
+                      ? () => onExcludeTransaction(tx.id, !tx.isExcluded)
+                      : undefined
+                  }
+                >
+                  {rowContent}
+                </SwipeableTxRow>
               );
             })}
           </div>
         ) : isInitialLoading ? (
-          <div className="space-y-1.5 animate-pulse">
+          <div className="ui-list-card animate-pulse">
             {[1, 2].map((n) => (
               <div
                 key={n}
-                className="p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between"
+                className="py-3 sm:py-3.5 flex items-center justify-between"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)]" />
@@ -922,16 +1009,113 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             ))}
           </div>
         ) : (
-          <div className="py-6 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-center">
-            <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] flex items-center justify-center mx-auto mb-2">
+          <div className="ui-empty-state py-6 px-4">
+            <div className="ui-empty-icon text-[var(--text-muted)]">
               <CalendarBlank size={16} weight="duotone" />
             </div>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="ui-empty-sub">
               Inga händelser denna dag
             </p>
           </div>
         )}
       </section>
+
+      {/* ============================================================== */}
+      {/* DEDIKERAD BOTTOM-SHEET FÖR ATT GRANSKA NYA HÄNDELSER           */}
+      {/* ============================================================== */}
+      <BottomSheet
+        isOpen={isInboxOpen}
+        onClose={() => setIsInboxOpen(false)}
+        title="Granska nya händelser"
+      >
+        <div className="space-y-4">
+          {unreviewedTransactions.length > 0 ? (
+            <>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-muted)] font-medium">
+                  Tryck på en rad för att ändra kategori eller dela belopp
+                </span>
+              </div>
+
+              <div className="ui-sheet-group">
+                {unreviewedTransactions.map((tx) => {
+                  const isIncome = tx.type === 'income';
+                  return (
+                    <div
+                      key={`inbox-${tx.id}`}
+                      className="ui-row"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleMarkReviewed([tx.id]);
+                          setIsInboxOpen(false);
+                          onSelectTransaction(tx);
+                        }}
+                        className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
+                      >
+                        <ItemLogo
+                          name={tx.title}
+                          category={tx.category}
+                          logoUrl={tx.logo}
+                          size="sm"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
+                            {tx.title}
+                          </span>
+                          <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5 truncate">
+                            <span className="truncate">{tx.category}</span>
+                            <span>· {formatSwedishDateHeading(tx.date)}</span>
+                          </span>
+                        </div>
+                      </button>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`font-display font-bold text-xs tabular-nums ${
+                            isIncome
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        >
+                          {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleMarkReviewed([tx.id])}
+                          title="Markera som granskad"
+                          className="ui-icon-btn-surface hover:text-emerald-500 hover:border-emerald-500/40"
+                        >
+                          <Check size={14} weight="bold" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleMarkReviewed(unreviewedTransactions.map((t) => t.id));
+                  setIsInboxOpen(false);
+                }}
+                className="w-full ui-btn-primary"
+              >
+                <Check size={14} weight="bold" />
+                <span>Markera alla som granskade ({unreviewedTransactions.length})</span>
+              </button>
+            </>
+          ) : (
+            <div className="py-8 text-center">
+              <p className="ui-empty-title">
+                Alla nya händelser är granskade!
+              </p>
+            </div>
+          )}
+        </div>
+      </BottomSheet>
     </div>
   );
 };

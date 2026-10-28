@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Bank,
   ArrowClockwise,
+  ArrowCounterClockwise,
   UserCircle,
   SignOut,
   CalendarBlank,
@@ -11,14 +12,12 @@ import {
   ArrowsLeftRight,
   Tag,
   CaretRight,
-  CaretLeft,
   Compass,
   Sun,
   Moon,
   Wallet,
   Plus,
   Trash,
-  PencilSimple,
   Check,
   X,
   ChatCircleText,
@@ -32,17 +31,21 @@ import {
 import { BankConnection } from '../services/bankService';
 import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
-import { TransactionItem, FixedExpenseItem, IncomeItem } from './HomeTab';
+import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
   saveStoredPaymentMethods,
+  compressImageFileToDataUrl,
 } from '../utils/appCache';
 import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../constants';
+import { BottomSheet } from './ui/BottomSheet';
+import { ItemLogo } from './ItemLogo';
 
 interface SettingsTabProps {
   period: PeriodInfo;
   connectedBank: string | null;
   connections: BankConnection[];
+  accounts?: AccountItem[];
   syncingBank: boolean;
   targetPayday: number;
   weekendHandling: WeekendHandlingMode;
@@ -101,16 +104,25 @@ export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, s
   preferences: 'Överföringar',
   security: 'Data & säkerhet',
   feedback: 'Skicka feedback',
-  privacy: 'Integritetspolicy (GDPR)',
+  privacy: 'Integritetspolicy',
   terms: 'Användarvillkor',
-  psd2: 'Open Banking & PSD2',
-  cookies: 'Cookies & lokal lagring',
+  psd2: 'Open Banking',
+  cookies: 'Cookies & lagring',
 };
+
+function stripRawAccountDigits(value: string): string {
+  return value
+    .replace(/\b\d[\d\s-]{3,}\d\b/g, '')
+    .replace(/[·•\-–—]\s*\d{2,}/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({
   period,
   connectedBank,
   connections,
+  accounts = [],
   syncingBank,
   targetPayday,
   weekendHandling,
@@ -149,17 +161,25 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [editEmail, setEditEmail] = useState(userEmail || '');
   const [savedMsg, setSavedMsg] = useState(false);
 
-  // Payment methods state
+  // Payment methods sheet state
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>(() =>
     getStoredPaymentMethods()
   );
-  const [newMethodName, setNewMethodName] = useState('');
-  const [editingMethodId, setEditingMethodId] = useState<string | null>(null);
-  const [editingMethodName, setEditingMethodName] = useState('');
+  const [pmSheetMode, setPmSheetMode] = useState<'new' | 'edit' | null>(null);
+  const [selectedPm, setSelectedPm] = useState<PaymentMethodOption | null>(null);
+  const [pmFormName, setPmFormName] = useState('');
+  const [pmDeleteConfirm, setPmDeleteConfirm] = useState(false);
+  const [pmResetConfirm, setPmResetConfirm] = useState(false);
+
+  // Security confirmation sheet
+  const [securityConfirmAction, setSecurityConfirmAction] = useState<'reset' | 'delete' | null>(
+    null
+  );
 
   // Feedback state
   const [feedbackType, setFeedbackType] = useState<'idea' | 'bug' | 'praise'>('idea');
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackSending, setFeedbackSending] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
 
   // Theme state
@@ -192,7 +212,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
-      root.style.backgroundColor = '#F2F0F0';
+      root.style.backgroundColor = '#F4F3F1';
     }
     try {
       localStorage.setItem('dejz_dark_mode', mode);
@@ -205,16 +225,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const hasActiveBank = Boolean(connectedBank || connections.length > 0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !onUpdateAvatar) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        onUpdateAvatar(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImageFileToDataUrl(file, 256, 0.8);
+      onUpdateAvatar(compressed);
+    } catch {
+      // ignore
+    }
+    e.target.value = '';
   };
 
   const handleExportGdprData = () => {
@@ -244,10 +264,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const renderSubViewHeader = (_title: string) => null;
+  const hiddenAvatarInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="image/*"
+      onChange={handleFileChange}
+      className="hidden"
+    />
+  );
 
   // ==========================================
-  // SUB-VIEW: PROFILE (utan "Utseende")
+  // SUB-VIEW: PROFILE
   // ==========================================
   if (subView === 'profile') {
     const handleSaveProfile = (e: React.FormEvent) => {
@@ -265,67 +293,72 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     const initialChar = (editName || userName || userEmail || '').trim().charAt(0);
 
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Profil')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-5">
-          <div className="flex items-center gap-4 pb-4 border-b border-[var(--border-subtle)]">
-            <div className="relative group shrink-0">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
+      <div className="ui-page animate-slide-in-right">
+        {hiddenAvatarInput}
+        <div className="ui-card p-5 space-y-5">
+          {/* Centered 64x64 Hero Avatar */}
+          <div className="text-center pb-5 border-b border-[var(--border-subtle)]">
+            <div className="relative inline-block mb-3">
+              <div className="w-16 h-16 rounded-[20px] bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
                 {userAvatar ? (
                   <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
                 ) : initialChar ? (
-                  <span className="font-display font-bold text-lg uppercase text-[var(--text-primary)]">
+                  <span className="font-display font-bold text-xl uppercase text-[var(--text-primary)]">
                     {initialChar}
                   </span>
                 ) : (
-                  <UserCircle size={32} weight="duotone" className="text-[var(--text-secondary)]" />
+                  <UserCircle size={34} weight="duotone" className="text-[var(--text-secondary)]" />
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] border-2 border-[var(--surface-color)] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
                 title="Byt profilbild"
               >
                 <Camera size={12} weight="bold" />
               </button>
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-display font-bold text-sm text-[var(--text-primary)] truncate">
-                {userName || userEmail || 'Gästkonto'}
-              </h3>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
-                {userEmail || 'Lokalt läge'}
-              </p>
-            </div>
+
+            <h3 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
+              {editName.trim() || userName || userEmail || 'Gästkonto'}
+            </h3>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate px-4">
+              {userEmail || 'Lokalt läge'}
+            </p>
+            {userAvatar && onUpdateAvatar && (
+              <button
+                type="button"
+                onClick={() => onUpdateAvatar(null)}
+                className="mt-2 text-[11px] font-semibold text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+              >
+                Ta bort bild
+              </button>
+            )}
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--text-primary)] block">
-                Namn
+            <div className="ui-sheet-group">
+              <label className="ui-input-row">
+                <span className="text-[var(--text-muted)] shrink-0">Namn</span>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Ditt förnamn"
+                  className="ui-inline-input"
+                />
               </label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="Ditt förnamn"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--text-primary)] block">
-                E-post
+              <label className="ui-input-row">
+                <span className="text-[var(--text-muted)] shrink-0">E-post</span>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  placeholder="namn@exempel.se"
+                  className="ui-inline-input"
+                />
               </label>
-              <input
-                type="email"
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                placeholder="namn@exempel.se"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-              />
             </div>
 
             {savedMsg && (
@@ -336,7 +369,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
+              className="w-full ui-btn-primary"
             >
               Spara
             </button>
@@ -351,8 +384,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   if (subView === 'categories') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Kategorier')}
+      <div className="ui-page animate-slide-in-right">
         <CategorySettings
           transactions={transactions}
           fixedExpenses={fixedExpenses}
@@ -367,151 +399,229 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // SUB-VIEW: BETALSÄTT
   // ==========================================
   if (subView === 'paymentMethods') {
-    const handleAddPaymentMethod = (e: React.FormEvent) => {
+    const closePmSheet = () => {
+      setPmSheetMode(null);
+      setSelectedPm(null);
+      setPmDeleteConfirm(false);
+    };
+
+    const handleSavePmSheet = (e: React.FormEvent) => {
       e.preventDefault();
-      const trimmed = newMethodName.trim();
+      const trimmed = pmFormName.trim();
       if (!trimmed) return;
-      if (paymentMethods.some((m) => m.name.toLowerCase() === trimmed.toLowerCase())) {
-        setNewMethodName('');
+
+      if (pmSheetMode === 'edit' && selectedPm) {
+        const next = paymentMethods.map((m) =>
+          m.id === selectedPm.id ? { ...m, name: trimmed } : m
+        );
+        setPaymentMethods(next);
+        saveStoredPaymentMethods(next);
+        closePmSheet();
         return;
       }
-      const next: PaymentMethodOption[] = [
-        ...paymentMethods,
-        { id: `pm-${Date.now()}`, name: trimmed, isCustom: true },
-      ];
-      setPaymentMethods(next);
-      saveStoredPaymentMethods(next);
-      setNewMethodName('');
+
+      if (pmSheetMode === 'new') {
+        if (paymentMethods.some((m) => m.name.toLowerCase() === trimmed.toLowerCase())) {
+          closePmSheet();
+          return;
+        }
+        const next: PaymentMethodOption[] = [
+          ...paymentMethods,
+          { id: `pm-${Date.now()}`, name: trimmed, isCustom: true },
+        ];
+        setPaymentMethods(next);
+        saveStoredPaymentMethods(next);
+        closePmSheet();
+      }
     };
 
-    const handleSaveEditMethod = (id: string) => {
-      const trimmed = editingMethodName.trim();
-      if (!trimmed) return;
-      const next = paymentMethods.map((m) =>
-        m.id === id ? { ...m, name: trimmed } : m
-      );
+    const handleDeleteMethod = () => {
+      if (!selectedPm || paymentMethods.length <= 1) return;
+      const next = paymentMethods.filter((m) => m.id !== selectedPm.id);
       setPaymentMethods(next);
       saveStoredPaymentMethods(next);
-      setEditingMethodId(null);
-      setEditingMethodName('');
-    };
-
-    const handleDeleteMethod = (id: string) => {
-      if (paymentMethods.length <= 1) return;
-      const next = paymentMethods.filter((m) => m.id !== id);
-      setPaymentMethods(next);
-      saveStoredPaymentMethods(next);
+      closePmSheet();
     };
 
     const handleResetMethods = () => {
       setPaymentMethods(DEFAULT_PAYMENT_METHODS);
       saveStoredPaymentMethods(DEFAULT_PAYMENT_METHODS);
+      setPmResetConfirm(false);
     };
 
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Betalsätt')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5 space-y-4">
-          <form onSubmit={handleAddPaymentMethod} className="flex items-center gap-2">
-            <input
-              type="text"
-              value={newMethodName}
-              onChange={(e) => setNewMethodName(e.target.value)}
-              placeholder="Lägg till eget betalsätt (t.ex. Qliro, Kontant)..."
-              className="flex-1 px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-            />
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card">
+          {paymentMethods.map((method) => (
             <button
-              type="submit"
-              disabled={!newMethodName.trim()}
-              className="px-3.5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center gap-1.5 hover:opacity-90 disabled:opacity-40 cursor-pointer shrink-0"
+              key={method.id}
+              type="button"
+              onClick={() => {
+                setSelectedPm(method);
+                setPmFormName(method.name);
+                setPmDeleteConfirm(false);
+                setPmSheetMode('edit');
+              }}
+              className="ui-row-btn"
             >
-              <Plus size={14} weight="bold" />
-              <span>Lägg till</span>
-            </button>
-          </form>
-
-          <div className="divide-y divide-[var(--border-subtle)] border-t border-[var(--border-subtle)]">
-            {paymentMethods.map((method) => {
-              const isEditing = editingMethodId === method.id;
-              return (
-                <div
-                  key={method.id}
-                  className="py-3 first:pt-3 last:pb-0 flex items-center justify-between gap-3 text-xs"
-                >
-                  {isEditing ? (
-                    <div className="flex items-center gap-2 flex-1">
-                      <input
-                        type="text"
-                        value={editingMethodName}
-                        onChange={(e) => setEditingMethodName(e.target.value)}
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none"
-                        autoFocus
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleSaveEditMethod(method.id)}
-                        className="p-1.5 rounded-lg bg-[var(--text-primary)] text-[var(--bg-color)] cursor-pointer"
-                      >
-                        <Check size={13} weight="bold" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditingMethodId(null)}
-                        className="p-1.5 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] cursor-pointer"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Wallet size={16} className="text-[var(--text-secondary)] shrink-0" />
-                        <span className="font-semibold text-[var(--text-primary)] truncate">
-                          {method.name}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingMethodId(method.id);
-                            setEditingMethodName(method.name);
-                          }}
-                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-color)] transition-colors cursor-pointer"
-                          title="Byt namn"
-                        >
-                          <PencilSimple size={14} />
-                        </button>
-                        {paymentMethods.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteMethod(method.id)}
-                            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                            title="Ta bort"
-                          >
-                            <Trash size={14} />
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  )}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="ui-icon-badge">
+                  <Wallet size={15} />
                 </div>
-              );
-            })}
-          </div>
+                <span className="ui-row-title">
+                  {method.name}
+                </span>
+              </div>
+              <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            </button>
+          ))}
+        </div>
 
-          <div className="pt-2 border-t border-[var(--border-subtle)] flex justify-end">
+        <div className="space-y-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedPm(null);
+              setPmFormName('');
+              setPmDeleteConfirm(false);
+              setPmSheetMode('new');
+            }}
+            className="w-full ui-btn-primary"
+          >
+            <Plus size={15} weight="bold" />
+            <span>Nytt betalsätt</span>
+          </button>
+
+          {pmResetConfirm ? (
+            <div className="ui-confirm-neutral">
+              <span className="font-medium text-[var(--text-secondary)]">
+                Återställa standardbetalsätt?
+              </span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPmResetConfirm(false)}
+                  className="ui-btn-sm"
+                >
+                  Avbryt
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetMethods}
+                  className="ui-btn-sm-primary"
+                >
+                  Återställ
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setPmResetConfirm(true)}
+                className="py-1.5 px-3 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <ArrowCounterClockwise size={13} />
+                <span>Återställ standardbetalsätt</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        <BottomSheet
+          isOpen={pmSheetMode !== null}
+          onClose={closePmSheet}
+          contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
+        >
+          <div className="ui-sheet-header mb-5">
+            <span className="ui-sheet-title">
+              {pmSheetMode === 'new' ? 'Nytt betalsätt' : 'Redigera betalsätt'}
+            </span>
             <button
               type="button"
-              onClick={handleResetMethods}
-              className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              onClick={closePmSheet}
+              className="ui-icon-btn"
             >
-              Återställ svenska standardbetalsätt
+              <X size={16} />
             </button>
           </div>
-        </div>
+
+          <div className="ui-hero-header">
+            <div className="ui-hero-icon">
+              <Wallet size={28} />
+            </div>
+            <h2 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
+              {pmFormName.trim() || 'Namnlöst betalsätt'}
+            </h2>
+          </div>
+
+          <form onSubmit={handleSavePmSheet} className="space-y-4">
+            <div className="ui-sheet-group">
+              <label className="ui-input-row">
+                <span className="text-[var(--text-muted)] shrink-0">Namn</span>
+                <input
+                  type="text"
+                  value={pmFormName}
+                  onChange={(e) => setPmFormName(e.target.value)}
+                  placeholder="T.ex. Kort, Swish, Faktura..."
+                  required
+                  className="ui-inline-input"
+                />
+              </label>
+            </div>
+
+            {pmDeleteConfirm ? (
+              <div className="ui-confirm-danger">
+                <span className="font-medium text-rose-700 dark:text-rose-300">
+                  Ta bort betalsättet?
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setPmDeleteConfirm(false)}
+                    className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
+                  >
+                    Avbryt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteMethod}
+                    className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
+                  >
+                    Ta bort
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={`grid gap-2 ${
+                  pmSheetMode === 'edit' && paymentMethods.length > 1
+                    ? 'grid-cols-2'
+                    : 'grid-cols-1'
+                }`}
+              >
+                {pmSheetMode === 'edit' && paymentMethods.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setPmDeleteConfirm(true)}
+                    className="ui-btn-danger"
+                  >
+                    <Trash size={14} />
+                    <span>Ta bort</span>
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  className="ui-btn-primary"
+                >
+                  <Check size={14} weight="bold" />
+                  <span>Spara</span>
+                </button>
+              </div>
+            )}
+          </form>
+        </BottomSheet>
       </div>
     );
   }
@@ -521,83 +631,87 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   if (subView === 'period') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Lönedag')}
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card">
+          <div className="p-4 space-y-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--text-muted)]">Ordinarie lönedag</span>
+              <span className="font-display font-bold text-[var(--text-primary)] tabular-nums">
+                Den {targetPayday}:e
+              </span>
+            </div>
 
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-5">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--text-primary)] block">
-              Ordinarie lönedag
-            </label>
-            <select
-              value={targetPayday}
-              onChange={(e) => onUpdatePayday(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer"
-            >
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                <option key={d} value={d}>
-                  Den {d}:e {d === 25 ? '(Standard)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-[var(--text-primary)] block">
-              Om lönedag är på helg
-            </label>
-            <div className="grid grid-cols-1 gap-2">
-              {[
-                {
-                  mode: 'before' as WeekendHandlingMode,
-                  title: 'Fredagen före',
-                },
-                {
-                  mode: 'after' as WeekendHandlingMode,
-                  title: 'Måndagen efter',
-                },
-                {
-                  mode: 'none' as WeekendHandlingMode,
-                  title: 'Ingen justering',
-                },
-              ].map((option) => {
-                const isSelected = weekendHandling === option.mode;
+            <div className="grid grid-cols-7 gap-1.5">
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
+                const isSelected = targetPayday === d;
                 return (
                   <button
-                    key={option.mode}
+                    key={d}
                     type="button"
-                    onClick={() => onUpdateWeekendHandling(option.mode)}
-                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                    onClick={() => onUpdatePayday(d)}
+                    className={`py-2 rounded-xl text-xs font-display font-bold tabular-nums transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[var(--surface-raised)] border-[var(--text-primary)]'
-                        : 'bg-[var(--bg-color)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[1.03]'
+                        : 'bg-[var(--bg-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
                     }`}
                   >
-                    <span className="text-xs font-bold text-[var(--text-primary)]">
-                      {option.title}
-                    </span>
-                    <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                        isSelected
-                          ? 'border-[var(--text-primary)] bg-[var(--text-primary)]'
-                          : 'border-[var(--text-muted)]'
-                      }`}
-                    >
-                      {isSelected && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--bg-color)]" />
-                      )}
-                    </div>
+                    {d}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between text-xs">
+          <div className="ui-row">
             <span className="text-[var(--text-muted)]">Aktuell period</span>
             <span className="font-display font-bold text-[var(--text-primary)] tabular-nums">
               {period.startLabel} – {period.endLabel}
             </span>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            Om lönedag infaller på helg
+          </span>
+          <div className="ui-group-card">
+            {[
+              {
+                mode: 'before' as WeekendHandlingMode,
+                title: 'Fredagen före',
+              },
+              {
+                mode: 'after' as WeekendHandlingMode,
+                title: 'Måndagen efter',
+              },
+              {
+                mode: 'none' as WeekendHandlingMode,
+                title: 'Ingen justering',
+              },
+            ].map((option) => {
+              const isSelected = weekendHandling === option.mode;
+              return (
+                <button
+                  key={option.mode}
+                  type="button"
+                  onClick={() => onUpdateWeekendHandling(option.mode)}
+                  className="ui-row-btn"
+                >
+                  <span
+                    className={
+                      isSelected
+                        ? 'font-bold text-[var(--text-primary)]'
+                        : 'font-semibold text-[var(--text-primary)]'
+                    }
+                  >
+                    {option.title}
+                  </span>
+                  {isSelected && (
+                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -608,76 +722,195 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // SUB-VIEW: BANKKONTON
   // ==========================================
   if (subView === 'bank') {
+    const formatKr = (amount: number) =>
+      `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
+
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Bankkonton')}
+      <div className="ui-page animate-slide-in-right">
+        {hasActiveBank ? (
+          <>
+            {/* Anslutna banker */}
+            <div className="space-y-1.5">
+              <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                Ansluten bank
+              </span>
+              <div className="ui-group-card">
+                {connections.length > 0 ? (
+                  connections.map((conn) => {
+                    const validMs = conn.valid_until ? new Date(conn.valid_until).getTime() : NaN;
+                    const computedDaysLeft =
+                      conn.days_until_expiry !== undefined && conn.days_until_expiry !== null
+                        ? conn.days_until_expiry
+                        : !Number.isNaN(validMs)
+                        ? Math.ceil((validMs - Date.now()) / (24 * 60 * 60 * 1000))
+                        : null;
+                    const isExpired =
+                      conn.status === 'expired' ||
+                      (computedDaysLeft !== null && computedDaysLeft <= 0);
+                    const isExpiringSoon =
+                      !isExpired &&
+                      (Boolean(conn.expiring_soon) ||
+                        (computedDaysLeft !== null && computedDaysLeft <= 14));
 
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[var(--text-primary)]">
-              Status
-            </span>
-            <span
-              className={`text-xs font-semibold ${
-                hasActiveBank
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-[var(--text-muted)]'
-              }`}
-            >
-              {hasActiveBank ? 'Ansluten' : 'Ej ansluten'}
-            </span>
-          </div>
-
-          {connections.length > 0 && (
-            <div className="divide-y divide-[var(--border-subtle)] border-t border-[var(--border-subtle)] pt-3">
-              {connections.map((conn) => (
-                <div
-                  key={conn.id}
-                  className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <span className="font-bold text-[var(--text-primary)] block">
-                      {conn.aspsp_name}
-                    </span>
-                    <span className="text-[11px] text-[var(--text-muted)]">
-                      {conn.status === 'active' ? 'Autosynk aktiv' : conn.status}
-                    </span>
+                    return (
+                      <div
+                        key={conn.id}
+                        className="ui-row"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <ItemLogo
+                            name={conn.aspsp_name}
+                            logoUrl={conn.aspsp_logo || undefined}
+                            size="md"
+                          />
+                          <div className="min-w-0">
+                            <span className="ui-row-title">
+                              {conn.aspsp_name}
+                            </span>
+                            {isExpired ? (
+                              <span className="text-xs text-rose-600 dark:text-rose-400 font-medium block">
+                                Samtycket har gått ut · Förnya åtkomst
+                              </span>
+                            ) : isExpiringSoon ? (
+                              <span className="text-xs text-amber-600 dark:text-amber-400 font-medium block">
+                                Samtycke går ut om {computedDaysLeft} {computedDaysLeft === 1 ? 'dag' : 'dagar'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
+                                Ansluten
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {(isExpired || isExpiringSoon) && (
+                            <button
+                              type="button"
+                              onClick={onOpenBank}
+                              className="px-2.5 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                            >
+                              Förnya
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => onDisconnectBank(conn.id)}
+                            className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                          >
+                            Koppla från
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="ui-row">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <ItemLogo name={connectedBank || 'Bank'} size="md" />
+                      <div className="min-w-0">
+                        <span className="ui-row-title">
+                          {connectedBank}
+                        </span>
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
+                          Ansluten
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onDisconnectBank()}
+                      className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                    >
+                      Koppla från
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onDisconnectBank(conn.id)}
-                    className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
-                  >
-                    Koppla från
-                  </button>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
-          )}
 
-          <div className="pt-1 flex items-center gap-2">
-            {hasActiveBank && (
+            {/* Kontolista utan råa kontonummer */}
+            {accounts.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                  Konton
+                </span>
+                <div className="ui-group-card">
+                  {accounts.map((acc) => {
+                    const cleanName = stripRawAccountDigits(acc.name) || 'Bankkonto';
+                    const cleanBank = stripRawAccountDigits(acc.bank || connectedBank || 'Bank');
+                    return (
+                      <button
+                        key={acc.id}
+                        type="button"
+                        onClick={onOpenBank}
+                        className="ui-row-btn"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ItemLogo name={cleanBank} size="md" />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">
+                              {cleanName}
+                            </span>
+                            <span className="ui-row-subtitle">
+                              {cleanBank}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="ui-row-amount shrink-0">
+                          {formatKr(acc.balance)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={onSyncBank}
                 disabled={syncingBank}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 cursor-pointer"
+                className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
               >
                 <ArrowClockwise size={14} className={syncingBank ? 'animate-spin' : ''} />
-                <span>{syncingBank ? 'Synkar...' : 'Synka'}</span>
+                <span>{syncingBank ? 'Synkar...' : 'Synka nu'}</span>
               </button>
-            )}
 
+              <button
+                type="button"
+                onClick={onOpenBank}
+                className="ui-btn-primary"
+              >
+                <Bank size={15} />
+                <span>Hantera konton</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="ui-card p-6 text-center space-y-4">
+            <div className="ui-hero-icon mb-0">
+              <Bank size={28} weight="duotone" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
+                Ingen bank ansluten
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
+                Anslut din bank med Mobilt BankID för att hämta konton och köp automatiskt.
+              </p>
+            </div>
             <button
               type="button"
               onClick={onOpenBank}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
+              className="w-full ui-btn-primary"
             >
               <Bank size={15} />
-              <span>{hasActiveBank ? 'Hantera' : 'Anslut bank'}</span>
+              <span>Anslut bank</span>
             </button>
           </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -687,17 +920,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   if (subView === 'preferences') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Överföringar')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5">
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-card-p">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <span className="text-xs font-bold text-[var(--text-primary)] block">
+              <span className="ui-row-title text-[13px] sm:text-sm">
                 Dölj egna överföringar
               </span>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                Räknas inte som utgift eller inkomst i budgeten.
+              <p className="ui-row-subtitle">
+                Räknas inte med i utgifter eller inkomster.
               </p>
             </div>
             {onToggleExcludeInternalTransfers && (
@@ -706,15 +937,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 role="switch"
                 aria-checked={excludeInternalTransfers}
                 onClick={() => onToggleExcludeInternalTransfers(!excludeInternalTransfers)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  excludeInternalTransfers
-                    ? 'bg-[var(--text-primary)]'
-                    : 'bg-[var(--border-subtle)]'
+                className={`ui-switch ${
+                  excludeInternalTransfers ? 'ui-switch-on' : 'ui-switch-off'
                 }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--bg-color)] ring-0 transition duration-200 ease-in-out ${
-                    excludeInternalTransfers ? 'translate-x-5' : 'translate-x-0'
+                  className={`ui-switch-thumb ${
+                    excludeInternalTransfers ? 'ui-switch-thumb-on' : 'translate-x-0'
                   }`}
                 />
               </button>
@@ -730,65 +959,142 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   if (subView === 'security') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Data & säkerhet')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden divide-y divide-[var(--border-subtle)]">
-          <div className="p-4 flex items-center justify-between gap-3 text-xs">
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card">
+          <div className="ui-row">
             <div className="min-w-0">
-              <span className="font-semibold text-[var(--text-primary)] block">
-                Exportera min data (GDPR)
+              <span className="ui-row-title text-[13px] sm:text-sm">
+                Exportera data
               </span>
-              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                Ladda ner all din sparade information som JSON-fil
+              <span className="ui-row-subtitle">
+                Ladda ner som JSON-fil
               </span>
             </div>
             <button
               type="button"
               onClick={handleExportGdprData}
-              className="px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-semibold hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0 flex items-center gap-1.5"
+              className="ui-btn-sm shrink-0 flex items-center gap-1.5"
             >
               <DownloadSimple size={14} />
               <span>Exportera</span>
             </button>
           </div>
 
-          <div className="p-4 flex items-center justify-between gap-3 text-xs">
+          <div className="ui-row">
             <div className="min-w-0">
-              <span className="font-semibold text-[var(--text-primary)] block">
-                Nollställ data
+              <span className="ui-row-title text-[13px] sm:text-sm">
+                Prisvarningar
               </span>
-              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                Rensa alla transaktioner och börja om
+              <span className="ui-row-subtitle">
+                Visa dolda varningar igen
               </span>
             </div>
             <button
               type="button"
-              onClick={onResetAccount}
-              className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold hover:bg-amber-500/20 transition-colors cursor-pointer shrink-0"
+              onClick={() => {
+                try {
+                  localStorage.removeItem('dejz_dismissed_price_alerts');
+                } catch {
+                  // ignore
+                }
+                setSavedMsg(true);
+                setTimeout(() => setSavedMsg(false), 2000);
+              }}
+              className="ui-btn-sm shrink-0"
+            >
+              {savedMsg ? 'Återställt!' : 'Återställ'}
+            </button>
+          </div>
+
+          <div className="ui-row">
+            <div className="min-w-0">
+              <span className="ui-row-title text-[13px] sm:text-sm">
+                Nollställ data
+              </span>
+              <span className="ui-row-subtitle">
+                Rensa alla poster och börja om
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSecurityConfirmAction('reset')}
+              className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-semibold hover:bg-amber-500/20 transition-colors cursor-pointer shrink-0"
             >
               Nollställ
             </button>
           </div>
 
-          <div className="p-4 flex items-center justify-between gap-3 text-xs">
+          <div className="ui-row">
             <div className="min-w-0">
-              <span className="font-semibold text-[var(--text-primary)] block">
+              <span className="ui-row-title text-[13px] sm:text-sm">
                 Radera konto
               </span>
-              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                Ta bort konto och all data permanent (Rätten att bli glömd)
+              <span className="ui-row-subtitle">
+                Ta bort konto och all data permanent
               </span>
             </div>
             <button
               type="button"
-              onClick={onDeleteAccount}
-              className="px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-500/20 transition-colors cursor-pointer shrink-0"
+              onClick={() => setSecurityConfirmAction('delete')}
+              className="px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-500/20 transition-colors cursor-pointer shrink-0"
             >
               Radera
             </button>
           </div>
         </div>
+
+        <BottomSheet
+          isOpen={securityConfirmAction !== null}
+          onClose={() => setSecurityConfirmAction(null)}
+          contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
+        >
+          <div className="ui-sheet-header">
+            <span className="ui-sheet-title">
+              {securityConfirmAction === 'delete' ? 'Radera konto' : 'Nollställ data'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSecurityConfirmAction(null)}
+              className="ui-icon-btn"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="space-y-4 text-xs">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
+              {securityConfirmAction === 'delete'
+                ? 'Detta raderar ditt konto och all tillhörande data permanent. Åtgärden går inte att ångra.'
+                : 'Detta rensar dina sparade transaktioner, fasta utgifter, inkomster och bankkopplingar.'}
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setSecurityConfirmAction(null)}
+                className="ui-btn-secondary"
+              >
+                Avbryt
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const action = securityConfirmAction;
+                  setSecurityConfirmAction(null);
+                  if (action === 'delete') {
+                    onDeleteAccount();
+                  } else if (action === 'reset') {
+                    onResetAccount();
+                  }
+                }}
+                className={`py-2.5 px-3 rounded-xl font-bold text-white cursor-pointer ${
+                  securityConfirmAction === 'delete' ? 'bg-rose-600' : 'bg-amber-600'
+                }`}
+              >
+                {securityConfirmAction === 'delete' ? 'Radera permanent' : 'Nollställ'}
+              </button>
+            </div>
+          </div>
+        </BottomSheet>
       </div>
     );
   }
@@ -797,15 +1103,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // SUB-VIEW: SKICKA FEEDBACK
   // ==========================================
   if (subView === 'feedback') {
-    const handleSendFeedback = (e: React.FormEvent) => {
+    const handleSendFeedback = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!feedbackMessage.trim()) return;
+      const cleanMessage = feedbackMessage.trim();
+      if (!cleanMessage || feedbackSending) return;
+      setFeedbackSending(true);
       try {
         const prev = JSON.parse(localStorage.getItem('dejz_user_feedback') || '[]');
         prev.unshift({
           id: Date.now(),
           type: feedbackType,
-          message: feedbackMessage.trim(),
+          message: cleanMessage,
           userEmail: userEmail || 'anonym',
           createdAt: new Date().toISOString(),
         });
@@ -813,23 +1121,33 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       } catch {
         // ignore
       }
-      setFeedbackSent(true);
-      setFeedbackMessage('');
-      setTimeout(() => setFeedbackSent(false), 3500);
+
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: feedbackType,
+            message: cleanMessage,
+            userEmail: userEmail || 'anonym',
+            userName: userName || null,
+          }),
+        });
+      } catch {
+        // fallback already stored locally
+      } finally {
+        setFeedbackSending(false);
+        setFeedbackSent(true);
+        setFeedbackMessage('');
+        setTimeout(() => setFeedbackSent(false), 3500);
+      }
     };
 
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Skicka feedback')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Har du ett förslag på hur Dejz kan bli bättre, eller har du hittat något som
-            kan slipas till? Skicka gärna dina tankar direkt till oss.
-          </p>
-
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-card-p">
           <form onSubmit={handleSendFeedback} className="space-y-4">
-            <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+            <div className="ui-segmented grid-cols-3">
               {[
                 { id: 'idea' as const, label: 'Förslag' },
                 { id: 'bug' as const, label: 'Bugg' },
@@ -839,10 +1157,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   key={t.id}
                   type="button"
                   onClick={() => setFeedbackType(t.id)}
-                  className={`py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    feedbackType === t.id
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                  className={`ui-segmented-tab ${
+                    feedbackType === t.id ? 'ui-segmented-tab-active' : ''
                   }`}
                 >
                   {t.label}
@@ -850,33 +1166,28 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               ))}
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--text-primary)] block">
-                Ditt meddelande
-              </label>
-              <textarea
-                rows={4}
-                value={feedbackMessage}
-                onChange={(e) => setFeedbackMessage(e.target.value)}
-                placeholder="Beskriv vad du tänker på..."
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
-              />
-            </div>
+            <textarea
+              rows={4}
+              value={feedbackMessage}
+              onChange={(e) => setFeedbackMessage(e.target.value)}
+              placeholder="Beskriv vad du tänker på..."
+              required
+              className="ui-box-input resize-none"
+            />
 
             {feedbackSent && (
               <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold text-center animate-fade-in">
-                Tack för din feedback! Vi läser allt som skickas in.
+                Tack för din feedback!
               </div>
             )}
 
             <button
               type="submit"
-              disabled={!feedbackMessage.trim()}
-              className="w-full py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
+              disabled={!feedbackMessage.trim() || feedbackSending}
+              className="ui-btn-primary"
             >
               <PaperPlaneTilt size={15} weight="bold" />
-              <span>Skicka feedback</span>
+              <span>{feedbackSending ? 'Skickar...' : 'Skicka'}</span>
             </button>
           </form>
         </div>
@@ -885,60 +1196,52 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
-  // SUB-VIEW: INTEGRITETSPOLICY (GDPR)
+  // SUB-VIEW: INTEGRITETSPOLICY
   // ==========================================
   if (subView === 'privacy') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Integritetspolicy (GDPR)')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4 text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
               1. Personuppgiftsansvar
             </h3>
             <p>
               Dejz behandlar dina personuppgifter i enlighet med EU:s dataskyddsförordning
-              (GDPR, 2016/679) samt svensk kompletterande dataskyddslagstiftning
-              (Lag 2018:218).
+              (GDPR, 2016/679) samt svensk dataskyddslagstiftning (Lag 2018:218).
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              2. Vilka uppgifter som behandlas
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              2. Uppgifter som behandlas
             </h3>
             <p>
-              Vi behandlar endast de uppgifter som krävs för att ge dig en sammanställning av
-              din ekonomi: kontouppgifter (e-post, namn), lönedagsinställningar, manuellt
-              inlagda poster samt de bankkonton och transaktioner du uttryckligen ger
-              samtycke till att hämta via Open Banking (PSD2).
+              Vi behandlar endast de uppgifter som krävs för din ekonomiöversikt:
+              kontouppgifter, lönedagsinställningar, manuella poster samt de bankkonton och
+              transaktioner du samtycker till att hämta via Open Banking.
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              3. Ändamål och rättslig grund
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              3. Ändamål & rättslig grund
             </h3>
             <p>
-              Behandlingen sker med stöd av avtal (Artikel 6.1 b GDPR) för att leverera
-              tjänsten samt uttryckligt samtycke (Artikel 6.1 a GDPR) vid hämtning av
-              kontoinformation via licensierad kontoinformationstjänst (AISP). Vi säljer
-              aldrig dina uppgifter vidare till tredje part.
+              Behandlingen sker med stöd av avtal (Artikel 6.1 b GDPR) samt uttryckligt
+              samtycke (Artikel 6.1 a GDPR) vid bankanslutning. Vi säljer aldrig dina
+              uppgifter vidare.
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              4. Dina rättigheter enligt GDPR
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              4. Dina rättigheter
             </h3>
             <p>
-              Du har rätt till registerutdrag (dataportabilitet), rättelse, begränsning av
-              behandling samt rätten att bli glömd (radering). Under{' '}
+              Under{' '}
               <span className="font-semibold text-[var(--text-primary)]">Data & säkerhet</span>{' '}
-              kan du när som helst exportera all din data eller radera ditt konto permanent
-              med omedelbar verkan. Du har även rätt att lämna klagomål till
-              Integritetsskyddsmyndigheten (IMY).
+              kan du när som helst exportera all din data eller radera ditt konto permanent.
             </p>
           </div>
         </div>
@@ -951,41 +1254,35 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   if (subView === 'terms') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Användarvillkor')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4 text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
               1. Om tjänsten
             </h3>
             <p>
               Dejz är ett digitalt verktyg för personlig ekonomiöversikt och
-              löneperiodsbudgetering. Tjänsten tillhandahålls i befintligt skick för
-              privat bruk.
+              löneperiodsbudgetering för privat bruk.
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
               2. Ingen finansiell rådgivning
             </h3>
             <p>
-              Information, sammanställningar och prognoser i Dejz utgör inte finansiell,
-              juridisk eller skattemässig rådgivning enligt lagen (2003:862) om finansiell
-              rådgivning till konsumenter. Samtliga ekonomiska beslut fattas av dig som
-              användare.
+              Sammanställningar och prognoser i Dejz utgör inte finansiell, juridisk eller
+              skattemässig rådgivning enligt lagen (2003:862).
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              3. Avslutande av konto & tillämplig lag
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              3. Avslutande & tillämplig lag
             </h3>
             <p>
-              Du kan när som helst avsluta ditt konto utan uppsägningstid under Inställningar.
-              Svensk lag tillämpas på dessa villkor och eventuell tvist avgörs av svensk
-              allmän domstol eller Allmänna reklamationsnämnden (ARN).
+              Du kan när som helst avsluta ditt konto utan uppsägningstid. Svensk lag
+              tillämpas på dessa villkor.
             </p>
           </div>
         </div>
@@ -994,45 +1291,41 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
-  // SUB-VIEW: OPEN BANKING & PSD2
+  // SUB-VIEW: OPEN BANKING
   // ==========================================
   if (subView === 'psd2') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Open Banking & PSD2')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4 text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
               Säker bankanslutning (PSD2)
             </h3>
             <p>
               Bankkopplingar sker via Enable Banking i enlighet med EU:s andra
-              betaltjänstdirektiv (PSD2) och lagen (2010:751) om betaltjänster. Autentisering
-              sker alltid direkt mot din bank med Mobilt BankID.
+              betaltjänstdirektiv (PSD2). Autentisering sker direkt mot din bank med Mobilt
+              BankID.
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              Endast läsrättigheter (Read-only)
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              Endast läsrättigheter
             </h3>
             <p>
               Dejz har uteslutande läsrättigheter till dina valda konton och transaktioner.
-              Appen kan aldrig flytta pengar, genomföra betalningar eller ändra något i din
-              internetbank.
+              Appen kan aldrig flytta pengar eller genomföra betalningar.
             </p>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              90-dagarssamtycke & återkallelse
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              Samtycke & återkallelse
             </h3>
             <p>
-              Enligt PSD2-regelverket gäller ett banksamtycke i högst 90 dagar åt gången. Du
-              kan när som helst återkalla ditt samtycke omedelbart under{' '}
-              <span className="font-semibold text-[var(--text-primary)]">Bankkonton</span>{' '}
-              genom att välja Koppla från.
+              Ett banksamtycke gäller i högst 90 dagar åt gången och kan när som helst
+              återkallas direkt under{' '}
+              <span className="font-semibold text-[var(--text-primary)]">Bankkonton</span>.
             </p>
           </div>
         </div>
@@ -1041,37 +1334,30 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
-  // SUB-VIEW: COOKIES & LOKAL LAGRING (LEK)
+  // SUB-VIEW: COOKIES & LAGRING
   // ==========================================
   if (subView === 'cookies') {
     return (
-      <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-        {renderSubViewHeader('Cookies & lokal lagring')}
-
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4 text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              Tekniskt nödvändig lagring (LEK)
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              Tekniskt nödvändig lagring
             </h3>
             <p>
-              Enligt lagen (2022:482) om elektronisk kommunikation (LEK) informerar vi om hur
-              information lagras i din enhet. Dejz använder uteslutande tekniskt nödvändig
-              lokal lagring (localStorage och sessionscookies) för att:
+              Dejz använder lokal lagring (localStorage och sessionscookies) uteslutande för
+              att hålla dig inloggad och spara dina inställningar såsom lönedag, utseende,
+              kategorier och betalsätt.
             </p>
-            <ul className="list-disc pl-4 mt-2 space-y-1">
-              <li>Hålla dig inloggad på ett säkert sätt</li>
-              <li>Spara ditt val av ljust/mörkt utseende och lönedag</li>
-              <li>Spara dina egna kategorier och betalsätt</li>
-            </ul>
           </div>
 
-          <div>
-            <h3 className="font-display font-bold text-sm text-[var(--text-primary)] mb-1">
-              Inga spårnings- eller reklamcookies
+          <div className="p-5">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
+              Inga spårningscookies
             </h3>
             <p>
               Dejz använder inga tredjepartscookies för annonsering, profilering eller
-              kommersiell spårning över webbplatser.
+              kommersiell spårning.
             </p>
           </div>
         </div>
@@ -1085,12 +1371,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const initialChar = (userName || userEmail || '').trim().charAt(0);
 
   return (
-    <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
+    <div className="ui-page animate-slide-in-left">
+      {hiddenAvatarInput}
+
       {/* 1. Clean Profile Header Card */}
       <button
         type="button"
         onClick={() => setSubView('profile')}
-        className="w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-3.5 text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+        className="w-full ui-card p-4 sm:p-5 flex items-center justify-between gap-3.5 text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -1108,53 +1396,46 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] border-2 border-[var(--surface-color)] flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
               title="Byt profilbild"
             >
               <Camera size={11} weight="bold" />
             </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
           </div>
 
           <div className="min-w-0 flex-1">
             <h2 className="font-display font-bold text-sm sm:text-base text-[var(--text-primary)] truncate">
               {userName || userEmail || 'Gästkonto'}
             </h2>
-            <span className="text-xs text-[var(--text-muted)] block mt-0.5 truncate">
+            <span className="ui-row-subtitle truncate">
               {userName && userEmail ? userEmail : 'Redigera profil'}
             </span>
           </div>
         </div>
 
         <CaretRight
-          size={16}
+          size={15}
           className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors shrink-0"
         />
       </button>
 
       {/* 2. Ekonomi */}
-      <div className="space-y-1.5">
+      <div className="ui-section">
         <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
           Ekonomi
         </span>
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden divide-y divide-[var(--border-subtle)]">
+        <div className="ui-group-card">
           {/* Bankkonton */}
           <button
             type="button"
             onClick={() => setSubView('bank')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <CreditCard size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Bankkonton
-              </span>
+              <div className="ui-icon-badge">
+                <CreditCard size={16} />
+              </div>
+              <span className="ui-row-title">Bankkonton</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span
@@ -1174,13 +1455,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('period')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <CalendarBlank size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Lönedag
-              </span>
+              <div className="ui-icon-badge">
+                <CalendarBlank size={16} />
+              </div>
+              <span className="ui-row-title">Lönedag</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
@@ -1194,13 +1475,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('categories')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <Tag size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Kategorier
-              </span>
+              <div className="ui-icon-badge">
+                <Tag size={16} />
+              </div>
+              <span className="ui-row-title">Kategorier</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
@@ -1209,96 +1490,89 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('paymentMethods')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <Wallet size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Betalsätt
-              </span>
+              <div className="ui-icon-badge">
+                <Wallet size={16} />
+              </div>
+              <span className="ui-row-title">Betalsätt</span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
-                {paymentMethods.length} st
-              </span>
-              <CaretRight size={14} className="text-[var(--text-muted)]" />
-            </div>
+            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
 
           {/* Överföringar */}
           <button
             type="button"
             onClick={() => setSubView('preferences')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <ArrowsLeftRight size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Överföringar
-              </span>
+              <div className="ui-icon-badge">
+                <ArrowsLeftRight size={16} />
+              </div>
+              <span className="ui-row-title">Överföringar</span>
             </div>
-            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs font-medium text-[var(--text-muted)]">
+                {excludeInternalTransfers ? 'Dolda' : 'Visas'}
+              </span>
+              <CaretRight size={14} className="text-[var(--text-muted)]" />
+            </div>
           </button>
         </div>
       </div>
 
-      {/* 3. Konto & support */}
-      <div className="space-y-1.5">
+      {/* 3. Konto & app */}
+      <div className="ui-section">
         <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
           Konto & app
         </span>
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden divide-y divide-[var(--border-subtle)]">
-          {/* Utseende (Snabbväxling Ljust / Mörkt) */}
+        <div className="ui-group-card">
+          {/* Utseende */}
           <button
             type="button"
             onClick={() => applyTheme(themeMode === 'dark' ? 'light' : 'dark')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              {themeMode === 'dark' ? (
-                <Moon size={18} className="text-[var(--text-secondary)] shrink-0" />
-              ) : (
-                <Sun size={18} className="text-[var(--text-secondary)] shrink-0" />
-              )}
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Utseende
-              </span>
+              <div className="ui-icon-badge">
+                {themeMode === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+              </div>
+              <span className="ui-row-title">Utseende</span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-medium text-[var(--text-muted)]">
-                {themeMode === 'dark' ? 'Mörkt' : 'Ljust'}
-              </span>
-              <CaretRight size={14} className="text-[var(--text-muted)]" />
-            </div>
+            <span className="text-xs font-medium text-[var(--text-muted)]">
+              {themeMode === 'dark' ? 'Mörkt' : 'Ljust'}
+            </span>
           </button>
 
           {/* Skicka feedback */}
           <button
             type="button"
             onClick={() => setSubView('feedback')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <ChatCircleText size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Skicka feedback
-              </span>
+              <div className="ui-icon-badge">
+                <ChatCircleText size={16} />
+              </div>
+              <span className="ui-row-title">Skicka feedback</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
 
-          {/* Onboarding */}
+          {/* Introduktion */}
           {onStartOnboarding && (
             <button
               type="button"
               onClick={onStartOnboarding}
-              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+              className="ui-row-btn"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <Compass size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <span className="text-xs font-semibold text-[var(--text-primary)]">
-                  Kör onboarding
-                </span>
+                <div className="ui-icon-badge">
+                  <Compass size={16} />
+                </div>
+                <span className="ui-row-title">Introduktion</span>
               </div>
               <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
             </button>
@@ -1308,13 +1582,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('security')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer group"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <ShieldCheck size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Data & säkerhet
-              </span>
+              <div className="ui-icon-badge">
+                <ShieldCheck size={16} />
+              </div>
+              <span className="ui-row-title">Data & säkerhet</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
@@ -1327,8 +1601,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-rose-500/5 active:scale-[0.995] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <SignOut size={18} className="text-rose-600 dark:text-rose-400 shrink-0" />
-                <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <SignOut size={16} />
+                </div>
+                <span className="text-[13px] sm:text-sm font-semibold text-rose-600 dark:text-rose-400">
                   Logga ut
                 </span>
               </div>
@@ -1337,13 +1613,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <button
               type="button"
               onClick={onOpenAuth}
-              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer"
+              className="ui-row-btn"
             >
               <div className="flex items-center gap-3">
-                <UserCircle size={18} className="text-[var(--text-secondary)] shrink-0" />
-                <span className="text-xs font-semibold text-[var(--text-primary)]">
-                  Logga in
-                </span>
+                <div className="ui-icon-badge">
+                  <UserCircle size={16} />
+                </div>
+                <span className="ui-row-title">Logga in</span>
               </div>
               <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
             </button>
@@ -1351,22 +1627,22 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         </div>
       </div>
 
-      {/* 4. Juridik & integritet (Svenska lagar & regler) */}
-      <div className="space-y-1.5">
+      {/* 4. Juridik & integritet */}
+      <div className="ui-section">
         <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
           Juridik & integritet
         </span>
-        <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden divide-y divide-[var(--border-subtle)]">
+        <div className="ui-group-card">
           <button
             type="button"
             onClick={() => setSubView('privacy')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <LockKey size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Integritetspolicy (GDPR)
-              </span>
+              <div className="ui-icon-badge">
+                <LockKey size={16} />
+              </div>
+              <span className="ui-row-title">Integritetspolicy</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
@@ -1374,13 +1650,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('terms')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <FileText size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Användarvillkor
-              </span>
+              <div className="ui-icon-badge">
+                <FileText size={16} />
+              </div>
+              <span className="ui-row-title">Användarvillkor</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
@@ -1388,13 +1664,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('psd2')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <Scales size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Open Banking & PSD2
-              </span>
+              <div className="ui-icon-badge">
+                <Scales size={16} />
+              </div>
+              <span className="ui-row-title">Open Banking</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
@@ -1402,13 +1678,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <button
             type="button"
             onClick={() => setSubView('cookies')}
-            className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-[var(--surface-hover)] active:scale-[0.995] transition-all cursor-pointer"
+            className="ui-row-btn"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <Cookie size={18} className="text-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Cookies & lokal lagring
-              </span>
+              <div className="ui-icon-badge">
+                <Cookie size={16} />
+              </div>
+              <span className="ui-row-title">Cookies & lagring</span>
             </div>
             <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
           </button>
@@ -1426,3 +1702,4 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     </div>
   );
 };
+

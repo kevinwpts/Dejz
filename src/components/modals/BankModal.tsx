@@ -5,19 +5,22 @@ import {
   MagnifyingGlass,
   SpinnerGap,
   ArrowSquareOut,
-  CheckCircle,
   WarningCircle,
   ArrowClockwise,
   Check,
-  LockKey
+  LockKey,
+  CaretLeft,
+  CaretRight,
 } from '@phosphor-icons/react';
 import {
   bankService,
   BankAspsp,
   BankEnvironment,
   BankAccount,
-  BankConnection
+  BankConnection,
 } from '../../services/bankService';
+import { BottomSheet } from '../ui/BottomSheet';
+import { ItemLogo } from '../ItemLogo';
 
 interface BankModalProps {
   isOpen: boolean;
@@ -29,6 +32,19 @@ interface BankModalProps {
   onBankStateUpdated: (connections: BankConnection[], accounts: BankAccount[]) => void;
 }
 
+function getCleanAccountTypeLabel(acc: BankAccount, index: number): string {
+  const raw = (acc.product || acc.name || '').trim();
+  const stripped = raw
+    .replace(/\b\d[\d\s-]{3,}\d\b/g, '')
+    .replace(/[·•\-–—]\s*\d{2,}/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  if (stripped && !/^\d+$/.test(stripped)) {
+    return stripped;
+  }
+  return index === 0 ? 'Lönekonto' : 'Sparkonto';
+}
+
 export const BankModal: React.FC<BankModalProps> = ({
   isOpen,
   userEmail,
@@ -38,7 +54,7 @@ export const BankModal: React.FC<BankModalProps> = ({
   onOpenAuth,
   onBankStateUpdated,
 }) => {
-  const [environment, setEnvironment] = useState<BankEnvironment>('production');
+  const [environment] = useState<BankEnvironment>('production');
   const [banks, setBanks] = useState<BankAspsp[]>([]);
   const [loadingBanks, setLoadingBanks] = useState(false);
   const [search, setSearch] = useState('');
@@ -50,6 +66,7 @@ export const BankModal: React.FC<BankModalProps> = ({
   const [startingAuth, setStartingAuth] = useState(false);
   const [authUrl, setAuthUrl] = useState<string | null>(null);
   const [authState, setAuthState] = useState<string | null>(null);
+  const [showManualCallback, setShowManualCallback] = useState(false);
   const [manualCallbackUrl, setManualCallbackUrl] = useState('');
   const [exchangingCode, setExchangingCode] = useState(false);
 
@@ -67,7 +84,7 @@ export const BankModal: React.FC<BankModalProps> = ({
       const list = await bankService.listBanks('SE', env);
       setBanks(list);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Kunde inte hämta banklistan från Enable Banking.');
+      setErrorMsg(err.message || 'Kunde inte hämta banklistan.');
     } finally {
       setLoadingBanks(false);
     }
@@ -96,9 +113,9 @@ export const BankModal: React.FC<BankModalProps> = ({
               const selIds = connAccounts.filter((a) => a.is_selected).map((a) => a.id);
               setSelectedAccountIds(selIds.length > 0 ? selIds : connAccounts.map((a) => a.id));
               const nameMap: Record<string, string> = {};
-              for (const a of connAccounts) {
-                nameMap[a.id] = a.custom_name || a.name || '';
-              }
+              connAccounts.forEach((a, idx) => {
+                nameMap[a.id] = a.custom_name || getCleanAccountTypeLabel(a, idx);
+              });
               setAccountCustomNames(nameMap);
               setStep('select-accounts');
             }
@@ -112,12 +129,11 @@ export const BankModal: React.FC<BankModalProps> = ({
     return () => window.removeEventListener('focus', handleFocus);
   }, [isOpen, step, connections.length, onBankStateUpdated]);
 
-  if (!isOpen) return null;
-
-  const handleSelectBank = async (bank: BankAspsp) => {
+  const handleSelectBank = async (bank: BankAspsp, reconnectConnectionId?: string | null) => {
     setSelectedBank(bank);
     setStartingAuth(true);
     setErrorMsg(null);
+    setShowManualCallback(false);
 
     try {
       const redirectUrl = `${window.location.origin}/bank/callback`;
@@ -127,6 +143,7 @@ export const BankModal: React.FC<BankModalProps> = ({
         aspspLogo: bank.logo,
         originContext: 'settings',
         environment,
+        reconnectConnectionId: reconnectConnectionId || null,
         redirectUrl,
       });
 
@@ -168,17 +185,18 @@ export const BankModal: React.FC<BankModalProps> = ({
       }
 
       if (!code || !state) {
-        throw new Error('Kunde inte hitta code eller state i länken.');
+        throw new Error('Kunde inte hitta verifieringskod i länken.');
       }
 
       const res = await bankService.exchangeCode({ code, state });
       setActiveConnection(res.connection);
-      setFetchedAccounts(res.accounts || []);
-      setSelectedAccountIds((res.accounts || []).map((a) => a.id));
+      const accs = res.accounts || [];
+      setFetchedAccounts(accs);
+      setSelectedAccountIds(accs.map((a) => a.id));
       const nameMap: Record<string, string> = {};
-      for (const a of (res.accounts || [])) {
-        nameMap[a.id] = a.custom_name || a.name || '';
-      }
+      accs.forEach((a, idx) => {
+        nameMap[a.id] = a.custom_name || getCleanAccountTypeLabel(a, idx);
+      });
       setAccountCustomNames(nameMap);
       setStep('select-accounts');
 
@@ -233,9 +251,9 @@ export const BankModal: React.FC<BankModalProps> = ({
     setFetchedAccounts(connAccs);
     setSelectedAccountIds(connAccs.filter((a) => a.is_selected).map((a) => a.id));
     const nameMap: Record<string, string> = {};
-    for (const a of connAccs) {
-      nameMap[a.id] = a.custom_name || a.name || '';
-    }
+    connAccs.forEach((a, idx) => {
+      nameMap[a.id] = a.custom_name || getCleanAccountTypeLabel(a, idx);
+    });
     setAccountCustomNames(nameMap);
     setStep('select-accounts');
   };
@@ -246,366 +264,405 @@ export const BankModal: React.FC<BankModalProps> = ({
 
   const formatKr = (amount: number | null | undefined, currency = 'SEK') => {
     if (amount === null || amount === undefined) return '–';
-    return `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} ${currency === 'SEK' ? 'kr' : currency}`;
+    return `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} ${
+      currency === 'SEK' ? 'kr' : currency
+    }`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 bg-black/60 backdrop-blur-xs animate-fade-in">
-      <div className="w-full max-w-md mt-auto max-h-[92dvh] flex flex-col bg-[var(--surface-color)] rounded-t-3xl rounded-b-none pb-[env(safe-area-inset-bottom,0px)] border-t border-x border-[var(--border-subtle)] shadow-modal overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2">
-            <Bank size={20} className="text-[var(--text-primary)]" weight="duotone" />
-            <h3 className="font-bold text-base text-[var(--text-primary)]">
-              Enable Banking
-            </h3>
-          </div>
-          <button
-            onClick={() => {
-              setStep('list');
-              onClose();
-            }}
-            className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          >
-            <X size={20} />
-          </button>
-        </div>
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={() => {
+        setStep('list');
+        onClose();
+      }}
+      contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
+    >
+      {/* Symmetrical Header */}
+      <div className="ui-sheet-header">
+        {step !== 'list' ? (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg(null);
+                setStep('list');
+              }}
+              title="Tillbaka"
+              aria-label="Tillbaka"
+              className="ui-icon-btn"
+            >
+              <CaretLeft size={15} weight="bold" />
+            </button>
+            <span className="ui-sheet-title">
+              {step === 'authorizing' ? selectedBank?.name || 'Anslut bank' : 'Välj konton'}
+            </span>
+          </>
+        ) : (
+          <span className="ui-sheet-title">
+            Anslut bank
+          </span>
+        )}
 
-        {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-4">
-          {!userEmail ? (
-            <div className="py-6 text-center space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto text-[var(--text-primary)]">
-                <LockKey size={24} weight="duotone" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                  Logga in för att koppla bank
-                </h4>
-                <p className="text-xs text-[var(--text-secondary)] max-w-xs mx-auto">
-                  Enable Banking kräver att du är inloggad med ditt Supabase-konto så att dina bankkonton kan sparas säkert.
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  onClose();
-                  onOpenAuth();
-                }}
-                className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90"
-              >
-                Logga in med Supabase
-              </button>
+        <button
+          type="button"
+          onClick={() => {
+            setStep('list');
+            onClose();
+          }}
+          className="ui-icon-btn"
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="space-y-4">
+        {!userEmail ? (
+          <div className="py-4 text-center space-y-4">
+            <div className="ui-hero-icon">
+              <LockKey size={26} weight="duotone" />
             </div>
-          ) : (
-            <>
-              {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2">
-                  <WarningCircle size={16} className="shrink-0 mt-0.5" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+            <div className="space-y-1">
+              <h4 className="font-display font-bold text-base text-[var(--text-primary)]">
+                Logga in först
+              </h4>
+              <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
+                Logga in på ditt konto för att ansluta och synka din bank.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenAuth();
+              }}
+              className="ui-btn-primary"
+            >
+              Logga in
+            </button>
+          </div>
+        ) : (
+          <>
+            {errorMsg && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2">
+                <WarningCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
 
-              {/* STEP 1: BANK LIST */}
-              {step === 'list' && (
-                <div className="space-y-4">
-                  {connections.length > 0 && (
-                    <div className="space-y-2">
-                      <span className="text-[11px] uppercase tracking-wider font-bold text-[var(--text-muted)]">
-                        Anslutna banker
-                      </span>
-                      {connections.map((conn) => (
-                        <div
-                          key={conn.id}
-                          className="p-3 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-between text-xs"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            {conn.aspsp_logo ? (
-                              <img
-                                src={conn.aspsp_logo}
-                                alt={conn.aspsp_name}
-                                className="w-6 h-6 rounded-md object-contain bg-white p-0.5"
+            {/* STEP 1: BANK LIST */}
+            {step === 'list' && (
+              <div className="space-y-4">
+                {connections.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="px-1 text-[11px] uppercase tracking-wider font-semibold text-[var(--text-muted)] block">
+                      Anslutna banker
+                    </span>
+                    <div className="ui-sheet-group">
+                      {connections.map((conn) => {
+                        const validMs = conn.valid_until ? new Date(conn.valid_until).getTime() : NaN;
+                        const daysLeft =
+                          conn.days_until_expiry !== undefined && conn.days_until_expiry !== null
+                            ? conn.days_until_expiry
+                            : !Number.isNaN(validMs)
+                            ? Math.ceil((validMs - Date.now()) / (24 * 60 * 60 * 1000))
+                            : null;
+                        const isExpired =
+                          conn.status === 'expired' || (daysLeft !== null && daysLeft <= 0);
+                        const isExpiringSoon =
+                          !isExpired &&
+                          (Boolean(conn.expiring_soon) || (daysLeft !== null && daysLeft <= 14));
+
+                        return (
+                          <div key={conn.id} className="ui-row">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenExistingAccountSelection(conn)}
+                              className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
+                            >
+                              <ItemLogo
+                                name={conn.aspsp_name}
+                                logoUrl={conn.aspsp_logo || undefined}
+                                size="sm"
                               />
-                            ) : (
-                              <Bank size={18} className="text-[var(--text-primary)]" />
-                            )}
-                            <div>
-                              <span className="font-bold text-[var(--text-primary)] block">
-                                {conn.aspsp_name}
-                              </span>
-                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                                {conn.status === 'active' ? 'Aktiv anslutning' : conn.status}
-                              </span>
+                              <div className="min-w-0">
+                                <span className="ui-row-title">
+                                  {conn.aspsp_name}
+                                </span>
+                                {isExpired ? (
+                                  <span className="text-[11px] text-rose-600 dark:text-rose-400 font-medium block">
+                                    Samtycket har gått ut
+                                  </span>
+                                ) : isExpiringSoon ? (
+                                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium block">
+                                    Går ut om {daysLeft} d
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium block">
+                                    Ansluten
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {(isExpired || isExpiringSoon) && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleSelectBank(
+                                      {
+                                        name: conn.aspsp_name,
+                                        country: conn.aspsp_country || 'SE',
+                                        logo: conn.aspsp_logo,
+                                        bic: null,
+                                      },
+                                      conn.id
+                                    )
+                                  }
+                                  className="px-2.5 py-1 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                                >
+                                  Förnya
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenExistingAccountSelection(conn)}
+                                className="flex items-center gap-1 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                              >
+                                <span>Konton</span>
+                                <CaretRight size={14} />
+                              </button>
                             </div>
                           </div>
-
-                          <button
-                            onClick={() => handleOpenExistingAccountSelection(conn)}
-                            className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
-                          >
-                            Hantera konton & namn
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Environment switcher (Production / Sandbox) */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                      Välj svensk bank (PSD2 / BankID)
-                    </span>
-                    <div className="flex rounded-lg bg-[var(--surface-raised)] p-0.5 border border-[var(--border-subtle)] text-[11px]">
-                      <button
-                        type="button"
-                        onClick={() => setEnvironment('production')}
-                        className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
-                          environment === 'production'
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                            : 'text-[var(--text-muted)]'
-                        }`}
-                      >
-                        Live
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEnvironment('sandbox')}
-                        className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
-                          environment === 'sandbox'
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                            : 'text-[var(--text-muted)]'
-                        }`}
-                      >
-                        Sandbox
-                      </button>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
 
-                  {/* Search bar */}
-                  <div className="relative">
-                    <MagnifyingGlass
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-                    />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Sök bank (Swedbank, SEB, Nordea, Handelsbanken...)"
-                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
-                    />
-                  </div>
-
-                  {/* Bank list */}
-                  {loadingBanks || startingAuth ? (
-                    <div className="py-10 flex flex-col items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
-                      <SpinnerGap size={28} className="animate-spin text-[var(--text-primary)]" />
-                      <span>
-                        {startingAuth
-                          ? `Startar säker anslutning mot ${selectedBank?.name}...`
-                          : 'Hämtar banker från Enable Banking...'}
-                      </span>
-                    </div>
-                  ) : filteredBanks.length > 0 ? (
-                    <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
-                      {filteredBanks.map((bank) => (
-                        <button
-                          key={bank.name}
-                          onClick={() => handleSelectBank(bank)}
-                          className="w-full p-3 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)] flex items-center justify-between transition-all text-left"
-                        >
-                          <div className="flex items-center gap-3">
-                            {bank.logo ? (
-                              <img
-                                src={bank.logo}
-                                alt={bank.name}
-                                className="w-7 h-7 rounded-lg object-contain bg-white p-0.5 border border-black/5"
-                              />
-                            ) : (
-                              <div className="w-7 h-7 rounded-lg bg-[var(--surface-color)] flex items-center justify-center">
-                                <Bank size={16} className="text-[var(--text-secondary)]" />
-                              </div>
-                            )}
-                            <span className="font-semibold text-sm text-[var(--text-primary)]">
-                              {bank.name}
-                            </span>
-                          </div>
-                          <span className="text-xs text-[var(--text-muted)] font-medium">
-                            Anslut →
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center space-y-2">
-                      <p className="text-xs text-[var(--text-muted)]">
-                        Inga banker hittades.
-                      </p>
-                      <button
-                        onClick={() => loadBanks(environment)}
-                        className="text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1 underline"
-                      >
-                        <ArrowClockwise size={14} />
-                        <span>Försök igen</span>
-                      </button>
-                    </div>
-                  )}
+                {/* Search bar */}
+                <div className="relative">
+                  <MagnifyingGlass
+                    size={15}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                  />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Sök bank..."
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  />
                 </div>
-              )}
 
-              {/* STEP 2: AUTHORIZING AT ENABLE BANKING */}
-              {step === 'authorizing' && authUrl && (
-                <div className="space-y-4 py-2">
-                  <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-center space-y-3">
-                    <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                      Identifiera dig hos {selectedBank?.name}
-                    </h4>
-                    <p className="text-xs text-[var(--text-secondary)]">
-                      Klicka på knappen nedan för att öppna Enable Banking och legitimera dig med Mobilt BankID.
-                    </p>
-
-                    <a
-                      href={authUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-3 px-4 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90"
-                    >
-                      <span>Öppna {selectedBank?.name} (BankID)</span>
-                      <ArrowSquareOut size={16} weight="bold" />
-                    </a>
+                {/* Bank list */}
+                {loadingBanks || startingAuth ? (
+                  <div className="py-10 flex flex-col items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
+                    <SpinnerGap size={24} className="animate-spin text-[var(--text-primary)]" />
+                    <span>
+                      {startingAuth
+                        ? `Ansluter till ${selectedBank?.name}...`
+                        : 'Hämtar banker...'}
+                    </span>
                   </div>
+                ) : filteredBanks.length > 0 ? (
+                  <div className="ui-sheet-group max-h-72 overflow-y-auto overflow-x-hidden">
+                    {filteredBanks.map((bank) => (
+                      <button
+                        key={bank.name}
+                        type="button"
+                        onClick={() => handleSelectBank(bank)}
+                        className="ui-row-btn"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {bank.logo ? (
+                            <img
+                              src={bank.logo}
+                              alt={bank.name}
+                              className="w-8 h-8 rounded-xl object-contain bg-white p-1 border border-black/5 shrink-0"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
+                              <Bank size={16} className="text-[var(--text-secondary)]" />
+                            </div>
+                          )}
+                          <span className="ui-row-title">
+                            {bank.name}
+                          </span>
+                        </div>
+                        <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center space-y-2">
+                    <p className="text-xs text-[var(--text-muted)]">Inga banker hittades.</p>
+                    <button
+                      type="button"
+                      onClick={() => loadBanks(environment)}
+                      className="text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1 underline cursor-pointer"
+                    >
+                      <ArrowClockwise size={14} />
+                      <span>Försök igen</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
-                  <form onSubmit={handleExchangeManualCallback} className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
-                    <label className="text-[11px] font-semibold text-[var(--text-secondary)] block">
-                      Slutförde du inloggningen i en annan flik (t.ex. dejz.se/bank/callback)?
-                    </label>
-                    <p className="text-[11px] text-[var(--text-muted)]">
-                      Om du skickades till en annan adress efter BankID kan du klistra in hela callback-URL:en här för att slutföra direkt:
-                    </p>
+            {/* STEP 2: AUTHORIZING AT ENABLE BANKING */}
+            {step === 'authorizing' && authUrl && (
+              <div className="space-y-4">
+                <div className="text-center pb-2">
+                  <div className="flex justify-center mb-3.5">
+                    <ItemLogo
+                      name={selectedBank?.name || 'Bank'}
+                      logoUrl={selectedBank?.logo}
+                      size="xl"
+                    />
+                  </div>
+                  <h4 className="font-display font-bold text-lg text-[var(--text-primary)]">
+                    {selectedBank?.name}
+                  </h4>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    Legitimera dig med Mobilt BankID för att hämta dina konton.
+                  </p>
+                </div>
+
+                <a
+                  href={authUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ui-btn-primary"
+                >
+                  <span>Öppna {selectedBank?.name}</span>
+                  <ArrowSquareOut size={15} weight="bold" />
+                </a>
+
+                {!showManualCallback ? (
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowManualCallback(true)}
+                      className="text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                    >
+                      Öppnades inloggningen i en annan flik?
+                    </button>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={handleExchangeManualCallback}
+                    className="pt-3 border-t border-[var(--border-subtle)] space-y-2 animate-fade-in"
+                  >
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={manualCallbackUrl}
                         onChange={(e) => setManualCallbackUrl(e.target.value)}
-                        placeholder="https://dejz.se/bank/callback?code=..."
-                        className="flex-1 px-3 py-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)]"
+                        placeholder="Klistra in återkopplingslänk..."
+                        className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
                       />
                       <button
                         type="submit"
                         disabled={exchangingCode || !manualCallbackUrl.trim()}
-                        className="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold disabled:opacity-50"
+                        className="ui-btn-sm-primary"
                       >
                         {exchangingCode ? 'Verifierar...' : 'Slutför'}
                       </button>
                     </div>
                   </form>
+                )}
+              </div>
+            )}
 
-                  <button
-                    type="button"
-                    onClick={() => setStep('list')}
-                    className="w-full py-2 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
-                    ← Tillbaka till banklistan
-                  </button>
-                </div>
-              )}
+            {/* STEP 3: SELECT ACCOUNTS & CUSTOM NAMES */}
+            {step === 'select-accounts' && (
+              <div className="space-y-4">
+                <div className="space-y-2.5 max-h-80 overflow-y-auto pr-0.5">
+                  {fetchedAccounts.map((acc, idx) => {
+                    const isChecked = selectedAccountIds.includes(acc.id);
+                    const fallbackLabel = getCleanAccountTypeLabel(acc, idx);
+                    const currentCustomName =
+                      accountCustomNames[acc.id] !== undefined
+                        ? accountCustomNames[acc.id]
+                        : acc.custom_name || fallbackLabel;
+                    const bankLabel = acc.bankName || activeConnection?.aspsp_name || 'Bank';
 
-              {/* STEP 3: SELECT ACCOUNTS & CUSTOM NAMES */}
-              {step === 'select-accounts' && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                    <CheckCircle size={20} weight="fill" />
-                    <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                      Välj konton & anpassa namn
-                    </h4>
-                  </div>
-
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    Välj vilka bankkonton från {activeConnection?.aspsp_name} som ska visas och ge dem egna smeknamn om du vill.
-                  </p>
-
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {fetchedAccounts.map((acc) => {
-                      const isChecked = selectedAccountIds.includes(acc.id);
-                      const currentCustomName =
-                        accountCustomNames[acc.id] !== undefined
-                          ? accountCustomNames[acc.id]
-                          : acc.custom_name || acc.name || '';
-                      return (
-                        <div
-                          key={acc.id}
-                          className={`p-3.5 rounded-xl border space-y-2 transition-all ${
-                            isChecked
-                              ? 'bg-[var(--surface-raised)] border-[var(--text-primary)]'
-                              : 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-70'
-                          }`}
+                    return (
+                      <div
+                        key={acc.id}
+                        className={`rounded-2xl border overflow-hidden transition-all ${
+                          isChecked
+                            ? 'bg-[var(--bg-color)] border-[var(--border-subtle)]'
+                            : 'bg-[var(--bg-color)]/50 border-[var(--border-subtle)] opacity-60'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleAccountSelection(acc.id)}
+                          className="ui-row cursor-pointer"
                         >
-                          <div className="flex items-center justify-between">
-                            <button
-                              type="button"
-                              onClick={() => toggleAccountSelection(acc.id)}
-                              className="flex items-center gap-3 text-left flex-1 min-w-0"
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div
+                              className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                                isChecked
+                                  ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                                  : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                              }`}
                             >
-                              <div
-                                className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 ${
-                                  isChecked
-                                    ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                                    : 'border-[var(--border-subtle)]'
-                                }`}
-                              >
-                                {isChecked && <Check size={12} weight="bold" />}
-                              </div>
-                              <div className="min-w-0">
-                                <span className="font-bold text-sm text-[var(--text-primary)] block truncate">
-                                  {acc.bban || acc.iban || acc.product || 'Bankkonto'}
-                                </span>
-                                <span className="text-[11px] text-[var(--text-muted)]">
-                                  {acc.bankName || activeConnection?.aspsp_name}
-                                </span>
-                              </div>
-                            </button>
-                            <span className="font-bold text-sm text-[var(--text-primary)] shrink-0 pl-2">
-                              {formatKr(acc.balance_amount, acc.balance_currency || acc.currency)}
-                            </span>
-                          </div>
-
-                          {isChecked && (
-                            <div className="pt-2 border-t border-[var(--border-subtle)]">
-                              <label className="text-[10px] uppercase tracking-wider font-bold text-[var(--text-muted)] block mb-1">
-                                Kontonamn i appen (valfritt)
-                              </label>
-                              <input
-                                type="text"
-                                value={currentCustomName}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setAccountCustomNames((prev) => ({ ...prev, [acc.id]: val }));
-                                }}
-                                placeholder="T.ex. Buffert, Reskassa, Privatkonto..."
-                                className="w-full px-3 py-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
-                                onClick={(e) => e.stopPropagation()}
-                              />
+                              {isChecked && <Check size={12} weight="bold" />}
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="ui-row-title">
+                                {currentCustomName || fallbackLabel}
+                              </span>
+                              <span className="ui-row-subtitle">
+                                {bankLabel}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="ui-row-amount text-sm shrink-0">
+                            {formatKr(acc.balance_amount, acc.balance_currency || acc.currency)}
+                          </span>
+                        </button>
 
-                  <button
-                    type="button"
-                    onClick={handleSaveSelectedAccounts}
-                    disabled={savingAccounts || selectedAccountIds.length === 0}
-                    className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {savingAccounts && <SpinnerGap size={16} className="animate-spin" />}
-                    <span>Spara konton & namn</span>
-                  </button>
+                        {isChecked && (
+                          <label className="ui-input-row border-t border-[var(--border-subtle)]">
+                            <span className="text-[var(--text-muted)] shrink-0">Kontonamn</span>
+                            <input
+                              type="text"
+                              value={currentCustomName}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setAccountCustomNames((prev) => ({ ...prev, [acc.id]: val }));
+                              }}
+                              placeholder={fallbackLabel}
+                              className="ui-inline-input"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </>
-          )}
-        </div>
+
+                <button
+                  type="button"
+                  onClick={handleSaveSelectedAccounts}
+                  disabled={savingAccounts || selectedAccountIds.length === 0}
+                  className="ui-btn-primary"
+                >
+                  {savingAccounts && <SpinnerGap size={15} className="animate-spin" />}
+                  <span>Spara</span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </BottomSheet>
   );
 };

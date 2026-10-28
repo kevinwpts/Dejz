@@ -1429,10 +1429,14 @@ export const dataService = {
       return;
     }
     try {
+      await supabase.from('bank_transactions').delete().eq('user_id', userId);
+      await supabase.from('bank_accounts').delete().eq('user_id', userId);
+      await supabase.from('bank_provider_sessions').delete().eq('user_id', userId);
+      await supabase.from('bank_connections').delete().eq('user_id', userId);
+      await supabase.from('bank_auth_states').delete().eq('user_id', userId);
       await supabase.from('transactions').delete().eq('user_id', userId);
       await supabase.from('fixed_expenses').delete().eq('user_id', userId);
       await supabase.from('income_sources').delete().eq('user_id', userId);
-      await supabase.from('bank_connections').delete().eq('user_id', userId);
       await supabase.from('profiles').delete().eq('id', userId);
     } catch (err) {
       console.error('Error deleting user data from Supabase:', err);

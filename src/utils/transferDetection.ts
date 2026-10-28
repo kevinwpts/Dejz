@@ -424,12 +424,9 @@ export function findInternalTransferIds(
       const oneAlreadyFlagged =
         internalIds.has(outTx.id) || internalIds.has(inTx.id);
 
-      const neitherIsCardPurchase =
-        !outTx.rawJson?.card_transaction && !inTx.rawJson?.card_transaction;
-
-      // Om det är samma belopp inom 3 dagar och antingen på olika bankkonton,
-      // eller ena benet redan flaggats som överföring, eller inget av benen är ett kortköp:
-      if (differentAccounts || oneAlreadyFlagged || neitherIsCardPurchase) {
+      // Pairwise matching without explicit transfer keywords requires either
+      // two distinct bank accounts or that at least one leg was already flagged as a transfer.
+      if (differentAccounts || oneAlreadyFlagged) {
         const score = (differentAccounts ? 100 : 0) + (oneAlreadyFlagged ? 50 : 0) - dayDiff * 10;
         if (score > bestScore) {
           bestScore = score;

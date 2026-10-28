@@ -102,12 +102,25 @@ function isLikelySalaryOrIncomeMatch(income: Income, tx: Transaction): boolean {
     return true;
   }
 
-  // If the user has a main salary item (e.g. >= 8 000 kr) and receives a bank income within 25% of that amount
+  // Never match Swish, store refunds, or insurance payouts as salary solely by amount
+  if (
+    txClean.includes('swish') ||
+    txClean.includes('retur') ||
+    txClean.includes('aterkop') ||
+    txClean.includes('skadeersattning') ||
+    tx.category === 'Swish' ||
+    tx.category === 'Återbetalning'
+  ) {
+    return false;
+  }
+
+  // Only allow amount-proximity fallback when at least one side is explicitly salary-named
+  // and the amount is within 12% of expected salary (>= 8 000 kr)
   const expectedAmount = Math.abs(Number(income.amount) || 0);
   const actualAmount = Math.abs(Number(tx.amount) || 0);
-  if (expectedAmount >= 5000 && actualAmount >= 5000) {
+  if ((isIncomeSalaryNamed || isTxSalaryNamed) && expectedAmount >= 8000 && actualAmount >= 8000) {
     const diffRatio = Math.abs(actualAmount - expectedAmount) / expectedAmount;
-    if (diffRatio <= 0.25) {
+    if (diffRatio <= 0.12) {
       return true;
     }
   }

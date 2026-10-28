@@ -1,301 +1,383 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence, useDragControls } from 'motion/react';
-import { Icon } from './Icon';
-import { IconButton } from './IconButton';
-import { feedback } from '../../utils/feedback';
-import { useScrollLock } from '../../hooks/useScrollLock';
+import { X, Check } from '@phosphor-icons/react';
 
-export interface BottomSheetProps {
+interface BottomSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: React.ReactNode;
-  subtitle?: React.ReactNode;
-  headerLeading?: React.ReactNode;
-  headerRight?: React.ReactNode;
-  showCloseButton?: boolean;
-  showDragHandle?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   children: React.ReactNode;
-  footer?: React.ReactNode;
-  className?: string;
+  title?: string;
+  subtitle?: string;
+  size?: 'sm' | 'md' | 'lg';
   bodyClassName?: string;
-  zIndex?: number;
-  maxHeight?: string;
+  footer?: React.ReactNode;
+  maxWidthClass?: string;
+  maxHeightClass?: string;
+  surfaceClass?: string;
+  paddingClass?: string;
+  contentClassName?: string;
+  zIndexClass?: string;
+  disablePadding?: boolean;
 }
 
-export function BottomSheet({
-  isOpen,
-  onClose,
-  title,
-  subtitle,
-  headerLeading,
-  headerRight,
-  showCloseButton = true,
-  showDragHandle = true,
-  size = 'md',
-  children,
-  footer,
-  className = '',
-  bodyClassName,
-  zIndex = 110,
-  maxHeight = 'max-h-[90dvh] sm:max-h-[85vh]',
-}: BottomSheetProps) {
-  useScrollLock(isOpen);
-  const [mounted, setMounted] = useState(false);
-  const dragControls = useDragControls();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Handle ESC key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  const sizeStyles = {
-    sm: 'sm:max-w-md',
-    md: 'sm:max-w-lg',
-    lg: 'sm:max-w-xl',
-    xl: 'sm:max-w-2xl',
-    full: 'sm:max-w-3xl',
-  }[size];
-
-  const hasHeader = Boolean(title || subtitle || headerLeading || headerRight || showCloseButton);
-
-  if (!mounted || typeof document === 'undefined' || !document.body) {
-    return null;
-  }
-
-  return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div
-          className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          style={{ zIndex }}
-        >
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-          />
-
-          {/* Bottom Sheet Card */}
-          <motion.div
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            drag="y"
-            dragListener={false}
-            dragControls={dragControls}
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.75 }}
-            onDragEnd={(_e, info) => {
-              if (info.offset.y > 70 || info.velocity.y > 350) {
-                onClose();
-              }
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] text-[var(--text-primary)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
-          >
-            {/* Mobile Drag Handle */}
-            {showDragHandle && (
-              <div
-                onPointerDown={(e) => dragControls.start(e)}
-                onClick={onClose}
-                className="w-full pt-2.5 pb-1 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
-              >
-                <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full" />
-              </div>
-            )}
-
-            {/* Header */}
-            {hasHeader && (
-              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-2.5 flex items-start justify-between shrink-0 border-b border-subtle">
-                <div className="flex items-start gap-3 min-w-0 pr-3 flex-1">
-                  {headerLeading && (
-                    <div className="shrink-0">
-                      {headerLeading}
-                    </div>
-                  )}
-                  <div className="flex flex-col min-w-0 flex-1">
-                    {title && (
-                      <h2 className="text-section-title truncate">
-                        {title}
-                      </h2>
-                    )}
-                    {subtitle && (
-                      <p className="text-secondary leading-snug break-words whitespace-normal mt-0.5">
-                        {subtitle}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {headerRight}
-                  {showCloseButton && (
-                    <IconButton
-                      icon={<Icon name="x" size={16} />}
-                      onClick={() => {
-                        if (typeof feedback?.light === 'function') feedback.light();
-                        onClose();
-                      }}
-                      variant="muted"
-                      size="sm"
-                      aria-label="Stäng"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Scrollable Body */}
-            <div
-              className={`flex-1 overflow-y-auto ${
-                bodyClassName ?? 'px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar'
-              } min-h-0`}
-            >
-              {children}
-            </div>
-
-            {/* Footer */}
-            {footer && (
-              <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
-                {footer}
-              </div>
-            )}
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
-    document.body
-  );
-}
-
-/**
- * Standardized option row for bottom sheets and selection menus.
- *
- * Requirements:
- * - Valt alternativ markeras med tydligare text (font-semibold) och en diskret bock (Check).
- * - INGEN färgad bakgrund!
- * - Neutral subtil hover-yta.
- * - Stöd för underrubriker, badges, ikoner och extra element.
- */
-export interface BottomSheetOptionProps<T = string> {
-  id?: T;
-  label: React.ReactNode;
-  subtitle?: React.ReactNode;
+export interface BottomSheetOptionProps {
+  label: string;
+  subtitle?: string;
   icon?: React.ReactNode;
-  badge?: React.ReactNode;
+  badge?: string;
   isSelected?: boolean;
   onClick: () => void;
-  disabled?: boolean;
-  rightElement?: React.ReactNode;
-  className?: string;
 }
 
-export function BottomSheetOption<T = string>({
+export const BottomSheetOption: React.FC<BottomSheetOptionProps> = ({
   label,
   subtitle,
   icon,
   badge,
-  isSelected = false,
+  isSelected,
   onClick,
-  disabled = false,
-  rightElement,
-  className = '',
-}: BottomSheetOptionProps<T>) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => {
-        if (!disabled) {
-          if (typeof feedback?.selection === 'function') {
-            feedback.selection();
-          } else if (typeof feedback?.tap === 'function') {
-            feedback.tap();
-          }
-          onClick();
-        }
-      }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[var(--radius-button-sm,8px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${className}`}
-    >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        {icon && (
-          <div className="w-8 h-8 rounded-[var(--radius-icon-button,6px)] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
-            {icon}
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-secondary truncate leading-tight ${
-                isSelected
-                  ? 'font-semibold text-[var(--text-primary)]'
-                  : 'font-medium'
-              }`}
-            >
-              {label}
-            </span>
-            {badge && (
-              <span className="text-micro-label font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] shrink-0">
-                {badge}
-              </span>
-            )}
-          </div>
-          {subtitle && (
-            <p className="text-micro-label truncate mt-0.5 leading-tight">
-              {subtitle}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0 ml-2">
-        {rightElement}
-        {isSelected && (
-          <div className="text-[var(--text-primary)] pl-1 shrink-0">
-            <Icon name="check" size={18} />
-          </div>
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`w-full px-3.5 py-3 rounded-2xl flex items-center justify-between gap-3 text-left transition-all cursor-pointer ${
+      isSelected
+        ? 'bg-[var(--surface-raised)] text-[var(--text-primary)]'
+        : 'hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
+    }`}
+  >
+    <div className="flex items-center gap-3 min-w-0 flex-1">
+      {icon && <div className="shrink-0 text-[var(--text-secondary)]">{icon}</div>}
+      <div className="min-w-0 flex-1">
+        <span className={`text-[13px] sm:text-sm block truncate ${isSelected ? 'font-bold' : 'font-semibold'}`}>
+          {label}
+        </span>
+        {subtitle && (
+          <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+            {subtitle}
+          </span>
         )}
       </div>
-    </button>
-  );
-}
-
-// Aliases for convenience
-export const BottomSheetOptionRow = BottomSheetOption;
-export const BottomSheetItem = BottomSheetOption;
-
-export interface BottomSheetSectionProps {
-  title?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function BottomSheetSection({ title, children, className = '' }: BottomSheetSectionProps) {
-  return (
-    <div className={`space-y-1.5 ${className}`}>
-      {title && (
-        <h3 className="px-3 text-micro-label tracking-wider uppercase">
-          {title}
-        </h3>
+    </div>
+    <div className="flex items-center gap-2 shrink-0">
+      {badge && (
+        <span className="text-xs font-display font-semibold text-[var(--text-muted)] tabular-nums">
+          {badge}
+        </span>
       )}
-      <div className="space-y-0.5">{children}</div>
+      {isSelected && <Check size={14} weight="bold" className="text-[var(--text-primary)]" />}
+    </div>
+  </button>
+);
+
+let openSheetsCount = 0;
+
+function incrementSheetLock() {
+  if (typeof document === 'undefined') return;
+  openSheetsCount += 1;
+  document.documentElement.setAttribute('data-sheet-open', 'true');
+  document.body.style.overflow = 'hidden';
+}
+
+function decrementSheetLock() {
+  if (typeof document === 'undefined') return;
+  openSheetsCount = Math.max(0, openSheetsCount - 1);
+  if (openSheetsCount === 0) {
+    document.documentElement.removeAttribute('data-sheet-open');
+    document.body.style.overflow = '';
+  }
+}
+
+export const BottomSheet: React.FC<BottomSheetProps> = ({
+  isOpen,
+  onClose,
+  children,
+  title,
+  subtitle,
+  bodyClassName,
+  footer,
+  maxWidthClass = 'max-w-md',
+  maxHeightClass = 'max-h-[92dvh]',
+  surfaceClass = 'bg-[var(--surface-color)]',
+  paddingClass = 'p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]',
+  contentClassName,
+  zIndexClass = 'z-[110]',
+  disablePadding = false,
+}) => {
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragStartYRef = useRef<number | null>(null);
+  const dragStartTimeRef = useRef<number>(0);
+  const canDragCurrentGestureRef = useRef<boolean>(false);
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+      setIsRendered(true);
+      setIsClosing(false);
+      setDragY(0);
+    } else if (isRendered) {
+      setIsClosing(true);
+      closeTimeoutRef.current = window.setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+        setDragY(0);
+      }, 240);
+    }
+    return () => {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, [isOpen, isRendered]);
+
+  useEffect(() => {
+    if (!isRendered) return;
+    incrementSheetLock();
+    return () => {
+      decrementSheetLock();
+    };
+  }, [isRendered]);
+
+  const triggerAnimatedClose = useCallback(() => {
+    setIsClosing(true);
+    closeTimeoutRef.current = window.setTimeout(() => {
+      onClose();
+    }, 220);
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        triggerAnimatedClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, triggerAnimatedClose]);
+
+  const isInteractiveTarget = (target: EventTarget | null): boolean => {
+    if (!(target instanceof HTMLElement)) return false;
+    return Boolean(
+      target.closest('input, textarea, select, [data-no-sheet-drag="true"]')
+    );
+  };
+
+  const findScrollableParent = (target: EventTarget | null): HTMLElement | null => {
+    let el = target instanceof HTMLElement ? target : null;
+    while (el && el !== sheetRef.current) {
+      const style = window.getComputedStyle(el);
+      const overflowY = style.overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+        return el;
+      }
+      el = el.parentElement;
+    }
+    if (
+      sheetRef.current &&
+      sheetRef.current.scrollHeight > sheetRef.current.clientHeight
+    ) {
+      return sheetRef.current;
+    }
+    return null;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (isClosing || e.touches.length !== 1) return;
+    if (isInteractiveTarget(e.target)) {
+      canDragCurrentGestureRef.current = false;
+      return;
+    }
+
+    const scrollable = findScrollableParent(e.target);
+    const isOnDragHandle =
+      e.target instanceof HTMLElement && Boolean(e.target.closest('[data-sheet-handle="true"]'));
+
+    if (!isOnDragHandle && scrollable && scrollable.scrollTop > 2) {
+      canDragCurrentGestureRef.current = false;
+      return;
+    }
+
+    dragStartYRef.current = e.touches[0].clientY;
+    dragStartTimeRef.current = performance.now();
+    canDragCurrentGestureRef.current = true;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!canDragCurrentGestureRef.current || dragStartYRef.current === null) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - dragStartYRef.current;
+
+    if (!isDragging) {
+      if (deltaY > 6) {
+        setIsDragging(true);
+      } else if (deltaY < -6) {
+        // User is scrolling down inside the sheet
+        canDragCurrentGestureRef.current = false;
+        dragStartYRef.current = null;
+        return;
+      } else {
+        return;
+      }
+    }
+
+    if (deltaY > 0) {
+      setDragY(deltaY);
+    } else {
+      // Subtle upward rubber-banding
+      setDragY(deltaY * 0.16);
+    }
+  };
+
+  const finishDrag = () => {
+    if (!isDragging || dragStartYRef.current === null) {
+      dragStartYRef.current = null;
+      canDragCurrentGestureRef.current = false;
+      setIsDragging(false);
+      return;
+    }
+
+    const elapsed = Math.max(1, performance.now() - dragStartTimeRef.current);
+    const velocity = dragY / elapsed; // px per ms
+
+    setIsDragging(false);
+    dragStartYRef.current = null;
+    canDragCurrentGestureRef.current = false;
+
+    if (dragY > 95 || (dragY > 35 && velocity > 0.48)) {
+      triggerAnimatedClose();
+    } else {
+      setDragY(0);
+    }
+  };
+
+  // Pointer events for desktop drag on the handle bar
+  const handleHandlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch' || isClosing) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStartYRef.current = e.clientY;
+    dragStartTimeRef.current = performance.now();
+    canDragCurrentGestureRef.current = true;
+    setIsDragging(true);
+  };
+
+  const handleHandlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch' || !isDragging || dragStartYRef.current === null) return;
+    const deltaY = e.clientY - dragStartYRef.current;
+    if (deltaY > 0) {
+      setDragY(deltaY);
+    } else {
+      setDragY(deltaY * 0.16);
+    }
+  };
+
+  const handleHandlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'touch') return;
+    finishDrag();
+  };
+
+  if (!isRendered) return null;
+
+  const backdropProgress = Math.max(0, Math.min(1, 1 - Math.max(0, dragY) / 340));
+  const computedBackdropOpacity = isClosing ? 0 : backdropProgress;
+
+  const effectivePaddingClass = contentClassName
+    ? contentClassName
+    : disablePadding
+    ? ''
+    : paddingClass;
+
+  const sheetElement = (
+    <div
+      className={`fixed inset-0 ${zIndexClass} flex items-end justify-center p-0`}
+      onClick={triggerAnimatedClose}
+    >
+      {/* Dynamic Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs pointer-events-none"
+        style={{
+          opacity: computedBackdropOpacity,
+          transition: isDragging ? 'none' : 'opacity 240ms cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      />
+
+      {/* Sheet Container */}
+      <div
+        ref={sheetRef}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={finishDrag}
+        onTouchCancel={finishDrag}
+        style={{
+          transform: isClosing
+            ? 'translateY(105%)'
+            : dragY !== 0
+            ? `translateY(${dragY}px)`
+            : undefined,
+          transition: isDragging
+            ? 'none'
+            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), height 240ms cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+        className={`relative z-10 w-full ${maxWidthClass} mt-auto ${surfaceClass} rounded-t-[28px] rounded-b-none ${effectivePaddingClass} border-t border-x border-[var(--border-subtle)] shadow-modal ${maxHeightClass} overflow-y-auto overflow-x-hidden ${
+          !isClosing && dragY === 0 ? 'animate-sheet-up' : ''
+        }`}
+      >
+        {/* Interactive Drag Handle Area */}
+        <div
+          data-sheet-handle="true"
+          onPointerDown={handleHandlePointerDown}
+          onPointerMove={handleHandlePointerMove}
+          onPointerUp={handleHandlePointerUp}
+          onPointerCancel={handleHandlePointerUp}
+          className={`w-full flex justify-center cursor-grab active:cursor-grabbing select-none touch-none ${
+            disablePadding || contentClassName ? 'pt-3 pb-1.5' : '-mt-2 pt-2 pb-3'
+          }`}
+          title="Svep nedåt för att stänga"
+        >
+          <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)] transition-transform active:scale-x-110" />
+        </div>
+
+        {title && (
+          <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-3">
+            <div className="min-w-0">
+              <span className="ui-sheet-title block">
+                {title}
+              </span>
+              {subtitle && (
+                <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+                  {subtitle}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={triggerAnimatedClose}
+              className="ui-icon-btn"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {bodyClassName ? <div className={bodyClassName}>{children}</div> : children}
+
+        {footer && <div className="pt-3 mt-2 border-t border-[var(--border-subtle)]">{footer}</div>}
+      </div>
     </div>
   );
-}
+
+  if (typeof document !== 'undefined') {
+    return createPortal(sheetElement, document.body);
+  }
+  return sheetElement;
+};

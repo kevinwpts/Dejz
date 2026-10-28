@@ -324,3 +324,255 @@ export function checkIsRecurringTransaction(
 
   return { isRecurring: false };
 }
+
+const KNOWN_MERCHANT_CHAINS: { key: string; label: string; patterns: RegExp[] }[] = [
+  { key: 'hemkop', label: 'Hemköp', patterns: [/\bhemk[öo]p\b/i] },
+  { key: 'coop', label: 'Coop', patterns: [/\b(stora\s+coop|coop\s+forum|coop\s+konsum|coop\s+n[äa]ra|coop\s+extra|coop)\b/i] },
+  {
+    key: 'ica',
+    label: 'ICA',
+    patterns: [/\b(ica\s+maxi|maxi\s+ica|ica\s+kvantum|ica\s+supermarket|ica\s+n[äa]ra|ica\s+butik)\b/i, /\bica\b(?!\s*(banken|f[öo]rs[äa]kring))/i],
+  },
+  { key: 'willys', label: 'Willys', patterns: [/\bwillys\b/i] },
+  { key: 'lidl', label: 'Lidl', patterns: [/\blidl\b/i] },
+  { key: 'citygross', label: 'City Gross', patterns: [/\bcity\s*gross\b/i] },
+  { key: 'systembolaget', label: 'Systembolaget', patterns: [/\bsystembolaget\b/i] },
+  { key: 'espressohouse', label: 'Espresso House', patterns: [/\bespresso\s*house\b/i] },
+  { key: 'mcdonalds', label: "McDonald's", patterns: [/\bmcdonald'?s?\b/i] },
+  { key: 'maxburgers', label: 'Max Burgers', patterns: [/\bmax\s+(burgers|hamburger)/i] },
+  { key: 'burgerking', label: 'Burger King', patterns: [/\bburger\s*king\b/i] },
+  { key: 'pressbyran', label: 'Pressbyrån', patterns: [/\bpressbyr[åa]n\b/i] },
+  { key: '7eleven', label: '7-Eleven', patterns: [/\b7[\s-]*eleven\b/i] },
+  { key: 'foodora', label: 'Foodora', patterns: [/\bfoodora\b/i] },
+  { key: 'wolt', label: 'Wolt', patterns: [/\bwolt\b/i] },
+  { key: 'apoteket', label: 'Apoteket', patterns: [/\bapoteket\b/i] },
+  { key: 'apotekhjartat', label: 'Apotek Hjärtat', patterns: [/\bapotek\s+hj[äa]rtat\b/i] },
+  { key: 'kronansapotek', label: 'Kronans Apotek', patterns: [/\bkronans\s+apotek\b/i] },
+  { key: 'apotea', label: 'Apotea', patterns: [/\bapotea\b/i] },
+  { key: 'clasohlson', label: 'Clas Ohlson', patterns: [/\bclas\s*ohlson\b/i] },
+  { key: 'ikea', label: 'IKEA', patterns: [/\bikea\b/i] },
+  { key: 'biltema', label: 'Biltema', patterns: [/\bbiltema\b/i] },
+  { key: 'jula', label: 'Jula', patterns: [/\bjula\b/i] },
+  { key: 'rusta', label: 'Rusta', patterns: [/\brusta\b/i] },
+  { key: 'normal', label: 'Normal', patterns: [/\bnormal\b/i] },
+  { key: 'ahlens', label: 'Åhléns', patterns: [/\b[åa]hl[ée]ns\b/i] },
+  { key: 'hm', label: 'H&M', patterns: [/\bh\s*&\s*m\b/i, /\bhennes\s*&\s*mauritz\b/i] },
+  { key: 'elgiganten', label: 'Elgiganten', patterns: [/\belgiganten\b/i] },
+  { key: 'netonnet', label: 'NetOnNet', patterns: [/\bnetonnet\b/i] },
+  { key: 'kjell', label: 'Kjell & Company', patterns: [/\bkjell\s*(&|o)\s*co/i] },
+  { key: 'skanetrafiken', label: 'Skånetrafiken', patterns: [/\bsk[åa]netrafiken\b/i] },
+  { key: 'vasttrafik', label: 'Västtrafik', patterns: [/\bv[äa]sttrafik\b/i] },
+  { key: 'sl', label: 'SL', patterns: [/\bab\s+storstockholms\s+lokaltrafik\b/i] },
+  { key: 'sj', label: 'SJ', patterns: [/\bsj\s+ab\b/i] },
+  { key: 'uber', label: 'Uber', patterns: [/\buber\b/i] },
+  { key: 'bolt', label: 'Bolt', patterns: [/\bbolt\b/i] },
+  { key: 'circlek', label: 'Circle K', patterns: [/\bcircle\s*k\b/i] },
+  { key: 'okq8', label: 'OKQ8', patterns: [/\bokq8\b/i] },
+  { key: 'preem', label: 'Preem', patterns: [/\bpreem\b/i] },
+  { key: 'easypark', label: 'EasyPark', patterns: [/\beasypark\b/i] },
+  { key: 'aimopark', label: 'Aimo Park', patterns: [/\baimo\s*park\b/i] },
+  { key: 'parkster', label: 'Parkster', patterns: [/\bparkster\b/i] },
+  { key: 'klarna', label: 'Klarna', patterns: [/\bklarna\b/i] },
+  { key: 'spotify', label: 'Spotify', patterns: [/\bspotify\b/i] },
+  { key: 'netflix', label: 'Netflix', patterns: [/\bnetflix\b/i] },
+  { key: 'sveafastigheter', label: 'Svea Fastigheter', patterns: [/\bsvea\s*fastigheter\b/i] },
+  { key: 'heimstaden', label: 'Heimstaden', patterns: [/\bheimstaden\b/i] },
+];
+
+function detectMerchantChain(tx: Partial<TransactionItem>): { key: string; label: string } | null {
+  const combined = [tx.title, tx.rawDescription, tx.counterpartyName].filter(Boolean).join(' ');
+  if (!combined) return null;
+  for (const chain of KNOWN_MERCHANT_CHAINS) {
+    if (chain.patterns.some((re) => re.test(combined))) {
+      return { key: chain.key, label: chain.label };
+    }
+  }
+  return null;
+}
+
+export interface SimilarTransactionsSummary {
+  brandLabel: string;
+  transactions: TransactionItem[];
+  totalAmount: number;
+  averageAmount: number;
+}
+
+/**
+ * Finds all transactions in `allTransactions` that belong to the same merchant, chain,
+ * fixed expense, or income as `targetTx` (sorted newest first).
+ */
+export function findSimilarTransactionsForTransaction(
+  targetTx: TransactionItem | null | undefined,
+  allTransactions: TransactionItem[] = [],
+  fixedExpenses: FixedExpenseItem[] = [],
+  incomes: IncomeItem[] = []
+): SimilarTransactionsSummary {
+  if (!targetTx) {
+    return { brandLabel: '', transactions: [], totalAmount: 0, averageAmount: 0 };
+  }
+
+  const targetType = targetTx.type === 'income' ? 'income' : 'expense';
+  const matchedFixed =
+    targetType === 'expense' ? findMatchingFixedExpense(targetTx, fixedExpenses) : null;
+  const matchedIncome =
+    targetType === 'income' ? findMatchingIncome(targetTx, incomes) : null;
+  const targetChain = detectMerchantChain(targetTx);
+  const targetTitleNorm = normalizeMerchantKey(targetTx.title || '');
+  const targetVariants = extractMerchantKeyVariants(targetTx.title || '').filter(
+    (v) => v.length >= 4 && !GENERIC_WRAPPER_WORDS.has(v)
+  );
+  const isTargetGeneric = isGenericPlaceholderMerchant(targetTx.title);
+
+  const matched: TransactionItem[] = [];
+
+  for (const tx of allTransactions) {
+    if (tx.id === targetTx.id) {
+      matched.push(tx);
+      continue;
+    }
+
+    const txType = tx.type === 'income' ? 'income' : 'expense';
+    if (txType !== targetType) continue;
+
+    // 1. Same fixed expense
+    if (matchedFixed) {
+      const otherFixed = findMatchingFixedExpense(tx, [matchedFixed]);
+      if (otherFixed && otherFixed.id === matchedFixed.id) {
+        matched.push(tx);
+        continue;
+      }
+    }
+
+    // 2. Same income source
+    if (matchedIncome) {
+      const otherInc = findMatchingIncome(tx, [matchedIncome]);
+      if (otherInc && otherInc.id === matchedIncome.id) {
+        matched.push(tx);
+        continue;
+      }
+    }
+
+    // 3. Same known retail/service chain (e.g. "Coop", "Hemköp Helsingborg Rydebäck" & "Hemköp")
+    if (targetChain) {
+      const otherChain = detectMerchantChain(tx);
+      if (otherChain && otherChain.key === targetChain.key) {
+        matched.push(tx);
+        continue;
+      }
+    }
+
+    // 4. Exact normalized title match
+    const otherTitleNorm = normalizeMerchantKey(tx.title || '');
+    if (targetTitleNorm && otherTitleNorm === targetTitleNorm) {
+      if (!isTargetGeneric) {
+        matched.push(tx);
+        continue;
+      }
+      // For generic titles (e.g. "Swish"), require same rawDescription/counterpartyName or amount
+      const rawA = normalizeMerchantKey(targetTx.rawDescription || targetTx.counterpartyName || '');
+      const rawB = normalizeMerchantKey(tx.rawDescription || tx.counterpartyName || '');
+      if (rawA && rawA === rawB) {
+        matched.push(tx);
+        continue;
+      }
+    }
+
+    // 5. Shared brand variant (for non-generic merchants)
+    if (!isTargetGeneric && targetVariants.length > 0 && !isGenericPlaceholderMerchant(tx.title)) {
+      const otherVariants = extractMerchantKeyVariants(tx.title || '').filter(
+        (v) => v.length >= 4 && !GENERIC_WRAPPER_WORDS.has(v)
+      );
+      if (targetVariants.some((tv) => otherVariants.includes(tv))) {
+        matched.push(tx);
+        continue;
+      }
+    }
+  }
+
+  matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
+  const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;
+
+  const brandLabel =
+    matchedFixed?.name ||
+    matchedIncome?.name ||
+    targetChain?.label ||
+    targetTx.title ||
+    'Mottagare';
+
+  return {
+    brandLabel,
+    transactions: matched,
+    totalAmount,
+    averageAmount,
+  };
+}
+
+/**
+ * Finds all historical transactions that match a specific FixedExpenseItem.
+ */
+export function findTransactionsForFixedExpense(
+  expense: FixedExpenseItem | null | undefined,
+  allTransactions: TransactionItem[] = []
+): SimilarTransactionsSummary {
+  if (!expense) {
+    return { brandLabel: '', transactions: [], totalAmount: 0, averageAmount: 0 };
+  }
+
+  const expChain = detectMerchantChain({ title: expense.name, rawDescription: expense.originalName });
+
+  const matched = allTransactions.filter((tx) => {
+    if (tx.type === 'income') return false;
+    const hit = findMatchingFixedExpense(tx, [expense]);
+    if (hit && hit.id === expense.id) return true;
+    if (expChain) {
+      const txChain = detectMerchantChain(tx);
+      if (txChain && txChain.key === expChain.key) return true;
+    }
+    return false;
+  });
+
+  matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
+  const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;
+
+  return {
+    brandLabel: expense.name,
+    transactions: matched,
+    totalAmount,
+    averageAmount,
+  };
+}
+
+/**
+ * Finds all historical transactions that match a specific IncomeItem.
+ */
+export function findTransactionsForIncome(
+  income: IncomeItem | null | undefined,
+  allTransactions: TransactionItem[] = []
+): SimilarTransactionsSummary {
+  if (!income) {
+    return { brandLabel: '', transactions: [], totalAmount: 0, averageAmount: 0 };
+  }
+
+  const matched = allTransactions.filter((tx) => {
+    if (tx.type !== 'income') return false;
+    const hit = findMatchingIncome(tx, [income]);
+    return Boolean(hit && hit.id === income.id);
+  });
+
+  matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
+  const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;
+
+  return {
+    brandLabel: income.name,
+    transactions: matched,
+    totalAmount,
+    averageAmount,
+  };
+}
+

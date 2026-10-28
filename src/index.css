@@ -1176,25 +1176,8 @@ h6 {
   input,
   textarea,
   select {
-    font-size: 16px;
+    font-size: inherit;
     color: var(--text-primary);
-  }
-}
-
-@media screen and (max-width: 767px) {
-  input.text-body,
-  input.text-body-medium,
-  input.text-xs,
-  input.text-sm,
-  input.text-label,
-  input.text-secondary,
-  textarea.text-body,
-  textarea.text-xs,
-  textarea.text-sm,
-  select.text-body,
-  select.text-xs,
-  select.text-sm {
-    font-size: 16px !important;
   }
 }
 
@@ -1209,7 +1192,7 @@ h6 {
     color: var(--text-tertiary);
     font-family: inherit;
     font-weight: 400;
-    font-size: 0.8125rem;
+    font-size: inherit;
     letter-spacing: -0.005em;
     opacity: 0.85;
   }
@@ -1530,7 +1513,7 @@ html.dark .dejz-logo,
 input:not(.font-amount):not(.text-section-title)::placeholder,
 textarea::placeholder {
   color: var(--text-tertiary);
-  font-size: 13px !important;
+  font-size: inherit;
   font-weight: 400 !important;
   letter-spacing: -0.005em;
   opacity: 0.85;
@@ -1539,7 +1522,7 @@ textarea::placeholder {
 input:not(.font-amount):not(.text-section-title)::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
   color: var(--text-tertiary);
-  font-size: 13px !important;
+  font-size: inherit;
   font-weight: 400 !important;
   letter-spacing: -0.005em;
   opacity: 0.85;
@@ -1611,9 +1594,376 @@ input.text-section-title::placeholder {
   animation: pulseSubtle 8s ease-in-out infinite;
 }
 
+@keyframes sheetUp {
+  0% {
+    opacity: 0;
+    transform: translateY(36px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@utility animate-sheet-up {
+  animation: sheetUp 280ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@utility animate-scale-in {
+  animation: scaleIn 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@utility animate-slide-in-right {
+  animation: slideInRight 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@utility animate-slide-in-left {
+  animation: slideInLeft 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Spatial 3D Depth Effect when a BottomSheet is open (iOS / Vaul style) */
+.app-spatial-shell {
+  transition:
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center top;
+}
+
+html[data-sheet-open="true"] .app-spatial-shell {
+  transform: scale(0.965) translateY(4px);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
-  .animate-pulse-subtle {
+  .animate-pulse-subtle,
+  .animate-sheet-up,
+  .animate-scale-in,
+  .animate-slide-in-right,
+  .animate-slide-in-left {
     animation: none !important;
+  }
+  html[data-sheet-open="true"] .app-spatial-shell {
+    transform: none !important;
+  }
+}
+
+/* Sekretessläge (Privacy Blur) för belopp och summor */
+html.privacy-blur .font-display.tabular-nums:not(.no-privacy-blur),
+html.privacy-blur .font-amount:not(.no-privacy-blur),
+html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  user-select: none;
+  transition: filter 180ms ease;
+}
+
+/* ==========================================================================
+   DEJZ UNIFIED GLOBAL UI DESIGN SYSTEM (.ui-*)
+   Centralized styling for pages, cards, lists, rows, sheets, buttons & inputs
+   ========================================================================== */
+@layer components {
+  /* 1. Page & Section Structure */
+  .ui-page {
+    @apply space-y-4 pb-36 sm:pb-40;
+    animation: fadeIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .ui-section {
+    @apply space-y-1.5;
+  }
+
+  .ui-section-header {
+    @apply flex items-center justify-between px-1;
+  }
+
+  .ui-section-title {
+    @apply font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] flex items-center gap-1.5;
+  }
+
+  .ui-section-meta {
+    @apply text-xs font-semibold text-[var(--text-muted)] tabular-nums;
+  }
+
+  .ui-section-action {
+    @apply text-xs font-bold text-[var(--text-primary)] hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer;
+  }
+
+  /* 2. Cards & Grouped Containers */
+  .ui-card {
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden;
+  }
+
+  .ui-card-p {
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5;
+  }
+
+  .ui-list-card {
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-4 py-1 sm:px-5 sm:py-1.5 divide-y divide-[var(--border-subtle)] overflow-hidden;
+  }
+
+  .ui-group-card {
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl divide-y divide-[var(--border-subtle)] overflow-hidden;
+  }
+
+  .ui-sheet-group {
+    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-[13px] sm:text-sm overflow-hidden;
+  }
+
+  .ui-sheet-box {
+    @apply p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)];
+  }
+
+  /* 3. List Rows & Transaction Rows */
+  .ui-tx-row {
+    @apply w-full py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
+  }
+
+  .ui-tx-row-static {
+    @apply w-full py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm text-left;
+  }
+
+  .ui-row {
+    @apply w-full px-4 py-3.5 flex items-center justify-between gap-3 text-[13px] sm:text-sm text-left;
+  }
+
+  .ui-row-btn {
+    @apply w-full px-4 py-3.5 flex items-center justify-between gap-3 text-[13px] sm:text-sm text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+  }
+
+  .ui-input-row {
+    @apply w-full px-4 py-3.5 flex items-center justify-between gap-3 text-[13px] sm:text-sm cursor-text;
+  }
+
+  .ui-row-title {
+    @apply font-semibold text-[var(--text-primary)] block truncate;
+  }
+
+  .ui-row-subtitle {
+    @apply text-xs text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
+  }
+
+  .ui-row-amount {
+    @apply font-display font-bold text-[var(--text-primary)] tabular-nums block;
+  }
+
+  .ui-row-amount-income {
+    @apply font-display font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block;
+  }
+
+  .ui-row-meta {
+    @apply text-xs text-[var(--text-muted)] tabular-nums block mt-0.5;
+  }
+
+  /* 4. 3-Column Summary & Stat Grids */
+  .ui-stat-grid {
+    @apply grid grid-cols-3 divide-x divide-[var(--border-subtle)];
+  }
+
+  .ui-stat-label {
+    @apply text-[11px] font-medium text-[var(--text-muted)] block truncate;
+  }
+
+  .ui-stat-value {
+    @apply font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
+  }
+
+  .ui-stat-sub {
+    @apply text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5 truncate;
+  }
+
+  /* 5. BottomSheet Headers, Heroes & Icon Badges */
+  .ui-sheet-header {
+    @apply flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-5;
+  }
+
+  .ui-sheet-sub-header {
+    @apply flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)];
+  }
+
+  .ui-sheet-title {
+    @apply font-display font-bold text-sm sm:text-[15px] text-[var(--text-primary)] truncate;
+  }
+
+  .ui-icon-btn {
+    @apply w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0;
+  }
+
+  .ui-icon-btn-surface {
+    @apply w-8 h-8 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0;
+  }
+
+  .ui-hero-header {
+    @apply text-center pb-5 border-b border-[var(--border-subtle)];
+  }
+
+  .ui-hero-icon {
+    @apply w-16 h-16 rounded-[20px] bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-3.5 text-[var(--text-primary)] shrink-0;
+  }
+
+  .ui-hero-amount {
+    @apply font-display font-extrabold text-3xl sm:text-4xl text-[var(--text-primary)] tabular-nums tracking-tight;
+  }
+
+  .ui-hero-amount-income {
+    @apply font-display font-extrabold text-3xl sm:text-4xl text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight;
+  }
+
+  .ui-icon-badge {
+    @apply w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
+  }
+
+  /* 6. Buttons & Confirmation Bars */
+  .ui-btn-primary {
+    @apply w-full py-3 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
+  }
+
+  .ui-btn-primary-lg {
+    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
+  }
+
+  .ui-btn-secondary {
+    @apply w-full py-2.5 px-4 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-1.5 transition-all cursor-pointer;
+  }
+
+  .ui-btn-danger {
+    @apply w-full py-2.5 px-4 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-1.5 transition-all cursor-pointer;
+  }
+
+  .ui-btn-sm {
+    @apply px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0;
+  }
+
+  .ui-btn-sm-primary {
+    @apply px-3 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 flex items-center justify-center gap-1 transition-opacity cursor-pointer shrink-0;
+  }
+
+  .ui-confirm-danger {
+    @apply p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-3 text-xs;
+  }
+
+  .ui-confirm-neutral {
+    @apply p-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-xs;
+  }
+
+  /* 7. Segmented Controls, Chips, Switches, Inputs & Day Buttons */
+  .ui-segmented {
+    @apply grid p-1 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)];
+  }
+
+  .ui-segmented-surface {
+    @apply grid p-1 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)];
+  }
+
+  .ui-segmented-tab {
+    @apply py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)];
+  }
+
+  .ui-segmented-tab-active {
+    @apply py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xs;
+  }
+
+  .ui-chip {
+    @apply px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)];
+  }
+
+  .ui-chip-active {
+    @apply px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)];
+  }
+
+  .ui-search-box {
+    @apply relative flex items-center bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-2xl px-3.5 py-2.5 transition-colors;
+  }
+
+  .ui-search-input {
+    @apply w-full bg-transparent border-0 p-0 pl-2.5 pr-6 text-[13px] sm:text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+  }
+
+  .ui-inline-input {
+    @apply w-full min-w-0 bg-transparent border-0 p-0 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] text-right focus:outline-none;
+  }
+
+  .ui-inline-amount-input {
+    @apply w-28 bg-transparent border-0 p-0 text-xs font-display font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] text-right tabular-nums focus:outline-none;
+  }
+
+  .ui-switch {
+    @apply w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer;
+  }
+
+  .ui-switch-on {
+    @apply bg-emerald-500;
+  }
+
+  .ui-switch-off {
+    @apply bg-[var(--border-subtle)];
+  }
+
+  .ui-switch-thumb {
+    @apply w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 left-0.5 transition-transform;
+  }
+
+  .ui-switch-thumb-on {
+    @apply translate-x-5;
+  }
+
+  .ui-day-btn {
+    @apply h-10 rounded-xl font-display text-xs tabular-nums transition-all cursor-pointer flex items-center justify-center border bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] font-semibold;
+  }
+
+  .ui-day-btn-active {
+    @apply h-10 rounded-xl font-display text-xs tabular-nums transition-all cursor-pointer flex items-center justify-center border bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-bold;
+  }
+
+  /* 8. Empty States */
+  .ui-empty-state {
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center;
+  }
+
+  .ui-empty-icon {
+    @apply w-10 h-10 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-2.5 text-[var(--text-muted)];
+  }
+
+  .ui-empty-title {
+    @apply text-xs font-semibold text-[var(--text-primary)];
+  }
+
+  .ui-empty-sub {
+    @apply text-[11px] text-[var(--text-muted)] mt-1 max-w-xs mx-auto;
   }
 }

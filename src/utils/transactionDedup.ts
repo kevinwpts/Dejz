@@ -171,10 +171,10 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
         const diff = getDaysDiff(itemDate, existDate);
 
         // E. Om den ena posten har ett generiskt namn ("Banktransaktion", "Betalning", "Autogiro") och den andra har ett riktigt namn
-        // med exakt samma belopp inom 5 dagar (och minst en saknar särskiljande saldo):
+        // med exakt samma belopp inom 2 dagar eller när en är reserverad och en är bokförd:
         const itemIsGeneric = isGenericDedupTitle(itemTitleNorm) || isGenericDedupTitle(item.title);
         const existIsGeneric = isGenericDedupTitle(existTitleNorm) || isGenericDedupTitle(existing.title);
-        if (itemIsGeneric !== existIsGeneric && diff <= 5) {
+        if (itemIsGeneric !== existIsGeneric && (diff <= 2 || isItemPending !== isExistPending)) {
           return true;
         }
 
@@ -197,7 +197,7 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
       if (daysDiff <= 4.5) {
         const itemIsGeneric = isGenericDedupTitle(itemTitleNorm) || isGenericDedupTitle(item.title);
         const existIsGeneric = isGenericDedupTitle(existTitleNorm) || isGenericDedupTitle(existing.title);
-        if (itemIsGeneric || existIsGeneric) {
+        if ((itemIsGeneric || existIsGeneric) && daysDiff <= 2) {
           return true;
         }
         if (itemTitleNorm && existTitleNorm) {

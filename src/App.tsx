@@ -36,6 +36,7 @@ import { AuthModal } from './components/modals/AuthModal';
 import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
+import { BottomSheet } from './components/ui/BottomSheet';
 import { supabase } from './supabaseClient';
 import {
   bankService,
@@ -59,7 +60,9 @@ import {
   getBankAccountTitle,
   getNormalizedBankTxAmount,
   isInternalTransferOrMicroSavings,
+  isLikelyCreditCardInvoiceBankTx,
   needsAiMerchantCleaning,
+  resolveBankTxSekAmount,
 } from './utils/bankHistoryAnalyzer';
 import { deduplicateTransactions } from './utils/transactionDedup';
 import {
@@ -133,8 +136,21 @@ function sanitizeTransactionItem(
   if (!item) return item;
   const metaMap = getTransactionMetaMap();
   const savedMeta = item.id ? metaMap[item.id] : undefined;
+  const effectiveOriginalAmount =
+    item.originalAmount !== undefined ? item.originalAmount : savedMeta?.originalAmount;
+  const effectiveAmount =
+    item.originalAmount !== undefined
+      ? item.amount
+      : savedMeta?.customAmount !== undefined
+      ? savedMeta.customAmount
+      : item.amount;
+
   const updated: TransactionItem = {
     ...item,
+    amount: effectiveAmount,
+    originalAmount: effectiveOriginalAmount,
+    linkedSwishTxId:
+      item.linkedSwishTxId !== undefined ? item.linkedSwishTxId : savedMeta?.linkedSwishTxId,
     isHearted: item.isHearted ?? savedMeta?.isHearted,
     isWaitingForPackage: item.isWaitingForPackage ?? savedMeta?.isWaitingForPackage,
     receiptUrl: item.receiptUrl ?? savedMeta?.receiptUrl,
@@ -161,6 +177,21 @@ function sanitizeTransactionItem(
     /swish/i.test(combinedText) ||
     updated.category === 'Swish';
 
+  // Rensa bort eventuell rå bankbeskrivning som av misstag lagts i "Anteckning" (note)
+  if (updated.note) {
+    const noteTrim = updated.note.trim().toLowerCase();
+    const rawTrim = (updated.rawDescription || '').trim().toLowerCase();
+    const cpTrim = (updated.counterpartyName || '').trim().toLowerCase();
+    const titleTrim = (updated.title || '').trim().toLowerCase();
+    if (
+      (rawTrim && noteTrim === rawTrim) ||
+      (cpTrim && noteTrim === cpTrim) ||
+      (titleTrim && noteTrim === titleTrim)
+    ) {
+      updated.note = undefined;
+    }
+  }
+
   // 1. Fastställ det faktiska köpdatumet (utan att flytta söndagsköp till lördag)
   const embeddedDate = parseDateFromSwedishText(combinedText, todayStr);
   if (embeddedDate && embeddedDate <= todayStr) {
@@ -175,7 +206,7 @@ function sanitizeTransactionItem(
     updated.date = todayStr;
   }
 
-  // 2. Swish-titelsanitering
+  // 2. Swish-titelsanitering eller direkt banknamn i snygg Title Case
   if (isSwish) {
     updated.category = 'Swish';
     updated.logo = SWISH_SVG_DATA_URI;
@@ -193,13 +224,32 @@ function sanitizeTransactionItem(
     } else {
       updated.title = 'Swish';
     }
-  } else if (updated.title) {
-    updated.title = cleanDisplayMerchantName(updated.title);
+  } else {
+    const rawBankSource = updated.counterpartyName || updated.rawDescription;
+    if (rawBankSource && !isGenericPlaceholderMerchant(rawBankSource)) {
+      const prevTitleLower = (updated.title || '').toLowerCase().trim();
+      const recat = categorizeBankTransactionForApp({
+        description: updated.rawDescription || '',
+        counterparty_name: updated.counterpartyName || '',
+      } as any);
+      if (recat.merchant && !isGenericPlaceholderMerchant(recat.merchant)) {
+        const cleanBankLower = recat.merchant.toLowerCase().trim();
+        updated.title = recat.merchant;
+        // Om titeln tidigare blivit felaktigt omskriven (t.ex. "Hemköp Rydebäck" -> "Ryde"), återställ även rätt kategori!
+        if (
+          prevTitleLower !== cleanBankLower &&
+          recat.category &&
+          recat.category !== 'Övrigt'
+        ) {
+          updated.category = recat.category;
+        }
+      }
+    } else if (updated.title) {
+      updated.title = cleanDisplayMerchantName(updated.title);
+    }
   }
 
-  // 3. Deterministisk matchning mot fasta utgifter, fasta inkomster och alias
-  // Fasta utgifter och inkomster går alltid först så att en känd fast post (t.ex. Svea Fastigheter)
-  // aldrig kan döpas om till något generiskt av ett AI-alias!
+  // 3. Deterministisk matchning mot fasta utgifter, fasta inkomster och exakta alias
   const kind = updated.type === 'income' ? 'income' : 'expense';
 
   if (updated.type !== 'income' && fixedList && fixedList.length > 0) {
@@ -222,7 +272,9 @@ function sanitizeTransactionItem(
     }
   }
 
-  const aliasMatch = resolveMerchantAlias(combinedText, aliasesOverride);
+  const rawAliasSource =
+    updated.rawDescription || updated.counterpartyName || updated.title || '';
+  const aliasMatch = resolveMerchantAlias(rawAliasSource, aliasesOverride);
   if (aliasMatch && !isGenericPlaceholderMerchant(aliasMatch.name)) {
     updated.title = aliasMatch.name;
     updated.category = normalizeCategoryToValid(aliasMatch.category, kind);
@@ -231,6 +283,7 @@ function sanitizeTransactionItem(
   }
 
   updated.category = normalizeCategoryToValid(updated.category, kind);
+  updated.logo = getLogoUrl(updated.title, updated.category) || updated.logo;
   return updated;
 }
 
@@ -292,15 +345,8 @@ function extractBankTxTime(
     }
   }
 
-  // 3. Om banken inte lämnade ut tid: använd ett deterministiskt klockslag anpassat efter butikskategori
-  return getTransactionTime({
-    id: `bank-${bt.id}`,
-    title: merchant,
-    category,
-    date: effectiveDate,
-    note: bt.description,
-    amount: Math.abs(Number(bt.amount) || 0),
-  });
+  // 3. Om banken inte lämnade ut tid: returnera tom sträng (hitta aldrig på klockslag)
+  return '';
 }
 
 function getPayDatesForIncome(
@@ -426,6 +472,8 @@ function reconcileFixedExpensesList(params: {
         name: finalName,
         originalName: ident.originalName,
         amount: finalAmt,
+        isShared: manual?.isShared,
+        fullAmount: manual?.fullAmount,
         dueDay: finalDue,
         category: finalCat,
         paymentMethod: finalMethod,
@@ -452,6 +500,8 @@ function reconcileFixedExpensesList(params: {
     );
     const finalAmt =
       manual?.amount !== undefined ? manual.amount : Math.round(Number(curr.amount) || 0);
+    const finalIsShared = manual?.isShared !== undefined ? manual.isShared : curr.isShared;
+    const finalFullAmt = manual?.fullAmount !== undefined ? manual.fullAmount : curr.fullAmount;
     const finalDue = manual?.dueDay || curr.dueDay || 27;
     const finalMethod = manual?.paymentMethod || curr.paymentMethod || 'Autogiro';
     const validId = ensureValidUuid(
@@ -464,6 +514,8 @@ function reconcileFixedExpensesList(params: {
       name: finalName,
       originalName: ident.originalName,
       amount: finalAmt,
+      isShared: finalIsShared,
+      fullAmount: finalFullAmt,
       dueDay: finalDue,
       category: finalCat,
       paymentMethod: finalMethod,
@@ -486,11 +538,15 @@ function reconcileFixedExpensesList(params: {
               name: finalName,
               category: finalCat,
               amount: finalAmt,
+              isShared: finalIsShared,
+              fullAmount: finalFullAmt,
               dueDay: finalDue,
               paymentMethod: finalMethod,
               logo: getLogoUrl(finalName, finalCat),
             }
           : {}),
+        isShared: finalIsShared ?? unified[existingIdx].isShared,
+        fullAmount: finalFullAmt ?? unified[existingIdx].fullAmount,
         receiptUrl: curr.receiptUrl || unified[existingIdx].receiptUrl,
         receiptName: curr.receiptName || unified[existingIdx].receiptName,
       };
@@ -529,6 +585,10 @@ function reconcileFixedExpensesList(params: {
         const nextAmt =
           existingManual?.amount !== undefined
             ? existingManual.amount
+            : existing.isShared
+            ? existing.amount
+            : dbIds.has(existing.id) && existing.amount > 0
+            ? existing.amount
             : detAmt > 0
             ? detAmt
             : existing.amount;
@@ -539,6 +599,11 @@ function reconcileFixedExpensesList(params: {
           ...existing,
           originalName: existing.originalName || det.name,
           amount: nextAmt,
+          isShared: existingManual?.isShared ?? existing.isShared,
+          fullAmount:
+            existingManual?.fullAmount ??
+            existing.fullAmount ??
+            (existing.isShared && detAmt > nextAmt ? detAmt : undefined),
           dueDay: nextDue,
         };
       } else {
@@ -551,6 +616,8 @@ function reconcileFixedExpensesList(params: {
           name: finalName,
           originalName: det.name,
           amount: finalAmt,
+          isShared: manual?.isShared,
+          fullAmount: manual?.fullAmount,
           dueDay: finalDue,
           category: finalCat,
           paymentMethod: finalMethod,
@@ -905,9 +972,10 @@ function mapBankTransactionsToAppItems(
       return true;
     })
     .map((bt) => {
-      const rawAmt = getNormalizedBankTxAmount(bt);
+      const fxInfo = resolveBankTxSekAmount(bt);
+      const rawAmt = fxInfo.signedSekAmount;
       const isIncome = rawAmt > 0;
-      const normAmt = Math.abs(rawAmt);
+      const normAmt = fxInfo.absSekAmount;
       let catInfo = categorizeBankTransactionForApp(bt);
       const reservationMeta = bookedToReservationMeta.get(bt.id);
       if (
@@ -996,6 +1064,11 @@ function mapBankTransactionsToAppItems(
         isTransactionManuallyExcluded(bt.id) ||
         isTransactionManuallyExcluded(`bank-${bt.id}`);
 
+      const isAutoCreditCardInvoice =
+        !isIncome &&
+        !bt.reconciliation_status &&
+        isLikelyCreditCardInvoiceBankTx(bt);
+
       const matchedBankAcc = accs.find((a) => a.id === bt.bank_account_id);
       const bankAccountName = matchedBankAcc
         ? (() => {
@@ -1012,6 +1085,11 @@ function mapBankTransactionsToAppItems(
           ? bt.description
           : reservationMeta?.preservedDescription) || bt.description;
 
+      const foreignCurrencyNote =
+        fxInfo.isForeignCurrency && fxInfo.originalCurrency !== 'SEK'
+          ? `Ursprungligt belopp: ${fxInfo.originalAmount.toLocaleString('sv-SE')} ${fxInfo.originalCurrency}`
+          : undefined;
+
       return sanitizeTransactionItem(
         {
           id: `bank-${bt.id}`,
@@ -1026,18 +1104,16 @@ function mapBankTransactionsToAppItems(
           reconciliationStatus: rawInternalTransferIds.has(bt.id)
             ? 'internal_transfer'
             : bt.reconciliation_status,
-          isExcluded: bt.reconciliation_status === 'excluded' || isManuallyExcluded,
-          note:
-            effectiveRawDesc &&
-            effectiveRawDesc.toLowerCase() !== catInfo.merchant.toLowerCase() &&
-            !isGenericPlaceholderMerchant(effectiveRawDesc)
-              ? effectiveRawDesc
-              : undefined,
+          isExcluded:
+            bt.reconciliation_status === 'excluded' ||
+            isManuallyExcluded ||
+            isAutoCreditCardInvoice,
+          note: foreignCurrencyNote,
           logo: catInfo.logo || getLogoUrl(catInfo.merchant, catInfo.category),
 
           rawDescription: effectiveRawDesc,
           counterpartyName: bt.counterparty_name || undefined,
-          currency: bt.currency || 'SEK',
+          currency: fxInfo.isForeignCurrency ? fxInfo.originalCurrency : bt.currency || 'SEK',
           creditDebitIndicator:
             bt.credit_debit_indicator || (isIncome ? 'CRDT' : 'DBIT'),
           transactionId: bt.transaction_id || undefined,
@@ -1092,6 +1168,16 @@ export const App: React.FC = () => {
     amount: number;
     msg: string;
     deepLink: string;
+  } | null>(null);
+  const [undoToast, setUndoToast] = useState<{
+    id: string;
+    excluded: boolean;
+    title: string;
+  } | null>(null);
+  const undoTimerRef = useRef<number | null>(null);
+  const [previewReceipt, setPreviewReceipt] = useState<{
+    url: string;
+    name: string;
   } | null>(null);
 
   useEffect(() => {
@@ -1172,10 +1258,14 @@ export const App: React.FC = () => {
     () => initialCache?.fixedExpenses || []
   );
 
-  // Riktiga köp
-  const [transactions, setTransactions] = useState<TransactionItem[]>(
-    () => initialCache?.transactions || []
-  );
+  // Riktiga köp (tvättas direkt vid laddning så att ev. gamla felaktiga alias återställs till bankens namn)
+  const [transactions, setTransactions] = useState<TransactionItem[]>(() => {
+    const rawList = initialCache?.transactions || [];
+    const initFixed = initialCache?.fixedExpenses || [];
+    const initInc = initialCache?.incomes || [];
+    const initAliases = getMerchantAliases();
+    return rawList.map((tx) => sanitizeTransactionItem(tx, initFixed, initInc, initAliases));
+  });
 
   // Refs till senaste listorna så att asynkrona synkar aldrig läser utdaterade closures
   const incomesRef = useRef<IncomeItem[]>(incomes);
@@ -2266,27 +2356,39 @@ export const App: React.FC = () => {
     userName,
   ]);
 
-  // Totala rörliga köp under aktuell period (exkludera fasta utgifter så de inte räknas dubbelt)
+  // Totala rörliga köp under aktuell period (exkludera fasta utgifter så de inte räknas dubbelt,
+  // och räkna av bekräftade butiksreturer/återköp så att "Kvar att spendera" ökar vid retur)
   const totalVariableSpent = useMemo(() => {
-    return periodTransactions
-      .filter((t) => {
-        if (t.type === 'income') return false;
-        if (t.isExcluded) return false;
-        if (isTransactionManuallyExcluded(t.id)) return false;
-        if (
-          excludeInternalTransfers &&
-          (internalTransferIds.has(t.id) ||
-            isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-        ) {
-          return false;
+    let grossSpent = 0;
+    let storeRefunds = 0;
+
+    for (const t of periodTransactions) {
+      if (t.isExcluded) continue;
+      if (isTransactionManuallyExcluded(t.id)) continue;
+      if (
+        excludeInternalTransfers &&
+        (internalTransferIds.has(t.id) ||
+          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
+      ) {
+        continue;
+      }
+
+      if (t.type === 'income') {
+        if (t.category === 'Återbetalning') {
+          storeRefunds += Math.abs(Number(t.amount) || 0);
         }
-        const recurring = checkIsRecurringTransaction(t, fixedExpenses, incomes);
-        if (recurring.isRecurring && recurring.type === 'expense') {
-          return false;
-        }
-        return true;
-      })
-      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+        continue;
+      }
+
+      const recurring = checkIsRecurringTransaction(t, fixedExpenses, incomes);
+      if (recurring.isRecurring && recurring.type === 'expense') {
+        continue;
+      }
+
+      grossSpent += Number(t.amount) || 0;
+    }
+
+    return Math.max(0, grossSpent - storeRefunds);
   }, [
     periodTransactions,
     excludeInternalTransfers,
@@ -2467,6 +2569,8 @@ export const App: React.FC = () => {
     unDismissFixedMerchant(data.name);
     saveManualFixedOverride(data.name, {
       amount: data.amount,
+      isShared: data.isShared,
+      fullAmount: data.fullAmount,
       dueDay: data.dueDay,
       category: data.category,
       paymentMethod: data.paymentMethod,
@@ -2622,6 +2726,8 @@ export const App: React.FC = () => {
       updated.name,
       {
         amount: updated.amount,
+        isShared: updated.isShared,
+        fullAmount: updated.fullAmount,
         dueDay: updated.dueDay,
         category: updated.category,
         paymentMethod: updated.paymentMethod,
@@ -2727,7 +2833,10 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleUpdateTransaction = async (updated: TransactionItem) => {
+  const handleUpdateTransaction = async (
+    updated: TransactionItem,
+    applyToSimilarIds?: string[]
+  ) => {
     const existing = transactionsRef.current.find((t) => t.id === updated.id);
     if (
       existing &&
@@ -2737,6 +2846,25 @@ export const App: React.FC = () => {
       saveMerchantAlias(existing.title, updated.title, updated.category);
       if (existing.counterpartyName) {
         saveMerchantAlias(existing.counterpartyName, updated.title, updated.category);
+      }
+      if (existing.rawDescription) {
+        saveMerchantAlias(existing.rawDescription, updated.title, updated.category);
+      }
+      saveMerchantAlias(updated.title, updated.title, updated.category);
+    }
+
+    const similarSet = new Set(applyToSimilarIds || []);
+    if (similarSet.size > 0) {
+      for (const tx of transactionsRef.current) {
+        if (similarSet.has(tx.id)) {
+          saveMerchantAlias(tx.title, updated.title, updated.category);
+          if (tx.counterpartyName) {
+            saveMerchantAlias(tx.counterpartyName, updated.title, updated.category);
+          }
+          if (tx.rawDescription) {
+            saveMerchantAlias(tx.rawDescription, updated.title, updated.category);
+          }
+        }
       }
     }
 
@@ -2755,11 +2883,29 @@ export const App: React.FC = () => {
       receiptName: itemWithLogo.receiptName,
       paymentMethod: itemWithLogo.paymentMethod,
       note: itemWithLogo.note,
+      customAmount:
+        itemWithLogo.originalAmount !== undefined &&
+        itemWithLogo.originalAmount > itemWithLogo.amount
+          ? itemWithLogo.amount
+          : undefined,
+      originalAmount: itemWithLogo.originalAmount,
+      linkedSwishTxId: itemWithLogo.linkedSwishTxId,
     });
     setTransactions((prev) => {
       const exists = prev.some((t) => t.id === itemWithLogo.id);
       const next = exists
-        ? prev.map((t) => (t.id === itemWithLogo.id ? itemWithLogo : t))
+        ? prev.map((t) => {
+            if (t.id === itemWithLogo.id) return itemWithLogo;
+            if (similarSet.has(t.id)) {
+              return {
+                ...t,
+                title: itemWithLogo.title,
+                category: itemWithLogo.category,
+                logo: itemWithLogo.logo,
+              };
+            }
+            return t;
+          })
         : [itemWithLogo, ...prev];
       transactionsRef.current = next;
       saveCachedAppState({ transactions: next });
@@ -2798,7 +2944,26 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleExcludeTransaction = async (id: string, exclude: boolean) => {
+  const handleExcludeTransaction = async (
+    id: string,
+    exclude: boolean,
+    skipToast?: boolean
+  ) => {
+    const targetTx = transactionsRef.current.find((t) => t.id === id);
+    if (!skipToast && targetTx) {
+      if (undoTimerRef.current) {
+        window.clearTimeout(undoTimerRef.current);
+      }
+      setUndoToast({
+        id,
+        excluded: exclude,
+        title: targetTx.title || 'Köpet',
+      });
+      undoTimerRef.current = window.setTimeout(() => {
+        setUndoToast(null);
+      }, 4500);
+    }
+
     setTransactionExcludedState(id, exclude);
     if (id.startsWith('bank-')) {
       setTransactionExcludedState(id.replace(/^bank-/, ''), exclude);
@@ -2856,11 +3021,6 @@ export const App: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      'Är du säker på att du vill radera ditt konto och all sparad data? Denna åtgärd går inte att ångra.'
-    );
-    if (!confirmed) return;
-
     if (userId && userId !== 'demo-user') {
       try {
         const {
@@ -2912,17 +3072,12 @@ export const App: React.FC = () => {
     setDismissedTxIds([]);
     setTargetPayday(25);
     setWeekendHandling('before');
+    setSettingsSubView('main');
     setActiveTab('home');
-
-    alert('Ditt konto och all tillhörande data har raderats permanent.');
+    setShowLanding(true);
   };
 
   const handleResetAccount = () => {
-    const confirmed = window.confirm(
-      'Är du säker på att du vill nollställa all finansiell data och börja om helt på nytt?'
-    );
-    if (!confirmed) return;
-
     const financialKeys = [
       'dejz_incomes',
       'dejz_fixed_expenses',
@@ -2943,9 +3098,10 @@ export const App: React.FC = () => {
     setDismissedTxIds([]);
     setConnections([]);
     setBankAccounts([]);
+    setSettingsSubView('main');
     setActiveTab('home');
-
-    alert('Kontot har nollställts och du kan börja om på nytt.');
+    setCallbackStatusMsg('Kontot har nollställts och du kan börja om på nytt.');
+    setTimeout(() => setCallbackStatusMsg(null), 4000);
   };
 
   if (showLanding || (!userId && !isInitialLoading && !isOnboardingActive)) {
@@ -3047,16 +3203,14 @@ export const App: React.FC = () => {
       style={{ backgroundImage: 'var(--bg-gradient)' }}
       className="min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]"
     >
+      <div className="app-spatial-shell flex-1 flex flex-col min-h-screen">
       <Navbar
         userEmail={userEmail}
         userName={userName}
         userAvatar={userAvatar}
+        hasUnreadNotifications={displayTransactions.some((t) => Boolean(t.isWaitingForPackage))}
         pageTitle={
-          isSearchModalOpen
-            ? 'Sök'
-            : isNotificationsModalOpen
-            ? 'Notiser'
-            : activeTab === 'settings'
+          activeTab === 'settings'
             ? settingsSubView === 'main'
               ? 'Inställningar'
               : SETTINGS_SUBVIEW_TITLES[settingsSubView]
@@ -3069,11 +3223,7 @@ export const App: React.FC = () => {
             : null
         }
         onBack={() => {
-          if (isSearchModalOpen) {
-            setIsSearchModalOpen(false);
-          } else if (isNotificationsModalOpen) {
-            setIsNotificationsModalOpen(false);
-          } else if (activeTab === 'settings' && settingsSubView !== 'main') {
+          if (activeTab === 'settings' && settingsSubView !== 'main') {
             setSettingsSubView('main');
           } else {
             setActiveTab('home');
@@ -3109,6 +3259,46 @@ export const App: React.FC = () => {
         </div>
       )}
 
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        transactions={displayTransactions}
+        fixedExpenses={fixedExpenses}
+        incomes={incomes}
+        period={period}
+        onSelectTransaction={(tx) => {
+          setSelectedTransaction(tx);
+          setIsTxModalOpen(true);
+        }}
+        onSelectFixed={(exp) => {
+          setSelectedFixedExpense(exp);
+          setIsFixedModalOpen(true);
+        }}
+        onSelectIncome={(inc) => {
+          setSelectedIncome(inc);
+          setIsIncomeModalOpen(true);
+        }}
+      />
+
+      <NotificationsModal
+        isOpen={isNotificationsModalOpen}
+        onClose={() => setIsNotificationsModalOpen(false)}
+        period={period}
+        kvarAttSpendera={kvarAttSpendera}
+        dagsbudget={dagsbudget}
+        fixedExpenses={fixedExpenses}
+        incomes={incomes}
+        transactions={displayTransactions}
+        onSelectFixed={(exp) => {
+          setSelectedFixedExpense(exp);
+          setIsFixedModalOpen(true);
+        }}
+        onSelectTransaction={(tx) => {
+          setSelectedTransaction(tx);
+          setIsTxModalOpen(true);
+        }}
+      />
+
       <main className="flex-1 w-full max-w-md mx-auto px-4 pt-4">
         <PullToRefresh
           onRefresh={async () => {
@@ -3116,49 +3306,8 @@ export const App: React.FC = () => {
             await refreshBankStatus();
           }}
         >
-          {isSearchModalOpen ? (
-            <SearchModal
-              isOpen={isSearchModalOpen}
-              onClose={() => setIsSearchModalOpen(false)}
-              transactions={displayTransactions}
-              fixedExpenses={fixedExpenses}
-              incomes={incomes}
-              period={period}
-              onSelectTransaction={(tx) => {
-                setSelectedTransaction(tx);
-                setIsTxModalOpen(true);
-              }}
-              onSelectFixed={(exp) => {
-                setSelectedFixedExpense(exp);
-                setIsFixedModalOpen(true);
-              }}
-              onSelectIncome={(inc) => {
-                setSelectedIncome(inc);
-                setIsIncomeModalOpen(true);
-              }}
-            />
-          ) : isNotificationsModalOpen ? (
-            <NotificationsModal
-              isOpen={isNotificationsModalOpen}
-              onClose={() => setIsNotificationsModalOpen(false)}
-              period={period}
-              kvarAttSpendera={kvarAttSpendera}
-              dagsbudget={dagsbudget}
-              fixedExpenses={fixedExpenses}
-              incomes={incomes}
-              transactions={displayTransactions}
-              onSelectFixed={(exp) => {
-                setSelectedFixedExpense(exp);
-                setIsFixedModalOpen(true);
-              }}
-              onSelectTransaction={(tx) => {
-                setSelectedTransaction(tx);
-                setIsTxModalOpen(true);
-              }}
-            />
-          ) : (
-            <>
-              {activeTab === 'home' && (
+          <>
+            {activeTab === 'home' && (
                 <HomeTab
                   period={period}
                   connectedBank={connectedBank}
@@ -3184,6 +3333,9 @@ export const App: React.FC = () => {
                   }}
                   onNavigateToFixed={() => setActiveTab('fixed')}
                   onNavigateToTransactions={() => setActiveTab('transactions')}
+                  onToggleHeart={handleToggleHeart}
+                  onTogglePackage={handleTogglePackage}
+                  onExcludeTransaction={handleExcludeTransaction}
                 />
               )}
 
@@ -3204,8 +3356,17 @@ export const App: React.FC = () => {
                     setSelectedFixedExpense(exp);
                     setIsFixedModalOpen(true);
                   }}
+                  onAddIncome={() => {
+                    setSelectedIncome(null);
+                    setIsIncomeModalOpen(true);
+                  }}
+                  onAddFixed={() => {
+                    setSelectedFixedExpense(null);
+                    setIsFixedModalOpen(true);
+                  }}
                   onDeleteIncome={handleDeleteIncome}
                   onDeleteFixed={handleDeleteFixed}
+                  onUpdateFixed={handleUpdateFixed}
                 />
               )}
 
@@ -3252,19 +3413,26 @@ export const App: React.FC = () => {
                     setSelectedTransaction(tx);
                     setIsTxModalOpen(true);
                   }}
+                  onAddTransaction={() => {
+                    setSelectedTransaction(null);
+                    setIsTxModalOpen(true);
+                  }}
                   onDeleteTransaction={handleDeleteTransaction}
+                  onToggleHeart={handleToggleHeart}
+                  onTogglePackage={handleTogglePackage}
+                  onExcludeTransaction={handleExcludeTransaction}
                 />
               )}
 
               {activeTab === 'saved' && (
-                <div className="space-y-3.5 pb-36 sm:pb-40 animate-fade-in">
+                <div className="ui-page">
                   {(() => {
                     const heartedList = displayTransactions.filter((t) => t.isHearted);
                     if (heartedList.length === 0) {
                       return (
-                        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
-                          <Heart size={20} className="text-[var(--text-muted)] mx-auto mb-2" />
-                          <p className="text-xs font-semibold text-[var(--text-primary)]">
+                        <section className="ui-empty-state">
+                          <Heart size={20} className="ui-empty-icon" />
+                          <p className="ui-empty-title">
                             Inga sparade köp
                           </p>
                         </section>
@@ -3290,23 +3458,21 @@ export const App: React.FC = () => {
                         new Intl.NumberFormat('sv-SE').format(Math.round(Math.abs(net))) + ' kr';
 
                       return (
-                        <section key={`saved-${dateKey}`} className="space-y-1.5">
-                          <div className="flex items-center justify-between px-1">
-                            <h3 className="font-display font-bold text-xs text-[var(--text-secondary)]">
+                        <section key={`saved-${dateKey}`} className="ui-section">
+                          <div className="ui-section-header">
+                            <h3 className="ui-section-title">
                               {formatSwedishDateHeading(dateKey)}
                             </h3>
                             <span
-                              className={`text-xs font-semibold tabular-nums ${
-                                net > 0
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : 'text-[var(--text-muted)]'
+                              className={`ui-section-meta ${
+                                net > 0 ? 'ui-row-amount-income' : ''
                               }`}
                             >
                               {net > 0 ? `+${netStr}` : `-${netStr}`}
                             </span>
                           </div>
 
-                          <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-3.5 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)]">
+                          <div className="ui-list-card">
                             {dayItems.map((tx) => {
                               const isIncome = tx.type === 'income';
                               const formattedAmt =
@@ -3319,9 +3485,9 @@ export const App: React.FC = () => {
                                     setSelectedTransaction(tx);
                                     setIsTxModalOpen(true);
                                   }}
-                                  className="w-full py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                                  className="ui-tx-row"
                                 >
-                                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
                                     <ItemLogo
                                       name={tx.title}
                                       category={tx.category}
@@ -3334,45 +3500,44 @@ export const App: React.FC = () => {
                                         <span className="truncate">{tx.title}</span>
                                         {tx.isHearted && (
                                           <Heart
-                                            size={12}
+                                            size={13}
                                             weight="fill"
                                             className="text-rose-500 shrink-0"
                                           />
                                         )}
                                         {tx.isWaitingForPackage && (
                                           <Package
-                                            size={12}
+                                            size={13}
                                             weight="fill"
                                             className="text-amber-500 shrink-0"
                                           />
                                         )}
                                         {tx.receiptUrl && (
                                           <Paperclip
-                                            size={12}
+                                            size={13}
                                             weight="bold"
                                             className="text-[var(--text-secondary)] shrink-0"
                                           />
                                         )}
                                       </span>
-                                      <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                                        <CategoryIcon category={tx.category} size={11} />
+                                      <span className="ui-row-subtitle flex items-center gap-1">
                                         <span className="truncate">{tx.category}</span>
                                       </span>
                                     </div>
                                   </div>
                                   <div className="text-right shrink-0">
                                     <span
-                                      className={`font-display font-bold tabular-nums block ${
-                                        isIncome
-                                          ? 'text-emerald-600 dark:text-emerald-400'
-                                          : 'text-[var(--text-primary)]'
+                                      className={`ui-row-amount ${
+                                        isIncome ? 'ui-row-amount-income' : ''
                                       }`}
                                     >
                                       {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
                                     </span>
-                                    <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
-                                      {getTransactionTime(tx)}
-                                    </span>
+                                    {getTransactionTime(tx) && (
+                                      <span className="ui-row-meta">
+                                        {getTransactionTime(tx)}
+                                      </span>
+                                    )}
                                   </div>
                                 </button>
                               );
@@ -3386,17 +3551,17 @@ export const App: React.FC = () => {
               )}
 
               {activeTab === 'packages' && (
-                <div className="space-y-3.5 pb-36 sm:pb-40 animate-fade-in">
+                <div className="ui-page">
                   {(() => {
                     const packageList = displayTransactions.filter((t) => t.isWaitingForPackage);
                     if (packageList.length === 0) {
                       return (
-                        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
-                          <Package size={20} className="text-[var(--text-muted)] mx-auto mb-2" />
-                          <p className="text-xs font-semibold text-[var(--text-primary)]">
+                        <section className="ui-empty-state">
+                          <Package size={20} className="ui-empty-icon" />
+                          <p className="ui-empty-title">
                             Inga paket på väg
                           </p>
-                          <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                          <p className="ui-empty-sub">
                             Öppna en transaktion och tryck på paketsymbolen för att hålla koll på beställningar du väntar på.
                           </p>
                         </section>
@@ -3422,23 +3587,21 @@ export const App: React.FC = () => {
                         new Intl.NumberFormat('sv-SE').format(Math.round(Math.abs(net))) + ' kr';
 
                       return (
-                        <section key={`pkg-${dateKey}`} className="space-y-1.5">
-                          <div className="flex items-center justify-between px-1">
-                            <h3 className="font-display font-bold text-xs text-[var(--text-secondary)]">
+                        <section key={`pkg-${dateKey}`} className="ui-section">
+                          <div className="ui-section-header">
+                            <h3 className="ui-section-title">
                               {formatSwedishDateHeading(dateKey)}
                             </h3>
                             <span
-                              className={`text-xs font-semibold tabular-nums ${
-                                net > 0
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : 'text-[var(--text-muted)]'
+                              className={`ui-section-meta ${
+                                net > 0 ? 'ui-row-amount-income' : ''
                               }`}
                             >
                               {net > 0 ? `+${netStr}` : `-${netStr}`}
                             </span>
                           </div>
 
-                          <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-3.5 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)]">
+                          <div className="ui-list-card">
                             {dayItems.map((tx) => {
                               const isIncome = tx.type === 'income';
                               const formattedAmt =
@@ -3446,7 +3609,7 @@ export const App: React.FC = () => {
                               return (
                                 <div
                                   key={tx.id}
-                                  className="py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px]"
+                                  className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm"
                                 >
                                   <button
                                     type="button"
@@ -3454,7 +3617,7 @@ export const App: React.FC = () => {
                                       setSelectedTransaction(tx);
                                       setIsTxModalOpen(true);
                                     }}
-                                    className="flex items-center gap-2.5 min-w-0 flex-1 text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
+                                    className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
                                   >
                                     <ItemLogo
                                       name={tx.title}
@@ -3468,28 +3631,27 @@ export const App: React.FC = () => {
                                         <span className="truncate">{tx.title}</span>
                                         {tx.isHearted && (
                                           <Heart
-                                            size={12}
+                                            size={13}
                                             weight="fill"
                                             className="text-rose-500 shrink-0"
                                           />
                                         )}
                                         {tx.isWaitingForPackage && (
                                           <Package
-                                            size={12}
+                                            size={13}
                                             weight="fill"
                                             className="text-amber-500 shrink-0"
                                           />
                                         )}
                                         {tx.receiptUrl && (
                                           <Paperclip
-                                            size={12}
+                                            size={13}
                                             weight="bold"
                                             className="text-[var(--text-secondary)] shrink-0"
                                           />
                                         )}
                                       </span>
-                                      <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                                        <CategoryIcon category={tx.category} size={11} />
+                                      <span className="ui-row-subtitle flex items-center gap-1">
                                         <span className="truncate">{tx.category}</span>
                                       </span>
                                     </div>
@@ -3497,17 +3659,17 @@ export const App: React.FC = () => {
                                   <div className="flex items-center gap-2.5 shrink-0">
                                     <div className="text-right">
                                       <span
-                                        className={`font-display font-bold tabular-nums block ${
-                                          isIncome
-                                            ? 'text-emerald-600 dark:text-emerald-400'
-                                            : 'text-[var(--text-primary)]'
+                                        className={`ui-row-amount ${
+                                          isIncome ? 'ui-row-amount-income' : ''
                                         }`}
                                       >
                                         {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
                                       </span>
-                                      <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
-                                        {getTransactionTime(tx)}
-                                      </span>
+                                      {getTransactionTime(tx) && (
+                                        <span className="ui-row-meta">
+                                          {getTransactionTime(tx)}
+                                        </span>
+                                      )}
                                     </div>
                                     <button
                                       type="button"
@@ -3530,11 +3692,11 @@ export const App: React.FC = () => {
               )}
 
               {activeTab === 'receipts' && (
-                <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
+                <div className="ui-page">
 
                   {displayTransactions.filter((t) => Boolean(t.receiptUrl)).length > 0 ||
                   fixedExpenses.filter((f) => Boolean(f.receiptUrl)).length > 0 ? (
-                    <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-3.5 py-0.5 sm:px-4 sm:py-1">
+                    <section className="ui-list-card">
                       <div className="divide-y divide-[var(--border-subtle)]">
                         {fixedExpenses
                           .filter((f) => Boolean(f.receiptUrl))
@@ -3545,7 +3707,7 @@ export const App: React.FC = () => {
                             return (
                               <div
                                 key={`receipt-fix-${exp.id}`}
-                                className="py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px]"
+                                className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm"
                               >
                                 <button
                                   type="button"
@@ -3553,7 +3715,7 @@ export const App: React.FC = () => {
                                     setSelectedFixedExpense(exp);
                                     setIsFixedModalOpen(true);
                                   }}
-                                  className="flex items-center gap-2.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
+                                  className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
                                 >
                                   <ItemLogo
                                     name={exp.name}
@@ -3563,11 +3725,10 @@ export const App: React.FC = () => {
                                     isRecurring={true}
                                   />
                                   <div className="min-w-0 flex-1">
-                                    <span className="font-semibold text-[var(--text-primary)] block truncate">
+                                    <span className="ui-row-title">
                                       {exp.name}
                                     </span>
-                                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                                      <CategoryIcon category={exp.category} size={11} />
+                                    <span className="ui-row-subtitle flex items-center gap-1">
                                       <span className="truncate">{exp.category}</span>
                                     </span>
                                   </div>
@@ -3575,20 +3736,24 @@ export const App: React.FC = () => {
 
                                 <div className="flex items-center gap-2.5 shrink-0">
                                   <div className="text-right">
-                                    <span className="font-display font-bold tabular-nums text-[var(--text-primary)] block">
+                                    <span className="ui-row-amount">
                                       -{formattedAmt}
                                     </span>
-                                    <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 truncate max-w-[110px]">
+                                    <span className="ui-row-meta truncate max-w-[110px]">
                                       {exp.receiptName || 'Kvitto'}
                                     </span>
                                   </div>
                                   {exp.receiptUrl && (
-                                    <a
-                                      href={exp.receiptUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-hover)] shrink-0"
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPreviewReceipt({
+                                          url: exp.receiptUrl!,
+                                          name: exp.receiptName || exp.name || 'Kvitto',
+                                        });
+                                      }}
+                                      className="ui-icon-btn"
                                       title="Öppna kvitto"
                                     >
                                       {exp.receiptUrl.startsWith('data:image/') ? (
@@ -3596,7 +3761,7 @@ export const App: React.FC = () => {
                                       ) : (
                                         <FileText size={14} />
                                       )}
-                                    </a>
+                                    </button>
                                   )}
                                 </div>
                               </div>
@@ -3612,7 +3777,7 @@ export const App: React.FC = () => {
                             return (
                               <div
                                 key={`receipt-tx-${tx.id}`}
-                                className="py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px]"
+                                className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[13px] sm:text-sm"
                               >
                                 <button
                                   type="button"
@@ -3620,7 +3785,7 @@ export const App: React.FC = () => {
                                     setSelectedTransaction(tx);
                                     setIsTxModalOpen(true);
                                   }}
-                                  className="flex items-center gap-2.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
+                                  className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
                                 >
                                   <ItemLogo
                                     name={tx.title}
@@ -3634,28 +3799,27 @@ export const App: React.FC = () => {
                                       <span className="truncate">{tx.title}</span>
                                       {tx.isHearted && (
                                         <Heart
-                                          size={12}
+                                          size={13}
                                           weight="fill"
                                           className="text-rose-500 shrink-0"
                                         />
                                       )}
                                       {tx.isWaitingForPackage && (
                                         <Package
-                                          size={12}
+                                          size={13}
                                           weight="fill"
                                           className="text-amber-500 shrink-0"
                                         />
                                       )}
                                       {tx.receiptUrl && (
                                         <Paperclip
-                                          size={12}
+                                          size={13}
                                           weight="bold"
                                           className="text-[var(--text-secondary)] shrink-0"
                                         />
                                       )}
                                     </span>
-                                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                                      <CategoryIcon category={tx.category} size={11} />
+                                    <span className="ui-row-subtitle flex items-center gap-1">
                                       <span className="truncate">{tx.category}</span>
                                     </span>
                                   </div>
@@ -3664,25 +3828,27 @@ export const App: React.FC = () => {
                                 <div className="flex items-center gap-2.5 shrink-0">
                                   <div className="text-right">
                                     <span
-                                      className={`font-display font-bold tabular-nums block ${
-                                        isIncome
-                                          ? 'text-emerald-600 dark:text-emerald-400'
-                                          : 'text-[var(--text-primary)]'
+                                      className={`ui-row-amount ${
+                                        isIncome ? 'ui-row-amount-income' : ''
                                       }`}
                                     >
                                       {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
                                     </span>
-                                    <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 truncate max-w-[110px]">
+                                    <span className="ui-row-meta truncate max-w-[110px]">
                                       {tx.receiptName || tx.date}
                                     </span>
                                   </div>
                                   {tx.receiptUrl && (
-                                    <a
-                                      href={tx.receiptUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-hover)] shrink-0"
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPreviewReceipt({
+                                          url: tx.receiptUrl!,
+                                          name: tx.receiptName || tx.title || 'Kvitto',
+                                        });
+                                      }}
+                                      className="ui-icon-btn"
                                       title="Öppna kvitto"
                                     >
                                       {tx.receiptUrl.startsWith('data:image/') ? (
@@ -3690,7 +3856,7 @@ export const App: React.FC = () => {
                                       ) : (
                                         <FileText size={14} />
                                       )}
-                                    </a>
+                                    </button>
                                   )}
                                 </div>
                               </div>
@@ -3699,12 +3865,12 @@ export const App: React.FC = () => {
                       </div>
                     </section>
                   ) : (
-                    <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center">
-                      <Paperclip size={20} className="text-[var(--text-muted)] mx-auto mb-2" />
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">
+                    <section className="ui-empty-state">
+                      <Paperclip size={20} className="ui-empty-icon" />
+                      <p className="ui-empty-title">
                         Inga bifogade kvitton
                       </p>
-                      <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                      <p className="ui-empty-sub">
                         Öppna ett köp eller en fast utgift och välj &quot;Bifoga kvitto&quot; för att samla dem här.
                       </p>
                     </section>
@@ -3717,6 +3883,7 @@ export const App: React.FC = () => {
                   period={period}
                   connectedBank={connectedBank}
                   connections={connections}
+                  accounts={accounts}
                   syncingBank={syncingBank}
                   targetPayday={targetPayday}
                   weekendHandling={weekendHandling}
@@ -3750,8 +3917,7 @@ export const App: React.FC = () => {
                   onSubViewChange={setSettingsSubView}
                 />
               )}
-            </>
-          )}
+          </>
         </PullToRefresh>
       </main>
 
@@ -3770,6 +3936,7 @@ export const App: React.FC = () => {
           fixedExpenses.filter((f) => Boolean(f.receiptUrl)).length
         }
       />
+      </div>
 
       <BankModal
         isOpen={isBankModalOpen}
@@ -3794,6 +3961,12 @@ export const App: React.FC = () => {
           setIsIncomeModalOpen(false);
           setSelectedIncome(null);
         }}
+        onSelectTransaction={(tx) => {
+          setIsIncomeModalOpen(false);
+          setSelectedIncome(null);
+          setSelectedTransaction(tx);
+          setIsTxModalOpen(true);
+        }}
         onSave={handleAddIncome}
         onUpdate={handleUpdateIncome}
         onDelete={handleDeleteIncome}
@@ -3808,6 +3981,12 @@ export const App: React.FC = () => {
           setIsFixedModalOpen(false);
           setSelectedFixedExpense(null);
         }}
+        onSelectTransaction={(tx) => {
+          setIsFixedModalOpen(false);
+          setSelectedFixedExpense(null);
+          setSelectedTransaction(tx);
+          setIsTxModalOpen(true);
+        }}
         onSave={handleAddFixed}
         onUpdate={handleUpdateFixed}
         onDelete={handleDeleteFixed}
@@ -3816,12 +3995,16 @@ export const App: React.FC = () => {
       <TransactionModal
         isOpen={isTxModalOpen}
         initialTransaction={selectedTransaction}
+        transactions={displayTransactions}
         accounts={accounts}
         fixedExpenses={fixedExpenses}
         incomes={incomes}
         onClose={() => {
           setIsTxModalOpen(false);
           setSelectedTransaction(null);
+        }}
+        onSelectTransaction={(tx) => {
+          setSelectedTransaction(tx);
         }}
         onSave={handleAddTransaction}
         onUpdate={handleUpdateTransaction}
@@ -3841,9 +4024,24 @@ export const App: React.FC = () => {
         }}
       />
 
-      {incomingSwishRequest && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-6 text-center space-y-4 shadow-2xl">
+      <BottomSheet
+        isOpen={Boolean(incomingSwishRequest)}
+        onClose={() => {
+          setIncomingSwishRequest(null);
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('swish_pay');
+            url.searchParams.delete('payee');
+            url.searchParams.delete('amount');
+            url.searchParams.delete('msg');
+            window.history.replaceState({}, '', url.pathname + url.search);
+          }
+        }}
+        contentClassName="px-6 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] text-center space-y-4"
+        zIndexClass="z-[200]"
+      >
+        {incomingSwishRequest && (
+          <>
             <div className="w-14 h-14 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto">
               <SwishLogo size={32} />
             </div>
@@ -3871,7 +4069,7 @@ export const App: React.FC = () => {
             <div className="space-y-2">
               <a
                 href={incomingSwishRequest.deepLink}
-                className="w-full py-3 px-4 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+                className="ui-btn-primary"
               >
                 <SwishLogo size={16} />
                 <span>Öppna Swish ({incomingSwishRequest.amount} kr)</span>
@@ -3889,16 +4087,81 @@ export const App: React.FC = () => {
                     window.history.replaceState({}, '', url.pathname + url.search);
                   }
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="w-full ui-btn-secondary"
               >
                 Stäng
               </button>
             </div>
+          </>
+        )}
+      </BottomSheet>
+
+      {/* Floating Undo Toast for Swipe Exclude */}
+      {undoToast && (
+        <div className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[150] w-[calc(100%-2rem)] max-w-sm animate-fade-in">
+          <div className="px-4 py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xl flex items-center justify-between gap-3 text-xs">
+            <span className="font-medium truncate">
+              {undoToast.excluded
+                ? `${undoToast.title} räknas inte i budget`
+                : `${undoToast.title} räknas med i budget`}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const { id, excluded } = undoToast;
+                if (undoTimerRef.current) {
+                  window.clearTimeout(undoTimerRef.current);
+                }
+                setUndoToast(null);
+                handleExcludeTransaction(id, !excluded, true);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-[var(--bg-color)]/15 hover:bg-[var(--bg-color)]/25 font-display font-bold shrink-0 cursor-pointer transition-colors"
+            >
+              Ångra
+            </button>
           </div>
         </div>
       )}
+
+      {/* In-App Receipt Lightbox Sheet */}
+      <BottomSheet
+        isOpen={Boolean(previewReceipt)}
+        onClose={() => setPreviewReceipt(null)}
+        title={previewReceipt?.name || 'Kvitto'}
+        zIndexClass="z-[190]"
+      >
+        {previewReceipt && (
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+              {previewReceipt.url.startsWith('data:image/') ||
+              /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
+                <img
+                  src={previewReceipt.url}
+                  alt={previewReceipt.name}
+                  className="max-h-[56dvh] w-auto object-contain rounded-xl"
+                />
+              ) : (
+                <iframe
+                  src={previewReceipt.url}
+                  title={previewReceipt.name}
+                  className="w-full h-[52dvh] rounded-xl border-0"
+                />
+              )}
+            </div>
+            <a
+              href={previewReceipt.url}
+              download={previewReceipt.name || 'kvitto.jpg'}
+              className="ui-btn-primary"
+            >
+              <FileText size={14} weight="bold" />
+              <span>Spara fil</span>
+            </a>
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 };
+
 
 export default App;

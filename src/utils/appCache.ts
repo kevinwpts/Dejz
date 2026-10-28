@@ -165,7 +165,7 @@ const DISMISSED_FIXED_KEY = 'dejz_dismissed_fixed_merchants_v1';
 const DISMISSED_INCOME_KEY = 'dejz_dismissed_income_merchants_v1';
 const MANUAL_FIXED_OVERRIDES_KEY = 'dejz_manual_fixed_overrides_v1';
 const MANUAL_INCOME_OVERRIDES_KEY = 'dejz_manual_income_overrides_v1';
-const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v1';
+const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v2';
 
 const GENERIC_PLACEHOLDER_MERCHANTS = new Set([
   'banktransaktion',
@@ -253,10 +253,7 @@ export function saveMerchantAlias(rawName: string, targetName: string, category:
     const sourceVariants = extractMerchantKeyVariants(rawName).filter(
       (v) => !isGenericPlaceholderMerchant(v)
     );
-    const targetVariants = extractMerchantKeyVariants(targetName).filter(
-      (v) => !isGenericPlaceholderMerchant(v)
-    );
-    if (sourceVariants.length === 0 && targetVariants.length === 0) return;
+    if (sourceVariants.length === 0) return;
 
     // Flatten alias chains: any existing alias pointing to rawName now points to targetName
     for (const [k, v] of Object.entries(map)) {
@@ -267,9 +264,6 @@ export function saveMerchantAlias(rawName: string, targetName: string, category:
     }
 
     for (const key of sourceVariants) {
-      map[key] = { name: targetName, category };
-    }
-    for (const key of targetVariants) {
       map[key] = { name: targetName, category };
     }
 
@@ -286,28 +280,13 @@ export function resolveMerchantAlias(
 ): { name: string; category: string } | null {
   if (!rawText || isGenericPlaceholderMerchant(rawText)) return null;
   const aliases = aliasesOverride || getMerchantAliases();
-  const entries = Object.entries(aliases).filter(
-    ([k, v]) => !isGenericPlaceholderMerchant(k) && !isGenericPlaceholderMerchant(v?.name)
-  );
-  if (entries.length === 0) return null;
-
   const variants = extractMerchantKeyVariants(rawText).filter(
     (v) => !isGenericPlaceholderMerchant(v)
   );
+  // Endast exakt nyckelmatchning — gör ALDRIG substring-matchning (så att t.ex. "ryde" aldrig matchar "hemköp rydebäck")!
   for (const v of variants) {
     if (aliases[v] && !isGenericPlaceholderMerchant(aliases[v].name)) {
       return aliases[v];
-    }
-  }
-
-  const normText = normalizeMerchantKey(rawText);
-  if (!normText || isGenericPlaceholderMerchant(normText)) return null;
-  // Sort longer keys first for most specific match
-  const sortedEntries = [...entries].sort((a, b) => b[0].length - a[0].length);
-  for (const [aliasKey, info] of sortedEntries) {
-    if (!aliasKey || aliasKey.length < 3) continue;
-    if (normText.includes(aliasKey)) {
-      return info;
     }
   }
 
@@ -437,10 +416,74 @@ export function unDismissIncomeMerchant(name: string): void {
 
 export interface ManualFixedOverride {
   amount?: number;
+  fullAmount?: number;
+  isShared?: boolean;
   dueDay?: number;
   category?: string;
   paymentMethod?: string;
   name?: string;
+}
+
+/**
+ * Compresses an uploaded image file (receipt photo or avatar) via HTML5 Canvas
+ * so Base64 strings stay small (~20-90 KB) and never exceed localStorage quotas.
+ */
+export function compressImageFileToDataUrl(
+  file: File,
+  maxDimension = 1280,
+  quality = 0.74
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () =>
+        typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Read error'));
+      reader.onerror = () => reject(new Error('Read error'));
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      if (typeof dataUrl !== 'string') {
+        reject(new Error('Invalid file data'));
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (width > maxDimension || height > maxDimension) {
+            if (width >= height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
 }
 
 export function getManualFixedOverrides(): Record<string, ManualFixedOverride> {
@@ -894,6 +937,9 @@ export function setShowAccountsOnHome(show: boolean): void {
 }
 
 const TRANSACTION_META_KEY = 'dejz_transaction_meta_v1';
+const CATEGORY_BUDGETS_KEY = 'dejz_category_budgets_v1';
+const REVIEWED_TX_IDS_KEY = 'dejz_reviewed_tx_ids_v1';
+const PRIVACY_BLUR_KEY = 'dejz_privacy_blur_v1';
 
 export interface TransactionMetaPatch {
   isHearted?: boolean;
@@ -902,6 +948,9 @@ export interface TransactionMetaPatch {
   receiptName?: string;
   paymentMethod?: string;
   note?: string;
+  customAmount?: number;
+  originalAmount?: number;
+  linkedSwishTxId?: string;
 }
 
 export function getTransactionMetaMap(): Record<string, TransactionMetaPatch> {
@@ -926,6 +975,86 @@ export function saveTransactionMeta(id: string, patch: TransactionMetaPatch): vo
   }
 }
 
+// --- Category Budgets Persistence ---
+export function getCategoryBudgets(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(CATEGORY_BUDGETS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveCategoryBudget(category: string, amount: number | null): void {
+  if (typeof window === 'undefined' || !category) return;
+  try {
+    const map = getCategoryBudgets();
+    if (amount === null || amount <= 0 || Number.isNaN(amount)) {
+      delete map[category];
+    } else {
+      map[category] = Math.round(amount);
+    }
+    localStorage.setItem(CATEGORY_BUDGETS_KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+// --- Reviewed Transactions Inbox Persistence ---
+export function getReviewedTransactionIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(REVIEWED_TX_IDS_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function hasInitializedReviewedTransactions(): boolean {
+  if (typeof window === 'undefined') return true;
+  return localStorage.getItem(REVIEWED_TX_IDS_KEY) !== null;
+}
+
+export function markTransactionsReviewed(ids: string[]): void {
+  if (typeof window === 'undefined' || !ids || ids.length === 0) return;
+  try {
+    const set = getReviewedTransactionIds();
+    for (const id of ids) {
+      if (id) set.add(id);
+    }
+    localStorage.setItem(REVIEWED_TX_IDS_KEY, JSON.stringify(Array.from(set)));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+// --- Privacy Blur Mode ---
+export function getPrivacyBlurMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(PRIVACY_BLUR_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setPrivacyBlurMode(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(PRIVACY_BLUR_KEY, String(enabled));
+  } catch {
+    // ignore
+  }
+}
+
 // --- Full Supabase Sync & Hydration for All User Choices ---
 export function collectAllUserPreferences(): Record<string, any> {
   if (typeof window === 'undefined') return {};
@@ -945,12 +1074,14 @@ export function collectAllUserPreferences(): Record<string, any> {
     dismissedIncomeMerchants: Array.from(getDismissedIncomeMerchants()),
     manualFixedOverrides: getManualFixedOverrides(),
     manualIncomeOverrides: getManualIncomeOverrides(),
-    merchantAliases: getMerchantAliases(),
+    merchantAliasesV2: getMerchantAliases(),
     categoryRemap: getCategoryRemap(),
     customExpenseCategories: getStoredExpenseCategories(),
     customIncomeCategories: getStoredIncomeCategories(),
     customPaymentMethods: getStoredPaymentMethods(),
     transactionMeta: getTransactionMetaMap(),
+    categoryBudgets: getCategoryBudgets(),
+    reviewedTransactionIds: Array.from(getReviewedTransactionIds()),
     mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
     swishContacts: safeParse('dejz_swish_contacts', []),
     weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
@@ -1052,14 +1183,20 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     if (prefs.manualIncomeOverrides && !localStorage.getItem(MANUAL_INCOME_OVERRIDES_KEY)) {
       localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(prefs.manualIncomeOverrides));
     }
-    if (prefs.merchantAliases && !localStorage.getItem(MERCHANT_ALIASES_KEY)) {
-      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(prefs.merchantAliases));
+    if (prefs.merchantAliasesV2 && !localStorage.getItem(MERCHANT_ALIASES_KEY)) {
+      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(prefs.merchantAliasesV2));
     }
     if (prefs.categoryRemap && !localStorage.getItem(CATEGORY_REMAP_KEY)) {
       localStorage.setItem(CATEGORY_REMAP_KEY, JSON.stringify(prefs.categoryRemap));
     }
     if (prefs.transactionMeta && !localStorage.getItem(TRANSACTION_META_KEY)) {
       localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(prefs.transactionMeta));
+    }
+    if (prefs.categoryBudgets && !localStorage.getItem(CATEGORY_BUDGETS_KEY)) {
+      localStorage.setItem(CATEGORY_BUDGETS_KEY, JSON.stringify(prefs.categoryBudgets));
+    }
+    if (Array.isArray(prefs.reviewedTransactionIds) && !localStorage.getItem(REVIEWED_TX_IDS_KEY)) {
+      localStorage.setItem(REVIEWED_TX_IDS_KEY, JSON.stringify(prefs.reviewedTransactionIds));
     }
     if (
       Array.isArray(prefs.customExpenseCategories) &&

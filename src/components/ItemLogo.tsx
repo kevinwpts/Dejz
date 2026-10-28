@@ -16,13 +16,14 @@ import {
   ArrowsClockwise
 } from '@phosphor-icons/react';
 import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
+import { getCategoryColor } from '../utils/categoryColors';
 import { SwishLogo } from './SwishLogo';
 
 interface ItemLogoProps {
   name: string;
   category?: string;
   logoUrl?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   isRecurring?: boolean;
 }
 
@@ -58,15 +59,17 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-8 rounded-xl',
-    md: 'w-9 h-9 rounded-xl',
+    sm: 'w-9 h-9 rounded-xl',
+    md: 'w-10 h-10 sm:w-11 sm:h-11 rounded-2xl',
     lg: 'w-12 h-12 rounded-2xl',
+    xl: 'w-16 h-16 rounded-[20px]',
   }[size];
 
   const iconSize = {
-    sm: 16,
-    md: 18,
+    sm: 18,
+    md: 20,
     lg: 24,
+    xl: 30,
   }[size];
 
   const renderCategoryIcon = () => {
@@ -119,19 +122,24 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     sm: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
     md: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
     lg: 'w-4 h-4 -bottom-1 -right-1',
+    xl: 'w-5 h-5 -bottom-1 -right-1',
   }[size];
 
   const badgeIconSize = {
     sm: 8,
     md: 8,
     lg: 10,
+    xl: 11,
   }[size];
+
+  const tintColor = getCategoryColor(category || name);
+  const imgPadding = size === 'xl' ? 'p-2' : 'p-1';
 
   const renderInnerContent = () => {
     if (isSwish) {
       return (
         <div
-          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 p-1.5`}
+          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 ${size === 'xl' ? 'p-2.5' : 'p-1.5'}`}
           title="Swish"
         >
           <SwishLogo className="w-full h-full object-contain" />
@@ -142,7 +150,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     if (currentSrc && !imgFailed) {
       return (
         <div
-          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 p-1`}
+          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0 ${imgPadding}`}
         >
           <img
             src={currentSrc}
@@ -157,7 +165,11 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
     return (
       <div
-        className={`${sizeClasses} bg-[var(--surface-raised)] text-[var(--text-secondary)] flex items-center justify-center shrink-0`}
+        className={`${sizeClasses} flex items-center justify-center shrink-0`}
+        style={{
+          backgroundColor: `${tintColor}18`,
+          color: tintColor,
+        }}
       >
         {renderCategoryIcon()}
       </div>

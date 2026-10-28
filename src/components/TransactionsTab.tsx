@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Receipt, MagnifyingGlass, X, Package, Heart, Paperclip } from '@phosphor-icons/react';
+import { Receipt, MagnifyingGlass, X, Package, Heart, Paperclip, Users, Plus } from '@phosphor-icons/react';
 import { TransactionItem, getTransactionTime, FixedExpenseItem, IncomeItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon } from './CategoryIcon';
+import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
@@ -13,19 +13,27 @@ interface TransactionsTabProps {
   incomes?: IncomeItem[];
   totalVariableSpent?: number;
   onSelectTransaction: (tx: TransactionItem) => void;
+  onAddTransaction?: () => void;
   onDeleteTransaction?: (id: string) => void;
+  onToggleHeart?: (id: string, isHearted: boolean) => void;
+  onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
+  onExcludeTransaction?: (id: string, exclude: boolean) => void;
   period?: any;
   targetPayday?: number;
   weekendHandling?: any;
 }
 
-type TxFilterMode = 'all' | 'expense' | 'income';
+type TxFilterMode = 'all' | 'expense' | 'income' | 'saved' | 'packages' | 'receipts';
 
 export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   transactions,
   fixedExpenses = [],
   incomes = [],
   onSelectTransaction,
+  onAddTransaction,
+  onToggleHeart,
+  onTogglePackage,
+  onExcludeTransaction,
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterMode, setFilterMode] = useState<TxFilterMode>('all');
@@ -44,20 +52,43 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     });
   }, [transactions]);
 
-  // Sök- och typfiltrering
+  // Sök- och typfiltrering (inklusive belopp)
   const filteredTransactions = useMemo(() => {
     return sortedTransactions.filter((tx) => {
       if (filterMode === 'expense' && tx.type === 'income') return false;
       if (filterMode === 'income' && tx.type !== 'income') return false;
+      if (filterMode === 'saved' && !tx.isHearted) return false;
+      if (filterMode === 'packages' && !tx.isWaitingForPackage) return false;
+      if (filterMode === 'receipts' && !tx.receiptUrl) return false;
 
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase().trim();
+      const qDigits = q.replace(/\s+/g, '');
+      const amtStr = String(Math.round(Number(tx.amount) || 0));
+      const formattedAmt = new Intl.NumberFormat('sv-SE')
+        .format(Math.round(Number(tx.amount) || 0))
+        .toLowerCase();
       const titleMatch = (tx.title || '').toLowerCase().includes(q);
       const catMatch = (tx.category || '').toLowerCase().includes(q);
       const noteMatch = (tx.note || '').toLowerCase().includes(q);
-      return titleMatch || catMatch || noteMatch;
+      const amountMatch =
+        (qDigits.length > 0 && amtStr.includes(qDigits)) || formattedAmt.includes(q);
+      return titleMatch || catMatch || noteMatch || amountMatch;
     });
   }, [sortedTransactions, searchQuery, filterMode]);
+
+  const savedCount = useMemo(
+    () => sortedTransactions.filter((tx) => tx.isHearted).length,
+    [sortedTransactions]
+  );
+  const packagesCount = useMemo(
+    () => sortedTransactions.filter((tx) => tx.isWaitingForPackage).length,
+    [sortedTransactions]
+  );
+  const receiptsCount = useMemo(
+    () => sortedTransactions.filter((tx) => Boolean(tx.receiptUrl)).length,
+    [sortedTransactions]
+  );
 
   // Gruppera strikt per datum så varje dag enbart visar dagens händelser
   const groupedByDate = useMemo(() => {
@@ -103,33 +134,47 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   ];
 
   return (
-    <div className="space-y-4 pb-36 sm:pb-40 animate-fade-in">
-      {/* Sökfält & Snabbfilter i toppen */}
-      <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-3.5 space-y-2.5">
-        <div className="relative">
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none">
-            <MagnifyingGlass size={16} />
+    <div className="ui-page">
+      {/* Sökfält, Nytt köp & Snabbfilter i toppen */}
+      <div className="ui-card p-3.5 space-y-2.5">
+        <div className="flex items-center gap-2">
+          <div className="ui-search-box flex-1 min-w-0">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none">
+              <MagnifyingGlass size={16} />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Sök köp, belopp eller kategori..."
+              className="ui-search-input"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Sök köp eller kategori..."
-            className="w-full pl-10 pr-8 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-          />
-          {searchQuery && (
+
+          {onAddTransaction && (
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg cursor-pointer"
+              onClick={onAddTransaction}
+              title="Lägg till manuellt köp eller inkomst"
+              className="h-[38px] px-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold flex items-center gap-1.5 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
             >
-              <X size={14} />
+              <Plus size={14} weight="bold" />
+              <span>Nytt</span>
             </button>
           )}
         </div>
 
         {/* Segmented Filter Control */}
-        <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+        <div className="ui-segmented grid-cols-3">
           {filterTabs.map((tab) => {
             const isActive = filterMode === tab.id;
             return (
@@ -137,17 +182,51 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setFilterMode(tab.id)}
-                className={`py-1.5 px-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer truncate ${
-                  isActive
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                }`}
+                className={`ui-segmented-tab ${isActive ? 'ui-segmented-tab-active' : ''}`}
               >
                 {tab.label}
               </button>
             );
           })}
         </div>
+
+        {/* Snabbfilter för Sparade, Paket & Kvitton direkt i samma vy */}
+        {(savedCount > 0 || packagesCount > 0 || receiptsCount > 0 || filterMode === 'saved' || filterMode === 'packages' || filterMode === 'receipts') && (
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+            {(savedCount > 0 || filterMode === 'saved') && (
+              <button
+                type="button"
+                onClick={() => setFilterMode(filterMode === 'saved' ? 'all' : 'saved')}
+                className={`ui-chip ${filterMode === 'saved' ? 'ui-chip-active' : ''}`}
+              >
+                <Heart size={13} weight={filterMode === 'saved' ? 'fill' : 'bold'} className={filterMode === 'saved' ? 'text-rose-400' : 'text-rose-500'} />
+                <span>Sparade</span>
+              </button>
+            )}
+
+            {(packagesCount > 0 || filterMode === 'packages') && (
+              <button
+                type="button"
+                onClick={() => setFilterMode(filterMode === 'packages' ? 'all' : 'packages')}
+                className={`ui-chip ${filterMode === 'packages' ? 'ui-chip-active' : ''}`}
+              >
+                <Package size={13} weight={filterMode === 'packages' ? 'fill' : 'bold'} className={filterMode === 'packages' ? 'text-amber-400' : 'text-amber-500'} />
+                <span>Paket</span>
+              </button>
+            )}
+
+            {(receiptsCount > 0 || filterMode === 'receipts') && (
+              <button
+                type="button"
+                onClick={() => setFilterMode(filterMode === 'receipts' ? 'all' : 'receipts')}
+                className={`ui-chip ${filterMode === 'receipts' ? 'ui-chip-active' : ''}`}
+              >
+                <Paperclip size={13} weight="bold" />
+                <span>Kvitton</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ============================================================== */}
@@ -156,17 +235,17 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       {groupedByDate.length > 0 ? (
         <div className="space-y-3.5">
           {groupedByDate.map((group) => (
-            <section key={group.dateKey} className="space-y-1.5">
+            <section key={group.dateKey} className="ui-section">
               {/* Datumgrupps-rubrik utanför modulen direkt på bakgrunden */}
-              <div className="flex items-center justify-between px-1 text-xs">
-                <span className="font-bold text-[var(--text-secondary)]">
+              <div className="ui-section-header">
+                <span className="ui-section-title">
                   {group.label}
                 </span>
                 <span
-                  className={`font-display font-semibold tabular-nums ${
+                  className={`ui-section-meta ${
                     group.net > 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-[var(--text-muted)]'
+                      ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                      : ''
                   }`}
                 >
                   {group.net > 0
@@ -178,7 +257,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               </div>
 
               {/* Rader i datumgruppen */}
-              <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl px-3.5 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)]">
+              <div className="ui-list-card">
                 {group.items.map((tx) => {
                   const isIncome = tx.type === 'income';
                   const recurringStatus = checkIsRecurringTransaction(
@@ -186,68 +265,108 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     fixedExpenses,
                     incomes
                   );
-                  return (
-                    <button
-                      key={tx.id}
-                      type="button"
-                      onClick={() => onSelectTransaction(tx)}
-                      className="w-full py-2.5 flex items-center justify-between gap-2.5 text-xs sm:text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <ItemLogo
-                          name={tx.title}
-                          category={tx.category}
-                          logoUrl={tx.logo}
-                          size="md"
-                          isRecurring={recurringStatus.isRecurring}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                            <span className="truncate">{tx.title}</span>
-                            {tx.isHearted && (
-                              <Heart
-                                size={12}
-                                weight="fill"
-                                className="text-rose-500 shrink-0"
-                              />
-                            )}
-                            {tx.isWaitingForPackage && (
-                              <Package
-                                size={12}
-                                weight="fill"
-                                className="text-amber-500 shrink-0"
-                              />
-                            )}
-                            {tx.receiptUrl && (
-                              <Paperclip
-                                size={12}
-                                weight="bold"
-                                className="text-[var(--text-secondary)] shrink-0"
-                              />
-                            )}
-                          </span>
-                          <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 truncate mt-0.5">
-                            <CategoryIcon category={tx.category} size={11} />
-                            <span className="truncate">{tx.category}</span>
-                          </span>
-                        </div>
-                      </div>
+                  const isSplit =
+                    tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
 
-                      <div className="text-right shrink-0">
-                        <span
-                          className={`font-display font-bold tabular-nums block ${
-                            isIncome
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
-                        </span>
-                        <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
-                          {getTransactionTime(tx)}
-                        </span>
-                      </div>
-                    </button>
+                  return (
+                    <SwipeableTxRow
+                      key={tx.id}
+                      isHearted={tx.isHearted}
+                      isWaitingForPackage={tx.isWaitingForPackage}
+                      isExcluded={tx.isExcluded}
+                      onToggleHeart={
+                        onToggleHeart ? () => onToggleHeart(tx.id, !tx.isHearted) : undefined
+                      }
+                      onTogglePackage={
+                        onTogglePackage
+                          ? () => onTogglePackage(tx.id, !tx.isWaitingForPackage)
+                          : undefined
+                      }
+                      onToggleExclude={
+                        onExcludeTransaction
+                          ? () => onExcludeTransaction(tx.id, !tx.isExcluded)
+                          : undefined
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onSelectTransaction(tx)}
+                        className="ui-tx-row bg-[var(--surface-color)]"
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                          <ItemLogo
+                            name={tx.title}
+                            category={tx.category}
+                            logoUrl={tx.logo}
+                            size="md"
+                            isRecurring={recurringStatus.isRecurring}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title flex items-center gap-1.5">
+                              <span className="truncate">{tx.title}</span>
+                              {tx.isHearted && (
+                                <Heart
+                                  size={13}
+                                  weight="fill"
+                                  className="text-rose-500 shrink-0"
+                                />
+                              )}
+                              {tx.isWaitingForPackage && (
+                                <Package
+                                  size={13}
+                                  weight="fill"
+                                  className="text-amber-500 shrink-0"
+                                />
+                              )}
+                              {tx.receiptUrl && (
+                                <Paperclip
+                                  size={13}
+                                  weight="bold"
+                                  className="text-[var(--text-secondary)] shrink-0"
+                                />
+                              )}
+                              {isSplit && (
+                                <Users
+                                  size={13}
+                                  weight="fill"
+                                  className="text-emerald-500 shrink-0"
+                                  title="Delad utgift"
+                                />
+                              )}
+                            </span>
+                            <span className="ui-row-subtitle flex items-center gap-1">
+                              <span className="truncate">{tx.category}</span>
+                              {isSplit && tx.originalAmount && (
+                                <span className="text-[11px] opacity-75 shrink-0">
+                                  · av {formatKr(tx.originalAmount)}
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span
+                            className={isIncome ? 'ui-row-amount-income' : 'ui-row-amount'}
+                          >
+                            {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                          </span>
+                          {(() => {
+                            const realTime = getTransactionTime(tx);
+                            const statusSub =
+                              realTime ||
+                              (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                                ? 'Reserverat'
+                                : '');
+                            return statusSub ? (
+                              <span className="ui-row-meta">
+                                {statusSub}
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
+                      </button>
+                    </SwipeableTxRow>
                   );
                 })}
               </div>
@@ -255,11 +374,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           ))}
         </div>
       ) : (
-        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-8 text-center animate-fade-in">
-          <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center mx-auto mb-2">
+        <section className="ui-empty-state animate-fade-in">
+          <div className="ui-empty-icon">
             <Receipt size={18} weight="duotone" />
           </div>
-          <p className="text-xs font-semibold text-[var(--text-primary)]">
+          <p className="ui-empty-title">
             Inga transaktioner hittades
           </p>
         </section>

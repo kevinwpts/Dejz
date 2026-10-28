@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Tag,
   Plus,
   Trash,
-  PencilSimple,
   Check,
   X,
   ArrowCounterClockwise,
+  CaretRight,
 } from '@phosphor-icons/react';
 import { Category } from '../types';
+import { BottomSheet } from './ui/BottomSheet';
 import {
   DEFAULT_EXPENSE_CATEGORIES,
   DEFAULT_INCOME_CATEGORIES,
@@ -49,14 +49,13 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
     getStoredIncomeCategories()
   );
 
-  const [isAdding, setIsAdding] = useState(false);
-  const [newCatName, setNewCatName] = useState('');
-  const [newCatIcon, setNewCatIcon] = useState('tag');
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editIcon, setEditIcon] = useState('tag');
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  // Sheet modal state
+  const [sheetMode, setSheetMode] = useState<'new' | 'edit' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [formName, setFormName] = useState('');
+  const [formIcon, setFormIcon] = useState('tag');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const currentList = activeTab === 'expense' ? expenseCategories : incomeCategories;
 
@@ -89,127 +88,132 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
     return counts;
   }, [activeTab, transactions, fixedExpenses, incomes]);
 
-  const handleStartEdit = (cat: Category) => {
-    setEditingId(cat.id);
-    setEditName(cat.name);
-    setEditIcon(cat.icon || 'tag');
-    setIsAdding(false);
-    setConfirmDeleteId(null);
+  const openEditSheet = (cat: Category) => {
+    setSelectedCategory(cat);
+    setFormName(cat.name);
+    setFormIcon(cat.icon || 'tag');
+    setShowDeleteConfirm(false);
+    setSheetMode('edit');
   };
 
-  const handleSaveEdit = (id: string) => {
-    const trimmed = editName.trim();
+  const openNewSheet = () => {
+    setSelectedCategory(null);
+    setFormName('');
+    setFormIcon('tag');
+    setShowDeleteConfirm(false);
+    setSheetMode('new');
+  };
+
+  const closeSheet = () => {
+    setSheetMode(null);
+    setSelectedCategory(null);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleSaveSheet = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = formName.trim();
     if (!trimmed) return;
 
-    const targetCat = currentList.find((c) => c.id === id);
-    const oldName = targetCat?.name || trimmed;
-    const isProtectedOvrigt = oldName.toLowerCase().trim() === 'övrigt';
-    const finalName = isProtectedOvrigt ? 'Övrigt' : trimmed;
+    if (sheetMode === 'edit' && selectedCategory) {
+      const oldName = selectedCategory.name || trimmed;
+      const isProtectedOvrigt = oldName.toLowerCase().trim() === 'övrigt';
+      const finalName = isProtectedOvrigt ? 'Övrigt' : trimmed;
 
-    if (activeTab === 'expense') {
-      const next = expenseCategories.map((c) =>
-        c.id === id ? { ...c, name: finalName, icon: editIcon } : c
-      );
-      setExpenseCategories(next);
-      saveStoredExpenseCategories(next);
-    } else {
-      const next = incomeCategories.map((c) =>
-        c.id === id ? { ...c, name: finalName, icon: editIcon } : c
-      );
-      setIncomeCategories(next);
-      saveStoredIncomeCategories(next);
-    }
-
-    if (oldName.toLowerCase().trim() !== finalName.toLowerCase().trim()) {
-      propagateCategoryChangeInCache(oldName, finalName);
-      if (onCategoryMutated) {
-        onCategoryMutated(oldName, finalName, activeTab);
+      if (activeTab === 'expense') {
+        const next = expenseCategories.map((c) =>
+          c.id === selectedCategory.id ? { ...c, name: finalName, icon: formIcon } : c
+        );
+        setExpenseCategories(next);
+        saveStoredExpenseCategories(next);
+      } else {
+        const next = incomeCategories.map((c) =>
+          c.id === selectedCategory.id ? { ...c, name: finalName, icon: formIcon } : c
+        );
+        setIncomeCategories(next);
+        saveStoredIncomeCategories(next);
       }
-    } else if (onCategoryMutated) {
-      // Trigger re-render for icon updates
-      onCategoryMutated(finalName, finalName, activeTab);
+
+      if (oldName.toLowerCase().trim() !== finalName.toLowerCase().trim()) {
+        propagateCategoryChangeInCache(oldName, finalName);
+        if (onCategoryMutated) {
+          onCategoryMutated(oldName, finalName, activeTab);
+        }
+      } else if (onCategoryMutated) {
+        onCategoryMutated(finalName, finalName, activeTab);
+      }
+      closeSheet();
+      return;
     }
 
-    setEditingId(null);
+    if (sheetMode === 'new') {
+      if (currentList.some((c) => c.name.toLowerCase().trim() === trimmed.toLowerCase())) {
+        closeSheet();
+        return;
+      }
+
+      const newId = `custom-${Date.now()}-${trimmed.toLowerCase().replace(/\s+/g, '-')}`;
+      const newCat: Category = {
+        id: newId,
+        name: trimmed,
+        icon: formIcon || 'tag',
+      };
+
+      if (activeTab === 'expense') {
+        const ovrigtIdx = expenseCategories.findIndex(
+          (c) => c.name.toLowerCase().trim() === 'övrigt'
+        );
+        const next =
+          ovrigtIdx >= 0
+            ? [
+                ...expenseCategories.slice(0, ovrigtIdx),
+                newCat,
+                ...expenseCategories.slice(ovrigtIdx),
+              ]
+            : [...expenseCategories, newCat];
+        setExpenseCategories(next);
+        saveStoredExpenseCategories(next);
+      } else {
+        const ovrigtIdx = incomeCategories.findIndex(
+          (c) => c.name.toLowerCase().trim() === 'övrigt'
+        );
+        const next =
+          ovrigtIdx >= 0
+            ? [
+                ...incomeCategories.slice(0, ovrigtIdx),
+                newCat,
+                ...incomeCategories.slice(ovrigtIdx),
+              ]
+            : [...incomeCategories, newCat];
+        setIncomeCategories(next);
+        saveStoredIncomeCategories(next);
+      }
+
+      closeSheet();
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const targetCat = currentList.find((c) => c.id === id);
-    if (!targetCat) return;
-    if (targetCat.name.toLowerCase().trim() === 'övrigt') return;
+  const handleDelete = () => {
+    if (!selectedCategory) return;
+    if (selectedCategory.name.toLowerCase().trim() === 'övrigt') return;
 
     if (activeTab === 'expense') {
       if (expenseCategories.length <= 1) return;
-      const next = expenseCategories.filter((c) => c.id !== id);
+      const next = expenseCategories.filter((c) => c.id !== selectedCategory.id);
       setExpenseCategories(next);
       saveStoredExpenseCategories(next);
     } else {
       if (incomeCategories.length <= 1) return;
-      const next = incomeCategories.filter((c) => c.id !== id);
+      const next = incomeCategories.filter((c) => c.id !== selectedCategory.id);
       setIncomeCategories(next);
       saveStoredIncomeCategories(next);
     }
 
-    propagateCategoryChangeInCache(targetCat.name, 'Övrigt');
+    propagateCategoryChangeInCache(selectedCategory.name, 'Övrigt');
     if (onCategoryMutated) {
-      onCategoryMutated(targetCat.name, 'Övrigt', activeTab);
+      onCategoryMutated(selectedCategory.name, 'Övrigt', activeTab);
     }
-    setConfirmDeleteId(null);
-  };
-
-  const handleAddCategory = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = newCatName.trim();
-    if (!trimmed) return;
-
-    // Prevent exact duplicate category names
-    if (currentList.some((c) => c.name.toLowerCase().trim() === trimmed.toLowerCase())) {
-      setNewCatName('');
-      setIsAdding(false);
-      return;
-    }
-
-    const newId = `custom-${Date.now()}-${trimmed.toLowerCase().replace(/\s+/g, '-')}`;
-    const newCat: Category = {
-      id: newId,
-      name: trimmed,
-      icon: newCatIcon || 'tag',
-    };
-
-    if (activeTab === 'expense') {
-      // Insert right before 'Övrigt'
-      const ovrigtIdx = expenseCategories.findIndex(
-        (c) => c.name.toLowerCase().trim() === 'övrigt'
-      );
-      const next =
-        ovrigtIdx >= 0
-          ? [
-              ...expenseCategories.slice(0, ovrigtIdx),
-              newCat,
-              ...expenseCategories.slice(ovrigtIdx),
-            ]
-          : [...expenseCategories, newCat];
-      setExpenseCategories(next);
-      saveStoredExpenseCategories(next);
-    } else {
-      const ovrigtIdx = incomeCategories.findIndex(
-        (c) => c.name.toLowerCase().trim() === 'övrigt'
-      );
-      const next =
-        ovrigtIdx >= 0
-          ? [
-              ...incomeCategories.slice(0, ovrigtIdx),
-              newCat,
-              ...incomeCategories.slice(ovrigtIdx),
-            ]
-          : [...incomeCategories, newCat];
-      setIncomeCategories(next);
-      saveStoredIncomeCategories(next);
-    }
-
-    setNewCatName('');
-    setNewCatIcon('tag');
-    setIsAdding(false);
+    closeSheet();
   };
 
   const handleResetToDefaults = () => {
@@ -227,263 +231,245 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
         onCategoryMutated('', '', 'income');
       }
     }
-    setEditingId(null);
-    setIsAdding(false);
-    setConfirmDeleteId(null);
+    setShowResetConfirm(false);
   };
 
+  const isProtectedOvrigt =
+    sheetMode === 'edit' &&
+    selectedCategory?.name.toLowerCase().trim() === 'övrigt';
+  const selectedUsageCount = selectedCategory
+    ? usageCounts[selectedCategory.name.toLowerCase().trim()] || 0
+    : 0;
+
   return (
-    <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center justify-between">
-        <span className="font-display font-bold text-xs text-[var(--text-primary)] flex items-center gap-1.5">
-          <Tag size={14} />
-          <span>Hantera kategorier</span>
-        </span>
+    <div className="space-y-4">
+      {/* Sub-tabs: Utgifter vs Inkomster */}
+      <div className="ui-segmented-surface grid-cols-2">
         <button
           type="button"
-          onClick={handleResetToDefaults}
-          className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
+          onClick={() => setActiveTab('expense')}
+          className={`ui-segmented-tab py-2 ${
+            activeTab === 'expense' ? 'ui-segmented-tab-active font-bold' : ''
+          }`}
         >
-          <ArrowCounterClockwise size={12} />
-          <span>Återställ</span>
+          Utgifter
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('income')}
+          className={`ui-segmented-tab py-2 ${
+            activeTab === 'income' ? 'ui-segmented-tab-active font-bold' : ''
+          }`}
+        >
+          Inkomster
         </button>
       </div>
 
-      <div className="p-4 space-y-3.5">
-        {/* Sub-tabs: Utgifter vs Inkomster */}
-        <div className="grid grid-cols-2 gap-1 rounded-2xl bg-[var(--bg-color)] p-1 border border-[var(--border-subtle)]">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('expense');
-              setEditingId(null);
-              setIsAdding(false);
-              setConfirmDeleteId(null);
-            }}
-            className={`py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'expense'
-                ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            Utgifter ({expenseCategories.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('income');
-              setEditingId(null);
-              setIsAdding(false);
-              setConfirmDeleteId(null);
-            }}
-            className={`py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'income'
-                ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            Inkomster ({incomeCategories.length})
-          </button>
-        </div>
-
-        {/* Categories List */}
-        <div className="divide-y divide-[var(--border-subtle)]">
-          {currentList.map((cat) => {
-            const isEditingThis = editingId === cat.id;
-            const isConfirmingDelete = confirmDeleteId === cat.id;
-            const isProtectedOvrigt = cat.name.toLowerCase().trim() === 'övrigt';
-            const count = usageCounts[cat.name.toLowerCase().trim()] || 0;
-
-            if (isEditingThis) {
-              return (
-                <div key={cat.id} className="py-3 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={editName}
-                      disabled={isProtectedOvrigt}
-                      onChange={(e) => setEditName(e.target.value)}
-                      placeholder="Namn"
-                      autoFocus
-                      className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none disabled:opacity-60"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleSaveEdit(cat.id)}
-                      className="p-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] hover:opacity-90 cursor-pointer"
-                    >
-                      <Check size={14} weight="bold" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(null)}
-                      className="p-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-
-                  {/* Icon Picker */}
-                  <div className="grid grid-cols-7 gap-1.5 max-h-36 overflow-y-auto p-1.5 bg-[var(--bg-color)] rounded-xl border border-[var(--border-subtle)]">
-                    {AVAILABLE_CATEGORY_ICONS.map((item) => {
-                      const IconComponent = item.icon;
-                      const isSelected = editIcon === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setEditIcon(item.id)}
-                          className={`p-2 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                              : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
-                          }`}
-                        >
-                          <IconComponent size={15} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={cat.id} className="py-2.5 first:pt-1 last:pb-1 text-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                    <CategoryIcon category={cat.name} iconId={cat.icon} size={14} badge={true} />
-                    <div className="min-w-0">
-                      <span className="font-semibold text-[var(--text-primary)] block truncate">
-                        {cat.name}
-                      </span>
-                      <span className="text-[11px] text-[var(--text-muted)] tabular-nums">
-                        {count} {count === 1 ? 'post' : 'poster'}
-                        {isProtectedOvrigt ? ' · Standard' : ''}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleStartEdit(cat)}
-                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                      title="Redigera"
-                    >
-                      <PencilSimple size={14} />
-                    </button>
-                    {!isProtectedOvrigt && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setConfirmDeleteId(isConfirmingDelete ? null : cat.id)
-                        }
-                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                        title="Ta bort"
-                      >
-                        <Trash size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {isConfirmingDelete && (
-                  <div className="mt-2 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-2 animate-fade-in">
-                    <span className="text-[11px] font-medium text-rose-700 dark:text-rose-300">
-                      {count > 0
-                        ? `Flytta ${count} st till "Övrigt" och ta bort?`
-                        : 'Ta bort kategorin?'}
-                    </span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDeleteId(null)}
-                        className="px-2 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] text-[11px] font-semibold cursor-pointer"
-                      >
-                        Avbryt
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(cat.id)}
-                        className="px-2 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-semibold cursor-pointer"
-                      >
-                        Ta bort
-                      </button>
-                    </div>
-                  </div>
-                )}
+      {/* Clean Divided List of Categories */}
+      <div className="ui-group-card">
+        {currentList.map((cat) => {
+          const count = usageCounts[cat.name.toLowerCase().trim()] || 0;
+          return (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => openEditSheet(cat)}
+              className="ui-row-btn"
+            >
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <CategoryIcon category={cat.name} iconId={cat.icon} size={15} badge={true} />
+                <span className="ui-row-title">
+                  {cat.name}
+                </span>
               </div>
-            );
-          })}
-        </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {count > 0 && (
+                  <span className="text-xs font-medium text-[var(--text-muted)] tabular-nums">
+                    {count}
+                  </span>
+                )}
+                <CaretRight size={14} className="text-[var(--text-muted)]" />
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Add Category Form / Button */}
-        {isAdding ? (
-          <form
-            onSubmit={handleAddCategory}
-            className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3 animate-fade-in"
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={newCatName}
-                onChange={(e) => setNewCatName(e.target.value)}
-                placeholder="Kategorinamn..."
-                autoFocus
-                className="flex-1 px-3 py-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none"
-              />
+      {/* Bottom Action Bar: Ny kategori + Återställ */}
+      <div className="space-y-2.5">
+        <button
+          type="button"
+          onClick={openNewSheet}
+          className="w-full ui-btn-primary"
+        >
+          <Plus size={15} weight="bold" />
+          <span>Ny kategori</span>
+        </button>
+
+        {showResetConfirm ? (
+          <div className="ui-confirm-neutral">
+            <span className="font-medium text-[var(--text-secondary)]">
+              Återställa standardkategorier?
+            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
-                type="submit"
-                className="px-3 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold hover:opacity-90 cursor-pointer"
+                type="button"
+                onClick={() => setShowResetConfirm(false)}
+                className="ui-btn-sm"
               >
-                Spara
+                Avbryt
               </button>
               <button
                 type="button"
-                onClick={() => setIsAdding(false)}
-                className="p-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)]"
+                onClick={handleResetToDefaults}
+                className="ui-btn-sm-primary"
               >
-                <X size={14} />
+                Återställ
               </button>
             </div>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              className="py-1.5 px-3 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <ArrowCounterClockwise size={13} />
+              <span>Återställ standardkategorier</span>
+            </button>
+          </div>
+        )}
+      </div>
 
-            <div className="grid grid-cols-7 gap-1.5 max-h-36 overflow-y-auto p-1 bg-[var(--surface-color)] rounded-xl border border-[var(--border-subtle)]">
+      {/* ============================================================== */}
+      {/* DEDICATED CATEGORY SHEET MODAL (Redigera eller Ny kategori)    */}
+      {/* ============================================================== */}
+      <BottomSheet isOpen={sheetMode !== null} onClose={closeSheet}>
+        {/* Top Header */}
+        <div className="ui-sheet-header mb-5">
+          <span className="ui-sheet-title">
+            {sheetMode === 'new' ? 'Ny kategori' : 'Redigera kategori'}
+          </span>
+          <button
+            type="button"
+            onClick={closeSheet}
+            className="ui-icon-btn"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Hero 64x64 Live Preview */}
+        <div className="ui-hero-header">
+          <div className="ui-hero-icon">
+            <CategoryIcon
+              category={formName || 'Kategori'}
+              iconId={formIcon}
+              size={28}
+              badge={false}
+            />
+          </div>
+          <h2 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
+            {formName.trim() || 'Namnlös kategori'}
+          </h2>
+        </div>
+
+        <form onSubmit={handleSaveSheet} className="space-y-4">
+          <div className="ui-sheet-group">
+            <label className="ui-input-row">
+              <span className="text-[var(--text-muted)] shrink-0">Namn</span>
+              <input
+                type="text"
+                value={formName}
+                disabled={isProtectedOvrigt}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="Ange namn..."
+                required
+                className="ui-inline-input disabled:opacity-60"
+              />
+            </label>
+          </div>
+
+          {/* Ikonväljare */}
+          <div className="space-y-1.5">
+            <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+              Ikon
+            </span>
+            <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] max-h-52 overflow-y-auto">
               {AVAILABLE_CATEGORY_ICONS.map((item) => {
                 const IconComponent = item.icon;
-                const isSelected = newCatIcon === item.id;
+                const isSelected = formIcon === item.id;
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setNewCatIcon(item.id)}
-                    className={`p-2 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                    onClick={() => setFormIcon(item.id)}
+                    className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
                       isSelected
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                        : 'bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <IconComponent size={15} />
+                    <IconComponent size={17} />
                   </button>
                 );
               })}
             </div>
-          </form>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setIsAdding(true);
-              setEditingId(null);
-              setConfirmDeleteId(null);
-            }}
-            className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Plus size={14} weight="bold" />
-            <span>Ny kategori</span>
-          </button>
-        )}
-      </div>
+          </div>
+
+          {showDeleteConfirm ? (
+            <div className="ui-confirm-danger">
+              <span className="font-medium text-rose-700 dark:text-rose-300">
+                {selectedUsageCount > 0
+                  ? `Flytta ${selectedUsageCount} poster till Övrigt?`
+                  : 'Ta bort kategorin?'}
+              </span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold cursor-pointer"
+                >
+                  Avbryt
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold cursor-pointer"
+                >
+                  Ta bort
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`grid gap-2 ${
+                sheetMode === 'edit' && !isProtectedOvrigt ? 'grid-cols-2' : 'grid-cols-1'
+              }`}
+            >
+              {sheetMode === 'edit' && !isProtectedOvrigt && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="ui-btn-danger"
+                >
+                  <Trash size={14} />
+                  <span>Ta bort</span>
+                </button>
+              )}
+
+              <button
+                type="submit"
+                className="ui-btn-primary"
+              >
+                <Check size={14} weight="bold" />
+                <span>Spara</span>
+              </button>
+            </div>
+          )}
+        </form>
+      </BottomSheet>
     </div>
   );
 };

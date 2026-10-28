@@ -44,12 +44,42 @@ function getSupabaseAdmin() {
   }
 }
 
+// Simple in-memory rate limiter per IP to protect AI and public endpoints
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function createRateLimiter(maxRequests: number, windowMs: number) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const forwarded = req.headers["x-forwarded-for"];
+    const clientIp =
+      (Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0]?.trim()) ||
+      req.socket.remoteAddress ||
+      "unknown";
+    const key = `${req.path}:${clientIp}`;
+    const now = Date.now();
+    const bucket = rateLimitBuckets.get(key);
+
+    if (!bucket || now > bucket.resetAt) {
+      rateLimitBuckets.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+
+    if (bucket.count >= maxRequests) {
+      return res.status(429).json({
+        error: "För många anrop på kort tid. Vänta en liten stund och försök igen.",
+      });
+    }
+
+    bucket.count += 1;
+    return next();
+  };
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: "5mb" }));
 
   // Request Logger
   app.use((req, res, next) => {
@@ -58,10 +88,15 @@ async function startServer() {
     }
     next();
   });
-  
-  app.post('/api/parse-transaction', async (req, res) => {
-    const { text } = req.body;
-    if (!text) return res.status(400).json({ error: 'Missing text' });
+
+  const aiRateLimit = createRateLimiter(30, 60 * 1000); // Max 30 AI calls per minute per IP
+  const feedbackRateLimit = createRateLimiter(10, 60 * 1000); // Max 10 feedback submissions per minute
+
+  app.post('/api/parse-transaction', aiRateLimit, async (req, res) => {
+    const { text } = req.body || {};
+    if (!text || typeof text !== 'string' || text.length > 500) {
+      return res.status(400).json({ error: 'Missing or invalid text' });
+    }
 
     console.log(`[Gemini] Parsing transaction: "${text}"`);
 
@@ -139,7 +174,7 @@ async function startServer() {
     }
   });
 
-  app.post('/api/ai/clean-merchants', async (req, res) => {
+  app.post('/api/ai/clean-merchants', aiRateLimit, async (req, res) => {
     const { items, expenseCategories, incomeCategories } = req.body || {};
     if (!Array.isArray(items) || items.length === 0) {
       return res.json({ results: [] });
@@ -315,9 +350,11 @@ ${JSON.stringify(batch)}`;
     }
   });
 
-  app.post('/api/parse-audio-expense', async (req, res) => {
-    const { audioBase64, mimeType } = req.body;
-    if (!audioBase64) return res.status(400).json({ error: 'Missing audio content' });
+  app.post('/api/parse-audio-expense', aiRateLimit, async (req, res) => {
+    const { audioBase64, mimeType } = req.body || {};
+    if (!audioBase64 || typeof audioBase64 !== 'string') {
+      return res.status(400).json({ error: 'Missing audio content' });
+    }
 
     console.log(`[Gemini Audio] Processing audio input (mimeType: ${mimeType || 'audio/webm'})...`);
 
@@ -443,6 +480,38 @@ ${JSON.stringify(batch)}`;
 
 
 
+  // User Feedback Endpoint (Persists to Supabase feedback table if available)
+  app.post('/api/feedback', feedbackRateLimit, async (req, res) => {
+    const { type, message, userEmail, userName } = req.body || {};
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: 'Meddelande saknas' });
+    }
+
+    const cleanMessage = message.trim().slice(0, 2000);
+    const cleanType = ['idea', 'bug', 'praise'].includes(type) ? type : 'idea';
+    const cleanEmail = typeof userEmail === 'string' ? userEmail.slice(0, 200) : 'anonym';
+    const cleanName = typeof userName === 'string' ? userName.slice(0, 120) : null;
+
+    console.log(`[Feedback] (${cleanType}) from ${cleanEmail}: ${cleanMessage}`);
+
+    const supabaseAdmin = getSupabaseAdmin();
+    if (supabaseAdmin) {
+      try {
+        await supabaseAdmin.from('feedback').insert({
+          type: cleanType,
+          message: cleanMessage,
+          user_email: cleanEmail,
+          user_name: cleanName,
+          created_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.warn('[Feedback] Could not insert into Supabase feedback table:', err);
+      }
+    }
+
+    return res.json({ success: true });
+  });
+
   // API Health Check
   app.get("/api/ping", (req, res) => {
     res.json({ 
@@ -478,7 +547,19 @@ ${JSON.stringify(batch)}`;
 
       // 1. Delete all user data from public tables
       // We do this first to avoid foreign key issues if any exist
-      const tables = ['transactions', 'fixed_expenses', 'income_sources', 'savings_goals', 'feedback', 'profiles'];
+      const tables = [
+        'bank_transactions',
+        'bank_accounts',
+        'bank_provider_sessions',
+        'bank_connections',
+        'bank_auth_states',
+        'transactions',
+        'fixed_expenses',
+        'income_sources',
+        'savings_goals',
+        'feedback',
+        'profiles',
+      ];
       
       for (const table of tables) {
         const { error } = await supabaseAdmin

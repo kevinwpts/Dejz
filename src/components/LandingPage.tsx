@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {
   ArrowRight,
   CaretLeft,
-  Envelope,
-  Lock,
   Eye,
   EyeSlash,
   SpinnerGap,
@@ -26,6 +24,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onContinueExisting,
 }) => {
   const [activePage, setActivePage] = useState<'landing' | 'auth'>('landing');
+  const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
   const [view, setView] = useState<AuthViewMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,10 +38,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     setView(mode);
     setErrorMsg(null);
     setSuccessMsg(null);
+    setSlideDir('forward');
     setActivePage('auth');
   };
 
-  const switchView = (newView: AuthViewMode) => {
+  const backToLanding = () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setSlideDir('back');
+    setActivePage('landing');
+  };
+
+  const switchView = (newView: AuthViewMode, dir: 'forward' | 'back' = 'forward') => {
+    setSlideDir(dir);
     setView(newView);
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -134,6 +142,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
+  const pageAnimClass =
+    slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
+
   if (activePage === 'auth') {
     const title =
       view === 'login'
@@ -143,12 +154,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         : 'Glömt lösenord';
 
     return (
-      <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none">
+      <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none overflow-x-hidden">
         {/* Top Bar */}
         <header className="flex items-center justify-between h-12">
           <button
             type="button"
-            onClick={() => setActivePage('landing')}
+            onClick={() => {
+              if (view === 'forgot_password') {
+                switchView('login', 'back');
+              } else {
+                backToLanding();
+              }
+            }}
             className="p-1.5 -ml-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-1.5"
             aria-label="Tillbaka"
           >
@@ -163,8 +180,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           />
         </header>
 
-        {/* Main Auth Form */}
-        <main className="my-auto py-8 space-y-6">
+        {/* Main Auth Form with directional transition */}
+        <main key={`auth-${view}`} className={`my-auto py-8 space-y-6 ${pageAnimClass}`}>
           <div className="space-y-1.5">
             <h1 className="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-[var(--text-primary)]">
               {title}
@@ -211,7 +228,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div className="flex items-center gap-3">
                 <div className="h-px bg-[var(--border-subtle)] flex-1" />
-                <span className="text-xs font-medium text-[var(--text-muted)]">eller e-post</span>
+                <span className="text-xs font-medium text-[var(--text-muted)]">eller med e-post</span>
                 <div className="h-px bg-[var(--border-subtle)] flex-1" />
               </div>
             </div>
@@ -232,67 +249,60 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">
-                E-postadress
-              </label>
-              <div className="relative">
-                <Envelope
-                  size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-                />
+            {/* Unified Hairline-Divided Card (Zero box-in-box) */}
+            <div className="rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+              <label className="px-4 py-3.5 block cursor-text">
+                <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
+                  E-postadress
+                </span>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="namn@exempel.se"
-                  className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                  className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
                 />
-              </div>
-            </div>
+              </label>
 
-            {view !== 'forgot_password' && (
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-medium text-[var(--text-muted)]">
-                    Lösenord
-                  </label>
-                  {view === 'login' && (
+              {view !== 'forgot_password' && (
+                <div className="px-4 py-3.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)]">
+                      Lösenord
+                    </span>
+                    {view === 'login' && (
+                      <button
+                        type="button"
+                        onClick={() => switchView('forgot_password', 'forward')}
+                        className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                      >
+                        Glömt lösenord?
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Minst 6 tecken"
+                      className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
+                    />
                     <button
                       type="button"
-                      onClick={() => switchView('forgot_password')}
-                      className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0"
+                      aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
                     >
-                      Glömt lösenord?
+                      {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
                     </button>
-                  )}
+                  </div>
                 </div>
-                <div className="relative">
-                  <Lock
-                    size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-                  />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Minst 6 tecken"
-                    className="w-full pl-10 pr-10 py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer"
-                    aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
-                  >
-                    {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <button
               type="submit"
@@ -314,7 +324,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Inget konto än?{' '}
               <button
                 type="button"
-                onClick={() => switchView('register')}
+                onClick={() => switchView('register', 'forward')}
                 className="font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
               >
                 Skapa konto
@@ -326,7 +336,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Har du redan ett konto?{' '}
               <button
                 type="button"
-                onClick={() => switchView('login')}
+                onClick={() => switchView('login', 'back')}
                 className="font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
               >
                 Logga in
@@ -336,7 +346,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {view === 'forgot_password' && (
             <button
               type="button"
-              onClick={() => switchView('login')}
+              onClick={() => switchView('login', 'back')}
               className="text-xs font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
             >
               Tillbaka till inloggning
@@ -348,7 +358,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none">
+    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none overflow-x-hidden">
       {/* Top Bar */}
       <header className="flex items-center justify-between h-12">
         <img
@@ -366,7 +376,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </header>
 
       {/* Main Focal Content */}
-      <main className="my-auto py-8 space-y-7">
+      <main
+        key="landing-main"
+        className={`my-auto py-8 space-y-7 ${
+          slideDir === 'back' ? 'animate-page-back' : 'animate-fade-in'
+        }`}
+      >
         {/* Minimalist Live Card Preview */}
         <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
           <div className="flex items-center justify-between">

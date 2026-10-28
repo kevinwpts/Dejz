@@ -33,6 +33,8 @@ export interface BankConnection {
   environment: BankEnvironment;
   status: 'active' | 'expired' | 'revoked' | 'error';
   valid_until: string | null;
+  days_until_expiry?: number | null;
+  expiring_soon?: boolean;
   last_synced_at: string | null;
   last_error: string | null;
   created_at: string;
@@ -182,6 +184,17 @@ export function compactBankTxRawJson(raw: any): any {
   }
   if (raw.remittance_information !== undefined) {
     compact.remittance_information = raw.remittance_information;
+  }
+  const currencyFields = [
+    'exchange_rate',
+    'instructed_amount',
+    'transaction_amount',
+    'currency_exchange',
+  ];
+  for (const key of currencyFields) {
+    if (raw[key] !== undefined && raw[key] !== null) {
+      compact[key] = raw[key];
+    }
   }
   const timeFields = [
     'transaction_date_time',
@@ -588,6 +601,7 @@ export const bankService = {
     connectionId?: string;
     bankAccountId?: string;
     loadMore?: boolean;
+    fullSync?: boolean;
   }): Promise<{
     connections: BankConnection[];
     accounts: BankAccount[];
@@ -602,6 +616,7 @@ export const bankService = {
       connectionId: params?.connectionId,
       bankAccountId: params?.bankAccountId,
       loadMore: params?.loadMore || false,
+      fullSync: params?.fullSync || false,
     });
     return {
       connections: res.connections || [],
