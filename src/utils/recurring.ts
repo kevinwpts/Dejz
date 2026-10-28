@@ -7,6 +7,7 @@ import {
 
 export interface RecurringMatchResult {
   isRecurring: boolean;
+  hasExactAmountMatch?: boolean;
   type?: 'expense' | 'income';
   matchedName?: string;
   matchedItemId?: string;
@@ -63,6 +64,12 @@ const GENERIC_WRAPPER_WORDS = new Set([
   'forsakring',
   'hemförsäkring',
   'hemforsakring',
+  'bilförsäkring',
+  'bilforsakring',
+  'barnförsäkring',
+  'barnforsakring',
+  'olycksfallsförsäkring',
+  'olycksfallsforsakring',
   'el',
   'bredband',
   'mobil',
@@ -110,11 +117,26 @@ function isEverydayGroceryPurchase(combinedNorm: string): boolean {
   return EVERYDAY_GROCERY_OR_FOOD_KEYWORDS.some((kw) => combinedNorm.includes(kw));
 }
 
-export function findMatchingFixedExpense(
+function getFixedExpenseAmountDistance(exp: FixedExpenseItem, txAmount: number): number {
+  const expAmt = Math.round(Math.abs(Number(exp.amount) || 0));
+  const fullAmt = exp.fullAmount ? Math.round(Math.abs(Number(exp.fullAmount) || 0)) : 0;
+  const distPrimary = Math.abs(expAmt - txAmount);
+  const distFull = fullAmt > 0 ? Math.abs(fullAmt - txAmount) : Infinity;
+  return Math.min(distPrimary, distFull);
+}
+
+export function isFixedExpenseAmountMatch(exp: FixedExpenseItem, txAmount: number): boolean {
+  if (!txAmount || txAmount <= 0) return true;
+  const dist = getFixedExpenseAmountDistance(exp, txAmount);
+  const refAmt = Math.max(exp.amount || 0, exp.fullAmount || 0, txAmount);
+  return dist <= Math.max(10, Math.round(refAmt * 0.08));
+}
+
+export function findAllMatchingFixedExpensesByMerchant(
   tx: Partial<TransactionItem> | string | null | undefined,
   fixedExpenses?: FixedExpenseItem[]
-): FixedExpenseItem | null {
-  if (!tx || !fixedExpenses || fixedExpenses.length === 0) return null;
+): FixedExpenseItem[] {
+  if (!tx || !fixedExpenses || fixedExpenses.length === 0) return [];
 
   const isStr = typeof tx === 'string';
   const txTitleNorm = normalizeMerchantKey(isStr ? tx : tx.title || '');
@@ -125,6 +147,7 @@ export function findMatchingFixedExpense(
   );
 
   const isGrocery = combinedNorm ? isEverydayGroceryPurchase(combinedNorm) : false;
+  const matches: FixedExpenseItem[] = [];
 
   if (combinedNorm) {
     for (const exp of fixedExpenses) {
@@ -132,47 +155,95 @@ export function findMatchingFixedExpense(
       const expOrigNorm = exp.originalName ? normalizeMerchantKey(exp.originalName) : '';
       if (!expNameNorm) continue;
 
-      // Exact match on normalized title or originalName always wins
       if (
         txTitleNorm === expNameNorm ||
         (expOrigNorm && txTitleNorm === expOrigNorm)
       ) {
-        return exp;
+        matches.push(exp);
+        continue;
       }
 
-      // Never let an everyday grocery/restaurant trip fuzzy-match a fixed expense
       if (isGrocery && !isEverydayGroceryPurchase(expNameNorm)) {
         continue;
       }
 
+      let matchedThisExp = false;
       const candidateNames = [exp.name, exp.originalName].filter(Boolean) as string[];
       for (const candName of candidateNames) {
+        if (matchedThisExp) break;
         const variants = extractMerchantKeyVariants(candName);
         for (const v of variants) {
-          if (v.length >= 3 && (combinedNorm.includes(v) || (txTitleNorm.length >= 4 && v.includes(txTitleNorm)))) {
-            return exp;
+          if (
+            v.length >= 3 &&
+            (combinedNorm.includes(v) || (txTitleNorm.length >= 4 && v.includes(txTitleNorm)))
+          ) {
+            matches.push(exp);
+            matchedThisExp = true;
+            break;
           }
         }
+        if (matchedThisExp) break;
 
         const brandTokens = extractSpecificBrandTokens(candName);
         for (const token of brandTokens) {
-          // Guard against "max" matching "max burgers" or "ica" matching "ica kvantum"
           if (token === 'max' || token === 'ica' || token === 'coop' || token === 'apple') {
             continue;
           }
           if (token.length >= 5 && combinedNorm.includes(token)) {
-            return exp;
+            matches.push(exp);
+            matchedThisExp = true;
+            break;
           }
         }
       }
     }
   }
 
+  return matches;
+}
+
+export function findMatchingFixedExpense(
+  tx: Partial<TransactionItem> | string | null | undefined,
+  fixedExpenses?: FixedExpenseItem[]
+): FixedExpenseItem | null {
+  if (!tx || !fixedExpenses || fixedExpenses.length === 0) return null;
+
+  const isStr = typeof tx === 'string';
+  const txTitleNorm = normalizeMerchantKey(isStr ? tx : tx.title || '');
+  const txAmt = !isStr ? Math.round(Math.abs(Number(tx.amount) || 0)) : 0;
+
+  const candidates = findAllMatchingFixedExpensesByMerchant(tx, fixedExpenses);
+  if (candidates.length > 0) {
+    if (candidates.length === 1) {
+      return candidates[0];
+    }
+    // Om användaren har flera fasta utgifter hos samma aktör (t.ex. 3 olika försäkringar hos Folksam),
+    // prioritera alltid den fasta utgift vars titel ELLER belopp stämmer bäst överens med transaktionen!
+    if (txAmt > 0) {
+      const sorted = [...candidates].sort((a, b) => {
+        const distA = getFixedExpenseAmountDistance(a, txAmt);
+        const distB = getFixedExpenseAmountDistance(b, txAmt);
+        if (distA !== distB) return distA - distB;
+        const aExactTitle = normalizeMerchantKey(a.name) === txTitleNorm ? 0 : 1;
+        const bExactTitle = normalizeMerchantKey(b.name) === txTitleNorm ? 0 : 1;
+        return aExactTitle - bExactTitle;
+      });
+      return sorted[0];
+    }
+    return candidates[0];
+  }
+
+  const combinedNorm = normalizeMerchantKey(
+    isStr
+      ? tx
+      : [tx.title, tx.rawDescription, tx.counterpartyName, tx.note].filter(Boolean).join(' ')
+  );
+  const isGrocery = combinedNorm ? isEverydayGroceryPurchase(combinedNorm) : false;
+
   // Fallback för anonyma bankrader (t.ex. "Banktransaktion", "Betalning", "Autogiro" där banken tappat mottagarnamnet
   // när en reserverad hyra eller räkning övergått till bokförd post):
   // Om beloppet på kronan matchar en registrerad fast utgift (>= 150 kr), koppla den till rätt fast utgift!
   if (!isStr && !isGrocery && tx.type !== 'income') {
-    const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
     if (txAmt >= 150) {
       const hasGenericTitle =
         isGenericPlaceholderMerchant(tx.title) &&
@@ -274,22 +345,29 @@ export function checkIsRecurringTransaction(
 
   // Explicit ID prefix check (items generated directly from fixed items)
   if (tx.id?.startsWith('fix-')) {
-    return { isRecurring: true, type: 'expense', matchedName: tx.title };
+    return { isRecurring: true, hasExactAmountMatch: true, type: 'expense', matchedName: tx.title };
   }
   if (tx.id?.startsWith('inc-')) {
-    return { isRecurring: true, type: 'income', matchedName: tx.title };
+    return { isRecurring: true, hasExactAmountMatch: true, type: 'income', matchedName: tx.title };
   }
 
   const txTitle = (tx.title || '').toLowerCase().trim();
   const txRaw = (tx.rawDescription || '').toLowerCase().trim();
   const txCat = (tx.category || '').toLowerCase().trim();
+  const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
 
   // 1. Match against fixed expenses (when not an explicit income)
   if (tx.type !== 'income') {
+    const allMatchedExps = findAllMatchingFixedExpensesByMerchant(tx, fixedExpenses);
     const matchedExp = findMatchingFixedExpense(tx, fixedExpenses);
     if (matchedExp) {
+      const hasExactAmountMatch =
+        allMatchedExps.length > 0
+          ? allMatchedExps.some((exp) => isFixedExpenseAmountMatch(exp, txAmt))
+          : isFixedExpenseAmountMatch(matchedExp, txAmt);
       return {
         isRecurring: true,
+        hasExactAmountMatch,
         type: 'expense',
         matchedName: matchedExp.name,
         matchedItemId: matchedExp.id,
@@ -301,8 +379,12 @@ export function checkIsRecurringTransaction(
   if (tx.type === 'income') {
     const matchedInc = findMatchingIncome(tx, incomes);
     if (matchedInc) {
+      const incAmt = Math.round(Math.abs(Number(matchedInc.amount) || 0));
+      const hasExactAmountMatch =
+        txAmt <= 0 || Math.abs(incAmt - txAmt) <= Math.max(25, Math.round(incAmt * 0.1));
       return {
         isRecurring: true,
+        hasExactAmountMatch,
         type: 'income',
         matchedName: matchedInc.name,
         matchedItemId: matchedInc.id,
@@ -319,10 +401,10 @@ export function checkIsRecurringTransaction(
       txRaw.includes('salary') ||
       txRaw.includes('löneutbetalning'))
   ) {
-    return { isRecurring: true, type: 'income', matchedName: 'Lön' };
+    return { isRecurring: true, hasExactAmountMatch: true, type: 'income', matchedName: 'Lön' };
   }
 
-  return { isRecurring: false };
+  return { isRecurring: false, hasExactAmountMatch: false };
 }
 
 const KNOWN_MERCHANT_CHAINS: { key: string; label: string; patterns: RegExp[] }[] = [
@@ -393,6 +475,7 @@ function detectMerchantChain(tx: Partial<TransactionItem>): { key: string; label
 export interface SimilarTransactionsSummary {
   brandLabel: string;
   transactions: TransactionItem[];
+  sameMerchantTransactions: TransactionItem[];
   totalAmount: number;
   averageAmount: number;
 }
@@ -400,6 +483,8 @@ export interface SimilarTransactionsSummary {
 /**
  * Finds all transactions in `allTransactions` that belong to the same merchant, chain,
  * fixed expense, or income as `targetTx` (sorted newest first).
+ * Also separates `sameMerchantTransactions` (exact same store/location name, e.g. "Circle K Varberg")
+ * from `transactions` (all stores in the same chain, e.g. "Circle K Helsingborg", "Circle K Stockholm").
  */
 export function findSimilarTransactionsForTransaction(
   targetTx: TransactionItem | null | undefined,
@@ -408,7 +493,13 @@ export function findSimilarTransactionsForTransaction(
   incomes: IncomeItem[] = []
 ): SimilarTransactionsSummary {
   if (!targetTx) {
-    return { brandLabel: '', transactions: [], totalAmount: 0, averageAmount: 0 };
+    return {
+      brandLabel: '',
+      transactions: [],
+      sameMerchantTransactions: [],
+      totalAmount: 0,
+      averageAmount: 0,
+    };
   }
 
   const targetType = targetTx.type === 'income' ? 'income' : 'expense';
@@ -418,21 +509,42 @@ export function findSimilarTransactionsForTransaction(
     targetType === 'income' ? findMatchingIncome(targetTx, incomes) : null;
   const targetChain = detectMerchantChain(targetTx);
   const targetTitleNorm = normalizeMerchantKey(targetTx.title || '');
+  const targetRawNorm = normalizeMerchantKey(
+    targetTx.counterpartyName || targetTx.rawDescription || targetTx.title || ''
+  );
   const targetVariants = extractMerchantKeyVariants(targetTx.title || '').filter(
     (v) => v.length >= 4 && !GENERIC_WRAPPER_WORDS.has(v)
   );
   const isTargetGeneric = isGenericPlaceholderMerchant(targetTx.title);
 
   const matched: TransactionItem[] = [];
+  const sameMerchant: TransactionItem[] = [];
 
   for (const tx of allTransactions) {
     if (tx.id === targetTx.id) {
       matched.push(tx);
+      sameMerchant.push(tx);
       continue;
     }
 
     const txType = tx.type === 'income' ? 'income' : 'expense';
     if (txType !== targetType) continue;
+
+    const otherTitleNorm = normalizeMerchantKey(tx.title || '');
+    const otherRawNorm = normalizeMerchantKey(
+      tx.counterpartyName || tx.rawDescription || tx.title || ''
+    );
+
+    const isExactSameStore =
+      !isTargetGeneric &&
+      Boolean(
+        (targetTitleNorm && otherTitleNorm === targetTitleNorm) ||
+          (targetRawNorm && otherRawNorm === targetRawNorm)
+      );
+
+    if (isExactSameStore) {
+      sameMerchant.push(tx);
+    }
 
     // 1. Same fixed expense
     if (matchedFixed) {
@@ -452,7 +564,7 @@ export function findSimilarTransactionsForTransaction(
       }
     }
 
-    // 3. Same known retail/service chain (e.g. "Coop", "Hemköp Helsingborg Rydebäck" & "Hemköp")
+    // 3. Same known retail/service chain (e.g. "Circle K Varberg", "Circle K Helsingborg" & "Circle K Stockholm")
     if (targetChain) {
       const otherChain = detectMerchantChain(tx);
       if (otherChain && otherChain.key === targetChain.key) {
@@ -462,7 +574,6 @@ export function findSimilarTransactionsForTransaction(
     }
 
     // 4. Exact normalized title match
-    const otherTitleNorm = normalizeMerchantKey(tx.title || '');
     if (targetTitleNorm && otherTitleNorm === targetTitleNorm) {
       if (!isTargetGeneric) {
         matched.push(tx);
@@ -473,6 +584,7 @@ export function findSimilarTransactionsForTransaction(
       const rawB = normalizeMerchantKey(tx.rawDescription || tx.counterpartyName || '');
       if (rawA && rawA === rawB) {
         matched.push(tx);
+        sameMerchant.push(tx);
         continue;
       }
     }
@@ -490,6 +602,7 @@ export function findSimilarTransactionsForTransaction(
   }
 
   matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  sameMerchant.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
   const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;
@@ -504,6 +617,7 @@ export function findSimilarTransactionsForTransaction(
   return {
     brandLabel,
     transactions: matched,
+    sameMerchantTransactions: sameMerchant,
     totalAmount,
     averageAmount,
   };
@@ -517,7 +631,13 @@ export function findTransactionsForFixedExpense(
   allTransactions: TransactionItem[] = []
 ): SimilarTransactionsSummary {
   if (!expense) {
-    return { brandLabel: '', transactions: [], totalAmount: 0, averageAmount: 0 };
+    return {
+      brandLabel: '',
+      transactions: [],
+      sameMerchantTransactions: [],
+      totalAmount: 0,
+      averageAmount: 0,
+    };
   }
 
   const expChain = detectMerchantChain({ title: expense.name, rawDescription: expense.originalName });
@@ -541,6 +661,7 @@ export function findTransactionsForFixedExpense(
   return {
     brandLabel: expense.name,
     transactions: matched,
+    sameMerchantTransactions: matched,
     totalAmount,
     averageAmount,
   };
@@ -554,7 +675,13 @@ export function findTransactionsForIncome(
   allTransactions: TransactionItem[] = []
 ): SimilarTransactionsSummary {
   if (!income) {
-    return { brandLabel: '', transactions: [], totalAmount: 0, averageAmount: 0 };
+    return {
+      brandLabel: '',
+      transactions: [],
+      sameMerchantTransactions: [],
+      totalAmount: 0,
+      averageAmount: 0,
+    };
   }
 
   const matched = allTransactions.filter((tx) => {
@@ -571,8 +698,10 @@ export function findTransactionsForIncome(
   return {
     brandLabel: income.name,
     transactions: matched,
+    sameMerchantTransactions: matched,
     totalAmount,
     averageAmount,
   };
 }
+
 

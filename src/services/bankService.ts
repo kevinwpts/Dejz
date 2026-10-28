@@ -676,28 +676,51 @@ export const bankService = {
 
     // First try direct query on public.bank_transactions for speed and full fields
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUid = sessionData?.session?.user?.id;
+      if (!currentUid) {
+        return [];
+      }
+
+      const { data: activeConns } = await supabase
+        .from('bank_connections')
+        .select('id')
+        .eq('user_id', currentUid)
+        .neq('status', 'revoked');
+      const activeConnIds = (activeConns || []).map((c) => c.id);
+      if (activeConnIds.length === 0) {
+        return [];
+      }
+
       // First get selected bank account IDs to avoid loading dead/unselected accounts
       const { data: selectedAccs } = await supabase
         .from('bank_accounts')
         .select('id')
+        .eq('user_id', currentUid)
+        .in('connection_id', activeConnIds)
         .eq('is_selected', true);
       const selectedIds = (selectedAccs || []).map((a) => a.id);
+
+      if (!bankAccountId && selectedIds.length === 0) {
+        return [];
+      }
 
       let query = supabase
         .from('bank_transactions')
         .select('*')
+        .eq('user_id', currentUid)
         .order('booking_date', { ascending: false, nullsFirst: true })
         .order('created_at', { ascending: false })
         .limit(maxRows);
 
       if (bankAccountId) {
         query = query.eq('bank_account_id', bankAccountId);
-      } else if (selectedIds.length > 0) {
+      } else {
         query = query.in('bank_account_id', selectedIds);
       }
 
       const { data, error } = await query;
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return deduplicateBankSyncRows(
           (data as BankTransactionItem[]).map(mergeTxWithReconciliationOverlay)
         );
@@ -731,6 +754,14 @@ export const bankService = {
     return await invokeEnableBanking({
       action: 'disconnect',
       connectionId,
+    });
+  },
+
+  async deleteAccount(): Promise<{
+    success: boolean;
+  }> {
+    return await invokeEnableBanking({
+      action: 'delete-account',
     });
   },
 };

@@ -946,11 +946,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     {(() => {
                       const realTime =
                         tx.time === 'Planerad' ? 'Planerad' : getTransactionTime(tx);
+                      const isPending =
+                        tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
                       const statusSub =
-                        realTime ||
-                        (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
-                          ? 'Reserverat'
-                          : '');
+                        realTime && isPending && realTime !== 'Planerad'
+                          ? `${realTime} · Reserverat`
+                          : realTime || (isPending ? 'Reserverat' : '');
                       return statusSub ? (
                         <span className="ui-row-meta">
                           {statusSub}
@@ -1009,11 +1010,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             ))}
           </div>
         ) : (
-          <div className="ui-empty-state py-6 px-4">
-            <div className="ui-empty-icon text-[var(--text-muted)]">
-              <CalendarBlank size={16} weight="duotone" />
-            </div>
-            <p className="ui-empty-sub">
+          <div className="ui-empty-state py-10 px-4">
+            <CalendarBlank size={36} weight="light" className="ui-empty-icon" />
+            <p className="ui-empty-sub mt-0">
               Inga händelser denna dag
             </p>
           </div>

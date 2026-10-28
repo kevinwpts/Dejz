@@ -107,6 +107,8 @@ import {
   getTransactionMetaMap,
   saveTransactionMeta,
   syncAllUserPreferencesToSupabase,
+  cancelPendingPreferenceSync,
+  clearAllLocalAppData,
   getStoredExpenseCategories,
   getStoredIncomeCategories,
 } from './utils/appCache';
@@ -118,6 +120,8 @@ import {
   checkIsRecurringTransaction,
   findMatchingFixedExpense,
   findMatchingIncome,
+  findAllMatchingFixedExpensesByMerchant,
+  isFixedExpenseAmountMatch,
 } from './utils/recurring';
 
 const AUTO_SYNC_COOLDOWN_MS = 45_000; // Minst 45 sek mellan automatiska bakgrundssynkningar
@@ -131,11 +135,17 @@ function sanitizeTransactionItem(
   item: TransactionItem,
   fixedList?: FixedExpenseItem[],
   incomeList?: IncomeItem[],
-  aliasesOverride?: Record<string, { name: string; category: string }>
+  aliasesOverride?: Record<string, { name: string; category: string }>,
+  fallbackMetaId?: string
 ): TransactionItem {
   if (!item) return item;
   const metaMap = getTransactionMetaMap();
-  const savedMeta = item.id ? metaMap[item.id] : undefined;
+  const fallbackMeta = fallbackMetaId ? metaMap[fallbackMetaId] : undefined;
+  const primaryMeta = item.id ? metaMap[item.id] : undefined;
+  const savedMeta =
+    fallbackMeta || primaryMeta
+      ? { ...(fallbackMeta || {}), ...(primaryMeta || {}) }
+      : undefined;
   const effectiveOriginalAmount =
     item.originalAmount !== undefined ? item.originalAmount : savedMeta?.originalAmount;
   const effectiveAmount =
@@ -192,14 +202,15 @@ function sanitizeTransactionItem(
     }
   }
 
-  // 1. Fastställ det faktiska köpdatumet (utan att flytta söndagsköp till lördag)
+  // 1. Fastställ det faktiska köpdatumet (utan att flytta söndagsköp till lördag eller skriva över bevarat reservationsdatum)
   const embeddedDate = parseDateFromSwedishText(combinedText, todayStr);
   if (embeddedDate && embeddedDate <= todayStr) {
     updated.date = embeddedDate;
   } else if (
     updated.valueDate &&
     /^\d{4}-\d{2}-\d{2}$/.test(updated.valueDate) &&
-    updated.valueDate <= todayStr
+    updated.valueDate <= todayStr &&
+    (!updated.date || updated.valueDate < updated.date)
   ) {
     updated.date = updated.valueDate;
   } else if (updated.date && updated.date > todayStr) {
@@ -255,9 +266,18 @@ function sanitizeTransactionItem(
   if (updated.type !== 'income' && fixedList && fixedList.length > 0) {
     const matchedFixed = findMatchingFixedExpense(updated, fixedList);
     if (matchedFixed) {
-      updated.title = matchedFixed.name;
-      updated.category = normalizeCategoryToValid(matchedFixed.category, 'expense');
-      updated.logo = matchedFixed.logo || getLogoUrl(matchedFixed.name, updated.category);
+      const amountMatches = isFixedExpenseAmountMatch(matchedFixed, updated.amount);
+      updated.title =
+        savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
+          ? savedMeta.customTitle
+          : amountMatches
+          ? matchedFixed.name
+          : updated.title;
+      updated.category = normalizeCategoryToValid(
+        savedMeta?.customCategory || matchedFixed.category,
+        'expense'
+      );
+      updated.logo = matchedFixed.logo || getLogoUrl(updated.title, updated.category);
       return updated;
     }
   }
@@ -265,9 +285,15 @@ function sanitizeTransactionItem(
   if (updated.type === 'income' && incomeList && incomeList.length > 0) {
     const matchedInc = findMatchingIncome(updated, incomeList);
     if (matchedInc) {
-      updated.title = matchedInc.name;
-      updated.category = normalizeCategoryToValid(matchedInc.category, 'income');
-      updated.logo = matchedInc.logo || getLogoUrl(matchedInc.name, updated.category);
+      updated.title =
+        savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
+          ? savedMeta.customTitle
+          : matchedInc.name;
+      updated.category = normalizeCategoryToValid(
+        savedMeta?.customCategory || matchedInc.category,
+        'income'
+      );
+      updated.logo = matchedInc.logo || getLogoUrl(updated.title, updated.category);
       return updated;
     }
   }
@@ -276,13 +302,26 @@ function sanitizeTransactionItem(
     updated.rawDescription || updated.counterpartyName || updated.title || '';
   const aliasMatch = resolveMerchantAlias(rawAliasSource, aliasesOverride);
   if (aliasMatch && !isGenericPlaceholderMerchant(aliasMatch.name)) {
-    updated.title = aliasMatch.name;
-    updated.category = normalizeCategoryToValid(aliasMatch.category, kind);
-    updated.logo = getLogoUrl(aliasMatch.name, updated.category);
+    updated.title =
+      savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
+        ? savedMeta.customTitle
+        : aliasMatch.name;
+    updated.category = normalizeCategoryToValid(
+      savedMeta?.customCategory || aliasMatch.category,
+      kind
+    );
+    updated.logo = getLogoUrl(updated.title, updated.category);
     return updated;
   }
 
-  updated.category = normalizeCategoryToValid(updated.category, kind);
+  if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+    updated.title = savedMeta.customTitle;
+  }
+  if (savedMeta?.customCategory) {
+    updated.category = normalizeCategoryToValid(savedMeta.customCategory, kind);
+  } else {
+    updated.category = normalizeCategoryToValid(updated.category, kind);
+  }
   updated.logo = getLogoUrl(updated.title, updated.category) || updated.logo;
   return updated;
 }
@@ -421,25 +460,73 @@ function reconcileFixedExpensesList(params: {
   const toPersist: FixedExpenseItem[] = [];
   const dbIds = new Set<string>();
 
-  const findExistingIndex = (candidate: { name: string; originalName?: string }) => {
-    const matched = findMatchingFixedExpense(
-      { title: candidate.name, rawDescription: candidate.originalName },
+  const findExistingIndex = (
+    candidate: { id?: string; name: string; originalName?: string; amount?: number },
+    requireAmountMatch = true
+  ) => {
+    if (candidate.id) {
+      const byIdIdx = unified.findIndex((u) => u.id === candidate.id);
+      if (byIdIdx !== -1) return byIdIdx;
+    }
+
+    const candAmt = Math.round(Math.abs(Number(candidate.amount) || 0));
+    const allMatches = findAllMatchingFixedExpensesByMerchant(
+      {
+        title: candidate.name,
+        rawDescription: candidate.originalName,
+        amount: candAmt,
+      },
       unified
     );
-    if (matched) {
-      return unified.findIndex((u) => u.id === matched.id);
+
+    if (allMatches.length > 0) {
+      for (const m of allMatches) {
+        if (!requireAmountMatch || candAmt <= 0 || isFixedExpenseAmountMatch(m, candAmt)) {
+          return unified.findIndex((u) => u.id === m.id);
+        }
+      }
+      return -1;
     }
+
     const normName = normalizeMerchantKey(candidate.name);
     const normOrig = candidate.originalName ? normalizeMerchantKey(candidate.originalName) : '';
     return unified.findIndex((u) => {
       const uNorm = normalizeMerchantKey(u.name);
       const uOrig = u.originalName ? normalizeMerchantKey(u.originalName) : '';
-      return (
+      const sameName =
         uNorm === normName ||
         (normOrig && (uNorm === normOrig || uOrig === normOrig)) ||
-        (uOrig && uOrig === normName)
-      );
+        (uOrig && uOrig === normName);
+      if (!sameName) return false;
+      if (requireAmountMatch && candAmt > 0 && u.amount > 0) {
+        return isFixedExpenseAmountMatch(u, candAmt);
+      }
+      return true;
     });
+  };
+
+  const resolveManualOverrideForItem = (
+    itemId: string | undefined,
+    ident: { normEffective: string; normOrig: string },
+    itemAmount: number,
+    totalSameMerchantCount: number
+  ) => {
+    if (itemId && overrides[`id:${itemId}`]) {
+      return overrides[`id:${itemId}`];
+    }
+    const byName = overrides[ident.normEffective] || overrides[ident.normOrig];
+    if (!byName) return undefined;
+    // Om det finns flera fasta utgifter hos samma aktör (t.ex. 3 försäkringar hos Folksam),
+    // applicera inte ett generiskt namn-override på en annan försäkring med helt annat belopp!
+    if (
+      totalSameMerchantCount > 1 &&
+      byName.amount !== undefined &&
+      itemAmount > 0 &&
+      Math.abs(byName.amount - itemAmount) > Math.max(15, Math.round(itemAmount * 0.1))
+    ) {
+      return undefined;
+    }
+    return byName;
   };
 
   // 1. Start from DB items if provided
@@ -449,20 +536,33 @@ function reconcileFixedExpensesList(params: {
       const ident = resolveItemIdentity(f.name || '', f.category || 'Boende', f.originalName);
       if (ident.isDismissed) continue;
 
-      const manual = overrides[ident.normEffective] || overrides[ident.normOrig];
-      const finalName = manual?.name || ident.effectiveName;
+      const rawDbAmt = Math.round(Number(f.amount) || 0);
+      const sameMerchantInDbCount = dbList.filter((other) => {
+        const oNorm = normalizeMerchantKey(other.originalName || other.name || '');
+        return oNorm && (oNorm === ident.normOrig || oNorm === ident.normEffective);
+      }).length;
+
+      const validId = ensureValidUuid(
+        f.id,
+        sameMerchantInDbCount > 1
+          ? `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}:${rawDbAmt}`
+          : `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
+      );
+      const manual = resolveManualOverrideForItem(
+        validId,
+        ident,
+        rawDbAmt,
+        sameMerchantInDbCount
+      );
+      const finalName = manual?.name || (sameMerchantInDbCount > 1 ? f.name : ident.effectiveName);
       const finalCat = normalizeCategoryToValid(
         manual?.category || ident.effectiveCategory || 'Boende',
         'expense'
       );
-      const finalAmt =
-        manual?.amount !== undefined ? manual.amount : Math.round(Number(f.amount) || 0);
+      const finalAmt = manual?.amount !== undefined ? manual.amount : rawDbAmt;
       const finalDue = manual?.dueDay || f.deductionDay || 27;
       const finalMethod = manual?.paymentMethod || f.paymentMethod || 'Autogiro';
-      const validId = ensureValidUuid(
-        f.id,
-        `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
-      );
+
       if (isValidUuid(f.id)) {
         dbIds.add(f.id);
       }
@@ -480,7 +580,7 @@ function reconcileFixedExpensesList(params: {
         logo: f.logo || getLogoUrl(finalName, finalCat),
       };
 
-      const existingIdx = findExistingIndex(item);
+      const existingIdx = findExistingIndex(item, true);
       if (existingIdx === -1) {
         unified.push(item);
       }
@@ -492,22 +592,34 @@ function reconcileFixedExpensesList(params: {
     const ident = resolveItemIdentity(curr.name, curr.category || 'Räkningar', curr.originalName);
     if (ident.isDismissed) continue;
 
-    const manual = overrides[ident.normEffective] || overrides[ident.normOrig];
-    const finalName = manual?.name || ident.effectiveName;
+    const rawCurrAmt = Math.round(Number(curr.amount) || 0);
+    const sameMerchantInCurrCount = currentList.filter((other) => {
+      const oNorm = normalizeMerchantKey(other.originalName || other.name || '');
+      return oNorm && (oNorm === ident.normOrig || oNorm === ident.normEffective);
+    }).length;
+
+    const validId = ensureValidUuid(
+      curr.id,
+      sameMerchantInCurrCount > 1
+        ? `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}:${rawCurrAmt}`
+        : `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
+    );
+    const manual = resolveManualOverrideForItem(
+      validId,
+      ident,
+      rawCurrAmt,
+      sameMerchantInCurrCount
+    );
+    const finalName = manual?.name || (sameMerchantInCurrCount > 1 ? curr.name : ident.effectiveName);
     const finalCat = normalizeCategoryToValid(
       manual?.category || ident.effectiveCategory || 'Räkningar',
       'expense'
     );
-    const finalAmt =
-      manual?.amount !== undefined ? manual.amount : Math.round(Number(curr.amount) || 0);
+    const finalAmt = manual?.amount !== undefined ? manual.amount : rawCurrAmt;
     const finalIsShared = manual?.isShared !== undefined ? manual.isShared : curr.isShared;
     const finalFullAmt = manual?.fullAmount !== undefined ? manual.fullAmount : curr.fullAmount;
     const finalDue = manual?.dueDay || curr.dueDay || 27;
     const finalMethod = manual?.paymentMethod || curr.paymentMethod || 'Autogiro';
-    const validId = ensureValidUuid(
-      curr.id,
-      `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
-    );
 
     const candidate: FixedExpenseItem = {
       id: validId,
@@ -524,7 +636,7 @@ function reconcileFixedExpensesList(params: {
       receiptName: curr.receiptName,
     };
 
-    const existingIdx = findExistingIndex(candidate);
+    const existingIdx = findExistingIndex(candidate, true);
     if (existingIdx === -1) {
       unified.push(candidate);
       if (uid && !dbIds.has(validId)) {
@@ -559,28 +671,50 @@ function reconcileFixedExpensesList(params: {
       const ident = resolveItemIdentity(det.name, det.category || 'Räkningar', det.name);
       if (ident.isDismissed) continue;
 
-      const manual = overrides[ident.normEffective] || overrides[ident.normOrig];
+      const detAmt = Math.round(Number(det.amount) || 0);
+      const existingMerchantMatches = findAllMatchingFixedExpensesByMerchant(
+        { title: det.name, amount: detAmt },
+        unified
+      );
+      const manual = resolveManualOverrideForItem(
+        undefined,
+        ident,
+        detAmt,
+        existingMerchantMatches.length
+      );
       const finalName = manual?.name || ident.effectiveName;
       const finalCat = normalizeCategoryToValid(
         manual?.category || ident.effectiveCategory || 'Räkningar',
         'expense'
       );
-      const detAmt = Math.round(Number(det.amount) || 0);
       const finalAmt = manual?.amount !== undefined ? manual.amount : detAmt;
       const finalDue = manual?.dueDay || det.deductionDay || 27;
       const finalMethod = manual?.paymentMethod || det.paymentMethod || 'Autogiro';
 
-      const existingIdx = findExistingIndex({
-        name: finalName,
-        originalName: det.name,
-      });
+      // Om vi redan har registrerade fasta utgifter för denna aktör i unified, matcha mot rätt belopp (eller första om endast 1 finns)
+      let existingIdx = findExistingIndex(
+        {
+          name: finalName,
+          originalName: det.name,
+          amount: detAmt,
+        },
+        true
+      );
+      if (existingIdx === -1 && existingMerchantMatches.length === 1) {
+        existingIdx = unified.findIndex((u) => u.id === existingMerchantMatches[0].id);
+      }
 
       if (existingIdx !== -1) {
         const existing = unified[existingIdx];
         const existingManual =
-          overrides[normalizeMerchantKey(existing.name)] ||
-          (existing.originalName ? overrides[normalizeMerchantKey(existing.originalName)] : undefined) ||
-          manual;
+          overrides[`id:${existing.id}`] ||
+          (existingMerchantMatches.length <= 1
+            ? overrides[normalizeMerchantKey(existing.name)] ||
+              (existing.originalName
+                ? overrides[normalizeMerchantKey(existing.originalName)]
+                : undefined) ||
+              manual
+            : undefined);
 
         const nextAmt =
           existingManual?.amount !== undefined
@@ -588,6 +722,8 @@ function reconcileFixedExpensesList(params: {
             : existing.isShared
             ? existing.amount
             : dbIds.has(existing.id) && existing.amount > 0
+            ? existing.amount
+            : existingMerchantMatches.length > 1 && existing.amount > 0
             ? existing.amount
             : detAmt > 0
             ? detAmt
@@ -606,7 +742,7 @@ function reconcileFixedExpensesList(params: {
             (existing.isShared && detAmt > nextAmt ? detAmt : undefined),
           dueDay: nextDue,
         };
-      } else {
+      } else if (existingMerchantMatches.length === 0) {
         const validId = ensureValidUuid(
           undefined,
           `fixed:${uid || 'local'}:${ident.normOrig || ident.normEffective}`
@@ -889,16 +1025,174 @@ function mapBankTransactionsToAppItems(
       preservedMerchant?: string;
       preservedCategory?: string;
       preservedDescription?: string;
+      replacedPendingId: string;
     }
   >();
   const consumedBookedIdsForPending = new Set<string>();
+  const settledPendingIds = new Set<string>();
+
+  // Samla alla reservationer (inklusive de som servern redan markerat som 'reserved_replaced'
+  // när reservationen övergick till bokförd transaktion) så att köpdatum, klockslag,
+  // butiksnamn och användarens markeringar (hjärta, paket, kvitto, delad utgift m.m.) alltid ärvs.
+  const pendingCandidates = bankTxs.filter((bt) => {
+    if (bt.booking_status === 'CNCL' || bt.booking_status === 'RJCT') return false;
+    if (bt.reconciliation_status === 'excluded') return false;
+    const isPendingOrReplaced =
+      bt.booking_status === 'PDNG' ||
+      bt.booking_status === 'HOLD' ||
+      bt.reconciliation_status === 'reserved_replaced' ||
+      Boolean(bt.replaced_by_bank_tx_id);
+    if (!isPendingOrReplaced) return false;
+    return getNormalizedBankTxAmount(bt) < 0;
+  });
+
+  const recordReservationMatch = (bt: BankTransactionItem, b: BankTransactionItem) => {
+    consumedBookedIdsForPending.add(b.id);
+    settledPendingIds.add(bt.id);
+    const pendingCatInfo = categorizeBankTransactionForApp(bt);
+    const pendingMerchant = pendingCatInfo.merchant.toLowerCase().trim();
+    const pendingIsGeneric = isGenericPlaceholderMerchant(pendingMerchant);
+    const purchaseDate = getActualTransactionDate(bt);
+    const purchaseTime = extractBankTxTime(
+      bt,
+      batchMinuteCounts,
+      purchaseDate,
+      pendingMerchant,
+      pendingMerchant
+    );
+    bookedToReservationMeta.set(b.id, {
+      purchaseDate,
+      purchaseTime,
+      preservedMerchant: !pendingIsGeneric ? pendingCatInfo.merchant : undefined,
+      preservedCategory:
+        !pendingIsGeneric && pendingCatInfo.category !== 'Övrigt'
+          ? pendingCatInfo.category
+          : undefined,
+      preservedDescription: !isGenericPlaceholderMerchant(bt.description)
+        ? bt.description || undefined
+        : undefined,
+      replacedPendingId: bt.id,
+    });
+  };
+
+  // Pass 1: Explicit DB-koppling eller exakt beloppsmatchning (0–10 dagar)
+  for (const bt of pendingCandidates) {
+    if (bt.replaced_by_bank_tx_id) {
+      const explicitBooked = bookedNegativeTxs.find(
+        (b) => b.id === bt.replaced_by_bank_tx_id && !consumedBookedIdsForPending.has(b.id)
+      );
+      if (explicitBooked) {
+        recordReservationMatch(bt, explicitBooked);
+        continue;
+      }
+    }
+
+    const pendingAmt = Math.round(Math.abs(getNormalizedBankTxAmount(bt)));
+    const pendingCatInfo = categorizeBankTransactionForApp(bt);
+    const pendingMerchant = pendingCatInfo.merchant.toLowerCase().trim();
+    const pendingIsGeneric = isGenericPlaceholderMerchant(pendingMerchant);
+    const pendingDate = getActualTransactionDate(bt);
+
+    const matchedBooked = bookedNegativeTxs.find((b) => {
+      if (consumedBookedIdsForPending.has(b.id)) return false;
+      if (
+        bt.bank_account_id &&
+        b.bank_account_id &&
+        bt.bank_account_id !== b.bank_account_id
+      ) {
+        return false;
+      }
+      const bAmt = Math.round(Math.abs(getNormalizedBankTxAmount(b)));
+      if (bAmt !== pendingAmt) return false;
+
+      const bCatInfo = categorizeBankTransactionForApp(b);
+      const bMerchant = bCatInfo.merchant.toLowerCase().trim();
+      const bookedIsGeneric = isGenericPlaceholderMerchant(bMerchant);
+
+      const merchantsMatch =
+        bMerchant === pendingMerchant ||
+        pendingIsGeneric ||
+        bookedIsGeneric ||
+        (bt.description && bt.description.toLowerCase().includes(bMerchant)) ||
+        (b.description && b.description.toLowerCase().includes(pendingMerchant));
+      if (!merchantsMatch) return false;
+
+      const bDate = getActualTransactionDate(b);
+      if (pendingDate && bDate) {
+        const diffMs = new Date(bDate).getTime() - new Date(pendingDate).getTime();
+        const dayDiff = Math.abs(diffMs) / (1000 * 60 * 60 * 24);
+        if (dayDiff <= 10 && diffMs >= -86_400_000) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (matchedBooked) {
+      recordReservationMatch(bt, matchedBooked);
+    }
+  }
+
+  // Pass 2: Ändrat slutbelopp för ersatta reservationer ('reserved_replaced'),
+  // t.ex. bensinstation (1 500 kr -> 642 kr), hotell eller matbutik online (ICA/Mathem).
+  for (const bt of pendingCandidates) {
+    if (settledPendingIds.has(bt.id)) continue;
+    if (
+      bt.reconciliation_status !== 'reserved_replaced' &&
+      !bt.replaced_by_bank_tx_id
+    ) {
+      continue;
+    }
+
+    const pendingCatInfo = categorizeBankTransactionForApp(bt);
+    const pendingMerchant = pendingCatInfo.merchant.toLowerCase().trim();
+    const pendingIsGeneric = isGenericPlaceholderMerchant(pendingMerchant);
+    if (pendingIsGeneric || pendingMerchant.length < 3) continue;
+
+    const pendingDate = getActualTransactionDate(bt);
+    if (!pendingDate) continue;
+
+    const matchedChangedAmtBooked = bookedNegativeTxs.find((b) => {
+      if (consumedBookedIdsForPending.has(b.id)) return false;
+      if (
+        bt.bank_account_id &&
+        b.bank_account_id &&
+        bt.bank_account_id !== b.bank_account_id
+      ) {
+        return false;
+      }
+
+      const bCatInfo = categorizeBankTransactionForApp(b);
+      const bMerchant = bCatInfo.merchant.toLowerCase().trim();
+      if (isGenericPlaceholderMerchant(bMerchant) || bMerchant.length < 3) {
+        return false;
+      }
+
+      const sameMerchant =
+        bMerchant === pendingMerchant ||
+        (pendingMerchant.length >= 4 && bMerchant.includes(pendingMerchant)) ||
+        (bMerchant.length >= 4 && pendingMerchant.includes(bMerchant));
+      if (!sameMerchant) return false;
+
+      const bDate = getActualTransactionDate(b);
+      if (!bDate) return false;
+      const diffMs = new Date(bDate).getTime() - new Date(pendingDate).getTime();
+      const dayDiff = Math.abs(diffMs) / (1000 * 60 * 60 * 24);
+      return dayDiff <= 10 && diffMs >= -86_400_000;
+    });
+
+    if (matchedChangedAmtBooked) {
+      recordReservationMatch(bt, matchedChangedAmtBooked);
+    }
+  }
 
   const mappedBankTxs: TransactionItem[] = bankTxs
     .filter((bt) => {
       if (bt.booking_status === 'CNCL' || bt.booking_status === 'RJCT') return false;
       if (
         bt.reconciliation_status === 'reserved_replaced' ||
-        bt.replaced_by_bank_tx_id
+        bt.replaced_by_bank_tx_id ||
+        settledPendingIds.has(bt.id)
       ) {
         return false;
       }
@@ -907,67 +1201,6 @@ function mapBankTransactionsToAppItems(
       }
       const rawAmt = getNormalizedBankTxAmount(bt);
       if (rawAmt === 0) return false;
-
-      if (bt.booking_status === 'PDNG' || bt.booking_status === 'HOLD') {
-        const pendingAmt = Math.round(Math.abs(rawAmt));
-        const pendingCatInfo = categorizeBankTransactionForApp(bt);
-        const pendingMerchant = pendingCatInfo.merchant.toLowerCase().trim();
-        const pendingDate = getActualTransactionDate(bt);
-
-        const isSettledByBooked = bookedNegativeTxs.some((b) => {
-          if (consumedBookedIdsForPending.has(b.id)) return false;
-          const bAmt = Math.round(Math.abs(getNormalizedBankTxAmount(b)));
-          if (bAmt !== pendingAmt) return false;
-          const bCatInfo = categorizeBankTransactionForApp(b);
-          const bMerchant = bCatInfo.merchant.toLowerCase().trim();
-
-          const pendingIsGeneric = isGenericPlaceholderMerchant(pendingMerchant);
-          const bookedIsGeneric = isGenericPlaceholderMerchant(bMerchant);
-
-          const merchantsMatch =
-            bMerchant === pendingMerchant ||
-            pendingIsGeneric ||
-            bookedIsGeneric ||
-            (bt.description && bt.description.toLowerCase().includes(bMerchant)) ||
-            (b.description && b.description.toLowerCase().includes(pendingMerchant));
-          if (!merchantsMatch) return false;
-
-          const bDate = getActualTransactionDate(b);
-          if (pendingDate && bDate) {
-            const dayDiff =
-              Math.abs(new Date(bDate).getTime() - new Date(pendingDate).getTime()) /
-              (1000 * 60 * 60 * 24);
-            if (dayDiff <= 7) {
-              consumedBookedIdsForPending.add(b.id);
-              const purchaseDate = pendingDate;
-              const purchaseTime = extractBankTxTime(
-                bt,
-                batchMinuteCounts,
-                purchaseDate,
-                pendingMerchant,
-                pendingMerchant
-              );
-              bookedToReservationMeta.set(b.id, {
-                purchaseDate,
-                purchaseTime,
-                preservedMerchant: !pendingIsGeneric ? pendingCatInfo.merchant : undefined,
-                preservedCategory:
-                  !pendingIsGeneric && pendingCatInfo.category !== 'Övrigt'
-                    ? pendingCatInfo.category
-                    : undefined,
-                preservedDescription:
-                  !isGenericPlaceholderMerchant(bt.description) ? bt.description : undefined,
-              });
-              return true;
-            }
-          }
-          return false;
-        });
-
-        if (isSettledByBooked) {
-          return false;
-        }
-      }
 
       return true;
     })
@@ -1062,7 +1295,11 @@ function mapBankTransactionsToAppItems(
 
       const isManuallyExcluded =
         isTransactionManuallyExcluded(bt.id) ||
-        isTransactionManuallyExcluded(`bank-${bt.id}`);
+        isTransactionManuallyExcluded(`bank-${bt.id}`) ||
+        (reservationMeta?.replacedPendingId
+          ? isTransactionManuallyExcluded(reservationMeta.replacedPendingId) ||
+            isTransactionManuallyExcluded(`bank-${reservationMeta.replacedPendingId}`)
+          : false);
 
       const isAutoCreditCardInvoice =
         !isIncome &&
@@ -1153,7 +1390,10 @@ function mapBankTransactionsToAppItems(
         },
         fixedList,
         incomeList,
-        aliases
+        aliases,
+        reservationMeta?.replacedPendingId
+          ? `bank-${reservationMeta.replacedPendingId}`
+          : undefined
       );
     });
 
@@ -1449,6 +1689,8 @@ export const App: React.FC = () => {
   const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(false);
 
   const userIdRef = useRef<string | null>(userId);
+  const isDeletingAccountRef = useRef<boolean>(false);
+  const lastHydratedUserIdRef = useRef<string | null>(initialCache?.userId || null);
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
@@ -1473,6 +1715,9 @@ export const App: React.FC = () => {
     connections: BankConnection[];
     accounts: BankAccount[];
   }> => {
+    if (!userIdRef.current || isDeletingAccountRef.current) {
+      return { connections: [], accounts: [] };
+    }
     if (refreshInFlightRef.current) {
       pendingRefreshRef.current = true;
       return refreshInFlightRef.current;
@@ -1482,133 +1727,166 @@ export const App: React.FC = () => {
       connections: BankConnection[];
       accounts: BankAccount[];
     }> => {
+      const requestedUid = userIdRef.current;
+      if (!requestedUid || isDeletingAccountRef.current) {
+        return { connections: [], accounts: [] };
+      }
       try {
         const [status, bankTxs] = await Promise.all([
           bankService.getStatus(),
           bankService.listAllTransactionsForReconciliation(5000).catch(() => []),
         ]);
-      const conns = status.connections || [];
-      const accs = status.accounts || [];
-      const activeUid = userIdRef.current;
+        const activeUid = userIdRef.current;
+        if (!activeUid || isDeletingAccountRef.current || activeUid !== requestedUid) {
+          return { connections: [], accounts: [] };
+        }
 
-      if (Array.isArray(bankTxs) && bankTxs.length > 0) {
-        const analyzed = analyzeBankTransactionsForOnboarding(
-          bankTxs,
-          targetPayday,
-          weekendHandling === 'before',
-          accs
-        );
+        const conns = status.connections || [];
+        const accs = status.accounts || [];
+        const hasActiveConns = conns.some((c) => c.status !== 'revoked');
 
-        const reconciledInc = reconcileIncomesList({
-          currentList: incomesRef.current,
-          detectedList: analyzed.detectedIncomes,
-          targetPayday,
-          uid: activeUid,
-        });
-
-        const reconciledFix = reconcileFixedExpensesList({
-          currentList: fixedExpensesRef.current,
-          detectedList: analyzed.detectedFixedExpenses,
-          uid: activeUid,
-        });
-
-        const aliases = getMerchantAliases();
-        const prevMap = new Map(transactionsRef.current.map((t) => [t.id, t]));
-        const uniqueBankTxs = mapBankTransactionsToAppItems(
-          bankTxs,
-          accs,
-          reconciledFix.items,
-          reconciledInc.items,
-          aliases
-        ).map((tx) => {
-          const prev = prevMap.get(tx.id);
-          if (!prev) return tx;
-          return {
-            ...tx,
-            isHearted: prev.isHearted ?? tx.isHearted,
-            isWaitingForPackage: prev.isWaitingForPackage ?? tx.isWaitingForPackage,
-            receiptUrl: prev.receiptUrl ?? tx.receiptUrl,
-            receiptName: prev.receiptName ?? tx.receiptName,
-            note: prev.note ?? tx.note,
-          };
-        });
-
-        const nonBankPrev = transactionsRef.current
-          .filter((p) => !p.id.startsWith('bank-'))
-          .map((t) =>
-            sanitizeTransactionItem(t, reconciledFix.items, reconciledInc.items, aliases)
+        if (hasActiveConns && Array.isArray(bankTxs) && bankTxs.length > 0) {
+          const analyzed = analyzeBankTransactionsForOnboarding(
+            bankTxs,
+            targetPayday,
+            weekendHandling === 'before',
+            accs
           );
 
-        const combinedTxs = deduplicateTransactions([...uniqueBankTxs, ...nonBankPrev]);
-        combinedTxs.sort((a, b) => {
-          const dCmp = b.date.localeCompare(a.date);
-          if (dCmp !== 0) return dCmp;
-          return getTransactionTime(b).localeCompare(getTransactionTime(a));
-        });
+          const reconciledInc = reconcileIncomesList({
+            currentList: incomesRef.current,
+            detectedList: analyzed.detectedIncomes,
+            targetPayday,
+            uid: activeUid,
+          });
 
-        // Uppdatera samtliga states i ett enda atomärt steg (inget hoppande eller flimmer)
-        incomesRef.current = reconciledInc.items;
-        fixedExpensesRef.current = reconciledFix.items;
-        transactionsRef.current = combinedTxs;
+          const reconciledFix = reconcileFixedExpensesList({
+            currentList: fixedExpensesRef.current,
+            detectedList: analyzed.detectedFixedExpenses,
+            uid: activeUid,
+          });
 
-        setConnections(conns);
-        setBankAccounts(accs);
-        setIncomes(reconciledInc.items);
-        setFixedExpenses(reconciledFix.items);
-        setTransactions(combinedTxs);
-        setIsInitialLoading(false);
+          const aliases = getMerchantAliases();
+          const prevMap = new Map(transactionsRef.current.map((t) => [t.id, t]));
+          const uniqueBankTxs = mapBankTransactionsToAppItems(
+            bankTxs,
+            accs,
+            reconciledFix.items,
+            reconciledInc.items,
+            aliases
+          ).map((tx) => {
+            const prev = prevMap.get(tx.id);
+            if (!prev) return tx;
+            return {
+              ...tx,
+              isHearted: prev.isHearted ?? tx.isHearted,
+              isWaitingForPackage: prev.isWaitingForPackage ?? tx.isWaitingForPackage,
+              receiptUrl: prev.receiptUrl ?? tx.receiptUrl,
+              receiptName: prev.receiptName ?? tx.receiptName,
+              note: prev.note ?? tx.note,
+            };
+          });
 
-        saveCachedAppState({
-          connections: conns,
-          bankAccounts: accs,
-          incomes: reconciledInc.items,
-          fixedExpenses: reconciledFix.items,
-          transactions: combinedTxs,
-          targetPayday,
-          weekendHandling,
-        });
+          const nonBankPrev = transactionsRef.current
+            .filter((p) => !p.id.startsWith('bank-'))
+            .map((t) =>
+              sanitizeTransactionItem(t, reconciledFix.items, reconciledInc.items, aliases)
+            );
 
-        // Spara eventuella nyupptäckta fasta poster till Supabase i bakgrunden så DB och cache alltid matchar
-        if (activeUid) {
-          for (const item of reconciledFix.toPersist) {
-            dataService
-              .saveFixedExpense(activeUid, {
-                id: item.id,
-                name: item.name,
-                originalName: item.originalName,
-                amount: item.amount,
-                deductionDay: item.dueDay,
-                category: item.category,
-                paymentMethod: item.paymentMethod || 'Autogiro',
-                frequency: Frequency.MONTHLY,
-                logo: item.logo,
-              })
-              .catch(() => {});
+          const combinedTxs = deduplicateTransactions([...uniqueBankTxs, ...nonBankPrev]);
+          combinedTxs.sort((a, b) => {
+            const dCmp = b.date.localeCompare(a.date);
+            if (dCmp !== 0) return dCmp;
+            return getTransactionTime(b).localeCompare(getTransactionTime(a));
+          });
+
+          if (!userIdRef.current || isDeletingAccountRef.current || userIdRef.current !== activeUid) {
+            return { connections: [], accounts: [] };
           }
-          for (const inc of reconciledInc.toPersist) {
-            dataService
-              .saveIncomeSource(activeUid, {
-                id: inc.id,
-                name: inc.name,
-                originalName: inc.originalName,
-                amount: inc.amount,
-                deductionDay: inc.payday,
-                category: inc.category,
-                frequency: Frequency.MONTHLY,
-                logo: inc.logo,
-              })
-              .catch(() => {});
+
+          // Uppdatera samtliga states i ett enda atomärt steg (inget hoppande eller flimmer)
+          incomesRef.current = reconciledInc.items;
+          fixedExpensesRef.current = reconciledFix.items;
+          transactionsRef.current = combinedTxs;
+
+          setConnections(conns);
+          setBankAccounts(accs);
+          setIncomes(reconciledInc.items);
+          setFixedExpenses(reconciledFix.items);
+          setTransactions(combinedTxs);
+          setIsInitialLoading(false);
+
+          saveCachedAppState({
+            userId: activeUid,
+            connections: conns,
+            bankAccounts: accs,
+            incomes: reconciledInc.items,
+            fixedExpenses: reconciledFix.items,
+            transactions: combinedTxs,
+            targetPayday,
+            weekendHandling,
+          });
+
+          // Spara eventuella nyupptäckta fasta poster till Supabase i bakgrunden så DB och cache alltid matchar
+          if (activeUid && !isDeletingAccountRef.current) {
+            for (const item of reconciledFix.toPersist) {
+              dataService
+                .saveFixedExpense(activeUid, {
+                  id: item.id,
+                  name: item.name,
+                  originalName: item.originalName,
+                  amount: item.amount,
+                  deductionDay: item.dueDay,
+                  category: item.category,
+                  paymentMethod: item.paymentMethod || 'Autogiro',
+                  frequency: Frequency.MONTHLY,
+                  logo: item.logo,
+                })
+                .catch(() => {});
+            }
+            for (const inc of reconciledInc.toPersist) {
+              dataService
+                .saveIncomeSource(activeUid, {
+                  id: inc.id,
+                  name: inc.name,
+                  originalName: inc.originalName,
+                  amount: inc.amount,
+                  deductionDay: inc.payday,
+                  category: inc.category,
+                  frequency: Frequency.MONTHLY,
+                  logo: inc.logo,
+                })
+                .catch(() => {});
+            }
+          }
+        } else {
+          if (!userIdRef.current || isDeletingAccountRef.current || userIdRef.current !== activeUid) {
+            return { connections: [], accounts: [] };
+          }
+          setConnections(conns);
+          setBankAccounts(accs);
+          setIsInitialLoading(false);
+
+          if (!hasActiveConns) {
+            const nonBankOnly = transactionsRef.current.filter((p) => !p.id.startsWith('bank-'));
+            if (nonBankOnly.length !== transactionsRef.current.length) {
+              transactionsRef.current = nonBankOnly;
+              setTransactions(nonBankOnly);
+            }
+            saveCachedAppState({
+              userId: activeUid,
+              connections: conns,
+              bankAccounts: accs,
+              transactions: nonBankOnly,
+            });
+          } else {
+            saveCachedAppState({
+              userId: activeUid,
+              connections: conns,
+              bankAccounts: accs,
+            });
           }
         }
-      } else {
-        setConnections(conns);
-        setBankAccounts(accs);
-        setIsInitialLoading(false);
-        saveCachedAppState({
-          connections: conns,
-          bankAccounts: accs,
-        });
-      }
 
         return { connections: conns, accounts: accs };
       } catch {
@@ -1616,9 +1894,11 @@ export const App: React.FC = () => {
         return { connections: [], accounts: [] };
       } finally {
         refreshInFlightRef.current = null;
-        if (pendingRefreshRef.current) {
+        if (pendingRefreshRef.current && userIdRef.current && !isDeletingAccountRef.current) {
           pendingRefreshRef.current = false;
           void refreshBankStatus();
+        } else {
+          pendingRefreshRef.current = false;
         }
       }
     };
@@ -1633,6 +1913,23 @@ export const App: React.FC = () => {
     async (
       uid: string
     ): Promise<{ connections: BankConnection[]; accounts: BankAccount[] }> => {
+      if (!uid || isDeletingAccountRef.current) {
+        return { connections: [], accounts: [] };
+      }
+
+      const cachedState = loadCachedAppState();
+      const isDifferentUser =
+        (lastHydratedUserIdRef.current !== null && lastHydratedUserIdRef.current !== uid) ||
+        (cachedState?.userId !== undefined && cachedState.userId !== null && cachedState.userId !== uid);
+
+      if (isDifferentUser) {
+        incomesRef.current = [];
+        fixedExpensesRef.current = [];
+        transactionsRef.current = [];
+        clearCachedAppState();
+      }
+      lastHydratedUserIdRef.current = uid;
+
       try {
         const [
           dbIncomes,
@@ -1652,8 +1949,14 @@ export const App: React.FC = () => {
           bankService.listAllTransactionsForReconciliation(5000).catch(() => []),
         ]);
 
+        if (isDeletingAccountRef.current || userIdRef.current !== uid) {
+          return { connections: [], accounts: [] };
+        }
+
         const conns = bankStatus.connections || [];
         const accs = bankStatus.accounts || [];
+        const hasActiveConns = conns.some((c) => c.status !== 'revoked');
+        const validBankTxs = hasActiveConns && Array.isArray(bankTxs) ? bankTxs : [];
 
         const resolvedPayday = dbSettings?.payday || targetPayday || 25;
         let resolvedWeekend: WeekendHandlingMode = weekendHandling;
@@ -1679,17 +1982,27 @@ export const App: React.FC = () => {
         }
 
         const analyzed =
-          Array.isArray(bankTxs) && bankTxs.length > 0
+          validBankTxs.length > 0
             ? analyzeBankTransactionsForOnboarding(
-                bankTxs,
+                validBankTxs,
                 resolvedPayday,
                 resolvedWeekend === 'before',
                 accs
               )
             : null;
 
+        // Använd aldrig lokalt cachade inkomster/utgifter om användaren inte har vare sig DB-rader eller aktiva banktransaktioner
+        const canMergeLocalIncomes =
+          !isDifferentUser &&
+          cachedState?.userId === uid &&
+          (dbIncomes.length > 0 || Boolean(analyzed));
+        const canMergeLocalFixed =
+          !isDifferentUser &&
+          cachedState?.userId === uid &&
+          (dbFixed.length > 0 || Boolean(analyzed));
+
         const reconciledInc = reconcileIncomesList({
-          currentList: incomesRef.current,
+          currentList: canMergeLocalIncomes ? incomesRef.current : [],
           dbList: dbIncomes,
           detectedList: analyzed?.detectedIncomes || null,
           targetPayday: resolvedPayday,
@@ -1697,7 +2010,7 @@ export const App: React.FC = () => {
         });
 
         const reconciledFix = reconcileFixedExpensesList({
-          currentList: fixedExpensesRef.current,
+          currentList: canMergeLocalFixed ? fixedExpensesRef.current : [],
           dbList: dbFixed,
           detectedList: analyzed?.detectedFixedExpenses || null,
           uid,
@@ -1747,9 +2060,9 @@ export const App: React.FC = () => {
 
         const prevMap = new Map(transactionsRef.current.map((t) => [t.id, t]));
         const uniqueBankTxs =
-          Array.isArray(bankTxs) && bankTxs.length > 0
+          validBankTxs.length > 0
             ? mapBankTransactionsToAppItems(
-                bankTxs,
+                validBankTxs,
                 accs,
                 reconciledFix.items,
                 reconciledInc.items,
@@ -1766,16 +2079,7 @@ export const App: React.FC = () => {
                   note: prev.note ?? tx.note,
                 };
               })
-            : transactionsRef.current
-                .filter((p) => p.id.startsWith('bank-'))
-                .map((t) =>
-                  sanitizeTransactionItem(
-                    t,
-                    reconciledFix.items,
-                    reconciledInc.items,
-                    aliases
-                  )
-                );
+            : [];
 
         const combinedTxs = deduplicateTransactions([...uniqueBankTxs, ...mappedDbTxs]);
         combinedTxs.sort((a, b) => {
@@ -1783,6 +2087,10 @@ export const App: React.FC = () => {
           if (dCmp !== 0) return dCmp;
           return getTransactionTime(b).localeCompare(getTransactionTime(a));
         });
+
+        if (isDeletingAccountRef.current || userIdRef.current !== uid) {
+          return { connections: [], accounts: [] };
+        }
 
         // Tillämpa alla beräknade listor i ett enda atomärt steg
         incomesRef.current = reconciledInc.items;
@@ -1809,34 +2117,36 @@ export const App: React.FC = () => {
         });
 
         // Synka nyupptäckta fasta poster till Supabase så att databasen aldrig saknar bankupptäckta poster
-        for (const item of reconciledFix.toPersist) {
-          dataService
-            .saveFixedExpense(uid, {
-              id: item.id,
-              name: item.name,
-              originalName: item.originalName,
-              amount: item.amount,
-              deductionDay: item.dueDay,
-              category: item.category,
-              paymentMethod: item.paymentMethod || 'Autogiro',
-              frequency: Frequency.MONTHLY,
-              logo: item.logo,
-            })
-            .catch(() => {});
-        }
-        for (const inc of reconciledInc.toPersist) {
-          dataService
-            .saveIncomeSource(uid, {
-              id: inc.id,
-              name: inc.name,
-              originalName: inc.originalName,
-              amount: inc.amount,
-              deductionDay: inc.payday,
-              category: inc.category,
-              frequency: Frequency.MONTHLY,
-              logo: inc.logo,
-            })
-            .catch(() => {});
+        if (!isDeletingAccountRef.current && userIdRef.current === uid) {
+          for (const item of reconciledFix.toPersist) {
+            dataService
+              .saveFixedExpense(uid, {
+                id: item.id,
+                name: item.name,
+                originalName: item.originalName,
+                amount: item.amount,
+                deductionDay: item.dueDay,
+                category: item.category,
+                paymentMethod: item.paymentMethod || 'Autogiro',
+                frequency: Frequency.MONTHLY,
+                logo: item.logo,
+              })
+              .catch(() => {});
+          }
+          for (const inc of reconciledInc.toPersist) {
+            dataService
+              .saveIncomeSource(uid, {
+                id: inc.id,
+                name: inc.name,
+                originalName: inc.originalName,
+                amount: inc.amount,
+                deductionDay: inc.payday,
+                category: inc.category,
+                frequency: Frequency.MONTHLY,
+                logo: inc.logo,
+              })
+              .catch(() => {});
+          }
         }
 
         return { connections: conns, accounts: accs };
@@ -2565,25 +2875,37 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleAddFixed = async (data: Omit<FixedExpenseItem, 'id'>) => {
+  const handleAddFixed = async (
+    data: Omit<FixedExpenseItem, 'id'>
+  ): Promise<FixedExpenseItem> => {
     unDismissFixedMerchant(data.name);
-    saveManualFixedOverride(data.name, {
-      amount: data.amount,
-      isShared: data.isShared,
-      fullAmount: data.fullAmount,
-      dueDay: data.dueDay,
-      category: data.category,
-      paymentMethod: data.paymentMethod,
-      name: data.name,
-    });
     const logo = data.logo || getLogoUrl(data.name, data.category);
     const validId = ensureValidUuid(
       undefined,
-      `fixed:${userId || 'local'}:${normalizeMerchantKey(data.name)}:${Date.now()}`
+      `fixed:${userId || 'local'}:${normalizeMerchantKey(data.name)}:${data.amount}:${Date.now()}`
+    );
+    const existingSameMerchant = findAllMatchingFixedExpensesByMerchant(
+      { title: data.name, amount: data.amount },
+      fixedExpensesRef.current
+    );
+    saveManualFixedOverride(
+      data.name,
+      {
+        amount: data.amount,
+        isShared: data.isShared,
+        fullAmount: data.fullAmount,
+        dueDay: data.dueDay,
+        category: data.category,
+        paymentMethod: data.paymentMethod,
+        name: data.name,
+      },
+      data.name,
+      validId,
+      existingSameMerchant.length > 0
     );
     const newItem: FixedExpenseItem = {
       ...data,
-      originalName: data.name,
+      originalName: data.originalName || data.name,
       logo,
       id: validId,
     };
@@ -2609,19 +2931,27 @@ export const App: React.FC = () => {
         })
         .catch(() => {});
     }
+    return newItem;
   };
 
   const handleMarkAsFixed = async (tx: TransactionItem, kind: 'expense' | 'income') => {
     const day = parseInt(tx.date.slice(8, 10), 10) || (kind === 'expense' ? 27 : 25);
+    setIsTxModalOpen(false);
+    setSelectedTransaction(null);
+    setActiveTab('fixed');
+
     if (kind === 'expense') {
-      await handleAddFixed({
+      const created = await handleAddFixed({
         name: tx.title,
+        originalName: tx.counterpartyName || tx.rawDescription || tx.title,
         amount: tx.amount,
         dueDay: day,
         category: tx.category || 'Räkningar',
-        paymentMethod: 'Kort',
+        paymentMethod: tx.paymentMethod || 'Autogiro',
         logo: tx.logo,
       });
+      setSelectedFixedExpense(created);
+      setIsFixedModalOpen(true);
     } else {
       await handleAddIncome({
         name: tx.title,
@@ -2631,9 +2961,6 @@ export const App: React.FC = () => {
         logo: tx.logo,
       });
     }
-    setIsTxModalOpen(false);
-    setSelectedTransaction(null);
-    setActiveTab('fixed');
   };
 
   const handleToggleHeart = useCallback((id: string, isHearted: boolean) => {
@@ -2710,8 +3037,21 @@ export const App: React.FC = () => {
   const handleUpdateFixed = async (updated: FixedExpenseItem) => {
     const existing = fixedExpensesRef.current.find((f) => f.id === updated.id);
     const rootOriginalName = existing?.originalName || existing?.name || updated.name;
+    const otherSameMerchantItems = fixedExpensesRef.current.filter(
+      (f) =>
+        f.id !== updated.id &&
+        findAllMatchingFixedExpensesByMerchant(
+          { title: rootOriginalName, rawDescription: existing?.name },
+          [f]
+        ).length > 0
+    );
+    const hasOtherSameMerchant = otherSameMerchantItems.length > 0;
 
-    if (existing && existing.name.toLowerCase().trim() !== updated.name.toLowerCase().trim()) {
+    if (
+      existing &&
+      existing.name.toLowerCase().trim() !== updated.name.toLowerCase().trim() &&
+      !hasOtherSameMerchant
+    ) {
       dismissFixedMerchant(existing.name, rootOriginalName);
       for (const variant of extractMerchantKeyVariants(existing.name)) {
         saveMerchantAlias(variant, updated.name, updated.category);
@@ -2720,8 +3060,16 @@ export const App: React.FC = () => {
         saveMerchantAlias(variant, updated.name, updated.category);
       }
     }
-    saveMerchantAlias(updated.name, updated.name, updated.category);
+    if (!hasOtherSameMerchant) {
+      saveMerchantAlias(updated.name, updated.name, updated.category);
+    }
     unDismissFixedMerchant(updated.name);
+
+    const logo = updated.logo || getLogoUrl(updated.name, updated.category);
+    const validId = ensureValidUuid(
+      updated.id,
+      `fixed:${userId || 'local'}:${normalizeMerchantKey(rootOriginalName)}:${updated.amount}`
+    );
     saveManualFixedOverride(
       updated.name,
       {
@@ -2733,14 +3081,11 @@ export const App: React.FC = () => {
         paymentMethod: updated.paymentMethod,
         name: updated.name,
       },
-      rootOriginalName
+      rootOriginalName,
+      validId,
+      hasOtherSameMerchant
     );
 
-    const logo = updated.logo || getLogoUrl(updated.name, updated.category);
-    const validId = ensureValidUuid(
-      updated.id,
-      `fixed:${userId || 'local'}:${normalizeMerchantKey(rootOriginalName)}`
-    );
     const itemWithLogo: FixedExpenseItem = {
       ...updated,
       id: validId,
@@ -2764,9 +3109,13 @@ export const App: React.FC = () => {
     saveCachedAppState({ fixedExpenses: nextFixed, transactions: nextTxs });
 
     if (userId) {
-      if (existing && existing.name !== itemWithLogo.name) {
+      if (existing && existing.name !== itemWithLogo.name && !hasOtherSameMerchant) {
         await dataService
-          .deleteFixedExpense('', userId, [existing.name, rootOriginalName].filter((n) => n !== itemWithLogo.name))
+          .deleteFixedExpense(
+            '',
+            userId,
+            [existing.name, rootOriginalName].filter((n) => n !== itemWithLogo.name)
+          )
           .catch(() => {});
       }
       await dataService
@@ -2787,13 +3136,20 @@ export const App: React.FC = () => {
 
   const handleDeleteFixed = async (id: string) => {
     const item = fixedExpensesRef.current.find((f) => f.id === id);
+    const nextFixed = fixedExpensesRef.current.filter((f) => f.id !== id);
+    const hasRemainingSameMerchant = item
+      ? findAllMatchingFixedExpensesByMerchant(
+          { title: item.originalName || item.name, rawDescription: item.name },
+          nextFixed
+        ).length > 0
+      : false;
+
     const namesToDelete: string[] = [];
-    if (item) {
+    if (item && !hasRemainingSameMerchant) {
       dismissFixedMerchant(item.name, item.originalName);
       namesToDelete.push(item.name);
       if (item.originalName) namesToDelete.push(item.originalName);
     }
-    const nextFixed = fixedExpensesRef.current.filter((f) => f.id !== id);
     fixedExpensesRef.current = nextFixed;
     setFixedExpenses(nextFixed);
     saveCachedAppState({ fixedExpenses: nextFixed });
@@ -2835,14 +3191,30 @@ export const App: React.FC = () => {
 
   const handleUpdateTransaction = async (
     updated: TransactionItem,
-    applyToSimilarIds?: string[]
+    applyToSimilarIds?: string[],
+    options?: {
+      renameScope?: 'single' | 'same-merchant' | 'chain';
+      renameTargetIds?: string[];
+      categoryTargetIds?: string[];
+    }
   ) => {
     const existing = transactionsRef.current.find((t) => t.id === updated.id);
-    if (
-      existing &&
-      (existing.title.toLowerCase().trim() !== updated.title.toLowerCase().trim() ||
-        existing.category !== updated.category)
-    ) {
+    const titleChanged = Boolean(
+      existing && existing.title.toLowerCase().trim() !== updated.title.toLowerCase().trim()
+    );
+    const categoryChanged = Boolean(existing && existing.category !== updated.category);
+
+    const renameScope = options?.renameScope || 'single';
+    const renameSet = new Set<string>(
+      titleChanged && renameScope !== 'single' ? options?.renameTargetIds || [] : []
+    );
+    const categorySet = new Set<string>(
+      options?.categoryTargetIds || (!titleChanged && applyToSimilarIds ? applyToSimilarIds : [])
+    );
+
+    // 1. Om användaren uttryckligen valt att byta namn på flera poster (exakt samma butik eller hela kedjan)
+    if (titleChanged && renameScope === 'same-merchant' && existing) {
+      // Spara alias ENDAST för exakt denna butik/plats (t.ex. "Circle K Varberg"), aldrig för andra orter!
       saveMerchantAlias(existing.title, updated.title, updated.category);
       if (existing.counterpartyName) {
         saveMerchantAlias(existing.counterpartyName, updated.title, updated.category);
@@ -2850,13 +3222,18 @@ export const App: React.FC = () => {
       if (existing.rawDescription) {
         saveMerchantAlias(existing.rawDescription, updated.title, updated.category);
       }
-      saveMerchantAlias(updated.title, updated.title, updated.category);
-    }
-
-    const similarSet = new Set(applyToSimilarIds || []);
-    if (similarSet.size > 0) {
       for (const tx of transactionsRef.current) {
-        if (similarSet.has(tx.id)) {
+        if (renameSet.has(tx.id)) {
+          saveTransactionMeta(tx.id, {
+            customTitle: updated.title,
+            ...(categoryChanged ? { customCategory: updated.category } : {}),
+          });
+        }
+      }
+    } else if (titleChanged && renameScope === 'chain') {
+      // Användaren valde uttryckligen att döpa om ALLA köp i hela kedjan
+      for (const tx of transactionsRef.current) {
+        if (renameSet.has(tx.id) || tx.id === updated.id) {
           saveMerchantAlias(tx.title, updated.title, updated.category);
           if (tx.counterpartyName) {
             saveMerchantAlias(tx.counterpartyName, updated.title, updated.category);
@@ -2864,9 +3241,57 @@ export const App: React.FC = () => {
           if (tx.rawDescription) {
             saveMerchantAlias(tx.rawDescription, updated.title, updated.category);
           }
+          saveTransactionMeta(tx.id, {
+            customTitle: updated.title,
+            ...(categoryChanged ? { customCategory: updated.category } : {}),
+          });
         }
       }
     }
+
+    // 2. Om användaren ändrar KATEGORI (med "Uppdatera liknande köp" påslaget), uppdatera ENDAST kategorin och behåll varje transaktions eget butiksnamn!
+    if (categoryChanged && categorySet.size > 0) {
+      for (const tx of transactionsRef.current) {
+        if (categorySet.has(tx.id)) {
+          const keepTitle = tx.id === updated.id ? updated.title : tx.title;
+          saveTransactionMeta(tx.id, { customCategory: updated.category });
+          saveMerchantAlias(tx.title, keepTitle, updated.category);
+          if (tx.counterpartyName) {
+            saveMerchantAlias(tx.counterpartyName, keepTitle, updated.category);
+          }
+          if (tx.rawDescription) {
+            saveMerchantAlias(tx.rawDescription, keepTitle, updated.category);
+          }
+        }
+      }
+    }
+
+    // 3. Spara per-transaktions-metadata för den redigerade transaktionen först så sanitizeTransactionItem respekterar customTitle/customCategory
+    const existingMeta = getTransactionMetaMap()[updated.id];
+    const nextCustomTitle = titleChanged
+      ? updated.title
+      : existingMeta?.customTitle;
+    const nextCustomCategory = categoryChanged
+      ? updated.category
+      : existingMeta?.customCategory;
+
+    saveTransactionMeta(updated.id, {
+      ...(nextCustomTitle ? { customTitle: nextCustomTitle } : {}),
+      ...(nextCustomCategory ? { customCategory: nextCustomCategory } : {}),
+      isHearted: updated.isHearted,
+      isWaitingForPackage: updated.isWaitingForPackage,
+      receiptUrl: updated.receiptUrl,
+      receiptName: updated.receiptName,
+      paymentMethod: updated.paymentMethod,
+      note: updated.note,
+      customAmount:
+        updated.originalAmount !== undefined &&
+        updated.originalAmount > updated.amount
+          ? updated.amount
+          : undefined,
+      originalAmount: updated.originalAmount,
+      linkedSwishTxId: updated.linkedSwishTxId,
+    });
 
     const logo = updated.logo || getLogoUrl(updated.title, updated.category);
     const aliases = getMerchantAliases();
@@ -2876,32 +3301,22 @@ export const App: React.FC = () => {
       incomesRef.current,
       aliases
     );
-    saveTransactionMeta(itemWithLogo.id, {
-      isHearted: itemWithLogo.isHearted,
-      isWaitingForPackage: itemWithLogo.isWaitingForPackage,
-      receiptUrl: itemWithLogo.receiptUrl,
-      receiptName: itemWithLogo.receiptName,
-      paymentMethod: itemWithLogo.paymentMethod,
-      note: itemWithLogo.note,
-      customAmount:
-        itemWithLogo.originalAmount !== undefined &&
-        itemWithLogo.originalAmount > itemWithLogo.amount
-          ? itemWithLogo.amount
-          : undefined,
-      originalAmount: itemWithLogo.originalAmount,
-      linkedSwishTxId: itemWithLogo.linkedSwishTxId,
-    });
+
     setTransactions((prev) => {
       const exists = prev.some((t) => t.id === itemWithLogo.id);
       const next = exists
         ? prev.map((t) => {
             if (t.id === itemWithLogo.id) return itemWithLogo;
-            if (similarSet.has(t.id)) {
+            const shouldRename = renameSet.has(t.id);
+            const shouldRecategorize = categorySet.has(t.id);
+            if (shouldRename || shouldRecategorize) {
+              const nextTitle = shouldRename ? itemWithLogo.title : t.title;
+              const nextCat = shouldRecategorize ? itemWithLogo.category : t.category;
               return {
                 ...t,
-                title: itemWithLogo.title,
-                category: itemWithLogo.category,
-                logo: itemWithLogo.logo,
+                title: nextTitle,
+                category: nextCat,
+                logo: getLogoUrl(nextTitle, nextCat) || t.logo,
               };
             }
             return t;
@@ -3003,103 +3418,139 @@ export const App: React.FC = () => {
   };
 
   const handleSignOut = async () => {
+    cancelPendingPreferenceSync();
     clearCachedAppState();
-    await supabase.auth.signOut().catch(() => {});
-    setUserId(null);
     userIdRef.current = null;
+    lastHydratedUserIdRef.current = null;
+    incomesRef.current = [];
+    fixedExpensesRef.current = [];
+    transactionsRef.current = [];
+    setUserId(null);
     setUserEmail(null);
     setConnections([]);
     setBankAccounts([]);
     setIncomes([]);
     setFixedExpenses([]);
     setTransactions([]);
-    incomesRef.current = [];
-    fixedExpensesRef.current = [];
-    transactionsRef.current = [];
+    await supabase.auth.signOut().catch(() => {});
     setShowLanding(true);
     setIsOnboardingActive(false);
   };
 
   const handleDeleteAccount = async () => {
-    if (userId && userId !== 'demo-user') {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const token = session?.access_token;
-        await fetch('/api/auth/delete-account', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ userId }),
-        });
-      } catch (err) {
-        console.error('Error calling delete-account API:', err);
-        await dataService.deleteAllUserData(userId).catch(() => {});
-      }
-    } else if (userId) {
-      await dataService.deleteAllUserData(userId).catch(() => {});
-    }
+    const uidToDelete = userId || userIdRef.current;
+    const connsToDisconnect = [...connections];
 
-    await supabase.auth.signOut().catch(() => {});
-
-    for (let i = localStorage.length - 1; i >= 0; i--) {
-      const key = localStorage.key(i);
-      if (
-        key &&
-        (key.startsWith('dejz_') ||
-          key.startsWith('user_settings_') ||
-          key.includes(userId || ''))
-      ) {
-        localStorage.removeItem(key);
-      }
-    }
+    // 1. Stoppa omedelbart alla pågående bakgrundssynkningar och rensa refs/state synkront
+    isDeletingAccountRef.current = true;
+    pendingRefreshRef.current = false;
+    cancelPendingPreferenceSync();
+    userIdRef.current = null;
+    lastHydratedUserIdRef.current = null;
+    incomesRef.current = [];
+    fixedExpensesRef.current = [];
+    transactionsRef.current = [];
+    aiCleanAttemptedRef.current.clear();
 
     setUserId(null);
-    userIdRef.current = null;
     setUserEmail(null);
+    setUserName('');
     setUserAvatar(null);
     setConnections([]);
     setBankAccounts([]);
     setIncomes([]);
     setFixedExpenses([]);
     setTransactions([]);
+    setDismissedTxIds([]);
+
+    // Rensa localStorage direkt så ingen lyssnare kan läsa gammal cache under raderingen
+    clearAllLocalAppData(false);
+
+    try {
+      if (uidToDelete && uidToDelete !== 'demo-user' && uidToDelete !== 'preview-user') {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        // Koppla från eventuella bankanslutningar hos Enable Banking
+        if (connsToDisconnect.length > 0) {
+          await Promise.allSettled(
+            connsToDisconnect
+              .filter((c) => c.status !== 'revoked')
+              .map((c) => bankService.disconnect(c.id))
+          );
+        }
+
+        // Radera alla rader i samtliga Supabase-tabeller via klienten (RLS)
+        await dataService.deleteAllUserData(uidToDelete).catch(() => {});
+
+        // Anropa både Edge Function (adminClient) och server-endpoint för garanterad fullständig radering inkl. auth.users
+        await Promise.allSettled([
+          bankService.deleteAccount(),
+          fetch('/api/auth/delete-account', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ userId: uidToDelete }),
+          }),
+        ]);
+      } else if (uidToDelete) {
+        await dataService.deleteAllUserData(uidToDelete).catch(() => {});
+      }
+    } catch (err) {
+      console.error('Error during account deletion:', err);
+    } finally {
+      await supabase.auth.signOut().catch(() => {});
+      clearAllLocalAppData(false);
+
+      incomesRef.current = [];
+      fixedExpensesRef.current = [];
+      transactionsRef.current = [];
+      setTargetPayday(25);
+      setWeekendHandling('before');
+      setSettingsSubView('main');
+      setActiveTab('home');
+      setIsOnboardingActive(false);
+      setShowLanding(true);
+      isDeletingAccountRef.current = false;
+    }
+  };
+
+  const handleResetAccount = async () => {
+    const activeUid = userId || userIdRef.current;
+    const connsToDisconnect = [...connections];
+
+    cancelPendingPreferenceSync();
+    clearAllLocalAppData(true);
+
     incomesRef.current = [];
     fixedExpensesRef.current = [];
     transactionsRef.current = [];
-    setDismissedTxIds([]);
-    setTargetPayday(25);
-    setWeekendHandling('before');
-    setSettingsSubView('main');
-    setActiveTab('home');
-    setShowLanding(true);
-  };
-
-  const handleResetAccount = () => {
-    const financialKeys = [
-      'dejz_incomes',
-      'dejz_fixed_expenses',
-      'dejz_transactions',
-      'dejz_dismissed_tx_ids',
-      'dejz_bank_connections',
-      'dejz_bank_accounts',
-    ];
-    financialKeys.forEach((key) => localStorage.removeItem(key));
-    clearCachedAppState();
+    aiCleanAttemptedRef.current.clear();
 
     setIncomes([]);
     setFixedExpenses([]);
     setTransactions([]);
-    incomesRef.current = [];
-    fixedExpensesRef.current = [];
-    transactionsRef.current = [];
     setDismissedTxIds([]);
     setConnections([]);
     setBankAccounts([]);
     setSettingsSubView('main');
     setActiveTab('home');
+
+    if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
+      if (connsToDisconnect.length > 0) {
+        await Promise.allSettled(
+          connsToDisconnect
+            .filter((c) => c.status !== 'revoked')
+            .map((c) => bankService.disconnect(c.id))
+        );
+      }
+      await dataService.deleteAllUserData(activeUid).catch(() => {});
+    }
+
     setCallbackStatusMsg('Kontot har nollställts och du kan börja om på nytt.');
     setTimeout(() => setCallbackStatusMsg(null), 4000);
   };
@@ -3119,6 +3570,19 @@ export const App: React.FC = () => {
           setIsOnboardingActive(false);
         }}
         onAuthenticated={(email, mode) => {
+          if (mode === 'register') {
+            cancelPendingPreferenceSync();
+            clearAllLocalAppData(true);
+            incomesRef.current = [];
+            fixedExpensesRef.current = [];
+            transactionsRef.current = [];
+            setIncomes([]);
+            setFixedExpenses([]);
+            setTransactions([]);
+            setConnections([]);
+            setBankAccounts([]);
+            setDismissedTxIds([]);
+          }
           setUserEmail(email);
           setShowLanding(false);
           supabase.auth.getSession().then(({ data: { session } }) => {
@@ -3430,8 +3894,8 @@ export const App: React.FC = () => {
                     const heartedList = displayTransactions.filter((t) => t.isHearted);
                     if (heartedList.length === 0) {
                       return (
-                        <section className="ui-empty-state">
-                          <Heart size={20} className="ui-empty-icon" />
+                        <section className="ui-empty-state-page animate-fade-in">
+                          <Heart size={48} weight="light" className="ui-empty-icon" />
                           <p className="ui-empty-title">
                             Inga sparade köp
                           </p>
@@ -3556,13 +4020,10 @@ export const App: React.FC = () => {
                     const packageList = displayTransactions.filter((t) => t.isWaitingForPackage);
                     if (packageList.length === 0) {
                       return (
-                        <section className="ui-empty-state">
-                          <Package size={20} className="ui-empty-icon" />
+                        <section className="ui-empty-state-page animate-fade-in">
+                          <Package size={52} weight="light" className="ui-empty-icon" />
                           <p className="ui-empty-title">
                             Inga paket på väg
-                          </p>
-                          <p className="ui-empty-sub">
-                            Öppna en transaktion och tryck på paketsymbolen för att hålla koll på beställningar du väntar på.
                           </p>
                         </section>
                       );
@@ -3865,13 +4326,10 @@ export const App: React.FC = () => {
                       </div>
                     </section>
                   ) : (
-                    <section className="ui-empty-state">
-                      <Paperclip size={20} className="ui-empty-icon" />
+                    <section className="ui-empty-state-page animate-fade-in">
+                      <Paperclip size={48} weight="light" className="ui-empty-icon" />
                       <p className="ui-empty-title">
                         Inga bifogade kvitton
-                      </p>
-                      <p className="ui-empty-sub">
-                        Öppna ett köp eller en fast utgift och välj &quot;Bifoga kvitto&quot; för att samla dem här.
                       </p>
                     </section>
                   )}
@@ -3975,6 +4433,7 @@ export const App: React.FC = () => {
       <FixedExpenseModal
         isOpen={isFixedModalOpen}
         initialExpense={selectedFixedExpense}
+        fixedExpenses={fixedExpenses}
         accounts={accounts}
         transactions={displayTransactions}
         onClose={() => {
@@ -3987,6 +4446,7 @@ export const App: React.FC = () => {
           setSelectedTransaction(tx);
           setIsTxModalOpen(true);
         }}
+        onMarkAsFixed={handleMarkAsFixed}
         onSave={handleAddFixed}
         onUpdate={handleUpdateFixed}
         onDelete={handleDeleteFixed}

@@ -335,6 +335,22 @@ export function getActualBankPaymentDateAndMeta(
     description.toLowerCase().includes('swish') ||
     /(467\d{8}|07\d{8}|123\d{7})/.test(description.replace(/[\s()-]/g, ''));
 
+  // 5. Extrahera när transaktionen först registrerades hos oss (created_at i svensk tid).
+  // För reserverade köp (PDNG/HOLD) fungerar detta som ett låst ankare om banken saknar
+  // köpdatum eller rullar fram bokföringsdatumet dag för dag medan köpet är reserverat.
+  let createdAtDate: string | undefined = undefined;
+  for (const cCandidate of [bt.created_at, raw.created_at]) {
+    if (typeof cCandidate === 'string' && cCandidate.trim()) {
+      const parsedCreated = formatIsoDateStockholm(cCandidate.trim());
+      if (parsedCreated && /^\d{4}-\d{2}-\d{2}$/.test(parsedCreated) && parsedCreated <= todayStr) {
+        createdAtDate = parsedCreated;
+        break;
+      }
+    }
+  }
+
+  const isPending = status === 'PDNG' || status === 'HOLD';
+
   // 6. Fastställ det faktiska köpdatumet
   let paymentDate: string;
   if (isSwish) {
@@ -344,7 +360,7 @@ export function getActualBankPaymentDateAndMeta(
     } else if (bookingDate && bookingDate <= todayStr) {
       paymentDate = bookingDate;
     } else {
-      paymentDate = valueDate || bookingDate || todayStr;
+      paymentDate = valueDate || bookingDate || createdAtDate || todayStr;
     }
   } else if (textDate) {
     paymentDate = textDate;
@@ -355,7 +371,13 @@ export function getActualBankPaymentDateAndMeta(
   } else if (bookingDate && bookingDate <= todayStr) {
     paymentDate = bookingDate;
   } else {
-    paymentDate = todayStr;
+    paymentDate = createdAtDate || todayStr;
+  }
+
+  // En reservation som redan fanns i vår databas vid createdAtDate kan aldrig ha genomförts
+  // på ett senare datum (förhindrar att reserverade köp hoppar till "Idag" vid midnatt).
+  if (isPending && createdAtDate && paymentDate > createdAtDate) {
+    paymentDate = createdAtDate;
   }
 
   if (paymentDate > todayStr) {
@@ -369,3 +391,4 @@ export function getActualBankPaymentDateAndMeta(
     paymentTime: rawPurchaseTime || undefined,
   };
 }
+

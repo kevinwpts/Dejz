@@ -353,11 +353,12 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                           </span>
                           {(() => {
                             const realTime = getTransactionTime(tx);
+                            const isPending =
+                              tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
                             const statusSub =
-                              realTime ||
-                              (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
-                                ? 'Reserverat'
-                                : '');
+                              realTime && isPending
+                                ? `${realTime} · Reserverat`
+                                : realTime || (isPending ? 'Reserverat' : '');
                             return statusSub ? (
                               <span className="ui-row-meta">
                                 {statusSub}
@@ -374,10 +375,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           ))}
         </div>
       ) : (
-        <section className="ui-empty-state animate-fade-in">
-          <div className="ui-empty-icon">
-            <Receipt size={18} weight="duotone" />
-          </div>
+        <section className="ui-empty-state-page animate-fade-in">
+          <Receipt size={48} weight="light" className="ui-empty-icon" />
           <p className="ui-empty-title">
             Inga transaktioner hittades
           </p>
@@ -386,3 +385,4 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     </div>
   );
 };
+

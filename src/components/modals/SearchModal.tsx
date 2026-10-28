@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
+  CaretLeft,
   MagnifyingGlass,
   Heart,
   Package,
@@ -14,7 +15,6 @@ import {
   getTransactionTime,
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
-import { BottomSheet } from '../ui/BottomSheet';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import {
@@ -55,6 +55,20 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen, onClose]);
 
   const formatKr = (amount: number) =>
     new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -179,7 +193,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           ? matchedInPeriod
           : matchedInPeriod || dueDatePassed
         : false;
-      const isAwaitingBank = Boolean(period && hasBankConnected && !matchedInPeriod && dueDatePassed);
+      const isAwaitingBank = Boolean(
+        period && hasBankConnected && !matchedInPeriod && dueDatePassed
+      );
       return {
         ...inc,
         isPaid: isPaidInPeriod,
@@ -206,7 +222,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           ? matchedInPeriod
           : matchedInPeriod || dueDatePassed
         : false;
-      const isAwaitingBank = Boolean(period && hasBankConnected && !matchedInPeriod && dueDatePassed);
+      const isAwaitingBank = Boolean(
+        period && hasBankConnected && !matchedInPeriod && dueDatePassed
+      );
       return {
         ...exp,
         isPaid: isPaidInPeriod,
@@ -232,357 +250,349 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     { id: 'fixed', label: 'Fasta & abonnemang' },
   ];
 
-  return (
-    <BottomSheet
-      isOpen={isOpen}
-      onClose={onClose}
-      surfaceClass="bg-[var(--bg-color)]"
-      maxHeightClass="max-h-[88dvh]"
-      zIndexClass="z-[120]"
-      disablePadding={true}
-    >
-      {/* Header */}
-      <div className="px-5 pt-1 pb-3 border-b border-[var(--border-subtle)] shrink-0 space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <span className="ui-sheet-title">
-            Sök & filtrera
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-icon-btn-surface"
-          >
-            <X size={16} />
-          </button>
-        </div>
+  if (!isOpen) return null;
 
-        {/* Search input */}
-        <div className="ui-search-box">
-          <MagnifyingGlass size={15} className="text-[var(--text-muted)] shrink-0" />
-          <input
-            type="text"
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Sök butik, utgift, belopp eller kategori..."
-            className="ui-search-input"
-          />
-          {query && (
+  return (
+    <div className="fixed inset-0 z-[140] bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col animate-fade-in">
+      {/* Sticky Full-Screen Header */}
+      <header className="bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-subtle)] pt-[calc(var(--safe-top,env(safe-area-inset-top,0px))+0.5rem)] pb-3 shrink-0">
+        <div className="max-w-lg mx-auto px-4 space-y-2.5">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md cursor-pointer"
+              onClick={onClose}
+              aria-label="Tillbaka"
+              title="Tillbaka"
+              className="p-2 -ml-2 text-[var(--text-primary)] hover:opacity-70 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
             >
-              <X size={14} />
+              <CaretLeft size={18} weight="bold" />
             </button>
-          )}
-        </div>
 
-        {/* Interactive Quick Filter Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-          {filterButtons.map((btn) => {
-            const active = quickFilter === btn.id;
-            return (
-              <button
-                key={btn.id}
-                type="button"
-                onClick={() => setQuickFilter(btn.id)}
-                className={active ? 'ui-chip-active' : 'ui-chip'}
-              >
-                {btn.label}
-              </button>
-            );
-          })}
+            {/* Search input */}
+            <div className="ui-search-box flex-1">
+              <MagnifyingGlass size={15} className="text-[var(--text-muted)] shrink-0" />
+              <input
+                type="text"
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Sök butik, utgift, belopp eller kategori..."
+                className="ui-search-input"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Interactive Quick Filter Bar */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            {filterButtons.map((btn) => {
+              const active = quickFilter === btn.id;
+              return (
+                <button
+                  key={btn.id}
+                  type="button"
+                  onClick={() => setQuickFilter(btn.id)}
+                  className={active ? 'ui-chip-active' : 'ui-chip'}
+                >
+                  {btn.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Scrollable Results Body */}
-      <div className="p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto space-y-4">
-        {!isSearchingOrFiltered ? (
-          <section className="ui-empty-state">
-            <div className="ui-empty-icon">
-              <MagnifyingGlass size={18} />
-            </div>
-            <p className="ui-empty-title">
-              Sök bland alla dina händelser
-            </p>
-            <p className="ui-empty-sub">
-              Skriv ett butiksnamn, belopp eller välj ett snabbfilter ovan
-            </p>
-          </section>
-        ) : hasResults ? (
-          <div className="space-y-4">
-            {/* Incomes - Enhetligt grupperat kort */}
-            {enrichedIncomes.length > 0 && (
-              <section className="ui-section">
-                <div className="ui-section-header">
-                  <h2 className="ui-section-title">
-                    Inkomster
-                  </h2>
-                  <span className="ui-row-amount-income text-[13px] sm:text-sm">
-                    +{formatKr(totalMatchedIncomes)}
-                  </span>
-                </div>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 py-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] space-y-4">
+          {!isSearchingOrFiltered ? (
+            <section className="ui-empty-state-page">
+              <MagnifyingGlass size={48} weight="light" className="ui-empty-icon" />
+              <p className="ui-empty-title">
+                Sök bland alla dina händelser
+              </p>
+            </section>
+          ) : hasResults ? (
+            <div className="space-y-4">
+              {/* Incomes */}
+              {enrichedIncomes.length > 0 && (
+                <section className="ui-section">
+                  <div className="ui-section-header">
+                    <h2 className="ui-section-title">
+                      Inkomster
+                    </h2>
+                    <span className="ui-row-amount-income text-[13px] sm:text-sm">
+                      +{formatKr(totalMatchedIncomes)}
+                    </span>
+                  </div>
 
-                <div className="ui-list-card">
-                  {enrichedIncomes.map((inc) => (
-                    <button
-                      key={inc.id}
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        onSelectIncome(inc);
-                      }}
-                      className="ui-tx-row"
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                        <ItemLogo
-                          name={inc.name}
-                          category={inc.category}
-                          logoUrl={inc.logo}
-                          size="md"
-                          isRecurring={false}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">
-                            {inc.name}
-                          </span>
-                          <span className="ui-row-subtitle">
-                            {inc.category || 'Lön'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="ui-row-amount-income">
-                          +{formatKr(inc.amount)}
-                        </span>
-                        <span
-                          className={`text-xs tabular-nums block mt-0.5 ${
-                            inc.isPaid
-                              ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                              : inc.isAwaitingBank
-                              ? 'text-amber-600 dark:text-amber-400 font-medium'
-                              : 'text-[var(--text-muted)]'
-                          }`}
-                        >
-                          {inc.isPaid
-                            ? 'Mottagen'
-                            : inc.isAwaitingBank
-                            ? 'Inväntar insättning'
-                            : `Den ${inc.payday}:e`}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Fixed Expenses - Enhetligt grupperat kort */}
-            {enrichedFixed.length > 0 && (
-              <section className="ui-section">
-                <div className="ui-section-header">
-                  <h2 className="ui-section-title">
-                    Fasta utgifter
-                  </h2>
-                  <span className="ui-row-amount text-[13px] sm:text-sm">
-                    -{formatKr(totalMatchedFixed)}
-                  </span>
-                </div>
-
-                <div className="ui-list-card">
-                  {enrichedFixed.map((exp) => (
-                    <button
-                      key={exp.id}
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        onSelectFixed(exp);
-                      }}
-                      className="ui-tx-row"
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                        <ItemLogo
-                          name={exp.name}
-                          category={exp.category}
-                          logoUrl={exp.logo}
-                          size="md"
-                          isRecurring={false}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">
-                            {exp.name}
-                          </span>
-                          <span className="ui-row-subtitle">
-                            {exp.category || 'Räkningar'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span className="ui-row-amount">
-                          -{formatKr(exp.amount)}
-                        </span>
-                        <span
-                          className={`text-xs tabular-nums block mt-0.5 ${
-                            exp.isPaid
-                              ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                              : exp.isAwaitingBank
-                              ? 'text-amber-600 dark:text-amber-400 font-medium'
-                              : 'text-[var(--text-muted)]'
-                          }`}
-                        >
-                          {exp.isPaid
-                            ? 'Betald'
-                            : exp.isAwaitingBank
-                            ? 'Inväntar dragning'
-                            : `Den ${exp.dueDay}:e`}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Transactions - Grupperade per datum */}
-            {groupedTransactionsByDate.length > 0 && (
-              <div className="space-y-3.5">
-                {groupedTransactionsByDate.map((group) => (
-                  <section key={group.dateKey} className="ui-section">
-                    <div className="ui-section-header">
-                      <span className="ui-section-title">
-                        {group.label}
-                      </span>
-                      <span
-                        className={`text-xs font-semibold tabular-nums ${
-                          group.net > 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-[var(--text-muted)]'
-                        }`}
+                  <div className="ui-list-card">
+                    {enrichedIncomes.map((inc) => (
+                      <button
+                        key={inc.id}
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onSelectIncome(inc);
+                        }}
+                        className="ui-tx-row"
                       >
-                        {group.net > 0
-                          ? `+${formatKr(group.net)}`
-                          : group.net < 0
-                          ? `-${formatKr(Math.abs(group.net))}`
-                          : formatKr(0)}
-                      </span>
-                    </div>
-
-                    <div className="ui-list-card">
-                      {group.items.map((tx) => {
-                        const isIncome = tx.type === 'income';
-                        const recurringStatus = checkIsRecurringTransaction(
-                          tx,
-                          fixedExpenses,
-                          incomes
-                        );
-                        const isSplit =
-                          tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
-                        const realTime = getTransactionTime(tx);
-                        const statusSub =
-                          realTime ||
-                          (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
-                            ? 'Reserverat'
-                            : '');
-
-                        return (
-                          <button
-                            key={tx.id}
-                            type="button"
-                            onClick={() => {
-                              onClose();
-                              onSelectTransaction(tx);
-                            }}
-                            className="ui-tx-row"
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                          <ItemLogo
+                            name={inc.name}
+                            category={inc.category}
+                            logoUrl={inc.logo}
+                            size="md"
+                            isRecurring={false}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">
+                              {inc.name}
+                            </span>
+                            <span className="ui-row-subtitle">
+                              {inc.category || 'Lön'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="ui-row-amount-income">
+                            +{formatKr(inc.amount)}
+                          </span>
+                          <span
+                            className={`text-xs tabular-nums block mt-0.5 ${
+                              inc.isPaid
+                                ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                                : inc.isAwaitingBank
+                                ? 'text-amber-600 dark:text-amber-400 font-medium'
+                                : 'text-[var(--text-muted)]'
+                            }`}
                           >
-                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                              <ItemLogo
-                                name={tx.title}
-                                category={tx.category}
-                                logoUrl={tx.logo}
-                                size="md"
-                                isRecurring={recurringStatus.isRecurring}
-                              />
-                              <div className="min-w-0 flex-1">
-                                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                                  <span className="truncate">{tx.title}</span>
-                                  {tx.isHearted && (
-                                    <Heart
-                                      size={13}
-                                      weight="fill"
-                                      className="text-rose-500 shrink-0"
-                                    />
-                                  )}
-                                  {tx.isWaitingForPackage && (
-                                    <Package
-                                      size={13}
-                                      weight="fill"
-                                      className="text-amber-500 shrink-0"
-                                    />
-                                  )}
-                                  {tx.receiptUrl && (
-                                    <Paperclip
-                                      size={13}
-                                      weight="bold"
-                                      className="text-[var(--text-secondary)] shrink-0"
-                                    />
-                                  )}
-                                  {isSplit && (
-                                    <Users
-                                      size={13}
-                                      weight="fill"
-                                      className="text-emerald-500 shrink-0"
-                                      title="Delad utgift"
-                                    />
-                                  )}
-                                </span>
-                                <span className="ui-row-subtitle">
-                                  <span className="truncate">{tx.category}</span>
-                                  {isSplit && tx.originalAmount && (
-                                    <span className="text-[11px] opacity-75 shrink-0">
-                                      · av {formatKr(tx.originalAmount)}
-                                    </span>
-                                  )}
-                                </span>
-                              </div>
-                            </div>
+                            {inc.isPaid
+                              ? 'Mottagen'
+                              : inc.isAwaitingBank
+                              ? 'Inväntar insättning'
+                              : `Den ${inc.payday}:e`}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-                            <div className="text-right shrink-0">
-                              <span
-                                className={
-                                  isIncome ? 'ui-row-amount-income' : 'ui-row-amount'
-                                }
-                              >
-                                {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
-                              </span>
-                              {statusSub ? (
-                                <span className="ui-row-meta">
-                                  {statusSub}
+              {/* Fixed Expenses */}
+              {enrichedFixed.length > 0 && (
+                <section className="ui-section">
+                  <div className="ui-section-header">
+                    <h2 className="ui-section-title">
+                      Fasta utgifter
+                    </h2>
+                    <span className="ui-row-amount text-[13px] sm:text-sm">
+                      -{formatKr(totalMatchedFixed)}
+                    </span>
+                  </div>
+
+                  <div className="ui-list-card">
+                    {enrichedFixed.map((exp) => (
+                      <button
+                        key={exp.id}
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onSelectFixed(exp);
+                        }}
+                        className="ui-tx-row"
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                          <ItemLogo
+                            name={exp.name}
+                            category={exp.category}
+                            logoUrl={exp.logo}
+                            size="md"
+                            isRecurring={false}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">
+                              {exp.name}
+                            </span>
+                            <span className="ui-row-subtitle">
+                              {exp.category || 'Räkningar'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="ui-row-amount">
+                            -{formatKr(exp.amount)}
+                          </span>
+                          <span
+                            className={`text-xs tabular-nums block mt-0.5 ${
+                              exp.isPaid
+                                ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                                : exp.isAwaitingBank
+                                ? 'text-amber-600 dark:text-amber-400 font-medium'
+                                : 'text-[var(--text-muted)]'
+                            }`}
+                          >
+                            {exp.isPaid
+                              ? 'Betald'
+                              : exp.isAwaitingBank
+                              ? 'Inväntar dragning'
+                              : `Den ${exp.dueDay}:e`}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Transactions - Grupperade per datum */}
+              {groupedTransactionsByDate.length > 0 && (
+                <div className="space-y-3.5">
+                  {groupedTransactionsByDate.map((group) => (
+                    <section key={group.dateKey} className="ui-section">
+                      <div className="ui-section-header">
+                        <span className="ui-section-title">
+                          {group.label}
+                        </span>
+                        <span
+                          className={`text-xs font-semibold tabular-nums ${
+                            group.net > 0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-[var(--text-muted)]'
+                          }`}
+                        >
+                          {group.net > 0
+                            ? `+${formatKr(group.net)}`
+                            : group.net < 0
+                            ? `-${formatKr(Math.abs(group.net))}`
+                            : formatKr(0)}
+                        </span>
+                      </div>
+
+                      <div className="ui-list-card">
+                        {group.items.map((tx) => {
+                          const isIncome = tx.type === 'income';
+                          const recurringStatus = checkIsRecurringTransaction(
+                            tx,
+                            fixedExpenses,
+                            incomes
+                          );
+                          const isSplit =
+                            tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
+                          const realTime = getTransactionTime(tx);
+                          const statusSub =
+                            realTime ||
+                            (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                              ? 'Reserverat'
+                              : '');
+
+                          return (
+                            <button
+                              key={tx.id}
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onSelectTransaction(tx);
+                              }}
+                              className="ui-tx-row"
+                            >
+                              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                <ItemLogo
+                                  name={tx.title}
+                                  category={tx.category}
+                                  logoUrl={tx.logo}
+                                  size="md"
+                                  isRecurring={recurringStatus.isRecurring}
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                                    <span className="truncate">{tx.title}</span>
+                                    {tx.isHearted && (
+                                      <Heart
+                                        size={13}
+                                        weight="fill"
+                                        className="text-rose-500 shrink-0"
+                                      />
+                                    )}
+                                    {tx.isWaitingForPackage && (
+                                      <Package
+                                        size={13}
+                                        weight="fill"
+                                        className="text-amber-500 shrink-0"
+                                      />
+                                    )}
+                                    {tx.receiptUrl && (
+                                      <Paperclip
+                                        size={13}
+                                        weight="bold"
+                                        className="text-[var(--text-secondary)] shrink-0"
+                                      />
+                                    )}
+                                    {isSplit && (
+                                      <Users
+                                        size={13}
+                                        weight="fill"
+                                        className="text-emerald-500 shrink-0"
+                                        title="Delad utgift"
+                                      />
+                                    )}
+                                  </span>
+                                  <span className="ui-row-subtitle">
+                                    <span className="truncate">{tx.category}</span>
+                                    {isSplit && tx.originalAmount && (
+                                      <span className="text-[11px] opacity-75 shrink-0">
+                                        · av {formatKr(tx.originalAmount)}
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="text-right shrink-0">
+                                <span
+                                  className={
+                                    isIncome ? 'ui-row-amount-income' : 'ui-row-amount'
+                                  }
+                                >
+                                  {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
                                 </span>
-                              ) : null}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <section className="ui-empty-state">
-            <div className="ui-empty-icon">
-              <MagnifyingGlass size={18} />
+                                {statusSub ? (
+                                  <span className="ui-row-meta">
+                                    {statusSub}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              )}
             </div>
-            <p className="ui-empty-title">
-              Inga träffar för din sökning
-            </p>
-          </section>
-        )}
+          ) : (
+            <section className="ui-empty-state-page">
+              <MagnifyingGlass size={48} weight="light" className="ui-empty-icon" />
+              <p className="ui-empty-title">
+                Inga träffar för din sökning
+              </p>
+            </section>
+          )}
+        </div>
       </div>
-    </BottomSheet>
+    </div>
   );
 };
+
 

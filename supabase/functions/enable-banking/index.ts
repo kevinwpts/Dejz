@@ -1814,6 +1814,70 @@ serve(async (req: Request) => {
       );
     }
 
+    // -------------------------------------------------------------------------
+    // 10. DELETE ACCOUNT (Revoke all sessions, delete all user data & auth user)
+    // -------------------------------------------------------------------------
+    if (action === "delete-account") {
+      try {
+        const { data: sessions } = await adminClient
+          .from("bank_provider_sessions")
+          .select("provider_session_id")
+          .eq("user_id", user.id);
+
+        if (Array.isArray(sessions) && sessions.length > 0) {
+          for (const s of sessions) {
+            if (s.provider_session_id) {
+              try {
+                await ebFetch(`/sessions/${encodeURIComponent(s.provider_session_id)}`, {
+                  method: "DELETE",
+                });
+              } catch {
+                // Best-effort revocation
+              }
+            }
+          }
+        }
+      } catch {
+        // Ignore session revocation errors during account deletion
+      }
+
+      const tables = [
+        "bank_transactions",
+        "bank_accounts",
+        "bank_provider_sessions",
+        "bank_connections",
+        "bank_auth_states",
+        "transactions",
+        "fixed_expenses",
+        "income_sources",
+        "savings_goals",
+        "accounts",
+        "feedback",
+        "profiles",
+      ];
+
+      for (const table of tables) {
+        try {
+          await adminClient
+            .from(table)
+            .delete()
+            .eq(table === "profiles" ? "id" : "user_id", user.id);
+        } catch {
+          // Continue deleting remaining tables
+        }
+      }
+
+      const { error: deleteUserErr } = await adminClient.auth.admin.deleteUser(user.id);
+      if (deleteUserErr) {
+        console.warn("Could not delete auth user in edge function:", deleteUserErr.message);
+      }
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: `Okänd åtgärd: ${action}` }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },

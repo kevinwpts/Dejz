@@ -889,27 +889,23 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </>
         ) : (
-          <div className="ui-card p-6 text-center space-y-4">
-            <div className="ui-hero-icon mb-0">
-              <Bank size={28} weight="duotone" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
-                Ingen bank ansluten
-              </h3>
-              <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
-                Anslut din bank med Mobilt BankID för att hämta konton och köp automatiskt.
-              </p>
-            </div>
+          <section className="ui-empty-state-page">
+            <Bank size={52} weight="light" className="ui-empty-icon" />
+            <h3 className="ui-empty-title">
+              Ingen bank ansluten
+            </h3>
+            <p className="ui-empty-sub mb-6">
+              Anslut din bank med Mobilt BankID för att hämta konton och köp automatiskt.
+            </p>
             <button
               type="button"
               onClick={onOpenBank}
-              className="w-full ui-btn-primary"
+              className="w-full max-w-xs ui-btn-primary"
             >
               <Bank size={15} />
               <span>Anslut bank</span>
             </button>
-          </div>
+          </section>
         )}
       </div>
     );

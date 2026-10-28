@@ -267,11 +267,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               );
             })
           ) : (
-            <div className="py-5 text-center">
-              <div className="ui-empty-icon">
-                <Coins size={16} weight="duotone" />
-              </div>
-              <p className="ui-empty-sub">Inga inkomster</p>
+            <div className="py-8 text-center">
+              <Coins size={32} weight="light" className="ui-empty-icon mb-2" />
+              <p className="ui-empty-sub mt-0">Inga inkomster</p>
             </div>
           )}
 
@@ -381,11 +379,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               </div>
             ))
           ) : (
-            <div className="py-5 text-center">
-              <div className="ui-empty-icon">
-                <Receipt size={16} weight="duotone" />
-              </div>
-              <p className="ui-empty-sub">Inga fasta utgifter</p>
+            <div className="py-8 text-center">
+              <Receipt size={32} weight="light" className="ui-empty-icon mb-2" />
+              <p className="ui-empty-sub mt-0">Inga fasta utgifter</p>
             </div>
           )}
 

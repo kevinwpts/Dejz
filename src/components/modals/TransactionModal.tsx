@@ -54,7 +54,15 @@ interface TransactionModalProps {
   onClose: () => void;
   onSelectTransaction?: (tx: TransactionItem) => void;
   onSave?: (data: Omit<TransactionItem, 'id'>) => void;
-  onUpdate?: (tx: TransactionItem, applyToSimilarIds?: string[]) => void;
+  onUpdate?: (
+    tx: TransactionItem,
+    applyToSimilarIds?: string[],
+    options?: {
+      renameScope?: 'single' | 'same-merchant' | 'chain';
+      renameTargetIds?: string[];
+      categoryTargetIds?: string[];
+    }
+  ) => void;
   onDelete?: (id: string) => void;
   onExclude?: (id: string, exclude: boolean) => void;
   onMarkAsFixed?: (tx: TransactionItem, kind: 'expense' | 'income') => void;
@@ -177,6 +185,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [category, setCategory] = useState('');
   const [applyToAllSimilar, setApplyToAllSimilar] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingRenameTitle, setPendingRenameTitle] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Swish / Be om Swish / Dela i budget state
@@ -243,6 +252,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setSubView('details');
       setNavDirection('forward');
       setShowDeleteConfirm(false);
+      setPendingRenameTitle(null);
       setSwishMode('request');
       const fullOriginalAmt = initialTransaction.originalAmount || initialTransaction.amount;
       setSwishAmount(Math.max(1, Math.round(fullOriginalAmt / 2)));
@@ -366,9 +376,17 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         activeTx.bankAccountName)
   );
 
-  const commitInlineChanges = (overrides?: Partial<TransactionItem>) => {
+  const commitInlineChanges = (
+    overrides?: Partial<TransactionItem>,
+    renameOptions?: {
+      renameScope?: 'single' | 'same-merchant' | 'chain';
+      renameTargetIds?: string[];
+      categoryTargetIds?: string[];
+    }
+  ) => {
     if (isCreateMode || !onUpdate || !activeTx) return;
-    const nextTitle = (overrides?.title !== undefined ? overrides.title : title).trim() || activeTx.title;
+    const nextTitle =
+      (overrides?.title !== undefined ? overrides.title : title).trim() || activeTx.title;
     const nextCategory = overrides?.category !== undefined ? overrides.category : category;
     const nextNote = (overrides?.note !== undefined ? overrides.note : note).trim();
     const nextPaymentMethod =
@@ -376,10 +394,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const nextDate = overrides?.date !== undefined ? overrides.date : date || activeTx.date;
     const nextAmount = isBankSynced
       ? activeTx.amount
-      : Math.max(1, Math.round(Number(overrides?.amount !== undefined ? overrides.amount : amount) || activeTx.amount));
+      : Math.max(
+          1,
+          Math.round(
+            Number(overrides?.amount !== undefined ? overrides.amount : amount) || activeTx.amount
+          )
+        );
 
-    const similarIds =
-      applyToAllSimilar && similarInfo.transactions.length > 1
+    const isCategoryChange = overrides?.category !== undefined && overrides.category !== activeTx.category;
+    const categoryTargetIds =
+      renameOptions?.categoryTargetIds !== undefined
+        ? renameOptions.categoryTargetIds
+        : isCategoryChange && applyToAllSimilar && similarInfo.transactions.length > 1
         ? similarInfo.transactions.map((t) => t.id)
         : undefined;
 
@@ -393,8 +419,33 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         paymentMethod: nextPaymentMethod,
         note: nextNote || undefined,
       },
-      similarIds
+      categoryTargetIds,
+      {
+        renameScope: renameOptions?.renameScope || 'single',
+        renameTargetIds: renameOptions?.renameTargetIds,
+        categoryTargetIds,
+      }
     );
+  };
+
+  const triggerRenameFlow = (rawNewTitle: string) => {
+    if (isCreateMode || !activeTx) return;
+    const cleanNewTitle = rawNewTitle.trim();
+    if (!cleanNewTitle) {
+      setTitle(activeTx.title);
+      setPendingRenameTitle(null);
+      return;
+    }
+    if (cleanNewTitle === activeTx.title) {
+      setPendingRenameTitle(null);
+      return;
+    }
+    // Om det finns andra liknande transaktioner (antingen samma butik eller i samma kedja), visa bekräftelse-popup!
+    if (similarInfo.transactions.length > 1) {
+      setPendingRenameTitle(cleanNewTitle);
+    } else {
+      commitInlineChanges({ title: cleanNewTitle }, { renameScope: 'single' });
+    }
   };
 
   const handleCreateSave = () => {
@@ -1519,36 +1570,57 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 category={category}
                 logoUrl={activeTx?.logo}
                 size="xl"
-                isRecurring={recurringStatus.isRecurring}
+                isRecurring={Boolean(
+                  recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
+                )}
               />
             </div>
 
             {/* Direkt-redigerbart namn i toppen */}
-            <label className="inline-flex items-center justify-center max-w-full px-3 cursor-text">
-              <input
-                type="text"
-                autoFocus={isCreateMode}
-                placeholder={isIncome ? 't.ex. Swish eller Lön' : 't.ex. ICA eller Kaffe'}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onBlur={() => {
-                  if (!isCreateMode && activeTx) {
-                    if (title.trim() && title.trim() !== activeTx.title) {
-                      commitInlineChanges({ title: title.trim() });
-                    } else if (!title.trim()) {
-                      setTitle(activeTx.title);
+            <div className="inline-flex items-center justify-center gap-1.5 max-w-full px-3">
+              <label className="inline-flex items-center justify-center max-w-full cursor-text">
+                <input
+                  type="text"
+                  autoFocus={isCreateMode}
+                  placeholder={isIncome ? 't.ex. Swish eller Lön' : 't.ex. ICA eller Kaffe'}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={() => {
+                    if (!isCreateMode && activeTx) {
+                      if (title.trim() && title.trim() !== activeTx.title) {
+                        triggerRenameFlow(title);
+                      } else if (!title.trim()) {
+                        setTitle(activeTx.title);
+                      }
                     }
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    (e.target as HTMLInputElement).blur();
-                  }
-                }}
-                size={Math.max(10, (title || activeTx?.title || 't.ex. ICA').length)}
-                className="max-w-[280px] bg-transparent border-0 p-0 font-display font-bold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 text-center focus:outline-none truncate"
-              />
-            </label>
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                  size={Math.max(10, (title || activeTx?.title || 't.ex. ICA').length)}
+                  className="max-w-[260px] bg-transparent border-0 p-0 font-display font-bold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 text-center focus:outline-none truncate"
+                />
+              </label>
+              {!isCreateMode &&
+                activeTx &&
+                title.trim() &&
+                title.trim() !== activeTx.title && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      triggerRenameFlow(title);
+                    }}
+                    title="Byt namn"
+                    className="w-6 h-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
+                  >
+                    <Check size={12} weight="bold" />
+                  </button>
+                )}
+            </div>
 
             {/* Belopp */}
             <div
@@ -1599,11 +1671,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </p>
               )}
 
-            {/* Lugn metadata-rad direkt under beloppet (endast datum & tid) */}
+            {/* Lugn metadata-rad direkt under beloppet (datum, tid & ev. reservationsstatus) */}
             {!isCreateMode && activeTx && (
               <p className="text-xs text-[var(--text-muted)] tabular-nums mt-1.5">
                 {formatSwedishFullDate(activeTx.date)}
                 {txTime ? ` · ${txTime}` : ''}
+                {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
+                  ? ' · Reserverat'
+                  : ''}
               </p>
             )}
           </div>
@@ -1767,8 +1842,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
               )}
 
-              {/* Gör till fast utgift / inkomst */}
-              {!isCreateMode && activeTx && !recurringStatus.isRecurring && onMarkAsFixed && (
+              {/* Gör till fast utgift / inkomst — alltid tillgänglig även om du har fler försäkringar/avtal hos samma företag */}
+              {!isCreateMode && activeTx && onMarkAsFixed && (
                 <button
                   type="button"
                   onClick={() =>
@@ -1779,7 +1854,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   <span className="text-[var(--text-muted)] shrink-0">Återkommande</span>
                   <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                     <ArrowsClockwise size={13} />
-                    <span>Gör till fast {isIncome ? 'inkomst' : 'utgift'}</span>
+                    <span>
+                      {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
+                        ? `Lägg till som egen fast ${isIncome ? 'inkomst' : 'utgift'}`
+                        : `Gör till fast ${isIncome ? 'inkomst' : 'utgift'}`}
+                    </span>
                     <CaretRight size={12} className="text-[var(--text-muted)]" />
                   </span>
                 </button>
@@ -1835,6 +1914,128 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </>
               )
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* BEKRÄFTELSE-POPUP VID NAMNBYTE (Endast detta köp vs Alla)       */}
+      {/* ============================================================== */}
+      {pendingRenameTitle && activeTx && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div
+            className="w-full max-w-sm rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center space-y-1.5">
+              <div className="mx-auto w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] mb-2">
+                <PencilSimple size={20} weight="duotone" />
+              </div>
+              <h3 className="font-display font-bold text-base text-[var(--text-primary)]">
+                Byt namn till &ldquo;{pendingRenameTitle}&rdquo;?
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                Välj om namnbytet endast ska gälla detta specifika köp eller flera poster.
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              {/* Val 1: Endast detta enskilda köp */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newName = pendingRenameTitle;
+                  setPendingRenameTitle(null);
+                  commitInlineChanges(
+                    { title: newName },
+                    { renameScope: 'single' }
+                  );
+                }}
+                className="w-full p-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-left transition-opacity hover:opacity-95 cursor-pointer flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <span className="block text-xs font-bold">
+                    Endast detta köp
+                  </span>
+                  <span className="block text-[11px] opacity-75 truncate mt-0.5">
+                    {activeTx.title} · {formatSwedishFullDate(activeTx.date)}
+                  </span>
+                </div>
+                <Check size={15} weight="bold" className="shrink-0" />
+              </button>
+
+              {/* Val 2: Alla köp på exakt samma ställe/butiksnamn (t.ex. alla "Circle K Varberg") */}
+              {similarInfo.sameMerchantTransactions.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newName = pendingRenameTitle;
+                    const ids = similarInfo.sameMerchantTransactions.map((t) => t.id);
+                    setPendingRenameTitle(null);
+                    commitInlineChanges(
+                      { title: newName },
+                      {
+                        renameScope: 'same-merchant',
+                        renameTargetIds: ids,
+                      }
+                    );
+                  }}
+                  className="w-full p-3.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-left transition-colors cursor-pointer flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <span className="block text-xs font-bold truncate">
+                      Alla &ldquo;{activeTx.title}&rdquo; ({similarInfo.sameMerchantTransactions.length} st)
+                    </span>
+                    <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
+                      Endast köp på exakt samma plats/butik
+                    </span>
+                  </div>
+                  <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                </button>
+              )}
+
+              {/* Val 3: Alla köp i hela kedjan (om det finns andra orter/butiker i kedjan, t.ex. Circle K Helsingborg & Stockholm) */}
+              {similarInfo.transactions.length > similarInfo.sameMerchantTransactions.length && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newName = pendingRenameTitle;
+                    const ids = similarInfo.transactions.map((t) => t.id);
+                    setPendingRenameTitle(null);
+                    commitInlineChanges(
+                      { title: newName },
+                      {
+                        renameScope: 'chain',
+                        renameTargetIds: ids,
+                      }
+                    );
+                  }}
+                  className="w-full p-3.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-left transition-colors cursor-pointer flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <span className="block text-xs font-bold truncate">
+                      Alla hos {similarInfo.brandLabel || activeTx.title} ({similarInfo.transactions.length} st)
+                    </span>
+                    <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
+                      Även andra orter och butiker i kedjan
+                    </span>
+                  </div>
+                  <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                </button>
+              )}
+
+              {/* Avbryt */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTitle(activeTx.title);
+                  setPendingRenameTitle(null);
+                }}
+                className="w-full py-2.5 rounded-2xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                Avbryt
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -165,7 +165,7 @@ const DISMISSED_FIXED_KEY = 'dejz_dismissed_fixed_merchants_v1';
 const DISMISSED_INCOME_KEY = 'dejz_dismissed_income_merchants_v1';
 const MANUAL_FIXED_OVERRIDES_KEY = 'dejz_manual_fixed_overrides_v1';
 const MANUAL_INCOME_OVERRIDES_KEY = 'dejz_manual_income_overrides_v1';
-const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v2';
+const MERCHANT_ALIASES_KEY = 'dejz_merchant_aliases_v3';
 
 const GENERIC_PLACEHOLDER_MERCHANTS = new Set([
   'banktransaktion',
@@ -499,19 +499,26 @@ export function getManualFixedOverrides(): Record<string, ManualFixedOverride> {
 export function saveManualFixedOverride(
   name: string,
   override: ManualFixedOverride,
-  previousOrOriginalName?: string
+  previousOrOriginalName?: string,
+  itemId?: string,
+  skipGenericMerchantKey?: boolean
 ): void {
   if (typeof window === 'undefined' || !name) return;
   try {
     const map = getManualFixedOverrides();
-    const keys = new Set<string>(extractMerchantKeyVariants(name));
-    if (previousOrOriginalName) {
-      for (const v of extractMerchantKeyVariants(previousOrOriginalName)) {
-        keys.add(v);
-      }
+    if (itemId) {
+      map[`id:${itemId}`] = { ...(map[`id:${itemId}`] || {}), ...override };
     }
-    for (const key of keys) {
-      map[key] = { ...(map[key] || {}), ...override };
+    if (!skipGenericMerchantKey) {
+      const keys = new Set<string>(extractMerchantKeyVariants(name));
+      if (previousOrOriginalName) {
+        for (const v of extractMerchantKeyVariants(previousOrOriginalName)) {
+          keys.add(v);
+        }
+      }
+      for (const key of keys) {
+        map[key] = { ...(map[key] || {}), ...override };
+      }
     }
     localStorage.setItem(MANUAL_FIXED_OVERRIDES_KEY, JSON.stringify(map));
     syncAllUserPreferencesToSupabase();
@@ -886,6 +893,19 @@ export function propagateCategoryChangeInCache(oldName: string, newName: string)
     if (incChanged) {
       localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(incOverrides));
     }
+
+    // 4. Per-transaction custom category metadata
+    const txMeta = getTransactionMetaMap();
+    let metaChanged = false;
+    for (const [k, v] of Object.entries(txMeta)) {
+      if (v.customCategory && v.customCategory.toLowerCase().trim() === oldLower) {
+        txMeta[k] = { ...v, customCategory: newName };
+        metaChanged = true;
+      }
+    }
+    if (metaChanged) {
+      localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(txMeta));
+    }
   } catch {
     // ignore
   }
@@ -942,6 +962,8 @@ const REVIEWED_TX_IDS_KEY = 'dejz_reviewed_tx_ids_v1';
 const PRIVACY_BLUR_KEY = 'dejz_privacy_blur_v1';
 
 export interface TransactionMetaPatch {
+  customTitle?: string;
+  customCategory?: string;
   isHearted?: boolean;
   isWaitingForPackage?: boolean;
   receiptUrl?: string;
@@ -1074,7 +1096,7 @@ export function collectAllUserPreferences(): Record<string, any> {
     dismissedIncomeMerchants: Array.from(getDismissedIncomeMerchants()),
     manualFixedOverrides: getManualFixedOverrides(),
     manualIncomeOverrides: getManualIncomeOverrides(),
-    merchantAliasesV2: getMerchantAliases(),
+    merchantAliasesV3: getMerchantAliases(),
     categoryRemap: getCategoryRemap(),
     customExpenseCategories: getStoredExpenseCategories(),
     customIncomeCategories: getStoredIncomeCategories(),
@@ -1091,6 +1113,40 @@ export function collectAllUserPreferences(): Record<string, any> {
 }
 
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+
+export function cancelPendingPreferenceSync(): void {
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+    syncTimeout = null;
+  }
+}
+
+export function clearAllLocalAppData(preserveTheme = false): void {
+  cancelPendingPreferenceSync();
+  if (typeof window === 'undefined') return;
+  try {
+    const savedTheme = preserveTheme ? localStorage.getItem('dejz_dark_mode') : null;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (
+        key.startsWith('dejz_') ||
+        key.startsWith('user_settings_') ||
+        key.startsWith('demo_') ||
+        (!preserveTheme && key.startsWith('sb-'))
+      ) {
+        localStorage.removeItem(key);
+      }
+    }
+    if (!preserveTheme) {
+      sessionStorage.clear();
+    } else if (savedTheme) {
+      localStorage.setItem('dejz_dark_mode', savedTheme);
+    }
+  } catch {
+    // ignore storage errors
+  }
+}
 
 export function syncAllUserPreferencesToSupabase(): void {
   if (typeof window === 'undefined') return;
@@ -1183,8 +1239,8 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     if (prefs.manualIncomeOverrides && !localStorage.getItem(MANUAL_INCOME_OVERRIDES_KEY)) {
       localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(prefs.manualIncomeOverrides));
     }
-    if (prefs.merchantAliasesV2 && !localStorage.getItem(MERCHANT_ALIASES_KEY)) {
-      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(prefs.merchantAliasesV2));
+    if (prefs.merchantAliasesV3 && !localStorage.getItem(MERCHANT_ALIASES_KEY)) {
+      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(prefs.merchantAliasesV3));
     }
     if (prefs.categoryRemap && !localStorage.getItem(CATEGORY_REMAP_KEY)) {
       localStorage.setItem(CATEGORY_REMAP_KEY, JSON.stringify(prefs.categoryRemap));

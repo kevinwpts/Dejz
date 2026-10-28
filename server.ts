@@ -557,6 +557,7 @@ ${JSON.stringify(batch)}`;
         'fixed_expenses',
         'income_sources',
         'savings_goals',
+        'accounts',
         'feedback',
         'profiles',
       ];

@@ -40,7 +40,20 @@ export default async function handler(req: any, res: any) {
 
     // 1. Delete all user data from public tables
     // We do this first to avoid foreign key issues if any exist
-    const tables = ['transactions', 'fixed_expenses', 'income_sources', 'savings_goals', 'feedback', 'profiles'];
+    const tables = [
+      'bank_transactions',
+      'bank_accounts',
+      'bank_provider_sessions',
+      'bank_connections',
+      'bank_auth_states',
+      'transactions',
+      'fixed_expenses',
+      'income_sources',
+      'savings_goals',
+      'accounts',
+      'feedback',
+      'profiles',
+    ];
     
     for (const table of tables) {
       const { error } = await supabaseAdmin

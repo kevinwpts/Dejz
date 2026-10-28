@@ -334,9 +334,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
         {!hasAnyNotifications && (
           <section className="ui-empty-state">
-            <div className="ui-empty-icon">
-              <Bell size={18} />
-            </div>
+            <Bell size={44} weight="light" className="ui-empty-icon" />
             <p className="ui-empty-title">
               Inga nya notiser
             </p>
@@ -346,3 +344,4 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
     </BottomSheet>
   );
 };
+

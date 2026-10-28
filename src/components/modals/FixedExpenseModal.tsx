@@ -11,6 +11,7 @@ import {
   FileText,
   ClockCounterClockwise,
   Users,
+  ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, AccountItem, TransactionItem, getTransactionTime } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
@@ -20,6 +21,8 @@ import { formatSwedishFullDate } from '../../utils/swedishDate';
 import {
   findMatchingFixedExpense,
   findTransactionsForFixedExpense,
+  findAllMatchingFixedExpensesByMerchant,
+  isFixedExpenseAmountMatch,
 } from '../../utils/recurring';
 import {
   getStoredExpenseCategories,
@@ -31,10 +34,12 @@ import {
 interface FixedExpenseModalProps {
   isOpen: boolean;
   initialExpense?: FixedExpenseItem | null;
+  fixedExpenses?: FixedExpenseItem[];
   accounts?: AccountItem[];
   transactions?: TransactionItem[];
   onClose: () => void;
   onSelectTransaction?: (tx: TransactionItem) => void;
+  onMarkAsFixed?: (tx: TransactionItem, kind: 'expense' | 'income') => void;
   onSave?: (data: Omit<FixedExpenseItem, 'id'>) => void;
   onUpdate?: (item: FixedExpenseItem) => void;
   onDelete?: (id: string) => void;
@@ -52,10 +57,12 @@ type ModalSubView =
 export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   isOpen,
   initialExpense,
+  fixedExpenses = [],
   accounts = [],
   transactions = [],
   onClose,
   onSelectTransaction,
+  onMarkAsFixed,
   onSave,
   onUpdate,
   onDelete,
@@ -314,42 +321,82 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
           {similarInfo.transactions.length > 0 ? (
             <div className="ui-sheet-group">
-              {similarInfo.transactions.map((tx) => (
-                <button
-                  key={tx.id}
-                  type="button"
-                  onClick={() => {
-                    if (onSelectTransaction) {
-                      onSelectTransaction(tx);
-                    }
-                  }}
-                  className="ui-row-btn"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <ItemLogo
-                      name={tx.title}
-                      category={tx.category}
-                      logoUrl={tx.logo}
-                      size="sm"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="ui-row-title">
-                        {tx.title}
-                      </span>
-                      <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
-                        {formatSwedishFullDate(tx.date)}
-                        {getTransactionTime(tx) ? ` · ${getTransactionTime(tx)}` : ''}
-                      </span>
+              {similarInfo.transactions.map((tx) => {
+                const allSameMerchantFixed = findAllMatchingFixedExpensesByMerchant(
+                  tx,
+                  fixedExpenses.length > 0
+                    ? fixedExpenses
+                    : activeExpense
+                    ? [activeExpense]
+                    : []
+                );
+                const hasAmountMatch = allSameMerchantFixed.some((exp) =>
+                  isFixedExpenseAmountMatch(exp, tx.amount)
+                );
+
+                return (
+                  <div
+                    key={tx.id}
+                    className="py-3 sm:py-3.5 flex items-center justify-between gap-2.5"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onSelectTransaction) {
+                          onSelectTransaction(tx);
+                        }
+                      }}
+                      className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
+                    >
+                      <ItemLogo
+                        name={tx.title}
+                        category={tx.category}
+                        logoUrl={tx.logo}
+                        size="sm"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="ui-row-title block truncate">
+                          {tx.title}
+                        </span>
+                        <span className="text-[11px] text-[var(--text-muted)] tabular-nums block mt-0.5">
+                          {formatSwedishFullDate(tx.date)}
+                          {getTransactionTime(tx) ? ` · ${getTransactionTime(tx)}` : ''}
+                        </span>
+                      </div>
+                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {!hasAmountMatch && onMarkAsFixed && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMarkAsFixed(tx, 'expense');
+                          }}
+                          title="Lägg till detta belopp som egen fast utgift"
+                          className="px-2 py-1 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <ArrowsClockwise size={11} weight="bold" />
+                          <span>+ Fast</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onSelectTransaction) {
+                            onSelectTransaction(tx);
+                          }
+                        }}
+                        className="flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span className="ui-row-amount">
+                          -{formatKr(tx.amount)}
+                        </span>
+                        <CaretRight size={12} className="text-[var(--text-muted)]" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="ui-row-amount">
-                      -{formatKr(tx.amount)}
-                    </span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="ui-sheet-box text-center text-xs text-[var(--text-muted)] py-6">

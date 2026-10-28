@@ -9,7 +9,6 @@ import {
   Package,
   Paperclip,
   SlidersHorizontal,
-  X,
 } from '@phosphor-icons/react';
 import {
   PeriodInfo,
@@ -75,7 +74,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   const [periodOffset, setPeriodOffset] = useState<number>(0);
   const [inspectedCategory, setInspectedCategory] = useState<string | null>(null);
   const [isPeriodMenuOpen, setIsPeriodMenuOpen] = useState(false);
-  const [catSheetNavDir, setCatSheetNavDir] = useState<'forward' | 'back'>('forward');
 
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -706,7 +704,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         )}
       </section>
 
-      {/* Sektion 2: Kategorier (Ren navigeringslista som öppnar dedikerad vy) */}
+      {/* Sektion 2: Kategorier (Inline Dropdown / Accordion) */}
       <section className="ui-card overflow-hidden">
         <div className="px-4 sm:px-5 pt-4 pb-2 flex items-center justify-between">
           <h2 className="ui-section-title">
@@ -723,445 +721,331 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               const budgetPct =
                 budgetCap > 0 ? Math.min(100, Math.round((item.amount / budgetCap) * 100)) : 0;
               const isOverBudget = budgetCap > 0 && item.amount > budgetCap;
+              const isExpanded = inspectedCategory === item.category;
 
               return (
-                <button
-                  key={item.category}
-                  type="button"
-                  onClick={() => {
-                    setInspectedCategory(item.category);
-                    setIsEditingBudgetCap(false);
-                    setBudgetCapInput(
-                      categoryBudgets[item.category]
-                        ? String(categoryBudgets[item.category])
-                        : ''
-                    );
-                  }}
-                  className="w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"
-                >
-                  <div className="w-full flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div
-                        className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
-                        style={{
-                          backgroundColor: `${catColor}18`,
-                          color: catColor,
-                        }}
-                      >
-                        <CategoryIcon category={item.category} size={18} color={catColor} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title text-[13px] sm:text-sm">
-                          {item.category}
-                        </span>
-                        {budgetCap > 0 && (
-                          <span className="ui-row-subtitle tabular-nums">
-                            Tak {formatKr(budgetCap)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <div className="text-right">
-                        <span
-                          className={`font-display font-bold text-[13px] sm:text-sm tabular-nums block ${
-                            item.isIncomeCategory
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : isOverBudget
-                              ? 'text-rose-600 dark:text-rose-400'
-                              : 'text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {item.isIncomeCategory
-                            ? `+${formatKr(item.amount)}`
-                            : item.amount > 0
-                            ? `-${formatKr(item.amount)}`
-                            : formatKr(0)}
-                        </span>
-                        {sliceInfo && (
-                          <span className="ui-row-meta">
-                            {sliceInfo.percentage}%
-                          </span>
-                        )}
-                      </div>
-                      <CaretRight
-                        size={14}
-                        weight="bold"
-                        className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  {budgetCap > 0 && (
-                    <div className="w-full pl-[52px]">
-                      <div className="w-full h-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden">
+                <div key={item.category} className="transition-colors">
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    onClick={() => {
+                      const nextCat = isExpanded ? null : item.category;
+                      setInspectedCategory(nextCat);
+                      setIsEditingBudgetCap(false);
+                      setBudgetCapInput(
+                        categoryBudgets[item.category]
+                          ? String(categoryBudgets[item.category])
+                          : ''
+                      );
+                      if (!item.isIncomeCategory) {
+                        setSelectedSliceCategory(nextCat);
+                      }
+                    }}
+                    className={`w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group ${
+                      isExpanded ? 'bg-[var(--bg-color)]/45' : ''
+                    }`}
+                  >
+                    <div className="w-full flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            isOverBudget
-                              ? 'bg-rose-500'
-                              : budgetPct >= 85
-                              ? 'bg-amber-500'
-                              : 'bg-emerald-500'
+                          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
+                          style={{
+                            backgroundColor: `${catColor}18`,
+                            color: catColor,
+                          }}
+                        >
+                          <CategoryIcon category={item.category} size={18} color={catColor} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="ui-row-title text-[13px] sm:text-sm">
+                            {item.category}
+                          </span>
+                          <span className="ui-row-subtitle tabular-nums">
+                            {item.items.length} {item.items.length === 1 ? 'post' : 'poster'}
+                            {budgetCap > 0 ? ` · Tak ${formatKr(budgetCap)}` : ''}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <div className="text-right">
+                          <span
+                            className={`font-display font-bold text-[13px] sm:text-sm tabular-nums block ${
+                              item.isIncomeCategory
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : isOverBudget
+                                ? 'text-rose-600 dark:text-rose-400'
+                                : 'text-[var(--text-primary)]'
+                            }`}
+                          >
+                            {item.isIncomeCategory
+                              ? `+${formatKr(item.amount)}`
+                              : item.amount > 0
+                              ? `-${formatKr(item.amount)}`
+                              : formatKr(0)}
+                          </span>
+                          {sliceInfo && (
+                            <span className="ui-row-meta">
+                              {sliceInfo.percentage}%
+                            </span>
+                          )}
+                        </div>
+                        <CaretDown
+                          size={14}
+                          weight="bold"
+                          className={`text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-transform duration-200 ${
+                            isExpanded ? 'rotate-180 text-[var(--text-primary)]' : ''
                           }`}
-                          style={{ width: `${budgetPct}%` }}
                         />
                       </div>
                     </div>
-                  )}
-                </button>
+
+                    {budgetCap > 0 && (
+                      <div className="w-full pl-[52px]">
+                        <div className="w-full h-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              isOverBudget
+                                ? 'bg-rose-500'
+                                : budgetPct >= 85
+                                ? 'bg-amber-500'
+                                : 'bg-emerald-500'
+                            }`}
+                            style={{ width: `${budgetPct}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Smooth Inline Dropdown Panel */}
+                  <div
+                    className={`grid transition-all duration-200 ease-out ${
+                      isExpanded
+                        ? 'grid-rows-[1fr] opacity-100 border-t border-[var(--border-subtle)] bg-[var(--bg-color)]/35'
+                        : 'grid-rows-[0fr] opacity-0'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      {isExpanded && (
+                        <div className="px-4 sm:px-5 py-3 space-y-2.5">
+                          {/* Inline Budget Cap Control for Expense Categories */}
+                          {!item.isIncomeCategory && (
+                            <div className="rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-3">
+                              {!isEditingBudgetCap ? (
+                                <div className="flex items-center justify-between gap-2 text-xs">
+                                  <span className="text-[var(--text-muted)] font-medium">
+                                    Budgettak per period
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setBudgetCapInput(
+                                        budgetCap > 0 ? String(budgetCap) : ''
+                                      );
+                                      setIsEditingBudgetCap(true);
+                                    }}
+                                    className="font-semibold text-[var(--text-primary)] hover:opacity-80 flex items-center gap-1.5 tabular-nums cursor-pointer"
+                                  >
+                                    <SlidersHorizontal
+                                      size={12}
+                                      className="text-[var(--text-secondary)]"
+                                    />
+                                    <span>
+                                      {budgetCap > 0
+                                        ? formatKr(budgetCap)
+                                        : 'Sätt budgettak'}
+                                    </span>
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="space-y-2.5">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-medium text-[var(--text-muted)]">
+                                      Budgettak (kr)
+                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                      <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        autoFocus
+                                        placeholder="0"
+                                        value={budgetCapInput}
+                                        onChange={(e) =>
+                                          setBudgetCapInput(
+                                            e.target.value.replace(/[^\d]/g, '')
+                                          )
+                                        }
+                                        className="w-24 px-2.5 py-1 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-display font-bold text-xs text-right text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const parsed = Math.max(
+                                            0,
+                                            Math.round(Number(budgetCapInput) || 0)
+                                          );
+                                          saveCategoryBudget(
+                                            item.category,
+                                            parsed > 0 ? parsed : null
+                                          );
+                                          setCategoryBudgets(getCategoryBudgets());
+                                          setIsEditingBudgetCap(false);
+                                        }}
+                                        className="ui-btn-sm-primary"
+                                      >
+                                        Spara
+                                      </button>
+                                      {budgetCap > 0 && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            saveCategoryBudget(item.category, null);
+                                            setCategoryBudgets(getCategoryBudgets());
+                                            setBudgetCapInput('');
+                                            setIsEditingBudgetCap(false);
+                                          }}
+                                          className="ui-btn-sm text-rose-500"
+                                        >
+                                          Ta bort
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-4 gap-1.5">
+                                    {[1500, 3000, 5000, 8000].map((preset) => {
+                                      const isSel = Number(budgetCapInput) === preset;
+                                      return (
+                                        <button
+                                          key={preset}
+                                          type="button"
+                                          onClick={() =>
+                                            setBudgetCapInput(String(preset))
+                                          }
+                                          className={`py-1.5 rounded-xl text-[11px] font-display font-bold tabular-nums transition-all cursor-pointer border ${
+                                            isSel
+                                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                                              : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                                          }`}
+                                        >
+                                          {new Intl.NumberFormat('sv-SE').format(
+                                            preset
+                                          )}{' '}
+                                          kr
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Category Items List */}
+                          <div className="divide-y divide-[var(--border-subtle)] rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] overflow-hidden">
+                            {item.items.map((subItem: any, idx: number) => {
+                              const isIncome = subItem.type === 'income';
+                              const itemName = subItem.title || subItem.name;
+
+                              return (
+                                <button
+                                  key={subItem.id || `${item.category}-${idx}`}
+                                  type="button"
+                                  onClick={() => {
+                                    if (subItem.date && onSelectTransaction) {
+                                      onSelectTransaction(subItem);
+                                    } else if (subItem.payday && onSelectIncome) {
+                                      onSelectIncome(subItem);
+                                    } else if (subItem.dueDay && onSelectFixed) {
+                                      onSelectFixed(subItem);
+                                    }
+                                  }}
+                                  className="w-full px-3.5 py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"
+                                >
+                                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <ItemLogo
+                                      name={itemName}
+                                      category={subItem.category || item.category}
+                                      logoUrl={subItem.logo}
+                                      size="sm"
+                                      isRecurring={false}
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                      <span className="ui-row-title text-xs sm:text-[13px] flex items-center gap-1.5">
+                                        <span className="truncate">{itemName}</span>
+                                        {subItem.isHearted && (
+                                          <Heart
+                                            size={12}
+                                            weight="fill"
+                                            className="text-rose-500 shrink-0"
+                                          />
+                                        )}
+                                        {subItem.isWaitingForPackage && (
+                                          <Package
+                                            size={12}
+                                            weight="fill"
+                                            className="text-amber-500 shrink-0"
+                                          />
+                                        )}
+                                        {subItem.receiptUrl && (
+                                          <Paperclip
+                                            size={12}
+                                            weight="bold"
+                                            className="text-[var(--text-secondary)] shrink-0"
+                                          />
+                                        )}
+                                      </span>
+                                      <span className="ui-row-subtitle">
+                                        {subItem.date
+                                          ? formatSwedishDateHeading(subItem.date)
+                                          : subItem.payday
+                                          ? `Den ${subItem.payday}:e`
+                                          : subItem.dueDay
+                                          ? `Den ${subItem.dueDay}:e`
+                                          : ''}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span
+                                      className={
+                                        isIncome
+                                          ? 'ui-row-amount-income text-xs sm:text-[13px]'
+                                          : 'ui-row-amount text-xs sm:text-[13px]'
+                                      }
+                                    >
+                                      {isIncome
+                                        ? `+${formatKr(subItem.amount)}`
+                                        : `-${formatKr(subItem.amount)}`}
+                                    </span>
+                                    <CaretRight
+                                      size={12}
+                                      weight="bold"
+                                      className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                                    />
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
         ) : (
-          <div className="py-6 text-center border-t border-[var(--border-subtle)]">
+          <div className="py-10 text-center border-t border-[var(--border-subtle)]">
             <p className="ui-empty-sub">
               Inga poster i perioden
             </p>
           </div>
         )}
       </section>
-
-      {/* Dedikerad Bottom-Sheet för Kategoridetaljer med äkta 1:1 drag-fysik */}
-      <BottomSheet
-        isOpen={Boolean(inspectedCategory)}
-        onClose={() => {
-          setInspectedCategory(null);
-          setIsEditingBudgetCap(false);
-        }}
-      >
-        {(() => {
-          const categoryData = categoryBreakdown.find((c) => c.category === inspectedCategory);
-          if (!categoryData) return null;
-          const sliceInfo = expenseChartSlices.find((s) => s.category === categoryData.category);
-          const avgPerItem =
-            categoryData.items.length > 0
-              ? categoryData.amount / categoryData.items.length
-              : 0;
-          const currentBudgetCap = !categoryData.isIncomeCategory
-            ? categoryBudgets[categoryData.category] || 0
-            : 0;
-          const isOverCap = currentBudgetCap > 0 && categoryData.amount > currentBudgetCap;
-          const capPct =
-            currentBudgetCap > 0
-              ? Math.min(100, Math.round((categoryData.amount / currentBudgetCap) * 100))
-              : 0;
-
-          const detailCatColor = sliceInfo?.color || getCategoryColor(categoryData.category);
-
-          if (isEditingBudgetCap) {
-            return (
-              <div
-                key="budget-cap-subview"
-                className="animate-page-forward space-y-5"
-              >
-                <div className="ui-sheet-sub-header">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCatSheetNavDir('back');
-                      setIsEditingBudgetCap(false);
-                    }}
-                    title="Tillbaka"
-                    aria-label="Tillbaka"
-                    className="ui-icon-btn"
-                  >
-                    <CaretLeft size={15} weight="bold" />
-                  </button>
-                  <span className="ui-sheet-title">
-                    Budgettak · {categoryData.category}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setInspectedCategory(null);
-                      setIsEditingBudgetCap(false);
-                    }}
-                    className="ui-icon-btn"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-
-                {/* Stort rent typografiskt beloppsfält */}
-                <div className="py-5 text-center space-y-2">
-                  <span className="text-xs font-medium text-[var(--text-muted)] block">
-                    Ange maxbelopp per period (kr)
-                  </span>
-                  <div className="flex items-baseline justify-center gap-1.5">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoFocus
-                      placeholder="0"
-                      value={budgetCapInput}
-                      onChange={(e) =>
-                        setBudgetCapInput(e.target.value.replace(/[^\d]/g, ''))
-                      }
-                      className="w-40 bg-transparent border-0 p-0 font-display font-extrabold text-4xl text-center text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
-                    />
-                    <span className="font-display font-bold text-xl text-[var(--text-muted)]">
-                      kr
-                    </span>
-                  </div>
-                </div>
-
-                {/* Snabbval-chips */}
-                <div className="grid grid-cols-4 gap-2">
-                  {[1500, 3000, 5000, 8000].map((preset) => {
-                    const isSel = Number(budgetCapInput) === preset;
-                    return (
-                      <button
-                        key={preset}
-                        type="button"
-                        onClick={() => setBudgetCapInput(String(preset))}
-                        className={`py-2.5 rounded-2xl text-xs font-display font-bold tabular-nums transition-all cursor-pointer border ${
-                          isSel
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                            : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
-                        }`}
-                      >
-                        {new Intl.NumberFormat('sv-SE').format(preset)} kr
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const parsed = Math.max(0, Math.round(Number(budgetCapInput) || 0));
-                      saveCategoryBudget(
-                        categoryData.category,
-                        parsed > 0 ? parsed : null
-                      );
-                      setCategoryBudgets(getCategoryBudgets());
-                      setCatSheetNavDir('back');
-                      setIsEditingBudgetCap(false);
-                    }}
-                    className="w-full ui-btn-primary"
-                  >
-                    <Check size={14} weight="bold" />
-                    <span>Spara budgettak</span>
-                  </button>
-
-                  {currentBudgetCap > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        saveCategoryBudget(categoryData.category, null);
-                        setCategoryBudgets(getCategoryBudgets());
-                        setBudgetCapInput('');
-                        setCatSheetNavDir('back');
-                        setIsEditingBudgetCap(false);
-                      }}
-                      className="w-full ui-btn-danger"
-                    >
-                      Ta bort budgettak
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <div
-              key="category-details-main"
-              className={`space-y-5 ${
-                catSheetNavDir === 'back' ? 'animate-page-back' : ''
-              }`}
-            >
-              {/* Header */}
-              <div className="ui-sheet-header">
-                <span className="ui-sheet-title">
-                  {categoryData.category}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setInspectedCategory(null)}
-                  className="ui-icon-btn"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* Hero Summary */}
-              <div className="flex flex-col items-center text-center pb-4 border-b border-[var(--border-subtle)]">
-                <div
-                  className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-3.5"
-                  style={{
-                    backgroundColor: `${detailCatColor}18`,
-                    color: detailCatColor,
-                  }}
-                >
-                  <CategoryIcon category={categoryData.category} size={28} color={detailCatColor} />
-                </div>
-                <div
-                  className={`font-display font-extrabold text-2xl sm:text-3xl tabular-nums tracking-tight ${
-                    categoryData.isIncomeCategory
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : isOverCap
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : 'text-[var(--text-primary)]'
-                  }`}
-                >
-                  {categoryData.isIncomeCategory
-                    ? `+${formatKr(categoryData.amount)}`
-                    : `-${formatKr(categoryData.amount)}`}
-                </div>
-                <span className="text-xs text-[var(--text-muted)] tabular-nums mt-1.5">
-                  {categoryData.items.length} {categoryData.items.length === 1 ? 'köp' : 'köp'}
-                  {sliceInfo ? ` · ${sliceInfo.percentage}% av utgifter` : ''}
-                  {categoryData.items.length > 1 ? ` · Snitt ${formatKr(avgPerItem)}` : ''}
-                </span>
-              </div>
-
-              {/* Kategoribudget / Månadstak som ren navigeringsrad */}
-              {!categoryData.isIncomeCategory && (
-                <div className="ui-sheet-group">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBudgetCapInput(
-                        currentBudgetCap > 0 ? String(currentBudgetCap) : ''
-                      );
-                      setCatSheetNavDir('forward');
-                      setIsEditingBudgetCap(true);
-                    }}
-                    className="w-full px-4 py-3.5 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--text-muted)]">Budgettak per period</span>
-                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
-                        <SlidersHorizontal size={12} className="text-[var(--text-secondary)]" />
-                        <span>
-                          {currentBudgetCap > 0
-                            ? formatKr(currentBudgetCap)
-                            : 'Sätt budgettak'}
-                        </span>
-                        <CaretRight size={12} className="text-[var(--text-muted)]" />
-                      </span>
-                    </div>
-
-                    {currentBudgetCap > 0 && (
-                      <div className="space-y-1">
-                        <div className="w-full h-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isOverCap
-                                ? 'bg-rose-500'
-                                : capPct >= 85
-                                ? 'bg-amber-500'
-                                : 'bg-emerald-500'
-                            }`}
-                            style={{ width: `${capPct}%` }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] tabular-nums">
-                          <span>{capPct}% av taket</span>
-                          <span>
-                            {isOverCap
-                              ? `${formatKr(categoryData.amount - currentBudgetCap)} över taket`
-                              : `${formatKr(currentBudgetCap - categoryData.amount)} kvar`}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Items List */}
-              <div className="ui-sheet-group">
-                {categoryData.items.map((subItem: any, idx: number) => {
-                  const isIncome = subItem.type === 'income';
-                  const itemName = subItem.title || subItem.name;
-
-                  return (
-                    <button
-                      key={subItem.id || `${categoryData.category}-${idx}`}
-                      type="button"
-                      onClick={() => {
-                        setInspectedCategory(null);
-                        if (subItem.date && onSelectTransaction) {
-                          onSelectTransaction(subItem);
-                        } else if (subItem.payday && onSelectIncome) {
-                          onSelectIncome(subItem);
-                        } else if (subItem.dueDay && onSelectFixed) {
-                          onSelectFixed(subItem);
-                        }
-                      }}
-                      className="ui-row-btn group"
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                        <ItemLogo
-                          name={itemName}
-                          category={subItem.category || categoryData.category}
-                          logoUrl={subItem.logo}
-                          size="md"
-                          isRecurring={false}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title flex items-center gap-1.5">
-                            <span className="truncate">{itemName}</span>
-                            {subItem.isHearted && (
-                              <Heart
-                                size={13}
-                                weight="fill"
-                                className="text-rose-500 shrink-0"
-                              />
-                            )}
-                            {subItem.isWaitingForPackage && (
-                              <Package
-                                size={13}
-                                weight="fill"
-                                className="text-amber-500 shrink-0"
-                              />
-                            )}
-                            {subItem.receiptUrl && (
-                              <Paperclip
-                                size={13}
-                                weight="bold"
-                                className="text-[var(--text-secondary)] shrink-0"
-                              />
-                            )}
-                          </span>
-                          <span className="ui-row-subtitle">
-                            {subItem.date
-                              ? formatSwedishDateHeading(subItem.date)
-                              : subItem.payday
-                              ? `Den ${subItem.payday}:e`
-                              : subItem.dueDay
-                              ? `Den ${subItem.dueDay}:e`
-                              : ''}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span
-                          className={isIncome ? 'ui-row-amount-income' : 'ui-row-amount'}
-                        >
-                          {isIncome
-                            ? `+${formatKr(subItem.amount)}`
-                            : `-${formatKr(subItem.amount)}`}
-                        </span>
-                        <CaretRight
-                          size={13}
-                          weight="bold"
-                          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
-      </BottomSheet>
     </div>
   );
 };

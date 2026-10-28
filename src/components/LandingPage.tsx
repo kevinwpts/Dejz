@@ -166,11 +166,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 backToLanding();
               }
             }}
-            className="p-1.5 -ml-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-1.5"
+            className="p-2 -ml-2 text-[var(--text-primary)] hover:opacity-70 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
             aria-label="Tillbaka"
+            title="Tillbaka"
           >
-            <CaretLeft size={20} weight="bold" />
-            <span className="text-xs font-semibold">Tillbaka</span>
+            <CaretLeft size={18} weight="bold" />
           </button>
 
           <img
