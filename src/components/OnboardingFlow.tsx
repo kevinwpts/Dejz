@@ -532,10 +532,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans overflow-x-hidden">
-      {/* Top Progress Header */}
-      <header className="space-y-4">
-        <div className="flex items-center justify-between h-10">
+    <div className="h-dvh max-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none">
+      {/* 1. TOP HEADER (Pinned / Non-scrolling) */}
+      <header className="shrink-0 space-y-3 pb-1">
+        <div className="flex items-center justify-between h-9">
           <button
             type="button"
             onClick={() => {
@@ -563,7 +563,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <div className="w-6" />
         </div>
 
-        {/* Minimal 4-step bar */}
+        {/* Minimal 4-step progress bar */}
         <div className="grid grid-cols-4 gap-1.5">
           {[1, 2, 3, 4].map((s) => (
             <div
@@ -577,16 +577,17 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       </header>
 
       {/* ============================================================== */}
-      {/* STEG 1: ENDAST FÖRNAMN ("One question per screen")             */}
+      {/* STEG 1: ENDAST FÖRNAMN (Låst skärm, noll scroll, pinnad knapp) */}
       {/* ============================================================== */}
       {step === 1 && (
         <form
           key="step-1"
           onSubmit={handleNextFromStep1}
-          className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="my-auto">
-            <div className="mb-8">
+          {/* Centrerat innehåll utan scroll */}
+          <div className="my-auto py-2">
+            <div className="mb-6">
               <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 Vad heter du?
               </h1>
@@ -605,31 +606,34 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={!name.trim()}
-            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
-          >
-            <span>Fortsätt</span>
-            <ArrowRight size={16} weight="bold" />
-          </button>
+          {/* Pinnad knapp i botten */}
+          <div className="shrink-0 pt-3">
+            <button
+              type="submit"
+              disabled={!name.trim()}
+              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+            >
+              <span>Fortsätt</span>
+              <ArrowRight size={16} weight="bold" />
+            </button>
+          </div>
         </form>
       )}
 
       {/* ============================================================== */}
-      {/* STEG 2: LÖNEDAG MED SNABBALTERNATIV, KALENDER & HELGHANTERING  */}
+      {/* STEG 2: LÖNEDAG (Låst skärm, mjuk scroll endast vid extremt liten skärm) */}
       {/* ============================================================== */}
       {step === 2 && (
         <div
           key="step-2"
-          className={`flex-1 flex flex-col justify-between py-6 ${pageAnimClass}`}
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="my-auto">
-            <div className="mb-8">
-              <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar py-2 my-auto space-y-4">
+            <div className="mb-2">
+              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 När får du lön?
               </h1>
-              <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 Välj din ordinarie lönedag så räknar Dejz ut din period och dagsbudget.
               </p>
             </div>
@@ -648,7 +652,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       key={preset.day}
                       type="button"
                       onClick={() => setPayday(preset.day)}
-                      className={`py-3.5 px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 flex items-center justify-center shadow-xs ${
+                      className={`py-3 px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 flex items-center justify-center shadow-xs ${
                         isSelected
                           ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] shadow-sm'
                           : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] text-[var(--text-primary)]'
@@ -671,7 +675,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               />
 
               {/* Helghantering - på som standard */}
-              <div className="p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-4">
+              <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <CalendarCheck size={16} weight="duotone" className="text-[var(--text-primary)] shrink-0" />
@@ -700,7 +704,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </div>
           </div>
 
-          <div className="pt-3">
+          {/* Pinnad knapp i botten */}
+          <div className="shrink-0 pt-3">
             <button
               type="button"
               onClick={handleNextFromStep2}
@@ -714,119 +719,119 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* STEG 3: ENABLE BANKING (Stora loggor direkt i vyn)             */}
-      {/* ============================================================== */}
-      {/* ============================================================== */}
-      {/* STEG 3: KOPPLA BANK (Helt inline på sidan utan modal)          */}
+      {/* STEG 3: KOPPLA BANK (Inline på sidan, pinnade knappar)        */}
       {/* ============================================================== */}
       {step === 3 && (
         <div
           key="step-3"
-          className={`flex-1 flex flex-col justify-between py-6 ${pageAnimClass}`}
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
           {/* SUB-VIEW 1: BANKID AUTENTISERING INLINE */}
           {step3View === 'authorizing' && (
-            <div className="my-auto">
-              <div className="text-center mb-8">
-                <div className="flex justify-center mb-3">
-                  <ItemLogo
-                    name={selectedBank?.name || 'Bank'}
-                    logoUrl={selectedBank?.logo || undefined}
-                    size="xl"
-                  />
+            <div className="flex-1 min-h-0 flex flex-col justify-between">
+              <div className="my-auto py-2">
+                <div className="text-center mb-6">
+                  <div className="flex justify-center mb-3">
+                    <ItemLogo
+                      name={selectedBank?.name || 'Bank'}
+                      logoUrl={selectedBank?.logo || undefined}
+                      size="xl"
+                    />
+                  </div>
+                  <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
+                    Anslut {selectedBank?.name || 'bank'}
+                  </h1>
+                  <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto mt-1.5 leading-relaxed">
+                    Legitimera dig med Mobilt BankID för att hämta dina konton och transaktioner till Dejz.
+                  </p>
                 </div>
-                <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Anslut {selectedBank?.name || 'bank'}
-                </h1>
-                <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto mt-2 leading-relaxed">
-                  Legitimera dig med Mobilt BankID för att hämta dina konton och transaktioner till Dejz.
-                </p>
-              </div>
 
-              {startingAuth ? (
-                <div className="py-8 flex flex-col items-center justify-center gap-3 bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl">
-                  <SpinnerGap size={28} className="animate-spin text-[var(--text-primary)]" />
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">
-                    Initierar anslutning till {selectedBank?.name}...
-                  </span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {authUrl && (
-                    <div className="space-y-3">
-                      <a
-                        href={authUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
-                      >
-                        <span>Öppna BankID ({selectedBank?.name})</span>
-                        <ArrowSquareOut size={16} weight="bold" />
-                      </a>
+                {startingAuth ? (
+                  <div className="py-8 flex flex-col items-center justify-center gap-3 bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl">
+                    <SpinnerGap size={28} className="animate-spin text-[var(--text-primary)]" />
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">
+                      Initierar anslutning till {selectedBank?.name}...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {authUrl && (
+                      <div className="space-y-3">
+                        <a
+                          href={authUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+                        >
+                          <span>Öppna BankID ({selectedBank?.name})</span>
+                          <ArrowSquareOut size={16} weight="bold" />
+                        </a>
 
-                      <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] py-1">
-                        <SpinnerGap size={14} className="animate-spin" />
-                        <span>Väntar på signering i BankID...</span>
+                        <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] py-1">
+                          <SpinnerGap size={14} className="animate-spin" />
+                          <span>Väntar på signering i BankID...</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {authError && (
-                    <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2.5">
-                      <WarningCircle size={16} weight="fill" className="shrink-0 mt-0.5" />
-                      <div className="flex-1 space-y-1.5">
-                        <p className="font-medium">{authError}</p>
+                    {authError && (
+                      <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2.5">
+                        <WarningCircle size={16} weight="fill" className="shrink-0 mt-0.5" />
+                        <div className="flex-1 space-y-1.5">
+                          <p className="font-medium">{authError}</p>
+                          <button
+                            type="button"
+                            onClick={() => selectedBank && handleSelectBankInline(selectedBank)}
+                            className="text-xs font-semibold underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <ArrowClockwise size={12} weight="bold" />
+                            <span>Försök igen</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Manuell länk vid iframe/extern webbläsare */}
+                    <div className="pt-2 text-center">
+                      {!showManualCallback ? (
                         <button
                           type="button"
-                          onClick={() => selectedBank && handleSelectBankInline(selectedBank)}
-                          className="text-xs font-semibold underline flex items-center gap-1 cursor-pointer"
+                          onClick={() => setShowManualCallback(true)}
+                          className="text-[11.5px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline transition-colors cursor-pointer"
                         >
-                          <ArrowClockwise size={12} weight="bold" />
-                          <span>Försök igen</span>
+                          Öppnades inte BankID eller fastnade länken?
                         </button>
-                      </div>
+                      ) : (
+                        <form
+                          onSubmit={handleExchangeManualCallback}
+                          className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2.5 text-left animate-fade-in"
+                        >
+                          <label className="text-[11px] font-medium text-[var(--text-secondary)] block">
+                            Klistra in returlänken eller koden från banken:
+                          </label>
+                          <input
+                            type="text"
+                            value={manualCallbackUrl}
+                            onChange={(e) => setManualCallbackUrl(e.target.value)}
+                            placeholder="https://... eller verifieringskod"
+                            className="w-full text-xs px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                          />
+                          <button
+                            type="submit"
+                            disabled={exchangingCode || !manualCallbackUrl.trim()}
+                            className="w-full py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold disabled:opacity-40 cursor-pointer"
+                          >
+                            {exchangingCode ? 'Verifierar anslutning...' : 'Verifiera anslutning'}
+                          </button>
+                        </form>
+                      )}
                     </div>
-                  )}
-
-                  {/* Manuell länk vid iframe/extern webbläsare */}
-                  <div className="pt-2 text-center">
-                    {!showManualCallback ? (
-                      <button
-                        type="button"
-                        onClick={() => setShowManualCallback(true)}
-                        className="text-[11.5px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline transition-colors cursor-pointer"
-                      >
-                        Öppnades inte BankID eller fastnade länken?
-                      </button>
-                    ) : (
-                      <form
-                        onSubmit={handleExchangeManualCallback}
-                        className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2.5 text-left animate-fade-in"
-                      >
-                        <label className="text-[11px] font-medium text-[var(--text-secondary)] block">
-                          Klistra in returlänken eller koden från banken:
-                        </label>
-                        <input
-                          type="text"
-                          value={manualCallbackUrl}
-                          onChange={(e) => setManualCallbackUrl(e.target.value)}
-                          placeholder="https://... eller verifieringskod"
-                          className="w-full text-xs px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
-                        />
-                        <button
-                          type="submit"
-                          disabled={exchangingCode || !manualCallbackUrl.trim()}
-                          className="w-full py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold disabled:opacity-40 cursor-pointer"
-                        >
-                          {exchangingCode ? 'Verifierar anslutning...' : 'Verifiera anslutning'}
-                        </button>
-                      </form>
-                    )}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              <div className="pt-2">
+              {/* Pinnad tillbaka-knapp */}
+              <div className="shrink-0 pt-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -841,20 +846,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* SUB-VIEW 2: SÖK BLAND ALLA BANKER INLINE */}
+          {/* SUB-VIEW 2: SÖK BLAND ALLA BANKER (Bara banklistan scrollar) */}
           {step3View === 'search' && (
-            <div className="my-auto">
-              <div className="mb-8">
+            <div className="flex-1 min-h-0 flex flex-col justify-between">
+              <div className="shrink-0 mb-3">
                 <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
                   Sök bank
                 </h1>
-                <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
+                <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
                   Välj din bank bland alla anslutna banker i Sverige.
                 </p>
-              </div>
 
-              <div className="space-y-3">
-                <div className="relative">
+                <div className="relative mt-3">
                   <MagnifyingGlass
                     size={15}
                     className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
@@ -865,40 +868,44 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     value={bankSearchQuery}
                     onChange={(e) => setBankSearchQuery(e.target.value)}
                     placeholder="Sök bank..."
-                    className="w-full pl-9 pr-3.5 py-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
                   />
                 </div>
+              </div>
 
+              {/* Endast banklistan scrollar */}
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-1.5 pr-0.5 rounded-2xl">
                 {loadingAllBanks ? (
                   <div className="py-12 flex flex-col items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
                     <SpinnerGap size={24} className="animate-spin text-[var(--text-primary)]" />
                     <span>Hämtar banker...</span>
                   </div>
                 ) : (
-                  <div className="max-h-72 overflow-y-auto space-y-1.5 pr-0.5 rounded-2xl">
-                    {allBanks
-                      .filter((b) =>
-                        b.name.toLowerCase().includes(bankSearchQuery.toLowerCase())
-                      )
-                      .map((bank) => (
-                        <button
-                          key={bank.name}
-                          type="button"
-                          onClick={() => handleSelectBankInline(bank)}
-                          className="w-full p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 transition-colors cursor-pointer text-left"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <ItemLogo name={bank.name} logoUrl={bank.logo || undefined} size="sm" />
-                            <span className="font-display font-semibold text-xs text-[var(--text-primary)] truncate">
-                              {bank.name}
-                            </span>
-                          </div>
-                          <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
-                        </button>
-                      ))}
-                  </div>
+                  allBanks
+                    .filter((b) =>
+                      b.name.toLowerCase().includes(bankSearchQuery.toLowerCase())
+                    )
+                    .map((bank) => (
+                      <button
+                        key={bank.name}
+                        type="button"
+                        onClick={() => handleSelectBankInline(bank)}
+                        className="w-full p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 transition-colors cursor-pointer text-left"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <ItemLogo name={bank.name} logoUrl={bank.logo || undefined} size="sm" />
+                          <span className="font-display font-semibold text-xs text-[var(--text-primary)] truncate">
+                            {bank.name}
+                          </span>
+                        </div>
+                        <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                      </button>
+                    ))
                 )}
+              </div>
 
+              {/* Pinnad bottenknapp */}
+              <div className="shrink-0 pt-3">
                 <button
                   type="button"
                   onClick={() => setStep3View('grid')}
@@ -910,86 +917,88 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* SUB-VIEW 3: VÄLJ KONTON INLINE */}
+          {/* SUB-VIEW 3: VÄLJ KONTON (Bara kontolistan scrollar) */}
           {step3View === 'select-accounts' && (
-            <div className="my-auto">
-              <div className="mb-8">
+            <div className="flex-1 min-h-0 flex flex-col justify-between">
+              <div className="shrink-0 mb-3">
                 <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
                   Välj konton
                 </h1>
-                <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
+                <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
                   Välj vilka konton du vill använda i Dejz.
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="max-h-72 overflow-y-auto space-y-2.5 pr-0.5">
-                  {fetchedAccounts.map((acc, idx) => {
-                    const isChecked = selectedAccountIds.includes(acc.id);
-                    const currentName =
-                      accountCustomNames[acc.id] !== undefined
-                        ? accountCustomNames[acc.id]
-                        : acc.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
+              {/* Scrollbar kontolista */}
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
+                {fetchedAccounts.map((acc, idx) => {
+                  const isChecked = selectedAccountIds.includes(acc.id);
+                  const currentName =
+                    accountCustomNames[acc.id] !== undefined
+                      ? accountCustomNames[acc.id]
+                      : acc.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
 
-                    return (
-                      <div
-                        key={acc.id}
-                        className={`p-3.5 rounded-2xl border transition-all ${
-                          isChecked
-                            ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
-                            : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-60'
-                        }`}
+                  return (
+                    <div
+                      key={acc.id}
+                      className={`p-3.5 rounded-2xl border transition-all ${
+                        isChecked
+                          ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
+                          : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-60'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleAccountSelection(acc.id)}
+                        className="w-full flex items-center gap-3 text-left cursor-pointer"
                       >
-                        <button
-                          type="button"
-                          onClick={() => toggleAccountSelection(acc.id)}
-                          className="w-full flex items-center gap-3 text-left cursor-pointer"
+                        <div
+                          className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                            isChecked
+                              ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                              : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                          }`}
                         >
-                          <div
-                            className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
-                              isChecked
-                                ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                                : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                            }`}
-                          >
-                            {isChecked && <Check size={12} weight="bold" />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
-                              {currentName}
-                            </span>
-                            <span className="text-[11px] text-[var(--text-muted)] block">
-                              {acc.account_id?.iban || acc.account_id?.bban || acc.bankName || 'Konto'}
-                            </span>
-                          </div>
-                          {acc.balance !== null && acc.balance !== undefined && (
-                            <span className="text-xs font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
-                              {formatKr(acc.balance)}
-                            </span>
-                          )}
-                        </button>
-
-                        {isChecked && (
-                          <div className="mt-2.5 pt-2 border-t border-[var(--border-subtle)]">
-                            <input
-                              type="text"
-                              value={currentName}
-                              onChange={(e) =>
-                                setAccountCustomNames((prev) => ({
-                                  ...prev,
-                                  [acc.id]: e.target.value,
-                                }))
-                              }
-                              placeholder="Namnge konto (t.ex. Lönekonto)"
-                              className="w-full px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
-                            />
-                          </div>
+                          {isChecked && <Check size={12} weight="bold" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
+                            {currentName}
+                          </span>
+                          <span className="text-[11px] text-[var(--text-muted)] block">
+                            {acc.account_id?.iban || acc.account_id?.bban || acc.bankName || 'Konto'}
+                          </span>
+                        </div>
+                        {acc.balance !== null && acc.balance !== undefined && (
+                          <span className="text-xs font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+                            {formatKr(acc.balance)}
+                          </span>
                         )}
-                      </div>
-                    );
-                  })}
-                </div>
+                      </button>
 
+                      {isChecked && (
+                        <div className="mt-2.5 pt-2 border-t border-[var(--border-subtle)]">
+                          <input
+                            type="text"
+                            value={currentName}
+                            onChange={(e) =>
+                              setAccountCustomNames((prev) => ({
+                                ...prev,
+                                [acc.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Namnge konto (t.ex. Lönekonto)"
+                            className="w-full px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Pinnad knapp */}
+              <div className="shrink-0 pt-3">
                 <button
                   type="button"
                   disabled={savingAccounts}
@@ -1012,15 +1021,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </div>
           )}
 
-          {/* SUB-VIEW 4: GRUNDLÄGANDE 3x3 BANK-GRID */}
+          {/* SUB-VIEW 4: GRUNDLÄGGANDE 3x3 BANK-GRID (Låst skärm) */}
           {step3View === 'grid' && (
-            <>
-              <div className="my-auto">
-                <div className="mb-8">
-                  <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+            <div className="flex-1 min-h-0 flex flex-col justify-between">
+              <div className="my-auto py-2 space-y-4">
+                <div>
+                  <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                     Koppla din bank
                   </h1>
-                  <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
+                  <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
                     Välj din bank för att hämta dina konton och köp automatiskt.
                   </p>
                 </div>
@@ -1056,18 +1065,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 ) : (
                   <div className="space-y-3">
                     {/* 3x3 Grid med stora, touch-vänliga bankloggor */}
-                    <div className="grid grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                       {POPULAR_SWEDISH_BANKS.map((b) => (
                         <button
                           key={b.id}
                           type="button"
                           onClick={() => handleSelectBankInline(b)}
-                          className="p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 flex flex-col items-center justify-center gap-2 transition-all duration-150 active:scale-95 cursor-pointer group shadow-xs"
+                          className="p-2.5 sm:p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group shadow-xs"
                         >
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0">
+                          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0">
                             <ItemLogo name={b.displayName} size="lg" />
                           </div>
-                          <span className="font-display font-semibold text-[11.5px] text-[var(--text-primary)] text-center truncate max-w-full leading-tight">
+                          <span className="font-display font-semibold text-[11px] sm:text-[11.5px] text-[var(--text-primary)] text-center truncate max-w-full leading-tight">
                             {b.displayName}
                           </span>
                         </button>
@@ -1093,7 +1102,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 )}
               </div>
 
-              <div className="space-y-2.5 pt-3">
+              {/* Pinnad bottenknapp */}
+              <div className="shrink-0 pt-3 space-y-2">
                 <button
                   type="button"
                   onClick={() => navigateStep(4, 'forward')}
@@ -1107,198 +1117,202 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   <button
                     type="button"
                     onClick={() => navigateStep(4, 'forward')}
-                    className="w-full py-2 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                    className="w-full py-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                   >
                     Hoppa över just nu
                   </button>
                 )}
               </div>
-            </>
+            </div>
           )}
         </div>
       )}
 
       {/* ============================================================== */}
-      {/* STEG 4: INKOMSTER & FASTA UTGIFTER (Öppnas i riktiga Sheets)   */}
+      {/* STEG 4: INKOMSTER & FASTA UTGIFTER (Mitten scrollar, knapp pinnad) */}
       {/* ============================================================== */}
       {step === 4 && (
         <div
           key="step-4"
-          className={`flex-1 flex flex-col justify-between py-5 min-h-0 ${pageAnimClass}`}
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="overflow-y-auto pr-0.5 pb-4">
-            <div className="mb-7">
+          {/* Mitten scrollar mjukt */}
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 pb-4 space-y-4">
+            <div className="mb-2">
               <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
                 Stämmer din översikt?
               </h1>
             </div>
 
-            <div className="space-y-5">
-            <div className="ui-card p-4 flex items-center justify-between gap-3">
-              <div>
-                <span className="ui-stat-label">
-                  Kvar efter fasta räkningar
-                </span>
-                <span className="font-display font-semibold text-2xl text-[var(--text-primary)] tabular-nums">
-                  {formatKr(kvarAttSpendera)}
-                </span>
-              </div>
-              <div className="text-right text-xs space-y-0.5 tabular-nums">
-                <div className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                  +{formatKr(totalInc)}
+            <div className="space-y-4">
+              <div className="ui-card p-4 flex items-center justify-between gap-3">
+                <div>
+                  <span className="ui-stat-label">
+                    Kvar efter fasta räkningar
+                  </span>
+                  <span className="font-display font-semibold text-2xl text-[var(--text-primary)] tabular-nums">
+                    {formatKr(kvarAttSpendera)}
+                  </span>
                 </div>
-                <div className="text-[var(--text-muted)] font-semibold">
-                  -{formatKr(totalFix)}
+                <div className="text-right text-xs space-y-0.5 tabular-nums">
+                  <div className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                    +{formatKr(totalInc)}
+                  </div>
+                  <div className="text-[var(--text-muted)] font-semibold">
+                    -{formatKr(totalFix)}
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Inkomster (Enhetlig grupperad lista som i Ekonomi-fliken) */}
-            <section className="ui-section">
-              <div className="ui-section-header">
-                <h2 className="ui-section-title">
-                  Inkomster ({incomes.length})
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => openAddSheet('income')}
-                  className="ui-section-action"
-                >
-                  <Plus size={12} weight="bold" />
-                  <span>Lägg till</span>
-                </button>
               </div>
 
-              {incomes.length > 0 ? (
-                <div className="ui-list-card">
-                  {incomes.map((inc) => (
-                    <button
-                      key={inc.id}
-                      type="button"
-                      onClick={() => openEditIncomeSheet(inc)}
-                      className="ui-tx-row"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <ItemLogo
-                          name={inc.name}
-                          category={inc.category}
-                          logoUrl={inc.logo}
-                          size="md"
-                          isRecurring={false}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">
-                            {inc.name}
-                          </span>
-                          <span className="ui-row-subtitle flex items-center gap-1">
-                            <span className="truncate">{inc.category || 'Lön'}</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="text-right">
-                          <span className="ui-row-amount ui-row-amount-income">
-                            +{formatKr(inc.amount)}
-                          </span>
-                          <span className="ui-row-meta">
-                            Den {inc.payday || payday}:e
-                          </span>
-                        </div>
-                        <CaretRight size={13} className="text-[var(--text-muted)]" />
-                      </div>
-                    </button>
-                  ))}
+              {/* Inkomster */}
+              <section className="ui-section">
+                <div className="ui-section-header">
+                  <h2 className="ui-section-title">
+                    Inkomster ({incomes.length})
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => openAddSheet('income')}
+                    className="ui-section-action"
+                  >
+                    <Plus size={12} weight="bold" />
+                    <span>Lägg till</span>
+                  </button>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openAddSheet('income')}
-                  className="w-full py-4 ui-card text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Plus size={14} weight="bold" />
-                  <span>Lägg till din inkomst</span>
-                </button>
-              )}
-            </section>
 
-            {/* Fasta utgifter (Enhetlig grupperad lista som i Ekonomi-fliken) */}
-            <section className="ui-section">
-              <div className="ui-section-header">
-                <h2 className="ui-section-title">
-                  Fasta utgifter ({fixedExpenses.length})
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => openAddSheet('fixed')}
-                  className="ui-section-action"
-                >
-                  <Plus size={12} weight="bold" />
-                  <span>Lägg till</span>
-                </button>
-              </div>
+                {incomes.length > 0 ? (
+                  <div className="ui-list-card">
+                    {incomes.map((inc) => (
+                      <button
+                        key={inc.id}
+                        type="button"
+                        onClick={() => openEditIncomeSheet(inc)}
+                        className="ui-tx-row"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ItemLogo
+                            name={inc.name}
+                            category={inc.category}
+                            logoUrl={inc.logo}
+                            size="md"
+                            isRecurring={false}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">
+                              {inc.name}
+                            </span>
+                            <span className="ui-row-subtitle flex items-center gap-1">
+                              <span className="truncate">{inc.category || 'Lön'}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-right">
+                            <span className="ui-row-amount ui-row-amount-income">
+                              +{formatKr(inc.amount)}
+                            </span>
+                            <span className="ui-row-meta">
+                              Den {inc.payday || payday}:e
+                            </span>
+                          </div>
+                          <CaretRight size={13} className="text-[var(--text-muted)]" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openAddSheet('income')}
+                    className="w-full py-4 ui-card text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Plus size={14} weight="bold" />
+                    <span>Lägg till din inkomst</span>
+                  </button>
+                )}
+              </section>
 
-              {fixedExpenses.length > 0 ? (
-                <div className="ui-list-card">
-                  {fixedExpenses.map((exp) => (
-                    <button
-                      key={exp.id}
-                      type="button"
-                      onClick={() => openEditFixedSheet(exp)}
-                      className="ui-tx-row"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <ItemLogo
-                          name={exp.name}
-                          category={exp.category}
-                          logoUrl={exp.logo}
-                          size="md"
-                          isRecurring={false}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">
-                            {exp.name}
-                          </span>
-                          <span className="ui-row-subtitle flex items-center gap-1">
-                            <span className="truncate">{exp.category || 'Räkningar'}</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="text-right">
-                          <span className="ui-row-amount">
-                            -{formatKr(exp.amount)}
-                          </span>
-                          <span className="ui-row-meta">
-                            Den {exp.dueDay}:e
-                          </span>
-                        </div>
-                        <CaretRight size={13} className="text-[var(--text-muted)]" />
-                      </div>
-                    </button>
-                  ))}
+              {/* Fasta utgifter */}
+              <section className="ui-section">
+                <div className="ui-section-header">
+                  <h2 className="ui-section-title">
+                    Fasta utgifter ({fixedExpenses.length})
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => openAddSheet('fixed')}
+                    className="ui-section-action"
+                  >
+                    <Plus size={12} weight="bold" />
+                    <span>Lägg till</span>
+                  </button>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openAddSheet('fixed')}
-                  className="w-full py-4 ui-card text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Plus size={14} weight="bold" />
-                  <span>Lägg till fast utgift</span>
-                </button>
-              )}
-            </section>
+
+                {fixedExpenses.length > 0 ? (
+                  <div className="ui-list-card">
+                    {fixedExpenses.map((exp) => (
+                      <button
+                        key={exp.id}
+                        type="button"
+                        onClick={() => openEditFixedSheet(exp)}
+                        className="ui-tx-row"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ItemLogo
+                            name={exp.name}
+                            category={exp.category}
+                            logoUrl={exp.logo}
+                            size="md"
+                            isRecurring={false}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">
+                              {exp.name}
+                            </span>
+                            <span className="ui-row-subtitle flex items-center gap-1">
+                              <span className="truncate">{exp.category || 'Räkningar'}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-right">
+                            <span className="ui-row-amount">
+                              -{formatKr(exp.amount)}
+                            </span>
+                            <span className="ui-row-meta">
+                              Den {exp.dueDay}:e
+                            </span>
+                          </div>
+                          <CaretRight size={13} className="text-[var(--text-muted)]" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openAddSheet('fixed')}
+                    className="w-full py-4 ui-card text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Plus size={14} weight="bold" />
+                    <span>Lägg till fast utgift</span>
+                  </button>
+                )}
+              </section>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onComplete}
-            className="ui-btn-primary py-3.5 text-sm shrink-0"
-          >
-            <span>Öppna Dejz</span>
-            <Check size={16} weight="bold" />
-          </button>
+          {/* Solid pinnad knapp i botten */}
+          <div className="shrink-0 pt-3 border-t border-[var(--border-subtle)]/40 bg-[var(--bg-color)]">
+            <button
+              type="button"
+              onClick={onComplete}
+              className="ui-btn-primary py-3.5 text-sm"
+            >
+              <span>Öppna Dejz</span>
+              <Check size={16} weight="bold" />
+            </button>
+          </div>
         </div>
       )}
 
