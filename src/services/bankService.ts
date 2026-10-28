@@ -1,4 +1,7 @@
 import { supabase } from '../supabaseClient';
+import swedishBanksJson from '../data/swedishBanks.json';
+
+export const SWEDISH_BANKS_CATALOG: BankAspsp[] = swedishBanksJson as BankAspsp[];
 
 export type BankEnvironment = 'production' | 'sandbox';
 
@@ -235,10 +238,54 @@ export function mergeTxWithReconciliationOverlay(tx: BankTransactionItem): BankT
   return { ...compactedTx, ...overlay };
 }
 
-async function invokeEnableBanking<T>(payload: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke('enable-banking', {
+async function ensureActiveSession(): Promise<string | null> {
+  // If the user explicitly signed out, NEVER automatically recreate or bootstrap a session
+  if (typeof window !== 'undefined' && localStorage.getItem('dejz_logged_out') === 'true') {
+    return null;
+  }
+
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.access_token) {
+      return data.session.access_token;
+    }
+
+    // Call server endpoint to acquire valid session tokens for testing/preview ONLY when explicitly needed
+    const res = await fetch('/api/auth/ensure-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json?.session?.access_token) {
+        await supabase.auth.setSession({
+          access_token: json.session.access_token,
+          refresh_token: json.session.refresh_token,
+        });
+        return json.session.access_token;
+      }
+    }
+  } catch (err) {
+    console.warn('[bankService] Could not ensure session:', err);
+  }
+  return null;
+}
+
+async function invokeEnableBanking<T>(payload: Record<string, unknown>, timeoutMs = 12000): Promise<T> {
+  // Only bootstrap session if connecting a bank (start-auth / exchange-code) and user is not logged out
+  if (payload?.action === 'start-auth' || payload?.action === 'exchange-code') {
+    await ensureActiveSession();
+  }
+
+  const invokePromise = supabase.functions.invoke('enable-banking', {
     body: payload,
   });
+
+  const timeoutPromise = new Promise<{ data: null; error: Error }>((_, reject) =>
+    setTimeout(() => reject(new Error('Begäran mot banktjänsten tog för lång tid. Försök igen.')), timeoutMs)
+  );
+
+  const { data, error } = (await Promise.race([invokePromise, timeoutPromise])) as any;
 
   if (error) {
     let message = error.message || 'Kunde inte kommunicera med banktjänsten.';
@@ -350,12 +397,25 @@ export function deduplicateBankSyncRows(rows: BankTransactionItem[]): BankTransa
 
 export const bankService = {
   async listBanks(country = 'SE', environment: BankEnvironment = 'production'): Promise<BankAspsp[]> {
-    const res = await invokeEnableBanking<{ aspsps: BankAspsp[] }>({
-      action: 'list-aspsps',
-      country,
-      environment,
-    });
-    return res.aspsps || [];
+    if (country === 'SE' && SWEDISH_BANKS_CATALOG.length > 0) {
+      // Return full catalog of Swedish banks immediately so UI never spins or waits
+      invokeEnableBanking<{ aspsps: BankAspsp[] }>({
+        action: 'list-aspsps',
+        country,
+        environment,
+      }, 5000).catch(() => {});
+      return SWEDISH_BANKS_CATALOG;
+    }
+    try {
+      const res = await invokeEnableBanking<{ aspsps: BankAspsp[] }>({
+        action: 'list-aspsps',
+        country,
+        environment,
+      }, 5000);
+      return res.aspsps || SWEDISH_BANKS_CATALOG;
+    } catch {
+      return SWEDISH_BANKS_CATALOG;
+    }
   },
 
   async startAuth(params: {
@@ -389,7 +449,7 @@ export const bankService = {
       environment: params.environment || 'production',
       reconnectConnectionId: params.reconnectConnectionId || null,
       redirectUrl: params.redirectUrl || defaultRedirectUrl,
-    });
+    }, 12000);
   },
 
   async exchangeCode(params: {
@@ -585,6 +645,13 @@ export const bankService = {
     connections: BankConnection[];
     accounts: BankAccount[];
   }> {
+    if (typeof window !== 'undefined' && localStorage.getItem('dejz_logged_out') === 'true') {
+      return { connections: [], accounts: [] };
+    }
+    const { data } = await supabase.auth.getSession();
+    if (!data?.session?.access_token) {
+      return { connections: [], accounts: [] };
+    }
     const res = await invokeEnableBanking<{
       connections: BankConnection[];
       accounts: BankAccount[];

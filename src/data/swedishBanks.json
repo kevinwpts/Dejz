@@ -1,0 +1,884 @@
+[
+  {
+    "name": "SEB",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SEB/",
+    "bic": "ESSESESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "SEB Corporate Card",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SEB%20Corporate%20Card/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Swedbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Swedbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Swedbank Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Swedbank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Handelsbanken",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Handelsbanken/",
+    "bic": "HANDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Nordea",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Nordea/",
+    "bic": "NDEASESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Nordea Corporate",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Nordea%20Corporate/",
+    "bic": "NDEASESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Nordea First Card",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Nordea%20First%20Card/",
+    "bic": "NDEASESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Länsförsäkringar Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/L%C3%A4nsf%C3%B6rs%C3%A4kringar%20Bank/",
+    "bic": "ELLFSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Danske Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Danske%20Bank/",
+    "bic": "DABASESX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Skandia",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Skandia/",
+    "bic": "SKIASESSXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "ICA Banken",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/ICA%20Banken/",
+    "bic": "IBCASES1XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "AirPlus",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/AirPlus/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Airwallex",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Airwallex/",
+    "bic": "AINHNL22",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Bank Norwegian",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Bank%20Norwegian/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Bergslagens Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Bergslagens%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Bjursås Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Bjurs%C3%A5s%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "bunq",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/bunq/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Circle K EXTRA Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Circle%20K%20EXTRA%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Coop Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Coop%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Dalslands Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Dalslands%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "DiPocket",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/DiPocket/",
+    "bic": "DIUALT22",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "DNB",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/DNB/",
+    "bic": "DNBASESX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ekeby Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ekeby%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ekobanken Medlemsbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ekobanken%20Medlemsbank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Eurocard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Eurocard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Facit Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Facit%20Bank/",
+    "bic": "FATIDK22XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Falkenbergs Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Falkenbergs%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ferratum Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ferratum%20Bank/",
+    "bic": "FEMAMTMTXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Finductive",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Finductive/",
+    "bic": "FINDMTMT",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Finnair Plus Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Finnair%20Plus%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Finom",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Finom/",
+    "bic": "FNOMNL22XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Forex Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Forex%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Fryksdalens Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Fryksdalens%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Genome",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Genome/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Hälsinglands Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/H%C3%A4lsinglands%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Häradssparbanken Mönsterås",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/H%C3%A4radssparbanken%20M%C3%B6nster%C3%A5s/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Högsby Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/H%C3%B6gsby%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "iBanFirst",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/BE/iBanFirst/",
+    "bic": "FXBBBEBBXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ikano Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ikano%20Bank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "INGO Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/INGO%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ivetofta Sparbank i Bromölla",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ivetofta%20Sparbank%20i%20Brom%C3%B6lla/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "JAK Medlemsbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/JAK%20Medlemsbank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Juni",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Juni/",
+    "bic": "JUNTSEG2XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Kinda-Ydre Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Kinda-Ydre%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Klarna",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Klarna/",
+    "bic": "KLRNSESSXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Laholms Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Laholms%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Lekebergs Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Lekebergs%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Leksands Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Leksands%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "LO Mervärde Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/LO%20Merv%C3%A4rde%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Lunar",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/DK/Lunar/",
+    "bic": "LUNADK22XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Lån & Spar Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/L%C3%A5n%20%26%20Spar%20Bank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Lönneberga-Tuna-Vena Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/L%C3%B6nneberga-Tuna-Vena%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Marginalen Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Marginalen%20Bank/",
+    "bic": "MARGSESSXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Markaryds Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Markaryds%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Mjöbäcks Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Mj%C3%B6b%C3%A4cks%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "MoreGolf Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Moregolf%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Morrow Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Morrow%20Bank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "N26",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/N26/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "NK Nyckeln Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/NK%20Nyckeln%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Norrbärke Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Norrb%C3%A4rke%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Northmill",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Northmill/",
+    "bic": "NOHLSESSXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "OKQ8 Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/OKQ8%20Bank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Opel Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Opel%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Orusts Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Orusts%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Payoneer",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Payoneer/",
+    "bic": "PAYNIE22XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "PayPal",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/PayPal/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Pleo",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Pleo/",
+    "bic": "PLEODKK2",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "PRO Mervärde Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/PRO%20Merv%C3%A4rde%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "re:member",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/re%3Amember/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Resurs Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Resurs%20Bank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Revolut",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Revolut/",
+    "bic": "REVOLT21",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Roslagens Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Roslagens%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "SaabKortet Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SaabKortet%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sala Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sala%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "SAS EuroBonus Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SAS%20EuroBonus%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "SBAB Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SBAB%20Bank/",
+    "bic": "SBAVSESSXXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Scandic Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Scandic%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sidensjö Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sidensj%C3%B6%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "SJ Prio Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SJ%20Prio%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Skurups Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Skurups%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Snapphanebygdens Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Snapphanebygdens%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Alingsås",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Alings%C3%A5s/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Boken",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Boken/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Eken",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Eken/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Gotland",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Gotland/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Göinge",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20G%C3%B6inge/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken i Enköping",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20i%20Enk%C3%B6ping/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken i Karlshamn",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20i%20Karlshamn/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Lidköping",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Lidk%C3%B6ping/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Nord",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Nord/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Rekarne",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Rekarne/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Sjuhärad",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Sjuh%C3%A4rad/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Skaraborg",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Skaraborg/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Skåne",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Sk%C3%A5ne/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Spira",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Spira/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Syd",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Syd/",
+    "bic": "SPSDSE23XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Tanum",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Tanum/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Tranemo",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20Tranemo/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sparbanken Västra Mälardalen",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Sparbanken%20V%C3%A4stra%20M%C3%A4lardalen/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Strawberry Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Strawberry%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "SumUp",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/SumUp/",
+    "bic": "SUMUIE22",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Svea Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Svea%20Bank/",
+    "bic": "SVEASESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Swan",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Swan/",
+    "bic": "SWNBFR22",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Södra Hestra Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/S%C3%B6dra%20Hestra%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sölvesborg-Mjällby Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/S%C3%B6lvesborg-Mj%C3%A4llby%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Sörmlands Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/S%C3%B6rmlands%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Tidaholms Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Tidaholms%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Tjörns Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Tj%C3%B6rns%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Trade Republic",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Trade%20Republic/",
+    "bic": "TREBDED1XXX",
+    "maximumConsentValidity": 7776000
+  },
+  {
+    "name": "Ulricehamns Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ulricehamns%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Vadstena Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Vadstena%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Valdemarsviks Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Valdemarsviks%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Varbergs Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Varbergs%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Vimmerby Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Vimmerby%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Virserums Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Virserums%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Viva.com",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Viva.com/",
+    "bic": "PRXBGRAA",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Wallet Mastercard",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Wallet%20Mastercard/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Wamo",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Wamo/",
+    "bic": "WAMOFIH2XXX",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Westra Wermlands Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Westra%20Wermlands%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Wise",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Wise/",
+    "bic": "TRWIBEBB",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ziklo Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/Ziklo%20Bank/",
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ålandsbanken",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/%C3%85landsbanken/",
+    "bic": "AABASESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ålems Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/%C3%85lems%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Åse Viste Sparbank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/%C3%85se%20Viste%20Sparbank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  },
+  {
+    "name": "Ölands Bank",
+    "country": "SE",
+    "logo": "https://enablebanking.com/brands/SE/%C3%96lands%20Bank/",
+    "bic": "SWEDSESS",
+    "maximumConsentValidity": 15552000
+  }
+]

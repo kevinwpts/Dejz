@@ -1528,6 +1528,9 @@ export const App: React.FC = () => {
 
   const [showLanding, setShowLanding] = useState<boolean>(() => {
     try {
+      if (localStorage.getItem('dejz_logged_out') === 'true') {
+        return true;
+      }
       if (localStorage.getItem('dejz_onboarding_in_progress') === 'true') {
         return false;
       }
@@ -2147,7 +2150,7 @@ export const App: React.FC = () => {
     supabase.auth
       .getSession()
       .then(async ({ data: { session } }: any) => {
-        if (session?.user) {
+        if (session?.user && localStorage.getItem('dejz_logged_out') !== 'true') {
           await runCoordinateHydration(session.user);
         } else {
           setIsInitialLoading(false);
@@ -2160,7 +2163,7 @@ export const App: React.FC = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
-      if (session?.user) {
+      if (session?.user && localStorage.getItem('dejz_logged_out') !== 'true') {
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || session.user.id !== userIdRef.current) {
           await runCoordinateHydration(session.user);
         }
@@ -2168,9 +2171,16 @@ export const App: React.FC = () => {
         setUserId(null);
         userIdRef.current = null;
         setUserEmail(null);
+        setUserName(null);
+        setUserAvatar(null);
         setConnections([]);
         setBankAccounts([]);
+        setIncomes([]);
+        setFixedExpenses([]);
+        setTransactions([]);
         setIsInitialLoading(false);
+        setShowLanding(true);
+        setIsOnboardingActive(false);
       }
     });
 
@@ -3310,8 +3320,18 @@ export const App: React.FC = () => {
   };
 
   const handleSignOut = async () => {
+    try {
+      localStorage.setItem('dejz_logged_out', 'true');
+      localStorage.removeItem('dejz_onboarding_in_progress');
+      localStorage.removeItem('dejz_onboarding_step');
+      localStorage.removeItem('dejz_user_name');
+      localStorage.removeItem('dejz_user_email');
+    } catch {
+      // ignore
+    }
     cancelPendingPreferenceSync();
     clearCachedAppState();
+    clearAllLocalAppData(false);
     userIdRef.current = null;
     lastHydratedUserIdRef.current = null;
     incomesRef.current = [];
@@ -3319,11 +3339,15 @@ export const App: React.FC = () => {
     transactionsRef.current = [];
     setUserId(null);
     setUserEmail(null);
+    setUserName(null);
+    setUserAvatar(null);
     setConnections([]);
     setBankAccounts([]);
     setIncomes([]);
     setFixedExpenses([]);
     setTransactions([]);
+    setActiveTab('home');
+    setSettingsSubView(null);
     await supabase.auth.signOut().catch(() => {});
     setShowLanding(true);
     setIsOnboardingActive(false);
@@ -3503,6 +3527,11 @@ export const App: React.FC = () => {
           setIsOnboardingActive(false);
         }}
         onAuthenticated={(email, mode) => {
+          try {
+            localStorage.removeItem('dejz_logged_out');
+          } catch {
+            // ignore
+          }
           if (mode === 'register') {
             cancelPendingPreferenceSync();
             clearAllLocalAppData(true);

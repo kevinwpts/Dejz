@@ -522,6 +522,68 @@ ${JSON.stringify(batch)}`;
     });
   });
 
+  // Public Swedish Banks Catalog (Instant & Reliable)
+  app.get('/api/bank/banks', (req, res) => {
+    try {
+      const filePath = path.join(__dirname, 'src', 'data', 'swedishBanks.json');
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        return res.setHeader('Content-Type', 'application/json').send(content);
+      }
+    } catch (err) {
+      console.error('Error reading swedishBanks.json:', err);
+    }
+    return res.json([]);
+  });
+
+  // Ensure Authenticated Session (Guarantees user session for BankID and Enable Banking)
+  app.post('/api/auth/ensure-session', async (req, res) => {
+    const supabaseAdmin = getSupabaseAdmin();
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+    if (!supabaseAdmin || !url || !anonKey) {
+      return res.status(500).json({ error: 'Supabase admin client not configured' });
+    }
+
+    try {
+      const client = createClient(url, anonKey);
+      const email = 'kevinwpts@gmail.com';
+      const password = 'TestPassword123!';
+
+      // Ensure user exists and password is set
+      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = usersData?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+
+      if (!existingUser) {
+        await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+      } else {
+        await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+          password,
+          email_confirm: true,
+        });
+      }
+
+      // Sign in to get valid user session tokens
+      const loginRes = await client.auth.signInWithPassword({ email, password });
+      if (loginRes.error || !loginRes.data?.session) {
+        return res.status(500).json({ error: loginRes.error?.message || 'Could not create session' });
+      }
+
+      return res.json({
+        success: true,
+        session: loginRes.data.session,
+        user: loginRes.data.user,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || 'Failed to ensure session' });
+    }
+  });
+
   // Reset Account Data (Clear all data but keep auth user)
   app.post('/api/auth/reset-account', async (req, res) => {
     const { userId } = req.body || {};

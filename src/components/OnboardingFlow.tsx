@@ -23,6 +23,7 @@ import {
   BankAspsp,
   BankConnection,
   BankAccount,
+  SWEDISH_BANKS_CATALOG,
 } from '../services/bankService';
 import { WeekendHandlingMode } from '../utils/periodEngine';
 import { ItemLogo } from './ItemLogo';
@@ -160,7 +161,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [manualCallbackUrl, setManualCallbackUrl] = useState('');
   const [exchangingCode, setExchangingCode] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [allBanks, setAllBanks] = useState<BankAspsp[]>([]);
+  const [allBanks, setAllBanks] = useState<BankAspsp[]>(SWEDISH_BANKS_CATALOG);
   const [loadingAllBanks, setLoadingAllBanks] = useState(false);
   const [bankSearchQuery, setBankSearchQuery] = useState('');
 
@@ -198,9 +199,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     setManualCallbackUrl('');
     setStep3View('authorizing');
 
+    let safetyTimer: any = null;
+    const timeoutPromise = new Promise((_, reject) => {
+      safetyTimer = setTimeout(() => {
+        reject(new Error('Initieringen tog för lång tid. Kontrollera din anslutning och försök igen.'));
+      }, 14000);
+    });
+
     try {
       const redirectUrl = `${window.location.origin}/bank/callback`;
-      const res = await bankService.startAuth({
+      const authPromise = bankService.startAuth({
         aspspName: bank.name,
         aspspCountry: bank.country || 'SE',
         aspspLogo: bank.logo || null,
@@ -208,6 +216,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         environment: 'production',
         redirectUrl,
       });
+
+      const res = (await Promise.race([authPromise, timeoutPromise])) as any;
+      if (safetyTimer) clearTimeout(safetyTimer);
 
       setAuthUrl(res.url);
       setAuthState(res.state);
@@ -217,6 +228,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         window.location.assign(res.url);
       }
     } catch (err: any) {
+      if (safetyTimer) clearTimeout(safetyTimer);
       setAuthError(err.message || 'Kunde inte starta autentisering mot banken.');
     } finally {
       setStartingAuth(false);
@@ -343,19 +355,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   };
 
   // Öppna sökning bland alla banker direkt på sidan
-  const handleOpenSearchBanks = async () => {
+  const handleOpenSearchBanks = () => {
     setStep3View('search');
+    setBankSearchQuery('');
     if (allBanks.length === 0) {
-      setLoadingAllBanks(true);
-      try {
-        const list = await bankService.listBanks('SE', 'production');
-        setAllBanks(list);
-      } catch {
-        // fallback
-      } finally {
-        setLoadingAllBanks(false);
-      }
+      setAllBanks(SWEDISH_BANKS_CATALOG);
     }
+    setLoadingAllBanks(false);
   };
 
   const toggleAccountSelection = (accId: string) => {
