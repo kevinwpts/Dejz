@@ -3,19 +3,32 @@ import {
   ArrowRight,
   CaretLeft,
   CaretRight,
-  Bank,
   CheckCircle,
   Plus,
   Trash,
   Check,
   PencilSimple,
   X,
+  MagnifyingGlass,
+  ShieldCheck,
 } from '@phosphor-icons/react';
 import { IncomeItem, FixedExpenseItem } from './HomeTab';
 import { BankConnection } from '../services/bankService';
 import { ItemLogo } from './ItemLogo';
 import { BottomSheet } from './ui/BottomSheet';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
+
+export const POPULAR_SWEDISH_BANKS: { id: string; name: string; displayName: string }[] = [
+  { id: 'swedbank', name: 'Swedbank', displayName: 'Swedbank' },
+  { id: 'handelsbanken', name: 'Handelsbanken', displayName: 'Handelsbanken' },
+  { id: 'seb', name: 'SEB', displayName: 'SEB' },
+  { id: 'nordea', name: 'Nordea', displayName: 'Nordea' },
+  { id: 'lansforsakringar', name: 'Länsförsäkringar Bank', displayName: 'Länsförsäkringar' },
+  { id: 'danske', name: 'Danske Bank', displayName: 'Danske Bank' },
+  { id: 'icabanken', name: 'ICA Banken', displayName: 'ICA Banken' },
+  { id: 'sbab', name: 'SBAB', displayName: 'SBAB' },
+  { id: 'avanza', name: 'Avanza', displayName: 'Avanza' },
+];
 
 interface OnboardingFlowProps {
   initialName: string;
@@ -25,7 +38,7 @@ interface OnboardingFlowProps {
   fixedExpenses: FixedExpenseItem[];
   onSaveName: (name: string) => void;
   onUpdatePayday?: (day: number) => void;
-  onOpenBankModal: () => void;
+  onOpenBankModal: (bankName?: string) => void;
   onAddIncome: (item: Omit<IncomeItem, 'id'>) => void;
   onUpdateIncome?: (item: IncomeItem) => void;
   onDeleteIncome: (id: string) => void;
@@ -337,27 +350,30 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <button
             type="button"
             onClick={handleNextFromStep2}
-            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
           >
-            <span>Fortsätt med den {payday}:e</span>
+            <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />
           </button>
         </div>
       )}
 
       {/* ============================================================== */}
-      {/* STEG 3: ENABLE BANKING                                         */}
+      {/* STEG 3: ENABLE BANKING (Stora loggor direkt i vyn)             */}
       {/* ============================================================== */}
       {step === 3 && (
         <div
           key="step-3"
-          className={`flex-1 flex flex-col justify-between py-8 ${pageAnimClass}`}
+          className={`flex-1 flex flex-col justify-between py-6 ${pageAnimClass}`}
         >
-          <div className="my-auto space-y-6">
+          <div className="my-auto space-y-4">
             <div>
               <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 Koppla din bank
               </h1>
+              <p className="text-xs text-[var(--text-muted)] mt-1.5">
+                Välj din bank för att hämta dina konton och köp automatiskt.
+              </p>
             </div>
 
             {hasConnectedBank ? (
@@ -382,37 +398,53 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
                 <button
                   type="button"
-                  onClick={onOpenBankModal}
+                  onClick={() => onOpenBankModal()}
                   className="w-full py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
                 >
                   Hantera eller lägg till bank
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={onOpenBankModal}
-                className="w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)] rounded-3xl p-5 flex items-center justify-between gap-4 text-left transition-all active:scale-[0.99] cursor-pointer"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-                    <Bank size={22} weight="duotone" />
-                  </div>
-                  <div>
-                    <span className="font-display font-semibold text-[15px] text-[var(--text-primary)] block">
-                      Välj din bank
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      Säker koppling via Enable Banking
-                    </span>
-                  </div>
+              <div className="space-y-3">
+                {/* 3x3 Grid med stora, touch-vänliga bankloggor */}
+                <div className="grid grid-cols-3 gap-2.5">
+                  {POPULAR_SWEDISH_BANKS.map((b) => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => onOpenBankModal(b.name)}
+                      className="p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 flex flex-col items-center justify-center gap-2 transition-all duration-150 active:scale-95 cursor-pointer group shadow-xs"
+                    >
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0">
+                        <ItemLogo name={b.displayName} size="lg" />
+                      </div>
+                      <span className="font-display font-semibold text-[11.5px] text-[var(--text-primary)] text-center truncate max-w-full leading-tight">
+                        {b.displayName}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                <ArrowRight size={16} className="text-[var(--text-muted)] shrink-0" />
-              </button>
+
+                {/* Sök / välj annan bank */}
+                <button
+                  type="button"
+                  onClick={() => onOpenBankModal()}
+                  className="w-full py-2.5 px-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <MagnifyingGlass size={14} weight="bold" />
+                  <span>Sök bland fler banker...</span>
+                </button>
+
+                {/* Trygghetsbadge */}
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--text-muted)] pt-0.5">
+                  <ShieldCheck size={14} weight="regular" />
+                  <span>Säker koppling via Mobilt BankID</span>
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 pt-3">
             <button
               type="button"
               onClick={() => navigateStep(4, 'forward')}

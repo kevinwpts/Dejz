@@ -27,6 +27,7 @@ interface BankModalProps {
   userEmail: string | null;
   connections: BankConnection[];
   bankAccounts: BankAccount[];
+  preselectedBankName?: string | null;
   onClose: () => void;
   onOpenAuth: () => void;
   onBankStateUpdated: (connections: BankConnection[], accounts: BankAccount[]) => void;
@@ -50,6 +51,7 @@ export const BankModal: React.FC<BankModalProps> = ({
   userEmail,
   connections,
   bankAccounts,
+  preselectedBankName,
   onClose,
   onOpenAuth,
   onBankStateUpdated,
@@ -95,6 +97,33 @@ export const BankModal: React.FC<BankModalProps> = ({
       loadBanks(environment);
     }
   }, [isOpen, userEmail, environment, step, loadBanks]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setStep('list');
+      setSelectedBank(null);
+      setAuthUrl(null);
+      setAuthState(null);
+      setErrorMsg(null);
+      return;
+    }
+
+    if (preselectedBankName && step === 'list' && !startingAuth) {
+      const cleanTarget = preselectedBankName.trim().toLowerCase();
+      const existingMatch = banks.find((b) => {
+        const bn = b.name.toLowerCase();
+        return bn === cleanTarget || bn.includes(cleanTarget) || cleanTarget.includes(bn);
+      });
+      handleSelectBank(
+        existingMatch || {
+          name: preselectedBankName,
+          country: 'SE',
+          logo: null,
+          bic: null,
+        }
+      );
+    }
+  }, [isOpen, preselectedBankName, banks, step, startingAuth]);
 
   // Poll status when window regains focus during 'authorizing' step
   useEffect(() => {

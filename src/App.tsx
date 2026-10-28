@@ -1528,6 +1528,7 @@ export const App: React.FC = () => {
 
   // Modaltillstånd
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+  const [preselectedBankName, setPreselectedBankName] = useState<string | null>(null);
   const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<IncomeItem | null>(null);
   const [isFixedModalOpen, setIsFixedModalOpen] = useState(false);
@@ -3522,7 +3523,10 @@ export const App: React.FC = () => {
           fixedExpenses={fixedExpenses}
           onSaveName={handleUpdateName}
           onUpdatePayday={handleUpdatePayday}
-          onOpenBankModal={() => setIsBankModalOpen(true)}
+          onOpenBankModal={(bankName?: string) => {
+            setPreselectedBankName(bankName || null);
+            setIsBankModalOpen(true);
+          }}
           onAddIncome={handleAddIncome}
           onUpdateIncome={handleUpdateIncome}
           onDeleteIncome={handleDeleteIncome}
@@ -3550,7 +3554,11 @@ export const App: React.FC = () => {
           userEmail={userEmail}
           connections={connections}
           bankAccounts={bankAccounts}
-          onClose={() => setIsBankModalOpen(false)}
+          preselectedBankName={preselectedBankName}
+          onClose={() => {
+            setIsBankModalOpen(false);
+            setPreselectedBankName(null);
+          }}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onBankStateUpdated={(conns, accs) => {
             setConnections(conns);
@@ -4354,7 +4362,11 @@ export const App: React.FC = () => {
         userEmail={userEmail}
         connections={connections}
         bankAccounts={bankAccounts}
-        onClose={() => setIsBankModalOpen(false)}
+        preselectedBankName={preselectedBankName}
+        onClose={() => {
+          setIsBankModalOpen(false);
+          setPreselectedBankName(null);
+        }}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onBankStateUpdated={(conns, accs) => {
           setConnections(conns);
