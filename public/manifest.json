@@ -4,8 +4,8 @@
   "description": "Samla lön, fasta räkningar och sparande på ett ställe. Se vad du har kvar att röra dig med fram till nästa lön.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F2F0F0",
-  "theme_color": "#F2F0F0",
+  "background_color": "#F3F8FC",
+  "theme_color": "#F3F8FC",
   "icons": [
     {
       "src": "/favicon.png",

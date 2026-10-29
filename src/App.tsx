@@ -3474,11 +3474,16 @@ export const App: React.FC = () => {
     transactionsRef.current = [];
     aiCleanedKeysRef.current.clear();
 
+    const withFastTimeout = <T,>(promise: Promise<T>, ms = 3000): Promise<T | null> =>
+      Promise.race([
+        promise.catch(() => null),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+      ]);
+
     try {
       // Hämta session och Bearer-token FÖRST innan localStorage rensas eller signOut körs
-      const {
-        data: { session },
-      } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+      const sessionRes = await withFastTimeout(supabase.auth.getSession(), 1500);
+      const session = sessionRes?.data?.session || null;
       const token = session?.access_token || null;
       const sessionUid = session?.user?.id || null;
       const stateUid =
@@ -3488,52 +3493,55 @@ export const App: React.FC = () => {
       const primaryUid = sessionUid || stateUid;
       const emailToDelete = session?.user?.email || emailFromState || null;
 
-      const withFastTimeout = <T,>(promise: Promise<T>, ms = 3500): Promise<T | null> =>
-        Promise.race([
-          promise.catch(() => null),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
-        ]);
-
-      // 3. Koppla från aktiva bankanslutningar hos Enable Banking (med kort timeout så det aldrig kan låsa raderingen)
+      // 3. Starta frånkoppling av Enable Banking-sessioner i bakgrunden (utan att blockera raderingen)
       if (connsToDisconnect.length > 0 && primaryUid) {
-        await withFastTimeout(
-          Promise.allSettled(
-            connsToDisconnect
-              .filter((c) => c.status !== 'revoked')
-              .map((c) => bankService.disconnect(c.id))
-          ),
-          3500
-        );
+        connsToDisconnect
+          .filter((c) => c.status !== 'revoked')
+          .forEach((c) => {
+            bankService.disconnect(c.id).catch(() => {});
+          });
       }
 
-      // 4. Kör fullständig radering på både servern (supabaseAdmin inkl. auth.users & storage), Edge Function och klient (RLS)
-      await Promise.allSettled([
-        primaryUid || emailToDelete
-          ? fetch('/api/auth/delete-account', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              },
-              body: JSON.stringify({
-                userId: primaryUid,
-                secondaryUserId: stateUid,
-                email: emailToDelete,
-              }),
-            }).catch((err) => console.error('delete-account error:', err))
-          : Promise.resolve(),
-        primaryUid
-          ? dataService.deleteAllUserData(primaryUid, true).catch(() => {})
-          : Promise.resolve(),
-        primaryUid
-          ? withFastTimeout(bankService.deleteAccount(), 3500)
-          : Promise.resolve(),
-      ]);
+      // 4. Kör server-side permanent radering (med 4s timeout) – kör klient-fallback endast om servern ej nås
+      let serverDeleted = false;
+      if (primaryUid || emailToDelete) {
+        const res = await withFastTimeout(
+          fetch('/api/auth/delete-account', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({
+              userId: primaryUid,
+              secondaryUserId: stateUid,
+              email: emailToDelete,
+            }),
+          }),
+          4000
+        );
+        if (res && res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data?.success && !data?.localOnly) {
+            serverDeleted = true;
+          }
+        }
+      }
+
+      if (!serverDeleted && primaryUid) {
+        await withFastTimeout(
+          Promise.allSettled([
+            dataService.deleteAllUserData(primaryUid, true),
+            bankService.deleteAccount(),
+          ]),
+          3000
+        );
+      }
     } catch (err) {
       console.error('Error during account deletion:', err);
     } finally {
-      // 5. Logga ut och rensa exakt all lokal lagring (localStorage + sessionStorage)
-      await supabase.auth.signOut().catch(() => {});
+      // 5. Logga ut lokalt direkt (utan att vänta på nätverksanrop mot redan raderad auth.users-post) och rensa all lokal lagring
+      await withFastTimeout(supabase.auth.signOut({ scope: 'local' }), 800);
       clearAllLocalAppData(false);
 
       userIdRef.current = null;
@@ -3588,24 +3596,27 @@ export const App: React.FC = () => {
     setConnections([]);
     setBankAccounts([]);
 
+    const withFastTimeout = <T,>(promise: Promise<T>, ms = 3000): Promise<T | null> =>
+      Promise.race([
+        promise.catch(() => null),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+      ]);
+
     try {
       if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
-        // Hämta session och token FÖRST innan lokal data nollställs
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const token = session?.access_token;
+        const sessionRes = await withFastTimeout(supabase.auth.getSession(), 1500);
+        const token = sessionRes?.data?.session?.access_token;
 
+        // Koppla från bank i bakgrunden så det inte låser nollställningen
         if (connsToDisconnect.length > 0) {
-          await Promise.allSettled(
-            connsToDisconnect
-              .filter((c) => c.status !== 'revoked')
-              .map((c) => bankService.disconnect(c.id))
-          );
+          connsToDisconnect
+            .filter((c) => c.status !== 'revoked')
+            .forEach((c) => {
+              bankService.disconnect(c.id).catch(() => {});
+            });
         }
 
-        // Anropa både dedikerad server-endpoint (Supabase admin) och klient-radering (RLS)
-        await Promise.allSettled([
+        const res = await withFastTimeout(
           fetch('/api/auth/reset-account', {
             method: 'POST',
             headers: {
@@ -3613,11 +3624,23 @@ export const App: React.FC = () => {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({ userId: activeUid }),
-          }).catch((err) => console.error('reset-account error:', err)),
-          dataService.deleteAllUserData(activeUid).catch(() => {}),
-        ]);
+          }),
+          3500
+        );
+
+        let serverReset = false;
+        if (res && res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data?.success && !data?.localOnly) {
+            serverReset = true;
+          }
+        }
+
+        if (!serverReset) {
+          await withFastTimeout(dataService.deleteAllUserData(activeUid), 3000);
+        }
       } else if (activeUid) {
-        await dataService.deleteAllUserData(activeUid).catch(() => {});
+        await withFastTimeout(dataService.deleteAllUserData(activeUid), 2000);
       }
     } catch (err) {
       console.error('Error during account reset:', err);

@@ -245,14 +245,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveMode = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
 
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (effectiveMode === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
       root.style.backgroundColor = '#0B0F17';
+      if (metaTheme) metaTheme.setAttribute('content', '#0B0F17');
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
       root.style.backgroundColor = '#F3F8FC';
+      if (metaTheme) metaTheme.setAttribute('content', '#F3F8FC');
     }
     try {
       localStorage.setItem('dejz_theme_pref', mode);

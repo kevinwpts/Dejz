@@ -716,9 +716,9 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
 
       console.log(`Starting account reset for user: ${targetUid}`);
 
-      // Clear nullable foreign-key references first so child/parent deletes never conflict
-      try {
-        await supabaseAdmin
+      // Wave 1: Clear nullable foreign-key references in parallel
+      await Promise.allSettled([
+        supabaseAdmin
           .from('transactions')
           .update({
             refund_of_transaction_id: null,
@@ -727,63 +727,39 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
             linked_fixed_expense_id: null,
             account_id: null,
           })
-          .eq('user_id', targetUid);
-      } catch {
-        // ignore if columns differ
-      }
-
-      try {
-        await supabaseAdmin
+          .eq('user_id', targetUid),
+        supabaseAdmin
           .from('bank_transactions')
           .update({
             linked_transfer_bank_tx_id: null,
             replaced_by_bank_tx_id: null,
           })
-          .eq('user_id', targetUid);
-      } catch {
-        // ignore
-      }
-
-      try {
-        await supabaseAdmin
+          .eq('user_id', targetUid),
+        supabaseAdmin
           .from('bank_auth_states')
           .update({ connection_id: null })
-          .eq('user_id', targetUid);
-      } catch {
-        // ignore
-      }
+          .eq('user_id', targetUid),
+      ]);
 
-      // Delete in strict bottom-up dependency order
-      const tables = [
+      // Wave 2: Delete all leaf tables in parallel
+      const leafTables = [
         'transactions',
         'bank_transactions',
         'bank_auth_states',
         'bank_provider_sessions',
-        'bank_accounts',
-        'bank_connections',
         'fixed_expenses',
         'income_sources',
         'savings_goals',
-        'accounts',
       ];
+      await Promise.allSettled(
+        leafTables.map((table) => supabaseAdmin.from(table).delete().eq('user_id', targetUid))
+      );
 
-      for (const table of tables) {
-        try {
-          const { error: delErr } = await supabaseAdmin
-            .from(table)
-            .delete()
-            .eq('user_id', targetUid);
-          if (delErr) {
-            console.warn(`[Reset] Warning deleting from ${table}:`, delErr.message);
-          }
-        } catch (tableErr) {
-          console.warn(`[Reset] Error deleting from ${table}:`, tableErr);
-        }
-      }
-
-      // Reset user_preferences in profile instead of deleting profile row
-      try {
-        await supabaseAdmin
+      // Wave 3: Delete parent bank/account tables and reset profile in parallel
+      await Promise.allSettled([
+        supabaseAdmin.from('bank_accounts').delete().eq('user_id', targetUid),
+        supabaseAdmin.from('accounts').delete().eq('user_id', targetUid),
+        supabaseAdmin
           .from('profiles')
           .update({
             user_preferences: {},
@@ -794,10 +770,10 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
             my_swish_phone: null,
             swish_contacts: null,
           })
-          .eq('id', targetUid);
-      } catch (profErr) {
-        console.warn('[Reset] Error updating profile preferences:', profErr);
-      }
+          .eq('id', targetUid),
+      ]);
+
+      await supabaseAdmin.from('bank_connections').delete().eq('user_id', targetUid);
 
       console.log(`Successfully reset account data for user: ${targetUid}`);
       return res.json({ success: true });
@@ -838,7 +814,7 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
         targetEmails.add(email.trim().toLowerCase());
       }
 
-      if (token) {
+      if (token && targetUserIds.size === 0) {
         const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
         if (!authErr && authData?.user) {
           targetUserIds.add(authData.user.id);
@@ -848,32 +824,25 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
         }
       }
 
-      // Look up any email associated with the targetUserIds from auth.users and profiles
-      for (const uid of Array.from(targetUserIds)) {
-        try {
-          const { data: uData } = await supabaseAdmin.auth.admin.getUserById(uid);
-          if (uData?.user?.email) {
-            targetEmails.add(uData.user.email.trim().toLowerCase());
-          }
-        } catch {
-          // ignore
-        }
-        try {
-          const { data: profData } = await supabaseAdmin
-            .from('profiles')
-            .select('email')
-            .eq('id', uid)
-            .maybeSingle();
-          if (profData?.email) {
-            targetEmails.add(String(profData.email).trim().toLowerCase());
-          }
-        } catch {
-          // ignore
-        }
+      // Look up any profile rows matching targetEmails in parallel
+      if (targetEmails.size > 0) {
+        await Promise.allSettled(
+          Array.from(targetEmails).map(async (em) => {
+            const { data: profRows } = await supabaseAdmin
+              .from('profiles')
+              .select('id')
+              .ilike('email', em);
+            for (const row of profRows || []) {
+              if (row?.id && uuidRegex.test(String(row.id))) {
+                targetUserIds.add(String(row.id));
+              }
+            }
+          })
+        );
       }
 
-      // Also find any auth.users or profiles rows matching targetEmails so no duplicate/recreated user is left behind
-      if (targetEmails.size > 0) {
+      // Only call listUsers if we still don't have a UUID for the email
+      if (targetUserIds.size === 0 && targetEmails.size > 0) {
         try {
           const { data: listData } = await supabaseAdmin.auth.admin.listUsers({
             page: 1,
@@ -887,148 +856,104 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
         } catch {
           // ignore
         }
-
-        for (const em of Array.from(targetEmails)) {
-          try {
-            const { data: profRows } = await supabaseAdmin
-              .from('profiles')
-              .select('id')
-              .ilike('email', em);
-            for (const row of profRows || []) {
-              if (row?.id && uuidRegex.test(String(row.id))) {
-                targetUserIds.add(String(row.id));
-              }
-            }
-          } catch {
-            // ignore
-          }
-        }
       }
 
       console.log(
         `Starting full permanent account deletion for userIds=[${Array.from(targetUserIds).join(', ')}], emails=[${Array.from(targetEmails).join(', ')}]`
       );
 
-      const tables = [
+      const leafTables = [
         'transactions',
         'bank_transactions',
         'bank_auth_states',
         'bank_provider_sessions',
-        'bank_accounts',
-        'bank_connections',
         'fixed_expenses',
         'income_sources',
         'savings_goals',
-        'accounts',
         'feedback',
-        'profiles',
       ];
 
-      for (const uid of Array.from(targetUserIds)) {
-        // 1a. Break nullable self-references & cross-table references first
-        try {
-          await supabaseAdmin
-            .from('transactions')
-            .update({
-              refund_of_transaction_id: null,
-              bank_transaction_id: null,
-              bank_account_id: null,
-              linked_fixed_expense_id: null,
-              account_id: null,
-            })
-            .eq('user_id', uid);
-        } catch {
-          // ignore
-        }
+      await Promise.allSettled(
+        Array.from(targetUserIds).map(async (uid) => {
+          // Wave 1: Break nullable self-references & cross-table references + clean storage in parallel
+          await Promise.allSettled([
+            supabaseAdmin
+              .from('transactions')
+              .update({
+                refund_of_transaction_id: null,
+                bank_transaction_id: null,
+                bank_account_id: null,
+                linked_fixed_expense_id: null,
+                account_id: null,
+              })
+              .eq('user_id', uid),
+            supabaseAdmin
+              .from('bank_transactions')
+              .update({
+                linked_transfer_bank_tx_id: null,
+                replaced_by_bank_tx_id: null,
+              })
+              .eq('user_id', uid),
+            supabaseAdmin
+              .from('bank_auth_states')
+              .update({ connection_id: null })
+              .eq('user_id', uid),
+            (async () => {
+              const [{ data: rootFiles }, { data: folderFiles }] = await Promise.all([
+                supabaseAdmin.storage.from('avatars').list('', { limit: 100, search: uid }),
+                supabaseAdmin.storage.from('avatars').list(uid, { limit: 100 }),
+              ]);
+              const pathsToRemove: string[] = [];
+              if (Array.isArray(rootFiles)) {
+                for (const f of rootFiles) {
+                  if (f.name && f.name.includes(uid)) pathsToRemove.push(f.name);
+                }
+              }
+              if (Array.isArray(folderFiles)) {
+                for (const f of folderFiles) {
+                  if (f.name) pathsToRemove.push(`${uid}/${f.name}`);
+                }
+              }
+              if (pathsToRemove.length > 0) {
+                await supabaseAdmin.storage.from('avatars').remove(pathsToRemove);
+              }
+            })(),
+          ]);
 
-        try {
-          await supabaseAdmin
-            .from('bank_transactions')
-            .update({
-              linked_transfer_bank_tx_id: null,
-              replaced_by_bank_tx_id: null,
-            })
-            .eq('user_id', uid);
-        } catch {
-          // ignore
-        }
+          // Wave 2: Delete all leaf tables in parallel
+          await Promise.allSettled(
+            leafTables.map((table) => supabaseAdmin.from(table).delete().eq('user_id', uid))
+          );
 
-        try {
-          await supabaseAdmin
-            .from('bank_auth_states')
-            .update({ connection_id: null })
-            .eq('user_id', uid);
-        } catch {
-          // ignore
-        }
+          // Wave 3: Delete parent account tables in parallel
+          await Promise.allSettled([
+            supabaseAdmin.from('bank_accounts').delete().eq('user_id', uid),
+            supabaseAdmin.from('accounts').delete().eq('user_id', uid),
+          ]);
 
-        // 1b. Delete from all public tables in bottom-up dependency order
-        for (const table of tables) {
-          try {
-            const col = table === 'profiles' ? 'id' : 'user_id';
-            const { error: delErr } = await supabaseAdmin
-              .from(table)
-              .delete()
-              .eq(col, uid);
-            if (delErr && table !== 'feedback') {
-              console.warn(`[Delete] Warning deleting from ${table} for ${uid}:`, delErr.message);
-            }
-          } catch (tableErr) {
-            console.warn(`[Delete] Error deleting from ${table} for ${uid}:`, tableErr);
-          }
-        }
+          // Wave 4: Delete bank_connections and profiles in parallel
+          await Promise.allSettled([
+            supabaseAdmin.from('bank_connections').delete().eq('user_id', uid),
+            supabaseAdmin.from('profiles').delete().eq('id', uid),
+          ]);
 
-        // 1c. Delete any uploaded avatar files in Supabase Storage
-        try {
-          const { data: rootFiles } = await supabaseAdmin.storage.from('avatars').list('', {
-            limit: 100,
-            search: uid,
-          });
-          if (Array.isArray(rootFiles) && rootFiles.length > 0) {
-            const pathsToRemove = rootFiles
-              .filter((f) => f.name && f.name.includes(uid))
-              .map((f) => f.name);
-            if (pathsToRemove.length > 0) {
-              await supabaseAdmin.storage.from('avatars').remove(pathsToRemove);
-            }
-          }
-          const { data: folderFiles } = await supabaseAdmin.storage.from('avatars').list(uid, {
-            limit: 100,
-          });
-          if (Array.isArray(folderFiles) && folderFiles.length > 0) {
-            const folderPaths = folderFiles.map((f) => `${uid}/${f.name}`);
-            await supabaseAdmin.storage.from('avatars').remove(folderPaths);
-          }
-        } catch {
-          // ignore storage cleanup errors
-        }
-
-        // 1d. Delete the auth user from auth.users
-        try {
+          // Wave 5: Delete the auth user from auth.users
           const { error: deleteUserErr } = await supabaseAdmin.auth.admin.deleteUser(uid);
           if (deleteUserErr) {
-            console.warn(`[Delete] First deleteUser attempt for ${uid} warning:`, deleteUserErr.message);
-            // Ensure profile is gone and retry hard delete
             await supabaseAdmin.from('profiles').delete().eq('id', uid);
             await supabaseAdmin.auth.admin.deleteUser(uid, false);
           }
-        } catch (deleteAuthError: any) {
-          console.warn('Could not delete auth user from auth.users:', deleteAuthError?.message);
-        }
-      }
+        })
+      );
 
-      // 2. Also clean up any rows matched by email (e.g. feedback or orphan profiles)
-      for (const em of Array.from(targetEmails)) {
-        try {
-          await supabaseAdmin.from('feedback').delete().ilike('user_email', em);
-        } catch {
-          // ignore
-        }
-        try {
-          await supabaseAdmin.from('profiles').delete().ilike('email', em);
-        } catch {
-          // ignore
-        }
+      // Clean up any rows matched by email in parallel
+      if (targetEmails.size > 0) {
+        await Promise.allSettled(
+          Array.from(targetEmails).flatMap((em) => [
+            supabaseAdmin.from('feedback').delete().ilike('user_email', em),
+            supabaseAdmin.from('profiles').delete().ilike('email', em),
+          ])
+        );
       }
 
       console.log(

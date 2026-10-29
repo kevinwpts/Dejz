@@ -1461,9 +1461,9 @@ export const dataService = {
       return;
     }
 
-    // Clear nullable foreign-key references first
-    try {
-      await supabase
+    // Wave 1: Clear nullable foreign-key references in parallel
+    await Promise.allSettled([
+      supabase
         .from('transactions')
         .update({
           refund_of_transaction_id: null,
@@ -1472,51 +1472,36 @@ export const dataService = {
           linked_fixed_expense_id: null,
           account_id: null,
         })
-        .eq('user_id', userId);
-    } catch {
-      // ignore
-    }
-
-    try {
-      await supabase
+        .eq('user_id', userId),
+      supabase
         .from('bank_transactions')
         .update({
           linked_transfer_bank_tx_id: null,
           replaced_by_bank_tx_id: null,
         })
-        .eq('user_id', userId);
-    } catch {
-      // ignore
-    }
+        .eq('user_id', userId),
+    ]);
 
-    // Delete in strict bottom-up dependency order
-    const tables = [
+    // Wave 2: Delete leaf tables in parallel
+    const leafTables = [
       'transactions',
       'bank_transactions',
       'bank_auth_states',
       'bank_provider_sessions',
-      'bank_accounts',
-      'bank_connections',
       'fixed_expenses',
       'income_sources',
       'savings_goals',
-      'accounts',
       'feedback',
     ];
-    for (const table of tables) {
-      try {
-        await supabase
-          .from(table)
-          .delete()
-          .eq('user_id', userId);
-      } catch (err) {
-        console.error(`Error deleting from ${table} in Supabase:`, err);
-      }
-    }
+    await Promise.allSettled(
+      leafTables.map((table) => supabase.from(table).delete().eq('user_id', userId))
+    );
 
-    // Clear profile preferences first (since RLS always allows UPDATE on own profile even if DELETE is restricted)
-    try {
-      await supabase
+    // Wave 3: Delete parent account tables and clear profile preferences in parallel
+    await Promise.allSettled([
+      supabase.from('bank_accounts').delete().eq('user_id', userId),
+      supabase.from('accounts').delete().eq('user_id', userId),
+      supabase
         .from('profiles')
         .update({
           user_preferences: {},
@@ -1527,20 +1512,13 @@ export const dataService = {
           my_swish_phone: null,
           swish_contacts: null,
         })
-        .eq('id', userId);
-    } catch (err) {
-      console.error('Error clearing profile preferences in Supabase:', err);
-    }
+        .eq('id', userId),
+    ]);
+
+    await supabase.from('bank_connections').delete().eq('user_id', userId);
 
     if (includeProfile) {
-      try {
-        await supabase
-          .from('profiles')
-          .delete()
-          .eq('id', userId);
-      } catch (err) {
-        console.error('Error deleting profile row in Supabase:', err);
-      }
+      await supabase.from('profiles').delete().eq('id', userId);
     }
   }
 };

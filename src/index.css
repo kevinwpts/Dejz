@@ -683,12 +683,12 @@ h6 {
   --orange-800: #9A4D00;
   --orange-900: #713800;
 
-  /* Airy Sky-Porcelain Brand Gradient & Scale */
-  --brand-peach: #E2F1FC;
-  --brand-pink: #EBF5FD;
-  --brand-lavender: #F2F7FC;
-  --brand-cream: #F5F9FC;
-  --brand-gradient: linear-gradient(180deg, #E2F1FC 0%, #ECF5FC 160px, #F3F8FC 320px, #F6F9FC 100%);
+  /* Airy Sky-Porcelain Brand Scale */
+  --brand-peach: #F3F8FC;
+  --brand-pink: #F3F8FC;
+  --brand-lavender: #F3F8FC;
+  --brand-cream: #F3F8FC;
+  --brand-gradient: none;
 
   /* Dejz Official Brand Logo Color */
   --logo-color: #0F172A;
@@ -697,11 +697,11 @@ h6 {
   --card-gap: 0.65rem;
   --menu-content-gap: 1.5rem;
 
-  /* Seamless Light Theme Background & Surfaces (Soft Sky-Porcelain + Pure Snow Cards) */
-  --bg-top-color: #E2F1FC;
+  /* Seamless Light Theme Background & Surfaces (Uniform #F3F8FC from status bar to bottom) */
+  --bg-top-color: #F3F8FC;
   --bg-color: #F3F8FC;
   --bg-secondary: #EEF4FA;
-  --bg-gradient: linear-gradient(180deg, #E2F1FC 0%, #ECF5FC 160px, #F3F8FC 320px, #F6F9FC 100%);
+  --bg-gradient: none;
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
