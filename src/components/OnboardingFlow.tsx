@@ -64,7 +64,7 @@ interface OnboardingFlowProps {
   onBackToLanding?: () => void;
 }
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 interface SheetEditorState {
   mode: 'add' | 'edit';
@@ -103,7 +103,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [step, setStep] = useState<OnboardingStep>(() => {
     try {
       const savedStep = Number(localStorage.getItem('dejz_onboarding_step'));
-      if (savedStep >= 1 && savedStep <= 5) {
+      if (savedStep >= 1 && savedStep <= 6) {
         return savedStep as OnboardingStep;
       }
     } catch {
@@ -183,15 +183,30 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }[]
   >([]);
 
+  // Föreslagna fasta inkomster för steg 4 (hämtas från riktiga banktransaktioner)
+  const [suggestedIncomes, setSuggestedIncomes] = useState<
+    {
+      id: string;
+      name: string;
+      amount: number;
+      payday: number;
+      category: string;
+      evidenceSummary?: string;
+      checked: boolean;
+      logo?: string;
+      isFromBank?: boolean;
+    }[]
+  >([]);
+
   const [analyzingBank, setAnalyzingBank] = useState(false);
   const [hasAnalyzedBank, setHasAnalyzedBank] = useState(false);
   const [isBankDataDetected, setIsBankDataDetected] = useState(false);
 
-  // Analysera RIKTIGA banktransaktioner från Enable Banking så fort bank är ansluten eller steg 3 visas
+  // Analysera RIKTIGA banktransaktioner från Enable Banking så fort bank är ansluten eller steg 3 / 4 visas
   useEffect(() => {
-    if (step !== 3 && connections.length === 0) return;
+    if (step !== 3 && step !== 4 && connections.length === 0) return;
     if (hasAnalyzedBank && isBankDataDetected) return;
-    if (step !== 3 && hasAnalyzedBank) return;
+    if (step !== 3 && step !== 4 && hasAnalyzedBank) return;
 
     let isMounted = true;
     const runBankAnalysis = async () => {
@@ -217,7 +232,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           );
 
           if (isMounted) {
-            const realDetected = analysis.detectedFixedExpenses.map((item, idx) => ({
+            const realDetectedFixed = analysis.detectedFixedExpenses.map((item, idx) => ({
               id: `bank-det-${idx}`,
               name: item.name,
               amount: Math.round(item.amount),
@@ -229,40 +244,51 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               logo: item.logo,
               isFromBank: true,
             }));
-            setSuggestedFixedExpenses(realDetected);
-            setIsBankDataDetected(true);
+            setSuggestedFixedExpenses(realDetectedFixed);
 
-            // Sätt automatiskt lönedag i Steg 4 utifrån analyserad inkomst från banken
             const primaryDetectedInc = analysis.detectedIncomes[0];
             const inferredPayday =
               analysis.suggestedPayday || primaryDetectedInc?.deductionDay || null;
+
+            const realDetectedIncomes = analysis.detectedIncomes.map((inc, idx) => ({
+              id: `bank-inc-${idx}`,
+              name: inc.name,
+              amount: Math.round(inc.amount),
+              payday: inc.deductionDay || inferredPayday || 25,
+              category: inc.category || 'Lön',
+              evidenceSummary: inc.evidenceSummary,
+              checked: true,
+              logo: inc.logo,
+              isFromBank: true,
+            }));
+            setSuggestedIncomes(realDetectedIncomes);
+            setIsBankDataDetected(true);
+
+            // Sätt automatiskt lönedag utifrån analyserad inkomst från banken
             if (inferredPayday && inferredPayday >= 1 && inferredPayday <= 31) {
               setPayday(inferredPayday);
               if (primaryDetectedInc?.name) {
                 setDetectedIncomeSourceLabel(primaryDetectedInc.name);
               }
             }
-
-            // Om vi även hittade återkommande inkomster (t.ex. Lön eller A-kassa) och inga finns inlagda ännu
-            if (analysis.detectedIncomes.length > 0 && incomes.length === 0) {
-              analysis.detectedIncomes.forEach((inc) => {
-                onAddIncome({
-                  name: inc.name,
-                  amount: Math.round(inc.amount),
-                  payday: inc.deductionDay || inferredPayday || payday,
-                  category: inc.category || 'Lön',
-                });
-              });
-            }
           }
-        } else if (isMounted && connections.length === 0 && suggestedFixedExpenses.length === 0) {
+        } else if (isMounted && connections.length === 0) {
           // Endast om användaren hoppade över bankkoppling helt visas vanliga förslag
-          setSuggestedFixedExpenses([
-            { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Boende', checked: false },
-            { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Boende', checked: false },
-            { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Försäkringar', checked: false },
-            { id: '4', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Abonnemang', checked: false },
-          ]);
+          if (suggestedFixedExpenses.length === 0) {
+            setSuggestedFixedExpenses([
+              { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Boende', checked: false },
+              { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Boende', checked: false },
+              { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Försäkringar', checked: false },
+              { id: '4', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Abonnemang', checked: false },
+            ]);
+          }
+          if (suggestedIncomes.length === 0) {
+            setSuggestedIncomes([
+              { id: 'inc-1', name: 'Lön', amount: 28500, payday: 25, category: 'Lön', checked: false },
+              { id: 'inc-2', name: 'CSN', amount: 13156, payday: 25, category: 'CSN', checked: false },
+              { id: 'inc-3', name: 'Barnbidrag', amount: 1250, payday: 20, category: 'Bidrag', checked: false },
+            ]);
+          }
         }
       } catch (err) {
         console.warn('Could not analyze bank transactions:', err);
@@ -278,13 +304,66 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [step, connections.length, hasAnalyzedBank, isBankDataDetected, payday, weekendHandling, fetchedAccounts, _bankAccounts, incomes.length, onAddIncome, suggestedFixedExpenses.length]);
+  }, [
+    step,
+    connections.length,
+    hasAnalyzedBank,
+    isBankDataDetected,
+    payday,
+    weekendHandling,
+    fetchedAccounts,
+    _bankAccounts,
+    suggestedFixedExpenses.length,
+    suggestedIncomes.length,
+  ]);
+
+  // Synka om App.tsx redan hunnit populera fixedExpenses eller incomes via bakgrundssynk
+  useEffect(() => {
+    if (suggestedFixedExpenses.length === 0 && fixedExpenses.length > 0) {
+      setSuggestedFixedExpenses(
+        fixedExpenses.map((f) => ({
+          id: f.id,
+          name: f.name,
+          amount: Math.round(f.amount),
+          dueDay: f.dueDay || 27,
+          category: f.category || 'Räkningar',
+          paymentMethod: f.paymentMethod || 'Autogiro',
+          checked: true,
+          logo: f.logo,
+          isFromBank: true,
+        }))
+      );
+      setIsBankDataDetected(true);
+    }
+  }, [fixedExpenses, suggestedFixedExpenses.length]);
+
+  useEffect(() => {
+    if (suggestedIncomes.length === 0 && incomes.length > 0) {
+      setSuggestedIncomes(
+        incomes.map((inc) => ({
+          id: inc.id,
+          name: inc.name,
+          amount: Math.round(inc.amount),
+          payday: inc.payday || 25,
+          category: inc.category || 'Lön',
+          checked: true,
+          logo: inc.logo,
+          isFromBank: true,
+        }))
+      );
+      const primary = incomes[0];
+      if (primary?.payday && primary.payday >= 1 && primary.payday <= 31) {
+        setPayday(primary.payday);
+        setDetectedIncomeSourceLabel(primary.name);
+      }
+    }
+  }, [incomes, suggestedIncomes.length]);
 
   const handleSaveSuggestedFixed = () => {
     suggestedFixedExpenses.forEach((item) => {
+      const existing = fixedExpenses.find((f) => f.name.toLowerCase() === item.name.toLowerCase());
       if (item.checked) {
-        const exists = fixedExpenses.some((f) => f.name.toLowerCase() === item.name.toLowerCase());
-        if (!exists) {
+        if (!existing) {
           onAddFixed({
             name: item.name,
             amount: item.amount,
@@ -294,9 +373,44 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             logo: item.logo,
           });
         }
+      } else if (existing) {
+        onDeleteFixed(existing.id);
       }
     });
     navigateStep(4, 'forward');
+  };
+
+  const handleSaveSuggestedIncomes = () => {
+    suggestedIncomes.forEach((item) => {
+      const existing = incomes.find((i) => i.name.toLowerCase() === item.name.toLowerCase());
+      if (item.checked) {
+        if (!existing) {
+          onAddIncome({
+            name: item.name,
+            amount: item.amount,
+            payday: item.payday,
+            category: item.category || 'Lön',
+            logo: item.logo,
+          });
+        }
+      } else if (existing) {
+        onDeleteIncome(existing.id);
+      }
+    });
+
+    // Utgå automatiskt från dagen på den valda/hittade lönen i nästa steg (När får du lön?)
+    const checkedList = suggestedIncomes.filter((i) => i.checked);
+    if (checkedList.length > 0) {
+      const primaryInc =
+        checkedList.find((i) => i.category === 'Lön' || i.category === 'Ersättning') ||
+        [...checkedList].sort((a, b) => b.amount - a.amount)[0];
+      if (primaryInc && primaryInc.payday >= 1 && primaryInc.payday <= 31) {
+        setPayday(primaryInc.payday);
+        setDetectedIncomeSourceLabel(primaryInc.name);
+      }
+    }
+
+    navigateStep(5, 'forward');
   };
 
   // BottomSheet editor state (för att lägga till eller ändra post)
@@ -474,7 +588,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     navigateStep(2, 'forward');
   };
 
-  const handleNextFromStep4Payday = () => {
+  const handleNextFromStep5Payday = () => {
     try {
       localStorage.setItem('dejz_target_payday', String(payday));
       localStorage.setItem('dejz_weekend_handling', weekendHandling);
@@ -487,7 +601,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     if (onUpdateWeekendHandling) {
       onUpdateWeekendHandling(weekendHandling);
     }
-    navigateStep(5, 'forward');
+    navigateStep(6, 'forward');
   };
 
   const openAddSheet = (type: 'income' | 'fixed') => {
@@ -553,6 +667,21 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           payday: cleanDay,
           category: sheetEditor.category || 'Lön',
         });
+        if (step === 4) {
+          setSuggestedIncomes((prev) => [
+            ...prev,
+            {
+              id: `custom-inc-${Date.now()}`,
+              name: cleanTitle,
+              amount: cleanAmt,
+              payday: cleanDay,
+              category: sheetEditor.category || 'Lön',
+              checked: true,
+            },
+          ]);
+          setPayday(cleanDay);
+          setDetectedIncomeSourceLabel(cleanTitle);
+        }
       } else if (sheetEditor.id && onUpdateIncome) {
         const existing = incomes.find((i) => i.id === sheetEditor.id);
         if (existing) {
@@ -651,13 +780,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <div
             className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${
               step === 1
-                ? 'w-1/5'
+                ? 'w-1/6'
                 : step === 2
-                ? 'w-2/5'
+                ? 'w-2/6'
                 : step === 3
-                ? 'w-3/5'
+                ? 'w-3/6'
                 : step === 4
-                ? 'w-4/5'
+                ? 'w-4/6'
+                : step === 5
+                ? 'w-5/6'
                 : 'w-full'
             }`}
           />
@@ -1187,11 +1318,131 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* STEG 4: NÄR FÅR DU LÖN? (Minimalistisk dragrad, auto-förvald)  */}
+      {/* STEG 4: VILKA FASTA INKOMSTER HAR DU? (Analyserat från banken) */}
       {/* ============================================================== */}
       {step === 4 && (
         <div
           key="step-4"
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+        >
+          {/* Pinnad rubrik med luft ovanför */}
+          <div className="shrink-0 pt-6 pb-3">
+            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              Vilka fasta inkomster har du?
+            </h1>
+            <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
+              {isBankDataDetected && suggestedIncomes.some((i) => i.isFromBank)
+                ? `Vi hittade ${suggestedIncomes.length} återkommande ${
+                    suggestedIncomes.length === 1 ? 'inkomst' : 'inkomster'
+                  } i dina banktransaktioner. Bocka i de som stämmer.`
+                : 'Bocka i dina fasta inkomster eller lägg till egna.'}
+            </p>
+          </div>
+
+          {/* Scrollbar lista i mitten */}
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
+            {analyzingBank && (
+              <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
+                <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
+                <span>Analyserar inkomster från din anslutna bank...</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {suggestedIncomes.map((item) => (
+                <div
+                  key={item.id}
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                    item.checked
+                      ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
+                      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSuggestedIncomes((prev) =>
+                        prev.map((p) => (p.id === item.id ? { ...p, checked: !p.checked } : p))
+                      )
+                    }
+                    className="flex items-center gap-3 text-left cursor-pointer flex-1 min-w-0"
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                        item.checked
+                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      {item.checked && <Check size={12} weight="bold" />}
+                    </div>
+
+                    <ItemLogo
+                      name={item.name}
+                      category={item.category}
+                      logoUrl={item.logo}
+                      size="md"
+                      isRecurring={false}
+                    />
+
+                    <div className="min-w-0 flex-1">
+                      <span className="ui-row-title">
+                        {item.name}
+                      </span>
+                      <span className="ui-row-subtitle flex items-center gap-1.5">
+                        <CategoryIcon
+                          category={item.category || 'Lön'}
+                          size={11}
+                          className="shrink-0 text-[var(--text-secondary)]"
+                        />
+                        <span className="truncate">
+                          {item.category || 'Lön'}
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="ui-row-amount ui-row-amount-income">
+                        +{formatKr(item.amount)}
+                      </span>
+                      <span className="ui-row-meta">
+                        Den {item.payday}:e
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openAddSheet('income')}
+              className="w-full py-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Plus size={14} weight="bold" />
+              <span>Lägg till egen fast inkomst</span>
+            </button>
+          </div>
+
+          <div className="shrink-0 pt-3">
+            <button
+              type="button"
+              onClick={handleSaveSuggestedIncomes}
+              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            >
+              <span>Fortsätt</span>
+              <ArrowRight size={16} weight="bold" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* STEG 5: NÄR FÅR DU LÖN? (Minimalistisk dragrad, auto-förvald)  */}
+      {/* ============================================================== */}
+      {step === 5 && (
+        <div
+          key="step-5"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
           <div className="my-auto py-4 space-y-10">
@@ -1262,7 +1513,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           <div className="shrink-0 pt-3">
             <button
               type="button"
-              onClick={handleNextFromStep4Payday}
+              onClick={handleNextFromStep5Payday}
               className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
             >
               <span>Fortsätt</span>
@@ -1273,11 +1524,11 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* STEG 5: STÄMMER DIN ÖVERSIKT? (Kategoriikoner + luftig rubrik) */}
+      {/* STEG 6: STÄMMER DIN ÖVERSIKT? (Kategoriikoner + luftig rubrik) */}
       {/* ============================================================== */}
-      {step === 5 && (
+      {step === 6 && (
         <div
-          key="step-5"
+          key="step-6"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
           {/* Pinnad rubrik med luft i toppen */}

@@ -2220,12 +2220,24 @@ function runCoreBankDetection(
       rawText.includes('lön') ||
       rawText.includes('lon ') ||
       rawText.includes('salary') ||
-      rawText.includes('löneutbetalning');
-    const isCsn = rawText.includes('csn') || rawText.includes('studiestöd');
+      rawText.includes('löneutbetalning') ||
+      rawText.includes('loneutbetalning') ||
+      rawText.includes('arvode');
+    const isCsn =
+      rawText.includes('csn') ||
+      rawText.includes('studiestöd') ||
+      rawText.includes('studiestod') ||
+      rawText.includes('centrala studiestödsnämnden');
     const isFk =
-      rawText.includes('försäkringskassan') || rawText.includes('forsakringskassan');
+      rawText.includes('försäkringskassan') ||
+      rawText.includes('forsakringskassan') ||
+      rawText.includes('föräldrapenning') ||
+      rawText.includes('sjukpenning') ||
+      rawText.includes('bostadsbidrag') ||
+      rawText.includes('aktivitetsstöd');
     const isBarnbidrag = rawText.includes('barnbidrag');
-    const isPension = rawText.includes('pension');
+    const isPension =
+      rawText.includes('pension') || rawText.includes('pensionsmyndigheten');
     const isAkassa =
       rawText.includes('a-kassa') ||
       rawText.includes('a kassa') ||
@@ -2233,7 +2245,9 @@ function runCoreBankDetection(
       rawText.includes('arbetslöshetsersättning') ||
       rawText.includes('arbetsloshetsersattning') ||
       rawText.includes('alfakassan') ||
-      rawText.includes('unionen');
+      rawText.includes('unionen') ||
+      rawText.includes('akademikernas');
+    const isUtbetalning = rawText.includes('utbetalning');
 
     if (
       !isExplicitSalary &&
@@ -2243,7 +2257,8 @@ function runCoreBankDetection(
       !isPension &&
       !isAkassa &&
       !isBankCodeIncome &&
-      amt < 12000
+      !isUtbetalning &&
+      amt < 2000
     ) {
       continue;
     }
@@ -2271,19 +2286,34 @@ function runCoreBankDetection(
     } else if (isAkassa) {
       groupKey = 'akassa';
       const cleanAcc = tx.counterparty_name ? cleanDisplayMerchantName(tx.counterparty_name) : 'A-kassa';
-      incomeName = cleanAcc.toLowerCase().includes('kassa') || cleanAcc.toLowerCase().includes('unionen') ? cleanAcc : 'A-kassa';
+      incomeName =
+        cleanAcc.toLowerCase().includes('kassa') || cleanAcc.toLowerCase().includes('unionen')
+          ? cleanAcc
+          : 'A-kassa';
       incomeCategory = 'Ersättning';
       isPrimarySalary = true;
     } else if (isPension) {
       groupKey = 'pension';
       incomeName = 'Pension';
       incomeCategory = 'Pension';
-      isPrimarySalary = false;
+      isPrimarySalary = true;
     } else if (tx.counterparty_name) {
       const cleanEmp = cleanDisplayMerchantName(tx.counterparty_name);
       groupKey = `salary_${normalizeMerchantKey(cleanEmp)}`;
-      incomeName = `Lön (${cleanEmp})`;
-      isPrimarySalary = true;
+      incomeName = isExplicitSalary ? `Lön (${cleanEmp})` : cleanEmp || 'Lön';
+      isPrimarySalary = isExplicitSalary || amt >= 10000;
+    } else {
+      const cleanDesc = cleanDisplayMerchantName(tx.description || '');
+      if (
+        cleanDesc &&
+        cleanDesc.toLowerCase() !== 'lön' &&
+        cleanDesc.toLowerCase() !== 'insättning' &&
+        cleanDesc.toLowerCase() !== 'utbetalning'
+      ) {
+        groupKey = `income_${normalizeMerchantKey(cleanDesc)}`;
+        incomeName = isExplicitSalary ? `Lön (${cleanDesc})` : cleanDesc;
+      }
+      isPrimarySalary = isExplicitSalary || amt >= 10000;
     }
 
     const txDate = tx.booking_date || tx.transaction_date || tx.value_date || '';
@@ -2305,29 +2335,41 @@ function runCoreBankDetection(
   }
 
   for (const grp of incomeGroups.values()) {
-    // If an inflow has no explicit salary/benefit keyword (only matched because amt >= 12000),
-    // require either >= 2 occurrences OR explicit 'utbetalning'/'lön' so a one-off large transfer isn't assumed to be salary
     const firstText = `${grp.txs[0].description || ''} ${grp.txs[0].counterparty_name || ''}`.toLowerCase();
     const firstBankCode = getBankTxCodeDescription(grp.txs[0]);
     const hasExplicitIncomeKeyword =
       firstText.includes('lön') ||
       firstText.includes('lon ') ||
       firstText.includes('salary') ||
+      firstText.includes('löneutbetalning') ||
+      firstText.includes('loneutbetalning') ||
       firstText.includes('utbetalning') ||
+      firstText.includes('arvode') ||
       firstText.includes('csn') ||
+      firstText.includes('studiestöd') ||
+      firstText.includes('studiestod') ||
       firstText.includes('försäkringskassan') ||
       firstText.includes('forsakringskassan') ||
+      firstText.includes('föräldrapenning') ||
+      firstText.includes('sjukpenning') ||
+      firstText.includes('bostadsbidrag') ||
       firstText.includes('barnbidrag') ||
       firstText.includes('pension') ||
       firstText.includes('a-kassa') ||
       firstText.includes('a kassa') ||
       firstText.includes('akassa') ||
+      firstText.includes('alfakassan') ||
+      firstText.includes('unionen') ||
       firstText.includes('arbetslös') ||
       firstBankCode.includes('salary') ||
       firstBankCode.includes('pension') ||
       firstBankCode.includes('social benefit');
 
-    if (!hasExplicitIncomeKeyword && grp.txs.length < 2) {
+    const distinctMonths = new Set(
+      grp.dates.map((d) => (d ? d.slice(0, 7) : '')).filter(Boolean)
+    ).size;
+
+    if (!hasExplicitIncomeKeyword && distinctMonths < 2) {
       continue;
     }
 
@@ -2356,6 +2398,7 @@ function runCoreBankDetection(
       deductionDay: normalizedDay,
       isVariable,
       icon: 'Wallet',
+      logo: getLogoUrl(grp.name, grp.category),
       detectedOccurrences: grp.txs.length,
       lastDate: latestDate,
       evidenceDates: grp.dates.slice(0, 6),
@@ -2368,6 +2411,13 @@ function runCoreBankDetection(
         isVariable
       ),
     });
+  }
+
+  // Sort detected incomes so primary salary / largest income comes first
+  detectedIncomes.sort((a, b) => b.amount - a.amount);
+
+  if (suggestedPayday === null && detectedIncomes.length > 0) {
+    suggestedPayday = detectedIncomes[0].deductionDay || 25;
   }
 
   // Layer 4: Period Boundaries & Variable Spending
