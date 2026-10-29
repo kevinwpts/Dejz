@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CaretLeft,
   CaretRight,
-  CheckCircle,
   Plus,
   Trash,
   Check,
@@ -24,6 +23,7 @@ import {
   SWEDISH_BANKS_CATALOG,
 } from '../services/bankService';
 import { WeekendHandlingMode } from '../utils/periodEngine';
+import { analyzeBankTransactionsForOnboarding } from '../utils/bankHistoryAnalyzer';
 import { ItemLogo } from './ItemLogo';
 import { BottomSheet } from './ui/BottomSheet';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
@@ -167,7 +167,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Föreslagna fasta utgifter för steg 4
   const [suggestedFixedExpenses, setSuggestedFixedExpenses] = useState<
-    { id: string; name: string; amount: number; dueDay: number; category: string; checked: boolean }[]
+    {
+      id: string;
+      name: string;
+      amount: number;
+      dueDay: number;
+      category: string;
+      checked: boolean;
+      logo?: string;
+      isFromBank?: boolean;
+    }[]
   >([
     { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Räkningar', checked: true },
     { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Räkningar', checked: true },
@@ -175,6 +184,60 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     { id: '4', name: 'Netflix', amount: 149, dueDay: 27, category: 'Nöje', checked: true },
     { id: '5', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Räkningar', checked: true },
   ]);
+
+  const [analyzingBank, setAnalyzingBank] = useState(false);
+  const [hasAnalyzedBank, setHasAnalyzedBank] = useState(false);
+  const [isBankDataDetected, setIsBankDataDetected] = useState(false);
+
+  // Analysera RIKTIGA banktransaktioner från Enable Banking när steg 4 laddas
+  useEffect(() => {
+    if (step !== 4 || hasAnalyzedBank) return;
+
+    let isMounted = true;
+    const runBankAnalysis = async () => {
+      setAnalyzingBank(true);
+      try {
+        const txRes = await bankService.listTransactions({ pageSize: 300 });
+        const bankTxs = txRes?.transactions || [];
+
+        if (bankTxs.length > 0) {
+          const analysis = analyzeBankTransactionsForOnboarding(
+            bankTxs,
+            payday,
+            weekendHandling === 'before',
+            fetchedAccounts
+          );
+
+          if (isMounted && analysis.detectedFixedExpenses.length > 0) {
+            const realDetected = analysis.detectedFixedExpenses.map((item, idx) => ({
+              id: `bank-det-${idx}`,
+              name: item.name,
+              amount: Math.round(item.amount),
+              dueDay: item.dueDay || 27,
+              category: item.category || 'Räkningar',
+              checked: true,
+              logo: (item as any).logo,
+              isFromBank: true,
+            }));
+            setSuggestedFixedExpenses(realDetected);
+            setIsBankDataDetected(true);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not analyze bank transactions:', err);
+      } finally {
+        if (isMounted) {
+          setAnalyzingBank(false);
+          setHasAnalyzedBank(true);
+        }
+      }
+    };
+
+    runBankAnalysis();
+    return () => {
+      isMounted = false;
+    };
+  }, [step, hasAnalyzedBank, payday, weekendHandling, fetchedAccounts]);
 
   const handleSaveSuggestedFixed = () => {
     suggestedFixedExpenses.forEach((item) => {
@@ -187,6 +250,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             dueDay: item.dueDay,
             category: item.category,
             paymentMethod: 'Autogiro',
+            logo: item.logo,
           });
         }
       }
@@ -1070,9 +1134,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 Vilka fasta utgifter har du?
               </h1>
               <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                Dejz har analyserat vanliga fasta räkningar. Bocka i de som stämmer eller lägg till egna.
+                {isBankDataDetected
+                  ? `Hittade ${suggestedFixedExpenses.length} återkommande utgifter i dina banktransaktioner. Bocka i de som stämmer.`
+                  : 'Bocka i dina vanliga fasta utgifter eller lägg till egna.'}
               </p>
             </div>
+
+            {analyzingBank && (
+              <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
+                <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
+                <span>Analyserar transaktioner från din anslutna bank...</span>
+              </div>
+            )}
 
             <div className="space-y-2.5">
               {suggestedFixedExpenses.map((item) => (
@@ -1102,6 +1175,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     >
                       {item.checked && <Check size={12} weight="bold" />}
                     </div>
+
+                    <ItemLogo
+                      name={item.name}
+                      category={item.category}
+                      logoUrl={item.logo}
+                      size="md"
+                      isRecurring={true}
+                    />
+
                     <div className="min-w-0 flex-1">
                       <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
                         {item.name}
