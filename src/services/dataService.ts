@@ -1470,17 +1470,33 @@ export const dataService = {
       'savings_goals',
       'accounts',
       'feedback',
-      'profiles',
     ];
     for (const table of tables) {
       try {
         await supabase
           .from(table)
           .delete()
-          .eq(table === 'profiles' ? 'id' : 'user_id', userId);
+          .eq('user_id', userId);
       } catch (err) {
         console.error(`Error deleting from ${table} in Supabase:`, err);
       }
+    }
+    // Clear profile preferences first (since RLS always allows UPDATE on own profile even if DELETE is restricted)
+    try {
+      await supabase
+        .from('profiles')
+        .update({
+          user_preferences: {},
+          show_accounts_on_home: false,
+          exclude_internal_transfers: true,
+          categories: null,
+          income_categories: null,
+          my_swish_phone: null,
+          swish_contacts: null,
+        })
+        .eq('id', userId);
+    } catch (err) {
+      console.error('Error clearing profile preferences in Supabase:', err);
     }
   }
 };

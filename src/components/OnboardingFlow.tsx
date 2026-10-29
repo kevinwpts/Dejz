@@ -624,7 +624,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     <div className="h-dvh max-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none">
       {/* 1. TOP HEADER (Pinned / Non-scrolling) */}
       <header className="shrink-0 space-y-3 pb-1">
-        <div className="flex items-center justify-between h-9">
+        <div className="flex items-center h-9">
           <button
             type="button"
             onClick={() => {
@@ -644,24 +644,23 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           >
             <CaretLeft size={18} weight="bold" />
           </button>
-
-          <span className="text-xs font-semibold text-[var(--text-muted)] tabular-nums">
-            Steg {step} av 5
-          </span>
-
-          <div className="w-6" />
         </div>
 
-        {/* Minimal 5-step progress bar */}
-        <div className="grid grid-cols-5 gap-1.5">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <div
-              key={s}
-              className={`h-1 rounded-full transition-colors duration-300 ${
-                s <= step ? 'bg-[var(--text-primary)]' : 'bg-[var(--border-subtle)]'
-              }`}
-            />
-          ))}
+        {/* En enda lång sammanhängande progress-bar utan stegtext */}
+        <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+          <div
+            className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${
+              step === 1
+                ? 'w-1/5'
+                : step === 2
+                ? 'w-2/5'
+                : step === 3
+                ? 'w-3/5'
+                : step === 4
+                ? 'w-4/5'
+                : 'w-full'
+            }`}
+          />
         </div>
       </header>
 
@@ -1195,7 +1194,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-4"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="my-auto py-4 space-y-6">
+          <div className="my-auto py-4 space-y-10">
             <div>
               <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                 När får du lön?
@@ -1207,18 +1206,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </p>
             </div>
 
-            {/* Minimalistiskt kort med stor dag och en enda dragrad */}
-            <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-6 space-y-6">
-              <div className="text-center space-y-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-                  Vald utbetalningsdag
-                </span>
-                <div className="font-display font-bold text-4xl sm:text-5xl tracking-tight text-[var(--text-primary)] tabular-nums">
-                  {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
-                </div>
+            {/* Direkt på bakgrunden utan kort/modul och utan rubriken "Vald utbetalningsdag" */}
+            <div className="space-y-6 py-2">
+              <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums text-center">
+                {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
               </div>
 
-              <div className="space-y-2.5 pt-1">
+              <div className="space-y-3">
                 <input
                   type="range"
                   min={1}
@@ -1237,8 +1231,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </div>
             </div>
 
-            {/* Helghantering - på som standard */}
-            <div className="p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-4">
+            {/* Helghantering direkt på bakgrunden */}
+            <div className="pt-2 border-t border-[var(--border-subtle)]/60 flex items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <CalendarCheck size={16} weight="duotone" className="text-[var(--text-primary)] shrink-0" />

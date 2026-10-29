@@ -643,19 +643,26 @@ export function getManualIncomeOverrides(): Record<string, ManualIncomeOverride>
 export function saveManualIncomeOverride(
   name: string,
   override: ManualIncomeOverride,
-  previousOrOriginalName?: string
+  previousOrOriginalName?: string,
+  itemId?: string,
+  skipGenericMerchantKey?: boolean
 ): void {
   if (typeof window === 'undefined' || !name) return;
   try {
     const map = getManualIncomeOverrides();
-    const keys = new Set<string>(extractMerchantKeyVariants(name));
-    if (previousOrOriginalName) {
-      for (const v of extractMerchantKeyVariants(previousOrOriginalName)) {
-        keys.add(v);
-      }
+    if (itemId) {
+      map[`id:${itemId}`] = { ...(map[`id:${itemId}`] || {}), ...override };
     }
-    for (const key of keys) {
-      map[key] = { ...(map[key] || {}), ...override };
+    if (!skipGenericMerchantKey) {
+      const keys = new Set<string>(extractMerchantKeyVariants(name));
+      if (previousOrOriginalName) {
+        for (const v of extractMerchantKeyVariants(previousOrOriginalName)) {
+          keys.add(v);
+        }
+      }
+      for (const key of keys) {
+        map[key] = { ...(map[key] || {}), ...override };
+      }
     }
     localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(map));
     syncAllUserPreferencesToSupabase();

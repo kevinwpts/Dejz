@@ -340,9 +340,9 @@ function sanitizeTransactionItem(
 function extractBankTxTime(
   bt: BankTransactionItem,
   _batchMinuteCounts: Map<string, number>,
-  effectiveDate: string,
-  category: string,
-  merchant: string
+  _effectiveDate: string,
+  _category: string,
+  _merchant: string
 ): string {
   const raw = bt.raw_json || {};
 
@@ -2827,8 +2827,8 @@ export const App: React.FC = () => {
 
     // Save any edited transaction metadata (title, category, paymentMethod, note) so the transaction itself keeps the edits
     saveTransactionMeta(tx.id, {
-      title: tx.title,
-      category: tx.category,
+      customTitle: tx.title,
+      customCategory: tx.category,
       paymentMethod: tx.paymentMethod,
       note: tx.note,
     });
@@ -2905,7 +2905,7 @@ export const App: React.FC = () => {
 
   const handleCategoryMutated = useCallback(
     (oldName: string, newName: string, kind: 'expense' | 'income') => {
-      propagateCategoryChangeInCache(oldName, newName, kind);
+      propagateCategoryChangeInCache(oldName, newName);
       const oldLower = oldName.trim().toLowerCase();
 
       if (kind === 'expense') {
@@ -3411,7 +3411,7 @@ export const App: React.FC = () => {
       incomesRef.current = [];
       fixedExpensesRef.current = [];
       transactionsRef.current = [];
-      aiCleanAttemptedRef.current.clear();
+      aiCleanedKeysRef.current.clear();
 
       setUserId(null);
       setUserEmail(null);
@@ -3437,7 +3437,24 @@ export const App: React.FC = () => {
     const activeUid = userId || userIdRef.current;
     const connsToDisconnect = [...connections];
 
+    // 1. Stoppa omedelbart alla pågående bakgrundssynkningar och Realtime-uppdateringar
+    // så att fasta utgifter aldrig kan återskapas under eller direkt efter nollställningen
+    isDeletingAccountRef.current = true;
+    pendingRefreshRef.current = false;
     cancelPendingPreferenceSync();
+
+    // 2. Töm minnes-refs och React-state direkt så att inga gamla poster ligger kvar i minnet
+    incomesRef.current = [];
+    fixedExpensesRef.current = [];
+    transactionsRef.current = [];
+    aiCleanedKeysRef.current.clear();
+
+    setIncomes([]);
+    setFixedExpenses([]);
+    setTransactions([]);
+    setDismissedTxIds([]);
+    setConnections([]);
+    setBankAccounts([]);
 
     try {
       if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
@@ -3455,7 +3472,7 @@ export const App: React.FC = () => {
           );
         }
 
-        // Anropa dedikerad server-endpoint som raderar all data i samtliga 10 tabeller via Supabase admin
+        // Anropa både dedikerad server-endpoint (Supabase admin) och klient-radering (RLS)
         await Promise.allSettled([
           fetch('/api/auth/reset-account', {
             method: 'POST',
@@ -3478,7 +3495,7 @@ export const App: React.FC = () => {
       incomesRef.current = [];
       fixedExpensesRef.current = [];
       transactionsRef.current = [];
-      aiCleanAttemptedRef.current.clear();
+      aiCleanedKeysRef.current.clear();
 
       setIncomes([]);
       setFixedExpenses([]);
@@ -3511,6 +3528,9 @@ export const App: React.FC = () => {
       setActiveTab('home');
       setCallbackStatusMsg('Kontot har nollställts och du kan börja om på nytt.');
       setTimeout(() => setCallbackStatusMsg(null), 4000);
+      setTimeout(() => {
+        isDeletingAccountRef.current = false;
+      }, 1500);
     }
   };
 
