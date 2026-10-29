@@ -165,7 +165,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [activeConnection, setActiveConnection] = useState<BankConnection | null>(null);
   const [savingAccounts, setSavingAccounts] = useState(false);
 
-  // Föreslagna fasta utgifter för steg 4
+  // Föreslagna fasta utgifter för steg 4 (hämtas från riktiga banktransaktioner)
   const [suggestedFixedExpenses, setSuggestedFixedExpenses] = useState<
     {
       id: string;
@@ -173,55 +173,83 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       amount: number;
       dueDay: number;
       category: string;
+      paymentMethod?: string;
+      evidenceSummary?: string;
       checked: boolean;
       logo?: string;
       isFromBank?: boolean;
     }[]
-  >([
-    { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Räkningar', checked: true },
-    { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Räkningar', checked: true },
-    { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Räkningar', checked: true },
-    { id: '4', name: 'Netflix', amount: 149, dueDay: 27, category: 'Nöje', checked: true },
-    { id: '5', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Räkningar', checked: true },
-  ]);
+  >([]);
 
   const [analyzingBank, setAnalyzingBank] = useState(false);
   const [hasAnalyzedBank, setHasAnalyzedBank] = useState(false);
   const [isBankDataDetected, setIsBankDataDetected] = useState(false);
 
-  // Analysera RIKTIGA banktransaktioner från Enable Banking när steg 4 laddas
+  // Analysera RIKTIGA banktransaktioner från Enable Banking så fort bank är ansluten eller steg 4 visas
   useEffect(() => {
-    if (step !== 4 || hasAnalyzedBank) return;
+    if (step !== 4 && connections.length === 0) return;
+    if (hasAnalyzedBank && isBankDataDetected) return;
+    if (step !== 4 && hasAnalyzedBank) return;
 
     let isMounted = true;
     const runBankAnalysis = async () => {
       setAnalyzingBank(true);
       try {
-        const txRes = await bankService.listTransactions({ pageSize: 300 });
-        const bankTxs = txRes?.transactions || [];
+        let bankTxs = await bankService.listAllTransactionsForReconciliation(5000).catch(() => []);
+        if (!bankTxs || bankTxs.length === 0) {
+          const txRes = await bankService.listTransactions({ pageSize: 500 });
+          bankTxs = txRes?.transactions || [];
+        }
+
+        let accountsForAnalysis = fetchedAccounts.length > 0 ? fetchedAccounts : _bankAccounts;
+        if (!accountsForAnalysis || accountsForAnalysis.length === 0) {
+          accountsForAnalysis = await bankService.getAccounts().catch(() => []);
+        }
 
         if (bankTxs.length > 0) {
           const analysis = analyzeBankTransactionsForOnboarding(
             bankTxs,
             payday,
             weekendHandling === 'before',
-            fetchedAccounts
+            accountsForAnalysis
           );
 
-          if (isMounted && analysis.detectedFixedExpenses.length > 0) {
+          if (isMounted) {
             const realDetected = analysis.detectedFixedExpenses.map((item, idx) => ({
               id: `bank-det-${idx}`,
               name: item.name,
               amount: Math.round(item.amount),
-              dueDay: item.dueDay || 27,
+              dueDay: item.deductionDay || 27,
               category: item.category || 'Räkningar',
+              paymentMethod: item.paymentMethod || 'Autogiro',
+              evidenceSummary: item.evidenceSummary,
               checked: true,
-              logo: (item as any).logo,
+              logo: item.logo,
               isFromBank: true,
             }));
             setSuggestedFixedExpenses(realDetected);
             setIsBankDataDetected(true);
+
+            // Om vi även hittade återkommande inkomster (t.ex. Lön eller A-kassa) och inga finns inlagda ännu
+            if (analysis.detectedIncomes.length > 0 && incomes.length === 0) {
+              analysis.detectedIncomes.forEach((inc) => {
+                onAddIncome({
+                  name: inc.name,
+                  amount: Math.round(inc.amount),
+                  payday: inc.deductionDay || payday,
+                  category: inc.category || 'Lön',
+                });
+              });
+            }
           }
+        } else if (isMounted && connections.length === 0 && suggestedFixedExpenses.length === 0) {
+          // Endast om användaren hoppade över bankkoppling helt visas vanliga förslag
+          setSuggestedFixedExpenses([
+            { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Boende', checked: false },
+            { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Boende', checked: false },
+            { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Försäkringar', checked: false },
+            { id: '4', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Abonnemang', checked: false },
+          ]);
         }
       } catch (err) {
         console.warn('Could not analyze bank transactions:', err);
@@ -237,7 +265,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [step, hasAnalyzedBank, payday, weekendHandling, fetchedAccounts]);
+  }, [step, connections.length, hasAnalyzedBank, isBankDataDetected, payday, weekendHandling, fetchedAccounts, _bankAccounts]);
 
   const handleSaveSuggestedFixed = () => {
     suggestedFixedExpenses.forEach((item) => {
@@ -249,7 +277,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             amount: item.amount,
             dueDay: item.dueDay,
             category: item.category,
-            paymentMethod: 'Autogiro',
+            paymentMethod: item.paymentMethod || 'Autogiro',
             logo: item.logo,
           });
         }
@@ -526,6 +554,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           category: sheetEditor.category || 'Räkningar',
           paymentMethod: sheetEditor.paymentMethod || 'Autogiro',
         });
+        if (step === 4) {
+          setSuggestedFixedExpenses((prev) => [
+            ...prev,
+            {
+              id: `custom-${Date.now()}`,
+              name: cleanTitle,
+              amount: cleanAmt,
+              dueDay: cleanDay,
+              category: sheetEditor.category || 'Räkningar',
+              paymentMethod: sheetEditor.paymentMethod || 'Autogiro',
+              checked: true,
+            },
+          ]);
+        }
       } else if (sheetEditor.id && onUpdateFixed) {
         const existing = fixedExpenses.find((f) => f.id === sheetEditor.id);
         if (existing) {
@@ -1188,8 +1230,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
                         {item.name}
                       </span>
-                      <span className="text-[11px] text-[var(--text-muted)] block">
-                        Förfaller den {item.dueDay}:e · {item.category}
+                      <span className="text-[11px] text-[var(--text-muted)] block truncate">
+                        Den {item.dueDay}:e · {item.paymentMethod || item.category}
+                        {item.evidenceSummary ? ` · ${item.evidenceSummary.split(' · ')[0]}` : ''}
                       </span>
                     </div>
                     <span className="text-xs font-semibold tabular-nums text-[var(--text-primary)] shrink-0">

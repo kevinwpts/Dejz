@@ -661,6 +661,13 @@ export function isInternalTransferOrMicroSavings(
   const creditorIban = (rawJson?.creditor_account?.iban || '').replace(/\s+/g, '').toUpperCase();
   const debtorIban = (rawJson?.debtor_account?.iban || '').replace(/\s+/g, '').toUpperCase();
 
+  // På utgående betalningar (DBIT / < 0) är debtor_account användarens eget konto.
+  // På inkommande betalningar (CRDT / > 0) är creditor_account användarens eget konto.
+  // Vi får ENDAST jämföra motpartens konto (creditor vid utflöde, debtor vid inflöde) mot userAccounts!
+  const txAmt = getNormalizedBankTxAmount(tx);
+  const counterpartyBban = txAmt < 0 ? creditorBban : txAmt > 0 ? debtorBban : '';
+  const counterpartyIban = txAmt < 0 ? creditorIban : txAmt > 0 ? debtorIban : '';
+
   for (const acc of userAccounts) {
     const bbanDigits = (acc.bban || '').replace(/\D+/g, '');
     if (bbanDigits.length >= 6) {
@@ -673,8 +680,7 @@ export function isInternalTransferOrMicroSavings(
         variants.some(
           (v) =>
             (combinedDigits.length >= 6 && combinedDigits.includes(v)) ||
-            (creditorBban && (creditorBban.includes(v) || v.includes(creditorBban))) ||
-            (debtorBban && (debtorBban.includes(v) || v.includes(debtorBban)))
+            (counterpartyBban && (counterpartyBban.includes(v) || v.includes(counterpartyBban)))
         )
       ) {
         return true;
@@ -684,19 +690,22 @@ export function isInternalTransferOrMicroSavings(
     const aIban = (acc.iban || '').replace(/\s+/g, '').toUpperCase();
     if (
       aIban.length >= 10 &&
-      (creditorIban === aIban ||
-        debtorIban === aIban ||
+      (counterpartyIban === aIban ||
         combined.toUpperCase().replace(/\s+/g, '').includes(aIban))
     ) {
       return true;
     }
 
-    for (const label of [acc.custom_name, acc.product, acc.name]) {
+    for (const label of [acc.custom_name, acc.product]) {
       const cleanLabel = (label || '').trim().toLowerCase();
       if (
-        cleanLabel.length >= 4 &&
+        cleanLabel.length >= 6 &&
         cleanLabel !== 'konto' &&
         cleanLabel !== 'bank' &&
+        cleanLabel !== 'privat' &&
+        cleanLabel !== 'lönekonto' &&
+        cleanLabel !== 'lonekonto' &&
+        !isLikelyPersonFullName(cleanLabel) &&
         combined.includes(cleanLabel)
       ) {
         return true;
@@ -765,6 +774,8 @@ export function findRawBankInternalTransferIds(
       text.includes('barnbidrag') ||
       text.includes('pension') ||
       text.includes('a-kassa') ||
+      text.includes('a kassa') ||
+      text.includes('akassa') ||
       text.includes('skatteverket') ||
       text.includes('återköp') ||
       text.includes('retur') ||
@@ -840,6 +851,8 @@ interface KeywordRule {
   fallbackName: string;
   category: string;
   paymentMethod: string;
+  splitByExactAmount?: boolean;
+  requireMultipleMonthsForCard?: boolean;
 }
 
 const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
@@ -905,6 +918,7 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   { keywords: ['tibber'], presetId: 'tibber-el', fallbackName: 'Tibber El', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['vattenfall'], presetId: 'vattenfall-el', fallbackName: 'Vattenfall', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['fortum'], presetId: 'fortum-el', fallbackName: 'Fortum', category: 'Boende', paymentMethod: 'Autogiro' },
+  { keywords: ['öresundskraft', 'oresundskraft', 'öresundkraft', 'oresundkraft'], fallbackName: 'Öresundskraft', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['ellevio', 'e.on', 'eon energi', 'göteborg energi', 'goteborg energi', 'skånska energi', 'kraftringen', 'jämtkraft', 'mälarenergi', 'tekniska verken', 'greenely', 'bixia', 'godel', 'hemab'], presetId: 'elavtal', fallbackName: 'Elräkning & Nät', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['verisure'], presetId: 'larm-verisure', fallbackName: 'Verisure Larm', category: 'Boende', paymentMethod: 'Autogiro' },
   { keywords: ['sector alarm'], presetId: 'larm-sector-alarm', fallbackName: 'Sector Alarm', category: 'Boende', paymentMethod: 'Autogiro' },
@@ -936,7 +950,7 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   // Träning & Hälsa
   { keywords: ['sats'], presetId: 'sats-gym', fallbackName: 'SATS', category: 'Hälsa', paymentMethod: 'Autogiro' },
   { keywords: ['nordic wellness'], presetId: 'nordic-wellness', fallbackName: 'Nordic Wellness', category: 'Hälsa', paymentMethod: 'Autogiro' },
-  { keywords: ['fitness24seven', 'fitness 24 seven'], presetId: 'fitness24seven', fallbackName: 'Fitness24Seven', category: 'Hälsa', paymentMethod: 'Autogiro' },
+  { keywords: ['fitness24seven', 'fitness 24 seven', 'fitness 24se', 'fitness24se'], presetId: 'fitness24seven', fallbackName: 'Fitness24Seven', category: 'Hälsa', paymentMethod: 'Autogiro' },
   { keywords: ['friskis'], presetId: 'friskis-svettis', fallbackName: 'Friskis & Svettis', category: 'Hälsa', paymentMethod: 'Autogiro' },
   { keywords: ['actic'], presetId: 'actic-gym', fallbackName: 'Actic', category: 'Hälsa', paymentMethod: 'Autogiro' },
   { keywords: ['stc training', 'stc gym'], presetId: 'stc-training', fallbackName: 'STC', category: 'Hälsa', paymentMethod: 'Autogiro' },
@@ -951,26 +965,28 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   { keywords: ['transportstyrelsen', 'trängselskatt', 'trangselskatt', 'epass24'], presetId: 'trangselskatt-infrastruktur', fallbackName: 'Trängselskatt / Fordon', category: 'Transport', paymentMethod: 'Autogiro' },
   { keywords: ['volvofinans', 'ziklo bank', 'vw finans', 'volkswagen finans', 'santander consumer', 'dnb finans', 'toyota financial'], presetId: 'bil-leasing', fallbackName: 'Billeasing / Billån', category: 'Transport', paymentMethod: 'Autogiro' },
 
-  // Fack, A-kassa & CSN
+  // Fack, A-kassa, Bankavgift & CSN
   { keywords: ['csn', 'centrala studiestödsnämnden'], presetId: 'csn-aterbetalning', fallbackName: 'CSN Lån', category: 'Räkningar', paymentMethod: 'Autogiro' },
-  { keywords: ['unionen'], presetId: 'akassa-unionen', fallbackName: 'Unionen A-kassa/Fack', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['union.akassa', 'unionens a-kassa', 'unionen a-kassa', 'unionen akassa'], fallbackName: 'Unionens A-kassa', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['unionen'], fallbackName: 'Unionen', category: 'Räkningar', paymentMethod: 'Autogiro' },
   { keywords: ['sveriges ingenjörer', 'akademikernas a-kassa', 'akademikernas erkända'], presetId: 'akassa-sveriges-ingenjorer', fallbackName: 'A-kassa / Fackförbund', category: 'Räkningar', paymentMethod: 'Autogiro' },
   { keywords: ['kommunal'], presetId: 'akassa-kommunal', fallbackName: 'Kommunal', category: 'Räkningar', paymentMethod: 'Autogiro' },
   { keywords: ['vision'], presetId: 'akassa-vision', fallbackName: 'Vision', category: 'Räkningar', paymentMethod: 'Autogiro' },
   { keywords: ['alfa-kassan', 'alfakassan'], presetId: 'akassa-alfakassan', fallbackName: 'Alfa-kassan', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['enkla vardag', 'vardagspaket'], fallbackName: 'SEB Enkla vardagen', category: 'Räkningar', paymentMethod: 'Autogiro' },
 
   // Tech, Moln, AI & Tidningar
-  { keywords: ['apple.com/bill', 'itunes.com/bill'], presetId: 'icloud-storage', fallbackName: 'Apple / iCloud', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['apple.com/bill', 'apple com/bi', 'apple.com/bi', 'itunes.com/bill'], fallbackName: 'Apple / iCloud', category: 'Abonnemang', paymentMethod: 'Kort', splitByExactAmount: true, requireMultipleMonthsForCard: true },
   { keywords: ['openai', 'chatgpt'], presetId: 'chatgpt-plus', fallbackName: 'ChatGPT Plus', category: 'Abonnemang', paymentMethod: 'Kort' },
-  { keywords: ['google one', 'google*storage'], presetId: 'google-one-100gb', fallbackName: 'Google One', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['google one', 'google*storage'], presetId: 'google-one-100gb', fallbackName: 'Google One', category: 'Abonnemang', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
   { keywords: ['microsoft*365', 'microsoft*office', 'msbill.info'], presetId: 'microsoft-365', fallbackName: 'Microsoft 365', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['anthropic', 'claude.ai'], presetId: 'claude-pro', fallbackName: 'Claude Pro', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['adobe'], presetId: 'adobe-photography', fallbackName: 'Adobe', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['1password'], presetId: '1password', fallbackName: '1Password', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['nordvpn'], presetId: 'nordvpn', fallbackName: 'NordVPN', category: 'Abonnemang', paymentMethod: 'Kort' },
-  { keywords: ['playstation', 'sony interactive'], presetId: 'playstation-plus', fallbackName: 'PlayStation', category: 'Nöjen', paymentMethod: 'Kort' },
-  { keywords: ['xbox', 'microsoft*xbox'], presetId: 'xbox-game-pass', fallbackName: 'Xbox Game Pass', category: 'Nöjen', paymentMethod: 'Kort' },
-  { keywords: ['nintendo'], presetId: 'nintendo-switch-online', fallbackName: 'Nintendo', category: 'Nöjen', paymentMethod: 'Kort' },
+  { keywords: ['playstation', 'sony interactive'], presetId: 'playstation-plus', fallbackName: 'PlayStation', category: 'Nöjen', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
+  { keywords: ['xbox', 'microsoft*xbox'], presetId: 'xbox-game-pass', fallbackName: 'Xbox Game Pass', category: 'Nöjen', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
+  { keywords: ['nintendo'], presetId: 'nintendo-switch-online', fallbackName: 'Nintendo', category: 'Nöjen', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
   { keywords: ['discord'], presetId: 'discord-nitro', fallbackName: 'Discord Nitro', category: 'Nöjen', paymentMethod: 'Kort' },
   { keywords: ['aftonbladet'], presetId: 'aftonbladet-plus', fallbackName: 'Aftonbladet Plus', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['expressen'], presetId: 'expressen-premium', fallbackName: 'Expressen Premium', category: 'Abonnemang', paymentMethod: 'Kort' },
@@ -1022,6 +1038,10 @@ const VARIABLE_SPENDING_EXCLUSIONS = [
   'preem',
   'st1 ',
   'ingo ',
+  'din-x',
+  'din x',
+  'tanka ',
+  'qstar',
   'clas ohlson',
   'kjell & co',
   'biltema',
@@ -1036,6 +1056,10 @@ const VARIABLE_SPENDING_EXCLUSIONS = [
   'elgiganten',
   'netonnet',
   'webhallen',
+  'felparkeringsavgift',
+  'kontrollavgift',
+  'parkeringsbot',
+  'svea inkasso',
 ];
 
 interface EverydayMerchantRule {
@@ -1765,6 +1789,11 @@ function buildEvidenceSummary(
 // 4. CORE HISTORICAL ANALYZER (USED IN BOTH ONBOARDING & SETTINGS SYNC)
 // ---------------------------------------------------------------------------
 
+function getBankTxCodeDescription(tx: BankTransactionItem): string {
+  const rawJson = tx.raw_json && typeof tx.raw_json === 'object' ? tx.raw_json : null;
+  return String(rawJson?.bank_transaction_code?.description || '').trim().toLowerCase();
+}
+
 function runCoreBankDetection(
   transactions: BankTransactionItem[],
   currentPayday = 25,
@@ -1776,8 +1805,24 @@ function runCoreBankDetection(
     (t) => t.booking_status !== 'PDNG' && t.booking_status !== 'HOLD'
   );
 
+  // Deduplicate identical transactions on the same date (e.g. if the same bank account was synced across multiple connections)
+  const seenTxSigs = new Set<string>();
+  const deduplicated: BankTransactionItem[] = [];
+  for (const t of bookedOrDefault) {
+    const date = t.booking_date || t.transaction_date || t.value_date || '';
+    const amtCents = Math.round(getNormalizedBankTxAmount(t) * 100);
+    const descKey = String(t.description || t.counterparty_name || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ' ');
+    const sig = `${date}|${amtCents}|${descKey}`;
+    if (seenTxSigs.has(sig)) continue;
+    seenTxSigs.add(sig);
+    deduplicated.push(t);
+  }
+
   // Sort newest first
-  const sorted = [...bookedOrDefault].sort((a, b) => {
+  const sorted = [...deduplicated].sort((a, b) => {
     const dA = a.booking_date || a.transaction_date || a.value_date || '';
     const dB = b.booking_date || b.transaction_date || b.value_date || '';
     return dB.localeCompare(dA);
@@ -1805,6 +1850,7 @@ function runCoreBankDetection(
     dates: string[];
     amounts: number[];
     hasExplicitAutogiroOrInvoice: boolean;
+    requireMultipleMonthsForCard?: boolean;
   };
 
   const candidateFixedMap = new Map<string, RawFixedGroup>();
@@ -1815,6 +1861,7 @@ function runCoreBankDetection(
     if (absAmount <= 0 || absAmount > 60000) continue;
 
     const combinedText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    const bankTxCode = getBankTxCodeDescription(tx);
 
     // Skip if it's an everyday grocery/restaurant merchant
     if (VARIABLE_SPENDING_EXCLUSIONS.some((ex) => combinedText.includes(ex))) {
@@ -1838,32 +1885,48 @@ function runCoreBankDetection(
       const cleanedRawName = cleanDisplayMerchantName(
         tx.counterparty_name || tx.description || ''
       );
-      const displayName =
+      const baseDisplayName =
         isGenericHousingPreset && cleanedRawName.length >= 3
           ? `Hyra (${cleanedRawName})`
           : preset?.name || matchedRule.fallbackName;
 
-      const key = isGenericHousingPreset
+      const displayName = matchedRule.splitByExactAmount
+        ? `${baseDisplayName} (${absAmount} kr)`
+        : baseDisplayName;
+
+      const baseKey = isGenericHousingPreset
         ? `housing_${normalizeMerchantKey(cleanedRawName)}`
         : matchedRule.presetId || matchedRule.fallbackName.toLowerCase();
+
+      const key = matchedRule.splitByExactAmount ? `${baseKey}_${absAmount}` : baseKey;
 
       const txDate = tx.booking_date || tx.transaction_date || tx.value_date || undefined;
       const deductionDay = getDayOfMonthFromIso(txDate, preset?.deductionDay || 27);
       const category = preset?.category || matchedRule.category;
-      const paymentMethod = preset?.paymentMethod || matchedRule.paymentMethod;
+      const isDirectDebit = bankTxCode === 'direct debit' || combinedText.includes('autogiro');
+      const isGiroPayment =
+        bankTxCode === 'payment' ||
+        combinedText.includes('bankgiro') ||
+        combinedText.includes('plusgiro');
+
+      const paymentMethod = isDirectDebit
+        ? 'Autogiro'
+        : isGiroPayment
+        ? 'Bankgiro'
+        : preset?.paymentMethod || matchedRule.paymentMethod;
 
       const hasExplicitAutogiroOrInvoice =
-        combinedText.includes('autogiro') ||
-        combinedText.includes('bankgiro') ||
-        combinedText.includes('plusgiro') ||
-        combinedText.includes('hyra') ||
-        combinedText.includes('hyresavi') ||
-        combinedText.includes('bolån') ||
-        combinedText.includes('csn') ||
-        paymentMethod === 'Autogiro' ||
-        paymentMethod === 'Bankgiro' ||
-        category === 'Boende' ||
-        category === 'Försäkringar';
+        !matchedRule.requireMultipleMonthsForCard &&
+        (isDirectDebit ||
+          isGiroPayment ||
+          combinedText.includes('hyra') ||
+          combinedText.includes('hyresavi') ||
+          combinedText.includes('bolån') ||
+          combinedText.includes('csn') ||
+          paymentMethod === 'Autogiro' ||
+          paymentMethod === 'Bankgiro' ||
+          category === 'Boende' ||
+          category === 'Försäkringar');
 
       const existing = candidateFixedMap.get(key);
       if (!existing) {
@@ -1874,13 +1937,14 @@ function runCoreBankDetection(
           frequency: Frequency.MONTHLY,
           deductionDay,
           paymentMethod,
-          logo: getLogoUrl(displayName, category),
+          logo: getLogoUrl(baseDisplayName, category),
           detectedOccurrences: 1,
           lastDate: txDate,
           matchedTxIds: new Set([tx.id]),
           dates: txDate ? [txDate] : [],
           amounts: [absAmount],
           hasExplicitAutogiroOrInvoice,
+          requireMultipleMonthsForCard: matchedRule.requireMultipleMonthsForCard,
         });
       } else {
         existing.detectedOccurrences += 1;
@@ -1895,16 +1959,20 @@ function runCoreBankDetection(
   }
 
   // Requirement 4: "En enstaka transaktion är inte bevis för ett abonnemang."
-  // Filter candidateFixedMap: require >= 2 occurrences across distinct dates/months OR explicit autogiro/bankgiro/housing/insurance agreement
+  // Filter candidateFixedMap: require >= 2 occurrences across distinct months/dates OR explicit autogiro/bankgiro/housing/insurance agreement
   const detectedFixedMap = new Map<string, DetectedFixedExpenseWithEvidence & { matchedTxIds: Set<string> }>();
   const fixedTransactionIds = new Set<string>();
 
   for (const [key, cand] of candidateFixedMap.entries()) {
     const distinctDates = Array.from(new Set(cand.dates));
-    const isConfirmedRecurring =
-      cand.detectedOccurrences >= 2 ||
-      distinctDates.length >= 2 ||
-      cand.hasExplicitAutogiroOrInvoice;
+    const distinctMonths = new Set(cand.dates.map((d) => getYearMonthKey(d)));
+    distinctMonths.delete('unknown');
+
+    const isConfirmedRecurring = cand.requireMultipleMonthsForCard
+      ? distinctMonths.size >= 2
+      : distinctMonths.size >= 2 ||
+        distinctDates.length >= 2 ||
+        cand.hasExplicitAutogiroOrInvoice;
 
     if (!isConfirmedRecurring) {
       // Single card transaction (e.g. single Apple 12 kr or single game purchase) is NOT proof of a subscription!
@@ -1921,6 +1989,8 @@ function runCoreBankDetection(
     const candNameLower = String(cand.name || '').toLowerCase();
     const isUtilityVariable =
       candNameLower.includes('el') ||
+      candNameLower.includes('öresund') ||
+      candNameLower.includes('oresund') ||
       candNameLower.includes('tibber') ||
       candNameLower.includes('vattenfall') ||
       candNameLower.includes('fortum') ||
@@ -1992,8 +2062,10 @@ function runCoreBankDetection(
     const latestTx = groupTxs[0];
     const latestAmount = Math.round(Math.abs(getNormalizedBankTxAmount(latestTx)));
     const combinedText = `${latestTx.description || ''} ${latestTx.counterparty_name || ''}`.toLowerCase();
+    const bankTxCode = getBankTxCodeDescription(latestTx);
 
     const hasExplicitAutogiroKeyword =
+      bankTxCode === 'direct debit' ||
       combinedText.includes('autogiro') ||
       combinedText.includes('bankgiro') ||
       combinedText.includes('plusgiro') ||
@@ -2138,7 +2210,12 @@ function runCoreBankDetection(
   for (const tx of validIncomeInflows) {
     const amt = Math.round(getNormalizedBankTxAmount(tx));
     const rawText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    const bankTxCode = getBankTxCodeDescription(tx);
 
+    const isBankCodeIncome =
+      bankTxCode.includes('salary') ||
+      bankTxCode.includes('pension') ||
+      bankTxCode.includes('social benefit');
     const isExplicitSalary =
       rawText.includes('lön') ||
       rawText.includes('lon ') ||
@@ -2151,6 +2228,7 @@ function runCoreBankDetection(
     const isPension = rawText.includes('pension');
     const isAkassa =
       rawText.includes('a-kassa') ||
+      rawText.includes('a kassa') ||
       rawText.includes('akassa') ||
       rawText.includes('arbetslöshetsersättning') ||
       rawText.includes('arbetsloshetsersattning') ||
@@ -2164,6 +2242,7 @@ function runCoreBankDetection(
       !isBarnbidrag &&
       !isPension &&
       !isAkassa &&
+      !isBankCodeIncome &&
       amt < 12000
     ) {
       continue;
@@ -2172,7 +2251,7 @@ function runCoreBankDetection(
     let groupKey = 'salary';
     let incomeName = 'Lön';
     let incomeCategory = 'Lön';
-    let isPrimarySalary = isExplicitSalary;
+    let isPrimarySalary = isExplicitSalary || isBankCodeIncome;
 
     if (isBarnbidrag) {
       groupKey = 'barnbidrag';
@@ -2189,16 +2268,16 @@ function runCoreBankDetection(
       incomeName = 'Försäkringskassan';
       incomeCategory = 'Bidrag';
       isPrimarySalary = false;
-    } else if (isPension) {
-      groupKey = 'pension';
-      incomeName = 'Pension';
-      incomeCategory = 'Pension';
-      isPrimarySalary = false;
     } else if (isAkassa) {
       groupKey = 'akassa';
       const cleanAcc = tx.counterparty_name ? cleanDisplayMerchantName(tx.counterparty_name) : 'A-kassa';
       incomeName = cleanAcc.toLowerCase().includes('kassa') || cleanAcc.toLowerCase().includes('unionen') ? cleanAcc : 'A-kassa';
       incomeCategory = 'Ersättning';
+      isPrimarySalary = true;
+    } else if (isPension) {
+      groupKey = 'pension';
+      incomeName = 'Pension';
+      incomeCategory = 'Pension';
       isPrimarySalary = false;
     } else if (tx.counterparty_name) {
       const cleanEmp = cleanDisplayMerchantName(tx.counterparty_name);
@@ -2229,6 +2308,7 @@ function runCoreBankDetection(
     // If an inflow has no explicit salary/benefit keyword (only matched because amt >= 12000),
     // require either >= 2 occurrences OR explicit 'utbetalning'/'lön' so a one-off large transfer isn't assumed to be salary
     const firstText = `${grp.txs[0].description || ''} ${grp.txs[0].counterparty_name || ''}`.toLowerCase();
+    const firstBankCode = getBankTxCodeDescription(grp.txs[0]);
     const hasExplicitIncomeKeyword =
       firstText.includes('lön') ||
       firstText.includes('lon ') ||
@@ -2240,8 +2320,12 @@ function runCoreBankDetection(
       firstText.includes('barnbidrag') ||
       firstText.includes('pension') ||
       firstText.includes('a-kassa') ||
+      firstText.includes('a kassa') ||
       firstText.includes('akassa') ||
-      firstText.includes('arbetslös');
+      firstText.includes('arbetslös') ||
+      firstBankCode.includes('salary') ||
+      firstBankCode.includes('pension') ||
+      firstBankCode.includes('social benefit');
 
     if (!hasExplicitIncomeKeyword && grp.txs.length < 2) {
       continue;
