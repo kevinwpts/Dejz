@@ -2111,9 +2111,15 @@ export const App: React.FC = () => {
           // ignore
         }
 
-        if (res.originContext === 'onboarding') {
+        const isOnboardingCallback =
+          res.originContext === 'onboarding' ||
+          localStorage.getItem('dejz_onboarding_in_progress') === 'true';
+
+        if (isOnboardingCallback) {
           try {
             localStorage.setItem('dejz_onboarding_in_progress', 'true');
+            localStorage.setItem('dejz_onboarding_step', '2');
+            localStorage.removeItem('dejz_onboarding_accounts_confirmed');
           } catch {
             // ignore
           }
@@ -2136,8 +2142,10 @@ export const App: React.FC = () => {
           });
         }
 
+        // Under onboardingen får användaren FÖRST välja vilka konton som ska synkas i steg 2 ("Välj konton")!
+        // Endast om banken kopplades inifrån Inställningar (utanför onboardingen) synkas alla direkt.
         const allIds = (res.accounts || []).map((a) => a.id);
-        if (res.connection && allIds.length > 0) {
+        if (!isOnboardingCallback && res.connection && allIds.length > 0) {
           await bankService
             .selectAccounts({
               connectionId: res.connection.id,
@@ -2148,15 +2156,12 @@ export const App: React.FC = () => {
           await bankService
             .sync({ connectionId: res.connection.id, fullSync: true })
             .catch(() => {});
+          await refreshBankStatus();
         }
 
-        await refreshBankStatus();
         pending.done = true;
         setCallbackStatusMsg(null);
-        if (
-          res.originContext !== 'onboarding' &&
-          localStorage.getItem('dejz_onboarding_in_progress') !== 'true'
-        ) {
+        if (!isOnboardingCallback) {
           setIsBankModalOpen(true);
         }
       } catch (err: any) {
@@ -2223,7 +2228,11 @@ export const App: React.FC = () => {
         }
         const status = await loadSupabaseUserData(uid);
         const activeConns = status.connections.filter((c) => c.status === 'active');
-        if (activeConns.length > 0) {
+        const isWaitingForOnboardingAccountChoice =
+          localStorage.getItem('dejz_onboarding_in_progress') === 'true' &&
+          localStorage.getItem('dejz_onboarding_accounts_confirmed') !== 'true';
+
+        if (activeConns.length > 0 && !isWaitingForOnboardingAccountChoice) {
           // Kontrollera om banken redan synkades alldeles nyss (inom senaste 3 minuterna)
           // för att undvika dubbel hämtning direkt vid appstart
           const latestSyncMs = activeConns.reduce((maxMs, conn) => {

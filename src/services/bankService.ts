@@ -495,9 +495,21 @@ export const bankService = {
       connectionId: params.connectionId,
       selectedAccountIds: params.selectedAccountIds,
     });
+    const unselectedIds: string[] = [];
     for (const acc of res.accounts || []) {
       if (!selectedSet.has(acc.id)) {
         saveAccountOverlay(acc.id, { is_selected: false, include_in_budget: false });
+        unselectedIds.push(acc.id);
+      }
+    }
+    if (unselectedIds.length > 0) {
+      try {
+        await supabase
+          .from('bank_transactions')
+          .delete()
+          .in('bank_account_id', unselectedIds);
+      } catch {
+        // ignore
       }
     }
     return {
@@ -671,6 +683,26 @@ export const bankService = {
     accounts: BankAccount[];
     syncErrors: string[];
   }> {
+    if (params?.fullSync) {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const uid = sessionData?.session?.user?.id;
+        if (uid) {
+          let resetQuery = supabase
+            .from('bank_accounts')
+            .update({ last_synced_at: null })
+            .eq('user_id', uid);
+          if (params.bankAccountId) {
+            resetQuery = resetQuery.eq('id', params.bankAccountId);
+          } else if (params.connectionId) {
+            resetQuery = resetQuery.eq('connection_id', params.connectionId);
+          }
+          await resetQuery;
+        }
+      } catch {
+        // ignore if RLS blocks direct update
+      }
+    }
     const res = await invokeEnableBanking<{
       connections: BankConnection[];
       accounts: BankAccount[];

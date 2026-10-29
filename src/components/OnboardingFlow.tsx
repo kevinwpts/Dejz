@@ -206,29 +206,24 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [isBankDataDetected, setIsBankDataDetected] = useState(false);
   const [verifyingBankReturn, setVerifyingBankReturn] = useState(false);
 
-  // Analysera RIKTIGA banktransaktioner från Enable Banking + Gemini AI så fort bank är ansluten eller steg 3 / 4 visas
+  // Analysera RIKTIGA banktransaktioner från Enable Banking + Gemini AI först när användaren når steg 3 eller 4 (efter att konton valts och synkats i steg 2)
   useEffect(() => {
-    if (step !== 3 && step !== 4 && connections.length === 0) return;
+    if (step !== 3 && step !== 4) return;
     if (hasAnalyzedBank && isBankDataDetected) return;
-    if (step !== 3 && step !== 4 && hasAnalyzedBank) return;
 
     let isMounted = true;
     const runBankAnalysis = async () => {
       setAnalyzingBank(true);
       try {
         let bankTxs = await bankService
-          .listAllTransactionsForReconciliation(5000, true)
+          .listAllTransactionsForReconciliation(5000, false)
           .catch(() => []);
-        if (!bankTxs || bankTxs.length === 0) {
-          const txRes = await bankService.listTransactions({ pageSize: 500 }).catch(() => null);
-          bankTxs = txRes?.transactions || [];
-        }
 
-        // Om en bank precis kopplats på steg 2 men transaktionssynken inte hunnit klart än (eller bara delvis synkats), kör full 95-dagars synk nu
-        if ((!bankTxs || bankTxs.length < 5) && connections.length > 0) {
+        // Om användaren laddade om på steg 3 och transaktionerna inte hunnit hämtas än, kör en full synk av valda konton nu
+        if ((!bankTxs || bankTxs.length === 0) && connections.length > 0) {
           await bankService.sync({ fullSync: true }).catch(() => {});
           bankTxs = await bankService
-            .listAllTransactionsForReconciliation(5000, true)
+            .listAllTransactionsForReconciliation(5000, false)
             .catch(() => []);
         }
 
@@ -656,21 +651,21 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     return idx === 0 ? 'Lönekonto' : 'Bankkonto';
   }, []);
 
-  // Hjälpfunktion för att öppna kontoval eller gå vidare så fort bankkopplingen är klar
+  // Hjälpfunktion för att öppna kontoval så fort bankkopplingen och dess konton är klara
   const applyConnectedBankState = React.useCallback(
     (conns: BankConnection[], accs: BankAccount[]) => {
       if (!conns || conns.length === 0) return false;
-      try {
-        localStorage.removeItem('dejz_onboarding_pending_bank_auth');
-      } catch {
-        // ignore
-      }
-      setVerifyingBankReturn(false);
-      setConnectingBankName(null);
       const newestConn = conns[0];
       const connAccounts = accs.filter((a) => a.connection_id === newestConn.id);
       const accountsToUse = connAccounts.length > 0 ? connAccounts : accs;
       if (accountsToUse.length > 0) {
+        try {
+          localStorage.removeItem('dejz_onboarding_pending_bank_auth');
+        } catch {
+          // ignore
+        }
+        setVerifyingBankReturn(false);
+        setConnectingBankName(null);
         setActiveConnection(newestConn);
         setFetchedAccounts(accountsToUse);
         const selIds = accountsToUse.filter((a) => a.is_selected !== false).map((a) => a.id);
@@ -728,24 +723,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         const status = await bankService.getStatus();
         if (isCancelled) return;
 
-        if (status.connections.length > 0) {
+        if (status.connections.length > 0 && status.accounts.length > 0) {
           if (onBankStateUpdated) {
             onBankStateUpdated(status.connections, status.accounts);
           }
-          const openedSelect = applyConnectedBankState(status.connections, status.accounts);
-          if (!openedSelect && status.connections.length > connections.length) {
-            navigateStep(3, 'forward');
-          }
+          applyConnectedBankState(status.connections, status.accounts);
           return;
+        }
+
+        // Om anslutningen precis skapats men kontona fortfarande hämtas av exchange-code, fortsätt polla!
+        if (status.connections.length > 0 && status.accounts.length === 0) {
+          hasPendingAuth = true;
+          setVerifyingBankReturn(true);
         }
       } catch {
         // ignore
       }
 
-      if (hasPendingAuth && attempt < 5 && !isCancelled) {
+      if (hasPendingAuth && attempt < 10 && !isCancelled) {
         retryTimer = setTimeout(() => {
           checkBankReturn(attempt + 1);
-        }, 1500);
+        }, 1200);
       } else if (!isCancelled) {
         setVerifyingBankReturn(false);
       }
@@ -772,9 +770,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     };
   }, [step, connections.length, onBankStateUpdated, applyConnectedBankState]);
 
-  // Spara valda konton och gå till steg 3 (Vilka fasta utgifter har du?)
+  // Spara valda konton, synka ENDAST de valda kontonas transaktioner (95 dagar) fullt ut och gå sedan till steg 3
   const handleSaveSelectedAccounts = async () => {
-    if (!activeConnection) {
+    const connToSync = activeConnection || connections[0] || null;
+    if (!connToSync) {
       navigateStep(3, 'forward');
       return;
     }
@@ -789,16 +788,32 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       if (selectedAccountIds.length > 0) {
         await bankService
           .selectAccounts({
-            connectionId: activeConnection.id,
+            connectionId: connToSync.id,
             selectedAccountIds,
           })
           .catch(() => {});
       }
-      const status = await bankService.getStatus();
-      if (onBankStateUpdated) {
+      try {
+        localStorage.setItem('dejz_onboarding_accounts_confirmed', 'true');
+      } catch {
+        // ignore
+      }
+      // Synka nu samtliga valda kontons transaktioner (full 95-dagarshistorik) FÖRE vi går vidare till steg 3!
+      await bankService
+        .sync({
+          connectionId: connToSync.id,
+          fullSync: true,
+        })
+        .catch(() => {});
+
+      const status = await bankService.getStatus().catch(() => null);
+      if (status && onBankStateUpdated) {
         onBankStateUpdated(status.connections, status.accounts);
       }
-      // Nollställ analys-flagga så att steg 3 garanterat analyserar de nyvalda kontonas transaktioner
+      // Nollställ analys-flaggor och listor så att steg 3 garanterat analyserar alla nyhämtade transaktioner direkt
+      setSuggestedFixedExpenses([]);
+      setSuggestedIncomes([]);
+      setIsBankDataDetected(false);
       setHasAnalyzedBank(false);
     } finally {
       setSavingAccounts(false);
@@ -1220,10 +1235,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <div className="flex-1 min-h-0 flex flex-col justify-between">
               <div className="shrink-0 pt-6 pb-3">
                 <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Välj konton
+                  Välj konton att synka
                 </h1>
                 <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                  Välj vilka konton du vill använda i Dejz.
+                  Bocka i de konton som ska synkas i Dejz. Vi analyserar fasta utgifter och inkomster från dina valda konton.
                 </p>
               </div>
 
@@ -1304,18 +1319,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               <div className="shrink-0 pt-3">
                 <button
                   type="button"
-                  disabled={savingAccounts}
+                  disabled={savingAccounts || selectedAccountIds.length === 0}
                   onClick={handleSaveSelectedAccounts}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                 >
                   {savingAccounts ? (
                     <>
                       <SpinnerGap size={16} className="animate-spin" />
-                      <span>Sparar konton...</span>
+                      <span>Synkar valda konton...</span>
                     </>
                   ) : (
                     <>
-                      <span>Fortsätt med valda konton</span>
+                      <span>Fortsätt med valda konton ({selectedAccountIds.length})</span>
                       <ArrowRight size={16} weight="bold" />
                     </>
                   )}
@@ -1383,6 +1398,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         </div>
                       </div>
                     ))}
+
+                    {_bankAccounts.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => applyConnectedBankState(connections, _bankAccounts)}
+                        className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                      >
+                        Välj vilka konton som ska synkas
+                      </button>
+                    )}
 
                     <button
                       type="button"
@@ -1455,7 +1480,17 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               <div className="shrink-0 pt-3 space-y-2">
                 <button
                   type="button"
-                  onClick={() => navigateStep(3, 'forward')}
+                  onClick={() => {
+                    if (
+                      hasConnectedBank &&
+                      _bankAccounts.length > 0 &&
+                      localStorage.getItem('dejz_onboarding_accounts_confirmed') !== 'true'
+                    ) {
+                      applyConnectedBankState(connections, _bankAccounts);
+                      return;
+                    }
+                    navigateStep(3, 'forward');
+                  }}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <span>Fortsätt</span>
