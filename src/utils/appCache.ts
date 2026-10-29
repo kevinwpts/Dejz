@@ -1268,22 +1268,27 @@ export function clearAllLocalAppData(preserveTheme = false): void {
   cancelPendingPreferenceSync();
   if (typeof window === 'undefined') return;
   try {
-    const savedTheme = preserveTheme ? localStorage.getItem('dejz_dark_mode') : null;
+    if (!preserveTheme) {
+      // Vid permanent kontoradering: rensa ALLT i localStorage och sessionStorage så att inte ett enda spår finns kvar
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('dejz_logged_out', 'true');
+      return;
+    }
+
+    const savedTheme = localStorage.getItem('dejz_dark_mode');
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
       if (!key) continue;
       if (
         key.startsWith('dejz_') ||
         key.startsWith('user_settings_') ||
-        key.startsWith('demo_') ||
-        (!preserveTheme && key.startsWith('sb-'))
+        key.startsWith('demo_')
       ) {
         localStorage.removeItem(key);
       }
     }
-    if (!preserveTheme) {
-      sessionStorage.clear();
-    } else if (savedTheme) {
+    if (savedTheme) {
       localStorage.setItem('dejz_dark_mode', savedTheme);
     }
   } catch {
@@ -1293,6 +1298,14 @@ export function clearAllLocalAppData(preserveTheme = false): void {
 
 export function syncAllUserPreferencesToSupabase(immediate = false): void {
   if (typeof window === 'undefined') return;
+  try {
+    if (localStorage.getItem('dejz_logged_out') === 'true') {
+      cancelPendingPreferenceSync();
+      return;
+    }
+  } catch {
+    // ignore
+  }
   if (syncTimeout) {
     clearTimeout(syncTimeout);
     syncTimeout = null;
@@ -1300,6 +1313,7 @@ export function syncAllUserPreferencesToSupabase(immediate = false): void {
 
   const performSync = async () => {
     try {
+      if (localStorage.getItem('dejz_logged_out') === 'true') return;
       const { data } = await supabase.auth.getSession();
       const uid = data?.session?.user?.id;
       if (!uid) return;

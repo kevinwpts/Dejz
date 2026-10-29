@@ -239,7 +239,6 @@ export function mergeTxWithReconciliationOverlay(tx: BankTransactionItem): BankT
 }
 
 async function ensureActiveSession(): Promise<string | null> {
-  // If the user explicitly signed out, NEVER automatically recreate or bootstrap a session
   if (typeof window !== 'undefined' && localStorage.getItem('dejz_logged_out') === 'true') {
     return null;
   }
@@ -250,20 +249,9 @@ async function ensureActiveSession(): Promise<string | null> {
       return data.session.access_token;
     }
 
-    // Call server endpoint to acquire valid session tokens for testing/preview ONLY when explicitly needed
-    const res = await fetch('/api/auth/ensure-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json?.session?.access_token) {
-        await supabase.auth.setSession({
-          access_token: json.session.access_token,
-          refresh_token: json.session.refresh_token,
-        });
-        return json.session.access_token;
-      }
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    if (refreshed?.session?.access_token) {
+      return refreshed.session.access_token;
     }
   } catch (err) {
     console.warn('[bankService] Could not ensure session:', err);
@@ -827,8 +815,11 @@ export const bankService = {
   async deleteAccount(): Promise<{
     success: boolean;
   }> {
-    return await invokeEnableBanking({
-      action: 'delete-account',
-    });
+    return await invokeEnableBanking(
+      {
+        action: 'delete-account',
+      },
+      4000
+    );
   },
 };

@@ -536,51 +536,28 @@ ${JSON.stringify(batch)}`;
     return res.json([]);
   });
 
-  // Ensure Authenticated Session (Guarantees user session for BankID and Enable Banking)
+  // Ensure Authenticated Session (Never auto-creates hardcoded accounts)
   app.post('/api/auth/ensure-session', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
     const supabaseAdmin = getSupabaseAdmin();
-    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
-    if (!supabaseAdmin || !url || !anonKey) {
-      return res.status(500).json({ error: 'Supabase admin client not configured' });
+    if (!supabaseAdmin || !token) {
+      return res.json({ success: false, session: null, user: null });
     }
 
     try {
-      const client = createClient(url, anonKey);
-      const email = 'kevinwpts@gmail.com';
-      const password = 'TestPassword123!';
-
-      // Ensure user exists and password is set
-      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = usersData?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-
-      if (!existingUser) {
-        await supabaseAdmin.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-        });
-      } else {
-        await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
-          password,
-          email_confirm: true,
-        });
+      const { data, error } = await supabaseAdmin.auth.getUser(token);
+      if (error || !data?.user) {
+        return res.json({ success: false, session: null, user: null });
       }
-
-      // Sign in to get valid user session tokens
-      const loginRes = await client.auth.signInWithPassword({ email, password });
-      if (loginRes.error || !loginRes.data?.session) {
-        return res.status(500).json({ error: loginRes.error?.message || 'Could not create session' });
-      }
-
       return res.json({
         success: true,
-        session: loginRes.data.session,
-        user: loginRes.data.user,
+        session: null,
+        user: data.user,
       });
-    } catch (err: any) {
-      return res.status(500).json({ error: err.message || 'Failed to ensure session' });
+    } catch {
+      return res.json({ success: false, session: null, user: null });
     }
   });
 
@@ -602,22 +579,69 @@ ${JSON.stringify(batch)}`;
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
 
     try {
+      let targetUid = userId;
       if (token) {
         const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
-        if (!authErr && authData?.user && authData.user.id !== userId) {
-          return res.status(403).json({ error: 'Du har endast behörighet att nollställa ditt eget konto' });
+        if (!authErr && authData?.user) {
+          if (
+            userId &&
+            userId !== 'preview-user' &&
+            userId !== 'demo-user' &&
+            authData.user.id !== userId
+          ) {
+            return res.status(403).json({ error: 'Du har endast behörighet att nollställa ditt eget konto' });
+          }
+          targetUid = authData.user.id;
         }
       }
 
-      console.log(`Starting account reset for user: ${userId}`);
+      console.log(`Starting account reset for user: ${targetUid}`);
 
+      // Clear nullable foreign-key references first so child/parent deletes never conflict
+      try {
+        await supabaseAdmin
+          .from('transactions')
+          .update({
+            refund_of_transaction_id: null,
+            bank_transaction_id: null,
+            bank_account_id: null,
+            linked_fixed_expense_id: null,
+            account_id: null,
+          })
+          .eq('user_id', targetUid);
+      } catch {
+        // ignore if columns differ
+      }
+
+      try {
+        await supabaseAdmin
+          .from('bank_transactions')
+          .update({
+            linked_transfer_bank_tx_id: null,
+            replaced_by_bank_tx_id: null,
+          })
+          .eq('user_id', targetUid);
+      } catch {
+        // ignore
+      }
+
+      try {
+        await supabaseAdmin
+          .from('bank_auth_states')
+          .update({ connection_id: null })
+          .eq('user_id', targetUid);
+      } catch {
+        // ignore
+      }
+
+      // Delete in strict bottom-up dependency order
       const tables = [
-        'bank_transactions',
-        'bank_accounts',
-        'bank_provider_sessions',
-        'bank_connections',
-        'bank_auth_states',
         'transactions',
+        'bank_transactions',
+        'bank_auth_states',
+        'bank_provider_sessions',
+        'bank_accounts',
+        'bank_connections',
         'fixed_expenses',
         'income_sources',
         'savings_goals',
@@ -626,10 +650,13 @@ ${JSON.stringify(batch)}`;
 
       for (const table of tables) {
         try {
-          await supabaseAdmin
+          const { error: delErr } = await supabaseAdmin
             .from(table)
             .delete()
-            .eq('user_id', userId);
+            .eq('user_id', targetUid);
+          if (delErr) {
+            console.warn(`[Reset] Warning deleting from ${table}:`, delErr.message);
+          }
         } catch (tableErr) {
           console.warn(`[Reset] Error deleting from ${table}:`, tableErr);
         }
@@ -648,12 +675,12 @@ ${JSON.stringify(batch)}`;
             my_swish_phone: null,
             swish_contacts: null,
           })
-          .eq('id', userId);
+          .eq('id', targetUid);
       } catch (profErr) {
         console.warn('[Reset] Error updating profile preferences:', profErr);
       }
 
-      console.log(`Successfully reset account data for user: ${userId}`);
+      console.log(`Successfully reset account data for user: ${targetUid}`);
       return res.json({ success: true });
     } catch (error: any) {
       console.error('Reset account error:', error);
@@ -661,13 +688,13 @@ ${JSON.stringify(batch)}`;
     }
   });
 
-  // Delete Account (Full deletion including auth user)
+  // Delete Account (Full permanent deletion of all user traces, storage files, public rows & auth.users)
   app.post('/api/auth/delete-account', async (req, res) => {
-    const { userId } = req.body || {};
+    const { userId, secondaryUserId, email } = req.body || {};
     const supabaseAdmin = getSupabaseAdmin();
 
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
+    if (!userId && !secondaryUserId && !email) {
+      return res.status(400).json({ error: 'Missing user identifier' });
     }
 
     if (!supabaseAdmin) {
@@ -676,25 +703,100 @@ ${JSON.stringify(batch)}`;
 
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
     try {
+      const targetUserIds = new Set<string>();
+      const targetEmails = new Set<string>();
+
+      if (typeof userId === 'string' && uuidRegex.test(userId.trim())) {
+        targetUserIds.add(userId.trim());
+      }
+      if (typeof secondaryUserId === 'string' && uuidRegex.test(secondaryUserId.trim())) {
+        targetUserIds.add(secondaryUserId.trim());
+      }
+      if (typeof email === 'string' && email.trim().includes('@')) {
+        targetEmails.add(email.trim().toLowerCase());
+      }
+
       if (token) {
         const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
-        if (!authErr && authData?.user && authData.user.id !== userId) {
-          return res.status(403).json({ error: 'Du har endast behörighet att radera ditt eget konto' });
+        if (!authErr && authData?.user) {
+          targetUserIds.add(authData.user.id);
+          if (authData.user.email) {
+            targetEmails.add(authData.user.email.trim().toLowerCase());
+          }
         }
       }
 
-      console.log(`Starting full account deletion for user: ${userId}`);
+      // Look up any email associated with the targetUserIds from auth.users and profiles
+      for (const uid of Array.from(targetUserIds)) {
+        try {
+          const { data: uData } = await supabaseAdmin.auth.admin.getUserById(uid);
+          if (uData?.user?.email) {
+            targetEmails.add(uData.user.email.trim().toLowerCase());
+          }
+        } catch {
+          // ignore
+        }
+        try {
+          const { data: profData } = await supabaseAdmin
+            .from('profiles')
+            .select('email')
+            .eq('id', uid)
+            .maybeSingle();
+          if (profData?.email) {
+            targetEmails.add(String(profData.email).trim().toLowerCase());
+          }
+        } catch {
+          // ignore
+        }
+      }
 
-      // 1. Delete all user data from public tables
+      // Also find any auth.users or profiles rows matching targetEmails so no duplicate/recreated user is left behind
+      if (targetEmails.size > 0) {
+        try {
+          const { data: listData } = await supabaseAdmin.auth.admin.listUsers({
+            page: 1,
+            perPage: 1000,
+          });
+          for (const u of listData?.users || []) {
+            if (u.email && targetEmails.has(u.email.trim().toLowerCase())) {
+              targetUserIds.add(u.id);
+            }
+          }
+        } catch {
+          // ignore
+        }
+
+        for (const em of Array.from(targetEmails)) {
+          try {
+            const { data: profRows } = await supabaseAdmin
+              .from('profiles')
+              .select('id')
+              .ilike('email', em);
+            for (const row of profRows || []) {
+              if (row?.id && uuidRegex.test(String(row.id))) {
+                targetUserIds.add(String(row.id));
+              }
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      console.log(
+        `Starting full permanent account deletion for userIds=[${Array.from(targetUserIds).join(', ')}], emails=[${Array.from(targetEmails).join(', ')}]`
+      );
+
       const tables = [
-        'bank_transactions',
-        'bank_accounts',
-        'bank_provider_sessions',
-        'bank_connections',
-        'bank_auth_states',
         'transactions',
+        'bank_transactions',
+        'bank_auth_states',
+        'bank_provider_sessions',
+        'bank_accounts',
+        'bank_connections',
         'fixed_expenses',
         'income_sources',
         'savings_goals',
@@ -702,30 +804,124 @@ ${JSON.stringify(batch)}`;
         'feedback',
         'profiles',
       ];
-      
-      for (const table of tables) {
+
+      for (const uid of Array.from(targetUserIds)) {
+        // 1a. Break nullable self-references & cross-table references first
         try {
           await supabaseAdmin
-            .from(table)
-            .delete()
-            .eq(table === 'profiles' ? 'id' : 'user_id', userId);
-        } catch (tableErr) {
-          console.warn(`[Delete] Error deleting from ${table}:`, tableErr);
+            .from('transactions')
+            .update({
+              refund_of_transaction_id: null,
+              bank_transaction_id: null,
+              bank_account_id: null,
+              linked_fixed_expense_id: null,
+              account_id: null,
+            })
+            .eq('user_id', uid);
+        } catch {
+          // ignore
+        }
+
+        try {
+          await supabaseAdmin
+            .from('bank_transactions')
+            .update({
+              linked_transfer_bank_tx_id: null,
+              replaced_by_bank_tx_id: null,
+            })
+            .eq('user_id', uid);
+        } catch {
+          // ignore
+        }
+
+        try {
+          await supabaseAdmin
+            .from('bank_auth_states')
+            .update({ connection_id: null })
+            .eq('user_id', uid);
+        } catch {
+          // ignore
+        }
+
+        // 1b. Delete from all public tables in bottom-up dependency order
+        for (const table of tables) {
+          try {
+            const col = table === 'profiles' ? 'id' : 'user_id';
+            const { error: delErr } = await supabaseAdmin
+              .from(table)
+              .delete()
+              .eq(col, uid);
+            if (delErr && table !== 'feedback') {
+              console.warn(`[Delete] Warning deleting from ${table} for ${uid}:`, delErr.message);
+            }
+          } catch (tableErr) {
+            console.warn(`[Delete] Error deleting from ${table} for ${uid}:`, tableErr);
+          }
+        }
+
+        // 1c. Delete any uploaded avatar files in Supabase Storage
+        try {
+          const { data: rootFiles } = await supabaseAdmin.storage.from('avatars').list('', {
+            limit: 100,
+            search: uid,
+          });
+          if (Array.isArray(rootFiles) && rootFiles.length > 0) {
+            const pathsToRemove = rootFiles
+              .filter((f) => f.name && f.name.includes(uid))
+              .map((f) => f.name);
+            if (pathsToRemove.length > 0) {
+              await supabaseAdmin.storage.from('avatars').remove(pathsToRemove);
+            }
+          }
+          const { data: folderFiles } = await supabaseAdmin.storage.from('avatars').list(uid, {
+            limit: 100,
+          });
+          if (Array.isArray(folderFiles) && folderFiles.length > 0) {
+            const folderPaths = folderFiles.map((f) => `${uid}/${f.name}`);
+            await supabaseAdmin.storage.from('avatars').remove(folderPaths);
+          }
+        } catch {
+          // ignore storage cleanup errors
+        }
+
+        // 1d. Delete the auth user from auth.users
+        try {
+          const { error: deleteUserErr } = await supabaseAdmin.auth.admin.deleteUser(uid);
+          if (deleteUserErr) {
+            console.warn(`[Delete] First deleteUser attempt for ${uid} warning:`, deleteUserErr.message);
+            // Ensure profile is gone and retry hard delete
+            await supabaseAdmin.from('profiles').delete().eq('id', uid);
+            await supabaseAdmin.auth.admin.deleteUser(uid, false);
+          }
+        } catch (deleteAuthError: any) {
+          console.warn('Could not delete auth user from auth.users:', deleteAuthError?.message);
         }
       }
 
-      // 2. Delete the auth user
-      try {
-        await supabaseAdmin.auth.admin.deleteUser(userId);
-      } catch (deleteAuthError: any) {
-        console.warn('Could not delete auth user from auth.users (non-fatal):', deleteAuthError?.message);
+      // 2. Also clean up any rows matched by email (e.g. feedback or orphan profiles)
+      for (const em of Array.from(targetEmails)) {
+        try {
+          await supabaseAdmin.from('feedback').delete().ilike('user_email', em);
+        } catch {
+          // ignore
+        }
+        try {
+          await supabaseAdmin.from('profiles').delete().ilike('email', em);
+        } catch {
+          // ignore
+        }
       }
 
-      console.log(`Successfully completed deletion for user: ${userId}`);
-      return res.json({ success: true });
+      console.log(
+        `Successfully completed permanent deletion for userIds=[${Array.from(targetUserIds).join(', ')}]`
+      );
+      return res.json({
+        success: true,
+        deletedUserIds: Array.from(targetUserIds),
+      });
     } catch (error: any) {
       console.error('Delete account error:', error);
-      return res.json({ success: true, warning: error.message });
+      return res.status(500).json({ error: error.message || 'Delete account failed' });
     }
   });
 

@@ -1442,7 +1442,15 @@ export const App: React.FC = () => {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (!data || !Array.isArray(data.results) || data.results.length === 0) return;
+        if (
+          isDeletingAccountRef.current ||
+          !userIdRef.current ||
+          !data ||
+          !Array.isArray(data.results) ||
+          data.results.length === 0
+        ) {
+          return;
+        }
 
         let anySaved = false;
         for (const resItem of data.results) {
@@ -1464,7 +1472,7 @@ export const App: React.FC = () => {
           anySaved = true;
         }
 
-        if (anySaved) {
+        if (anySaved && !isDeletingAccountRef.current && userIdRef.current) {
           const updatedAliases = getMerchantAliases();
           setTransactions((prev) => {
             const next = deduplicateTransactions(
@@ -2091,6 +2099,7 @@ export const App: React.FC = () => {
   // Initiera Supabase-session och trigga en enda koordinerad, atomär hydrering vid appstart
   useEffect(() => {
     const runCoordinateHydration = async (sessionUser: any) => {
+      if (isDeletingAccountRef.current) return;
       const uid = sessionUser.id;
       setUserId(uid);
       userIdRef.current = uid;
@@ -3356,7 +3365,8 @@ export const App: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const uidToDelete = userId || userIdRef.current;
+    const uidFromState = userId || userIdRef.current;
+    const emailFromState = userEmail;
     const connsToDisconnect = [...connections];
 
     // 1. Stoppa omedelbart alla pågående bakgrundssynkningar och förhindra återskapande
@@ -3364,45 +3374,71 @@ export const App: React.FC = () => {
     pendingRefreshRef.current = false;
     cancelPendingPreferenceSync();
 
-    try {
-      if (uidToDelete && uidToDelete !== 'demo-user' && uidToDelete !== 'preview-user') {
-        // Hämta session och Bearer-token FÖRST innan localStorage rensas eller signOut körs!
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const token = session?.access_token;
+    // 2. Töm minnes-refs omedelbart så att inga pågående effekter kan läsa eller återskapa gammal data
+    incomesRef.current = [];
+    fixedExpensesRef.current = [];
+    transactionsRef.current = [];
+    aiCleanedKeysRef.current.clear();
 
-        // Koppla från eventuella bankanslutningar hos Enable Banking
-        if (connsToDisconnect.length > 0) {
-          await Promise.allSettled(
+    try {
+      // Hämta session och Bearer-token FÖRST innan localStorage rensas eller signOut körs
+      const {
+        data: { session },
+      } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+      const token = session?.access_token || null;
+      const sessionUid = session?.user?.id || null;
+      const stateUid =
+        uidFromState && uidFromState !== 'demo-user' && uidFromState !== 'preview-user'
+          ? uidFromState
+          : null;
+      const primaryUid = sessionUid || stateUid;
+      const emailToDelete = session?.user?.email || emailFromState || null;
+
+      const withFastTimeout = <T,>(promise: Promise<T>, ms = 3500): Promise<T | null> =>
+        Promise.race([
+          promise.catch(() => null),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+        ]);
+
+      // 3. Koppla från aktiva bankanslutningar hos Enable Banking (med kort timeout så det aldrig kan låsa raderingen)
+      if (connsToDisconnect.length > 0 && primaryUid) {
+        await withFastTimeout(
+          Promise.allSettled(
             connsToDisconnect
               .filter((c) => c.status !== 'revoked')
               .map((c) => bankService.disconnect(c.id))
-          );
-        }
-
-        // Radera alla rader i samtliga Supabase-tabeller via klienten (RLS)
-        await dataService.deleteAllUserData(uidToDelete).catch(() => {});
-
-        // Anropa både Edge Function (adminClient) och server-endpoint för fullständig radering inkl. auth.users
-        await Promise.allSettled([
-          bankService.deleteAccount().catch(() => {}),
-          fetch('/api/auth/delete-account', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ userId: uidToDelete }),
-          }).catch((err) => console.error('delete-account error:', err)),
-        ]);
-      } else if (uidToDelete) {
-        await dataService.deleteAllUserData(uidToDelete).catch(() => {});
+          ),
+          3500
+        );
       }
+
+      // 4. Kör fullständig radering på både servern (supabaseAdmin inkl. auth.users & storage), Edge Function och klient (RLS)
+      await Promise.allSettled([
+        primaryUid || emailToDelete
+          ? fetch('/api/auth/delete-account', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({
+                userId: primaryUid,
+                secondaryUserId: stateUid,
+                email: emailToDelete,
+              }),
+            }).catch((err) => console.error('delete-account error:', err))
+          : Promise.resolve(),
+        primaryUid
+          ? dataService.deleteAllUserData(primaryUid, true).catch(() => {})
+          : Promise.resolve(),
+        primaryUid
+          ? withFastTimeout(bankService.deleteAccount(), 3500)
+          : Promise.resolve(),
+      ]);
     } catch (err) {
       console.error('Error during account deletion:', err);
     } finally {
-      // Logga ut och rensa all lokal lagring först efter att nätverksanropen är klara
+      // 5. Logga ut och rensa exakt all lokal lagring (localStorage + sessionStorage)
       await supabase.auth.signOut().catch(() => {});
       clearAllLocalAppData(false);
 
@@ -3415,7 +3451,7 @@ export const App: React.FC = () => {
 
       setUserId(null);
       setUserEmail(null);
-      setUserName('');
+      setUserName(null);
       setUserAvatar(null);
       setConnections([]);
       setBankAccounts([]);
@@ -3429,7 +3465,9 @@ export const App: React.FC = () => {
       setActiveTab('home');
       setIsOnboardingActive(false);
       setShowLanding(true);
-      isDeletingAccountRef.current = false;
+      setTimeout(() => {
+        isDeletingAccountRef.current = false;
+      }, 1000);
     }
   };
 

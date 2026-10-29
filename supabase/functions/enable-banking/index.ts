@@ -1828,9 +1828,10 @@ serve(async (req: Request) => {
           for (const s of sessions) {
             if (s.provider_session_id) {
               try {
-                await ebFetch(`/sessions/${encodeURIComponent(s.provider_session_id)}`, {
-                  method: "DELETE",
-                });
+                await enableBankingRequest(
+                  `/sessions/${encodeURIComponent(s.provider_session_id)}`,
+                  { method: "DELETE" },
+                );
               } catch {
                 // Best-effort revocation
               }
@@ -1841,13 +1842,40 @@ serve(async (req: Request) => {
         // Ignore session revocation errors during account deletion
       }
 
+      try {
+        await adminClient
+          .from("transactions")
+          .update({
+            refund_of_transaction_id: null,
+            bank_transaction_id: null,
+            bank_account_id: null,
+            linked_fixed_expense_id: null,
+            account_id: null,
+          })
+          .eq("user_id", user.id);
+      } catch {
+        // ignore
+      }
+
+      try {
+        await adminClient
+          .from("bank_transactions")
+          .update({
+            linked_transfer_bank_tx_id: null,
+            replaced_by_bank_tx_id: null,
+          })
+          .eq("user_id", user.id);
+      } catch {
+        // ignore
+      }
+
       const tables = [
-        "bank_transactions",
-        "bank_accounts",
-        "bank_provider_sessions",
-        "bank_connections",
-        "bank_auth_states",
         "transactions",
+        "bank_transactions",
+        "bank_auth_states",
+        "bank_provider_sessions",
+        "bank_accounts",
+        "bank_connections",
         "fixed_expenses",
         "income_sources",
         "savings_goals",

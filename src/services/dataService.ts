@@ -1453,18 +1453,50 @@ export const dataService = {
     }
   },
 
-  async deleteAllUserData(userId: string) {
-    if (!userId || userId === 'demo-user') {
-      localStorage.clear();
+  async deleteAllUserData(userId: string, includeProfile = false) {
+    if (!userId || userId === 'demo-user' || userId === 'preview-user') {
+      if (includeProfile) {
+        localStorage.clear();
+      }
       return;
     }
+
+    // Clear nullable foreign-key references first
+    try {
+      await supabase
+        .from('transactions')
+        .update({
+          refund_of_transaction_id: null,
+          bank_transaction_id: null,
+          bank_account_id: null,
+          linked_fixed_expense_id: null,
+          account_id: null,
+        })
+        .eq('user_id', userId);
+    } catch {
+      // ignore
+    }
+
+    try {
+      await supabase
+        .from('bank_transactions')
+        .update({
+          linked_transfer_bank_tx_id: null,
+          replaced_by_bank_tx_id: null,
+        })
+        .eq('user_id', userId);
+    } catch {
+      // ignore
+    }
+
+    // Delete in strict bottom-up dependency order
     const tables = [
-      'bank_transactions',
-      'bank_accounts',
-      'bank_provider_sessions',
-      'bank_connections',
-      'bank_auth_states',
       'transactions',
+      'bank_transactions',
+      'bank_auth_states',
+      'bank_provider_sessions',
+      'bank_accounts',
+      'bank_connections',
       'fixed_expenses',
       'income_sources',
       'savings_goals',
@@ -1481,6 +1513,7 @@ export const dataService = {
         console.error(`Error deleting from ${table} in Supabase:`, err);
       }
     }
+
     // Clear profile preferences first (since RLS always allows UPDATE on own profile even if DELETE is restricted)
     try {
       await supabase
@@ -1497,6 +1530,17 @@ export const dataService = {
         .eq('id', userId);
     } catch (err) {
       console.error('Error clearing profile preferences in Supabase:', err);
+    }
+
+    if (includeProfile) {
+      try {
+        await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', userId);
+      } catch (err) {
+        console.error('Error deleting profile row in Supabase:', err);
+      }
     }
   }
 };
