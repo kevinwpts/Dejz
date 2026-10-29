@@ -2145,7 +2145,9 @@ export const App: React.FC = () => {
             })
             .catch(() => {});
           setCallbackStatusMsg('Synkar transaktioner från din bank...');
-          await bankService.sync({ connectionId: res.connection.id }).catch(() => {});
+          await bankService
+            .sync({ connectionId: res.connection.id, fullSync: true })
+            .catch(() => {});
         }
 
         await refreshBankStatus();

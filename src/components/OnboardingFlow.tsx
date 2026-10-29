@@ -216,16 +216,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     const runBankAnalysis = async () => {
       setAnalyzingBank(true);
       try {
-        let bankTxs = await bankService.listAllTransactionsForReconciliation(5000).catch(() => []);
+        let bankTxs = await bankService
+          .listAllTransactionsForReconciliation(5000, true)
+          .catch(() => []);
         if (!bankTxs || bankTxs.length === 0) {
           const txRes = await bankService.listTransactions({ pageSize: 500 }).catch(() => null);
           bankTxs = txRes?.transactions || [];
         }
 
-        // Om en bank precis kopplats på steg 2 men transaktionssynken inte hunnit klart än, kör en synk nu
-        if ((!bankTxs || bankTxs.length === 0) && connections.length > 0) {
-          await bankService.sync().catch(() => {});
-          bankTxs = await bankService.listAllTransactionsForReconciliation(5000).catch(() => []);
+        // Om en bank precis kopplats på steg 2 men transaktionssynken inte hunnit klart än (eller bara delvis synkats), kör full 95-dagars synk nu
+        if ((!bankTxs || bankTxs.length < 5) && connections.length > 0) {
+          await bankService.sync({ fullSync: true }).catch(() => {});
+          bankTxs = await bankService
+            .listAllTransactionsForReconciliation(5000, true)
+            .catch(() => []);
         }
 
         let accountsForAnalysis = fetchedAccounts.length > 0 ? fetchedAccounts : _bankAccounts;
@@ -284,7 +288,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             }
           }
 
-          // Förfina med Gemini AI för att fånga nystartade 1-dragningsabonnemang och verifiera exakta utbetalningsdagar (t.ex. A-kassa den 22:a)
+          // Förfina med Gemini AI för att fånga nystartade 1-dragningsabonnemang och verifiera exakta utbetalningsdagar (t.ex. A-kassa den 22:a),
+          // utan att NÅGONSIN radera regelbekräftade fasta utgifter eller inkomster!
           if (expenseCandidates.length > 0 || incomeCandidates.length > 0) {
             try {
               const aiRes = await fetch('/api/ai/analyze-onboarding', {
@@ -295,114 +300,141 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               if (aiRes.ok && isMounted) {
                 const aiData = await aiRes.json();
                 if (!aiData?.fallback) {
-                  const expCandMap = new Map(expenseCandidates.map((c) => [c.key, c]));
-                  const incCandMap = new Map(incomeCandidates.map((c) => [c.key, c]));
-
-                  if (Array.isArray(aiData.expenses) && aiData.expenses.length > 0) {
-                    const aiFixedList = aiData.expenses
-                      .filter((e: any) => e && e.include === true && Number(e.amount) > 0)
-                      .map((e: any, idx: number) => {
-                        const cand = expCandMap.get(e.key);
-                        const cleanName = String(e.name || cand?.name || 'Fast utgift').trim();
-                        const cleanCat = String(e.category || cand?.category || 'Räkningar').trim();
-                        const cleanDay =
-                          typeof e.day === 'number' && e.day >= 1 && e.day <= 31
-                            ? Math.round(e.day)
-                            : cand?.ruleDay || 27;
-                        const cleanAmt = Math.round(Number(e.amount) || cand?.latestAmount || 0);
-                        const cleanMethod =
-                          e.paymentMethod || cand?.paymentMethod || 'Autogiro';
-                        const occ = cand?.occurrences || 1;
-                        const lastD = cand?.rawDates?.[0] || '';
-                        const summary = `${occ} ${occ === 1 ? 'betalning' : 'betalningar'}${
-                          lastD ? ` (senast ${lastD})` : ''
-                        } · ${cleanAmt} kr`;
-
-                        return {
-                          id: `bank-ai-exp-${idx}`,
-                          name: cleanName,
-                          amount: cleanAmt,
-                          dueDay: cleanDay,
-                          category: cleanCat,
-                          paymentMethod: cleanMethod,
-                          evidenceSummary: summary,
-                          checked: true,
-                          logo: getLogoUrl(cleanName, cleanCat),
-                          isFromBank: true,
-                        };
-                      })
-                      .sort((a: any, b: any) => b.amount - a.amount);
-
-                    if (aiFixedList.length > 0) {
-                      setSuggestedFixedExpenses((prev) => {
-                        const uncheckedNames = new Set(
-                          prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
-                        );
-                        return aiFixedList.map((item: any) => ({
-                          ...item,
-                          checked: !uncheckedNames.has(item.name.toLowerCase()),
-                        }));
-                      });
+                  const aiExpByKey = new Map<string, any>();
+                  if (Array.isArray(aiData.expenses)) {
+                    for (const e of aiData.expenses) {
+                      if (e && e.key) aiExpByKey.set(String(e.key), e);
                     }
                   }
 
-                  if (Array.isArray(aiData.incomes) && aiData.incomes.length > 0) {
-                    const aiIncomeList = aiData.incomes
-                      .filter((inc: any) => inc && inc.include === true && Number(inc.amount) > 0)
-                      .map((inc: any, idx: number) => {
-                        const cand = incCandMap.get(inc.key);
-                        const cleanName = String(inc.name || cand?.name || 'Inkomst').trim();
-                        const cleanCat = String(inc.category || cand?.category || 'Lön').trim();
-                        const cleanDay =
-                          typeof inc.day === 'number' && inc.day >= 1 && inc.day <= 31
-                            ? Math.round(inc.day)
-                            : cand?.ruleDay || 25;
-                        const cleanAmt = Math.round(Number(inc.amount) || cand?.latestAmount || 0);
-                        const occ = cand?.occurrences || 1;
-                        const lastD = cand?.rawDates?.[0] || '';
-                        const summary = `${occ} ${occ === 1 ? 'insättning' : 'insättningar'}${
-                          lastD ? ` (senast ${lastD})` : ''
-                        } · ${cleanAmt} kr`;
+                  const mergedExpenses = expenseCandidates
+                    .filter((cand) => {
+                      if (cand.isRuleDetected) return true;
+                      const aiItem = aiExpByKey.get(cand.key);
+                      return aiItem?.include === true && Number(aiItem?.amount || cand.latestAmount) > 0;
+                    })
+                    .map((cand, idx) => {
+                      const aiItem = aiExpByKey.get(cand.key);
+                      const cleanName = String(
+                        cand.isRuleDetected ? cand.name : aiItem?.name || cand.name || 'Fast utgift'
+                      ).trim();
+                      const cleanCat = String(
+                        aiItem?.category || cand.category || 'Räkningar'
+                      ).trim();
+                      const cleanDay =
+                        typeof aiItem?.day === 'number' && aiItem.day >= 1 && aiItem.day <= 31
+                          ? Math.round(aiItem.day)
+                          : cand.ruleDay || 27;
+                      const cleanAmt = Math.round(
+                        cand.latestAmount || Number(aiItem?.amount) || 0
+                      );
+                      const cleanMethod =
+                        aiItem?.paymentMethod || cand.paymentMethod || 'Autogiro';
+                      const occ = cand.occurrences || 1;
+                      const lastD = cand.rawDates?.[0] || '';
+                      const summary = `${occ} ${occ === 1 ? 'betalning' : 'betalningar'}${
+                        lastD ? ` (senast ${lastD})` : ''
+                      } · ${cleanAmt} kr`;
 
-                        return {
-                          id: `bank-ai-inc-${idx}`,
-                          name: cleanName,
-                          amount: cleanAmt,
-                          payday: cleanDay,
-                          category: cleanCat,
-                          evidenceSummary: summary,
-                          checked: true,
-                          logo: getLogoUrl(cleanName, cleanCat),
-                          isFromBank: true,
-                        };
-                      })
-                      .sort((a: any, b: any) => b.amount - a.amount);
+                      return {
+                        id: `bank-ai-exp-${idx}`,
+                        name: cleanName,
+                        amount: cleanAmt,
+                        dueDay: cleanDay,
+                        category: cleanCat,
+                        paymentMethod: cleanMethod,
+                        evidenceSummary: summary,
+                        checked: true,
+                        logo: getLogoUrl(cleanName, cleanCat),
+                        isFromBank: true,
+                      };
+                    })
+                    .sort((a, b) => b.amount - a.amount);
 
-                    if (aiIncomeList.length > 0) {
-                      setSuggestedIncomes((prev) => {
-                        const uncheckedNames = new Set(
-                          prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
-                        );
-                        return aiIncomeList.map((item: any) => ({
-                          ...item,
-                          checked: !uncheckedNames.has(item.name.toLowerCase()),
-                        }));
-                      });
+                  if (mergedExpenses.length > 0) {
+                    setSuggestedFixedExpenses((prev) => {
+                      const uncheckedNames = new Set(
+                        prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
+                      );
+                      return mergedExpenses.map((item) => ({
+                        ...item,
+                        checked: !uncheckedNames.has(item.name.toLowerCase()),
+                      }));
+                    });
+                  }
 
-                      const primaryAiInc = aiIncomeList[0];
-                      const bestPayday =
-                        primaryAiInc?.payday ||
-                        (typeof aiData.suggestedPayday === 'number' &&
-                        aiData.suggestedPayday >= 1 &&
-                        aiData.suggestedPayday <= 31
-                          ? aiData.suggestedPayday
-                          : null);
+                  const aiIncByKey = new Map<string, any>();
+                  if (Array.isArray(aiData.incomes)) {
+                    for (const inc of aiData.incomes) {
+                      if (inc && inc.key) aiIncByKey.set(String(inc.key), inc);
+                    }
+                  }
 
-                      if (bestPayday && bestPayday >= 1 && bestPayday <= 31) {
-                        setPayday(bestPayday);
-                        if (primaryAiInc?.name) {
-                          setDetectedIncomeSourceLabel(primaryAiInc.name);
-                        }
+                  const mergedIncomes = incomeCandidates
+                    .filter((cand) => {
+                      if (cand.isRuleDetected) return true;
+                      const aiItem = aiIncByKey.get(cand.key);
+                      return aiItem?.include === true && Number(aiItem?.amount || cand.latestAmount) > 0;
+                    })
+                    .map((cand, idx) => {
+                      const aiItem = aiIncByKey.get(cand.key);
+                      const cleanName = String(
+                        cand.isRuleDetected ? cand.name : aiItem?.name || cand.name || 'Inkomst'
+                      ).trim();
+                      const cleanCat = String(
+                        aiItem?.category || cand.category || 'Lön'
+                      ).trim();
+                      const cleanDay =
+                        typeof aiItem?.day === 'number' && aiItem.day >= 1 && aiItem.day <= 31
+                          ? Math.round(aiItem.day)
+                          : cand.ruleDay || 25;
+                      const cleanAmt = Math.round(
+                        cand.latestAmount || Number(aiItem?.amount) || 0
+                      );
+                      const occ = cand.occurrences || 1;
+                      const lastD = cand.rawDates?.[0] || '';
+                      const summary = `${occ} ${occ === 1 ? 'insättning' : 'insättningar'}${
+                        lastD ? ` (senast ${lastD})` : ''
+                      } · ${cleanAmt} kr`;
+
+                      return {
+                        id: `bank-ai-inc-${idx}`,
+                        name: cleanName,
+                        amount: cleanAmt,
+                        payday: cleanDay,
+                        category: cleanCat,
+                        evidenceSummary: summary,
+                        checked: true,
+                        logo: getLogoUrl(cleanName, cleanCat),
+                        isFromBank: true,
+                      };
+                    })
+                    .sort((a, b) => b.amount - a.amount);
+
+                  if (mergedIncomes.length > 0) {
+                    setSuggestedIncomes((prev) => {
+                      const uncheckedNames = new Set(
+                        prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
+                      );
+                      return mergedIncomes.map((item) => ({
+                        ...item,
+                        checked: !uncheckedNames.has(item.name.toLowerCase()),
+                      }));
+                    });
+
+                    const primaryAiInc = mergedIncomes[0];
+                    const bestPayday =
+                      primaryAiInc?.payday ||
+                      (typeof aiData.suggestedPayday === 'number' &&
+                      aiData.suggestedPayday >= 1 &&
+                      aiData.suggestedPayday <= 31
+                        ? aiData.suggestedPayday
+                        : null);
+
+                    if (bestPayday && bestPayday >= 1 && bestPayday <= 31) {
+                      setPayday(bestPayday);
+                      if (primaryAiInc?.name) {
+                        setDetectedIncomeSourceLabel(primaryAiInc.name);
                       }
                     }
                   }
@@ -457,9 +489,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     suggestedIncomes.length,
   ]);
 
-  // Synka om App.tsx redan hunnit populera fixedExpenses eller incomes via bakgrundssynk
+  // Synka om App.tsx redan hunnit populera fixedExpenses eller incomes via bakgrundssynk (utan att låsa runBankAnalysis)
   useEffect(() => {
-    if (suggestedFixedExpenses.length === 0 && fixedExpenses.length > 0) {
+    if (suggestedFixedExpenses.length === 0 && fixedExpenses.length > 0 && !analyzingBank) {
       setSuggestedFixedExpenses(
         fixedExpenses.map((f) => ({
           id: f.id,
@@ -473,9 +505,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           isFromBank: true,
         }))
       );
-      setIsBankDataDetected(true);
     }
-  }, [fixedExpenses, suggestedFixedExpenses.length]);
+  }, [fixedExpenses, suggestedFixedExpenses.length, analyzingBank]);
 
   useEffect(() => {
     if (suggestedIncomes.length === 0 && incomes.length > 0) {
@@ -618,6 +649,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   };
 
+  const getSmartAccountDefaultName = React.useCallback((acc: BankAccount, idx: number) => {
+    if (acc.custom_name && acc.custom_name.trim()) return acc.custom_name.trim();
+    const prod = (acc.product || '').trim();
+    if (prod) return prod;
+    return idx === 0 ? 'Lönekonto' : 'Bankkonto';
+  }, []);
+
   // Hjälpfunktion för att öppna kontoval eller gå vidare så fort bankkopplingen är klar
   const applyConnectedBankState = React.useCallback(
     (conns: BankConnection[], accs: BankAccount[]) => {
@@ -639,7 +677,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         setSelectedAccountIds(selIds.length > 0 ? selIds : accountsToUse.map((a) => a.id));
         const nameMap: Record<string, string> = {};
         accountsToUse.forEach((a, idx) => {
-          nameMap[a.id] = a.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
+          nameMap[a.id] = getSmartAccountDefaultName(a, idx);
         });
         setAccountCustomNames(nameMap);
         setStep2View('select-accounts');
@@ -647,7 +685,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       }
       return false;
     },
-    []
+    [getSmartAccountDefaultName]
   );
 
   // Reagera DIREKT när App.tsx uppdaterar connections/bankAccounts efter ?code=&state= (utan att kräva window focus)
@@ -1196,7 +1234,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   const currentName =
                     accountCustomNames[acc.id] !== undefined
                       ? accountCustomNames[acc.id]
-                      : acc.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
+                      : getSmartAccountDefaultName(acc, idx);
+                  const rawNum = (acc.bban || acc.iban || '').trim();
+                  const formattedNum =
+                    rawNum.length === 11 && /^\d+$/.test(rawNum)
+                      ? `${rawNum.slice(0, 4)}-${rawNum.slice(4)}`
+                      : rawNum || acc.product || 'Bankkonto';
 
                   return (
                     <div
@@ -1226,12 +1269,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                             {currentName}
                           </span>
                           <span className="text-[11px] text-[var(--text-muted)] block">
-                            {acc.account_id?.iban || acc.account_id?.bban || acc.bankName || 'Konto'}
+                            {formattedNum}
                           </span>
                         </div>
-                        {acc.balance !== null && acc.balance !== undefined && (
+                        {acc.balance_amount !== null && acc.balance_amount !== undefined && (
                           <span className="text-xs font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
-                            {formatKr(acc.balance)}
+                            {formatKr(acc.balance_amount)}
                           </span>
                         )}
                       </button>

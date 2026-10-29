@@ -177,6 +177,15 @@ export function compactBankTxRawJson(raw: any): any {
       amount: raw.balance_after_transaction.amount,
     };
   }
+  if (raw.bank_transaction_code && typeof raw.bank_transaction_code === 'object') {
+    compact.bank_transaction_code = raw.bank_transaction_code;
+  }
+  if (raw.creditor_account && typeof raw.creditor_account === 'object') {
+    compact.creditor_account = raw.creditor_account;
+  }
+  if (raw.debtor_account && typeof raw.debtor_account === 'object') {
+    compact.debtor_account = raw.debtor_account;
+  }
   if (raw.card_transaction && typeof raw.card_transaction === 'object') {
     compact.card_transaction = {
       authorized_date: raw.card_transaction.authorized_date,
@@ -718,7 +727,8 @@ export const bankService = {
   },
 
   async listAllTransactionsForReconciliation(
-    bankAccountIdOrLimit?: string | number | null
+    bankAccountIdOrLimit?: string | number | null,
+    includeAllConnectedAccounts = false
   ): Promise<BankTransactionItem[]> {
     const bankAccountId =
       typeof bankAccountIdOrLimit === 'string' && bankAccountIdOrLimit.trim().length > 0
@@ -747,16 +757,24 @@ export const bankService = {
         return [];
       }
 
-      // First get selected bank account IDs to avoid loading dead/unselected accounts
-      const { data: selectedAccs } = await supabase
+      const { data: allConnAccs } = await supabase
         .from('bank_accounts')
-        .select('id')
+        .select('id, is_selected')
         .eq('user_id', currentUid)
-        .in('connection_id', activeConnIds)
-        .eq('is_selected', true);
-      const selectedIds = (selectedAccs || []).map((a) => a.id);
+        .in('connection_id', activeConnIds);
 
-      if (!bankAccountId && selectedIds.length === 0) {
+      const allAccIds = (allConnAccs || []).map((a) => a.id);
+      const selectedIds = (allConnAccs || [])
+        .filter((a) => a.is_selected !== false)
+        .map((a) => a.id);
+
+      const targetAccountIds = includeAllConnectedAccounts
+        ? allAccIds
+        : selectedIds.length > 0
+        ? selectedIds
+        : allAccIds;
+
+      if (!bankAccountId && targetAccountIds.length === 0) {
         return [];
       }
 
@@ -771,7 +789,7 @@ export const bankService = {
       if (bankAccountId) {
         query = query.eq('bank_account_id', bankAccountId);
       } else {
-        query = query.in('bank_account_id', selectedIds);
+        query = query.in('bank_account_id', targetAccountIds);
       }
 
       const { data, error } = await query;

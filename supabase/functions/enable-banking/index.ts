@@ -1017,7 +1017,7 @@ serve(async (req: Request) => {
                 balance_type: balanceInfo.balanceType,
                 balance_label: balanceInfo.balanceLabel,
                 balances_json: rawBalances,
-                last_synced_at: new Date().toISOString(),
+                last_synced_at: null,
                 updated_at: new Date().toISOString(),
               },
               { onConflict: "connection_id,provider_account_uid" },

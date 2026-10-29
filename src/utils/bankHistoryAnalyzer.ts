@@ -603,8 +603,20 @@ export function isInternalTransferOrMicroSavings(
     return false;
   }
 
+  const bankCodeDesc = String(rawJson?.bank_transaction_code?.description || '')
+    .trim()
+    .toLowerCase();
+
+  // SEB och andra svenska banker märker kontoöverföringar med bank_transaction_code.description === "Transfer"
   if (
-    combined.includes('enkla vardagen') ||
+    bankCodeDesc === 'transfer' ||
+    bankCodeDesc === 'internal transfer' ||
+    bankCodeDesc === 'account transfer'
+  ) {
+    return true;
+  }
+
+  if (
     combined.includes('enkla sparkontot') ||
     combined.includes('egna konton') ||
     combined.includes('egen överföring') ||
@@ -641,7 +653,7 @@ export function isInternalTransferOrMicroSavings(
     return true;
   }
 
-  // Om beskrivningen enbart är ett bankkontonummer (t.ex. "5196 00 507 53")
+  // Om beskrivningen enbart är ett bankkontonummer eller kontonummer + referens (t.ex. "5196 00 507 53" eller "56090198013 095739195424")
   const rawAcctCandidate = (tx.description || tx.counterparty_name || '')
     .replace(/^(från|fran|till|överföring|overforing|insättning|insattning)\s+/i, '')
     .trim();
@@ -650,7 +662,7 @@ export function isInternalTransferOrMicroSavings(
     rawAcctCandidate.length >= 7 &&
     /^[\d\s.,-]+$/.test(rawAcctCandidate) &&
     rawAcctDigits.length >= 7 &&
-    rawAcctDigits.length <= 16
+    rawAcctDigits.length <= 32
   ) {
     return true;
   }
@@ -667,6 +679,16 @@ export function isInternalTransferOrMicroSavings(
   const txAmt = getNormalizedBankTxAmount(tx);
   const counterpartyBban = txAmt < 0 ? creditorBban : txAmt > 0 ? debtorBban : '';
   const counterpartyIban = txAmt < 0 ? creditorIban : txAmt > 0 ? debtorIban : '';
+
+  const normalizePersonLetters = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-zåäö\s-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const txDescLetters = normalizePersonLetters(tx.description || '');
+  const txCpLetters = normalizePersonLetters(tx.counterparty_name || '');
 
   for (const acc of userAccounts) {
     const bbanDigits = (acc.bban || '').replace(/\D+/g, '');
@@ -696,6 +718,22 @@ export function isInternalTransferOrMicroSavings(
       return true;
     }
 
+    // Kontrollera om transaktionens beskrivning/motpart är kontoinnehavarens eget namn
+    // (inklusive SEB:s 12-teckens trunkering vid egen överföring, t.ex. "KEVIN PETERS" för "KEVIN PETERSEN")
+    const holderLetters = normalizePersonLetters(acc.name || '');
+    if (holderLetters.length >= 7 && holderLetters.includes(' ')) {
+      for (const party of [txDescLetters, txCpLetters]) {
+        if (!party || party.length < 7 || !party.includes(' ')) continue;
+        if (
+          party === holderLetters ||
+          (party.length >= 8 && holderLetters.startsWith(party)) ||
+          (holderLetters.length >= 8 && party.startsWith(holderLetters))
+        ) {
+          return true;
+        }
+      }
+    }
+
     for (const label of [acc.custom_name, acc.product]) {
       const cleanLabel = (label || '').trim().toLowerCase();
       if (
@@ -703,6 +741,7 @@ export function isInternalTransferOrMicroSavings(
         cleanLabel !== 'konto' &&
         cleanLabel !== 'bank' &&
         cleanLabel !== 'privat' &&
+        cleanLabel !== 'privatkonto' &&
         cleanLabel !== 'lönekonto' &&
         cleanLabel !== 'lonekonto' &&
         !isLikelyPersonFullName(cleanLabel) &&
@@ -2045,12 +2084,19 @@ function runCoreBankDetection(
         : undefined;
 
       const isGenericHousingPreset = matchedRule.presetId === 'hyra-bostad';
+      const isAppleBillingRule =
+        matchedRule.fallbackName === 'Apple / iCloud' ||
+        matchedRule.keywords.includes('apple.com/bill');
       const cleanedRawName = cleanDisplayMerchantName(
         tx.counterparty_name || tx.description || ''
       );
       const baseDisplayName =
         isGenericHousingPreset && cleanedRawName.length >= 3
           ? `Hyra (${cleanedRawName})`
+          : isAppleBillingRule
+          ? absAmount === 12 || absAmount === 39 || absAmount === 129
+            ? 'Apple / iCloud+'
+            : 'Apple-abonnemang'
           : preset?.name || matchedRule.fallbackName;
 
       const displayName = matchedRule.splitByExactAmount
@@ -2079,8 +2125,10 @@ function runCoreBankDetection(
         : preset?.paymentMethod || matchedRule.paymentMethod;
 
       const STANDARD_APPLE_GOOGLE_SUB_TIERS = new Set([
-        12, 15, 19, 25, 29, 35, 39, 45, 49, 55, 59, 65, 69, 75, 79, 85, 89, 95, 99, 109, 115,
-        119, 129, 139, 149, 159, 169, 179, 189, 199, 219, 229, 239, 249, 279, 299, 349, 399,
+        9, 10, 12, 15, 19, 20, 25, 29, 30, 35, 39, 45, 49, 55, 59, 65, 69, 75, 79, 85, 89, 95, 99,
+        105, 109, 115, 119, 125, 129, 135, 139, 145, 149, 155, 159, 165, 169, 175, 179, 185, 189,
+        195, 199, 209, 219, 229, 239, 249, 259, 269, 279, 289, 299, 319, 329, 349, 359, 379, 399,
+        449, 499,
       ]);
       const isStandardSubTier =
         matchedRule.requireMultipleMonthsForCard && STANDARD_APPLE_GOOGLE_SUB_TIERS.has(absAmount);
@@ -2371,6 +2419,18 @@ function runCoreBankDetection(
   const validIncomeInflows = inflows.filter((tx) => {
     const amt = getNormalizedBankTxAmount(tx);
     if (amt < 1000) return false;
+    const bankCode = getBankTxCodeDescription(tx);
+    if (
+      bankCode === 'transfer' ||
+      bankCode === 'internal transfer' ||
+      bankCode === 'account transfer' ||
+      bankCode === 'instant payment'
+    ) {
+      return false;
+    }
+    if (isInternalTransferOrMicroSavings(tx, userAccounts)) {
+      return false;
+    }
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     if (REFUND_OR_TRANSFER_EXCLUSIONS.some((kw) => text.includes(kw))) {
       return false;
@@ -2418,13 +2478,24 @@ function runCoreBankDetection(
     const isFk =
       rawText.includes('försäkringskassan') ||
       rawText.includes('forsakringskassan') ||
+      rawText.includes('fkassa') ||
       rawText.includes('föräldrapenning') ||
+      rawText.includes('foraldrapenning') ||
       rawText.includes('sjukpenning') ||
       rawText.includes('bostadsbidrag') ||
-      rawText.includes('aktivitetsstöd');
+      rawText.includes('aktivitetsstöd') ||
+      rawText.includes('aktivitetsersättning') ||
+      rawText.includes('sjukersättning') ||
+      rawText.includes('underhållsstöd');
     const isBarnbidrag = rawText.includes('barnbidrag');
     const isPension =
-      rawText.includes('pension') || rawText.includes('pensionsmyndigheten');
+      rawText.includes('pension') ||
+      rawText.includes('pensionsmyndigheten') ||
+      rawText.includes('alecta') ||
+      rawText.includes('amf ') ||
+      rawText.includes('min pension') ||
+      rawText.includes('kåpan') ||
+      rawText.includes('spv ');
     const isAkassa =
       rawText.includes('a-kassa') ||
       rawText.includes('a kassa') ||
@@ -2432,8 +2503,11 @@ function runCoreBankDetection(
       rawText.includes('arbetslöshetsersättning') ||
       rawText.includes('arbetsloshetsersattning') ||
       rawText.includes('alfakassan') ||
+      rawText.includes('alfa-kassan') ||
       rawText.includes('unionen') ||
-      rawText.includes('akademikernas');
+      rawText.includes('akademikernas') ||
+      rawText.includes('småa') ||
+      rawText.includes('smaa');
     const isUtbetalning = rawText.includes('utbetalning');
 
     if (
@@ -2445,7 +2519,7 @@ function runCoreBankDetection(
       !isAkassa &&
       !isBankCodeIncome &&
       !isUtbetalning &&
-      amt < 2000
+      amt < 5000
     ) {
       continue;
     }
@@ -2537,16 +2611,23 @@ function runCoreBankDetection(
       firstText.includes('studiestod') ||
       firstText.includes('försäkringskassan') ||
       firstText.includes('forsakringskassan') ||
+      firstText.includes('fkassa') ||
       firstText.includes('föräldrapenning') ||
+      firstText.includes('foraldrapenning') ||
       firstText.includes('sjukpenning') ||
       firstText.includes('bostadsbidrag') ||
+      firstText.includes('aktivitetsstöd') ||
       firstText.includes('barnbidrag') ||
       firstText.includes('pension') ||
       firstText.includes('a-kassa') ||
       firstText.includes('a kassa') ||
       firstText.includes('akassa') ||
       firstText.includes('alfakassan') ||
+      firstText.includes('alfa-kassan') ||
       firstText.includes('unionen') ||
+      firstText.includes('akademikernas') ||
+      firstText.includes('småa') ||
+      firstText.includes('smaa') ||
       firstText.includes('arbetslös') ||
       firstBankCode.includes('salary') ||
       firstBankCode.includes('pension') ||
@@ -2556,8 +2637,9 @@ function runCoreBankDetection(
       grp.dates.map((d) => (d ? d.slice(0, 7) : '')).filter(Boolean)
     ).size;
 
-    if (!hasExplicitIncomeKeyword && distinctMonths < 2) {
-      continue;
+    if (!hasExplicitIncomeKeyword) {
+      if (distinctMonths < 2) continue;
+      if (isLikelyPersonFullName(grp.name)) continue;
     }
 
     const latestAmount = grp.amounts[0];
@@ -2872,6 +2954,16 @@ export function extractOnboardingAiCandidates(
   for (const tx of core.inflows) {
     const amt = Math.round(getNormalizedBankTxAmount(tx));
     if (amt < 1500) continue;
+    const bankCode = getBankTxCodeDescription(tx);
+    if (
+      bankCode === 'transfer' ||
+      bankCode === 'internal transfer' ||
+      bankCode === 'account transfer' ||
+      bankCode === 'instant payment'
+    ) {
+      continue;
+    }
+    if (isInternalTransferOrMicroSavings(tx, userAccounts)) continue;
     const rawText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
     if (
       /(överföring|overforing|egna konton|sparkonto|swish|återköp|aterkop|retur|refund|kreditering|återbetalning|aterbetalning)/.test(
@@ -2882,6 +2974,7 @@ export function extractOnboardingAiCandidates(
     }
     const normKey = normalizeMerchantKey(tx.counterparty_name || tx.description || '');
     if (!normKey || coveredInflowNames.has(normKey)) continue;
+    if (isLikelyPersonFullName(normKey)) continue;
     const arr = unmatchedInflowsByNorm.get(normKey) || [];
     arr.push(tx);
     unmatchedInflowsByNorm.set(normKey, arr);
@@ -2896,6 +2989,7 @@ export function extractOnboardingAiCandidates(
     const displayName = cleanDisplayMerchantName(
       latestTx.counterparty_name || latestTx.description || normKey
     );
+    if (isLikelyPersonFullName(displayName)) continue;
     const rawDates = groupTxs
       .map((t) => t.booking_date || t.transaction_date || t.value_date || '')
       .filter(Boolean)
