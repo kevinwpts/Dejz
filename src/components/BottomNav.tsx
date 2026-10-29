@@ -165,48 +165,48 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           </div>
         )}
 
-        {/* Split Dock: Main Footer Pill + Detached "Mer" Button Outside */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-2xl shadow-nav p-1 flex items-center justify-around">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id && !isMenuOpen;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onChangeTab(tab.id);
-                  }}
-                  className={`flex-1 py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
-                    isActive
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
-                  }`}
-                >
-                  <Icon size={17} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
-                    {tab.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Unified Floating Glass Capsule Dock (All 5 items in one cohesive pill) */}
+        <div className="bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id && !isMenuOpen;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onChangeTab(tab.id);
+                }}
+                className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+                  isActive
+                    ? 'text-[var(--text-primary)] font-semibold'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
+                }`}
+              >
+                <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
+                <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
 
-          {/* Standalone "Mer" Button Outside Main Footer */}
+          {/* Integrated "Mer" Tab inside the same unified capsule dock */}
           <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
             aria-label="Mer"
-            className={`shrink-0 w-[52px] self-stretch rounded-2xl backdrop-blur-2xl border border-[var(--border-subtle)] shadow-nav p-1 flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+            className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
               isMoreActive
-                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold border-transparent'
-                : 'bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
+                ? 'text-[var(--text-primary)] font-semibold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
-            <SquaresFour size={17} weight={isMoreActive ? 'fill' : 'regular'} />
-            <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">Mer</span>
+            <SquaresFour size={20} weight={isMoreActive ? 'fill' : 'regular'} />
+            <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
+              Mer
+            </span>
           </button>
         </div>
       </nav>

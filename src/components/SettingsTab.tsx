@@ -249,13 +249,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     if (effectiveMode === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
-      root.style.backgroundColor = '#0B0F17';
-      if (metaTheme) metaTheme.setAttribute('content', '#0B0F17');
+      root.style.backgroundColor = '#0A0A0C';
+      if (metaTheme) metaTheme.setAttribute('content', '#0A0A0C');
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
-      root.style.backgroundColor = '#F3F8FC';
-      if (metaTheme) metaTheme.setAttribute('content', '#F3F8FC');
+      root.style.backgroundColor = '#F6F6F4';
+      if (metaTheme) metaTheme.setAttribute('content', '#F6F6F4');
     }
     try {
       localStorage.setItem('dejz_theme_pref', mode);
@@ -383,9 +383,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="space-y-3.5">
-              <label className="block space-y-1.5">
-                <span className="block text-xs font-medium text-[var(--text-secondary)] px-0.5">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+              <label className="px-4 py-3.5 block cursor-text">
+                <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
                   Namn
                 </span>
                 <input
@@ -393,12 +393,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Ditt förnamn"
-                  className="ui-input"
+                  className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                 />
               </label>
 
-              <label className="block space-y-1.5">
-                <span className="block text-xs font-medium text-[var(--text-secondary)] px-0.5">
+              <label className="px-4 py-3.5 block cursor-text">
+                <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
                   E-postadress
                 </span>
                 <input
@@ -406,7 +406,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
                   placeholder="namn@exempel.se"
-                  className="ui-input"
+                  className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                 />
               </label>
             </div>
@@ -636,37 +636,38 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </button>
           </div>
 
-          <div className="ui-hero-header mb-4">
-            <div className="ui-hero-icon">
-              <Wallet size={26} />
-            </div>
-            <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] truncate px-4">
-              {pmFormName.trim() || 'Namnlöst betalsätt'}
-            </h2>
-          </div>
-
           <form onSubmit={handleSavePmSheet} className="space-y-4">
-            <div className="ui-sheet-group">
-              <label className="ui-input-row">
-                <span className="ui-info-label">Namn</span>
-                <input
-                  type="text"
-                  value={pmFormName}
-                  onChange={(e) => setPmFormName(e.target.value)}
-                  placeholder="T.ex. Kort, Swish, Faktura..."
-                  required
-                  className="ui-inline-input"
-                />
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
+              <label className="flex items-center gap-3.5 cursor-text">
+                <div className="w-11 h-11 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                  <Wallet size={22} weight="duotone" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                    Namn på betalsätt
+                  </span>
+                  <input
+                    type="text"
+                    autoFocus={pmSheetMode === 'new'}
+                    value={pmFormName}
+                    onChange={(e) => setPmFormName(e.target.value)}
+                    placeholder="Namn"
+                    required
+                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                  />
+                </div>
               </label>
             </div>
 
-            <div
-              className={`grid gap-2 ${
-                pmSheetMode === 'edit' && paymentMethods.length > 1
-                  ? 'grid-cols-2'
-                  : 'grid-cols-1'
-              }`}
-            >
+            <div className="space-y-2.5">
+              <button
+                type="submit"
+                className="ui-btn-primary"
+              >
+                <Check size={14} weight="bold" />
+                <span>Spara betalsätt</span>
+              </button>
+
               {pmSheetMode === 'edit' && paymentMethods.length > 1 && (
                 <button
                   type="button"
@@ -674,23 +675,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   className="ui-btn-danger"
                 >
                   <Trash size={14} />
-                  <span>Ta bort</span>
+                  <span>Ta bort betalsätt</span>
                 </button>
               )}
-
-              <button
-                type="submit"
-                className="ui-btn-primary"
-              >
-                <Check size={14} weight="bold" />
-                <span>Spara</span>
-              </button>
             </div>
 
             <ConfirmDialog
               isOpen={pmDeleteConfirm}
               title="Ta bort betalsätt?"
-              description={`Vill du ta bort ${pmFormName || 'betalsättet'}?`}
+              description={`${pmFormName || 'Betalsättet'} tas bort.`}
               confirmLabel="Ta bort"
               onConfirm={handleDeleteMethod}
               onCancel={() => setPmDeleteConfirm(false)}
@@ -887,7 +880,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                           <button
                             type="button"
                             onClick={() => setDisconnectConfirmConnId(conn.id)}
-                            className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                            className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
                           >
                             Koppla från
                           </button>
@@ -909,7 +902,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     <button
                       type="button"
                       onClick={() => setDisconnectConfirmConnId('__default__')}
-                      className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                      className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
                     >
                       Koppla från
                     </button>
@@ -990,35 +983,40 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               title="Kontoinställningar"
             >
               {editingAccount && (
-                <form onSubmit={handleSaveAccountDetail} className="space-y-5">
-                  <div className="ui-hero-header">
-                    <div className="flex justify-center mb-3">
+                <form onSubmit={handleSaveAccountDetail} className="space-y-4">
+                  <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+                    <label className="flex items-center gap-3.5 cursor-text">
                       <ItemLogo
                         name={editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
                         logoUrl={editingAccount.logo}
-                        size="xl"
+                        size="lg"
                       />
-                    </div>
-                    <h2 className="font-display font-bold text-lg text-[var(--text-primary)] truncate px-4">
-                      {accountNameInput.trim() || 'Bankkonto'}
-                    </h2>
-                    <div className="ui-hero-amount mt-1">
-                      {formatKr(editingAccount.balance)}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                          Kontonamn
+                        </span>
+                        <input
+                          type="text"
+                          value={accountNameInput}
+                          onChange={(e) => setAccountNameInput(e.target.value)}
+                          placeholder="Kontonamn"
+                          required
+                          className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                        />
+                      </div>
+                    </label>
+
+                    <div className="border-t border-[var(--border-subtle)] pt-3.5 flex items-baseline justify-between gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                        Saldo
+                      </span>
+                      <span className="font-display font-bold text-xl text-[var(--text-primary)] tabular-nums">
+                        {formatKr(editingAccount.balance)}
+                      </span>
                     </div>
                   </div>
 
                   <div className="ui-sheet-group">
-                    <label className="ui-input-row">
-                      <span className="text-[var(--text-muted)] shrink-0">Kontonamn</span>
-                      <input
-                        type="text"
-                        value={accountNameInput}
-                        onChange={(e) => setAccountNameInput(e.target.value)}
-                        placeholder="T.ex. Lönekonto, Sparkonto..."
-                        required
-                        className="ui-inline-input"
-                      />
-                    </label>
 
                     <div className="ui-row">
                       <span className="text-[var(--text-muted)] shrink-0">Bank</span>
@@ -1078,7 +1076,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <ConfirmDialog
               isOpen={disconnectConfirmConnId !== null}
               title="Koppla från bank?"
-              description="Vill du koppla från banken och sluta synka konton?"
+              description="Konton slutar synkas tills du ansluter igen."
               confirmLabel="Koppla från"
               onConfirm={() => {
                 const id = disconnectConfirmConnId;
@@ -1119,75 +1117,83 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'security') {
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card">
-          <div className="ui-row">
-            <div className="min-w-0 pr-3">
-              <span className="ui-row-title text-[13px] sm:text-sm">
+        <div className="ui-admin-card">
+          <button
+            type="button"
+            onClick={handleExportGdprData}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <DownloadSimple size={18} weight="regular" />
+              </span>
+              <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
                 Exportera data
               </span>
-              <span className="ui-row-subtitle">
-                Ladda ner som JSON-fil
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-value">JSON</span>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
               </span>
             </div>
-            <button
-              type="button"
-              onClick={handleExportGdprData}
-              className="ui-btn-sm shrink-0 flex items-center gap-1.5"
-            >
-              <DownloadSimple size={14} />
-              <span>Exportera</span>
-            </button>
-          </div>
+          </button>
 
-          <div className="ui-row">
-            <div className="min-w-0 pr-3">
-              <span className="ui-row-title text-[13px] sm:text-sm">
-                Nollställ data & historik
+          <button
+            type="button"
+            disabled={securityProcessing}
+            onClick={() => setSecurityConfirmAction('reset')}
+            className="ui-admin-row disabled:opacity-50"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <ArrowCounterClockwise size={18} weight="regular" />
               </span>
-              <span className="ui-row-subtitle">
-                Rensa alla poster, bankkopplingar och börja om
+              <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                Nollställ data
               </span>
             </div>
-            <button
-              type="button"
-              disabled={securityProcessing}
-              onClick={() => setSecurityConfirmAction('reset')}
-              className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-semibold hover:bg-amber-500/20 disabled:opacity-50 transition-colors cursor-pointer shrink-0"
-            >
-              Nollställ
-            </button>
-          </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
+          </button>
+        </div>
 
-          <div className="ui-row">
-            <div className="min-w-0 pr-3">
-              <span className="ui-row-title text-[13px] sm:text-sm text-rose-600 dark:text-rose-400">
+        <div className="ui-admin-card">
+          <button
+            type="button"
+            disabled={securityProcessing}
+            onClick={() => setSecurityConfirmAction('delete')}
+            className="ui-admin-row disabled:opacity-50"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="w-5 h-5 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400">
+                <Trash size={18} weight="regular" />
+              </span>
+              <span className="font-medium text-[13px] sm:text-[13.5px] text-rose-600 dark:text-rose-400 truncate">
                 Radera konto
               </span>
-              <span className="ui-row-subtitle">
-                Ta bort konto, bankkopplingar och all data permanent
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
               </span>
             </div>
-            <button
-              type="button"
-              disabled={securityProcessing}
-              onClick={() => setSecurityConfirmAction('delete')}
-              className="px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-500/20 disabled:opacity-50 transition-colors cursor-pointer shrink-0"
-            >
-              Radera
-            </button>
-          </div>
+          </button>
         </div>
 
         <ConfirmDialog
           isOpen={securityConfirmAction !== null}
           loading={securityProcessing}
-          title={securityConfirmAction === 'delete' ? 'Radera konto permanent?' : 'Nollställ data & historik?'}
+          title={securityConfirmAction === 'delete' ? 'Radera konto?' : 'Nollställ data?'}
           description={
             securityConfirmAction === 'delete'
-              ? 'Detta raderar ditt konto och all tillhörande data permanent från servern. Åtgärden går inte att ångra och du loggas ut.'
-              : 'Detta rensar alla dina sparade transaktioner, fasta utgifter, inkomster och bankanslutningar så att du kan börja om från början.'
+              ? 'Ditt konto och all data tas bort. Detta går inte att ångra.'
+              : 'Alla poster och bankkopplingar tas bort så att du kan börja om.'
           }
-          confirmLabel={securityConfirmAction === 'delete' ? 'Radera permanent' : 'Nollställ allt'}
+          confirmLabel={securityConfirmAction === 'delete' ? 'Radera' : 'Nollställ'}
           variant="danger"
           onConfirm={async () => {
             const action = securityConfirmAction;
@@ -1287,7 +1293,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               rows={4}
               value={feedbackMessage}
               onChange={(e) => setFeedbackMessage(e.target.value)}
-              placeholder="Beskriv vad du tänker på..."
+              placeholder="Ditt meddelande"
               required
               className="ui-box-input resize-none"
             />
@@ -1516,21 +1522,21 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                         : 'border-[var(--border-subtle)] opacity-80 group-hover:opacity-100'
                     } ${
                       opt.id === 'light'
-                        ? 'bg-[#EEF4FA]'
+                        ? 'bg-[#F6F6F4]'
                         : opt.id === 'dark'
-                        ? 'bg-[#0B0F17]'
-                        : 'bg-gradient-to-br from-[#EEF4FA] from-50% to-[#0B0F17] to-50%'
+                        ? 'bg-[#0A0A0C]'
+                        : 'bg-gradient-to-br from-[#F6F6F4] from-50% to-[#0A0A0C] to-50%'
                     }`}
                   >
                     {opt.id === 'system' ? (
                       <>
-                        <div className="w-full h-5 rounded-lg bg-white/90 border border-slate-900/5 px-1.5 flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-full bg-slate-800" />
-                          <div className="h-1.5 w-8 rounded-full bg-slate-300" />
+                        <div className="w-full h-5 rounded-lg bg-white/95 border border-black/5 px-1.5 flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-[#111113]" />
+                          <div className="h-1.5 w-8 rounded-full bg-black/15" />
                         </div>
                         <div className="space-y-1.5">
-                          <div className="w-full h-3.5 rounded-md bg-[#131B26] border border-white/10" />
-                          <div className="w-3/4 h-3.5 rounded-md bg-[#131B26] border border-white/10" />
+                          <div className="w-full h-3.5 rounded-md bg-[#141417] border border-white/10" />
+                          <div className="w-3/4 h-3.5 rounded-md bg-[#141417] border border-white/10" />
                         </div>
                       </>
                     ) : (
@@ -1538,18 +1544,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                         <div
                           className={`w-full h-5 rounded-lg px-1.5 flex items-center gap-1 ${
                             opt.id === 'light'
-                              ? 'bg-white border border-slate-900/5'
-                              : 'bg-[#131B26] border border-white/10'
+                              ? 'bg-white border border-black/5'
+                              : 'bg-[#141417] border border-white/10'
                           }`}
                         >
                           <div
                             className={`w-2 h-2 rounded-full ${
-                              opt.id === 'light' ? 'bg-slate-900' : 'bg-slate-100'
+                              opt.id === 'light' ? 'bg-[#111113]' : 'bg-[#F5F5F7]'
                             }`}
                           />
                           <div
                             className={`h-1.5 w-8 rounded-full ${
-                              opt.id === 'light' ? 'bg-slate-200' : 'bg-slate-700'
+                              opt.id === 'light' ? 'bg-black/15' : 'bg-white/20'
                             }`}
                           />
                         </div>
@@ -1557,15 +1563,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                           <div
                             className={`w-full h-3.5 rounded-md ${
                               opt.id === 'light'
-                                ? 'bg-white border border-slate-900/5'
-                                : 'bg-[#131B26] border border-white/10'
+                                ? 'bg-white border border-black/5'
+                                : 'bg-[#141417] border border-white/10'
                             }`}
                           />
                           <div
                             className={`w-3/4 h-3.5 rounded-md ${
                               opt.id === 'light'
-                                ? 'bg-white border border-slate-900/5'
-                                : 'bg-[#131B26] border border-white/10'
+                                ? 'bg-white border border-black/5'
+                                : 'bg-[#141417] border border-white/10'
                             }`}
                           />
                         </div>
@@ -1896,10 +1902,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <ShieldCheck size={18} weight="regular" />
               </span>
-              <div className="min-w-0 flex-1">
-                <span className={rowTitleClass}>Data & säkerhet</span>
-                <span className={rowSubClass}>Nollställ data, radera konto & export</span>
-              </div>
+              <span className={rowTitleClass}>Data & säkerhet</span>
             </div>
             <div className="ui-admin-right">
               <span className="ui-admin-chevron">

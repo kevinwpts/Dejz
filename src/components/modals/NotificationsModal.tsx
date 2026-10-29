@@ -109,7 +109,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             <div className="ui-section-header">
               <h2 className="ui-section-title">
                 <CalendarBlank size={14} />
-                <span>Kommande fasta utgifter ({upcomingUnpaidFixed.length})</span>
+                <span>Kommande fasta utgifter</span>
               </h2>
               <span className="ui-row-amount text-[13px] sm:text-sm">
                 -{formatKr(upcomingUnpaidFixed.reduce((acc, i) => acc + i.exp.amount, 0))}
@@ -171,7 +171,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             <div className="ui-section-header">
               <h2 className="ui-section-title">
                 <Package size={14} className="text-amber-500" weight="fill" />
-                <span>Väntar på paket ({waitingPackages.length})</span>
+                <span>Väntar på paket</span>
               </h2>
             </div>
 

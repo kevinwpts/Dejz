@@ -475,7 +475,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                 {/* Search bar */}
                 <div className="relative">
                   <MagnifyingGlass
-                    size={15}
+                    size={16}
                     className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
                   />
                   <input
@@ -483,7 +483,7 @@ export const BankModal: React.FC<BankModalProps> = ({
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Sök bank..."
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
                   />
                 </div>
 
@@ -592,12 +592,12 @@ export const BankModal: React.FC<BankModalProps> = ({
                         value={manualCallbackUrl}
                         onChange={(e) => setManualCallbackUrl(e.target.value)}
                         placeholder="Klistra in återkopplingslänk..."
-                        className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                        className="flex-1 px-3.5 py-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
                       />
                       <button
                         type="submit"
                         disabled={exchangingCode || !manualCallbackUrl.trim()}
-                        className="ui-btn-sm-primary"
+                        className="ui-btn-sm-primary px-4"
                       >
                         {exchangingCode ? 'Verifierar...' : 'Slutför'}
                       </button>

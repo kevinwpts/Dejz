@@ -922,7 +922,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 <input
                   type="text"
                   autoFocus={isCreateMode}
-                  placeholder="t.ex. Riksbyggen eller Netflix"
+                  placeholder="Butik eller tjänst"
                   value={name}
                   onChange={(e) => {
                     const nextName = e.target.value;
@@ -1062,7 +1062,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                     <ConfirmDialog
                       isOpen={showDeleteConfirm}
                       title="Ta bort fast utgift?"
-                      description={`Vill du ta bort ${displayName} från dina fasta utgifter?`}
+                      description={`${displayName} tas bort från dina fasta utgifter.`}
                       confirmLabel="Ta bort"
                       onConfirm={handleDelete}
                       onCancel={() => setShowDeleteConfirm(false)}
@@ -1086,7 +1086,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               <button
                 type="button"
                 onClick={() => navigateSubView('edit', 'forward')}
-                className="px-3 py-1.5 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <PencilSimple size={13} weight="regular" />
                 <span>Redigera</span>

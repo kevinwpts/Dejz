@@ -691,8 +691,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {isInitialLoading && accounts.length === 0 ? (
             <div className="h-10 w-44 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
           ) : (
-            <div className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.015em] text-[var(--text-primary)] tabular-nums">
-              {formatKr(kvarAttSpendera)}
+            <div className="font-display text-[40px] sm:text-[44px] font-bold tracking-[-0.03em] leading-none text-[var(--text-primary)] tabular-nums mt-1 flex items-baseline">
+              <span>{new Intl.NumberFormat('sv-SE').format(Math.round(kvarAttSpendera))}</span>
+              <span className="text-[20px] sm:text-[22px] font-semibold text-[var(--text-muted)] ml-1.5 tracking-normal">
+                kr
+              </span>
             </div>
           )}
         </div>
@@ -743,7 +746,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO MED MJUK KONTO-ACCORDION                 */}
       {/* ============================================================== */}
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5">
+      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3 sm:px-5 sm:py-3.5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <span className="text-xs text-[var(--text-secondary)] font-medium block">
@@ -752,8 +755,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-7 w-32 rounded-lg bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <div className="font-display text-xl sm:text-2xl font-semibold tracking-[-0.01em] text-[var(--text-primary)] tabular-nums mt-0.5">
-                {formatKr(totalBalance)}
+              <div className="font-display text-2xl sm:text-[26px] font-bold tracking-[-0.02em] text-[var(--text-primary)] tabular-nums mt-0.5 flex items-baseline">
+                <span>{new Intl.NumberFormat('sv-SE').format(Math.round(totalBalance))}</span>
+                <span className="text-[15px] font-semibold text-[var(--text-muted)] ml-1 tracking-normal">
+                  kr
+                </span>
               </div>
             )}
           </div>
@@ -880,7 +886,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           <div className="py-2.5 flex items-center justify-between">
             <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
               <SwishLogo size={14} />
-              <span>Väntar på Swish ({pendingSwishItems.length})</span>
+              <span>Väntar på Swish</span>
             </span>
             <span className="font-display font-semibold text-xs text-emerald-600 dark:text-emerald-400 tabular-nums">
               +{formatKr(pendingSwishItems.reduce((s, i) => s + i.expectedAmt, 0))}
@@ -1011,28 +1017,26 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     setSelectedDateKey(day.dateKey);
                   }
                 }}
-                className={`relative shrink-0 w-[52px] sm:w-[56px] h-[62px] sm:h-[64px] rounded-2xl border transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 ${
+                className={`relative shrink-0 w-[50px] sm:w-[54px] h-[60px] sm:h-[62px] rounded-2xl transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 ${
                   isSelected
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                    : isToday
-                    ? 'bg-sky-500/10 dark:bg-sky-400/15 text-[var(--text-primary)] border-sky-500/45 dark:border-sky-400/50'
-                    : 'bg-[var(--surface-color)]/85 hover:bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-subtle'
+                    : 'bg-transparent hover:bg-[var(--surface-color)]/70 text-[var(--text-primary)]'
                 }`}
               >
                 <span
-                  className={`text-[10.5px] leading-none ${
+                  className={`text-[11px] leading-none ${
                     isSelected
-                      ? 'text-[var(--bg-color)]/80 font-medium'
+                      ? 'text-[var(--bg-color)]/75 font-medium'
                       : isToday
-                      ? 'text-sky-600 dark:text-sky-400 font-semibold'
-                      : 'text-[var(--text-secondary)] font-normal'
+                      ? 'text-[var(--text-primary)] font-semibold'
+                      : 'text-[var(--text-muted)] font-medium'
                   }`}
                 >
                   {day.topLabel}
                 </span>
                 <span
-                  className={`font-display text-[13.5px] tabular-nums leading-none mt-1 no-privacy-blur ${
-                    isSelected || isToday ? 'font-semibold' : 'font-medium'
+                  className={`font-display text-[15px] tabular-nums leading-none mt-1.5 no-privacy-blur ${
+                    isSelected || isToday ? 'font-bold' : 'font-semibold'
                   }`}
                 >
                   {day.dayNum}
@@ -1044,8 +1048,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         isSelected
                           ? 'bg-[var(--bg-color)]'
                           : isToday
-                          ? 'bg-sky-500 dark:bg-sky-400'
-                          : 'bg-[var(--text-muted)]/65'
+                          ? 'bg-[var(--text-primary)]'
+                          : 'bg-[var(--text-muted)]/60'
                       }`}
                     />
                   )}

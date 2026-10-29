@@ -477,7 +477,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                 <input
                   type="text"
                   autoFocus={isCreateMode}
-                  placeholder="t.ex. Lön eller CSN"
+                  placeholder="Inkomstkälla"
                   value={name}
                   onChange={(e) => {
                     const nextName = e.target.value;
@@ -582,7 +582,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                     <ConfirmDialog
                       isOpen={showDeleteConfirm}
                       title="Ta bort inkomst?"
-                      description={`Vill du ta bort ${displayName} från dina inkomster?`}
+                      description={`${displayName} tas bort från dina inkomster.`}
                       confirmLabel="Ta bort"
                       onConfirm={handleDelete}
                       onCancel={() => setShowDeleteConfirm(false)}
@@ -606,7 +606,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               <button
                 type="button"
                 onClick={() => navigateSubView('edit', 'forward')}
-                className="px-3 py-1.5 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <PencilSimple size={13} weight="regular" />
                 <span>Redigera</span>

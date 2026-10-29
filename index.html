@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Dejz" />
-    <meta name="theme-color" content="#F3F8FC" id="theme-color-meta" />
+    <meta name="theme-color" content="#F6F6F4" id="theme-color-meta" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <script>
@@ -34,13 +34,13 @@
           if (isDark) {
             root.classList.add('dark');
             root.classList.remove('light');
-            root.style.backgroundColor = '#0B0F17';
-            if (metaTheme) metaTheme.setAttribute('content', '#0B0F17');
+            root.style.backgroundColor = '#0A0A0C';
+            if (metaTheme) metaTheme.setAttribute('content', '#0A0A0C');
           } else {
             root.classList.add('light');
             root.classList.remove('dark');
-            root.style.backgroundColor = '#F3F8FC';
-            if (metaTheme) metaTheme.setAttribute('content', '#F3F8FC');
+            root.style.backgroundColor = '#F6F6F4';
+            if (metaTheme) metaTheme.setAttribute('content', '#F6F6F4');
           }
           var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
           var isStandalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);

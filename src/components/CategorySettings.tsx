@@ -349,49 +349,45 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           </button>
         </div>
 
-        {/* Hero Live Preview */}
-        <div className="ui-hero-header mb-4">
-          <div className="ui-hero-icon">
-            <CategoryIcon
-              category={formName || 'Kategori'}
-              iconId={formIcon}
-              size={26}
-              badge={false}
-            />
-          </div>
-          <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] truncate px-4">
-            {formName.trim() || 'Namnlös kategori'}
-          </h2>
-        </div>
-
         <form onSubmit={handleSaveSheet} className="space-y-4">
-          <div className="ui-sheet-group">
-            {isProtectedOvrigt ? (
-              <div className="ui-locked-row">
-                <span className="ui-info-label">Namn</span>
-                <span className="ui-info-value text-[var(--text-secondary)]">
-                  {formName} (standard)
-                </span>
-              </div>
-            ) : (
-              <label className="ui-input-row">
-                <span className="ui-info-label">Namn</span>
-                <input
-                  type="text"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Ange namn..."
-                  required
-                  className="ui-inline-input"
+          {/* Stort och tydligt inmatningskort med live-ikon */}
+          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
+            <label className="flex items-center gap-3.5 cursor-text">
+              <div className="w-11 h-11 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
+                <CategoryIcon
+                  category={formName || 'Kategori'}
+                  iconId={formIcon}
+                  size={22}
+                  badge={false}
                 />
-              </label>
-            )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                  Namn på kategori
+                </span>
+                {isProtectedOvrigt ? (
+                  <span className="font-display font-semibold text-lg sm:text-xl text-[var(--text-secondary)] block">
+                    {formName} (standard)
+                  </span>
+                ) : (
+                  <input
+                    type="text"
+                    autoFocus={sheetMode === 'new'}
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="t.ex. Uteliv eller Husdjur"
+                    required
+                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                  />
+                )}
+              </div>
+            </label>
           </div>
 
-          {/* Ikonväljare utan dubbelramar */}
+          {/* Ikonväljare */}
           <div className="space-y-1.5">
-            <span className="px-1 text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)] block">
-              Ikon
+            <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+              Välj ikon
             </span>
             <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] max-h-56 overflow-y-auto">
               {AVAILABLE_CATEGORY_ICONS.map((item) => {
@@ -415,11 +411,15 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
             </div>
           </div>
 
-          <div
-            className={`grid gap-2 ${
-              sheetMode === 'edit' && !isProtectedOvrigt ? 'grid-cols-2' : 'grid-cols-1'
-            }`}
-          >
+          <div className="space-y-2.5">
+            <button
+              type="submit"
+              className="ui-btn-primary"
+            >
+              <Check size={14} weight="bold" />
+              <span>Spara kategori</span>
+            </button>
+
             {sheetMode === 'edit' && !isProtectedOvrigt && (
               <button
                 type="button"
@@ -427,17 +427,9 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                 className="ui-btn-danger"
               >
                 <Trash size={14} />
-                <span>Ta bort</span>
+                <span>Ta bort kategori</span>
               </button>
             )}
-
-            <button
-              type="submit"
-              className="ui-btn-primary"
-            >
-              <Check size={14} weight="bold" />
-              <span>Spara</span>
-            </button>
           </div>
 
           <ConfirmDialog
@@ -445,8 +437,8 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
             title="Ta bort kategori?"
             description={
               selectedUsageCount > 0
-                ? `${selectedUsageCount} poster kommer att flyttas till Övrigt.`
-                : `Vill du ta bort kategorin ${formName}?`
+                ? `${selectedUsageCount} poster flyttas till Övrigt.`
+                : `${formName} tas bort.`
             }
             confirmLabel="Ta bort"
             onConfirm={handleDelete}

@@ -383,8 +383,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Sök transaktioner"
-              aria-label="Sök transaktioner"
+              placeholder="Sök"
+              aria-label="Sök"
               className="ui-search-input"
             />
             {searchQuery && (
@@ -415,7 +415,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           >
             <SlidersHorizontal size={15} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
             {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
+              <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[10px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
                 {activeFilterCount}
               </span>
             )}
@@ -425,11 +425,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
             <button
               type="button"
               onClick={onAddTransaction}
-              title="Lägg till manuellt köp eller inkomst"
-              className="h-[38px] px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
+              title="Lägg till händelse"
+              className="h-[38px] px-3.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1 hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer shrink-0"
             >
               <Plus size={13} weight="bold" />
-              <span>Nytt</span>
+              <span>Lägg till</span>
             </button>
           )}
         </div>
@@ -717,9 +717,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                 { id: 'all' as DateRangeFilter, label: 'Alla datum' },
                 {
                   id: 'period' as DateRangeFilter,
-                  label: period
-                    ? `Löneperiod (${period.startLabel}–${period.endLabel})`
-                    : 'Denna löneperiod',
+                  label: 'Denna löneperiod',
                 },
                 { id: 'last30' as DateRangeFilter, label: 'Senaste 30 dagarna' },
                 { id: 'thisMonth' as DateRangeFilter, label: 'Denna kalendermånad' },
@@ -756,7 +754,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                   onClick={() => setSelectedCategories([])}
                   className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
-                  Rensa ({selectedCategories.length})
+                  Rensa
                 </button>
               )}
             </div>

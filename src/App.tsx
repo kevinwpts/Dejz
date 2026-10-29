@@ -4799,7 +4799,7 @@ export const App: React.FC = () => {
                 className="ui-btn-primary"
               >
                 <SwishLogo size={16} />
-                <span>Öppna Swish ({incomingSwishRequest.amount} kr)</span>
+                <span>Öppna Swish</span>
               </a>
               <button
                 type="button"

@@ -153,13 +153,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onBack || onLogoClick}
-              className="flex items-center gap-2.5 min-w-0 py-1 pr-2 focus:outline-none hover:opacity-85 active:scale-95 transition-all cursor-pointer text-[var(--text-primary)]"
+              className="flex items-center gap-1.5 -ml-1.5 min-w-0 py-1.5 px-1.5 rounded-full focus:outline-none hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer text-[var(--text-primary)]"
               aria-label="Tillbaka"
             >
-              <span className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex items-center justify-center shrink-0">
-                <CaretLeft size={15} weight="bold" />
-              </span>
-              <span className="font-display font-semibold text-[17px] tracking-[-0.005em] truncate">
+              <CaretLeft size={19} weight="bold" className="shrink-0" />
+              <span className="font-display font-semibold text-[17.5px] tracking-[-0.01em] truncate">
                 {pageTitle}
               </span>
             </button>
@@ -171,7 +169,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Profil & inställningar"
               className="flex items-center gap-2.5 py-1 pr-2 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group"
             >
-              <span className="w-10 h-10 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
+              <span className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
                 {userAvatar && !imgError ? (
                   <img
                     src={userAvatar}
@@ -180,31 +178,31 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onError={() => setImgError(true)}
                   />
                 ) : initialChar ? (
-                  <span className="font-display font-semibold text-sm uppercase text-[var(--text-primary)]">
+                  <span className="font-display font-semibold text-[13.5px] uppercase text-[var(--text-primary)]">
                     {initialChar}
                   </span>
                 ) : (
-                  <UserCircle size={24} weight="duotone" className="text-[var(--text-secondary)]" />
+                  <UserCircle size={22} weight="duotone" className="text-[var(--text-secondary)]" />
                 )}
               </span>
             </button>
           )}
 
-          {/* Höger: Sekretessläge, Sök och Notiser i runda ytor (döljs i Profil & Inställningar) */}
+          {/* Höger: Samlad kapsel för Sekretessläge, Sök och Notiser (utan 3 separata runda ramar) */}
           {!hideActions && (
-            <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-0.5 p-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle">
               <button
                 type="button"
                 onClick={togglePrivacyBlur}
                 title={privacyBlur ? 'Visa belopp (Sekretessläge aktivt)' : 'Dölj belopp (Sekretessläge)'}
                 aria-label="Sekretessläge"
-                className={`w-9 h-9 rounded-full border border-[var(--border-subtle)] shadow-subtle active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0 ${
+                className={`w-8 h-8 rounded-full active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0 ${
                   privacyBlur
-                    ? 'text-amber-500 bg-amber-500/12 border-amber-500/20'
-                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
                 }`}
               >
-                {privacyBlur ? <EyeSlash size={18} weight="fill" /> : <Eye size={18} weight="regular" />}
+                {privacyBlur ? <EyeSlash size={17} weight="fill" /> : <Eye size={17} weight="regular" />}
               </button>
 
               {!hideSearch && (
@@ -213,9 +211,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={onSearchClick}
                   title="Sök"
                   aria-label="Sök"
-                  className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+                  className="w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
                 >
-                  <MagnifyingGlass size={18} weight="regular" />
+                  <MagnifyingGlass size={17} weight="regular" />
                 </button>
               )}
 
@@ -224,13 +222,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={onNotificationsClick}
                 title="Notiser & insikter"
                 aria-label="Notiser"
-                className="relative w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+                className="relative w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
               >
-                <Bell size={18} weight="regular" />
+                <Bell size={17} weight="regular" />
                 {hasUnreadNotifications && (
                   <span
                     aria-hidden="true"
-                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-[var(--surface-color)]"
+                    className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[var(--surface-color)]"
                   />
                 )}
               </button>

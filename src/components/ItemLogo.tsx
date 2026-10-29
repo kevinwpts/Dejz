@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowsClockwise } from '@phosphor-icons/react';
 import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
 import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
@@ -44,31 +43,17 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-8 rounded-xl',
-    md: 'w-9 h-9 rounded-xl',
-    lg: 'w-11 h-11 rounded-2xl',
-    xl: 'w-14 h-14 rounded-2xl',
+    sm: 'w-8 h-8 rounded-[11px]',
+    md: 'w-10 h-10 rounded-[13px]',
+    lg: 'w-11 h-11 rounded-[14px]',
+    xl: 'w-14 h-14 rounded-[18px]',
   }[size];
 
   const iconSize = {
     sm: 16,
-    md: 18,
+    md: 19,
     lg: 22,
     xl: 26,
-  }[size];
-
-  const badgeSizeClasses = {
-    sm: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
-    md: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
-    lg: 'w-4 h-4 -bottom-1 -right-1',
-    xl: 'w-5 h-5 -bottom-1 -right-1',
-  }[size];
-
-  const badgeIconSize = {
-    sm: 8,
-    md: 8,
-    lg: 10,
-    xl: 11,
   }[size];
 
   const tintColor = resolveCategoryColor(category || name);
@@ -120,19 +105,5 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     );
   };
 
-  if (!isRecurring) {
-    return renderInnerContent();
-  }
-
-  return (
-    <div className="relative inline-flex shrink-0" title="Återkommande fast post">
-      {renderInnerContent()}
-      <span
-        aria-label="Återkommande"
-        className={`absolute ${badgeSizeClasses} rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center ring-2 ring-[var(--surface-color)] shadow-xs pointer-events-none`}
-      >
-        <ArrowsClockwise size={badgeIconSize} weight="bold" />
-      </span>
-    </div>
-  );
+  return renderInnerContent();
 };

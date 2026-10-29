@@ -377,10 +377,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : ''
               }`}
             >
-              <label className="ui-input-row">
-                <span className="text-[var(--text-muted)] shrink-0 flex items-center gap-2">
-                  <Envelope size={15} />
-                  <span>E-post</span>
+              <label className="px-4 py-3.5 block cursor-text">
+                <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
+                  E-postadress
                 </span>
                 <input
                   type="email"
@@ -391,17 +390,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     setEmail(e.target.value);
                     if (hasPasswordError || errorMsg) handleReset();
                   }}
-                  className="ui-inline-input"
+                  className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                 />
               </label>
 
               {view !== 'forgot_password' && (
-                <label className="ui-input-row">
-                  <span className="text-[var(--text-muted)] shrink-0 flex items-center gap-2">
-                    <Lock size={15} />
-                    <span>Lösenord</span>
+                <label className="px-4 py-3.5 block cursor-text">
+                  <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
+                    Lösenord
                   </span>
-                  <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
@@ -411,14 +409,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         setPassword(e.target.value);
                         if (hasPasswordError || errorMsg) handleReset();
                       }}
-                      className="ui-inline-input"
+                      className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0"
                     >
-                      {showPassword ? <EyeSlash size={15} /> : <Eye size={15} />}
+                      {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
                     </button>
                   </div>
                 </label>

@@ -1182,7 +1182,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                               Math.min(fullAmt, Math.max(0, Number(e.target.value) || 0))
                             );
                           }}
-                          className="w-28 bg-transparent border-0 p-0 text-xs font-display font-bold text-[var(--text-primary)] text-right tabular-nums focus:outline-none"
+                          className="ui-inline-amount-input"
                         />
                       </label>
                     </div>
@@ -1315,9 +1315,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       className="ui-btn-primary"
                     >
                       <Check size={14} weight="bold" />
-                      <span>
-                        Spara min andel ({formatKr(myBudgetShareAmount)})
-                      </span>
+                      <span>Spara min andel</span>
                     </button>
                   </>
                 );
@@ -1329,7 +1327,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <div className="grid grid-cols-3 gap-2">
                 {[
                   {
-                    label: 'Dela lika (50%)',
+                    label: 'Dela lika · 50%',
                     val: Math.max(
                       1,
                       Math.round((activeTx.originalAmount || activeTx.amount) / 2)
@@ -1343,7 +1341,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     ),
                   },
                   {
-                    label: 'Hela (100%)',
+                    label: 'Hela · 100%',
                     val: Math.max(
                       1,
                       Math.round(activeTx.originalAmount || activeTx.amount)
@@ -1380,7 +1378,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     min="1"
                     value={swishAmount}
                     onChange={(e) => setSwishAmount(Math.max(0, Number(e.target.value) || 0))}
-                    className="w-28 bg-transparent border-0 p-0 text-xs font-display font-bold text-[var(--text-primary)] text-right tabular-nums focus:outline-none"
+                    className="ui-inline-amount-input"
                   />
                 </label>
                 <label className="ui-input-row">
@@ -1397,7 +1395,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
               {/* Mitt eget Swish-nummer & QR-kod (i Be om Swish-läge) */}
               {swishMode === 'request' && (
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
+                <div className="p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                       <QrCode size={14} weight="bold" />
@@ -1407,9 +1405,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setIsEditingMyPhone(true)}
-                        className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                        className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer tabular-nums"
                       >
-                        Ändra ({mySwishPhone})
+                        {mySwishPhone} · Ändra
                       </button>
                     )}
                   </div>
@@ -1423,8 +1421,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           setMySwishPhone(e.target.value);
                           saveMySwishPhone(e.target.value.trim());
                         }}
-                        placeholder="Ditt mobilnummer (070-123 45 67)"
-                        className="flex-1 py-2 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                        placeholder="Ditt mobilnummer"
+                        className="flex-1 py-3 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
                       />
                       {normalizedMySwishPhone.length >= 7 && (
                         <button
@@ -1434,7 +1432,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                             setIsEditingMyPhone(false);
                             setShowSwishQr(true);
                           }}
-                          className="ui-btn-sm-primary"
+                          className="ui-btn-sm-primary py-3 px-4 rounded-xl"
                         >
                           Klar
                         </button>
@@ -1444,99 +1442,29 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                   {!isEditingMyPhone && showSwishQr && (
                     <div className="flex flex-col items-center pt-1 pb-1">
-                      {/* Interaktiv QR-kod som kan klickas för att simulera skanning */}
-                      <div className="relative inline-block">
-                        <button
-                          type="button"
-                          onClick={handleSimulateScan}
-                          disabled={simulatedScanState === 'scanning'}
-                          className={`relative p-3.5 rounded-2xl bg-white border border-[var(--border-subtle)] shadow-xs transition-all select-none overflow-hidden ${
-                            simulatedScanState === 'idle'
-                              ? 'cursor-pointer hover:border-emerald-500/60 hover:shadow-md hover:scale-[1.01] active:scale-95 group'
-                              : simulatedScanState === 'scanning'
-                              ? 'cursor-wait ring-2 ring-emerald-500/50'
-                              : 'ring-2 ring-emerald-500'
-                          }`}
-                          title="Tryck på QR-koden för att simulera att den skannas"
-                        >
-                          {qrDataUrl ? (
-                            <img
-                              src={qrDataUrl}
-                              alt="Swish QR-kod"
-                              className="w-44 h-44 object-contain transition-opacity"
-                            />
-                          ) : (
-                            <div className="w-44 h-44 flex items-center justify-center text-xs text-zinc-400">
-                              Skapar QR...
-                            </div>
-                          )}
-
-                          {/* Laserscanner-animering vid pågående skanning */}
-                          {simulatedScanState === 'scanning' && (
-                            <div className="absolute inset-0 pointer-events-none bg-emerald-500/10">
-                              <div className="absolute left-2 right-2 h-1 bg-emerald-500 shadow-[0_0_12px_#10b981] animate-scan-laser rounded-full" />
-                            </div>
-                          )}
-
-                          {/* Grön bekräftelse-overlay vid mottagen Swish */}
-                          {simulatedScanState === 'success' && (
-                            <div className="absolute inset-0 bg-emerald-600/95 backdrop-blur-[2px] flex flex-col items-center justify-center text-white p-3 rounded-2xl animate-scale-in">
-                              <div className="w-12 h-12 rounded-full bg-white text-emerald-600 flex items-center justify-center mb-1.5 shadow-md">
-                                <Check size={28} weight="bold" />
-                              </div>
-                              <span className="font-display font-bold text-base tracking-tight text-white">
-                                +{formatKr(swishAmount)}
-                              </span>
-                              <span className="text-[11px] font-semibold text-emerald-100 mt-0.5">
-                                Swish mottagen!
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Klick-prompt i idle-läge */}
-                          {simulatedScanState === 'idle' && (
-                            <div className="absolute inset-x-2.5 bottom-2.5 py-1 px-2 rounded-xl bg-black/75 backdrop-blur-xs text-white text-[10.5px] font-semibold flex items-center justify-center gap-1.5 opacity-90 group-hover:opacity-100 group-hover:scale-[1.02] transition-all">
-                              <Sparkle size={12} weight="fill" className="text-amber-300" />
-                              <span>Tryck för att simulera skanning</span>
-                            </div>
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Status och hjälpetikett under QR-koden */}
-                      <div className="mt-2 text-center space-y-1">
-                        {simulatedScanState === 'idle' ? (
-                          <p className="text-[11px] font-medium text-[var(--text-muted)]">
-                            Låt din vän skanna med Swish-appen, eller tryck på QR-koden för att simulera skanning ({swishAmount} kr)
-                          </p>
-                        ) : simulatedScanState === 'scanning' ? (
-                          <p className="text-[11.5px] font-semibold text-emerald-600 dark:text-emerald-400 animate-pulse flex items-center justify-center gap-1">
-                            <Sparkle size={13} weight="fill" />
-                            <span>Skannar QR-kod och godkänner Swish...</span>
-                          </p>
+                      <div className="relative p-3.5 rounded-2xl bg-white border border-[var(--border-subtle)] shadow-xs">
+                        {qrDataUrl ? (
+                          <img
+                            src={qrDataUrl}
+                            alt="Swish QR-kod"
+                            className="w-44 h-44 object-contain"
+                          />
                         ) : (
-                          <div className="space-y-1">
-                            <p className="text-[11.5px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
-                              <Check size={14} weight="bold" />
-                              <span>Skanning simulerad! +{formatKr(swishAmount)} har dragits av.</span>
-                            </p>
-                            <button
-                              type="button"
-                              onClick={handleResetSimulation}
-                              className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline cursor-pointer"
-                            >
-                              Testa skanna igen
-                            </button>
+                          <div className="w-44 h-44 flex items-center justify-center text-xs text-zinc-400">
+                            Skapar QR...
                           </div>
                         )}
                       </div>
+                      <p className="text-[11.5px] text-[var(--text-muted)] mt-2.5 text-center">
+                        Skanna med Swish-appen för att betala {formatKr(swishAmount)}
+                      </p>
                     </div>
                   )}
                 </div>
               )}
 
               {/* Sparade kontakter / Mottagare */}
-              <div className="p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-2.5">
+              <div className="p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-[var(--text-primary)]">
                     {swishMode === 'request'
@@ -1554,21 +1482,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
 
                 {isAddingContact && (
-                  <div className="p-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2 animate-fade-in">
-                    <div className="grid grid-cols-2 gap-1.5">
+                  <div className="p-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2.5 animate-fade-in">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="text"
                         value={newContactName}
                         onChange={(e) => setNewContactName(e.target.value)}
-                        placeholder="Namn (t.ex. Sambo)"
-                        className="py-1.5 px-2.5 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none"
+                        placeholder="Namn, t.ex. Sambo"
+                        className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
                       />
                       <input
                         type="tel"
                         value={newContactPhone}
                         onChange={(e) => setNewContactPhone(e.target.value)}
                         placeholder="070-123 45 67"
-                        className="py-1.5 px-2.5 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none"
+                        className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
                       />
                     </div>
                     <button
@@ -1589,7 +1517,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         setNewContactPhone('');
                         setIsAddingContact(false);
                       }}
-                      className="w-full py-1.5 rounded-lg bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-bold cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold cursor-pointer"
                     >
                       Spara kontakt
                     </button>
@@ -1647,8 +1575,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     setSwishPhone(e.target.value);
                     setSwishRecipientName('');
                   }}
-                  placeholder="Mobilnummer (070-123 45 67)"
-                  className="w-full py-2 px-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="Mobilnummer"
+                  className="w-full py-3 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
                 />
               </div>
 
@@ -1783,12 +1711,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <ClockCounterClockwise size={14} weight="bold" />
                       <span>
                         {activeTx.isWaitingForSwish
-                          ? `Bevakas på Hemfliken (${formatKr(
-                              activeTx.pendingSwishAmount || swishAmount
-                            )}) · Tryck för att ta bort`
-                          : `Bevaka ”Väntar på Swish” (${formatKr(
-                              swishAmount
-                            )}) på Hemfliken`}
+                          ? 'Bevakas på Hemfliken · Ta bort'
+                          : 'Bevaka på Hemfliken'}
                       </span>
                     </button>
                   )}
@@ -1817,7 +1741,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="ui-btn-primary"
                 >
                   <SwishLogo size={15} />
-                  <span>Öppna Swish ({swishAmount} kr)</span>
+                  <span>Öppna Swish</span>
                 </button>
               )}
             </>
@@ -1966,7 +1890,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   );
                   navigateSubView('edit', 'forward');
                 }}
-                className="px-3 py-1.5 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <PencilSimple size={13} weight="regular" />
                 <span>Redigera</span>
@@ -2258,7 +2182,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   <input
                     type="text"
                     autoFocus={isCreateMode}
-                    placeholder={isIncome ? 't.ex. Swish eller Lön' : 't.ex. ICA eller Kaffe'}
+                    placeholder={isIncome ? 'Inkomstkälla' : 'Butik eller köp'}
                     value={title}
                     onChange={(e) => {
                       const nextTitle = e.target.value;
@@ -2383,7 +2307,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Lägg till..."
+                  placeholder="Lägg till anteckning"
                   className="ui-inline-input"
                 />
               </label>
@@ -2487,7 +2411,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     <ConfirmDialog
                       isOpen={showDeleteConfirm}
                       title="Ta bort transaktion?"
-                      description={`Vill du ta bort ${activeTx.title} permanent?`}
+                      description={`${activeTx.title} tas bort.`}
                       confirmLabel="Ta bort"
                       onConfirm={handleDelete}
                       onCancel={() => setShowDeleteConfirm(false)}
@@ -2530,7 +2454,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   onClick={() => commitEditChanges('chain')}
                   className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  Uppdatera alla ({similarInfo.transactions.length} st)
+                  Uppdatera alla
                 </button>
 
                 <button

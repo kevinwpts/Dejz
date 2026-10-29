@@ -1266,13 +1266,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           onSubmit={handleNextFromStep1}
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="my-auto py-4">
-            <div className="mb-6">
-              <h1 className="font-display font-semibold text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                Vad heter du?
-              </h1>
-            </div>
+          <div className="shrink-0 pt-6 pb-4">
+            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              Vad heter du?
+            </h1>
+          </div>
 
+          <div className="my-auto py-4">
             <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
               <input
                 type="text"
@@ -1392,13 +1392,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           {/* SUB-VIEW: KOPPLA BANK MED DIREKT SÖKFÄLT + 3x3 GRID PÅ SAMMA SIDA */}
           {step2View === 'grid' && (
             <div className="flex-1 min-h-0 flex flex-col justify-between">
-              <div className="flex-1 min-h-0 flex flex-col justify-center py-2 space-y-4">
-                <div className="shrink-0">
-                  <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                    Koppla din bank
-                  </h1>
-                </div>
+              <div className="shrink-0 pt-6 pb-4">
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Koppla din bank
+                </h1>
+              </div>
 
+              <div className="flex-1 min-h-0 flex flex-col justify-center py-1 space-y-4">
                 {authError && (
                   <div className="shrink-0 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between gap-2.5 animate-scale-in">
                     <div className="flex items-center gap-2">
@@ -1855,13 +1855,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-5"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="my-auto py-4 space-y-10">
-            <div>
-              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                När får du lön?
-              </h1>
-            </div>
+          <div className="shrink-0 pt-6 pb-4">
+            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              När får du lön?
+            </h1>
+          </div>
 
+          <div className="my-auto py-4 space-y-10">
             {/* Direkt på bakgrunden utan kort/modul */}
             <div className="space-y-6 py-2">
               <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums text-center">
@@ -1932,43 +1932,41 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-6"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="my-auto py-4 space-y-8">
-            <div>
-              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                Kvar efter fasta räkningar
-              </h1>
+          <div className="shrink-0 pt-6 pb-4">
+            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              Kvar efter fasta räkningar
+            </h1>
+          </div>
+
+          <div className="my-auto py-4 space-y-6">
+            <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums">
+              {formatKr(kvarAttSpendera)}
             </div>
 
-            <div className="space-y-6">
-              <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums">
-                {formatKr(kvarAttSpendera)}
+            <div className="pt-4 border-t border-[var(--border-subtle)]/60 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--text-muted)]">
+                  Inkomster
+                </span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  +{formatKr(totalInc)}
+                </span>
               </div>
 
-              <div className="pt-4 border-t border-[var(--border-subtle)]/60 space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[var(--text-muted)]">
-                    Inkomster
-                  </span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                    +{formatKr(totalInc)}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--text-muted)]">
+                  Fasta utgifter
+                </span>
+                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                  -{formatKr(totalFix)}
+                </span>
+              </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-[var(--text-muted)]">
-                    Fasta utgifter
-                  </span>
-                  <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                    -{formatKr(totalFix)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-[var(--text-muted)]">Lönedag</span>
-                  <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                    {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--text-muted)]">Lönedag</span>
+                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                  {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
+                </span>
               </div>
             </div>
           </div>

@@ -683,114 +683,114 @@ h6 {
   --orange-800: #9A4D00;
   --orange-900: #713800;
 
-  /* Airy Sky-Porcelain Brand Scale */
-  --brand-peach: #F3F8FC;
-  --brand-pink: #F3F8FC;
-  --brand-lavender: #F3F8FC;
-  --brand-cream: #F3F8FC;
+  /* Warm Stone / Alabaster Brand Scale */
+  --brand-peach: #F6F6F4;
+  --brand-pink: #F6F6F4;
+  --brand-lavender: #F6F6F4;
+  --brand-cream: #F6F6F4;
   --brand-gradient: none;
 
   /* Dejz Official Brand Logo Color */
-  --logo-color: #0F172A;
+  --logo-color: #111113;
 
   /* Universal Card Gap / Spacing */
   --card-gap: 0.65rem;
   --menu-content-gap: 1.5rem;
 
-  /* Seamless Light Theme Background & Surfaces (Uniform #F3F8FC from status bar to bottom) */
-  --bg-top-color: #F3F8FC;
-  --bg-color: #F3F8FC;
-  --bg-secondary: #EEF4FA;
+  /* Seamless Light Theme Background & Surfaces (Warm Stone / Alabaster #F6F6F4) */
+  --bg-top-color: #F6F6F4;
+  --bg-color: #F6F6F4;
+  --bg-secondary: #EFEFED;
   --bg-gradient: none;
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
-  --surface-raised: #FFFFFF;
-  --surface-high: #F1F6FA;
+  --surface-raised: #EFEFED;
+  --surface-high: #EFEFED;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #EEF4FA;
-  --surface-input: #EEF4FA;
-  --surface-hover: #F1F6FA;
-  --surface-tint: rgba(14, 165, 233, 0.02);
+  --surface-muted: #EFEFED;
+  --surface-input: #EFEFED;
+  --surface-hover: #F2F2F0;
+  --surface-tint: rgba(17, 17, 19, 0.02);
 
-  --text-primary: #0F172A;
-  --text-metric-label: #1E293B;
-  --text-secondary: #334155;
-  --text-tertiary: #475569;
-  --text-muted: #56687D;
-  --text-disabled: #94A3B8;
-  --text-inactive: #64748B;
+  --text-primary: #111113;
+  --text-metric-label: #111113;
+  --text-secondary: #52525B;
+  --text-tertiary: #71717A;
+  --text-muted: #8E8E93;
+  --text-disabled: #A1A1AA;
+  --text-inactive: #8E8E93;
 
-  --border-subtle: rgba(15, 23, 42, 0.055);
-  --border-color: rgba(15, 23, 42, 0.06);
-  --border-control: rgba(15, 23, 42, 0.11);
-  --border-strong: rgba(15, 23, 42, 0.16);
-  --border-divider: rgba(15, 23, 42, 0.05);
-  --border-menu-divider: rgba(15, 23, 42, 0.05);
+  --border-subtle: rgba(17, 17, 19, 0.06);
+  --border-color: rgba(17, 17, 19, 0.06);
+  --border-control: rgba(17, 17, 19, 0.11);
+  --border-strong: rgba(17, 17, 19, 0.16);
+  --border-divider: rgba(17, 17, 19, 0.055);
+  --border-menu-divider: rgba(17, 17, 19, 0.055);
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #FFFFFF;
-  --chip-text: #334155;
-  --chip-active-bg: #0F172A;
+  --chip-text: #52525B;
+  --chip-active-bg: #111113;
   --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F3F8FC;
-  --surface-nested: #F3F8FC;
+  --card-nested-bg: #F6F6F4;
+  --surface-nested: #F6F6F4;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Minimal Card Shadows, Discreet Nav & Menu Shadows */
-  --shadow-level-1: 0 2px 8px -3px rgba(14, 42, 71, 0.025);
-  --shadow-level-2: 0 8px 20px -6px rgba(14, 42, 71, 0.05);
-  --shadow-level-3: 0 14px 28px -8px rgba(14, 42, 71, 0.07);
+  --shadow-level-1: 0 2px 10px -4px rgba(17, 17, 19, 0.03);
+  --shadow-level-2: 0 8px 24px -6px rgba(17, 17, 19, 0.06);
+  --shadow-level-3: 0 14px 32px -8px rgba(17, 17, 19, 0.08);
 
-  /* Brand Accents & Colors - Luminous Sky Cyan & Warm Coral-Amber */
-  --accent-color: #0EA5E9;
-  --accent-hover: #0284C7;
-  --accent-pressed: #0369A1;
-  --accent-gradient: linear-gradient(135deg, #2AD0FA 0%, #0EA5E9 55%, #0284C7 100%);
+  /* Brand Accents & Colors - Carbon Black Primary & Emerald Inflows */
+  --accent-color: #111113;
+  --accent-hover: #27272A;
+  --accent-pressed: #09090B;
+  --accent-gradient: none;
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(14, 165, 233, 0.10);
-  --accent-container: rgba(14, 165, 233, 0.10);
-  --on-accent-container: #0284C7;
+  --accent-soft: rgba(17, 17, 19, 0.06);
+  --accent-container: rgba(17, 17, 19, 0.06);
+  --on-accent-container: #111113;
   --accent-on-solid: #FFFFFF;
   --dejz-accent: var(--accent-color);
   --accent-glow: none;
   --accent-secondary-color: var(--accent-container);
 
   /* Primary & Secondary button states (Light mode) */
-  --btn-primary-bg: #0F172A;
+  --btn-primary-bg: #111113;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #1E293B;
-  --btn-primary-pressed: #0F172A;
+  --btn-primary-hover: #27272A;
+  --btn-primary-pressed: #09090B;
   --btn-secondary-bg: #FFFFFF;
 
   --modal-bg: var(--bg-color);
-  --shadow-modal: 0 16px 36px -10px rgba(15, 23, 42, 0.10), 0 4px 12px -4px rgba(15, 23, 42, 0.04);
-  --shadow-nav: 0 8px 22px -6px rgba(15, 23, 42, 0.065), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
-  --shadow-subtle: 0 2px 8px -3px rgba(14, 42, 71, 0.025);
+  --shadow-modal: 0 20px 44px -12px rgba(17, 17, 19, 0.12), 0 4px 12px -4px rgba(17, 17, 19, 0.04);
+  --shadow-nav: 0 10px 30px -6px rgba(17, 17, 19, 0.08), 0 2px 8px -2px rgba(17, 17, 19, 0.04);
+  --shadow-subtle: 0 1px 4px rgba(17, 17, 19, 0.025);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #EEF4FA;
+  --bg-hover: #F2F2F0;
 
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
 
-  --success-color: #16A34A;
-  --success-container: rgba(22, 163, 74, 0.10);
-  --danger-color: #F43F5E;
-  --danger-container: rgba(244, 63, 94, 0.10);
-  --warning-color: #FB923C;
-  --warning-container: rgba(251, 146, 60, 0.12);
-  --info-color: #0EA5E9;
-  --info-container: rgba(14, 165, 233, 0.10);
-  --scrim-color: rgba(15, 23, 42, 0.45);
+  --success-color: #10B981;
+  --success-container: rgba(16, 185, 129, 0.10);
+  --danger-color: #EF4444;
+  --danger-container: rgba(239, 68, 68, 0.10);
+  --warning-color: #F59E0B;
+  --warning-container: rgba(245, 158, 11, 0.12);
+  --info-color: #111113;
+  --info-container: rgba(17, 17, 19, 0.06);
+  --scrim-color: rgba(17, 17, 19, 0.45);
 
-  --nav-active-color: #0F172A;
-  --nav-inactive-color: #475569;
-  --nav-plus-bg: #FB923C;
+  --nav-active-color: #111113;
+  --nav-inactive-color: #8E8E93;
+  --nav-plus-bg: #111113;
   --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
 
@@ -801,12 +801,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #0F172A;
+  --date-active-bg: #111113;
   --date-active-color: #FFFFFF;
   --date-active-shadow: none;
-  --date-inactive-bg: #FFFFFF;
-  --date-inactive-border: rgba(15, 23, 42, 0.05);
-  --date-inactive-color: #475569;
+  --date-inactive-bg: transparent;
+  --date-inactive-border: transparent;
+  --date-inactive-color: #636366;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -887,117 +887,118 @@ h6 {
 }
 
 .black-theme {
-  --bg-top-color: #0B0F17;
-  --bg-color: #0B0F17;
-  --bg-secondary: #0B0F17;
+  --bg-top-color: #0A0A0C;
+  --bg-color: #0A0A0C;
+  --bg-secondary: #0A0A0C;
   --bg-gradient: none;
-  --surface-color: #131B26;
-  --surface-gradient: #131B26;
-  --surface-solid: #131B26;
-  --surface-raised: #1A2433;
-  --surface-elevated: #1A2433;
-  --surface-elevated-gradient: #1A2433;
+  --surface-color: #141417;
+  --surface-gradient: #141417;
+  --surface-solid: #141417;
+  --surface-raised: #1C1C21;
+  --surface-elevated: #1C1C21;
+  --surface-elevated-gradient: #1C1C21;
   --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
   --shadow-subtle: 0 8px 24px -6px rgba(0, 0, 0, 0.35);
-  --surface-high: #1E293B;
-  --surface-muted: #1E293B;
-  --surface-input: #1E293B;
-  --surface-hover: #243144;
-  --bg-hover: #243144;
-  --transaction-bg: #131B26;
-  --card-nested-bg: #1A2433;
-  --surface-nested: #1A2433;
+  --surface-high: #1C1C21;
+  --surface-muted: #1C1C21;
+  --surface-input: #1C1C21;
+  --surface-hover: #24242B;
+  --bg-hover: #24242B;
+  --transaction-bg: #141417;
+  --card-nested-bg: #1C1C21;
+  --surface-nested: #1C1C21;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
-  --chip-bg: #1A2433;
-  --text-metric-label: #E2E8F0;
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-control: #2A3648;
-  --border-strong: #334155;
-  --border-divider: rgba(255, 255, 255, 0.06);
-  --border-menu-divider: rgba(255, 255, 255, 0.06);
-  --input-bg: #1A2433;
-  --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
-  --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
-  --on-accent-container: #38BDF8;
+  --chip-bg: #1C1C21;
+  --text-metric-label: #F5F5F7;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-control: #27272F;
+  --border-strong: #32323C;
+  --border-divider: rgba(255, 255, 255, 0.065);
+  --border-menu-divider: rgba(255, 255, 255, 0.065);
+  --input-bg: #1C1C21;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-container: rgba(255, 255, 255, 0.08);
+  --on-accent-container: #F5F5F7;
   --accent-secondary-color: var(--accent-container);
-  --btn-primary-bg: #38BDF8;
-  --btn-primary-text: #0B0F17;
-  --btn-primary-hover: #7DD3FC;
-  --btn-primary-pressed: #0EA5E9;
-  --btn-secondary-bg: #1A2433;
+  --btn-primary-bg: #F5F5F7;
+  --btn-primary-text: #0A0A0C;
+  --btn-primary-hover: #E5E5EA;
+  --btn-primary-pressed: #D1D1D6;
+  --btn-secondary-bg: #1C1C21;
 
-  --success-container: rgba(74, 222, 128, 0.15);
-  --warning-container: rgba(251, 191, 36, 0.15);
-  --danger-container: rgba(244, 63, 94, 0.16);
+  --success-container: rgba(16, 185, 129, 0.15);
+  --warning-container: rgba(245, 158, 11, 0.15);
+  --danger-container: rgba(239, 68, 68, 0.16);
   --info-container: var(--surface-muted);
 }
 
 .dark {
-  /* Deep Midnight Slate Dark Theme */
-  --bg-top-color: #0B0F17;
-  --bg-color: #0B0F17;
-  --bg-secondary: #0B0F17;
+  /* Obsidian Carbon Dark Theme */
+  --bg-top-color: #0A0A0C;
+  --bg-color: #0A0A0C;
+  --bg-secondary: #0A0A0C;
   --bg-gradient: none;
 
   /* Layer 1: Surface */
-  --surface-color: #131B26;
-  --surface-gradient: #131B26;
-  --surface-solid: #131B26;
+  --surface-color: #141417;
+  --surface-gradient: #141417;
+  --surface-solid: #141417;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #1A2433;
-  --surface-elevated: #1A2433;
-  --surface-elevated-gradient: #1A2433;
+  --surface-raised: #1C1C21;
+  --surface-elevated: #1C1C21;
+  --surface-elevated-gradient: #1C1C21;
   --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #1E293B;
-  --surface-muted: #1E293B;
-  --surface-input: #1E293B;
-  --surface-hover: #243144;
-  --bg-hover: #243144;
+  --surface-high: #1C1C21;
+  --surface-muted: #1C1C21;
+  --surface-input: #1C1C21;
+  --surface-hover: #24242B;
+  --bg-hover: #24242B;
   --surface-tint: transparent;
 
   /* Typography */
-  --text-primary: #F8FAFC;
-  --text-metric-label: #E2E8F0;
-  --text-secondary: #CBD5E1;
-  --text-tertiary: #94A3B8;
-  --text-muted: #94A3B8;
-  --text-disabled: #64748B;
-  --text-inactive: #64748B;
+  --text-primary: #F5F5F7;
+  --text-metric-label: #F5F5F7;
+  --text-secondary: #98989F;
+  --text-tertiary: #8E8E93;
+  --text-muted: #6E6E73;
+  --text-disabled: #48484A;
+  --text-inactive: #6E6E73;
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.065);
-  --border-color: rgba(255, 255, 255, 0.065);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-color: rgba(255, 255, 255, 0.07);
   --border-control: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.18);
   --border-divider: rgba(255, 255, 255, 0.065);
   --border-menu-divider: rgba(255, 255, 255, 0.065);
   --inner-highlight: transparent;
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --accent-soft: color-mix(in srgb, var(--accent-color) 18%, transparent);
-  --accent-container: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
-  --on-accent-container: #38BDF8;
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --accent-color: #F5F5F7;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-container: rgba(255, 255, 255, 0.08);
+  --on-accent-container: #F5F5F7;
   --accent-secondary-color: var(--accent-container);
-  --btn-primary-bg: #F8FAFC;
-  --btn-primary-text: #0B0F17;
-  --btn-primary-hover: #E2E8F0;
-  --btn-primary-pressed: #CBD5E1;
-  --btn-secondary-bg: #1A2433;
+  --btn-primary-bg: #F5F5F7;
+  --btn-primary-text: #0A0A0C;
+  --btn-primary-hover: #E5E5EA;
+  --btn-primary-pressed: #D1D1D6;
+  --btn-secondary-bg: #1C1C21;
 
   --chip-bg: rgba(255, 255, 255, 0.06);
-  --chip-text: #CBD5E1;
-  --chip-active-bg: #F8FAFC;
-  --chip-active-text: #0B0F17;
+  --chip-text: #98989F;
+  --chip-active-bg: #F5F5F7;
+  --chip-active-text: #0A0A0C;
 
-  --transaction-bg: #131B26;
-  --card-nested-bg: #1A2433;
-  --surface-nested: #1A2433;
-  --remaining-today-gradient: #131B26;
+  --transaction-bg: #141417;
+  --card-nested-bg: #1C1C21;
+  --surface-nested: #1C1C21;
+  --remaining-today-gradient: #141417;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 
@@ -1005,8 +1006,8 @@ h6 {
   --shadow-level-1: none;
   --shadow-level-2: none;
   --shadow-level-3: none;
-  --shadow-modal: 0 18px 28px -6px rgba(0, 0, 0, 0.55), 0 6px 10px -4px rgba(0, 0, 0, 0.35);
-  --shadow-nav: 0 8px 20px -4px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 20px 36px -6px rgba(0, 0, 0, 0.65), 0 6px 12px -4px rgba(0, 0, 0, 0.45);
+  --shadow-nav: 0 10px 28px -4px rgba(0, 0, 0, 0.55);
   --shadow-subtle: none;
 
   --logo-color: #FFFFFF;
@@ -1015,20 +1016,20 @@ h6 {
   --card-inner-stroke: none;
 
   /* Status Colors */
-  --success-color: #4ADE80;
-  --success-container: rgba(74, 222, 128, 0.15);
-  --warning-color: #FB923C;
-  --warning-container: rgba(251, 146, 60, 0.15);
-  --danger-color: #FB7185;
-  --danger-container: rgba(244, 63, 94, 0.16);
-  --info-color: #38BDF8;
+  --success-color: #34D399;
+  --success-container: rgba(52, 211, 153, 0.15);
+  --warning-color: #FBBF24;
+  --warning-container: rgba(251, 191, 36, 0.15);
+  --danger-color: #F87171;
+  --danger-container: rgba(248, 113, 113, 0.16);
+  --info-color: #F5F5F7;
   --info-container: var(--surface-muted);
-  --scrim-color: rgba(4, 9, 20, 0.65);
+  --scrim-color: rgba(0, 0, 0, 0.68);
 
-  --nav-active-color: #38BDF8;
-  --nav-inactive-color: #94A3B8;
-  --nav-plus-bg: #FB923C;
-  --nav-plus-color: #FFFFFF;
+  --nav-active-color: #F5F5F7;
+  --nav-inactive-color: #6E6E73;
+  --nav-plus-bg: #F5F5F7;
+  --nav-plus-color: #0A0A0C;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -1038,12 +1039,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #F8FAFC;
-  --date-active-color: #0B0F17;
+  --date-active-bg: #F5F5F7;
+  --date-active-color: #0A0A0C;
   --date-active-shadow: none;
-  --date-inactive-bg: #131B26;
-  --date-inactive-border: rgba(255, 255, 255, 0.06);
-  --date-inactive-color: #94A3B8;
+  --date-inactive-bg: transparent;
+  --date-inactive-border: transparent;
+  --date-inactive-color: #8E8E93;
 }
 
 /* Glass-Card Surface Utility (borderless translucent glass) */
@@ -1736,21 +1737,11 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
 }
 
 /* ==========================================================================
-   GLOBAL TYPOGRAPHY REFINEMENT (Nordic Airy Proportions)
-   Prevents thick/bloated weights (700/800) and cramped tracking (-0.025em)
+   GLOBAL TYPOGRAPHY REFINEMENT (Nordic Proportions)
    ========================================================================== */
 .font-extrabold,
 .font-black {
-  font-weight: 600 !important;
-}
-
-.font-bold {
-  font-weight: 600 !important;
-}
-
-.tracking-tight,
-.tracking-tighter {
-  letter-spacing: -0.008em !important;
+  font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -1781,7 +1772,7 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-section-action {
-    @apply py-1 px-2.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
+    @apply py-1.5 px-3.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[12.5px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
   }
 
   .ui-date-header {
@@ -1790,32 +1781,32 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
 
   /* 2. Cards & Grouped Containers */
   .ui-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[26px] shadow-subtle overflow-hidden;
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] shadow-subtle overflow-hidden;
   }
 
   .ui-card-p {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[26px] shadow-subtle p-4 sm:p-5;
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] shadow-subtle p-4 sm:p-5;
   }
 
   .ui-list-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)] overflow-hidden;
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-0.5 sm:px-4 sm:py-1 divide-y divide-[var(--border-subtle)] overflow-hidden;
   }
 
   .ui-group-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl divide-y divide-[var(--border-subtle)] overflow-hidden;
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] divide-y divide-[var(--border-subtle)] overflow-hidden;
   }
 
   /* Admin & Settings Lists — +8-12px row height, inset dividers starting at text and ending before right edge, aligned right columns */
   .ui-admin-card {
-    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden;
+    @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] overflow-hidden;
   }
 
   .ui-admin-row {
-    @apply relative w-full px-4 py-3.5 sm:py-4 min-h-[52px] flex items-center justify-between gap-3.5 text-[13px] sm:text-[13.5px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply relative w-full px-4 py-3.5 sm:py-4 min-h-[52px] flex items-center justify-between gap-3.5 text-[14px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-admin-row-static {
-    @apply relative w-full px-4 py-3.5 sm:py-4 min-h-[52px] flex items-center justify-between gap-3.5 text-[13px] sm:text-[13.5px] text-left;
+    @apply relative w-full px-4 py-3.5 sm:py-4 min-h-[52px] flex items-center justify-between gap-3.5 text-[14px] text-left;
   }
 
   .ui-admin-row:not(:last-child)::after,
@@ -1851,7 +1842,7 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-sheet-group {
-    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-[13px] overflow-hidden;
+    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-[13.5px] overflow-hidden;
   }
 
   .ui-sheet-box {
@@ -1860,23 +1851,23 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
 
   /* 3. List Rows & Transaction Rows */
   .ui-tx-row {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[14px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-tx-row-static {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] text-left;
+    @apply w-full py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[14px] text-left;
   }
 
   .ui-row {
-    @apply w-full px-4 py-3 sm:py-3.5 min-h-[46px] flex items-center justify-between gap-3 text-[13px] text-left;
+    @apply w-full px-4 py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13.5px] text-left;
   }
 
   .ui-locked-row {
-    @apply w-full px-4 py-3 sm:py-3.5 min-h-[46px] flex items-center justify-between gap-3 text-[13px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
+    @apply w-full px-4 py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13.5px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
   }
 
   .ui-row-btn {
-    @apply w-full px-4 py-3 sm:py-3.5 min-h-[46px] flex items-center justify-between gap-3 text-[13px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full px-4 py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13.5px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-input-row {
@@ -1884,11 +1875,11 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-row-title {
-    @apply font-medium text-[13px] sm:text-[13.5px] tracking-[-0.005em] text-[var(--text-primary)] block truncate;
+    @apply font-semibold text-[15px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] block truncate;
   }
 
   .ui-row-subtitle {
-    @apply text-[11.5px] font-normal text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5 truncate;
+    @apply text-[12.5px] font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
   }
 
   .ui-info-label {
@@ -1896,19 +1887,19 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-info-value {
-    @apply text-[13.5px] font-normal text-[var(--text-primary)];
+    @apply text-[13.5px] font-medium text-[var(--text-primary)];
   }
 
   .ui-row-amount {
-    @apply font-display font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.008em] text-[var(--text-primary)] tabular-nums block;
+    @apply font-display font-semibold text-[15px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
   }
 
   .ui-row-amount-income {
-    @apply font-display font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.008em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
+    @apply font-display font-semibold text-[15px] tracking-[-0.01em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
   }
 
   .ui-row-meta {
-    @apply text-[11px] font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
+    @apply text-[11.5px] font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
   }
 
   /* 4. 3-Column Summary & Stat Grids */
@@ -1917,11 +1908,11 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-stat-label {
-    @apply text-[11px] font-medium text-[var(--text-secondary)] block truncate;
+    @apply text-[11.5px] font-medium text-[var(--text-muted)] block truncate;
   }
 
   .ui-stat-value {
-    @apply font-display font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.008em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
+    @apply font-display font-semibold text-[14.5px] sm:text-[15px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
   }
 
   .ui-stat-sub {
@@ -1938,11 +1929,11 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-sheet-title {
-    @apply font-display font-semibold text-[15.5px] sm:text-[16px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
+    @apply font-display font-semibold text-[16px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
   }
 
   .ui-icon-btn {
-    @apply w-8 h-8 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0;
+    @apply w-8 h-8 rounded-full bg-[var(--bg-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center transition-colors cursor-pointer shrink-0;
   }
 
   .ui-icon-btn-surface {
@@ -1954,48 +1945,48 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-hero-icon {
-    @apply w-15 h-15 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-3 text-[var(--text-primary)] shrink-0;
+    @apply w-15 h-15 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-3 text-[var(--text-primary)] shrink-0;
   }
 
   .ui-hero-amount {
-    @apply font-display font-semibold text-2xl sm:text-3xl text-[var(--text-primary)] tabular-nums tracking-[-0.015em];
+    @apply font-display font-bold text-3xl sm:text-4xl text-[var(--text-primary)] tabular-nums tracking-[-0.025em];
   }
 
   .ui-hero-amount-income {
-    @apply font-display font-semibold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 tabular-nums tracking-[-0.015em];
+    @apply font-display font-bold text-3xl sm:text-4xl text-emerald-600 dark:text-emerald-400 tabular-nums tracking-[-0.025em];
   }
 
   .ui-icon-badge {
-    @apply w-9 h-9 rounded-full bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
+    @apply w-9 h-9 rounded-xl bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
   }
 
-  /* 6. Buttons & Confirmation Bars */
+  /* 6. Buttons & Confirmation Bars (Full 52px Capsule CTAs & Unified Pill Actions) */
   .ui-btn-primary {
-    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[15px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14.5px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[15.5px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
-    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-6 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[15px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
-    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[52px] px-6 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[15px] font-semibold text-rose-600 dark:text-rose-400 hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm {
-    @apply px-2.5 py-1 rounded-lg bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0;
+    @apply px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[12.5px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-btn-sm-primary {
-    @apply px-2.5 py-1 rounded-lg bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 flex items-center justify-center gap-1 transition-opacity cursor-pointer shrink-0;
+    @apply px-3.5 py-1.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[12.5px] font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-confirm-danger {
-    @apply p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between gap-3 text-xs;
+    @apply p-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 text-xs;
   }
 
   .ui-confirm-neutral {
@@ -2032,11 +2023,15 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-search-input {
-    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-[13.5px] font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-base sm:text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+  }
+
+  .ui-box-input {
+    @apply w-full p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--text-primary)] transition-colors;
   }
 
   .ui-inline-input {
-    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-base sm:text-[15px] font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
+    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-base sm:text-[15px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
   }
 
   .ui-inline-amount-input {

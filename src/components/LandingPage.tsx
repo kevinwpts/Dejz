@@ -396,8 +396,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     : 'border-[var(--border-subtle)]'
                 }`}
               >
-                <label className="px-4 py-3.5 block cursor-text">
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
+                <label className="px-4.5 py-4 block cursor-text">
+                  <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">
                     E-postadress
                   </span>
                   <input
@@ -409,21 +409,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       if (hasPasswordError || errorMsg) clearErrors();
                     }}
                     placeholder="namn@exempel.se"
-                    className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
+                    className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                   />
                 </label>
 
                 {view !== 'forgot_password' && (
-                  <div className="border-t border-[var(--border-subtle)] px-4 py-3.5">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-semibold text-[var(--text-muted)]">
+                  <div className="border-t border-[var(--border-subtle)] px-4.5 py-4">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-medium text-[var(--text-secondary)]">
                         Lösenord
                       </span>
                       {view === 'login' && (
                         <button
                           type="button"
                           onClick={() => switchView('forgot_password', 'forward')}
-                          className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                          className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                         >
                           Glömt lösenord?
                         </button>
@@ -440,7 +440,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           if (hasPasswordError || errorMsg) clearErrors();
                         }}
                         placeholder="Minst 6 tecken"
-                        className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
+                        className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                       />
                       <button
                         type="button"
@@ -448,7 +448,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0"
                         aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
                       >
-                        {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
+                        {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
                   </div>

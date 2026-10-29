@@ -277,7 +277,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Sök butik, utgift, belopp eller kategori..."
+                placeholder="Sök"
                 className="ui-search-input"
               />
               {query && (
