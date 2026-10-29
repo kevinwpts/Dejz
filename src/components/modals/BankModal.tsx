@@ -125,9 +125,9 @@ export const BankModal: React.FC<BankModalProps> = ({
     }
   }, [isOpen, preselectedBankName, banks, step, startingAuth]);
 
-  // Poll status when window regains focus during 'authorizing' step
+  // Poll status when window regains focus after bank auth
   useEffect(() => {
-    if (!isOpen || step !== 'authorizing') return;
+    if (!isOpen) return;
     const handleFocus = async () => {
       try {
         const status = await bankService.getStatus();
@@ -156,7 +156,7 @@ export const BankModal: React.FC<BankModalProps> = ({
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [isOpen, step, connections.length, onBankStateUpdated]);
+  }, [isOpen, connections.length, onBankStateUpdated]);
 
   const handleSelectBank = async (bank: BankAspsp, reconnectConnectionId?: string | null) => {
     setSelectedBank(bank);
@@ -178,11 +178,12 @@ export const BankModal: React.FC<BankModalProps> = ({
 
       setAuthUrl(res.url);
       setAuthState(res.state);
-      setStep('authorizing');
 
       const isInIframe = window.self !== window.top;
       if (!isInIframe) {
         window.location.assign(res.url);
+      } else {
+        setStep('authorizing');
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Kunde inte starta autentisering mot banken.');

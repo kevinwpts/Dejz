@@ -12,9 +12,7 @@ import {
   MagnifyingGlass,
   ShieldCheck,
   CalendarCheck,
-  ArrowSquareOut,
   SpinnerGap,
-  ArrowClockwise,
   WarningCircle,
 } from '@phosphor-icons/react';
 import { IncomeItem, FixedExpenseItem } from './HomeTab';
@@ -152,14 +150,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   }, [step]);
 
   // Steg 3: Inline bank anslutning och vyer direkt på sidan
-  const [step3View, setStep3View] = useState<'grid' | 'search' | 'authorizing' | 'select-accounts'>('grid');
-  const [selectedBank, setSelectedBank] = useState<BankAspsp | null>(null);
+  const [step3View, setStep3View] = useState<'grid' | 'search' | 'select-accounts'>('grid');
+  const [connectingBankName, setConnectingBankName] = useState<string | null>(null);
   const [startingAuth, setStartingAuth] = useState(false);
-  const [authUrl, setAuthUrl] = useState<string | null>(null);
-  const [authState, setAuthState] = useState<string | null>(null);
-  const [showManualCallback, setShowManualCallback] = useState(false);
-  const [manualCallbackUrl, setManualCallbackUrl] = useState('');
-  const [exchangingCode, setExchangingCode] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [allBanks, setAllBanks] = useState<BankAspsp[]>(SWEDISH_BANKS_CATALOG);
   const [loadingAllBanks, setLoadingAllBanks] = useState(false);
@@ -183,21 +176,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   }, [initialName, name]);
 
-  // Starta BankID-autentisering direkt på sidan
+  // Starta BankID-autentisering direkt och sömlöst (utan onödig mellanlandningsskärm)
   const handleSelectBankInline = async (
     bank: BankAspsp | { name: string; country?: string; logo?: string | null }
   ) => {
-    setSelectedBank({
-      name: bank.name,
-      country: bank.country || 'SE',
-      logo: bank.logo || null,
-      bic: null,
-    });
+    setConnectingBankName(bank.name);
     setStartingAuth(true);
     setAuthError(null);
-    setShowManualCallback(false);
-    setManualCallbackUrl('');
-    setStep3View('authorizing');
 
     let safetyTimer: any = null;
     const timeoutPromise = new Promise((_, reject) => {
@@ -220,16 +205,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       const res = (await Promise.race([authPromise, timeoutPromise])) as any;
       if (safetyTimer) clearTimeout(safetyTimer);
 
-      setAuthUrl(res.url);
-      setAuthState(res.state);
-
-      const isInIframe = window.self !== window.top;
-      if (!isInIframe) {
+      if (res?.url) {
+        // Direkt, sömlös omdirigering till BankID / Enable Banking
         window.location.assign(res.url);
+      } else {
+        throw new Error('Kunde inte hämta anslutningslänk från banken.');
       }
     } catch (err: any) {
       if (safetyTimer) clearTimeout(safetyTimer);
-      setAuthError(err.message || 'Kunde inte starta autentisering mot banken.');
+      setConnectingBankName(null);
+      setAuthError(err.message || 'Kunde inte starta autentisering mot banken. Testa igen.');
     } finally {
       setStartingAuth(false);
     }
@@ -237,7 +222,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Poll status när fönstret återfår fokus under bankinloggning
   useEffect(() => {
-    if (step !== 3 || step3View !== 'authorizing') return;
+    if (step !== 3) return;
     const handleFocus = async () => {
       try {
         const status = await bankService.getStatus();
@@ -270,57 +255,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [step, step3View, connections.length, onBankStateUpdated]);
-
-  // Manuell länk för callback i iframe/annan flik
-  const handleExchangeManualCallback = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualCallbackUrl.trim()) return;
-    setExchangingCode(true);
-    setAuthError(null);
-
-    try {
-      let code = '';
-      let state = authState || '';
-
-      if (manualCallbackUrl.includes('code=')) {
-        const urlObj = new URL(
-          manualCallbackUrl.startsWith('http')
-            ? manualCallbackUrl.trim()
-            : `https://dejz.se/bank/callback?${manualCallbackUrl.trim()}`
-        );
-        code = urlObj.searchParams.get('code') || '';
-        state = urlObj.searchParams.get('state') || state;
-      } else {
-        code = manualCallbackUrl.trim();
-      }
-
-      if (!code || !state) {
-        throw new Error('Kunde inte hitta verifieringskod i länken.');
-      }
-
-      const res = await bankService.exchangeCode({ code, state });
-      setActiveConnection(res.connection);
-      const accs = res.accounts || [];
-      setFetchedAccounts(accs);
-      setSelectedAccountIds(accs.map((a) => a.id));
-      const nameMap: Record<string, string> = {};
-      accs.forEach((a, idx) => {
-        nameMap[a.id] = a.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
-      });
-      setAccountCustomNames(nameMap);
-      setStep3View('select-accounts');
-
-      const status = await bankService.getStatus();
-      if (onBankStateUpdated) {
-        onBankStateUpdated(status.connections, status.accounts);
-      }
-    } catch (err: any) {
-      setAuthError(err.message || 'Kunde inte slutföra bankkopplingen.');
-    } finally {
-      setExchangingCode(false);
-    }
-  };
+  }, [step, connections.length, onBankStateUpdated]);
 
   // Spara valda konton och gå till steg 4
   const handleSaveSelectedAccounts = async () => {
@@ -726,125 +661,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-3"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          {/* SUB-VIEW 1: BANKID AUTENTISERING INLINE */}
-          {step3View === 'authorizing' && (
-            <div className="flex-1 min-h-0 flex flex-col justify-between">
-              <div className="my-auto py-2">
-                <div className="text-center mb-6">
-                  <div className="flex justify-center mb-3">
-                    <ItemLogo
-                      name={selectedBank?.name || 'Bank'}
-                      logoUrl={selectedBank?.logo || undefined}
-                      size="xl"
-                    />
-                  </div>
-                  <h1 className="font-display font-semibold text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
-                    Anslut {selectedBank?.name || 'bank'}
-                  </h1>
-                  <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto mt-1.5 leading-relaxed">
-                    Legitimera dig med Mobilt BankID för att hämta dina konton och transaktioner till Dejz.
-                  </p>
-                </div>
 
-                {startingAuth ? (
-                  <div className="py-8 flex flex-col items-center justify-center gap-3 bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl">
-                    <SpinnerGap size={28} className="animate-spin text-[var(--text-primary)]" />
-                    <span className="text-xs font-medium text-[var(--text-secondary)]">
-                      Initierar anslutning till {selectedBank?.name}...
-                    </span>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {authUrl && (
-                      <div className="space-y-3">
-                        <a
-                          href={authUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
-                        >
-                          <span>Öppna BankID ({selectedBank?.name})</span>
-                          <ArrowSquareOut size={16} weight="bold" />
-                        </a>
-
-                        <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] py-1">
-                          <SpinnerGap size={14} className="animate-spin" />
-                          <span>Väntar på signering i BankID...</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {authError && (
-                      <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2.5">
-                        <WarningCircle size={16} weight="fill" className="shrink-0 mt-0.5" />
-                        <div className="flex-1 space-y-1.5">
-                          <p className="font-medium">{authError}</p>
-                          <button
-                            type="button"
-                            onClick={() => selectedBank && handleSelectBankInline(selectedBank)}
-                            className="text-xs font-semibold underline flex items-center gap-1 cursor-pointer"
-                          >
-                            <ArrowClockwise size={12} weight="bold" />
-                            <span>Försök igen</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Manuell länk vid iframe/extern webbläsare */}
-                    <div className="pt-2 text-center">
-                      {!showManualCallback ? (
-                        <button
-                          type="button"
-                          onClick={() => setShowManualCallback(true)}
-                          className="text-[11.5px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline transition-colors cursor-pointer"
-                        >
-                          Öppnades inte BankID eller fastnade länken?
-                        </button>
-                      ) : (
-                        <form
-                          onSubmit={handleExchangeManualCallback}
-                          className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2.5 text-left animate-fade-in"
-                        >
-                          <label className="text-[11px] font-medium text-[var(--text-secondary)] block">
-                            Klistra in returlänken eller koden från banken:
-                          </label>
-                          <input
-                            type="text"
-                            value={manualCallbackUrl}
-                            onChange={(e) => setManualCallbackUrl(e.target.value)}
-                            placeholder="https://... eller verifieringskod"
-                            className="w-full text-xs px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
-                          />
-                          <button
-                            type="submit"
-                            disabled={exchangingCode || !manualCallbackUrl.trim()}
-                            className="w-full py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold disabled:opacity-40 cursor-pointer"
-                          >
-                            {exchangingCode ? 'Verifierar anslutning...' : 'Verifiera anslutning'}
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Pinnad tillbaka-knapp */}
-              <div className="shrink-0 pt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep3View('grid');
-                    setAuthError(null);
-                  }}
-                  className="w-full py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                >
-                  ← Välj en annan bank
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* SUB-VIEW 2: SÖK BLAND ALLA BANKER (Bara banklistan scrollar) */}
           {step3View === 'search' && (
@@ -871,6 +688,21 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
                   />
                 </div>
+                {authError && (
+                  <div className="mt-3 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between gap-2.5 animate-scale-in">
+                    <div className="flex items-center gap-2">
+                      <WarningCircle size={15} weight="fill" className="shrink-0" />
+                      <span>{authError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAuthError(null)}
+                      className="text-xs font-semibold underline shrink-0 cursor-pointer"
+                    >
+                      Stäng
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Endast banklistan scrollar */}
@@ -885,22 +717,41 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     .filter((b) =>
                       b.name.toLowerCase().includes(bankSearchQuery.toLowerCase())
                     )
-                    .map((bank) => (
-                      <button
-                        key={bank.name}
-                        type="button"
-                        onClick={() => handleSelectBankInline(bank)}
-                        className="w-full p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 transition-colors cursor-pointer text-left"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <ItemLogo name={bank.name} logoUrl={bank.logo || undefined} size="sm" />
-                          <span className="font-display font-semibold text-xs text-[var(--text-primary)] truncate">
-                            {bank.name}
-                          </span>
-                        </div>
-                        <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
-                      </button>
-                    ))
+                    .map((bank) => {
+                      const isConnecting =
+                        startingAuth &&
+                        (connectingBankName === bank.name);
+                      return (
+                        <button
+                          key={bank.name}
+                          type="button"
+                          disabled={startingAuth}
+                          onClick={() => handleSelectBankInline(bank)}
+                          className={`w-full p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-between gap-3 transition-colors cursor-pointer text-left ${
+                            isConnecting
+                              ? 'ring-2 ring-[var(--text-primary)]'
+                              : startingAuth
+                              ? 'opacity-40 pointer-events-none'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <ItemLogo name={bank.name} logoUrl={bank.logo || undefined} size="sm" />
+                            <span className="font-display font-semibold text-xs text-[var(--text-primary)] truncate">
+                              {bank.name}
+                            </span>
+                          </div>
+                          {isConnecting ? (
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)] shrink-0">
+                              <SpinnerGap size={14} className="animate-spin" />
+                              <span>Ansluter...</span>
+                            </div>
+                          ) : (
+                            <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })
                 )}
               </div>
 
@@ -1034,6 +885,22 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   </p>
                 </div>
 
+                {authError && (
+                  <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between gap-2.5 animate-scale-in">
+                    <div className="flex items-center gap-2">
+                      <WarningCircle size={16} weight="fill" className="shrink-0" />
+                      <span>{authError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAuthError(null)}
+                      className="text-xs font-semibold underline shrink-0 cursor-pointer"
+                    >
+                      Stäng
+                    </button>
+                  </div>
+                )}
+
                 {hasConnectedBank ? (
                   <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
                     {connections.map((conn) => (
@@ -1066,28 +933,47 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   <div className="space-y-3">
                     {/* 3x3 Grid med stora, touch-vänliga bankloggor */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-                      {POPULAR_SWEDISH_BANKS.map((b) => (
-                        <button
-                          key={b.id}
-                          type="button"
-                          onClick={() => handleSelectBankInline(b)}
-                          className="p-2.5 sm:p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group shadow-xs"
-                        >
-                          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0">
-                            <ItemLogo name={b.displayName} size="lg" />
-                          </div>
-                          <span className="font-display font-semibold text-[11px] sm:text-[11.5px] text-[var(--text-primary)] text-center truncate max-w-full leading-tight">
-                            {b.displayName}
-                          </span>
-                        </button>
-                      ))}
+                      {POPULAR_SWEDISH_BANKS.map((b) => {
+                        const isConnecting =
+                          startingAuth &&
+                          (connectingBankName === b.name || connectingBankName === b.displayName);
+                        const isAnyConnecting = startingAuth && Boolean(connectingBankName);
+
+                        return (
+                          <button
+                            key={b.id}
+                            type="button"
+                            disabled={isAnyConnecting}
+                            onClick={() => handleSelectBankInline(b)}
+                            className={`p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group shadow-xs ${
+                              isConnecting
+                                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] scale-[0.98]'
+                                : isAnyConnecting
+                                ? 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-40 pointer-events-none'
+                                : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 text-[var(--text-primary)]'
+                            }`}
+                          >
+                            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0 relative">
+                              {isConnecting ? (
+                                <SpinnerGap size={24} className="animate-spin text-[var(--bg-color)]" />
+                              ) : (
+                                <ItemLogo name={b.displayName} size="lg" />
+                              )}
+                            </div>
+                            <span className="font-display font-semibold text-[11px] sm:text-[11.5px] text-center truncate max-w-full leading-tight">
+                              {isConnecting ? 'Ansluter...' : b.displayName}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
 
                     {/* Sök / välj annan bank */}
                     <button
                       type="button"
+                      disabled={startingAuth}
                       onClick={handleOpenSearchBanks}
-                      className="w-full py-2.5 px-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full py-2.5 px-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-40"
                     >
                       <MagnifyingGlass size={14} weight="bold" />
                       <span>Sök bland fler banker...</span>
