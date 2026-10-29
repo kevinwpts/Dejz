@@ -602,9 +602,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               </p>
             </div>
 
-            <div className="space-y-3">
-              {/* Tre snabbalternativ för de vanligaste lönedagarna */}
-              <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-4">
+              {/* Snabbalternativ */}
+              <div className="grid grid-cols-3 gap-2.5">
                 {[
                   { day: 25, label: 'Den 25:e' },
                   { day: 27, label: 'Den 27:e' },
@@ -616,13 +616,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       key={preset.day}
                       type="button"
                       onClick={() => setPayday(preset.day)}
-                      className={`py-3 px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 flex items-center justify-center shadow-xs ${
+                      className={`py-3.5 px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 flex flex-col items-center justify-center gap-1 shadow-xs ${
                         isSelected
                           ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] shadow-sm'
                           : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] text-[var(--text-primary)]'
                       }`}
                     >
-                      <span className="font-display font-bold text-sm sm:text-[15px] leading-tight">
+                      <span className="font-display font-bold text-sm sm:text-base leading-tight">
                         {preset.label}
                       </span>
                     </button>
@@ -630,13 +630,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 })}
               </div>
 
-              {/* Kalender / Datumväljare */}
-              <DayOfMonthPicker
-                selectedDay={payday}
-                onSelectDay={setPayday}
-                mode="payday"
-                showHeader={false}
-              />
+              {/* Minimalistisk datumväljare (annan dag) */}
+              <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl p-4 flex items-center justify-between gap-3">
+                <span className="font-display font-semibold text-xs text-[var(--text-primary)]">
+                  Annan lönedag i månaden
+                </span>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={payday}
+                    onChange={(e) => setPayday(Number(e.target.value))}
+                    className="px-3 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] cursor-pointer"
+                  >
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                      <option key={d} value={d}>
+                        Den {d}:e
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
               {/* Helghantering - på som standard */}
               <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-4">
@@ -935,8 +947,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     {connections.map((conn) => (
                       <div key={conn.id} className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                            <CheckCircle size={20} weight="fill" />
+                          <div className="relative shrink-0">
+                            <ItemLogo name={conn.aspsp_name} logoUrl={conn.aspsp_logo || undefined} size="md" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--surface-color)]" />
                           </div>
                           <div className="min-w-0">
                             <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
