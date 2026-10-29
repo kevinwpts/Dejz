@@ -202,7 +202,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // Kontoval efter lyckad autentisering
   const [fetchedAccounts, setFetchedAccounts] = useState<BankAccount[]>([]);
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
-  const hasInitializedAccountSelectionRef = React.useRef<boolean>(false);
+  const seenAccountIdsRef = React.useRef<Set<string>>(new Set());
   const [activeConnection, setActiveConnection] = useState<BankConnection | null>(null);
   const [savingAccounts, setSavingAccounts] = useState(false);
   const pendingSyncConnectionIdRef = React.useRef<string | null>(null);
@@ -751,7 +751,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     return idx === 0 ? 'Lönekonto' : 'Bankkonto';
   }, []);
 
-  // Hjälpfunktion för att öppna kontoval så fort bankkopplingen och dess konton är klara
+  // Hjälpfunktion för att öppna och uppdatera kontoval så att samtliga bankkonton garanterat kommer med från start
   const applyConnectedBankState = React.useCallback(
     (conns: BankConnection[], accs: BankAccount[]) => {
       if (!conns || conns.length === 0) return false;
@@ -768,11 +768,24 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         setConnectingBankName(null);
         setActiveConnection(newestConn);
         setFetchedAccounts(accountsToUse);
-        if (!hasInitializedAccountSelectionRef.current) {
-          hasInitializedAccountSelectionRef.current = true;
-          const selIds = accountsToUse.filter((a) => a.is_selected !== false).map((a) => a.id);
-          setSelectedAccountIds(selIds.length > 0 ? selIds : accountsToUse.map((a) => a.id));
+
+        // Lägg automatiskt till nytillkomna konton som valda, utan att skriva över konton användaren själv bockat ur
+        const newlyDiscoveredIds: string[] = [];
+        for (const acc of accountsToUse) {
+          if (!seenAccountIdsRef.current.has(acc.id)) {
+            seenAccountIdsRef.current.add(acc.id);
+            if (acc.is_selected !== false) {
+              newlyDiscoveredIds.push(acc.id);
+            }
+          }
         }
+        if (newlyDiscoveredIds.length > 0) {
+          setSelectedAccountIds((prev) => {
+            const merged = new Set([...prev, ...newlyDiscoveredIds]);
+            return Array.from(merged);
+          });
+        }
+
         setStep2View('select-accounts');
         return true;
       }
@@ -781,22 +794,22 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     []
   );
 
-  // Reagera DIREKT när App.tsx uppdaterar connections/bankAccounts efter ?code=&state= (utan att kräva window focus)
+  // Reagera DIREKT när App.tsx uppdaterar connections/bankAccounts (även om select-accounts redan visas så att ett 3:e konto aldrig missas!)
   useEffect(() => {
-    if (step !== 2 || step2View === 'select-accounts') return;
+    if (step !== 2) return;
     if (connections.length > 0 && _bankAccounts.length > 0) {
       applyConnectedBankState(connections, _bankAccounts);
     }
-  }, [step, step2View, connections, _bankAccounts, applyConnectedBankState]);
+  }, [step, connections, _bankAccounts, applyConnectedBankState]);
 
   // Poll status med automatiska omförsök när användaren återvänder från Mobilt BankID till appen
   useEffect(() => {
-    if (step !== 2 || step2View === 'select-accounts') return;
+    if (step !== 2 || Boolean(bankCallbackStatusMsg)) return;
     let isCancelled = false;
     let retryTimer: any = null;
 
     const checkBankReturn = async (attempt = 0) => {
-      if (isCancelled || step !== 2 || step2View === 'select-accounts') return;
+      if (isCancelled || step !== 2 || Boolean(bankCallbackStatusMsg)) return;
 
       let hasPendingAuth = false;
       try {
@@ -813,7 +826,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         // ignore
       }
 
-      if (hasPendingAuth && attempt === 0) {
+      if (hasPendingAuth && attempt === 0 && step2View !== 'select-accounts') {
         setVerifyingBankReturn(true);
       }
 
@@ -826,6 +839,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             onBankStateUpdated(status.connections, status.accounts);
           }
           applyConnectedBankState(status.connections, status.accounts);
+          // Gör alltid en extra efterkoll 1.5s senare om backend-funktionen fortfarande hämtade saldo på det sista kontot
+          if (attempt < 2 && !isCancelled) {
+            retryTimer = setTimeout(() => {
+              checkBankReturn(attempt + 1);
+            }, 1500);
+          }
           return;
         }
 
@@ -856,7 +875,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     window.addEventListener('pageshow', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
-    // Kör även en koll direkt om vi precis landat på steg 2 med en väntande BankID-session
+    // Kör även en koll direkt om vi precis landat på steg 2
     checkBankReturn(0);
 
     return () => {
@@ -866,7 +885,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       window.removeEventListener('pageshow', handleVisibilityOrFocus);
       window.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [step, connections.length, onBankStateUpdated, applyConnectedBankState]);
+  }, [step, step2View, bankCallbackStatusMsg, connections.length, onBankStateUpdated, applyConnectedBankState]);
 
   // Spara valda konton och gå direkt till steg 3 där synk + analys sker i ett enda sammanhängande flöde
   const handleSaveSelectedAccounts = async () => {
@@ -1361,7 +1380,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     </>
                   ) : (
                     <>
-                      <span>Fortsätt ({selectedAccountIds.length})</span>
+                      <span>Fortsätt</span>
                       <ArrowRight size={16} weight="bold" />
                     </>
                   )}
@@ -1596,18 +1615,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-3"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="shrink-0 pt-6 pb-4 flex items-center justify-between gap-3">
+          <div className="shrink-0 pt-6 pb-4">
             <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               Vilka fasta utgifter har du?
             </h1>
-            <button
-              type="button"
-              onClick={() => openAddSheet('fixed')}
-              className="px-3 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-            >
-              <Plus size={13} weight="bold" />
-              <span>Lägg till</span>
-            </button>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
@@ -1703,17 +1714,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </button>
           </div>
 
-          <div className="shrink-0 pt-3 space-y-2.5">
-            {suggestedFixedExpenses.length > 0 && (
-              <div className="flex items-center justify-between text-xs px-1">
-                <span className="text-[var(--text-muted)]">
-                  Valda fasta utgifter ({suggestedFixedExpenses.filter((i) => i.checked).length} st)
-                </span>
-                <span className="font-display font-semibold text-[var(--text-primary)] tabular-nums">
-                  -{formatKr(suggestedFixedExpenses.filter((i) => i.checked).reduce((s, i) => s + i.amount, 0))}/mån
-                </span>
-              </div>
-            )}
+          <div className="shrink-0 pt-3">
             <button
               type="button"
               onClick={handleSaveSuggestedFixed}
@@ -1734,18 +1735,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-4"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="shrink-0 pt-6 pb-4 flex items-center justify-between gap-3">
+          <div className="shrink-0 pt-6 pb-4">
             <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               Vilka fasta inkomster har du?
             </h1>
-            <button
-              type="button"
-              onClick={() => openAddSheet('income')}
-              className="px-3 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-            >
-              <Plus size={13} weight="bold" />
-              <span>Lägg till</span>
-            </button>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
@@ -1841,17 +1834,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </button>
           </div>
 
-          <div className="shrink-0 pt-3 space-y-2.5">
-            {suggestedIncomes.length > 0 && (
-              <div className="flex items-center justify-between text-xs px-1">
-                <span className="text-[var(--text-muted)]">
-                  Valda inkomster ({suggestedIncomes.filter((i) => i.checked).length} st)
-                </span>
-                <span className="font-display font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  +{formatKr(suggestedIncomes.filter((i) => i.checked).reduce((s, i) => s + i.amount, 0))}/mån
-                </span>
-              </div>
-            )}
+          <div className="shrink-0 pt-3">
             <button
               type="button"
               onClick={handleSaveSuggestedIncomes}
@@ -1885,7 +1868,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
               </div>
 
-              <div className="space-y-3">
+              <div>
                 <input
                   type="range"
                   min={1}
@@ -1902,11 +1885,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   }}
                   className="ui-payday-slider"
                 />
-                <div className="flex items-center justify-between text-[11px] font-medium text-[var(--text-muted)] tabular-nums px-0.5">
-                  <span>1</span>
-                  <span>25</span>
-                  <span>31</span>
-                </div>
               </div>
             </div>
 
@@ -1969,7 +1947,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               <div className="pt-4 border-t border-[var(--border-subtle)]/60 space-y-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[var(--text-muted)]">
-                    Inkomster ({incomes.length})
+                    Inkomster
                   </span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                     +{formatKr(totalInc)}
@@ -1978,7 +1956,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
                 <div className="flex items-center justify-between">
                   <span className="text-[var(--text-muted)]">
-                    Fasta utgifter ({fixedExpenses.length})
+                    Fasta utgifter
                   </span>
                   <span className="font-semibold text-[var(--text-primary)] tabular-nums">
                     -{formatKr(totalFix)}

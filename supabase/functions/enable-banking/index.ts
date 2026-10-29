@@ -924,42 +924,61 @@ serve(async (req: Request) => {
       const rawAccounts = Array.isArray(sessionData?.accounts) ? sessionData.accounts : [];
       const upsertedAccounts: any[] = [];
 
-      for (const acc of rawAccounts) {
-        const uid = acc?.uid || acc?.account_id?.iban || acc?.resource_id;
-        if (!uid) continue;
+      // Fetch initial balances for all accounts in parallel FIRST so the database never holds a partial subset of accounts mid-loop
+      const preparedAccounts = await Promise.all(
+        rawAccounts.map(async (acc: any) => {
+          const uid = acc?.uid || acc?.account_id?.iban || acc?.resource_id;
+          if (!uid) return null;
 
-        const iban = acc?.account_id?.iban || null;
-        const bban =
-          acc?.account_id?.bban ||
-          acc?.account_id?.other?.identification ||
-          (Array.isArray(acc?.all_account_ids) && acc.all_account_ids[0]?.identification) ||
-          null;
-        const name = acc?.name || acc?.product || acc?.details || stateRecord.aspsp_name;
-        const product = acc?.product || acc?.cash_account_type || null;
-        const currency = acc?.currency || "SEK";
-        const stableKey = normalizeAccountIdentity(iban, bban, uid);
+          const iban = acc?.account_id?.iban || null;
+          const bban =
+            acc?.account_id?.bban ||
+            acc?.account_id?.other?.identification ||
+            (Array.isArray(acc?.all_account_ids) && acc.all_account_ids[0]?.identification) ||
+            null;
+          const name = acc?.name || acc?.product || acc?.details || stateRecord.aspsp_name;
+          const product = acc?.product || acc?.cash_account_type || null;
+          const currency = acc?.currency || "SEK";
+          const stableKey = normalizeAccountIdentity(iban, bban, uid);
 
-        // Fetch initial balance for each available account so user can see it when choosing accounts
-        let balanceInfo = {
-          amount: null as number | null,
-          currency,
-          balanceType: null as string | null,
-          balanceLabel: null as string | null,
-        };
-        let rawBalances: any[] = [];
+          let balanceInfo = {
+            amount: null as number | null,
+            currency,
+            balanceType: null as string | null,
+            balanceLabel: null as string | null,
+          };
+          let rawBalances: any[] = [];
 
-        try {
-          const balRes = await enableBankingRequest(`/accounts/${encodeURIComponent(uid)}/balances`, {
-            method: "GET",
-            environment: envToUse,
-            psuIpAddress,
-            psuUserAgent,
-          });
-          rawBalances = Array.isArray(balRes?.balances) ? balRes.balances : [];
-          balanceInfo = selectPreferredBalance(rawBalances);
-        } catch {
-          // If initial balance fetch fails, still save the account so the user can select it
-        }
+          try {
+            const balRes = await enableBankingRequest(`/accounts/${encodeURIComponent(uid)}/balances`, {
+              method: "GET",
+              environment: envToUse,
+              psuIpAddress,
+              psuUserAgent,
+            });
+            rawBalances = Array.isArray(balRes?.balances) ? balRes.balances : [];
+            balanceInfo = selectPreferredBalance(rawBalances);
+          } catch {
+            // If initial balance fetch fails, still save the account so the user can select it
+          }
+
+          return {
+            uid,
+            iban,
+            bban,
+            name,
+            product,
+            currency,
+            stableKey,
+            balanceInfo,
+            rawBalances,
+          };
+        }),
+      );
+
+      for (const prep of preparedAccounts) {
+        if (!prep) continue;
+        const { uid, iban, bban, name, product, currency, stableKey, balanceInfo, rawBalances } = prep;
 
         // Check if this physical account already exists on this connection by stable_account_key, iban, bban, or uid
         const matchedExisting = (existingConnAccounts || []).find((ea: any) => {
