@@ -1880,7 +1880,7 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-input-row {
-    @apply w-full px-4 py-3 sm:py-3.5 min-h-[46px] flex items-center justify-between gap-3 text-[13px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
+    @apply w-full px-4 py-3.5 min-h-[52px] flex items-center justify-between gap-3 text-[13.5px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
   }
 
   .ui-row-title {
@@ -1892,11 +1892,11 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-info-label {
-    @apply text-[13px] font-normal text-[var(--text-secondary)] shrink-0;
+    @apply text-[13.5px] font-normal text-[var(--text-secondary)] shrink-0;
   }
 
   .ui-info-value {
-    @apply text-[13px] font-normal text-[var(--text-primary)];
+    @apply text-[13.5px] font-normal text-[var(--text-primary)];
   }
 
   .ui-row-amount {
@@ -1971,19 +1971,19 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
 
   /* 6. Buttons & Confirmation Bars */
   .ui-btn-primary {
-    @apply w-full py-2.5 px-4 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[13.5px] tracking-[-0.005em] flex items-center justify-center gap-1.5 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full py-3 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14.5px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14.5px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
-    @apply w-full py-2.5 px-4 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-1.5 transition-all cursor-pointer;
+    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
-    @apply w-full py-2.5 px-4 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[13px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-1.5 transition-all cursor-pointer;
+    @apply w-full py-3.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 active:scale-[0.99] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm {
@@ -2036,11 +2036,50 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
   }
 
   .ui-inline-input {
-    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-[13px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] text-right focus:outline-none transition-colors;
+    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-base sm:text-[15px] font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
   }
 
   .ui-inline-amount-input {
-    @apply w-32 bg-transparent border-0 p-0 text-[13px] font-display font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] text-right tabular-nums focus:outline-none transition-colors;
+    @apply w-36 bg-transparent border-0 p-0 text-base sm:text-[15.5px] font-display font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right tabular-nums focus:outline-none transition-colors;
+  }
+
+  .ui-payday-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--border-subtle);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .ui-payday-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--text-primary);
+    border: 3px solid var(--surface-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+
+  .ui-payday-slider::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+  }
+
+  .ui-payday-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--text-primary);
+    border: 3px solid var(--surface-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    transition: transform 0.12s ease;
   }
 
   .ui-switch {

@@ -31,6 +31,7 @@ import {
   normalizeCategoryToValid,
   compressImageFileToDataUrl,
 } from '../../utils/appCache';
+import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -904,30 +905,64 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             </div>
           )}
 
-          <div className="ui-sheet-group">
-            <label className="ui-input-row">
-              <span className="ui-info-label shrink-0">Namn</span>
-              <input
-                type="text"
-                autoFocus={isCreateMode}
-                placeholder="t.ex. Hyra eller Spotify"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="ui-inline-input"
+          {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
+          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+            <label className="flex items-center gap-3.5 cursor-text">
+              <ItemLogo
+                name={name || activeExpense?.name || 'Fast utgift'}
+                category={category}
+                logoUrl={activeExpense?.logo}
+                size="lg"
+                isRecurring={true}
               />
+              <div className="flex-1 min-w-0">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                  Namn
+                </span>
+                <input
+                  type="text"
+                  autoFocus={isCreateMode}
+                  placeholder="t.ex. Riksbyggen eller Netflix"
+                  value={name}
+                  onChange={(e) => {
+                    const nextName = e.target.value;
+                    setName(nextName);
+                    const inferred = inferCategoryAndMethodFromName(nextName, 'fixed');
+                    if (inferred?.category) {
+                      setCategory(inferred.category);
+                    }
+                    if (inferred?.paymentMethod) {
+                      setPaymentMethod(inferred.paymentMethod);
+                    }
+                  }}
+                  className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                />
+              </div>
             </label>
 
-            <label className="ui-input-row">
-              <span className="ui-info-label shrink-0">Belopp (kr/mån)</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                className="ui-inline-input tabular-nums"
-              />
-            </label>
+            <div className="border-t border-[var(--border-subtle)] pt-3.5">
+              <label className="block cursor-text">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                  Belopp per månad
+                </span>
+                <div className="flex items-baseline justify-between gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="0"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
+                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
+                  />
+                  <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
+                    kr/mån
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div className="ui-sheet-group">
 
             <button
               type="button"

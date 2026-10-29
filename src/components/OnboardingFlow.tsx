@@ -22,8 +22,17 @@ import {
   SWEDISH_BANKS_CATALOG,
 } from '../services/bankService';
 import { WeekendHandlingMode } from '../utils/periodEngine';
-import { extractOnboardingAiCandidates } from '../utils/bankHistoryAnalyzer';
+import {
+  extractOnboardingAiCandidates,
+  inferCategoryAndMethodFromName,
+} from '../utils/bankHistoryAnalyzer';
 import { getLogoUrl } from '../utils/logo';
+import {
+  getStoredExpenseCategories,
+  getStoredIncomeCategories,
+  getStoredPaymentMethods,
+  normalizeCategoryToValid,
+} from '../utils/appCache';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { BottomSheet } from './ui/BottomSheet';
@@ -193,8 +202,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // Kontoval efter lyckad autentisering
   const [fetchedAccounts, setFetchedAccounts] = useState<BankAccount[]>([]);
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
+  const hasInitializedAccountSelectionRef = React.useRef<boolean>(false);
   const [activeConnection, setActiveConnection] = useState<BankConnection | null>(null);
   const [savingAccounts, setSavingAccounts] = useState(false);
+  const pendingSyncConnectionIdRef = React.useRef<string | null>(null);
 
   // Föreslagna fasta utgifter för steg 3 (hämtas från riktiga banktransaktioner)
   const [suggestedFixedExpenses, setSuggestedFixedExpenses] = useState<
@@ -232,15 +243,30 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [isBankDataDetected, setIsBankDataDetected] = useState(false);
   const [verifyingBankReturn, setVerifyingBankReturn] = useState(false);
 
-  // Analysera RIKTIGA banktransaktioner från Enable Banking + Gemini AI först när användaren når steg 3 eller 4 (efter att konton valts och synkats i steg 2)
+  // Analysera RIKTIGA banktransaktioner från Enable Banking + Gemini AI först när användaren når steg 3 eller 4 (efter att konton valts i steg 2)
   useEffect(() => {
     if (step !== 3 && step !== 4) return;
-    if (hasAnalyzedBank && isBankDataDetected) return;
+    if (hasAnalyzedBank && isBankDataDetected && !pendingSyncConnectionIdRef.current) return;
 
     let isMounted = true;
     const runBankAnalysis = async () => {
       setAnalyzingBank(true);
       try {
+        const pendingConnId = pendingSyncConnectionIdRef.current;
+        if (pendingConnId) {
+          pendingSyncConnectionIdRef.current = null;
+          await bankService
+            .sync({
+              connectionId: pendingConnId,
+              fullSync: true,
+            })
+            .catch(() => {});
+          const status = await bankService.getStatus().catch(() => null);
+          if (status && onBankStateUpdated && isMounted) {
+            onBankStateUpdated(status.connections, status.accounts);
+          }
+        }
+
         let bankTxs = await bankService
           .listAllTransactionsForReconciliation(5000, false)
           .catch(() => []);
@@ -563,7 +589,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           onUpdateFixed &&
           (existing.amount !== item.amount ||
             existing.dueDay !== item.dueDay ||
-            existing.name !== item.name)
+            existing.name !== item.name ||
+            existing.category !== item.category ||
+            existing.paymentMethod !== (item.paymentMethod || existing.paymentMethod))
         ) {
           onUpdateFixed({
             ...existing,
@@ -571,6 +599,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             amount: item.amount,
             dueDay: item.dueDay,
             category: item.category || existing.category,
+            paymentMethod: item.paymentMethod || existing.paymentMethod || 'Autogiro',
+            logo: item.logo || existing.logo,
           });
         }
       } else if (existing) {
@@ -598,7 +628,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           onUpdateIncome &&
           (existing.amount !== item.amount ||
             existing.payday !== item.payday ||
-            existing.name !== item.name)
+            existing.name !== item.name ||
+            existing.category !== item.category)
         ) {
           onUpdateIncome({
             ...existing,
@@ -606,6 +637,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             amount: item.amount,
             payday: item.payday,
             category: item.category || existing.category,
+            logo: item.logo || existing.logo,
           });
         }
       } else if (existing) {
@@ -629,8 +661,28 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // BottomSheet editor state (för att lägga till eller ändra post)
   const [sheetEditor, setSheetEditor] = useState<SheetEditorState | null>(null);
-  const [sheetSubView, setSheetSubView] = useState<'main' | 'day-picker'>('main');
+  const [sheetSubView, setSheetSubView] = useState<
+    'main' | 'day-picker' | 'category-picker' | 'payment-picker'
+  >('main');
   const [sheetNavDir, setSheetNavDir] = useState<'forward' | 'back'>('forward');
+
+  const availableExpenseCategories = React.useMemo(
+    () => getStoredExpenseCategories().map((c) => c.name),
+    [sheetEditor?.type, sheetEditor?.mode]
+  );
+
+  const availableIncomeCategories = React.useMemo(
+    () => getStoredIncomeCategories().map((c) => c.name),
+    [sheetEditor?.type, sheetEditor?.mode]
+  );
+
+  const availablePaymentMethods = React.useMemo(() => {
+    const stored = getStoredPaymentMethods().map((m) => m.name);
+    if (sheetEditor?.paymentMethod && !stored.includes(sheetEditor.paymentMethod)) {
+      return [...stored, sheetEditor.paymentMethod];
+    }
+    return stored;
+  }, [sheetEditor?.paymentMethod]);
 
   useEffect(() => {
     if (initialName && !name) {
@@ -716,8 +768,11 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         setConnectingBankName(null);
         setActiveConnection(newestConn);
         setFetchedAccounts(accountsToUse);
-        const selIds = accountsToUse.filter((a) => a.is_selected !== false).map((a) => a.id);
-        setSelectedAccountIds(selIds.length > 0 ? selIds : accountsToUse.map((a) => a.id));
+        if (!hasInitializedAccountSelectionRef.current) {
+          hasInitializedAccountSelectionRef.current = true;
+          const selIds = accountsToUse.filter((a) => a.is_selected !== false).map((a) => a.id);
+          setSelectedAccountIds(selIds.length > 0 ? selIds : accountsToUse.map((a) => a.id));
+        }
         setStep2View('select-accounts');
         return true;
       }
@@ -736,12 +791,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Poll status med automatiska omförsök när användaren återvänder från Mobilt BankID till appen
   useEffect(() => {
-    if (step !== 2) return;
+    if (step !== 2 || step2View === 'select-accounts') return;
     let isCancelled = false;
     let retryTimer: any = null;
 
     const checkBankReturn = async (attempt = 0) => {
-      if (isCancelled || step !== 2) return;
+      if (isCancelled || step !== 2 || step2View === 'select-accounts') return;
 
       let hasPendingAuth = false;
       try {
@@ -813,7 +868,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     };
   }, [step, connections.length, onBankStateUpdated, applyConnectedBankState]);
 
-  // Spara valda konton, synka ENDAST de valda kontonas transaktioner (95 dagar) fullt ut och gå sedan till steg 3
+  // Spara valda konton och gå direkt till steg 3 där synk + analys sker i ett enda sammanhängande flöde
   const handleSaveSelectedAccounts = async () => {
     const connToSync = activeConnection || connections[0] || null;
     if (!connToSync) {
@@ -835,23 +890,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       } catch {
         // ignore
       }
-      // Synka nu samtliga valda kontons transaktioner (full 95-dagarshistorik) FÖRE vi går vidare till steg 3!
-      await bankService
-        .sync({
-          connectionId: connToSync.id,
-          fullSync: true,
-        })
-        .catch(() => {});
-
-      const status = await bankService.getStatus().catch(() => null);
-      if (status && onBankStateUpdated) {
-        onBankStateUpdated(status.connections, status.accounts);
-      }
-      // Nollställ analys-flaggor och listor så att steg 3 garanterat analyserar alla nyhämtade transaktioner direkt
+      pendingSyncConnectionIdRef.current = connToSync.id;
       setSuggestedFixedExpenses([]);
       setSuggestedIncomes([]);
       setIsBankDataDetected(false);
       setHasAnalyzedBank(false);
+      setAnalyzingBank(true);
     } finally {
       setSavingAccounts(false);
       navigateStep(3, 'forward');
@@ -941,7 +985,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       name: item.name,
       amount: String(Math.round(item.amount)),
       day: item.dueDay || 27,
-      category: item.category || 'Räkningar',
+      category: normalizeCategoryToValid(item.category || 'Räkningar', 'expense'),
       paymentMethod: item.paymentMethod || 'Autogiro',
       logo: item.logo,
     });
@@ -964,7 +1008,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       name: item.name,
       amount: String(Math.round(item.amount)),
       day: item.payday || payday || 25,
-      category: item.category || 'Lön',
+      category: normalizeCategoryToValid(item.category || 'Lön', 'income'),
       logo: item.logo,
     });
   };
@@ -980,12 +1024,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     if (!cleanTitle || cleanAmt <= 0) return;
 
     if (sheetEditor.type === 'income') {
+      const nextCat = normalizeCategoryToValid(sheetEditor.category || 'Lön', 'income');
+      const nextLogo = sheetEditor.logo || getLogoUrl(cleanTitle, nextCat);
       if (sheetEditor.mode === 'add') {
         onAddIncome({
           name: cleanTitle,
           amount: cleanAmt,
           payday: cleanDay,
-          category: sheetEditor.category || 'Lön',
+          category: nextCat,
+          logo: nextLogo,
         });
         setSuggestedIncomes((prev) => [
           ...prev,
@@ -994,7 +1041,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             name: cleanTitle,
             amount: cleanAmt,
             payday: cleanDay,
-            category: sheetEditor.category || 'Lön',
+            category: nextCat,
+            logo: nextLogo,
             checked: true,
           },
         ]);
@@ -1009,6 +1057,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   name: cleanTitle,
                   amount: cleanAmt,
                   payday: cleanDay,
+                  category: nextCat,
+                  logo: nextLogo,
                   checked: true,
                 }
               : item
@@ -1026,19 +1076,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               name: cleanTitle,
               amount: cleanAmt,
               payday: cleanDay,
+              category: nextCat,
+              logo: nextLogo,
             });
           }
         }
         setPayday(cleanDay);
       }
     } else {
+      const nextCat = normalizeCategoryToValid(sheetEditor.category || 'Räkningar', 'expense');
+      const nextMethod = sheetEditor.paymentMethod || 'Autogiro';
+      const nextLogo = sheetEditor.logo || getLogoUrl(cleanTitle, nextCat);
       if (sheetEditor.mode === 'add') {
         onAddFixed({
           name: cleanTitle,
           amount: cleanAmt,
           dueDay: cleanDay,
-          category: sheetEditor.category || 'Räkningar',
-          paymentMethod: sheetEditor.paymentMethod || 'Autogiro',
+          category: nextCat,
+          paymentMethod: nextMethod,
+          logo: nextLogo,
         });
         setSuggestedFixedExpenses((prev) => [
           ...prev,
@@ -1047,8 +1103,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             name: cleanTitle,
             amount: cleanAmt,
             dueDay: cleanDay,
-            category: sheetEditor.category || 'Räkningar',
-            paymentMethod: sheetEditor.paymentMethod || 'Autogiro',
+            category: nextCat,
+            paymentMethod: nextMethod,
+            logo: nextLogo,
             checked: true,
           },
         ]);
@@ -1062,6 +1119,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   name: cleanTitle,
                   amount: cleanAmt,
                   dueDay: cleanDay,
+                  category: nextCat,
+                  paymentMethod: nextMethod,
+                  logo: nextLogo,
                   checked: true,
                 }
               : item
@@ -1079,6 +1139,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               name: cleanTitle,
               amount: cleanAmt,
               dueDay: cleanDay,
+              category: nextCat,
+              paymentMethod: nextMethod,
+              logo: nextLogo,
             });
           }
         }
@@ -1533,17 +1596,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-3"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="shrink-0 pt-6 pb-4">
+          <div className="shrink-0 pt-6 pb-4 flex items-center justify-between gap-3">
             <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               Vilka fasta utgifter har du?
             </h1>
+            <button
+              type="button"
+              onClick={() => openAddSheet('fixed')}
+              className="px-3 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            >
+              <Plus size={13} weight="bold" />
+              <span>Lägg till</span>
+            </button>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
             {analyzingBank && (
               <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
                 <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
-                <span>Analyserar dina banktransaktioner...</span>
+                <span>Synkar och analyserar dina banktransaktioner...</span>
               </div>
             )}
 
@@ -1551,13 +1622,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               {suggestedFixedExpenses.map((item) => (
                 <div
                   key={item.id}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 ${
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-2.5 ${
                     item.checked
                       ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
                       : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
                   }`}
                 >
-                  {/* Checkbox: bockar i / ur */}
+                  {/* Checkbox med generös träffyta */}
                   <button
                     type="button"
                     onClick={() =>
@@ -1566,16 +1637,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       )
                     }
                     aria-label={`Välj ${item.name}`}
-                    className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors cursor-pointer ${
-                      item.checked
-                        ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                        : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                    }`}
+                    className="w-9 h-9 -ml-1.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
                   >
-                    {item.checked && <Check size={12} weight="bold" />}
+                    <span
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                        item.checked
+                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      {item.checked && <Check size={12} weight="bold" />}
+                    </span>
                   </button>
 
-                  {/* Rad: tryck för att ändra belopp, namn eller dag direkt */}
+                  {/* Rad: tryck för att ändra belopp, namn, kategori eller dag direkt */}
                   <button
                     type="button"
                     onClick={() => openEditSuggestedFixed(item)}
@@ -1621,14 +1696,24 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <button
               type="button"
               onClick={() => openAddSheet('fixed')}
-              className="w-full py-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>Lägg till egen fast utgift</span>
             </button>
           </div>
 
-          <div className="shrink-0 pt-3">
+          <div className="shrink-0 pt-3 space-y-2.5">
+            {suggestedFixedExpenses.length > 0 && (
+              <div className="flex items-center justify-between text-xs px-1">
+                <span className="text-[var(--text-muted)]">
+                  Valda fasta utgifter ({suggestedFixedExpenses.filter((i) => i.checked).length} st)
+                </span>
+                <span className="font-display font-semibold text-[var(--text-primary)] tabular-nums">
+                  -{formatKr(suggestedFixedExpenses.filter((i) => i.checked).reduce((s, i) => s + i.amount, 0))}/mån
+                </span>
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSaveSuggestedFixed}
@@ -1649,10 +1734,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           key="step-4"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
-          <div className="shrink-0 pt-6 pb-4">
+          <div className="shrink-0 pt-6 pb-4 flex items-center justify-between gap-3">
             <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               Vilka fasta inkomster har du?
             </h1>
+            <button
+              type="button"
+              onClick={() => openAddSheet('income')}
+              className="px-3 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            >
+              <Plus size={13} weight="bold" />
+              <span>Lägg till</span>
+            </button>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
@@ -1667,13 +1760,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               {suggestedIncomes.map((item) => (
                 <div
                   key={item.id}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 ${
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-2.5 ${
                     item.checked
                       ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
                       : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
                   }`}
                 >
-                  {/* Checkbox: bockar i / ur */}
+                  {/* Checkbox med generös träffyta */}
                   <button
                     type="button"
                     onClick={() =>
@@ -1682,16 +1775,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       )
                     }
                     aria-label={`Välj ${item.name}`}
-                    className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors cursor-pointer ${
-                      item.checked
-                        ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                        : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                    }`}
+                    className="w-9 h-9 -ml-1.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
                   >
-                    {item.checked && <Check size={12} weight="bold" />}
+                    <span
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
+                        item.checked
+                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      {item.checked && <Check size={12} weight="bold" />}
+                    </span>
                   </button>
 
-                  {/* Rad: tryck för att ändra belopp, namn eller dag direkt */}
+                  {/* Rad: tryck för att ändra belopp, namn, kategori eller dag direkt */}
                   <button
                     type="button"
                     onClick={() => openEditSuggestedIncome(item)}
@@ -1737,14 +1834,24 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <button
               type="button"
               onClick={() => openAddSheet('income')}
-              className="w-full py-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>Lägg till egen fast inkomst</span>
             </button>
           </div>
 
-          <div className="shrink-0 pt-3">
+          <div className="shrink-0 pt-3 space-y-2.5">
+            {suggestedIncomes.length > 0 && (
+              <div className="flex items-center justify-between text-xs px-1">
+                <span className="text-[var(--text-muted)]">
+                  Valda inkomster ({suggestedIncomes.filter((i) => i.checked).length} st)
+                </span>
+                <span className="font-display font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  +{formatKr(suggestedIncomes.filter((i) => i.checked).reduce((s, i) => s + i.amount, 0))}/mån
+                </span>
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSaveSuggestedIncomes}
@@ -1786,10 +1893,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   value={payday}
                   onChange={(e) => setPayday(Number(e.target.value))}
                   aria-label="Välj lönedag"
-                  className="w-full h-2 rounded-full bg-[var(--border-subtle)] accent-[var(--text-primary)] cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, var(--text-primary) 0%, var(--text-primary) ${
+                      ((payday - 1) / 30) * 100
+                    }%, var(--border-subtle) ${
+                      ((payday - 1) / 30) * 100
+                    }%, var(--border-subtle) 100%)`,
+                  }}
+                  className="ui-payday-slider"
                 />
                 <div className="flex items-center justify-between text-[11px] font-medium text-[var(--text-muted)] tabular-nums px-0.5">
                   <span>1</span>
+                  <span>25</span>
                   <span>31</span>
                 </div>
               </div>
@@ -1902,7 +2017,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       >
         {sheetEditor && (
           <div>
-            {sheetSubView === 'day-picker' ? (
+            {sheetSubView === 'day-picker' && (
               <div
                 key="sheet-day-picker"
                 className="animate-page-forward space-y-4"
@@ -1921,7 +2036,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     <CaretLeft size={15} weight="bold" />
                   </button>
                   <span className="ui-sheet-title">
-                    {sheetEditor.type === 'income' ? 'Välj lönedag' : 'Välj förfallodag'}
+                    {sheetEditor.type === 'income' ? 'Välj utbetalningsdag' : 'Välj förfallodag'}
                   </span>
                   <button
                     type="button"
@@ -1942,7 +2057,145 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   mode={sheetEditor.type === 'income' ? 'payday' : 'dueday'}
                 />
               </div>
-            ) : (
+            )}
+
+            {sheetSubView === 'category-picker' && (
+              <div
+                key="sheet-category-picker"
+                className="animate-page-forward space-y-4"
+              >
+                <div className="ui-sheet-sub-header">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetNavDir('back');
+                      setSheetSubView('main');
+                    }}
+                    title="Tillbaka"
+                    aria-label="Tillbaka"
+                    className="ui-icon-btn"
+                  >
+                    <CaretLeft size={15} weight="bold" />
+                  </button>
+                  <span className="ui-sheet-title">Välj kategori</span>
+                  <button
+                    type="button"
+                    onClick={() => setSheetEditor(null)}
+                    className="ui-icon-btn"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="ui-sheet-group">
+                  {(sheetEditor.type === 'income'
+                    ? availableIncomeCategories
+                    : availableExpenseCategories
+                  ).map((c) => {
+                    const isSel = c === sheetEditor.category;
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => {
+                          setSheetEditor({ ...sheetEditor, category: c });
+                          setSheetNavDir('back');
+                          setSheetSubView('main');
+                        }}
+                        className="ui-row-btn"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <CategoryIcon category={c} size={14} badge={true} />
+                          <span
+                            className={`truncate ${
+                              isSel
+                                ? 'font-medium text-[var(--text-primary)]'
+                                : 'font-normal text-[var(--text-primary)]'
+                            }`}
+                          >
+                            {c}
+                          </span>
+                        </div>
+                        {isSel && (
+                          <Check
+                            size={14}
+                            weight="bold"
+                            className="text-[var(--text-primary)] shrink-0"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {sheetSubView === 'payment-picker' && (
+              <div
+                key="sheet-payment-picker"
+                className="animate-page-forward space-y-4"
+              >
+                <div className="ui-sheet-sub-header">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetNavDir('back');
+                      setSheetSubView('main');
+                    }}
+                    title="Tillbaka"
+                    aria-label="Tillbaka"
+                    className="ui-icon-btn"
+                  >
+                    <CaretLeft size={15} weight="bold" />
+                  </button>
+                  <span className="ui-sheet-title">Välj betalsätt</span>
+                  <button
+                    type="button"
+                    onClick={() => setSheetEditor(null)}
+                    className="ui-icon-btn"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="ui-sheet-group">
+                  {availablePaymentMethods.map((m) => {
+                    const isSel = m === (sheetEditor.paymentMethod || 'Autogiro');
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => {
+                          setSheetEditor({ ...sheetEditor, paymentMethod: m });
+                          setSheetNavDir('back');
+                          setSheetSubView('main');
+                        }}
+                        className="ui-row-btn"
+                      >
+                        <span
+                          className={`truncate ${
+                            isSel
+                              ? 'font-medium text-[var(--text-primary)]'
+                              : 'font-normal text-[var(--text-primary)]'
+                          }`}
+                        >
+                          {m}
+                        </span>
+                        {isSel && (
+                          <Check
+                            size={14}
+                            weight="bold"
+                            className="text-[var(--text-primary)] shrink-0"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {sheetSubView === 'main' && (
               <form
                 key="sheet-main"
                 onSubmit={handleSaveSheet}
@@ -1969,9 +2222,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   </button>
                 </div>
 
-                {/* Hero Amount & Logo Preview */}
-                <div className="ui-hero-header">
-                  <div className="ui-hero-icon">
+                {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
+                <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+                  <label className="flex items-center gap-3.5 cursor-text">
                     <ItemLogo
                       name={
                         sheetEditor.name ||
@@ -1979,64 +2232,129 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       }
                       category={sheetEditor.category}
                       logoUrl={sheetEditor.logo}
-                      size="xl"
+                      size="lg"
                       isRecurring={true}
                     />
-                  </div>
-                  <div
-                    className={`font-display font-extrabold text-3xl tabular-nums ${
-                      sheetEditor.type === 'income'
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {sheetEditor.type === 'income' ? '+' : '-'}
-                    {formatKr(Math.max(0, Math.round(Number(sheetEditor.amount) || 0)))}
-                  </div>
-                </div>
-
-                {/* Hairline-Divided Direct Manipulation Fields */}
-                <div className="ui-sheet-group text-[13px] sm:text-sm">
-                  <label className="ui-input-row">
-                    <span className="text-[var(--text-muted)] shrink-0">Namn</span>
-                    <div className="flex items-center justify-end gap-1.5 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                        Namn
+                      </span>
                       <input
                         type="text"
                         required
                         autoFocus={sheetEditor.mode === 'add'}
                         placeholder={
-                          sheetEditor.type === 'income' ? 't.ex. Lön' : 't.ex. Hyra'
+                          sheetEditor.type === 'income'
+                            ? 't.ex. Lön eller CSN'
+                            : 't.ex. Riksbyggen eller Netflix'
                         }
                         value={sheetEditor.name}
-                        onChange={(e) =>
-                          setSheetEditor({ ...sheetEditor, name: e.target.value })
-                        }
-                        className="ui-inline-input"
+                        onChange={(e) => {
+                          const nextName = e.target.value;
+                          const inferred = inferCategoryAndMethodFromName(
+                            nextName,
+                            sheetEditor.type
+                          );
+                          setSheetEditor((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  name: nextName,
+                                  ...(inferred?.category ? { category: inferred.category } : {}),
+                                  ...(inferred?.paymentMethod && prev.type === 'fixed'
+                                    ? { paymentMethod: inferred.paymentMethod }
+                                    : {}),
+                                  ...(inferred?.logo ? { logo: inferred.logo } : {}),
+                                }
+                              : prev
+                          );
+                        }}
+                        className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
                       />
-                      <PencilSimple size={12} className="text-[var(--text-muted)] shrink-0 opacity-60" />
                     </div>
                   </label>
 
-                  <label className="ui-input-row">
-                    <span className="text-[var(--text-muted)] shrink-0">Belopp (kr)</span>
-                    <div className="flex items-center justify-end gap-1.5">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        required
-                        placeholder="0"
-                        value={sheetEditor.amount}
-                        onChange={(e) =>
-                          setSheetEditor({
-                            ...sheetEditor,
-                            amount: e.target.value.replace(/[^\d]/g, ''),
-                          })
+                  <div className="border-t border-[var(--border-subtle)] pt-3.5">
+                    <label className="block cursor-text">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                        Belopp per månad
+                      </span>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          required
+                          placeholder="0"
+                          value={sheetEditor.amount}
+                          onChange={(e) =>
+                            setSheetEditor((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    amount: e.target.value.replace(/[^\d]/g, ''),
+                                  }
+                                : prev
+                            )
+                          }
+                          className={`w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl tabular-nums focus:outline-none placeholder-[var(--text-muted)]/40 ${
+                            sheetEditor.type === 'income'
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        />
+                        <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
+                          kr/mån
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Valbara rader för Kategori, Betalsätt och Dag */}
+                <div className="ui-sheet-group text-[13.5px] sm:text-sm">
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSheetNavDir('forward');
+                      setSheetSubView('category-picker');
+                    }}
+                    className="ui-row-btn"
+                  >
+                    <span className="text-[var(--text-muted)] shrink-0">Kategori</span>
+                    <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                      <CategoryIcon
+                        category={
+                          sheetEditor.category ||
+                          (sheetEditor.type === 'income' ? 'Lön' : 'Räkningar')
                         }
-                        className="w-28 bg-transparent border-0 p-0 text-xs font-display font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] text-right tabular-nums focus:outline-none"
+                        size={13}
+                        className="shrink-0 text-[var(--text-secondary)]"
                       />
-                      <PencilSimple size={12} className="text-[var(--text-muted)] shrink-0 opacity-60" />
-                    </div>
-                  </label>
+                      <span>
+                        {sheetEditor.category ||
+                          (sheetEditor.type === 'income' ? 'Lön' : 'Räkningar')}
+                      </span>
+                      <CaretRight size={12} className="text-[var(--text-muted)]" />
+                    </span>
+                  </button>
+
+                  {sheetEditor.type === 'fixed' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSheetNavDir('forward');
+                        setSheetSubView('payment-picker');
+                      }}
+                      className="ui-row-btn"
+                    >
+                      <span className="text-[var(--text-muted)] shrink-0">Betalsätt</span>
+                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                        <span>{sheetEditor.paymentMethod || 'Autogiro'}</span>
+                        <CaretRight size={12} className="text-[var(--text-muted)]" />
+                      </span>
+                    </button>
+                  )}
 
                   <button
                     type="button"

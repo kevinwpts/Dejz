@@ -46,6 +46,7 @@ import {
   syncAllUserPreferencesToSupabase,
   compressImageFileToDataUrl,
 } from '../../utils/appCache';
+import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -2241,42 +2242,88 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           )}
 
           <div className="space-y-4">
-            <div className="ui-sheet-group">
-              {/* Namn */}
-              <label className="ui-input-row">
-                <span className="ui-info-label shrink-0">Namn</span>
-                <input
-                  type="text"
-                  autoFocus={isCreateMode}
-                  placeholder={isIncome ? 't.ex. Swish eller Lön' : 't.ex. ICA eller Kaffe'}
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="ui-inline-input"
+            {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+              <label className="flex items-center gap-3.5 cursor-text">
+                <ItemLogo
+                  name={title || activeTx?.title || (isIncome ? 'Inkomst' : 'Utgift')}
+                  category={category}
+                  logoUrl={activeTx?.logo}
+                  size="lg"
                 />
-              </label>
-
-              {/* Belopp */}
-              {!isBankSynced ? (
-                <label className="ui-input-row">
-                  <span className="ui-info-label shrink-0">Belopp (kr)</span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                    Namn
+                  </span>
                   <input
                     type="text"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                    className="ui-inline-amount-input"
+                    autoFocus={isCreateMode}
+                    placeholder={isIncome ? 't.ex. Swish eller Lön' : 't.ex. ICA eller Kaffe'}
+                    value={title}
+                    onChange={(e) => {
+                      const nextTitle = e.target.value;
+                      setTitle(nextTitle);
+                      const inferred = inferCategoryAndMethodFromName(
+                        nextTitle,
+                        isIncome ? 'income' : 'transaction'
+                      );
+                      if (inferred?.category) {
+                        setCategory(inferred.category);
+                      }
+                      if (isCreateMode && inferred?.paymentMethod) {
+                        setPaymentMethod(inferred.paymentMethod);
+                      }
+                    }}
+                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
                   />
-                </label>
-              ) : (
-                <div className="ui-locked-row">
-                  <span className="ui-info-label shrink-0">Belopp</span>
-                  <span className="font-display font-medium text-[var(--text-secondary)] tabular-nums">
-                    {isIncome ? '+' : '-'}
-                    {formatKr(activeTx!.amount)}
-                  </span>
                 </div>
-              )}
+              </label>
+
+              <div className="border-t border-[var(--border-subtle)] pt-3.5">
+                {!isBankSynced ? (
+                  <label className="block cursor-text">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                      Belopp
+                    </span>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="0"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
+                        className={`w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none ${
+                          isIncome
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-[var(--text-primary)]'
+                        }`}
+                      />
+                      <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
+                        kr
+                      </span>
+                    </div>
+                  </label>
+                ) : (
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Belopp (banksynkad)
+                    </span>
+                    <span
+                      className={`font-display font-bold text-xl tabular-nums ${
+                        isIncome
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {isIncome ? '+' : '-'}
+                      {formatKr(activeTx!.amount)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="ui-sheet-group">
 
               {/* Kategori */}
               <button

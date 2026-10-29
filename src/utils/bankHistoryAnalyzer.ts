@@ -4,7 +4,11 @@ import { Config, FixedExpense, Frequency, Income, PaydayType, Transaction, Weeke
 import { getLogoUrl } from './logo';
 import { getPeriodBoundaries } from './date';
 import { getActualBankPaymentDateAndMeta } from './swedishDate';
-import { resolveMerchantAlias } from './appCache';
+import {
+  resolveMerchantAlias,
+  normalizeCategoryToValid,
+  getStoredPaymentMethods,
+} from './appCache';
 
 export type DetectedFixedExpenseWithEvidence = Omit<FixedExpense, 'id'> & {
   detectedOccurrences: number;
@@ -3484,4 +3488,552 @@ export function getAutoImportableBankTransactions(
 
   return toImport;
 }
+
+function normalizePaymentMethodName(rawMethod: string | undefined): string | undefined {
+  if (!rawMethod) return undefined;
+  const stored = getStoredPaymentMethods().map((m) => m.name);
+  if (stored.includes(rawMethod)) return rawMethod;
+  const lower = rawMethod.toLowerCase();
+  if (lower.includes('bankgiro') || lower.includes('plusgiro')) {
+    const bgMatch = stored.find(
+      (m) => m.toLowerCase().includes('bankgiro') || m.toLowerCase().includes('plusgiro')
+    );
+    return bgMatch || 'Bankgiro / Plusgiro';
+  }
+  if (lower.includes('autogiro')) {
+    return stored.find((m) => m.toLowerCase().includes('autogiro')) || 'Autogiro';
+  }
+  if (lower.includes('kort')) {
+    return stored.find((m) => m.toLowerCase().includes('kort')) || 'Kort';
+  }
+  if (lower.includes('e-faktura') || lower.includes('efaktura')) {
+    return stored.find((m) => m.toLowerCase().includes('e-faktura')) || 'E-faktura';
+  }
+  if (lower.includes('faktura')) {
+    return stored.find((m) => m.toLowerCase() === 'faktura') || 'Faktura';
+  }
+  if (lower.includes('swish')) {
+    return stored.find((m) => m.toLowerCase().includes('swish')) || 'Swish';
+  }
+  return rawMethod;
+}
+
+function matchesKeywordSmart(text: string, kw: string): boolean {
+  const cleanKw = kw.toLowerCase();
+  const trimmedKw = cleanKw.trim();
+  if (!trimmedKw) return false;
+  if (cleanKw.endsWith(' ')) {
+    const padded = ` ${text} `;
+    return padded.includes(` ${trimmedKw} `) || text === trimmedKw || text.startsWith(cleanKw);
+  }
+  // For very short 2-3 char keywords like "sl", "el", "dn", "vy", "ul", require word boundary
+  if (trimmedKw.length <= 3 && /^[a-zåäö0-9]+$/i.test(trimmedKw)) {
+    const escaped = trimmedKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(^|[^a-zåäö0-9])${escaped}($|[^a-zåäö0-9])`, 'i').test(text);
+  }
+  return text.includes(trimmedKw);
+}
+
+/**
+ * Automatically infers category, payment method, and logo when a user manually types
+ * a merchant or item name (e.g. "Riksbyggen", "Netflix", "A-kassa", "SATS", "ICA").
+ */
+export function inferCategoryAndMethodFromName(
+  rawName: string,
+  kind: 'fixed' | 'income' | 'transaction'
+): {
+  category?: string;
+  paymentMethod?: string;
+  logo?: string;
+} | null {
+  try {
+    const trimmed = (rawName || '').trim();
+    if (trimmed.length < 2) return null;
+
+    const text = trimmed.toLowerCase();
+    const categoryKind = kind === 'income' ? 'income' : 'expense';
+
+    // 1. Check user's custom merchant aliases first
+    const alias = resolveMerchantAlias(trimmed);
+    if (alias?.category) {
+      return {
+        category: normalizeCategoryToValid(alias.category, categoryKind),
+        logo: getLogoUrl(alias.name || trimmed),
+      };
+    }
+
+    // 2. Income rules
+    if (kind === 'income') {
+      if (
+        [
+          'barnbidrag',
+          'försäkringskassan',
+          'forsakringskassan',
+          'fkassa',
+          'föräldrapenning',
+          'foraldrapenning',
+          'sjukpenning',
+          'bostadsbidrag',
+          'aktivitetsstöd',
+          'aktivitetsersättning',
+          'sjukersättning',
+          'underhållsstöd',
+          'csn',
+          'studiestöd',
+          'studiestod',
+          'studiemedel',
+          'bidrag',
+          'a-kassa',
+          'a kassa',
+          'akassa',
+          'alfakassan',
+          'alfa-kassan',
+          'unionen',
+          'akademikernas',
+          'småa',
+          'smaa',
+          'arbetslöshetsersättning',
+          'ersättning',
+        ].some((kw) => matchesKeywordSmart(text, kw))
+      ) {
+        return {
+          category: normalizeCategoryToValid('Bidrag', 'income'),
+          logo: getLogoUrl(trimmed),
+        };
+      }
+
+      if (
+        [
+          'pension',
+          'pensionsmyndigheten',
+          'alecta',
+          'amf',
+          'kåpan',
+          'min pension',
+          'tjänstepension',
+          'spv',
+        ].some((kw) => matchesKeywordSmart(text, kw))
+      ) {
+        return {
+          category: normalizeCategoryToValid('Pension', 'income'),
+          logo: getLogoUrl(trimmed),
+        };
+      }
+
+      if (matchesKeywordSmart(text, 'swish')) {
+        return {
+          category: normalizeCategoryToValid('Swish', 'income'),
+          paymentMethod: 'Swish',
+          logo: getLogoUrl(trimmed),
+        };
+      }
+
+      if (
+        ['lön', 'lon', 'salary', 'arvode', 'löneutbetalning', 'bonus', 'timlön'].some((kw) =>
+          matchesKeywordSmart(text, kw)
+        )
+      ) {
+        return {
+          category: normalizeCategoryToValid('Lön', 'income'),
+          logo: getLogoUrl(trimmed),
+        };
+      }
+
+      return null;
+    }
+
+    // 3. Check EXTENDED_FIXED_EXPENSE_RULES (Riksbyggen, Netflix, Spotify, Tibber, Hedvig, Tele2, SATS, A-kassa, etc.)
+    for (const rule of EXTENDED_FIXED_EXPENSE_RULES) {
+      if (rule.keywords.some((kw) => matchesKeywordSmart(text, kw))) {
+        return {
+          category: normalizeCategoryToValid(rule.category, 'expense'),
+          paymentMethod: normalizePaymentMethodName(rule.paymentMethod),
+          logo: getLogoUrl(rule.fallbackName || trimmed),
+        };
+      }
+    }
+
+    // 4. Check SWEDISH_EXPENSE_PRESETS
+    for (const preset of SWEDISH_EXPENSE_PRESETS) {
+      const presetNameLower = preset.name.toLowerCase();
+      if (
+        presetNameLower === text ||
+        (text.length >= 3 && matchesKeywordSmart(text, presetNameLower))
+      ) {
+        return {
+          category: normalizeCategoryToValid(preset.category, 'expense'),
+          paymentMethod: normalizePaymentMethodName(preset.paymentMethod),
+          logo: getLogoUrl(preset.name),
+        };
+      }
+    }
+
+    // 5. Check EVERYDAY_MERCHANT_RULES (ICA, Coop, Willys, Systembolaget, Foodora, Circle K, Apotea, IKEA, etc.)
+    for (const merch of EVERYDAY_MERCHANT_RULES) {
+      if (
+        merch.cleanName.toLowerCase() === text ||
+        merch.keywords.some((kw) => matchesKeywordSmart(text, kw))
+      ) {
+        return {
+          category: normalizeCategoryToValid(merch.preferredCategories[0] || 'Övrigt', 'expense'),
+          paymentMethod: kind === 'transaction' ? 'Kort' : undefined,
+          logo: getLogoUrl(merch.cleanName),
+        };
+      }
+    }
+
+  // 6. Broad Swedish category keyword fallback for manual names
+  const manualKeywordGroups: Array<{
+    keywords: string[];
+    category: string;
+    paymentMethod?: string;
+  }> = [
+    {
+      keywords: [
+        'riksbyggen',
+        'hsb',
+        'brf',
+        'sbc',
+        'bostadsrätt',
+        'bostadsratt',
+        'hyra',
+        'avgift',
+        'månadsavgift',
+        'manadsavgift',
+        'boende',
+        'lägenhet',
+        'lagenhet',
+        'fastighet',
+        'heimstaden',
+        'wallenstam',
+        'willhem',
+        'akelius',
+        'balder',
+        'stena',
+        'poseidon',
+        'familjebostäder',
+        'stockholmshem',
+        'svenska bostäder',
+        'mimer',
+        'uppsalahem',
+        'samfällighet',
+        'samfallighet',
+      ],
+      category: 'Boende',
+      paymentMethod: 'Bankgiro / Plusgiro',
+    },
+    {
+      keywords: [
+        'bolån',
+        'bolan',
+        'bostadslån',
+        'amortering',
+        'ränta',
+        'ranta',
+        'hypotek',
+        'sbab',
+        'landshypotek',
+        'stabelo',
+        'el',
+        'elräkning',
+        'elrakning',
+        'elnät',
+        'elnat',
+        'tibber',
+        'vattenfall',
+        'fortum',
+        'eon',
+        'e.on',
+        'ellevio',
+        'öresundskraft',
+        'oresundskraft',
+        'fjärrvärme',
+        'fjarrvarme',
+        'vatten',
+        'avlopp',
+        'sophämtning',
+        'renhållning',
+        'verisure',
+        'sector alarm',
+        'hemlarm',
+      ],
+      category: 'Boende',
+      paymentMethod: 'Autogiro',
+    },
+    {
+      keywords: [
+        'försäkring',
+        'forsakring',
+        'hemförsäkring',
+        'hemforsakring',
+        'bilförsäkring',
+        'bilforsakring',
+        'personförsäkring',
+        'olycksfall',
+        'barnförsäkring',
+        'djurförsäkring',
+        'livförsäkring',
+        'villaförsäkring',
+        'hedvig',
+        'folksam',
+        'trygg-hansa',
+        'trygghansa',
+        'länsförsäkringar',
+        'lansforsakringar',
+        'agria',
+        'lassie',
+        'gjensidige',
+        'moderna',
+        'svedea',
+        'bliwa',
+      ],
+      category: 'Försäkring',
+      paymentMethod: 'Autogiro',
+    },
+    {
+      keywords: [
+        'netflix',
+        'spotify',
+        'youtube',
+        'disney',
+        'hbo',
+        'viaplay',
+        'tv4',
+        'prime',
+        'skyshowtime',
+        'discovery',
+        'storytel',
+        'bookbeat',
+        'nextory',
+        'podme',
+        'audible',
+        'tidal',
+        'apple',
+        'icloud',
+        'google one',
+        'chatgpt',
+        'openai',
+        'claude',
+        'cursor',
+        'midjourney',
+        'microsoft',
+        'adobe',
+        '1password',
+        'nordvpn',
+        'mullvad',
+        'dropbox',
+        'canva',
+        'patreon',
+        'substack',
+        'duolingo',
+        'playstation',
+        'xbox',
+        'nintendo',
+        'discord',
+        'steam',
+        'aftonbladet',
+        'expressen',
+        'dn',
+        'svd',
+        'readly',
+        'prenumeration',
+        'streaming',
+      ],
+      category: 'Abonnemang',
+      paymentMethod: 'Kort',
+    },
+    {
+      keywords: [
+        'tele2',
+        'telia',
+        'telenor',
+        'tre',
+        'vimla',
+        'hallon',
+        'halebop',
+        'fello',
+        'comviq',
+        'bahnhof',
+        'ownit',
+        'bredband',
+        'bredband2',
+        'fiber',
+        'mobil',
+        'mobilabonnemang',
+        'telefon',
+        'abonnemang',
+        'sappa',
+        'open infra',
+        'globalconnect',
+      ],
+      category: 'Abonnemang',
+      paymentMethod: 'Autogiro',
+    },
+    {
+      keywords: [
+        'gym',
+        'träning',
+        'traning',
+        'sats',
+        'nordic wellness',
+        'fitness24seven',
+        'friskis',
+        'actic',
+        'stc',
+        'malkars',
+        'member 24',
+        'member24',
+        'strava',
+        'whoop',
+        'padel',
+        'apotek',
+        'apotea',
+        'tandläkare',
+        'tandlakare',
+        'tandvård',
+        'frisör',
+        'frisor',
+        'massage',
+      ],
+      category: 'Hälsa',
+      paymentMethod: 'Autogiro',
+    },
+    {
+      keywords: [
+        'sl',
+        'västtrafik',
+        'vasttrafik',
+        'skånetrafiken',
+        'skanetrafiken',
+        'hallandstrafiken',
+        'ul',
+        'länstrafiken',
+        'busskort',
+        'månadskort',
+        'pendelkort',
+        'kollektivtrafik',
+        'parkering',
+        'boendeparkering',
+        'garage',
+        'easypark',
+        'aimo',
+        'apcoa',
+        'parkster',
+        'bensin',
+        'diesel',
+        'laddning',
+        'trängselskatt',
+        'trangselskatt',
+        'fordonsskatt',
+        'bilskatt',
+        'billån',
+        'billeasing',
+        'leasing',
+        'uber',
+        'bolt',
+        'taxi',
+        'sj',
+      ],
+      category: 'Transport',
+      paymentMethod: kind === 'fixed' ? 'Autogiro' : 'Kort',
+    },
+    {
+      keywords: [
+        'csn',
+        'studielån',
+        'studiemedel',
+        'a-kassa',
+        'akassa',
+        'fack',
+        'fackförbund',
+        'fackavgift',
+        'unionen',
+        'akademikernas',
+        'kommunal',
+        'vision',
+        'alfakassan',
+        'småa',
+        'handels',
+        'lärarnas',
+        'if metall',
+        'vårdförbundet',
+        'ledarna',
+        'lån',
+        'privatlån',
+        'blancolån',
+        'kredit',
+        'anyfin',
+        'resurs',
+        'ikano',
+        'marginalen',
+        'avida',
+        'brocc',
+        'förskola',
+        'forskola',
+        'barnomsorg',
+        'fritids',
+        'bankavgift',
+      ],
+      category: 'Räkningar',
+      paymentMethod: 'Autogiro',
+    },
+    {
+      keywords: [
+        'ica',
+        'coop',
+        'willys',
+        'hemköp',
+        'hemkop',
+        'lidl',
+        'city gross',
+        'mathem',
+        'systembolaget',
+        'mat',
+        'livsmedel',
+        'handla',
+      ],
+      category: 'Mat & dryck',
+      paymentMethod: 'Kort',
+    },
+    {
+      keywords: [
+        'restaurang',
+        'lunch',
+        'middag',
+        'kaffe',
+        'fika',
+        'café',
+        'cafe',
+        'espresso house',
+        'foodora',
+        'wolt',
+        'mcdonalds',
+        'burger king',
+        'uteliv',
+        'bar',
+        'pub',
+        'bio',
+        'filmstaden',
+      ],
+      category: 'Uteliv',
+      paymentMethod: 'Kort',
+    },
+  ];
+
+    for (const group of manualKeywordGroups) {
+      if (group.keywords.some((kw) => matchesKeywordSmart(text, kw))) {
+        return {
+          category: normalizeCategoryToValid(group.category, 'expense'),
+          paymentMethod: normalizePaymentMethodName(group.paymentMethod),
+          logo: getLogoUrl(trimmed),
+        };
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 
