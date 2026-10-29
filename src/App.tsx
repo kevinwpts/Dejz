@@ -2077,7 +2077,9 @@ export const App: React.FC = () => {
           }
           await refreshBankStatus();
           setCallbackStatusMsg(null);
-          setIsBankModalOpen(true);
+          if (localStorage.getItem('dejz_onboarding_in_progress') !== 'true') {
+            setIsBankModalOpen(true);
+          }
         })
         .catch((err: any) => {
           setCallbackStatusMsg(`Kunde inte slutföra bankkoppling: ${err.message || 'Okänt fel'}`);
