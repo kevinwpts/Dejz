@@ -1223,10 +1223,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   className="w-full h-2 rounded-full bg-[var(--border-subtle)] accent-[var(--text-primary)] cursor-pointer"
                 />
                 <div className="flex items-center justify-between text-[11px] font-medium text-[var(--text-muted)] tabular-nums px-0.5">
-                  <span>Den 1:a</span>
-                  <span>Den 15:e</span>
-                  <span>Den 25:e</span>
-                  <span>Sista (31:a)</span>
+                  <span>1</span>
+                  <span>31</span>
                 </div>
               </div>
             </div>
