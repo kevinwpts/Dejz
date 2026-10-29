@@ -350,6 +350,125 @@ ${JSON.stringify(batch)}`;
     }
   });
 
+  // AI Onboarding Analyzer: Verifierar och förfinar fasta utgifter (inkl. nystartade abonnemang med 1 dragning),
+  // fasta inkomster samt exakta dragnings-/utbetalningsdagar (t.ex. A-kassa den 22:a vs Lön den 25:e).
+  app.post('/api/ai/analyze-onboarding', aiRateLimit, async (req, res) => {
+    const { expenseCandidates, incomeCandidates } = req.body || {};
+    const expList = Array.isArray(expenseCandidates) ? expenseCandidates.slice(0, 45) : [];
+    const incList = Array.isArray(incomeCandidates) ? incomeCandidates.slice(0, 20) : [];
+
+    if (expList.length === 0 && incList.length === 0) {
+      return res.json({ expenses: [], incomes: [], suggestedPayday: null });
+    }
+
+    const ai = getGenAI();
+    if (!ai) {
+      return res.json({ fallback: true });
+    }
+
+    try {
+      const prompt = `Du är en senior svensk privatekonomisk analytiker och expert på svenska banktransaktioner (Enable Banking, SEB, Swedbank, Handelsbanken, Nordea).
+Användaren genomför onboardingen i budgetappen Dejz och har precis kopplat sin bank.
+Din uppgift är att med kirurgisk precision analysera kandidatlistorna för:
+1. FASTA UTGIFTER ("expenseCandidates")
+2. FASTA INKOMSTER ("incomeCandidates")
+
+RIKTLINJER FÖR FASTA UTGIFTER ("expenses"):
+- Vi vill hitta ALLA verkliga fasta månadskostnader, räkningar och abonnemang – ÄVEN om användaren nyligen har startat ett abonnemang eller avtal så att det bara finns 1 dragning ("occurrences": 1) i historiken!
+- Inkludera ("include": true):
+  • Boende: Hyra, bostadsrättsavgift (BRF), fastighetsbolag, bolån/amortering, el/energi, bredband/fiber, hemförsäkring, hemlarm, samfällighet.
+  • Abonnemang & Streaming: Mobilabonnemang (Telia, Tele2, Telenor, Tre, Hallon, Vimla, Fello, Comviq, Halebop), Spotify, Netflix, YouTube Premium, Disney+, Max/HBO, Viaplay, TV4 Play, Storytel, BookBeat, Nextory, PodMe, Apple/iCloud-prenumerationer, Google One, ChatGPT Plus, Claude, Microsoft 365, Adobe, tidningsprenumerationer.
+  • Hälsa & Träning: Gymkort och medlemskap (SATS, Nordic Wellness, Fitness24Seven, Friskis & Svettis, STC, lokala gym).
+  • Räkningar, Fack, A-kassa & Lån: CSN-återbetalning, fackförbund, A-kasseavgift (Unionen, Akademikernas, Kommunal, SMÅA, Alfa-kassan m.fl.), privatlån/delbetalning (Anyfin, Resurs Bank, Ikano, Marginalen, Avida, Brocc), barnomsorg/förskoleavgift, trängselskatt, billeasing/billån, månadskort i kollektivtrafik.
+- Exkludera STRIKT ("include": false):
+  • Alla vanliga vardagsköp och engångsköp! Exempelvis matbutiker, restauranger, kaféer, barer, bagerier, apotek, kläder, hemelektronik, engångsköp på Klarna/Qliro, enstaka parkeringsbiljetter (Parkster/EasyPark småbelopp), elsparkcyklar (Voi/Tier/Ryde), taxi/Uber, bensin/laddning, varuautomater och Swish till privatpersoner. Listan får ALDRIG fyllas med vardagsköp!
+- Sätt ett rent, naturligt svenskt namn ("name", t.ex. "Spotify", "Hyra (Heimstaden)", "Unionens A-kassa", "SATS") och välj kategori ("category") bland: ["Boende", "Räkningar", "Abonnemang", "Streaming", "Försäkringar", "Hälsa", "Transport", "Nöjen"].
+
+RIKTLINJER FÖR FASTA INKOMSTER ("incomes"):
+- Inkludera ("include": true) verkliga återkommande inkomster: Lön, A-kassa / Arbetslöshetsersättning (t.ex. Unionens A-kassa, Akademikernas A-kassa, Alfa-kassan), CSN Studiestöd, Försäkringskassan (föräldrapenning, sjukpenning, bostadsbidrag, aktivitetsstöd), Barnbidrag, Pension.
+- Exkludera ("include": false) egna överföringar mellan konton, Swish från privatpersoner och återköp/returer från butiker.
+- Välj kategori ("category") bland: ["Lön", "Ersättning", "CSN", "Bidrag", "Pension"]. (A-kassa ska ha kategorin "Ersättning").
+
+KRITISKT VIKTIGT FÖR DATUM / DRAGNINGSDAG ("day": 1–31):
+- Titta noga på "datesWithWeekday" (där varje historiskt datum visas med veckodag: Mon, Tue, Wed, Thu, Fri, Sat, Sun) samt "ruleDay".
+- TVINGA ALDRIG en inkomst eller utgift till den 25:e om transaktionerna visar en annan återkommande dag!
+  • Exempel A-kassa: Om användaren har A-kassa och utbetalningarna i "datesWithWeekday" oftast har kommit den 22:a (t.ex. ["2026-03-22", "2026-02-22", "2026-01-25"] eller ["2026-02-22"]), MÅSTE "day" bli 22 (INTE 25!). Många svenska a-kassor betalar ut runt den 22:a–24:e eller på torsdagar. Utgå alltid från användarens faktiska vanligaste utbetalningsdag i historiken!
+  • Helgjustering: Justera ENDAST en observerad dag med 1–2 dagar om betalningen skedde på en fredag (Fri) eller måndag (Mon) ENBART för att den ordinarie dagen inföll på en lördag (Sat) eller söndag (Sun).
+    - Exempel 1: Lön eller CSN utbetald "2026-01-23 (Fri)" -> den 25:e var en söndag -> ordinarie dag är 25.
+    - Exempel 2: Barnbidrag utbetalt på fredag den 18:e eller 19:e -> den 20:e var helg -> ordinarie dag är 20.
+    - Exempel 3: Autogiro draget "2026-03-30 (Mon)" då den 28:e var lördag och andra månader drogs den 28:e -> ordinarie dag är 28.
+    - Exempel 4: Kortabonnemang (t.ex. Spotify, Netflix) dras exakt samma datum varje månad oavsett helg (t.ex. den 14:e) -> behåll exakt den 14:e!
+- Sätt "suggestedPayday" till "day" (1–31) för användarens huvudsakliga inkomst (t.ex. Lön eller A-kassa). Om användarens främsta inkomst är A-kassa den 22:a ska "suggestedPayday" vara 22.
+
+Kandidater att analysera:
+${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              expenses: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    key: { type: Type.STRING },
+                    include: { type: Type.BOOLEAN },
+                    name: { type: Type.STRING },
+                    category: { type: Type.STRING },
+                    amount: { type: Type.NUMBER },
+                    day: { type: Type.INTEGER },
+                    paymentMethod: { type: Type.STRING },
+                  },
+                  required: ["key", "include", "name", "category", "amount", "day"],
+                },
+              },
+              incomes: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    key: { type: Type.STRING },
+                    include: { type: Type.BOOLEAN },
+                    name: { type: Type.STRING },
+                    category: { type: Type.STRING },
+                    amount: { type: Type.NUMBER },
+                    day: { type: Type.INTEGER },
+                  },
+                  required: ["key", "include", "name", "category", "amount", "day"],
+                },
+              },
+              suggestedPayday: { type: Type.INTEGER },
+            },
+            required: ["expenses", "incomes"],
+          },
+        },
+      });
+
+      const responseText = result.text?.trim() || '{}';
+      const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+
+      return res.json({
+        expenses: Array.isArray(parsed?.expenses) ? parsed.expenses : [],
+        incomes: Array.isArray(parsed?.incomes) ? parsed.incomes : [],
+        suggestedPayday:
+          typeof parsed?.suggestedPayday === 'number' &&
+          parsed.suggestedPayday >= 1 &&
+          parsed.suggestedPayday <= 31
+            ? parsed.suggestedPayday
+            : null,
+      });
+    } catch (error) {
+      console.error('[Gemini] analyze-onboarding error, falling back to rule engine:', error);
+      return res.json({ fallback: true });
+    }
+  });
+
   app.post('/api/parse-audio-expense', aiRateLimit, async (req, res) => {
     const { audioBase64, mimeType } = req.body || {};
     if (!audioBase64 || typeof audioBase64 !== 'string') {

@@ -981,9 +981,17 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   { keywords: ['google one', 'google*storage'], presetId: 'google-one-100gb', fallbackName: 'Google One', category: 'Abonnemang', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
   { keywords: ['microsoft*365', 'microsoft*office', 'msbill.info'], presetId: 'microsoft-365', fallbackName: 'Microsoft 365', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['anthropic', 'claude.ai'], presetId: 'claude-pro', fallbackName: 'Claude Pro', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['cursor.com', 'cursor, ai'], fallbackName: 'Cursor', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['midjourney'], fallbackName: 'Midjourney', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['adobe'], presetId: 'adobe-photography', fallbackName: 'Adobe', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['1password'], presetId: '1password', fallbackName: '1Password', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['nordvpn'], presetId: 'nordvpn', fallbackName: 'NordVPN', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['mullvad'], fallbackName: 'Mullvad VPN', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['dropbox'], fallbackName: 'Dropbox', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['canva'], fallbackName: 'Canva', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['patreon'], fallbackName: 'Patreon', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['substack'], fallbackName: 'Substack', category: 'Abonnemang', paymentMethod: 'Kort' },
+  { keywords: ['duolingo'], fallbackName: 'Duolingo', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['playstation', 'sony interactive'], presetId: 'playstation-plus', fallbackName: 'PlayStation', category: 'Nöjen', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
   { keywords: ['xbox', 'microsoft*xbox'], presetId: 'xbox-game-pass', fallbackName: 'Xbox Game Pass', category: 'Nöjen', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
   { keywords: ['nintendo'], presetId: 'nintendo-switch-online', fallbackName: 'Nintendo', category: 'Nöjen', paymentMethod: 'Kort', requireMultipleMonthsForCard: true },
@@ -994,6 +1002,27 @@ const EXTENDED_FIXED_EXPENSE_RULES: KeywordRule[] = [
   { keywords: ['svenska dagbladet', 'svd.se'], presetId: 'svenska-dagbladet', fallbackName: 'Svenska Dagbladet', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['dagens industri', 'di.se'], presetId: 'dagens-industri', fallbackName: 'Dagens Industri', category: 'Abonnemang', paymentMethod: 'Kort' },
   { keywords: ['readly'], presetId: 'readly-tidningar', fallbackName: 'Readly', category: 'Abonnemang', paymentMethod: 'Kort' },
+
+  // Ytterligare svenska lån, fack, a-kassor, bredband & gym
+  { keywords: ['anyfin'], fallbackName: 'Anyfin', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['resurs bank'], fallbackName: 'Resurs Bank', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['ikano bank'], fallbackName: 'Ikano Bank', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['marginalen'], fallbackName: 'Marginalen Bank', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['avida'], fallbackName: 'Avida Finans', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['brocc'], fallbackName: 'Brocc', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['hyresgästföreningen', 'hyresgastforeningen'], fallbackName: 'Hyresgästföreningen', category: 'Boende', paymentMethod: 'Autogiro' },
+  { keywords: ['småa', 'smaa', 'småföretagarnas a-kassa'], fallbackName: 'SMÅA A-kassa', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['handels a-kassa', 'handelsanställdas'], fallbackName: 'Handels', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['lärarnas a-kassa', 'sveriges lärare', 'lararnas a-kassa'], fallbackName: 'Sveriges Lärare / A-kassa', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['if metall'], fallbackName: 'IF Metall', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['vårdförbundet', 'vardforbundet'], fallbackName: 'Vårdförbundet', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['ledarna'], fallbackName: 'Ledarna', category: 'Räkningar', paymentMethod: 'Autogiro' },
+  { keywords: ['sappa'], fallbackName: 'Sappa', category: 'Abonnemang', paymentMethod: 'Autogiro' },
+  { keywords: ['open infra'], fallbackName: 'Open Infra', category: 'Abonnemang', paymentMethod: 'Autogiro' },
+  { keywords: ['globalconnect'], fallbackName: 'GlobalConnect', category: 'Abonnemang', paymentMethod: 'Autogiro' },
+  { keywords: ['malkars'], fallbackName: 'Malkars Träningscenter', category: 'Hälsa', paymentMethod: 'Autogiro' },
+  { keywords: ['member 24', 'member24'], fallbackName: 'Member 24', category: 'Hälsa', paymentMethod: 'Autogiro' },
+  { keywords: ['puls & träning', 'puls och traning'], fallbackName: 'Puls & Träning', category: 'Hälsa', paymentMethod: 'Autogiro' },
 ];
 
 // Merchants that are everyday variable purchases and should NEVER be auto-classified as fixed monthly expenses
@@ -1738,6 +1767,140 @@ function getDayOfMonthFromIso(dateStr: string | null | undefined, fallbackDay = 
   return fallbackDay;
 }
 
+/**
+ * Räknar ut den faktiska återkommande dragnings-/utbetalningsdagen i månaden (1–31)
+ * utifrån samtliga observerade datum i transaktionshistoriken.
+ * Tar hänsyn till om en enskild dragning flyttats p.g.a. helg (t.ex. fredag före helg-25:e
+ * eller måndag efter helg-förfallodag), men tvingar ALDRIG en inkomst (såsom A-kassa den 22:a)
+ * till den 25:e om transaktionerna faktiskt sker på en annan dag.
+ */
+export function inferTrueRecurringDayOfMonth(
+  datesIso: string[],
+  kind: 'expense' | 'income',
+  category: string,
+  name: string,
+  fallbackDay = 25
+): number {
+  const validDates = Array.from(new Set(datesIso.filter(Boolean))).sort((a, b) =>
+    b.localeCompare(a)
+  );
+  if (validDates.length === 0) return fallbackDay;
+
+  interface ParsedObs {
+    iso: string;
+    year: number;
+    month: number;
+    day: number;
+    dayOfWeek: number; // 0 = Sun, 1 = Mon, ..., 5 = Fri, 6 = Sat
+    daysInMonth: number;
+  }
+
+  const parsed: ParsedObs[] = [];
+  for (const d of validDates) {
+    const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) continue;
+    const year = parseInt(m[1], 10);
+    const month = parseInt(m[2], 10);
+    const day = parseInt(m[3], 10);
+    if (month < 1 || month > 12 || day < 1 || day > 31) continue;
+    const dt = new Date(year, month - 1, day, 12, 0, 0);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    parsed.push({
+      iso: d,
+      year,
+      month,
+      day,
+      dayOfWeek: dt.getDay(),
+      daysInMonth,
+    });
+  }
+
+  if (parsed.length === 0) return fallbackDay;
+
+  const rawDaysSet = new Set(parsed.map((p) => p.day));
+  const lowerName = (name || '').toLowerCase();
+  const lowerCat = (category || '').toLowerCase();
+  const isAkassaOrBenefit =
+    lowerName.includes('kassa') ||
+    lowerName.includes('unionen') ||
+    lowerName.includes('ersättning') ||
+    lowerCat === 'ersättning' ||
+    lowerName.includes('försäkringskassan');
+
+  const adjustedDays = parsed.map((obs) => {
+    const d = obs.day;
+
+    if (kind === 'income') {
+      // Om en utbetalning skedde på en fredag (dayOfWeek === 5):
+      // Kontrollera om lördag (d+1) eller söndag (d+2) är den faktiska dagen under andra månader
+      if (obs.dayOfWeek === 5) {
+        if (rawDaysSet.has(d + 1)) {
+          return d + 1;
+        }
+        if (rawDaysSet.has(d + 2)) {
+          return d + 2;
+        }
+        // Endast om det är vanlig Lön eller CSN (EJ A-kassa!) och fredagen inföll den 23:e eller 24:e
+        // (vilket innebär att den 25:e var lördag eller söndag) och ingen vardagsutbetalning skett på 23/24:
+        if (
+          !isAkassaOrBenefit &&
+          (lowerCat === 'lön' || lowerCat === 'csn') &&
+          (d === 23 || d === 24) &&
+          !parsed.some((other) => other.day === d && other.dayOfWeek !== 5)
+        ) {
+          return 25;
+        }
+        if (
+          lowerName.includes('barnbidrag') &&
+          (d === 18 || d === 19) &&
+          !parsed.some((other) => other.day === d && other.dayOfWeek !== 5)
+        ) {
+          return 20;
+        }
+      }
+      return d;
+    } else {
+      // För utgifter (autogiro/bankgiro/kort):
+      // Om en dragning skedde på en måndag (dayOfWeek === 1), kolla om söndagen (d-1) eller lördagen (d-2)
+      // finns som dragningsdag en annan månad
+      if (obs.dayOfWeek === 1) {
+        if (d > 1 && rawDaysSet.has(d - 1)) return d - 1;
+        if (d > 2 && rawDaysSet.has(d - 2)) return d - 2;
+      }
+      // Om en dragning skedde på en fredag (dayOfWeek === 5), kolla om lördagen (d+1) eller söndagen (d+2)
+      // finns som dragningsdag en annan månad
+      if (obs.dayOfWeek === 5) {
+        if (rawDaysSet.has(d + 1)) return d + 1;
+        if (rawDaysSet.has(d + 2)) return d + 2;
+      }
+      // Om februari-dragning skedde på sista dagen i februari (28/29) men andra månader drogs 30 eller 31:
+      if (obs.month === 2 && d >= 27) {
+        if (rawDaysSet.has(30)) return 30;
+        if (rawDaysSet.has(31)) return 31;
+      }
+      return d;
+    }
+  });
+
+  // Räkna ut vanligaste dagen (mode) bland alla observerade (och helgjusterade) månader
+  const counts = new Map<number, number>();
+  for (const d of adjustedDays) {
+    counts.set(d, (counts.get(d) || 0) + 1);
+  }
+
+  let bestDay = adjustedDays[0];
+  let bestCount = 0;
+  for (const [dayVal, count] of counts.entries()) {
+    if (count > bestCount) {
+      bestCount = count;
+      bestDay = dayVal;
+    }
+  }
+
+  // Om alla dagar bara förekommit 1 gång men ligger tätt (t.ex. [23, 22]), välj den lägsta/typiska i klustret eller senaste
+  return bestDay;
+}
+
 function getYearMonthKey(dateStr: string | null | undefined): string {
   if (!dateStr) return 'unknown';
   return dateStr.slice(0, 7); // YYYY-MM
@@ -1915,8 +2078,15 @@ function runCoreBankDetection(
         ? 'Bankgiro'
         : preset?.paymentMethod || matchedRule.paymentMethod;
 
+      const STANDARD_APPLE_GOOGLE_SUB_TIERS = new Set([
+        12, 15, 19, 25, 29, 35, 39, 45, 49, 55, 59, 65, 69, 75, 79, 85, 89, 95, 99, 109, 115,
+        119, 129, 139, 149, 159, 169, 179, 189, 199, 219, 229, 239, 249, 279, 299, 349, 399,
+      ]);
+      const isStandardSubTier =
+        matchedRule.requireMultipleMonthsForCard && STANDARD_APPLE_GOOGLE_SUB_TIERS.has(absAmount);
+
       const hasExplicitAutogiroOrInvoice =
-        !matchedRule.requireMultipleMonthsForCard &&
+        (!matchedRule.requireMultipleMonthsForCard || isStandardSubTier) &&
         (isDirectDebit ||
           isGiroPayment ||
           combinedText.includes('hyra') ||
@@ -1926,7 +2096,11 @@ function runCoreBankDetection(
           paymentMethod === 'Autogiro' ||
           paymentMethod === 'Bankgiro' ||
           category === 'Boende' ||
-          category === 'Försäkringar');
+          category === 'Försäkringar' ||
+          category === 'Streaming' ||
+          category === 'Abonnemang' ||
+          category === 'Hälsa' ||
+          category === 'Räkningar');
 
       const existing = candidateFixedMap.get(key);
       if (!existing) {
@@ -1944,7 +2118,8 @@ function runCoreBankDetection(
           dates: txDate ? [txDate] : [],
           amounts: [absAmount],
           hasExplicitAutogiroOrInvoice,
-          requireMultipleMonthsForCard: matchedRule.requireMultipleMonthsForCard,
+          requireMultipleMonthsForCard:
+            matchedRule.requireMultipleMonthsForCard && !isStandardSubTier,
         });
       } else {
         existing.detectedOccurrences += 1;
@@ -1958,8 +2133,7 @@ function runCoreBankDetection(
     }
   }
 
-  // Requirement 4: "En enstaka transaktion är inte bevis för ett abonnemang."
-  // Filter candidateFixedMap: require >= 2 occurrences across distinct months/dates OR explicit autogiro/bankgiro/housing/insurance agreement
+  // Filter candidateFixedMap: require >= 2 occurrences across distinct months/dates OR known subscription/autogiro/bankgiro/housing/insurance agreement
   const detectedFixedMap = new Map<string, DetectedFixedExpenseWithEvidence & { matchedTxIds: Set<string> }>();
   const fixedTransactionIds = new Set<string>();
 
@@ -1975,7 +2149,6 @@ function runCoreBankDetection(
         cand.hasExplicitAutogiroOrInvoice;
 
     if (!isConfirmedRecurring) {
-      // Single card transaction (e.g. single Apple 12 kr or single game purchase) is NOT proof of a subscription!
       continue;
     }
 
@@ -1984,6 +2157,13 @@ function runCoreBankDetection(
     }
 
     const frequency = inferFrequencyFromDates(cand.dates);
+    const trueDeductionDay = inferTrueRecurringDayOfMonth(
+      cand.dates,
+      'expense',
+      cand.category,
+      cand.name,
+      cand.deductionDay || 27
+    );
     const minAmt = Math.min(...cand.amounts);
     const maxAmt = Math.max(...cand.amounts);
     const candNameLower = String(cand.name || '').toLowerCase();
@@ -2011,7 +2191,7 @@ function runCoreBankDetection(
       amount: cand.amount,
       category: cand.category,
       frequency,
-      deductionDay: cand.deductionDay,
+      deductionDay: trueDeductionDay,
       paymentMethod: cand.paymentMethod,
       isVariable,
       logo: cand.logo,
@@ -2113,6 +2293,13 @@ function runCoreBankDetection(
       }
 
       const frequency = inferFrequencyFromDates(dates);
+      const trueDeductionDay = inferTrueRecurringDayOfMonth(
+        dates,
+        'expense',
+        category,
+        displayName,
+        deductionDay
+      );
       const minAmt = Math.min(...amounts);
       const maxAmt = Math.max(...amounts);
       const isVariable = amounts.length >= 2 && (maxAmt - minAmt) / (minAmt || 1) > 0.05;
@@ -2123,7 +2310,7 @@ function runCoreBankDetection(
         amount: latestAmount,
         category,
         frequency,
-        deductionDay,
+        deductionDay: trueDeductionDay,
         paymentMethod: hasExplicitAutogiroKeyword ? 'Autogiro' : 'Kort',
         isVariable,
         logo: getLogoUrl(displayName, category),
@@ -2375,12 +2562,15 @@ function runCoreBankDetection(
 
     const latestAmount = grp.amounts[0];
     const latestDate = grp.dates[0];
-    const dayOfMonth = getDayOfMonthFromIso(latestDate, 25);
+    const fallbackDay = getDayOfMonthFromIso(latestDate, 25);
 
-    let normalizedDay = dayOfMonth;
-    if (grp.isPrimarySalary && dayOfMonth >= 22 && dayOfMonth <= 26) {
-      normalizedDay = 25;
-    }
+    const normalizedDay = inferTrueRecurringDayOfMonth(
+      grp.dates,
+      'income',
+      grp.category,
+      grp.name,
+      fallbackDay
+    );
 
     if (grp.isPrimarySalary && suggestedPayday === null) {
       suggestedPayday = normalizedDay;
@@ -2491,6 +2681,253 @@ export function analyzeBankTransactionsForOnboarding(
     suggestedPayday: core.suggestedPayday,
     calculatedSpentSincePayday: Math.round(calculatedSpentSincePayday),
     analyzedTransactionCount: transactions.length,
+  };
+}
+
+export interface OnboardingAiCandidateGroup {
+  key: string;
+  name: string;
+  rawSample: string;
+  category?: string;
+  paymentMethod?: string;
+  latestAmount: number;
+  amounts: number[];
+  datesWithWeekday: string[];
+  rawDates: string[];
+  occurrences: number;
+  ruleDay: number;
+  isRuleDetected: boolean;
+}
+
+function formatDateWithWeekday(isoDate: string): string {
+  const m = (isoDate || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return isoDate;
+  const dt = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10), 12, 0, 0);
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return `${m[1]}-${m[2]}-${m[3]} (${days[dt.getDay()] || ''})`;
+}
+
+/**
+ * Sammanställer kandidater (både regeldetekterade och 1-dragningars/okända kandidater)
+ * med exakta datum och veckodagar för AI-verifiering i onboardingen.
+ */
+export function extractOnboardingAiCandidates(
+  transactions: BankTransactionItem[],
+  currentPayday = 25,
+  paydayBeforeWeekend = true,
+  userAccounts: BankAccount[] = []
+): {
+  baseAnalysis: AnalyzedBankOnboardingData;
+  expenseCandidates: OnboardingAiCandidateGroup[];
+  incomeCandidates: OnboardingAiCandidateGroup[];
+} {
+  const baseAnalysis = analyzeBankTransactionsForOnboarding(
+    transactions,
+    currentPayday,
+    paydayBeforeWeekend,
+    userAccounts
+  );
+
+  if (!Array.isArray(transactions) || transactions.length === 0) {
+    return {
+      baseAnalysis,
+      expenseCandidates: [],
+      incomeCandidates: [],
+    };
+  }
+
+  const core = runCoreBankDetection(
+    transactions,
+    currentPayday,
+    paydayBeforeWeekend,
+    userAccounts
+  );
+
+  const expenseCandidates: OnboardingAiCandidateGroup[] = [];
+
+  // 1. Alla regeldetekterade fasta utgifter
+  core.detectedFixedExpenses.forEach((det, idx) => {
+    const rawDates = det.evidenceDates || (det.lastDate ? [det.lastDate] : []);
+    expenseCandidates.push({
+      key: `det_exp_${idx}`,
+      name: det.name,
+      rawSample: det.name,
+      category: det.category || 'Räkningar',
+      paymentMethod: det.paymentMethod || 'Autogiro',
+      latestAmount: Math.round(det.amount),
+      amounts: (det.evidenceAmounts || [det.amount]).map((a) => Math.round(a)),
+      datesWithWeekday: rawDates.map(formatDateWithWeekday),
+      rawDates,
+      occurrences: det.detectedOccurrences || rawDates.length || 1,
+      ruleDay: det.deductionDay || 27,
+      isRuleDetected: true,
+    });
+  });
+
+  // 2. Okända / nystartade utgiftskandidater (t.ex. 1 dragning på nytt abonnemang, gym, el, försäkring, bredband, BRF)
+  // Filtrera bort uppenbara vardagsköp (matbutiker, restauranger, kaféer, Swish till privatpersoner, frekventa småköp)
+  const unmatchedByNorm = new Map<string, BankTransactionItem[]>();
+  for (const tx of core.outflows) {
+    if (core.fixedTransactionIds.has(tx.id)) continue;
+    const absAmt = Math.round(Math.abs(getNormalizedBankTxAmount(tx)));
+    if (absAmt < 19 || absAmt > 50000) continue;
+
+    const combinedText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    if (VARIABLE_SPENDING_EXCLUSIONS.some((ex) => combinedText.includes(ex))) continue;
+    if (
+      /(kafé|kafe|cafe|coffee|bageri|konditori|restaurang|pizza|sushi|burger|krog|bar |pub |lunch|kiosk|automat|parkster|easypark|aimo| Uber |bolt|voi |tier |ryde |taxi|swish|7-eleven|pressbyr)/.test(
+        combinedText
+      ) &&
+      !combinedText.includes('autogiro') &&
+      !combinedText.includes('månad')
+    ) {
+      continue;
+    }
+
+    const normKey = normalizeMerchantKey(tx.counterparty_name || tx.description || '');
+    if (!normKey || normKey.length < 3) continue;
+    const arr = unmatchedByNorm.get(normKey) || [];
+    arr.push(tx);
+    unmatchedByNorm.set(normKey, arr);
+  }
+
+  let unmatchedExpIdx = 0;
+  for (const [normKey, groupTxs] of unmatchedByNorm.entries()) {
+    if (unmatchedExpIdx >= 30) break;
+    // Om man handlat på samma ställe mer än 4 gånger på 90 dagar utan att det matchat månadsmönster är det vardagskonsumtion
+    const distinctMonths = new Set(
+      groupTxs.map((t) => getYearMonthKey(t.booking_date || t.transaction_date || t.value_date))
+    );
+    distinctMonths.delete('unknown');
+    if (groupTxs.length > Math.max(3, distinctMonths.size * 1.5)) continue;
+
+    const latestTx = groupTxs[0];
+    const latestAmt = Math.round(Math.abs(getNormalizedBankTxAmount(latestTx)));
+    const rawSample = `${latestTx.counterparty_name || ''} ${latestTx.description || ''}`.trim();
+    const displayName = cleanDisplayMerchantName(
+      latestTx.counterparty_name || latestTx.description || normKey
+    );
+    const rawDates = groupTxs
+      .map((t) => t.booking_date || t.transaction_date || t.value_date || '')
+      .filter(Boolean)
+      .slice(0, 6);
+    const amounts = groupTxs
+      .map((t) => Math.round(Math.abs(getNormalizedBankTxAmount(t))))
+      .slice(0, 6);
+    const bankTxCode = getBankTxCodeDescription(latestTx);
+    const isDirectDebit =
+      bankTxCode === 'direct debit' || rawSample.toLowerCase().includes('autogiro');
+    const isGiro =
+      bankTxCode === 'payment' ||
+      rawSample.toLowerCase().includes('bankgiro') ||
+      rawSample.toLowerCase().includes('plusgiro');
+    const paymentMethod = isDirectDebit ? 'Autogiro' : isGiro ? 'Bankgiro' : 'Kort';
+    const ruleDay = inferTrueRecurringDayOfMonth(
+      rawDates,
+      'expense',
+      'Abonnemang',
+      displayName,
+      getDayOfMonthFromIso(rawDates[0], 27)
+    );
+
+    expenseCandidates.push({
+      key: `cand_exp_${unmatchedExpIdx++}`,
+      name: displayName,
+      rawSample,
+      category: paymentMethod === 'Kort' ? 'Abonnemang' : 'Räkningar',
+      paymentMethod,
+      latestAmount: latestAmt,
+      amounts,
+      datesWithWeekday: rawDates.map(formatDateWithWeekday),
+      rawDates,
+      occurrences: groupTxs.length,
+      ruleDay,
+      isRuleDetected: false,
+    });
+  }
+
+  // 3. Alla regeldetekterade inkomster + eventuella oupptäckta inkomstkandidater >= 1500 kr
+  const incomeCandidates: OnboardingAiCandidateGroup[] = [];
+  const coveredInflowNames = new Set<string>();
+
+  core.detectedIncomes.forEach((inc, idx) => {
+    const rawDates = inc.evidenceDates || (inc.lastDate ? [inc.lastDate] : []);
+    coveredInflowNames.add(normalizeMerchantKey(inc.name));
+    incomeCandidates.push({
+      key: `det_inc_${idx}`,
+      name: inc.name,
+      rawSample: inc.name,
+      category: inc.category || 'Lön',
+      latestAmount: Math.round(inc.amount),
+      amounts: (inc.evidenceAmounts || [inc.amount]).map((a) => Math.round(a)),
+      datesWithWeekday: rawDates.map(formatDateWithWeekday),
+      rawDates,
+      occurrences: inc.detectedOccurrences || rawDates.length || 1,
+      ruleDay: inc.deductionDay || 25,
+      isRuleDetected: true,
+    });
+  });
+
+  const unmatchedInflowsByNorm = new Map<string, BankTransactionItem[]>();
+  for (const tx of core.inflows) {
+    const amt = Math.round(getNormalizedBankTxAmount(tx));
+    if (amt < 1500) continue;
+    const rawText = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
+    if (
+      /(överföring|overforing|egna konton|sparkonto|swish|återköp|aterkop|retur|refund|kreditering|återbetalning|aterbetalning)/.test(
+        rawText
+      )
+    ) {
+      continue;
+    }
+    const normKey = normalizeMerchantKey(tx.counterparty_name || tx.description || '');
+    if (!normKey || coveredInflowNames.has(normKey)) continue;
+    const arr = unmatchedInflowsByNorm.get(normKey) || [];
+    arr.push(tx);
+    unmatchedInflowsByNorm.set(normKey, arr);
+  }
+
+  let unmatchedIncIdx = 0;
+  for (const [normKey, groupTxs] of unmatchedInflowsByNorm.entries()) {
+    if (unmatchedIncIdx >= 12) break;
+    const latestTx = groupTxs[0];
+    const latestAmt = Math.round(getNormalizedBankTxAmount(latestTx));
+    const rawSample = `${latestTx.counterparty_name || ''} ${latestTx.description || ''}`.trim();
+    const displayName = cleanDisplayMerchantName(
+      latestTx.counterparty_name || latestTx.description || normKey
+    );
+    const rawDates = groupTxs
+      .map((t) => t.booking_date || t.transaction_date || t.value_date || '')
+      .filter(Boolean)
+      .slice(0, 6);
+    const amounts = groupTxs.map((t) => Math.round(getNormalizedBankTxAmount(t))).slice(0, 6);
+    const ruleDay = inferTrueRecurringDayOfMonth(
+      rawDates,
+      'income',
+      'Lön',
+      displayName,
+      getDayOfMonthFromIso(rawDates[0], 25)
+    );
+
+    incomeCandidates.push({
+      key: `cand_inc_${unmatchedIncIdx++}`,
+      name: displayName,
+      rawSample,
+      category: 'Lön',
+      latestAmount: latestAmt,
+      amounts,
+      datesWithWeekday: rawDates.map(formatDateWithWeekday),
+      rawDates,
+      occurrences: groupTxs.length,
+      ruleDay,
+      isRuleDetected: false,
+    });
+  }
+
+  return {
+    baseAnalysis,
+    expenseCandidates,
+    incomeCandidates,
   };
 }
 

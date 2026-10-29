@@ -23,7 +23,8 @@ import {
   SWEDISH_BANKS_CATALOG,
 } from '../services/bankService';
 import { WeekendHandlingMode } from '../utils/periodEngine';
-import { analyzeBankTransactionsForOnboarding } from '../utils/bankHistoryAnalyzer';
+import { extractOnboardingAiCandidates } from '../utils/bankHistoryAnalyzer';
+import { getLogoUrl } from '../utils/logo';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { BottomSheet } from './ui/BottomSheet';
@@ -48,6 +49,7 @@ interface OnboardingFlowProps {
   onUpdateWeekendHandling?: (mode: WeekendHandlingMode) => void;
   connections: BankConnection[];
   bankAccounts?: BankAccount[];
+  bankCallbackStatusMsg?: string | null;
   onBankStateUpdated?: (connections: BankConnection[], accounts: BankAccount[]) => void;
   incomes: IncomeItem[];
   fixedExpenses: FixedExpenseItem[];
@@ -85,6 +87,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   onUpdateWeekendHandling,
   connections,
   bankAccounts: _bankAccounts = [],
+  bankCallbackStatusMsg = null,
   onBankStateUpdated,
   incomes,
   fixedExpenses,
@@ -201,8 +204,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [analyzingBank, setAnalyzingBank] = useState(false);
   const [hasAnalyzedBank, setHasAnalyzedBank] = useState(false);
   const [isBankDataDetected, setIsBankDataDetected] = useState(false);
+  const [verifyingBankReturn, setVerifyingBankReturn] = useState(false);
 
-  // Analysera RIKTIGA banktransaktioner från Enable Banking så fort bank är ansluten eller steg 3 / 4 visas
+  // Analysera RIKTIGA banktransaktioner från Enable Banking + Gemini AI så fort bank är ansluten eller steg 3 / 4 visas
   useEffect(() => {
     if (step !== 3 && step !== 4 && connections.length === 0) return;
     if (hasAnalyzedBank && isBankDataDetected) return;
@@ -214,8 +218,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       try {
         let bankTxs = await bankService.listAllTransactionsForReconciliation(5000).catch(() => []);
         if (!bankTxs || bankTxs.length === 0) {
-          const txRes = await bankService.listTransactions({ pageSize: 500 });
+          const txRes = await bankService.listTransactions({ pageSize: 500 }).catch(() => null);
           bankTxs = txRes?.transactions || [];
+        }
+
+        // Om en bank precis kopplats på steg 2 men transaktionssynken inte hunnit klart än, kör en synk nu
+        if ((!bankTxs || bankTxs.length === 0) && connections.length > 0) {
+          await bankService.sync().catch(() => {});
+          bankTxs = await bankService.listAllTransactionsForReconciliation(5000).catch(() => []);
         }
 
         let accountsForAnalysis = fetchedAccounts.length > 0 ? fetchedAccounts : _bankAccounts;
@@ -224,15 +234,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         }
 
         if (bankTxs.length > 0) {
-          const analysis = analyzeBankTransactionsForOnboarding(
-            bankTxs,
-            payday,
-            weekendHandling === 'before',
-            accountsForAnalysis
-          );
+          const { baseAnalysis, expenseCandidates, incomeCandidates } =
+            extractOnboardingAiCandidates(
+              bankTxs,
+              payday,
+              weekendHandling === 'before',
+              accountsForAnalysis
+            );
 
           if (isMounted) {
-            const realDetectedFixed = analysis.detectedFixedExpenses.map((item, idx) => ({
+            const realDetectedFixed = baseAnalysis.detectedFixedExpenses.map((item, idx) => ({
               id: `bank-det-${idx}`,
               name: item.name,
               amount: Math.round(item.amount),
@@ -246,11 +257,11 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             }));
             setSuggestedFixedExpenses(realDetectedFixed);
 
-            const primaryDetectedInc = analysis.detectedIncomes[0];
+            const primaryDetectedInc = baseAnalysis.detectedIncomes[0];
             const inferredPayday =
-              analysis.suggestedPayday || primaryDetectedInc?.deductionDay || null;
+              baseAnalysis.suggestedPayday || primaryDetectedInc?.deductionDay || null;
 
-            const realDetectedIncomes = analysis.detectedIncomes.map((inc, idx) => ({
+            const realDetectedIncomes = baseAnalysis.detectedIncomes.map((inc, idx) => ({
               id: `bank-inc-${idx}`,
               name: inc.name,
               amount: Math.round(inc.amount),
@@ -270,6 +281,135 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               if (primaryDetectedInc?.name) {
                 setDetectedIncomeSourceLabel(primaryDetectedInc.name);
               }
+            }
+          }
+
+          // Förfina med Gemini AI för att fånga nystartade 1-dragningsabonnemang och verifiera exakta utbetalningsdagar (t.ex. A-kassa den 22:a)
+          if (expenseCandidates.length > 0 || incomeCandidates.length > 0) {
+            try {
+              const aiRes = await fetch('/api/ai/analyze-onboarding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ expenseCandidates, incomeCandidates }),
+              });
+              if (aiRes.ok && isMounted) {
+                const aiData = await aiRes.json();
+                if (!aiData?.fallback) {
+                  const expCandMap = new Map(expenseCandidates.map((c) => [c.key, c]));
+                  const incCandMap = new Map(incomeCandidates.map((c) => [c.key, c]));
+
+                  if (Array.isArray(aiData.expenses) && aiData.expenses.length > 0) {
+                    const aiFixedList = aiData.expenses
+                      .filter((e: any) => e && e.include === true && Number(e.amount) > 0)
+                      .map((e: any, idx: number) => {
+                        const cand = expCandMap.get(e.key);
+                        const cleanName = String(e.name || cand?.name || 'Fast utgift').trim();
+                        const cleanCat = String(e.category || cand?.category || 'Räkningar').trim();
+                        const cleanDay =
+                          typeof e.day === 'number' && e.day >= 1 && e.day <= 31
+                            ? Math.round(e.day)
+                            : cand?.ruleDay || 27;
+                        const cleanAmt = Math.round(Number(e.amount) || cand?.latestAmount || 0);
+                        const cleanMethod =
+                          e.paymentMethod || cand?.paymentMethod || 'Autogiro';
+                        const occ = cand?.occurrences || 1;
+                        const lastD = cand?.rawDates?.[0] || '';
+                        const summary = `${occ} ${occ === 1 ? 'betalning' : 'betalningar'}${
+                          lastD ? ` (senast ${lastD})` : ''
+                        } · ${cleanAmt} kr`;
+
+                        return {
+                          id: `bank-ai-exp-${idx}`,
+                          name: cleanName,
+                          amount: cleanAmt,
+                          dueDay: cleanDay,
+                          category: cleanCat,
+                          paymentMethod: cleanMethod,
+                          evidenceSummary: summary,
+                          checked: true,
+                          logo: getLogoUrl(cleanName, cleanCat),
+                          isFromBank: true,
+                        };
+                      })
+                      .sort((a: any, b: any) => b.amount - a.amount);
+
+                    if (aiFixedList.length > 0) {
+                      setSuggestedFixedExpenses((prev) => {
+                        const uncheckedNames = new Set(
+                          prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
+                        );
+                        return aiFixedList.map((item: any) => ({
+                          ...item,
+                          checked: !uncheckedNames.has(item.name.toLowerCase()),
+                        }));
+                      });
+                    }
+                  }
+
+                  if (Array.isArray(aiData.incomes) && aiData.incomes.length > 0) {
+                    const aiIncomeList = aiData.incomes
+                      .filter((inc: any) => inc && inc.include === true && Number(inc.amount) > 0)
+                      .map((inc: any, idx: number) => {
+                        const cand = incCandMap.get(inc.key);
+                        const cleanName = String(inc.name || cand?.name || 'Inkomst').trim();
+                        const cleanCat = String(inc.category || cand?.category || 'Lön').trim();
+                        const cleanDay =
+                          typeof inc.day === 'number' && inc.day >= 1 && inc.day <= 31
+                            ? Math.round(inc.day)
+                            : cand?.ruleDay || 25;
+                        const cleanAmt = Math.round(Number(inc.amount) || cand?.latestAmount || 0);
+                        const occ = cand?.occurrences || 1;
+                        const lastD = cand?.rawDates?.[0] || '';
+                        const summary = `${occ} ${occ === 1 ? 'insättning' : 'insättningar'}${
+                          lastD ? ` (senast ${lastD})` : ''
+                        } · ${cleanAmt} kr`;
+
+                        return {
+                          id: `bank-ai-inc-${idx}`,
+                          name: cleanName,
+                          amount: cleanAmt,
+                          payday: cleanDay,
+                          category: cleanCat,
+                          evidenceSummary: summary,
+                          checked: true,
+                          logo: getLogoUrl(cleanName, cleanCat),
+                          isFromBank: true,
+                        };
+                      })
+                      .sort((a: any, b: any) => b.amount - a.amount);
+
+                    if (aiIncomeList.length > 0) {
+                      setSuggestedIncomes((prev) => {
+                        const uncheckedNames = new Set(
+                          prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
+                        );
+                        return aiIncomeList.map((item: any) => ({
+                          ...item,
+                          checked: !uncheckedNames.has(item.name.toLowerCase()),
+                        }));
+                      });
+
+                      const primaryAiInc = aiIncomeList[0];
+                      const bestPayday =
+                        primaryAiInc?.payday ||
+                        (typeof aiData.suggestedPayday === 'number' &&
+                        aiData.suggestedPayday >= 1 &&
+                        aiData.suggestedPayday <= 31
+                          ? aiData.suggestedPayday
+                          : null);
+
+                      if (bestPayday && bestPayday >= 1 && bestPayday <= 31) {
+                        setPayday(bestPayday);
+                        if (primaryAiInc?.name) {
+                          setDetectedIncomeSourceLabel(primaryAiInc.name);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            } catch {
+              // Ignorera nätverksfel – regelmotorn har redan satt alla poster
             }
           }
         } else if (isMounted && connections.length === 0) {
@@ -443,6 +583,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       try {
         localStorage.setItem('dejz_onboarding_in_progress', 'true');
         localStorage.setItem('dejz_onboarding_step', '2');
+        localStorage.setItem(
+          'dejz_onboarding_pending_bank_auth',
+          JSON.stringify({ bankName: bank.name, ts: Date.now() })
+        );
       } catch {
         // ignore
       }
@@ -474,42 +618,121 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
   };
 
-  // Poll status när fönstret återfår fokus under bankinloggning på steg 2
+  // Hjälpfunktion för att öppna kontoval eller gå vidare så fort bankkopplingen är klar
+  const applyConnectedBankState = React.useCallback(
+    (conns: BankConnection[], accs: BankAccount[]) => {
+      if (!conns || conns.length === 0) return false;
+      try {
+        localStorage.removeItem('dejz_onboarding_pending_bank_auth');
+      } catch {
+        // ignore
+      }
+      setVerifyingBankReturn(false);
+      setConnectingBankName(null);
+      const newestConn = conns[0];
+      const connAccounts = accs.filter((a) => a.connection_id === newestConn.id);
+      const accountsToUse = connAccounts.length > 0 ? connAccounts : accs;
+      if (accountsToUse.length > 0) {
+        setActiveConnection(newestConn);
+        setFetchedAccounts(accountsToUse);
+        const selIds = accountsToUse.filter((a) => a.is_selected !== false).map((a) => a.id);
+        setSelectedAccountIds(selIds.length > 0 ? selIds : accountsToUse.map((a) => a.id));
+        const nameMap: Record<string, string> = {};
+        accountsToUse.forEach((a, idx) => {
+          nameMap[a.id] = a.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
+        });
+        setAccountCustomNames(nameMap);
+        setStep2View('select-accounts');
+        return true;
+      }
+      return false;
+    },
+    []
+  );
+
+  // Reagera DIREKT när App.tsx uppdaterar connections/bankAccounts efter ?code=&state= (utan att kräva window focus)
+  useEffect(() => {
+    if (step !== 2 || step2View === 'select-accounts') return;
+    if (connections.length > 0 && _bankAccounts.length > 0) {
+      applyConnectedBankState(connections, _bankAccounts);
+    }
+  }, [step, step2View, connections, _bankAccounts, applyConnectedBankState]);
+
+  // Poll status med automatiska omförsök när användaren återvänder från Mobilt BankID till appen
   useEffect(() => {
     if (step !== 2) return;
-    const handleFocus = async () => {
+    let isCancelled = false;
+    let retryTimer: any = null;
+
+    const checkBankReturn = async (attempt = 0) => {
+      if (isCancelled || step !== 2) return;
+
+      let hasPendingAuth = false;
       try {
-        const status = await bankService.getStatus();
-        if (status.connections.length > connections.length || status.accounts.length > 0) {
-          if (onBankStateUpdated) {
-            onBankStateUpdated(status.connections, status.accounts);
-          }
-          const newestConn = status.connections[0];
-          if (newestConn) {
-            const connAccounts = status.accounts.filter((a) => a.connection_id === newestConn.id);
-            if (connAccounts.length > 0) {
-              setActiveConnection(newestConn);
-              setFetchedAccounts(connAccounts);
-              const selIds = connAccounts.filter((a) => a.is_selected !== false).map((a) => a.id);
-              setSelectedAccountIds(selIds.length > 0 ? selIds : connAccounts.map((a) => a.id));
-              const nameMap: Record<string, string> = {};
-              connAccounts.forEach((a, idx) => {
-                nameMap[a.id] = a.custom_name || (idx === 0 ? 'Lönekonto' : 'Sparkonto');
-              });
-              setAccountCustomNames(nameMap);
-              setStep2View('select-accounts');
-            } else {
-              navigateStep(3, 'forward');
-            }
+        const rawPending = localStorage.getItem('dejz_onboarding_pending_bank_auth');
+        if (rawPending) {
+          const parsed = JSON.parse(rawPending);
+          if (parsed?.ts && Date.now() - Number(parsed.ts) < 15 * 60 * 1000) {
+            hasPendingAuth = true;
+          } else {
+            localStorage.removeItem('dejz_onboarding_pending_bank_auth');
           }
         }
       } catch {
         // ignore
       }
+
+      if (hasPendingAuth && attempt === 0) {
+        setVerifyingBankReturn(true);
+      }
+
+      try {
+        const status = await bankService.getStatus();
+        if (isCancelled) return;
+
+        if (status.connections.length > 0) {
+          if (onBankStateUpdated) {
+            onBankStateUpdated(status.connections, status.accounts);
+          }
+          const openedSelect = applyConnectedBankState(status.connections, status.accounts);
+          if (!openedSelect && status.connections.length > connections.length) {
+            navigateStep(3, 'forward');
+          }
+          return;
+        }
+      } catch {
+        // ignore
+      }
+
+      if (hasPendingAuth && attempt < 5 && !isCancelled) {
+        retryTimer = setTimeout(() => {
+          checkBankReturn(attempt + 1);
+        }, 1500);
+      } else if (!isCancelled) {
+        setVerifyingBankReturn(false);
+      }
     };
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [step, connections.length, onBankStateUpdated]);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'hidden') return;
+      checkBankReturn(0);
+    };
+
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    window.addEventListener('pageshow', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    // Kör även en koll direkt om vi precis landat på steg 2 med en väntande BankID-session
+    checkBankReturn(0);
+
+    return () => {
+      isCancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.removeEventListener('pageshow', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [step, connections.length, onBankStateUpdated, applyConnectedBankState]);
 
   // Spara valda konton och gå till steg 3 (Vilka fasta utgifter har du?)
   const handleSaveSelectedAccounts = async () => {
@@ -537,6 +760,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       if (onBankStateUpdated) {
         onBankStateUpdated(status.connections, status.accounts);
       }
+      // Nollställ analys-flagga så att steg 3 garanterat analyserar de nyvalda kontonas transaktioner
+      setHasAnalyzedBank(false);
     } finally {
       setSavingAccounts(false);
       navigateStep(3, 'forward');
@@ -1082,6 +1307,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     >
                       Stäng
                     </button>
+                  </div>
+                )}
+
+                {(bankCallbackStatusMsg || verifyingBankReturn) && (
+                  <div className="p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-3 text-xs font-medium text-[var(--text-primary)] animate-scale-in">
+                    <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
+                    <span>
+                      {bankCallbackStatusMsg ||
+                        'Verifierar BankID-inloggning och hämtar dina konton...'}
+                    </span>
                   </div>
                 )}
 

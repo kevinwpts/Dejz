@@ -1292,7 +1292,31 @@ export const App: React.FC = () => {
     () => initialCache?.bankAccounts || []
   );
   const [syncingBank, setSyncingBank] = useState(false);
-  const [callbackStatusMsg, setCallbackStatusMsg] = useState<string | null>(null);
+  const [callbackStatusMsg, setCallbackStatusMsg] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('code') && params.get('state')) {
+      return 'Slutför bankkoppling och hämtar dina konton...';
+    }
+    return null;
+  });
+  const pendingBankCallbackRef = useRef<{
+    code: string;
+    state: string;
+    promise: Promise<void> | null;
+    done: boolean;
+  } | null>(
+    (() => {
+      if (typeof window === 'undefined') return null;
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      if (code && state) {
+        return { code, state, promise: null, done: false };
+      }
+      return null;
+    })()
+  );
 
   // Inställning för att dölja och exkludera interna överföringar från "Kvar att spendera"
   const [excludeInternalTransfers, setExcludeInternalTransfersState] = useState<boolean>(() =>
@@ -2062,39 +2086,93 @@ export const App: React.FC = () => {
     [refreshBankStatus]
   );
 
-  // Hantera Enable Banking OAuth callback (?code=...&state=...)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const state = params.get('state');
+  // Hantera Enable Banking OAuth callback (?code=...&state=...) koordinerat utan race conditions
+  const processPendingBankCallback = useCallback(async () => {
+    const pending = pendingBankCallbackRef.current;
+    if (!pending || pending.done) return;
+    if (pending.promise) {
+      await pending.promise;
+      return;
+    }
 
-    if (code && state && userId) {
-      setCallbackStatusMsg('Slutför bankkoppling via Enable Banking...');
-      window.history.replaceState({}, '', '/');
+    const runExchange = async () => {
+      try {
+        setCallbackStatusMsg('Slutför bankkoppling och hämtar dina konton...');
+        window.history.replaceState({}, '', '/');
 
-      bankService
-        .exchangeCode({ code, state })
-        .then(async (res) => {
-          const allIds = (res.accounts || []).map((a) => a.id);
-          if (res.connection && allIds.length > 0) {
-            await bankService.selectAccounts({
+        const res = await bankService.exchangeCode({
+          code: pending.code,
+          state: pending.state,
+        });
+
+        try {
+          localStorage.removeItem('dejz_onboarding_pending_bank_auth');
+        } catch {
+          // ignore
+        }
+
+        if (res.originContext === 'onboarding') {
+          try {
+            localStorage.setItem('dejz_onboarding_in_progress', 'true');
+          } catch {
+            // ignore
+          }
+          setIsOnboardingActive(true);
+          setShowLanding(false);
+        }
+
+        // Uppdatera anslutning & konton direkt så att onboardingen reagerar omedelbart
+        if (res.connection) {
+          setConnections((prev) => {
+            const filtered = prev.filter((c) => c.id !== res.connection.id);
+            return [res.connection, ...filtered];
+          });
+        }
+        if (Array.isArray(res.accounts) && res.accounts.length > 0) {
+          setBankAccounts((prev) => {
+            const newIds = new Set(res.accounts.map((a) => a.id));
+            const kept = prev.filter((a) => !newIds.has(a.id));
+            return [...res.accounts, ...kept];
+          });
+        }
+
+        const allIds = (res.accounts || []).map((a) => a.id);
+        if (res.connection && allIds.length > 0) {
+          await bankService
+            .selectAccounts({
               connectionId: res.connection.id,
               selectedAccountIds: allIds,
-            });
-            await bankService.sync({ connectionId: res.connection.id });
-          }
-          await refreshBankStatus();
-          setCallbackStatusMsg(null);
-          if (localStorage.getItem('dejz_onboarding_in_progress') !== 'true') {
-            setIsBankModalOpen(true);
-          }
-        })
-        .catch((err: any) => {
-          setCallbackStatusMsg(`Kunde inte slutföra bankkoppling: ${err.message || 'Okänt fel'}`);
-          setTimeout(() => setCallbackStatusMsg(null), 6000);
-        });
+            })
+            .catch(() => {});
+          setCallbackStatusMsg('Synkar transaktioner från din bank...');
+          await bankService.sync({ connectionId: res.connection.id }).catch(() => {});
+        }
+
+        await refreshBankStatus();
+        pending.done = true;
+        setCallbackStatusMsg(null);
+        if (
+          res.originContext !== 'onboarding' &&
+          localStorage.getItem('dejz_onboarding_in_progress') !== 'true'
+        ) {
+          setIsBankModalOpen(true);
+        }
+      } catch (err: any) {
+        pending.done = true;
+        setCallbackStatusMsg(`Kunde inte slutföra bankkoppling: ${err.message || 'Okänt fel'}`);
+        setTimeout(() => setCallbackStatusMsg(null), 6000);
+      }
+    };
+
+    pending.promise = runExchange();
+    await pending.promise;
+  }, [refreshBankStatus]);
+
+  useEffect(() => {
+    if (userId && pendingBankCallbackRef.current && !pendingBankCallbackRef.current.done) {
+      processPendingBankCallback();
     }
-  }, [userId, refreshBankStatus]);
+  }, [userId, processPendingBankCallback]);
 
   // Initiera Supabase-session och trigga en enda koordinerad, atomär hydrering vid appstart
   useEffect(() => {
@@ -2136,6 +2214,11 @@ export const App: React.FC = () => {
       }
       hydrationInFlightRef.current = uid;
       try {
+        // Om vi precis kom tillbaka från BankID / Enable Banking (?code=...&state=...),
+        // slutför bankkopplingen FÖRE loadSupabaseUserData så att tom data aldrig skriver över kopplingen!
+        if (pendingBankCallbackRef.current && !pendingBankCallbackRef.current.done) {
+          await processPendingBankCallback();
+        }
         const status = await loadSupabaseUserData(uid);
         const activeConns = status.connections.filter((c) => c.status === 'active');
         if (activeConns.length > 0) {
@@ -3653,6 +3736,7 @@ export const App: React.FC = () => {
           onUpdateWeekendHandling={handleUpdateWeekendHandling}
           connections={connections}
           bankAccounts={bankAccounts}
+          bankCallbackStatusMsg={callbackStatusMsg}
           onBankStateUpdated={(conns, accs) => {
             setConnections(conns);
             setBankAccounts(accs);
