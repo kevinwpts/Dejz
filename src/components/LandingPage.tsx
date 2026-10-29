@@ -81,6 +81,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     setGoogleLoading(true);
 
     try {
+      try {
+        localStorage.removeItem('dejz_logged_out');
+        if (view === 'register') {
+          localStorage.setItem('dejz_onboarding_in_progress', 'true');
+          localStorage.setItem('dejz_onboarding_step', '1');
+          localStorage.removeItem('dejz_onboarding_v2_done');
+          localStorage.removeItem('dejz_onboarding_completed');
+        }
+      } catch {
+        // ignore
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -89,6 +100,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       });
       if (error) throw error;
     } catch (err: any) {
+      if (view === 'register') {
+        try {
+          localStorage.removeItem('dejz_onboarding_in_progress');
+          localStorage.removeItem('dejz_onboarding_step');
+        } catch {
+          // ignore
+        }
+      }
       setErrorMsg(err.message || 'Kunde inte starta Google-inloggning.');
       setGoogleLoading(false);
     }
@@ -127,6 +146,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
     try {
       if (view === 'login') {
+        try {
+          localStorage.removeItem('dejz_logged_out');
+        } catch {
+          // ignore
+        }
         const { data, error } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
           password,
@@ -136,6 +160,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           onAuthenticated(data.user.email || cleanEmail, 'login');
         }
       } else if (view === 'register') {
+        // Sätt onboarding-flaggor INNAN supabase.auth.signUp anropas så att onAuthStateChange
+        // aldrig hinner rendera appens startsida emellan under ett halvt sekunds hydrering!
+        try {
+          localStorage.removeItem('dejz_logged_out');
+          localStorage.setItem('dejz_onboarding_in_progress', 'true');
+          localStorage.setItem('dejz_onboarding_step', '1');
+          localStorage.removeItem('dejz_onboarding_v2_done');
+          localStorage.removeItem('dejz_onboarding_completed');
+        } catch {
+          // ignore
+        }
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
@@ -164,6 +199,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       if (isNetworkError && cleanEmail) {
         onAuthenticated(cleanEmail, targetMode);
         return;
+      }
+
+      if (view === 'register') {
+        try {
+          localStorage.removeItem('dejz_onboarding_in_progress');
+          localStorage.removeItem('dejz_onboarding_step');
+        } catch {
+          // ignore
+        }
       }
 
       if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {

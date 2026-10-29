@@ -2189,6 +2189,29 @@ export const App: React.FC = () => {
       setUserId(uid);
       userIdRef.current = uid;
       setUserEmail(sessionUser.email || null);
+
+      try {
+        const isOnboardingPending =
+          localStorage.getItem('dejz_onboarding_in_progress') === 'true';
+        const isOnboardingDone =
+          localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
+          localStorage.getItem('dejz_onboarding_completed') === 'true';
+        const isBrandNewUser =
+          !isOnboardingDone &&
+          Boolean(sessionUser?.created_at) &&
+          Date.now() - new Date(sessionUser.created_at).getTime() < 90_000;
+
+        if (isOnboardingPending || isBrandNewUser) {
+          if (!isOnboardingPending) {
+            localStorage.setItem('dejz_onboarding_in_progress', 'true');
+            localStorage.setItem('dejz_onboarding_step', '1');
+          }
+          setIsOnboardingActive(true);
+        }
+      } catch {
+        // ignore
+      }
+
       setShowLanding(false);
       const metaAvatar =
         sessionUser.user_metadata?.avatar_url ||
@@ -2267,10 +2290,10 @@ export const App: React.FC = () => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       if (session?.user && localStorage.getItem('dejz_logged_out') !== 'true') {
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || session.user.id !== userIdRef.current) {
-          await runCoordinateHydration(session.user);
+          void runCoordinateHydration(session.user);
         }
       } else if (event === 'SIGNED_OUT') {
         setUserId(null);
@@ -3730,20 +3753,9 @@ export const App: React.FC = () => {
             setBankAccounts([]);
             setDismissedTxIds([]);
           }
-          setUserEmail(email);
-          setShowLanding(false);
-          supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) {
-              setUserId(session.user.id);
-              userIdRef.current = session.user.id;
-              loadSupabaseUserData(session.user.id);
-            } else if (!userIdRef.current) {
-              setUserId('preview-user');
-              userIdRef.current = 'preview-user';
-            }
-          });
           if (mode === 'register') {
             setIsOnboardingActive(true);
+            setShowLanding(false);
           } else {
             try {
               localStorage.setItem('dejz_onboarding_v2_done', 'true');
@@ -3754,13 +3766,38 @@ export const App: React.FC = () => {
               // ignore
             }
             setIsOnboardingActive(false);
+            setShowLanding(false);
           }
+          setUserEmail(email);
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+              setUserId(session.user.id);
+              userIdRef.current = session.user.id;
+              loadSupabaseUserData(session.user.id);
+            } else if (!userIdRef.current) {
+              setUserId('preview-user');
+              userIdRef.current = 'preview-user';
+            }
+          });
         }}
       />
     );
   }
 
-  if (isOnboardingActive) {
+  const shouldShowOnboarding =
+    isOnboardingActive ||
+    (() => {
+      try {
+        return (
+          localStorage.getItem('dejz_onboarding_in_progress') === 'true' &&
+          localStorage.getItem('dejz_onboarding_v2_done') !== 'true'
+        );
+      } catch {
+        return false;
+      }
+    })();
+
+  if (shouldShowOnboarding) {
     return (
       <>
         <OnboardingFlow
