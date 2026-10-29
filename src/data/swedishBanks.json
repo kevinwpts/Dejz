@@ -1,5 +1,12 @@
 [
   {
+    "name": "Avanza",
+    "country": "SE",
+    "logo": null,
+    "bic": null,
+    "maximumConsentValidity": 15552000
+  },
+  {
     "name": "SEB",
     "country": "SE",
     "logo": "https://enablebanking.com/brands/SE/SEB/",

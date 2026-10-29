@@ -63,7 +63,7 @@ interface OnboardingFlowProps {
   onBackToLanding?: () => void;
 }
 
-type OnboardingStep = 1 | 2 | 3 | 4;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 
 interface SheetEditorState {
   mode: 'add' | 'edit';
@@ -102,7 +102,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [step, setStep] = useState<OnboardingStep>(() => {
     try {
       const savedStep = Number(localStorage.getItem('dejz_onboarding_step'));
-      if (savedStep >= 1 && savedStep <= 4) {
+      if (savedStep >= 1 && savedStep <= 5) {
         return savedStep as OnboardingStep;
       }
     } catch {
@@ -164,6 +164,35 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const [accountCustomNames, setAccountCustomNames] = useState<Record<string, string>>({});
   const [activeConnection, setActiveConnection] = useState<BankConnection | null>(null);
   const [savingAccounts, setSavingAccounts] = useState(false);
+
+  // Föreslagna fasta utgifter för steg 4
+  const [suggestedFixedExpenses, setSuggestedFixedExpenses] = useState<
+    { id: string; name: string; amount: number; dueDay: number; category: string; checked: boolean }[]
+  >([
+    { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Räkningar', checked: true },
+    { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Räkningar', checked: true },
+    { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Räkningar', checked: true },
+    { id: '4', name: 'Netflix', amount: 149, dueDay: 27, category: 'Nöje', checked: true },
+    { id: '5', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Räkningar', checked: true },
+  ]);
+
+  const handleSaveSuggestedFixed = () => {
+    suggestedFixedExpenses.forEach((item) => {
+      if (item.checked) {
+        const exists = fixedExpenses.some((f) => f.name.toLowerCase() === item.name.toLowerCase());
+        if (!exists) {
+          onAddFixed({
+            name: item.name,
+            amount: item.amount,
+            dueDay: item.dueDay,
+            category: item.category,
+            paymentMethod: 'Autogiro',
+          });
+        }
+      }
+    });
+    navigateStep(5, 'forward');
+  };
 
   // BottomSheet editor state for Step 4 (replaces cramped inline forms)
   const [sheetEditor, setSheetEditor] = useState<SheetEditorState | null>(null);
@@ -492,15 +521,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           </button>
 
           <span className="text-xs font-semibold text-[var(--text-muted)] tabular-nums">
-            Steg {step} av 4
+            Steg {step} av 5
           </span>
 
           <div className="w-6" />
         </div>
 
-        {/* Minimal 4-step progress bar */}
-        <div className="grid grid-cols-4 gap-1.5">
-          {[1, 2, 3, 4].map((s) => (
+        {/* Minimal 5-step progress bar */}
+        <div className="grid grid-cols-5 gap-1.5">
+          {[1, 2, 3, 4, 5].map((s) => (
             <div
               key={s}
               className={`h-1 rounded-full transition-colors duration-300 ${
@@ -914,7 +943,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                               {conn.aspsp_name}
                             </span>
                             <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                              Ansluten · Fasta utgifter analyserade
+                              Ansluten
                             </span>
                           </div>
                         </div>
@@ -1015,11 +1044,96 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* STEG 4: INKOMSTER & FASTA UTGIFTER (Mitten scrollar, knapp pinnad) */}
+      {/* STEG 4: VÄLJ FÄRDIGANALYSERADE FASTA UTGIFTER                */}
       {/* ============================================================== */}
       {step === 4 && (
         <div
           key="step-4"
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+        >
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar py-2 my-auto space-y-4">
+            <div>
+              <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                Vilka fasta utgifter har du?
+              </h1>
+              <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                Dejz har analyserat vanliga fasta räkningar. Bocka i de som stämmer eller lägg till egna.
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              {suggestedFixedExpenses.map((item) => (
+                <div
+                  key={item.id}
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                    item.checked
+                      ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
+                      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-60'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSuggestedFixedExpenses((prev) =>
+                        prev.map((p) => (p.id === item.id ? { ...p, checked: !p.checked } : p))
+                      )
+                    }
+                    className="flex items-center gap-3 text-left cursor-pointer flex-1 min-w-0"
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                        item.checked
+                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      {item.checked && <Check size={12} weight="bold" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
+                        {item.name}
+                      </span>
+                      <span className="text-[11px] text-[var(--text-muted)] block">
+                        Förfaller den {item.dueDay}:e · {item.category}
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+                      -{formatKr(item.amount)}
+                    </span>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openAddSheet('fixed')}
+              className="w-full py-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Plus size={14} weight="bold" />
+              <span>Lägg till egen fast utgift</span>
+            </button>
+          </div>
+
+          <div className="shrink-0 pt-3">
+            <button
+              type="button"
+              onClick={handleSaveSuggestedFixed}
+              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            >
+              <span>Fortsätt</span>
+              <ArrowRight size={16} weight="bold" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* STEG 5: INKOMSTER & FASTA UTGIFTER (Mitten scrollar, knapp pinnad) */}
+      {/* ============================================================== */}
+      {step === 5 && (
+        <div
+          key="step-5"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
         >
           {/* Mitten scrollar mjukt */}
