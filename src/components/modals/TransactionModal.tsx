@@ -1012,63 +1012,47 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* HUVUDVY 1: FÖRHANDSGRANSKNING (Ren läsvy utan inline-inputs)    */}
+      {/* HUVUDVY 1: FÖRHANDSGRANSKNING (Ren läsvy utan redigeringsfält) */}
       {/* ============================================================== */}
       {subView === 'details' && !isCreateMode && activeTx && (
         <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
           {/* Top Header */}
           <div className="ui-sheet-header mb-5">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               {onToggleHeart && (
                 <button
                   type="button"
                   onClick={() => onToggleHeart(activeTx.id, !activeTx.isHearted)}
                   title="Spara köp"
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
-                    activeTx.isHearted
-                      ? 'text-rose-500 bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20'
-                      : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  className={`ui-icon-btn ${
+                    activeTx.isHearted ? 'text-rose-500 hover:text-rose-600' : ''
                   }`}
                 >
                   <Heart
-                    size={15}
+                    size={18}
                     weight={activeTx.isHearted ? 'fill' : 'regular'}
                     className={activeTx.isHearted ? 'text-rose-500' : ''}
                   />
                 </button>
               )}
-              {onTogglePackage && (
+              {!isIncome && onTogglePackage && (
                 <button
                   type="button"
                   onClick={() =>
                     onTogglePackage(activeTx.id, !activeTx.isWaitingForPackage)
                   }
                   title="Väntar på paket"
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
-                    activeTx.isWaitingForPackage
-                      ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
-                      : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  className={`ui-icon-btn ${
+                    activeTx.isWaitingForPackage ? 'text-amber-500 hover:text-amber-600' : ''
                   }`}
                 >
                   <Package
-                    size={15}
+                    size={18}
                     weight={activeTx.isWaitingForPackage ? 'fill' : 'regular'}
                     className={activeTx.isWaitingForPackage ? 'text-amber-500' : ''}
                   />
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                title="Bifoga kvitto"
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
-                  draftReceipts.length > 0
-                    ? 'text-[var(--text-primary)] bg-[var(--surface-hover)] border-[var(--text-muted)]'
-                    : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                <Paperclip size={15} weight={draftReceipts.length > 0 ? 'bold' : 'regular'} />
-              </button>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -1140,7 +1124,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           <div className="space-y-3">
-            {/* Förhandsgranskningstabell */}
+            {/* Förhandsgranskningstabell (endast läsvy) */}
             <div className="ui-sheet-group">
               <div className="ui-row">
                 <span className="ui-info-label">Kategori</span>
@@ -1178,6 +1162,17 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
               )}
 
+              {activeTx.rawDescription &&
+                activeTx.rawDescription.trim().toLowerCase() !==
+                  activeTx.title.trim().toLowerCase() && (
+                  <div className="ui-row">
+                    <span className="ui-info-label">Banktext</span>
+                    <span className="ui-info-value text-right truncate max-w-[210px] text-[var(--text-secondary)] font-normal">
+                      {activeTx.rawDescription.trim()}
+                    </span>
+                  </div>
+                )}
+
               {note && (
                 <div className="ui-row">
                   <span className="ui-info-label">Anteckning</span>
@@ -1191,96 +1186,78 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 <div className="ui-row">
                   <span className="ui-info-label">Budget</span>
                   <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                    Exkluderad från budget
+                    Räknas ej i budget
                   </span>
                 </div>
               )}
-
-              <div className="ui-row">
-                <span className="ui-info-label">
-                  {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Paperclip size={13} />
-                  <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga'}</span>
-                </button>
-              </div>
             </div>
 
-            {/* Liknande köp */}
-            <div className="ui-sheet-group">
-              <button
-                type="button"
-                onClick={() => navigateSubView('similar', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="font-medium text-[var(--text-primary)] shrink-0">
-                  Liknande köp
-                </span>
-                <span className="text-[var(--text-secondary)] font-normal flex items-center gap-1.5 tabular-nums shrink-0">
-                  <span>
-                    {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
-                  </span>
-                  <CaretRight size={12} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-            </div>
-
-            {/* Bifogade kvitton visas i snygga kort */}
+            {/* Bifogade kvitton (visas endast i förhandsgranskning om det faktiskt finns kvitton) */}
             {draftReceipts.length > 0 && (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {draftReceipts.map((rcpt, idx) => (
-                  <div
+                  <button
                     key={`${rcpt.name}-${idx}`}
-                    className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5"
+                    type="button"
+                    onClick={() => {
+                      setPreviewReceipt(rcpt);
+                      navigateSubView('receipt-preview', 'forward');
+                    }}
+                    className="w-full rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5 text-left hover:opacity-95 transition-opacity cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-2 px-0.5">
                       <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate">
                         <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
                         <span className="truncate">{rcpt.name || `Kvitto ${idx + 1}`}</span>
                       </span>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveReceiptAt(idx)}
-                          className="p-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                          title="Ta bort kvitto"
-                        >
-                          <Trash size={13} />
-                        </button>
-                      </div>
+                      <span className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1 shrink-0">
+                        <span>Öppna</span>
+                        <CaretRight size={11} className="text-[var(--text-muted)]" />
+                      </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewReceipt(rcpt);
-                        navigateSubView('receipt-preview', 'forward');
-                      }}
-                      className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-60 cursor-pointer hover:opacity-95 transition-opacity"
-                    >
+                    <div className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-56">
                       {rcpt.url.startsWith('data:image/') ||
                       /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
                         <img
                           src={rcpt.url}
                           alt={rcpt.name || 'Kvitto'}
-                          className="max-h-52 w-auto object-contain rounded-lg"
+                          className="max-h-48 w-auto object-contain rounded-lg"
                         />
                       ) : (
-                        <div className="py-6 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-                          <FileText size={28} weight="duotone" />
+                        <div className="py-5 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                          <FileText size={26} weight="duotone" />
                           <span className="font-medium">{rcpt.name || 'Öppna dokument'}</span>
                         </div>
                       )}
-                    </button>
-                  </div>
+                    </div>
+                  </button>
                 ))}
               </div>
             )}
+
+            {/* Liknande transaktioner */}
+            <div className="ui-sheet-group">
+              <button
+                type="button"
+                onClick={() => navigateSubView('similar', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-2 shrink-0">
+                  <ClockCounterClockwise
+                    size={15}
+                    className="text-[var(--text-secondary)] shrink-0"
+                  />
+                  <span>Liknande transaktioner</span>
+                </span>
+                <span className="text-[var(--text-secondary)] font-normal flex items-center gap-1.5 tabular-nums shrink-0">
+                  <span>
+                    {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
+                  </span>
+                  <CaretRight size={13} className="text-[var(--text-muted)]" />
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1354,6 +1331,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   category={category}
                   logoUrl={activeTx?.logo}
                   size="lg"
+                  isRecurring={Boolean(!isCreateMode && recurringStatus.isRecurring)}
                 />
                 <div className="flex-1 min-w-0">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
@@ -1427,8 +1405,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
             </div>
 
+            {/* Grupp 1: Egenskaper & Kvitto */}
             <div className="ui-sheet-group">
-
               {/* Kategori */}
               <button
                 type="button"
@@ -1492,7 +1470,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 />
               </label>
 
-              {/* Bifoga kvitto (både vid ny händelse och redigering!) */}
+              {/* Bifoga kvitto */}
               <div className="ui-row">
                 <span className="ui-info-label shrink-0">
                   {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
@@ -1506,69 +1484,72 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga kvitto'}</span>
                 </button>
               </div>
+            </div>
 
-              {/* Räkna med i budget */}
-              {!isCreateMode && activeTx && onExclude && (
-                <div className="ui-row">
-                  <span className="ui-info-label shrink-0">Räkna med i budget</span>
+            {/* Grupp 2: Budget & Återkommande (endast vid redigering av befintlig händelse) */}
+            {!isCreateMode && activeTx && (onExclude || onMarkAsFixed) && (
+              <div className="ui-sheet-group">
+                {onExclude && (
+                  <div className="ui-row">
+                    <span className="ui-info-label shrink-0">Räkna med i budget</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={!isExcluded}
+                      onClick={() => onExclude(activeTx.id, !isExcluded)}
+                      className={`ui-switch ${
+                        !isExcluded ? 'ui-switch-on' : 'ui-switch-off'
+                      }`}
+                    >
+                      <span
+                        className={`ui-switch-thumb ${
+                          !isExcluded ? 'ui-switch-thumb-on' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                )}
+
+                {onMarkAsFixed && (
                   <button
                     type="button"
-                    role="switch"
-                    aria-checked={!isExcluded}
-                    onClick={() => onExclude(activeTx.id, !isExcluded)}
-                    className={`ui-switch ${
-                      !isExcluded ? 'ui-switch-on' : 'ui-switch-off'
-                    }`}
+                    onClick={() => {
+                      const nextTitle = title.trim() || activeTx.title;
+                      const nextCategory = category || activeTx.category;
+                      const nextPaymentMethod =
+                        paymentMethod || getDefaultPaymentMethodForTx(activeTx);
+                      const nextNote = note.trim() || activeTx.note;
+                      const nextAmount = isBankSynced
+                        ? activeTx.amount
+                        : Math.max(1, Math.round(Number(amount) || activeTx.amount));
+                      onMarkAsFixed(
+                        {
+                          ...activeTx,
+                          title: nextTitle,
+                          amount: nextAmount,
+                          category: nextCategory,
+                          paymentMethod: nextPaymentMethod,
+                          note: nextNote,
+                        },
+                        isIncome ? 'income' : 'expense'
+                      );
+                    }}
+                    className="ui-row-btn"
                   >
-                    <span
-                      className={`ui-switch-thumb ${
-                        !isExcluded ? 'ui-switch-thumb-on' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-              )}
-
-              {/* Gör till fast utgift / inkomst */}
-              {!isCreateMode && activeTx && onMarkAsFixed && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextTitle = title.trim() || activeTx.title;
-                    const nextCategory = category || activeTx.category;
-                    const nextPaymentMethod =
-                      paymentMethod || getDefaultPaymentMethodForTx(activeTx);
-                    const nextNote = note.trim() || activeTx.note;
-                    const nextAmount = isBankSynced
-                      ? activeTx.amount
-                      : Math.max(1, Math.round(Number(amount) || activeTx.amount));
-                    onMarkAsFixed(
-                      {
-                        ...activeTx,
-                        title: nextTitle,
-                        amount: nextAmount,
-                        category: nextCategory,
-                        paymentMethod: nextPaymentMethod,
-                        note: nextNote,
-                      },
-                      isIncome ? 'income' : 'expense'
-                    );
-                  }}
-                  className="ui-row-btn"
-                >
-                  <span className="ui-info-label shrink-0">Återkommande</span>
-                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
-                    <ArrowsClockwise size={13} />
-                    <span>
-                      {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
-                        ? `Lägg till som egen fast ${isIncome ? 'inkomst' : 'utgift'}`
-                        : `Gör till fast ${isIncome ? 'inkomst' : 'utgift'}`}
+                    <span className="ui-info-label shrink-0">Återkommande</span>
+                    <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                      <ArrowsClockwise size={13} />
+                      <span>
+                        {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
+                          ? `Lägg till som egen fast ${isIncome ? 'inkomst' : 'utgift'}`
+                          : `Gör till fast ${isIncome ? 'inkomst' : 'utgift'}`}
+                      </span>
+                      <CaretRight size={12} className="text-[var(--text-muted)]" />
                     </span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
-                </button>
-              )}
-            </div>
+                  </button>
+                )}
+              </div>
+            )}
 
             {draftReceipts.length > 0 && (
               <div className="space-y-2">

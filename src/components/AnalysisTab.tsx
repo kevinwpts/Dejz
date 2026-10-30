@@ -796,11 +796,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                           ? `Den ${subItem.dueDay}:e`
                                           : ''}
                                       </span>
-                                      {isFixedExpItem && (
-                                        <span className="text-[11px] font-medium text-[var(--text-secondary)] shrink-0">
-                                          · Fast
-                                        </span>
-                                      )}
                                       {subItem.isHearted && (
                                         <Heart
                                           size={11}

@@ -1148,7 +1148,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       {/* ============================================================== */}
       {subView === 'details' && !isCreateMode && (
         <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
-          <div className="ui-sheet-header">
+          <div className="ui-sheet-header mb-5">
             <span className="ui-sheet-title">Fast utgift</span>
             <div className="flex items-center gap-1.5">
               <button
@@ -1166,7 +1166,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
           </div>
 
           {/* Hero Receipt Header (Ren förhandsgranskning utan inline-inputs) */}
-          <div className="ui-hero-header mb-5">
+          <div className="ui-hero-header mb-5 pb-5">
             <div className="flex justify-center mb-3.5">
               <ItemLogo
                 name={displayName}
@@ -1189,6 +1189,10 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 kr/mån
               </span>
             </div>
+
+            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+              Dras den {dueDay}:e varje månad
+            </p>
           </div>
 
           <div className="space-y-3">
@@ -1202,6 +1206,13 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </div>
 
               <div className="ui-row">
+                <span className="ui-info-label">Betalsätt</span>
+                <span className="ui-info-value">
+                  {paymentMethod}
+                </span>
+              </div>
+
+              <div className="ui-row">
                 <span className="ui-info-label">Dragningsdag</span>
                 <span className="ui-info-value tabular-nums">
                   Den {dueDay}:e
@@ -1209,9 +1220,9 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </div>
 
               <div className="ui-row">
-                <span className="ui-info-label">Betalsätt</span>
-                <span className="ui-info-value">
-                  {paymentMethod}
+                <span className="ui-info-label">Årskostnad</span>
+                <span className="ui-info-value tabular-nums">
+                  -{formatKr((Number(amount) || 0) * 12)}/år
                 </span>
               </div>
 
@@ -1235,70 +1246,48 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   </div>
                 </div>
               )}
-
-              <div className="ui-row">
-                <span className="ui-info-label">
-                  {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Paperclip size={13} />
-                  <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga'}</span>
-                </button>
-              </div>
             </div>
 
-            {/* Bifogade kvitton visas som snygga kort */}
+            {/* Bifogade kvitton (visas endast i förhandsgranskning om det faktiskt finns kvitton) */}
             {draftReceipts.length > 0 && (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {draftReceipts.map((rcpt, idx) => (
-                  <div
+                  <button
                     key={`${rcpt.name}-${idx}`}
-                    className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5"
+                    type="button"
+                    onClick={() => {
+                      setPreviewReceipt(rcpt);
+                      navigateSubView('receipt-preview', 'forward');
+                    }}
+                    className="w-full rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5 text-left hover:opacity-95 transition-opacity cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-2 px-0.5">
                       <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate">
                         <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
                         <span className="truncate">{rcpt.name || `Kvitto ${idx + 1}`}</span>
                       </span>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveReceiptAt(idx)}
-                          className="p-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                          title="Ta bort kvitto"
-                        >
-                          <Trash size={13} />
-                        </button>
-                      </div>
+                      <span className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1 shrink-0">
+                        <span>Öppna</span>
+                        <CaretRight size={11} className="text-[var(--text-muted)]" />
+                      </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewReceipt(rcpt);
-                        navigateSubView('receipt-preview', 'forward');
-                      }}
-                      className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-60 cursor-pointer hover:opacity-95 transition-opacity"
-                    >
+                    <div className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-56">
                       {rcpt.url.startsWith('data:image/') ||
                       /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
                         <img
                           src={rcpt.url}
                           alt={rcpt.name || 'Kvitto'}
-                          className="max-h-52 w-auto object-contain rounded-lg"
+                          className="max-h-48 w-auto object-contain rounded-lg"
                         />
                       ) : (
-                        <div className="py-6 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-                          <FileText size={28} weight="duotone" />
+                        <div className="py-5 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                          <FileText size={26} weight="duotone" />
                           <span className="font-medium">{rcpt.name || 'Öppna dokument'}</span>
                         </div>
                       )}
-                    </button>
-                  </div>
+                    </div>
+                  </button>
                 ))}
               </div>
             )}

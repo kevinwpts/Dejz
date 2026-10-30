@@ -4490,7 +4490,6 @@ export const App: React.FC = () => {
                                         className="shrink-0 text-[var(--text-secondary)]"
                                       />
                                       <span className="truncate">{exp.category}</span>
-                                      <span className="shrink-0 text-[var(--text-muted)]">· Fast</span>
                                       <Paperclip
                                         size={11}
                                         weight="bold"
@@ -4584,9 +4583,6 @@ export const App: React.FC = () => {
                                         className="shrink-0 text-[var(--text-secondary)]"
                                       />
                                       <span className="truncate">{tx.category}</span>
-                                      {recurring.isRecurring && (
-                                        <span className="shrink-0 text-[var(--text-muted)]">· Fast</span>
-                                      )}
                                       {tx.isHearted && (
                                         <Heart
                                           size={11}

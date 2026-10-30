@@ -591,7 +591,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
       {/* ============================================================== */}
       {subView === 'details' && !isCreateMode && (
         <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
-          <div className="ui-sheet-header">
+          <div className="ui-sheet-header mb-5">
             <span className="ui-sheet-title">Fast inkomst</span>
             <div className="flex items-center gap-1.5">
               <button
@@ -609,7 +609,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           </div>
 
           {/* Hero Receipt Header (Ren förhandsgranskning utan inline-inputs) */}
-          <div className="ui-hero-header mb-5">
+          <div className="ui-hero-header mb-5 pb-5">
             <div className="flex justify-center mb-3.5">
               <ItemLogo
                 name={displayName}
@@ -632,6 +632,10 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                 kr/mån
               </span>
             </div>
+
+            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+              Utbetalas den {payday}:e varje månad
+            </p>
           </div>
 
           <div className="space-y-3">

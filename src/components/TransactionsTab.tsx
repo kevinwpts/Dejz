@@ -960,11 +960,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                 className="shrink-0"
                               />
                               <span className="truncate">{tx.category}</span>
-                              {isFixedExpenseTx && (
-                                <span className="text-[11px] font-medium text-[var(--text-secondary)] shrink-0">
-                                  · Fast
-                                </span>
-                              )}
                               {tx.isHearted && (
                                 <Heart
                                   size={11}
