@@ -487,7 +487,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'goals') {
     return (
       <div className="animate-slide-in-right">
-        <SavingsGoalsView />
+        <SavingsGoalsView userName={userName} />
       </div>
     );
   }

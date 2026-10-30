@@ -39,6 +39,7 @@ import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
 import { BottomSheet } from './components/ui/BottomSheet';
+import { EmptyClusterArtwork } from './components/ui/VisualArtwork';
 import { supabase } from './supabaseClient';
 import {
   bankService,
@@ -4193,7 +4194,7 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {activeTab === 'goals' && <SavingsGoalsView />}
+              {activeTab === 'goals' && <SavingsGoalsView userName={userName} />}
 
               {activeTab === 'matpriskollen' && <MatpriskollenView />}
 
@@ -4204,9 +4205,12 @@ export const App: React.FC = () => {
                     if (heartedList.length === 0) {
                       return (
                         <section className="ui-empty-state-page animate-fade-in">
-                          <Heart size={48} weight="light" className="ui-empty-icon" />
+                          <EmptyClusterArtwork variant="saved" />
                           <p className="ui-empty-title">
-                            Inga sparade köp
+                            Inga sparade köp än
+                          </p>
+                          <p className="ui-empty-sub">
+                            Markera en transaktion med ett hjärta för att enkelt hitta den här.
                           </p>
                         </section>
                       );
@@ -4335,9 +4339,12 @@ export const App: React.FC = () => {
                     if (packageList.length === 0) {
                       return (
                         <section className="ui-empty-state-page animate-fade-in">
-                          <Package size={52} weight="light" className="ui-empty-icon" />
+                          <EmptyClusterArtwork variant="packages" />
                           <p className="ui-empty-title">
                             Inga paket på väg
+                          </p>
+                          <p className="ui-empty-sub">
+                            Markera ett onlineköp som "Väntar på paket" för att hålla koll tills det har levererats.
                           </p>
                         </section>
                       );
@@ -4680,9 +4687,12 @@ export const App: React.FC = () => {
                     </section>
                   ) : (
                     <section className="ui-empty-state-page animate-fade-in">
-                      <Paperclip size={48} weight="light" className="ui-empty-icon" />
+                      <EmptyClusterArtwork variant="receipts" />
                       <p className="ui-empty-title">
-                        Inga bifogade kvitton
+                        Inga bifogade kvitton än
+                      </p>
+                      <p className="ui-empty-sub">
+                        Fota eller ladda upp kvitton på dina köp och fasta utgifter så samlas alla här.
                       </p>
                     </section>
                   )}

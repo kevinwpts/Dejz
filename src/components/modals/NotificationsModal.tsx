@@ -1,8 +1,9 @@
 import React from 'react';
-import { Bell, X } from '@phosphor-icons/react';
+import { X } from '@phosphor-icons/react';
 import { PeriodInfo } from '../../utils/periodEngine';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../HomeTab';
 import { BottomSheet } from '../ui/BottomSheet';
+import { EmptyClusterArtwork } from '../ui/VisualArtwork';
 
 interface NotificationsModalProps {
   isOpen: boolean;
@@ -47,9 +48,12 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
       {/* Empty State */}
       <div className="p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
         <section className="ui-empty-state">
-          <Bell size={44} weight="light" className="ui-empty-icon" />
+          <EmptyClusterArtwork variant="notifications" />
           <p className="ui-empty-title">
             Inga nya notiser
+          </p>
+          <p className="ui-empty-sub">
+            När något viktigt händer med dina konton eller räkningar dyker det upp här.
           </p>
         </section>
       </div>

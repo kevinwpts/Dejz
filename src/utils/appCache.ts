@@ -1066,12 +1066,23 @@ const SAVINGS_GOALS_KEY = 'dejz_savings_goals_v1';
 const REVIEWED_TX_IDS_KEY = 'dejz_reviewed_tx_ids_v1';
 const PRIVACY_BLUR_KEY = 'dejz_privacy_blur_v1';
 
+export interface SavingsGoalActivity {
+  id: string;
+  text: string;
+  date: string;
+  amount?: number;
+}
+
 export interface SavingsGoalItem {
   id: string;
   name: string;
   targetAmount: number;
   currentAmount: number;
   monthlyContribution?: number;
+  artworkId?: string;
+  customImageUrl?: string;
+  createdAt?: string;
+  activities?: SavingsGoalActivity[];
 }
 
 export function getSavingsGoals(): SavingsGoalItem[] {

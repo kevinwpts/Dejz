@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import {
-  Coins,
-  Receipt,
   Plus,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { PeriodInfo } from '../utils/periodEngine';
+import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
 interface FixedTabProps {
   period: PeriodInfo;
@@ -159,9 +158,23 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               );
             })
           ) : (
-            <div className="py-10 text-center">
-              <Coins size={34} weight="light" className="ui-empty-icon mb-2" />
-              <p className="ui-empty-sub mt-0">Inga inkomster tillagda</p>
+            <div className="py-9 px-4 text-center">
+              <EmptyClusterArtwork variant="income" />
+              <p className="font-display font-semibold text-sm text-[var(--text-primary)]">
+                Du har inga fasta inkomster än
+              </p>
+              <p className="text-xs text-[var(--text-secondary)] max-w-[260px] mx-auto mt-1 mb-4 leading-relaxed">
+                Lägg till din lön eller fasta inkomster för att få exakt koll på din lön-till-lön-budget.
+              </p>
+              {onAddIncome && (
+                <button
+                  type="button"
+                  onClick={onAddIncome}
+                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
+                >
+                  <span>Kom igång</span>
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -232,9 +245,23 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               </button>
             ))
           ) : (
-            <div className="py-10 text-center">
-              <Receipt size={34} weight="light" className="ui-empty-icon mb-2" />
-              <p className="ui-empty-sub mt-0">Inga fasta utgifter tillagda</p>
+            <div className="py-9 px-4 text-center">
+              <EmptyClusterArtwork variant="fixed" />
+              <p className="font-display font-semibold text-sm text-[var(--text-primary)]">
+                Du har inga fasta utgifter än
+              </p>
+              <p className="text-xs text-[var(--text-secondary)] max-w-[270px] mx-auto mt-1 mb-4 leading-relaxed">
+                Lägg till dina fasta betalningar. Då får du en fullständig översikt över kommande räkningar och vad som är kvar att spendera.
+              </p>
+              {onAddFixed && (
+                <button
+                  type="button"
+                  onClick={onAddFixed}
+                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
+                >
+                  <span>Kom igång</span>
+                </button>
+              )}
             </div>
           )}
         </div>
