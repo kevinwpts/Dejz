@@ -6,7 +6,6 @@ import {
   EyeSlash,
   SpinnerGap,
   EnvelopeSimple,
-  ArrowSquareOut,
   WarningCircle,
   PaperPlaneTilt,
 } from '@phosphor-icons/react';
@@ -269,14 +268,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Main Content Area */}
         {resetEmailSent ? (
           /* Modern "Check your inbox" screen - dedicated, clean, delightfully minimal */
-          <main key="auth-reset-sent" className="my-auto py-8 space-y-7 animate-scale-in">
-            <div className="w-16 h-16 rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto shadow-subtle relative">
-              <EnvelopeSimple size={30} weight="duotone" className="text-[var(--text-primary)]" />
-              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-[var(--surface-color)]" />
-              </span>
-            </div>
+          <main key="auth-reset-sent" className="my-auto py-8 space-y-6 animate-scale-in">
+            <EnvelopeSimple size={48} weight="light" className="ui-empty-icon" />
 
             <div className="space-y-2 text-center px-2">
               <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
@@ -293,34 +286,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
             </div>
 
-            <div className="space-y-3 pt-2">
-              <a
-                href="mailto:"
-                className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            <div className="flex items-center justify-between px-1 pt-2">
+              <button
+                type="button"
+                onClick={() => setResetEmailSent(false)}
+                className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
-                <span>Öppna e-postapp</span>
-                <ArrowSquareOut size={16} weight="bold" />
-              </a>
+                Fel e-post? Ändra
+              </button>
 
-              <div className="flex items-center justify-between px-1 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setResetEmailSent(false)}
-                  className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                >
-                  Fel e-post? Ändra
-                </button>
-
-                <button
-                  type="button"
-                  disabled={resendCooldown > 0 || resending}
-                  onClick={handleResendReset}
-                  className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  {resending && <SpinnerGap size={12} className="animate-spin" />}
-                  {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : 'Skicka igen'}
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={resendCooldown > 0 || resending}
+                onClick={handleResendReset}
+                className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                {resending && <SpinnerGap size={12} className="animate-spin" />}
+                {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : 'Skicka igen'}
+              </button>
             </div>
           </main>
         ) : (

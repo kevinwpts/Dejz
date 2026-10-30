@@ -642,7 +642,7 @@ export const MatpriskollenView: React.FC = () => {
             className="px-3.5 py-2 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
           >
             <CaretLeft size={14} weight="bold" />
-            <span>Tillbaka till kartan</span>
+            <span>Tillbaka till butiker</span>
           </button>
 
           {selectedStore.dist && (
@@ -944,8 +944,8 @@ export const MatpriskollenView: React.FC = () => {
             activeSubTab === 'stores' ? 'ui-segment-btn-active' : 'ui-segment-btn-idle'
           }`}
         >
-          <Compass size={13} weight={activeSubTab === 'stores' ? 'fill' : 'regular'} />
-          <span>Karta & butiker</span>
+          <Storefront size={13} weight={activeSubTab === 'stores' ? 'fill' : 'regular'} />
+          <span>Butiker</span>
         </button>
         <button
           type="button"
@@ -1164,310 +1164,26 @@ export const MatpriskollenView: React.FC = () => {
 
       {activeSubTab === 'stores' ? (
         <>
-          {/* STOR VOI-LIKNANDE INTERAKTIV KARTA (Drag/Pan, Pinch-to-Zoom, Dubbeltryck, Hjulzoom) */}
-          <section className="rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle overflow-hidden">
-            <div
-              ref={mapContainerRef}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              style={{ touchAction: 'none' }}
-              className={`relative w-full ${
-                isMapExpanded ? 'h-[72dvh]' : 'h-[430px] sm:h-[490px]'
-              } bg-[#E8EEF2] dark:bg-[#11161F] overflow-hidden select-none transition-[height] duration-300 ${
-                isDraggingMap ? 'cursor-grabbing' : 'cursor-grab'
-              }`}
-            >
-              {/* Floating Top Overlay: Kedjefilter & "Sök i detta område" (Voi-stil) */}
-              <div
-                className="absolute top-3 left-3 right-3 z-20 flex flex-col gap-2 pointer-events-none"
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pointer-events-auto">
-                  {CHAIN_FILTERS.map((chain) => {
-                    const active = selectedChain === chain;
-                    return (
-                      <button
-                        key={chain}
-                        type="button"
-                        onClick={() => setSelectedChain(chain)}
-                        className={`px-3 py-1.5 rounded-full text-[11px] font-semibold shrink-0 transition-all cursor-pointer backdrop-blur-xl shadow-sm ${
-                          active
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                            : 'bg-[var(--surface-color)]/90 border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-color)]'
-                        }`}
-                      >
-                        {chain === 'Alla' ? 'Alla butiker' : chain}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {hasPannedAway && (
-                  <div className="flex justify-center pointer-events-auto animate-fade-in">
-                    <button
-                      type="button"
-                      onClick={handleSearchThisArea}
-                      className="px-3.5 py-2 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold shadow-lg flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform cursor-pointer"
-                    >
-                      <MagnifyingGlass size={13} weight="bold" />
-                      <span>Sök butiker i detta område</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* 5x5 Retina Map Tiles Centered on mapCenter */}
-              <div className="absolute left-1/2 top-1/2">
-                {mapRenderData.tiles.map((t) => (
-                  <React.Fragment key={t.key}>
-                    <img
-                      src={t.lightUrl}
-                      alt=""
-                      draggable={false}
-                      style={{
-                        left: `${Math.round(t.dx)}px`,
-                        top: `${Math.round(t.dy)}px`,
-                      }}
-                      className="absolute w-[256px] h-[256px] max-w-none pointer-events-none block dark:hidden"
-                    />
-                    <img
-                      src={t.darkUrl}
-                      alt=""
-                      draggable={false}
-                      style={{
-                        left: `${Math.round(t.dx)}px`,
-                        top: `${Math.round(t.dy)}px`,
-                      }}
-                      className="absolute w-[256px] h-[256px] max-w-none pointer-events-none hidden dark:block"
-                    />
-                  </React.Fragment>
-                ))}
-
-                {/* Current Location / Search Center Blue Pulse Dot */}
-                {Math.abs(mapRenderData.originX) < 600 &&
-                  Math.abs(mapRenderData.originY) < 600 && (
-                    <div
-                      style={{
-                        left: `${Math.round(mapRenderData.originX)}px`,
-                        top: `${Math.round(mapRenderData.originY)}px`,
-                      }}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center">
-                        <div className="w-3.5 h-3.5 rounded-full bg-sky-500 border-2 border-white shadow-sm" />
-                      </div>
-                    </div>
-                  )}
-
-                {/* Interactive Store Markers (Voi-style pins, with live item price when searching!) */}
-                {mapRenderData.pins.map(({ store, sx, sy }) => {
-                  if (Math.abs(sx) > 520 || Math.abs(sy) > 480) return null;
-                  const isSelectedPin = previewStore?.key === store.key;
-                  const matchingOffer = cheapestOfferByStoreKey.get(store.key);
-                  const isSearchingItem = offerSearch.trim().length > 0;
-                  if (isSearchingItem && !matchingOffer && cheapestOfferByStoreKey.size > 0) {
-                    // Dim stores without the searched item
-                  }
-
-                  return (
-                    <button
-                      key={store.key}
-                      type="button"
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onTouchStart={(e) => e.stopPropagation()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreviewStore(store);
-                        setMapCenter({ lat: store.lat, lon: store.lon });
-                      }}
-                      style={{
-                        left: `${Math.round(sx)}px`,
-                        top: `${Math.round(sy)}px`,
-                      }}
-                      title={`${store.name} (${store.offerCount} erbjudanden)`}
-                      className={`absolute -translate-x-1/2 -translate-y-full z-20 flex flex-col items-center group transition-all cursor-pointer ${
-                        isSelectedPin
-                          ? 'scale-110 z-30'
-                          : matchingOffer
-                          ? 'scale-105 z-25'
-                          : isSearchingItem && cheapestOfferByStoreKey.size > 0
-                          ? 'opacity-45 hover:opacity-90'
-                          : 'hover:scale-105 active:scale-95'
-                      }`}
-                    >
-                      <div
-                        className={`px-2.5 py-1.5 rounded-full border shadow-md flex items-center gap-1.5 transition-colors ${
-                          isSelectedPin
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                            : matchingOffer
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                        }`}
-                      >
-                        {store.imageUrl ? (
-                          <img
-                            src={store.imageUrl}
-                            alt={store.chainName}
-                            className="w-4.5 h-4.5 rounded-full object-contain bg-white p-0.5 shrink-0"
-                          />
-                        ) : (
-                          <MapPin
-                            size={13}
-                            weight="fill"
-                            className={
-                              isSelectedPin || matchingOffer
-                                ? 'text-emerald-300'
-                                : 'text-emerald-500'
-                            }
-                          />
-                        )}
-                        <span className="text-[11px] font-semibold whitespace-nowrap max-w-[96px] truncate">
-                          {store.chainName || store.name}
-                        </span>
-                        {matchingOffer ? (
-                          <span className="px-1.5 py-0.5 rounded-full bg-white text-emerald-700 text-[9.5px] font-bold tabular-nums leading-none whitespace-nowrap">
-                            {splitOfferTexts(matchingOffer).shortBadgeCondition
-                              ? `${splitOfferTexts(matchingOffer).shortBadgeCondition} ${matchingOffer.price}`
-                              : matchingOffer.price}
-                          </span>
-                        ) : (
-                          store.offerCount > 0 && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9.5px] font-bold tabular-nums leading-none">
-                              {store.offerCount}
-                            </span>
-                          )
-                        )}
-                      </div>
-                      <div
-                        className={`w-2 h-2 rotate-45 -mt-1 border-r border-b ${
-                          isSelectedPin
-                            ? 'bg-[var(--text-primary)] border-[var(--text-primary)]'
-                            : matchingOffer
-                            ? 'bg-emerald-600 border-emerald-600'
-                            : 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
-                        }`}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Right-Side Voi Map Controls (Locate, Expand, Zoom In/Out) */}
-              <div
-                className="absolute right-3 top-14 z-20 flex flex-col gap-2"
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-              >
+          {/* Kedjefilter */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            {CHAIN_FILTERS.map((chain) => {
+              const active = selectedChain === chain;
+              return (
                 <button
+                  key={chain}
                   type="button"
-                  onClick={() => setIsMapExpanded((v) => !v)}
-                  aria-label={isMapExpanded ? 'Minska karta' : 'Större karta'}
-                  title={isMapExpanded ? 'Minska karta' : 'Större karta'}
-                  className="w-9 h-9 rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-subtle)] shadow-md flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer"
+                  onClick={() => setSelectedChain(chain)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold shrink-0 transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                      : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
                 >
-                  {isMapExpanded ? (
-                    <CornersIn size={16} weight="bold" />
-                  ) : (
-                    <CornersOut size={16} weight="bold" />
-                  )}
+                  {chain === 'Alla' ? 'Alla butiker' : chain}
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMapCenter({ lat: coords.lat, lon: coords.lon });
-                    setMapZoom(13);
-                  }}
-                  aria-label="Centrera karta"
-                  title="Centrera karta"
-                  className="w-9 h-9 rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-subtle)] shadow-md flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer"
-                >
-                  <NavigationArrow size={15} weight="fill" />
-                </button>
-
-                <div className="rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-subtle)] shadow-md overflow-hidden divide-y divide-[var(--border-subtle)]">
-                  <button
-                    type="button"
-                    onClick={() => setMapZoom((z) => Math.min(17, z + 1))}
-                    aria-label="Zooma in"
-                    className="w-9 h-9 flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Plus size={15} weight="bold" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMapZoom((z) => Math.max(9, z - 1))}
-                    aria-label="Zooma ut"
-                    className="w-9 h-9 flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Minus size={15} weight="bold" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Voi-Style Floating Bottom Card when a Store Pin is Selected */}
-              {previewStore ? (
-                <div
-                  className="absolute left-3 right-3 bottom-3 z-30 p-3.5 rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] shadow-xl animate-fade-in"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <ItemLogo
-                        name={previewStore.name}
-                        category="Mat & dryck"
-                        logoUrl={previewStore.imageUrl}
-                        size="md"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-display font-semibold text-[13.5px] text-[var(--text-primary)] truncate">
-                          {previewStore.name}
-                        </h3>
-                        <p className="text-[11.5px] text-[var(--text-muted)] truncate mt-0.5">
-                          {[
-                            previewStore.chainName || 'Matbutik',
-                            previewStore.dist ? `${previewStore.dist} km bort` : undefined,
-                            `${previewStore.offerCount} erbjudanden`,
-                          ]
-                            .filter(Boolean)
-                            .join(' · ')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setPreviewStore(null)}
-                      className="w-7 h-7 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] shrink-0 cursor-pointer"
-                    >
-                      <X size={13} weight="bold" />
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => fetchOffersForStore(previewStore)}
-                    className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    <span>Visa alla {previewStore.offerCount} erbjudanden</span>
-                    <CaretRight size={13} weight="bold" />
-                  </button>
-                </div>
-              ) : (
-                <div className="absolute left-3 bottom-3 z-20 px-3 py-1.5 rounded-full bg-[var(--surface-color)]/90 backdrop-blur-xl border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] pointer-events-none flex items-center gap-1.5">
-                  <MapPin size={12} weight="fill" className="text-emerald-500" />
-                  <span>Dra och zooma fritt i kartan · Tryck på en butik</span>
-                </div>
-              )}
-            </div>
-          </section>
+              );
+            })}
+          </div>
 
           {/* Lista med butiker i närheten */}
           <section className="ui-section">

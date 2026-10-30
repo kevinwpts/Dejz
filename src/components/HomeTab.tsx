@@ -68,6 +68,7 @@ export interface FixedExpenseItem {
   bankAccountName?: string;
   receiptUrl?: string;
   receiptName?: string;
+  receipts?: { url: string; name: string }[];
 }
 
 export interface TransactionItem {
@@ -94,6 +95,7 @@ export interface TransactionItem {
   paymentMethod?: string;
   receiptUrl?: string;
   receiptName?: string;
+  receipts?: { url: string; name: string }[];
 
   // Information hämtad från Enable Banking / Open Banking API
   rawDescription?: string;
@@ -916,93 +918,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* ============================================================== */}
-      {/* MODUL 2.6: VÄNTAR PÅ SWISH (Bevakning & 1-klicks avräkning)    */}
-      {/* ============================================================== */}
-      {pendingSwishItems.length > 0 && (
-        <section className="ui-list-card">
-          <div className="py-2.5 flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-              <SwishLogo size={14} />
-              <span>Väntar på Swish</span>
-            </span>
-            <span className="font-display font-semibold text-xs text-emerald-600 dark:text-emerald-400 tabular-nums">
-              +{formatKr(pendingSwishItems.reduce((s, i) => s + i.expectedAmt, 0))}
-            </span>
-          </div>
-          {pendingSwishItems.map(({ tx, expectedAmt, suggestedSwish }) => (
-            <div
-              key={`swish-wait-${tx.id}`}
-              className="py-2.5 flex items-center justify-between gap-3 text-xs"
-            >
-              <button
-                type="button"
-                onClick={() => onSelectTransaction(tx)}
-                className="min-w-0 flex-1 text-left hover:opacity-80 transition-opacity cursor-pointer"
-              >
-                <span className="font-semibold text-[var(--text-primary)] block truncate">
-                  {tx.title}
-                  {tx.pendingSwishRecipient ? ` · ${tx.pendingSwishRecipient}` : ''}
-                </span>
-                <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5 tabular-nums">
-                  {suggestedSwish
-                    ? `Matchande Swish hittad: ${suggestedSwish.title} (+${formatKr(
-                        suggestedSwish.amount
-                      )})`
-                    : `Utlägg ${formatSwedishDateHeading(tx.date)} · Inväntar +${formatKr(
-                        expectedAmt
-                      )}`}
-                </span>
-              </button>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                {suggestedSwish && onUpdateTransaction ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const fullAmt = tx.originalAmount || tx.amount + expectedAmt;
-                      const netMyShare = Math.max(0, Math.round(fullAmt - suggestedSwish.amount));
-                      if (onExcludeTransaction) {
-                        onExcludeTransaction(suggestedSwish.id, true);
-                      }
-                      onUpdateTransaction({
-                        ...tx,
-                        amount: netMyShare,
-                        originalAmount: fullAmt,
-                        linkedSwishTxId: suggestedSwish.id,
-                        isWaitingForSwish: false,
-                        pendingSwishAmount: undefined,
-                      });
-                    }}
-                    className="ui-btn-sm-primary"
-                  >
-                    <Check size={12} weight="bold" />
-                    <span>Räkna av</span>
-                  </button>
-                ) : (
-                  onUpdateTransaction && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onUpdateTransaction({
-                          ...tx,
-                          isWaitingForSwish: false,
-                          pendingSwishAmount: undefined,
-                        })
-                      }
-                      className="ui-btn-sm"
-                    >
-                      <Check size={12} weight="bold" />
-                      <span>Fått</span>
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* ============================================================== */}
       {/* MODUL 3: HORISONTELL TIDSLINJE PER DAG (Direkt mot bakgrunden) */}
       {/* ============================================================== */}
       <section className="pt-1">
@@ -1108,8 +1023,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 fixedExpenses,
                 incomes
               );
-              const isSplit =
-                tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
+              const isFixedExpenseTx = Boolean(
+                !isIncome && (recurringStatus.isRecurring || tx.id.startsWith('planned-exp-'))
+              );
+              const hasReceipts = Boolean(
+                (Array.isArray(tx.receipts) && tx.receipts.length > 0) || tx.receiptUrl
+              );
 
               const rowContent = (
                 <button
@@ -1126,7 +1045,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       category={tx.category}
                       logoUrl={tx.logo}
                       size="md"
-                      isRecurring={recurringStatus.isRecurring}
+                      isRecurring={recurringStatus.isRecurring || isPlanned}
                     />
                     <div className="min-w-0 flex-1">
                       <span className="ui-row-title">
@@ -1139,9 +1058,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           className="shrink-0"
                         />
                         <span className="truncate">{tx.category}</span>
-                        {isSplit && tx.originalAmount && (
-                          <span className="text-[11px] opacity-80 shrink-0">
-                            · av {formatKr(tx.originalAmount)}
+                        {isFixedExpenseTx && (
+                          <span className="text-[11px] font-medium text-[var(--text-secondary)] shrink-0">
+                            · Fast
                           </span>
                         )}
                         {tx.isHearted && (
@@ -1158,19 +1077,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                             className="text-amber-500 shrink-0 ml-0.5"
                           />
                         )}
-                        {tx.receiptUrl && (
+                        {hasReceipts && (
                           <Paperclip
                             size={11}
                             weight="bold"
                             className="text-[var(--text-secondary)] shrink-0 ml-0.5"
-                          />
-                        )}
-                        {isSplit && (
-                          <Users
-                            size={11}
-                            weight="fill"
-                            className="text-emerald-500 shrink-0 ml-0.5"
-                            title="Delad utgift"
                           />
                         )}
                       </span>

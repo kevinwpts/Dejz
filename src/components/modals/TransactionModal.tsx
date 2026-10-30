@@ -19,9 +19,8 @@ import {
   PencilSimple,
   CalendarBlank,
   Sparkle,
+  Plus,
 } from '@phosphor-icons/react';
-import QRCode from 'qrcode';
-import { SwishLogo } from '../SwishLogo';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import {
@@ -33,7 +32,12 @@ import {
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
-import { formatSwedishFullDate, formatSwedishDateHeading } from '../../utils/swedishDate';
+import {
+  formatSwedishFullDate,
+  formatSwedishDateHeading,
+  getItemReceipts,
+  ReceiptAttachment,
+} from '../../utils/swedishDate';
 import {
   checkIsRecurringTransaction,
   findSimilarTransactionsForTransaction,
@@ -181,6 +185,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const activeTx = isCreateMode ? null : initialTransaction || lastTxRef.current;
 
   const [subView, setSubView] = useState<ModalSubView>('details');
+  const [pickerReturnView, setPickerReturnView] = useState<'details' | 'edit'>('details');
   const [navDirection, setNavDirection] = useState<'forward' | 'back'>('forward');
   const [txType, setTxType] = useState<'expense' | 'income'>('expense');
   const [title, setTitle] = useState('');
@@ -189,30 +194,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState('Kort');
   const [note, setNote] = useState('');
   const [category, setCategory] = useState('');
+  const [draftReceipts, setDraftReceipts] = useState<ReceiptAttachment[]>([]);
+  const [previewReceipt, setPreviewReceipt] = useState<ReceiptAttachment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSimilarPopup, setShowSimilarPopup] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Swish / Be om Swish / Dela i budget state
-  const [swishMode, setSwishMode] = useState<'request' | 'budget-split' | 'send'>('request');
-  const [swishAmount, setSwishAmount] = useState<number>(0);
-  const [myBudgetShareAmount, setMyBudgetShareAmount] = useState<number>(0);
-  const [selectedLinkedSwishId, setSelectedLinkedSwishId] = useState<string | undefined>(undefined);
-  const [swishPhone, setSwishPhone] = useState('');
-  const [swishRecipientName, setSwishRecipientName] = useState('');
-  const [swishMessage, setSwishMessage] = useState('');
-  const [swishContacts, setSwishContacts] = useState<SwishContact[]>(() => loadSwishContacts());
-  const [isAddingContact, setIsAddingContact] = useState(false);
-  const [newContactName, setNewContactName] = useState('');
-  const [newContactPhone, setNewContactPhone] = useState('');
-  const [swishFeedback, setSwishFeedback] = useState<string | null>(null);
-  const [mySwishPhone, setMySwishPhone] = useState<string>(() => loadMySwishPhone());
-  const [isEditingMyPhone, setIsEditingMyPhone] = useState<boolean>(() => !loadMySwishPhone());
-  const [showSwishQr, setShowSwishQr] = useState<boolean>(true);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [trackPendingSwish, setTrackPendingSwish] = useState<boolean>(true);
-  const [simulatedScanState, setSimulatedScanState] = useState<'idle' | 'scanning' | 'success'>('idle');
-  const scanTimerRef = useRef<number | null>(null);
   const [pickerYearMonth, setPickerYearMonth] = useState<{ year: number; month: number }>(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
@@ -220,6 +207,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [showFullAccount, setShowFullAccount] = useState(false);
 
   const navigateSubView = (next: ModalSubView, dir: 'forward' | 'back' = 'forward') => {
+    if (next === 'receipt-preview' && (subView === 'details' || subView === 'edit')) {
+      setPickerReturnView(subView);
+    }
     setNavDirection(dir);
     setSubView(next);
   };
@@ -261,32 +251,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           kind
         )
       );
+      setDraftReceipts(getItemReceipts(initialTransaction));
+      setPreviewReceipt(null);
       setSubView('details');
+      setPickerReturnView('details');
       setNavDirection('forward');
       setShowDeleteConfirm(false);
       setShowSimilarPopup(false);
       setShowFullAccount(false);
-      setSwishMode('request');
-      const fullOriginalAmt = initialTransaction.originalAmount || initialTransaction.amount;
-      setSwishAmount(
-        initialTransaction.pendingSwishAmount || Math.max(1, Math.round(fullOriginalAmt / 2))
-      );
-      setMyBudgetShareAmount(Math.round(initialTransaction.amount));
-      setSelectedLinkedSwishId(initialTransaction.linkedSwishTxId);
-      setSwishRecipientName(initialTransaction.pendingSwishRecipient || '');
-      setTrackPendingSwish(
-        initialTransaction.isWaitingForSwish !== undefined
-          ? initialTransaction.isWaitingForSwish
-          : true
-      );
-      setSwishMessage(initialTransaction.title || '');
-      setSwishFeedback(null);
-      setIsAddingContact(false);
-      const storedMyPhone = loadMySwishPhone();
-      setMySwishPhone(storedMyPhone);
-      setIsEditingMyPhone(!storedMyPhone);
-      setShowSwishQr(true);
-      setSimulatedScanState('idle');
     } else {
       const todayIso = new Date().toISOString().slice(0, 10);
       setTxType('expense');
@@ -300,114 +272,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setPaymentMethod('Kort');
       setNote('');
       setCategory('Mat & dryck');
+      setDraftReceipts([]);
+      setPreviewReceipt(null);
       setSubView('edit');
+      setPickerReturnView('edit');
       setNavDirection('forward');
       setShowDeleteConfirm(false);
       setShowSimilarPopup(false);
     }
   }, [initialTransaction, isOpen]);
-
-  const normalizedMySwishPhone = useMemo(
-    () => normalizeSwedishSwishNumber(mySwishPhone),
-    [mySwishPhone]
-  );
-
-  const cleanSwishMessage = useMemo(() => {
-    const rawMsg = swishMessage || activeTx?.title || '';
-    return rawMsg.replace(/;/g, ' ').trim().slice(0, 50);
-  }, [swishMessage, activeTx?.title]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (subView !== 'swish' || swishMode !== 'request') {
-      setQrDataUrl(null);
-      return;
-    }
-    const phoneToUse =
-      normalizedMySwishPhone.length >= 7 ? normalizedMySwishPhone : '0701234567';
-    const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
-    const swishQrPayload = `C${phoneToUse};${amt};${cleanSwishMessage};0`;
-    QRCode.toDataURL(swishQrPayload, {
-      width: 240,
-      margin: 1,
-      errorCorrectionLevel: 'M',
-      color: {
-        dark: '#09090B',
-        light: '#FFFFFF',
-      },
-    })
-      .then((url) => {
-        if (!cancelled) setQrDataUrl(url);
-      })
-      .catch(() => {
-        if (!cancelled) setQrDataUrl(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [subView, swishMode, normalizedMySwishPhone, swishAmount, cleanSwishMessage]);
-
-  useEffect(() => {
-    return () => {
-      if (scanTimerRef.current) window.clearTimeout(scanTimerRef.current);
-    };
-  }, []);
-
-  const handleSimulateScan = () => {
-    if (simulatedScanState !== 'idle' || !activeTx) return;
-    setSimulatedScanState('scanning');
-    if (scanTimerRef.current) window.clearTimeout(scanTimerRef.current);
-    scanTimerRef.current = window.setTimeout(() => {
-      setSimulatedScanState('success');
-      const fullAmt = Math.round(activeTx.originalAmount || activeTx.amount);
-      const reqAmt = Math.max(1, Math.min(fullAmt, Math.round(Number(swishAmount) || 0)));
-      const nextMyShare = Math.max(0, fullAmt - reqAmt);
-      const payerName = (swishRecipientName || 'Vän').trim();
-
-      // 1. Skapa en inkommen Swish-transaktion i historiken
-      if (onSave) {
-        const currentTime = new Intl.DateTimeFormat('sv-SE', {
-          timeZone: 'Europe/Stockholm',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        })
-          .format(new Date())
-          .replace('.', ':');
-        onSave({
-          title: `Swish från ${payerName}`,
-          amount: reqAmt,
-          date: activeTx.date || new Date().toISOString().slice(0, 10),
-          time: currentTime,
-          category: 'Swish',
-          type: 'income',
-          paymentMethod: 'Swish',
-          note: `Avräknat för ${cleanSwishMessage || activeTx.title}`,
-        });
-      }
-
-      // 2. Uppdatera utlägget så din budgetandel sänks och bevakningen markeras som klar
-      if (onUpdate) {
-        onUpdate({
-          ...activeTx,
-          amount: nextMyShare,
-          originalAmount: fullAmt,
-          isWaitingForSwish: false,
-          pendingSwishAmount: undefined,
-          pendingSwishRecipient: undefined,
-        });
-      }
-
-      setSwishFeedback(
-        `✓ Swish på ${formatKr(reqAmt)} mottagen! Beloppet har dragits av från ditt utlägg och lagts till i historiken.`
-      );
-    }, 650);
-  };
-
-  const handleResetSimulation = () => {
-    setSimulatedScanState('idle');
-    setSwishFeedback(null);
-  };
 
   const resolvedAccountInfo = useMemo(() => {
     if (!activeTx) return null;
@@ -539,6 +412,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         category: nextCategory,
         paymentMethod: nextPaymentMethod,
         note: nextNote || undefined,
+        receipts: draftReceipts.length > 0 ? draftReceipts : undefined,
+        receiptUrl: draftReceipts.length > 0 ? draftReceipts[0].url : undefined,
+        receiptName: draftReceipts.length > 0 ? draftReceipts[0].name : undefined,
       },
       categoryTargetIds,
       {
@@ -586,6 +462,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         type: txType,
         paymentMethod: paymentMethod || 'Kort',
         note: note.trim() || undefined,
+        receipts: draftReceipts.length > 0 ? draftReceipts : undefined,
+        receiptUrl: draftReceipts.length > 0 ? draftReceipts[0].url : undefined,
+        receiptName: draftReceipts.length > 0 ? draftReceipts[0].name : undefined,
       });
     }
     onClose();
@@ -600,19 +479,41 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   };
 
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !onUpdate || !activeTx) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
     try {
-      const dataUrl = await compressImageFileToDataUrl(file, 1280, 0.74);
-      onUpdate({
-        ...activeTx,
-        receiptUrl: dataUrl,
-        receiptName: file.name,
-      });
+      const uploaded: ReceiptAttachment[] = [];
+      for (const file of files) {
+        const dataUrl = await compressImageFileToDataUrl(file, 1280, 0.74);
+        uploaded.push({ url: dataUrl, name: file.name || 'Bifogat kvitto' });
+      }
+      const nextReceipts = [...draftReceipts, ...uploaded];
+      setDraftReceipts(nextReceipts);
+      if (!isCreateMode && onUpdate && activeTx) {
+        onUpdate({
+          ...activeTx,
+          receipts: nextReceipts,
+          receiptUrl: nextReceipts[0]?.url,
+          receiptName: nextReceipts[0]?.name,
+        });
+      }
     } catch {
       // ignore
     }
     e.target.value = '';
+  };
+
+  const handleRemoveReceiptAt = (index: number) => {
+    const nextReceipts = draftReceipts.filter((_, i) => i !== index);
+    setDraftReceipts(nextReceipts);
+    if (!isCreateMode && onUpdate && activeTx) {
+      onUpdate({
+        ...activeTx,
+        receipts: nextReceipts.length > 0 ? nextReceipts : undefined,
+        receiptUrl: nextReceipts[0]?.url,
+        receiptName: nextReceipts[0]?.name,
+      });
+    }
   };
 
   const slideAnimClass =
@@ -622,10 +523,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
-      {/* Hidden file input for receipt */}
+      {/* Hidden file input for receipt (supports multiple) */}
       <input
         ref={fileInputRef}
         type="file"
+        multiple
         accept="image/*,application/pdf"
         className="hidden"
         onChange={handleReceiptUpload}
@@ -658,21 +560,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </button>
           </div>
 
-          {/* Compact Merchant Summary Bar */}
-          <div className="px-3.5 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <ItemLogo
-                name={similarInfo.brandLabel || activeTx.title}
-                category={category}
-                logoUrl={activeTx.logo}
-                size="sm"
-              />
-              <span className="font-medium text-[13px] text-[var(--text-primary)] truncate">
-                {similarInfo.brandLabel || activeTx.title}
-              </span>
-            </div>
-            <span className="text-xs text-[var(--text-secondary)] tabular-nums shrink-0">
-              {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
+          <div className="ui-date-header px-1">
+            <span className="font-medium text-[var(--text-secondary)]">
+              {similarInfo.transactions.length}{' '}
+              {similarInfo.transactions.length === 1 ? 'händelse' : 'händelser'}
+            </span>
+            <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
+              Totalt {formatKr(similarInfo.totalAmount)}
             </span>
           </div>
 
@@ -1053,711 +947,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* SUB-VIEW 4: SWISH / DELA UTLÄGG (Egen vy i arket)              */}
-      {/* ============================================================== */}
-      {subView === 'swish' && activeTx && (
-        <div className={`${slideAnimClass} space-y-4 text-xs`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView('details', 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title flex items-center gap-1.5">
-              <SwishLogo size={16} />
-              <span>Dela utgift</span>
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          {/* Växla mellan Be om Swish, Dela i budget och Swisha */}
-          <div className="ui-segmented grid-cols-3">
-            <button
-              type="button"
-              onClick={() => setSwishMode('request')}
-              className={`ui-segmented-tab ${
-                swishMode === 'request' ? 'ui-segmented-tab-active' : ''
-              }`}
-            >
-              Be om Swish
-            </button>
-            <button
-              type="button"
-              onClick={() => setSwishMode('budget-split')}
-              className={`ui-segmented-tab ${
-                swishMode === 'budget-split' ? 'ui-segmented-tab-active' : ''
-              }`}
-            >
-              Dela i budget
-            </button>
-            <button
-              type="button"
-              onClick={() => setSwishMode('send')}
-              className={`ui-segmented-tab ${
-                swishMode === 'send' ? 'ui-segmented-tab-active' : ''
-              }`}
-            >
-              Swisha
-            </button>
-          </div>
-
-          {swishMode === 'budget-split' ? (
-            <div className="space-y-4 animate-fade-in">
-              {(() => {
-                const fullAmt = Math.round(
-                  activeTx.originalAmount || activeTx.amount
-                );
-                return (
-                  <>
-                    {/* Snabbval för min egen andel */}
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        {
-                          label: 'Min del 50%',
-                          val: Math.max(1, Math.round(fullAmt / 2)),
-                        },
-                        {
-                          label: 'Min del 33%',
-                          val: Math.max(1, Math.round(fullAmt / 3)),
-                        },
-                        {
-                          label: 'Hela (100%)',
-                          val: fullAmt,
-                        },
-                      ].map((opt) => {
-                        const isSel = Number(myBudgetShareAmount) === opt.val && !selectedLinkedSwishId;
-                        return (
-                          <button
-                            key={opt.label}
-                            type="button"
-                            onClick={() => {
-                              setSelectedLinkedSwishId(undefined);
-                              setMyBudgetShareAmount(opt.val);
-                            }}
-                            className={`py-2.5 px-2 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
-                              isSel
-                                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                                : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
-                            }`}
-                          >
-                            <span className="text-[11px] opacity-80 block truncate">
-                              {opt.label}
-                            </span>
-                            <span className="font-display font-bold tabular-nums block mt-0.5">
-                              {opt.val} kr
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Eget belopp för min andel — kantlös inline-input */}
-                    <div className="ui-sheet-group">
-                      <div className="ui-row">
-                        <span className="text-[var(--text-muted)]">Ursprungligt utlägg</span>
-                        <span className="font-display font-bold text-[var(--text-secondary)] tabular-nums">
-                          {formatKr(fullAmt)}
-                        </span>
-                      </div>
-                      <label className="ui-input-row">
-                        <span className="text-[var(--text-muted)]">Min kostnad i budget (kr)</span>
-                        <input
-                          type="number"
-                          min="0"
-                          max={fullAmt}
-                          value={myBudgetShareAmount}
-                          onChange={(e) => {
-                            setSelectedLinkedSwishId(undefined);
-                            setMyBudgetShareAmount(
-                              Math.min(fullAmt, Math.max(0, Number(e.target.value) || 0))
-                            );
-                          }}
-                          className="ui-inline-amount-input"
-                        />
-                      </label>
-                    </div>
-
-                    {/* Koppla mot inkommen Swish */}
-                    {recentIncomingSwishList.length > 0 && (
-                      <div className="space-y-2">
-                        <span className="text-[11px] font-semibold text-[var(--text-muted)] px-1 block">
-                          Eller räkna av en inkommen Swish
-                        </span>
-                        <div className="ui-sheet-group">
-                          {recentIncomingSwishList.map((swTx) => {
-                            const isLinked = selectedLinkedSwishId === swTx.id;
-                            const netAfterSwish = Math.max(0, Math.round(fullAmt - swTx.amount));
-                            return (
-                              <button
-                                key={swTx.id}
-                                type="button"
-                                onClick={() => {
-                                  if (isLinked) {
-                                    setSelectedLinkedSwishId(undefined);
-                                    setMyBudgetShareAmount(fullAmt);
-                                  } else {
-                                    setSelectedLinkedSwishId(swTx.id);
-                                    setMyBudgetShareAmount(netAfterSwish);
-                                  }
-                                }}
-                                className="ui-row-btn"
-                              >
-                                <div className="min-w-0 flex-1">
-                                  <span className="ui-row-title">
-                                    {swTx.title}
-                                  </span>
-                                  <span className="text-[11px] text-[var(--text-muted)] tabular-nums block">
-                                    {formatSwedishFullDate(swTx.date)} · Kvar att betala:{' '}
-                                    {formatKr(netAfterSwish)}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <span className="ui-row-amount ui-row-amount-income">
-                                    +{formatKr(swTx.amount)}
-                                  </span>
-                                  <div
-                                    className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                      isLinked
-                                        ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                                        : 'border-[var(--border-control)]'
-                                    }`}
-                                  >
-                                    {isLinked && <Check size={12} weight="bold" />}
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Bevaka som "Väntar på Swish" på Hemfliken */}
-                    {Number(myBudgetShareAmount) < fullAmt && !selectedLinkedSwishId && (
-                      <div className="ui-sheet-group">
-                        <div className="ui-row">
-                          <div className="min-w-0 pr-2">
-                            <span className="ui-row-title block">
-                              Bevaka ”Väntar på Swish” på Hemfliken
-                            </span>
-                            <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 tabular-nums">
-                              Påminner om {formatKr(fullAmt - Number(myBudgetShareAmount))} tills Swish kommer in
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            role="switch"
-                            aria-checked={trackPendingSwish}
-                            onClick={() => setTrackPendingSwish((prev) => !prev)}
-                            className={`ui-switch ${
-                              trackPendingSwish ? 'ui-switch-on' : 'ui-switch-off'
-                            }`}
-                          >
-                            <span
-                              className={`ui-switch-thumb ${
-                                trackPendingSwish ? 'ui-switch-thumb-on' : 'translate-x-0'
-                              }`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!onUpdate) return;
-                        const nextShare = Math.min(
-                          fullAmt,
-                          Math.max(0, Math.round(Number(myBudgetShareAmount) || 0))
-                        );
-                        if (
-                          selectedLinkedSwishId &&
-                          selectedLinkedSwishId !== activeTx.linkedSwishTxId &&
-                          onExclude
-                        ) {
-                          onExclude(selectedLinkedSwishId, true);
-                        } else if (
-                          !selectedLinkedSwishId &&
-                          activeTx.linkedSwishTxId &&
-                          onExclude
-                        ) {
-                          onExclude(activeTx.linkedSwishTxId, false);
-                        }
-                        const isSplitPending =
-                          nextShare < fullAmt && !selectedLinkedSwishId && trackPendingSwish;
-                        onUpdate({
-                          ...activeTx,
-                          amount: nextShare,
-                          originalAmount: nextShare < fullAmt ? fullAmt : undefined,
-                          linkedSwishTxId:
-                            nextShare < fullAmt ? selectedLinkedSwishId : undefined,
-                          isWaitingForSwish: isSplitPending,
-                          pendingSwishAmount: isSplitPending
-                            ? Math.max(1, fullAmt - nextShare)
-                            : undefined,
-                          pendingSwishRecipient: isSplitPending
-                            ? swishRecipientName || swishPhone || activeTx.pendingSwishRecipient
-                            : undefined,
-                        });
-                        navigateSubView('details', 'back');
-                      }}
-                      className="ui-btn-primary"
-                    >
-                      <Check size={14} weight="bold" />
-                      <span>Spara min andel</span>
-                    </button>
-                  </>
-                );
-              })()}
-            </div>
-          ) : (
-            <>
-              {/* Snabbval för uppdelning av beloppet */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  {
-                    label: 'Dela lika · 50%',
-                    val: Math.max(
-                      1,
-                      Math.round((activeTx.originalAmount || activeTx.amount) / 2)
-                    ),
-                  },
-                  {
-                    label: 'En tredjedel',
-                    val: Math.max(
-                      1,
-                      Math.round((activeTx.originalAmount || activeTx.amount) / 3)
-                    ),
-                  },
-                  {
-                    label: 'Hela · 100%',
-                    val: Math.max(
-                      1,
-                      Math.round(activeTx.originalAmount || activeTx.amount)
-                    ),
-                  },
-                ].map((opt) => {
-                  const isSel = Number(swishAmount) === opt.val;
-                  return (
-                    <button
-                      key={opt.label}
-                      type="button"
-                      onClick={() => setSwishAmount(opt.val)}
-                      className={`py-2.5 px-2 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
-                        isSel
-                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                          : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
-                      }`}
-                    >
-                      <span className="text-[11px] opacity-80 block truncate">{opt.label}</span>
-                      <span className="font-display font-bold tabular-nums block mt-0.5">
-                        {opt.val} kr
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Belopp & Meddelande i tabellkort med kantlösa inline-fält */}
-              <div className="ui-sheet-group">
-                <label className="ui-input-row">
-                  <span className="text-[var(--text-muted)] shrink-0">Belopp (kr)</span>
-                  <input
-                    type="number"
-                    min="1"
-                    value={swishAmount}
-                    onChange={(e) => setSwishAmount(Math.max(0, Number(e.target.value) || 0))}
-                    className="ui-inline-amount-input"
-                  />
-                </label>
-                <label className="ui-input-row">
-                  <span className="text-[var(--text-muted)] shrink-0">Meddelande</span>
-                  <input
-                    type="text"
-                    value={swishMessage}
-                    onChange={(e) => setSwishMessage(e.target.value)}
-                    placeholder={activeTx.title}
-                    className="ui-inline-input"
-                  />
-                </label>
-              </div>
-
-              {/* Mitt eget Swish-nummer & QR-kod (i Be om Swish-läge) */}
-              {swishMode === 'request' && (
-                <div className="p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                      <QrCode size={14} weight="bold" />
-                      <span>Mitt Swish-nummer</span>
-                    </span>
-                    {normalizedMySwishPhone.length >= 7 && !isEditingMyPhone && (
-                      <button
-                        type="button"
-                        onClick={() => setIsEditingMyPhone(true)}
-                        className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer tabular-nums"
-                      >
-                        {mySwishPhone} · Ändra
-                      </button>
-                    )}
-                  </div>
-
-                  {(isEditingMyPhone || normalizedMySwishPhone.length < 7) && (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="tel"
-                        value={mySwishPhone}
-                        onChange={(e) => {
-                          setMySwishPhone(e.target.value);
-                          saveMySwishPhone(e.target.value.trim());
-                        }}
-                        placeholder="Ditt mobilnummer"
-                        className="flex-1 py-3 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
-                      />
-                      {normalizedMySwishPhone.length >= 7 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            saveMySwishPhone(mySwishPhone.trim());
-                            setIsEditingMyPhone(false);
-                            setShowSwishQr(true);
-                          }}
-                          className="ui-btn-sm-primary py-3 px-4 rounded-xl"
-                        >
-                          Klar
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {!isEditingMyPhone && showSwishQr && (
-                    <div className="flex flex-col items-center pt-1 pb-1">
-                      <div className="relative p-3.5 rounded-2xl bg-white border border-[var(--border-subtle)] shadow-xs">
-                        {qrDataUrl ? (
-                          <img
-                            src={qrDataUrl}
-                            alt="Swish QR-kod"
-                            className="w-44 h-44 object-contain"
-                          />
-                        ) : (
-                          <div className="w-44 h-44 flex items-center justify-center text-xs text-zinc-400">
-                            Skapar QR...
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-[11.5px] text-[var(--text-muted)] mt-2.5 text-center">
-                        Skanna med Swish-appen för att betala {formatKr(swishAmount)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Sparade kontakter / Mottagare */}
-              <div className="p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[var(--text-primary)]">
-                    {swishMode === 'request'
-                      ? 'Välj vem som ska betala dig'
-                      : 'Välj mottagare att Swisha'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddingContact((prev) => !prev)}
-                    className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1 hover:opacity-80 cursor-pointer"
-                  >
-                    <UserPlus size={13} weight="bold" />
-                    <span>{isAddingContact ? 'Stäng' : 'Spara kontakt'}</span>
-                  </button>
-                </div>
-
-                {isAddingContact && (
-                  <div className="p-3 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] space-y-2.5 animate-fade-in">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={newContactName}
-                        onChange={(e) => setNewContactName(e.target.value)}
-                        placeholder="Namn, t.ex. Sambo"
-                        className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
-                      />
-                      <input
-                        type="tel"
-                        value={newContactPhone}
-                        onChange={(e) => setNewContactPhone(e.target.value)}
-                        placeholder="070-123 45 67"
-                        className="py-2.5 px-3 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const n = newContactName.trim();
-                        const p = newContactPhone.trim();
-                        if (!n || !p) return;
-                        const updated = [
-                          ...swishContacts,
-                          { id: `sc-${Date.now()}`, name: n, phone: p },
-                        ];
-                        setSwishContacts(updated);
-                        saveSwishContacts(updated);
-                        setSwishPhone(p);
-                        setSwishRecipientName(n);
-                        setNewContactName('');
-                        setNewContactPhone('');
-                        setIsAddingContact(false);
-                      }}
-                      className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold cursor-pointer"
-                    >
-                      Spara kontakt
-                    </button>
-                  </div>
-                )}
-
-                {swishContacts.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {swishContacts.map((c) => {
-                      const active = swishPhone === c.phone;
-                      return (
-                        <div
-                          key={c.id}
-                          className={`inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-xl border text-xs font-semibold transition-all ${
-                            active
-                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSwishPhone(c.phone);
-                              setSwishRecipientName(c.name);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {c.name}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = swishContacts.filter((item) => item.id !== c.id);
-                              setSwishContacts(next);
-                              saveSwishContacts(next);
-                              if (swishPhone === c.phone) {
-                                setSwishPhone('');
-                                setSwishRecipientName('');
-                              }
-                            }}
-                            className="p-0.5 rounded hover:opacity-70 cursor-pointer"
-                          >
-                            <X size={11} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <input
-                  type="tel"
-                  value={swishPhone}
-                  onChange={(e) => {
-                    setSwishPhone(e.target.value);
-                    setSwishRecipientName('');
-                  }}
-                  placeholder="Mobilnummer"
-                  className="w-full py-3 px-3.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
-                />
-              </div>
-
-              {swishFeedback && (
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold text-center animate-fade-in">
-                  {swishFeedback}
-                </div>
-              )}
-
-              {swishMode === 'request' ? (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <a
-                      href={(() => {
-                        const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
-                        const label = cleanSwishMessage || activeTx.title;
-                        const prefilledUrl =
-                          normalizedMySwishPhone.length >= 7 && typeof window !== 'undefined'
-                            ? `${window.location.origin}/?swish_pay=1&payee=${encodeURIComponent(
-                                normalizedMySwishPhone
-                              )}&amount=${amt}&msg=${encodeURIComponent(label)}`
-                            : '';
-                        const msgText = prefilledUrl
-                          ? `Hej${
-                              swishRecipientName ? ` ${swishRecipientName}` : ''
-                            }! Kan du swisha ${amt} kr för ${label}?\n\nKlicka här för att öppna Swish färdigifyllt:\n${prefilledUrl}`
-                          : `Hej${
-                              swishRecipientName ? ` ${swishRecipientName}` : ''
-                            }! Kan du swisha ${amt} kr för ${label}?`;
-                        const cleanPhone = swishPhone.replace(/[^\d+]/g, '');
-                        const isIOS =
-                          typeof navigator !== 'undefined' &&
-                          /iPad|iPhone|iPod/i.test(navigator.userAgent);
-                        const sep = isIOS ? '&' : '?';
-                        return cleanPhone
-                          ? `sms:${cleanPhone}${sep}body=${encodeURIComponent(msgText)}`
-                          : `sms:${sep}body=${encodeURIComponent(msgText)}`;
-                      })()}
-                      className="ui-btn-primary"
-                    >
-                      <ChatCircleText size={14} weight="bold" />
-                      <span>Skicka SMS</span>
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        const amt = Math.max(1, Math.round(Number(swishAmount) || 0));
-                        const label = cleanSwishMessage || activeTx.title;
-                        const prefilledUrl =
-                          normalizedMySwishPhone.length >= 7 && typeof window !== 'undefined'
-                            ? `${window.location.origin}/?swish_pay=1&payee=${encodeURIComponent(
-                                normalizedMySwishPhone
-                              )}&amount=${amt}&msg=${encodeURIComponent(label)}`
-                            : '';
-                        const msgText = prefilledUrl
-                          ? `Hej${
-                              swishRecipientName ? ` ${swishRecipientName}` : ''
-                            }! Kan du swisha ${amt} kr för ${label}?\n\nKlicka här för att öppna Swish färdigifyllt:\n${prefilledUrl}`
-                          : `Hej${
-                              swishRecipientName ? ` ${swishRecipientName}` : ''
-                            }! Kan du swisha ${amt} kr för ${label}?`;
-                        try {
-                          await navigator.clipboard?.writeText(msgText);
-                        } catch {
-                          // ignore
-                        }
-                        if (typeof navigator !== 'undefined' && navigator.share) {
-                          try {
-                            await navigator.share({
-                              title: `Swisha ${amt} kr för ${label}`,
-                              text: msgText,
-                            });
-                            return;
-                          } catch {
-                            // fallback
-                          }
-                        }
-                        setSwishFeedback('Swish-länk kopierad!');
-                        setTimeout(() => setSwishFeedback(null), 3000);
-                      }}
-                      className="ui-btn-secondary flex items-center justify-center gap-1.5"
-                    >
-                      <Copy size={14} />
-                      <span>Kopiera länk</span>
-                    </button>
-                  </div>
-
-                  {/* Bevaka inväntad Swish direkt på Hemfliken */}
-                  {onUpdate && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const fullAmt = Math.round(
-                          activeTx.originalAmount || activeTx.amount
-                        );
-                        const reqAmt = Math.max(
-                          1,
-                          Math.min(fullAmt, Math.round(Number(swishAmount) || 0))
-                        );
-                        const nextMyShare = Math.max(0, fullAmt - reqAmt);
-                        if (activeTx.isWaitingForSwish) {
-                          onUpdate({
-                            ...activeTx,
-                            isWaitingForSwish: false,
-                            pendingSwishAmount: undefined,
-                            pendingSwishRecipient: undefined,
-                          });
-                          setSwishFeedback('Swish-bevakning borttagen');
-                        } else {
-                          onUpdate({
-                            ...activeTx,
-                            amount: nextMyShare > 0 ? nextMyShare : activeTx.amount,
-                            originalAmount: nextMyShare > 0 ? fullAmt : activeTx.originalAmount,
-                            isWaitingForSwish: true,
-                            pendingSwishAmount: reqAmt,
-                            pendingSwishRecipient:
-                              swishRecipientName.trim() || swishPhone.trim() || undefined,
-                          });
-                          setSwishFeedback(
-                            `Bevakar ${formatKr(reqAmt)} under ”Väntar på Swish” på Hemfliken!`
-                          );
-                        }
-                        setTimeout(() => setSwishFeedback(null), 3500);
-                      }}
-                      className={`w-full py-2.5 px-3.5 rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                        activeTx.isWaitingForSwish
-                          ? 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
-                      }`}
-                    >
-                      <ClockCounterClockwise size={14} weight="bold" />
-                      <span>
-                        {activeTx.isWaitingForSwish
-                          ? 'Bevakas på Hemfliken · Ta bort'
-                          : 'Bevaka på Hemfliken'}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const cleanPhone = normalizeSwedishSwishNumber(swishPhone);
-                    if (cleanPhone) {
-                      navigator.clipboard?.writeText(cleanPhone).catch(() => {});
-                    }
-                    const payload = {
-                      version: 1,
-                      payee: { value: cleanPhone, editable: true },
-                      amount: { value: Number(swishAmount) || 0, editable: true },
-                      message: {
-                        value: swishMessage || activeTx.title,
-                        editable: true,
-                      },
-                    };
-                    window.location.href = `swish://payment?data=${encodeURIComponent(
-                      JSON.stringify(payload)
-                    )}`;
-                  }}
-                  className="ui-btn-primary"
-                >
-                  <SwishLogo size={15} />
-                  <span>Öppna Swish</span>
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* ============================================================== */}
       {/* SUB-VIEW 5: INBYGGD KVITTO-VISNING (Fungerar i iOS & PWA)      */}
       {/* ============================================================== */}
-      {subView === 'receipt-preview' && activeTx?.receiptUrl && (
+      {subView === 'receipt-preview' && previewReceipt && (
         <div className={`${slideAnimClass} space-y-4`}>
           <div className="ui-sheet-sub-header">
             <button
               type="button"
-              onClick={() => navigateSubView('details', 'back')}
+              onClick={() => navigateSubView(pickerReturnView, 'back')}
               title="Tillbaka"
               aria-label="Tillbaka"
               className="ui-icon-btn"
@@ -1765,7 +962,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <CaretLeft size={15} weight="bold" />
             </button>
             <span className="ui-sheet-title truncate max-w-[180px]">
-              {activeTx.receiptName || 'Kvitto'}
+              {previewReceipt.name || 'Kvitto'}
             </span>
             <button
               type="button"
@@ -1777,17 +974,17 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
-            {activeTx.receiptUrl.startsWith('data:image/') ||
-            /\.(png|jpe?g|webp|gif)$/i.test(activeTx.receiptUrl) ? (
+            {previewReceipt.url.startsWith('data:image/') ||
+            /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
               <img
-                src={activeTx.receiptUrl}
-                alt={activeTx.receiptName || 'Kvitto'}
+                src={previewReceipt.url}
+                alt={previewReceipt.name || 'Kvitto'}
                 className="max-h-[56dvh] w-auto object-contain rounded-xl"
               />
             ) : (
               <iframe
-                src={activeTx.receiptUrl}
-                title={activeTx.receiptName || 'Kvitto'}
+                src={previewReceipt.url}
+                title={previewReceipt.name || 'Kvitto'}
                 className="w-full h-[52dvh] rounded-xl border-0"
               />
             )}
@@ -1795,8 +992,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           <div className="grid grid-cols-2 gap-2">
             <a
-              href={activeTx.receiptUrl}
-              download={activeTx.receiptName || `kvitto-${activeTx.date}.jpg`}
+              href={previewReceipt.url}
+              download={previewReceipt.name || `kvitto-${activeTx?.date || 'ny'}.jpg`}
               className="ui-btn-primary"
             >
               <FileText size={14} weight="bold" />
@@ -1807,8 +1004,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               onClick={() => fileInputRef.current?.click()}
               className="ui-btn-secondary flex items-center justify-center gap-1.5"
             >
-              <Paperclip size={14} />
-              <span>Byt kvitto</span>
+              <Plus size={14} weight="bold" />
+              <span>Bifoga fler</span>
             </button>
           </div>
         </div>
@@ -1865,12 +1062,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 title="Bifoga kvitto"
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer border ${
-                  activeTx.receiptUrl
+                  draftReceipts.length > 0
                     ? 'text-[var(--text-primary)] bg-[var(--surface-hover)] border-[var(--text-muted)]'
                     : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <Paperclip size={15} weight={activeTx.receiptUrl ? 'bold' : 'regular'} />
+                <Paperclip size={15} weight={draftReceipts.length > 0 ? 'bold' : 'regular'} />
               </button>
             </div>
 
@@ -1888,6 +1085,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       isIncome ? 'income' : 'expense'
                     )
                   );
+                  setDraftReceipts(getItemReceipts(activeTx));
                   navigateSubView('edit', 'forward');
                 }}
                 className="px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
@@ -1914,9 +1112,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 category={activeTx.category}
                 logoUrl={activeTx.logo}
                 size="xl"
-                isRecurring={Boolean(
-                  recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
-                )}
+                isRecurring={Boolean(recurringStatus.isRecurring)}
               />
             </div>
 
@@ -1933,12 +1129,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               {formatKr(activeTx.amount)}
             </div>
 
-            {activeTx.originalAmount && activeTx.originalAmount !== activeTx.amount && (
-              <p className="text-xs font-medium text-[var(--text-secondary)] mt-1 tabular-nums">
-                Delad utgift · Ursprungligt belopp -{formatKr(activeTx.originalAmount)}
-              </p>
-            )}
-
             <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
               {formatSwedishDateHeading(activeTx.date)}
               {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
@@ -1950,7 +1140,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           <div className="space-y-3">
-            {/* Förhandsgranskningstabell (Enbart läsbar information med normalviktiga värden) */}
+            {/* Förhandsgranskningstabell */}
             <div className="ui-sheet-group">
               <div className="ui-row">
                 <span className="ui-info-label">Kategori</span>
@@ -2005,29 +1195,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   </span>
                 </div>
               )}
+
+              <div className="ui-row">
+                <span className="ui-info-label">
+                  {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Paperclip size={13} />
+                  <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga'}</span>
+                </button>
+              </div>
             </div>
 
-            {/* Separerade handlingar: Dela utgift & Liknande köp */}
+            {/* Liknande köp */}
             <div className="ui-sheet-group">
-              <button
-                type="button"
-                onClick={() => navigateSubView('swish', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="font-medium text-[var(--text-primary)] shrink-0">
-                  Dela utgift
-                </span>
-                <span className="text-[var(--text-secondary)] font-normal flex items-center gap-1.5 shrink-0">
-                  <SwishLogo size={14} />
-                  <span>
-                    {activeTx.isWaitingForSwish && activeTx.pendingSwishAmount
-                      ? `Väntar på ${formatKr(activeTx.pendingSwishAmount)}`
-                      : 'Swish'}
-                  </span>
-                  <CaretRight size={12} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-
               <button
                 type="button"
                 onClick={() => navigateSubView('similar', 'forward')}
@@ -2045,60 +1230,55 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </button>
             </div>
 
-            {/* Bifogat kvitto visas direkt som standard i ett snyggt kort */}
-            {activeTx.receiptUrl && (
-              <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between gap-2 px-0.5">
-                  <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate">
-                    <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-                    <span className="truncate">{activeTx.receiptName || 'Bifogat kvitto'}</span>
-                  </span>
-                  <div className="flex items-center gap-1.5 shrink-0">
+            {/* Bifogade kvitton visas i snygga kort */}
+            {draftReceipts.length > 0 && (
+              <div className="space-y-2.5">
+                {draftReceipts.map((rcpt, idx) => (
+                  <div
+                    key={`${rcpt.name}-${idx}`}
+                    className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2 px-0.5">
+                      <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                        <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
+                        <span className="truncate">{rcpt.name || `Kvitto ${idx + 1}`}</span>
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveReceiptAt(idx)}
+                          className="p-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                          title="Ta bort kvitto"
+                        >
+                          <Trash size={13} />
+                        </button>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                      onClick={() => {
+                        setPreviewReceipt(rcpt);
+                        navigateSubView('receipt-preview', 'forward');
+                      }}
+                      className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-60 cursor-pointer hover:opacity-95 transition-opacity"
                     >
-                      Byt
+                      {rcpt.url.startsWith('data:image/') ||
+                      /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
+                        <img
+                          src={rcpt.url}
+                          alt={rcpt.name || 'Kvitto'}
+                          className="max-h-52 w-auto object-contain rounded-lg"
+                        />
+                      ) : (
+                        <div className="py-6 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                          <FileText size={28} weight="duotone" />
+                          <span className="font-medium">{rcpt.name || 'Öppna dokument'}</span>
+                        </div>
+                      )}
                     </button>
-                    {onUpdate && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onUpdate({
-                            ...activeTx,
-                            receiptUrl: undefined,
-                            receiptName: undefined,
-                          })
-                        }
-                        className="p-1.5 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                        title="Ta bort kvitto"
-                      >
-                        <Trash size={13} />
-                      </button>
-                    )}
                   </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => navigateSubView('receipt-preview', 'forward')}
-                  className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-60 cursor-pointer hover:opacity-95 transition-opacity"
-                >
-                  {activeTx.receiptUrl.startsWith('data:image/') ||
-                  /\.(png|jpe?g|webp|gif)$/i.test(activeTx.receiptUrl) ? (
-                    <img
-                      src={activeTx.receiptUrl}
-                      alt={activeTx.receiptName || 'Kvitto'}
-                      className="max-h-52 w-auto object-contain rounded-lg"
-                    />
-                  ) : (
-                    <div className="py-6 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-                      <FileText size={28} weight="duotone" />
-                      <span className="font-medium">{activeTx.receiptName || 'Öppna dokument'}</span>
-                    </div>
-                  )}
-                </button>
+                ))}
               </div>
             )}
           </div>
@@ -2312,6 +1492,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 />
               </label>
 
+              {/* Bifoga kvitto (både vid ny händelse och redigering!) */}
+              <div className="ui-row">
+                <span className="ui-info-label shrink-0">
+                  {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Paperclip size={13} />
+                  <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga kvitto'}</span>
+                </button>
+              </div>
+
               {/* Räkna med i budget */}
               {!isCreateMode && activeTx && onExclude && (
                 <div className="ui-row">
@@ -2374,6 +1569,39 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </button>
               )}
             </div>
+
+            {draftReceipts.length > 0 && (
+              <div className="space-y-2">
+                {draftReceipts.map((rcpt, idx) => (
+                  <div
+                    key={`${rcpt.name}-${idx}`}
+                    className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewReceipt(rcpt);
+                        navigateSubView('receipt-preview', 'forward');
+                      }}
+                      className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 cursor-pointer"
+                    >
+                      <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
+                      <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                        {rcpt.name || `Kvitto ${idx + 1}`}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveReceiptAt(idx)}
+                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer shrink-0"
+                      title="Ta bort kvitto"
+                    >
+                      <Trash size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {isCreateMode ? (
               <button

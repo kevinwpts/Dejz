@@ -560,7 +560,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <div className="ui-page animate-slide-in-right">
         <div className="ui-admin-card">
           {paymentMethods.map((method) => {
-            const count = pmUsageCounts[method.name.toLowerCase().trim()] || 0;
             return (
               <button
                 key={method.id}
@@ -582,9 +581,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   </span>
                 </div>
                 <div className="ui-admin-right">
-                  <span className="ui-admin-value">
-                    {count > 0 ? count : ''}
-                  </span>
                   <span className="ui-admin-chevron">
                     <CaretRight size={13} />
                   </span>

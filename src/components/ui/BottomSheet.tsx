@@ -167,10 +167,12 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, triggerAnimatedClose]);
 
+  const scrollBodyRef = useRef<HTMLDivElement>(null);
+
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (fullScreen) return;
-    const sheetEl = sheetRef.current;
-    if (sheetEl && sheetEl.scrollTop > 2) return;
+    const scrollEl = scrollBodyRef.current || sheetRef.current;
+    if (scrollEl && scrollEl.scrollTop > 2) return;
     const target = e.target as HTMLElement;
     if (target.closest('input, textarea, select')) return;
     dragStartYRef.current = e.touches[0].clientY;
@@ -179,8 +181,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (fullScreen || dragStartYRef.current === null) return;
-    const sheetEl = sheetRef.current;
-    if (sheetEl && sheetEl.scrollTop > 2) {
+    const scrollEl = scrollBodyRef.current || sheetRef.current;
+    if (scrollEl && scrollEl.scrollTop > 2) {
       dragStartYRef.current = null;
       setDragOffsetY(0);
       setIsDragging(false);
@@ -212,6 +214,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     ? contentClassName
     : disablePadding
     ? ''
+    : footer
+    ? 'px-5 pb-4'
     : paddingClass;
 
   const sheetElement = (
@@ -250,52 +254,77 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             ? 'none'
             : 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
-        className={`relative z-10 w-full ${maxWidthClass} ${
+        className={`relative z-10 w-full flex flex-col overflow-hidden ${maxWidthClass} ${
           fullScreen
             ? 'h-[100dvh] max-h-[100dvh] rounded-none border-x border-[var(--border-subtle)]'
             : `mt-auto rounded-t-[28px] rounded-b-none border-t border-x border-[var(--border-subtle)] ${maxHeightClass}`
-        } ${surfaceClass} ${effectivePaddingClass} shadow-modal overflow-y-auto overflow-x-hidden ${
+        } ${surfaceClass} shadow-modal ${
           !isClosing && dragOffsetY === 0 ? 'animate-sheet-up' : ''
         }`}
       >
-        {/* Top Handle / Safe Area Spacer */}
+        {/* Sticky Top Handle & Optional Header */}
         <div
-          className={
-            fullScreen
-              ? 'pt-[max(0.5rem,env(safe-area-inset-top,0.5rem))]'
-              : 'w-full flex justify-center pt-2 pb-3 cursor-grab active:cursor-grabbing'
-          }
+          className={`shrink-0 ${surfaceClass} z-20 ${
+            disablePadding ? '' : 'px-5 pt-2'
+          }`}
         >
-          {!fullScreen && (
-            <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)]" />
+          <div
+            className={
+              fullScreen
+                ? 'pt-[max(0.5rem,env(safe-area-inset-top,0.5rem))]'
+                : 'w-full flex justify-center pt-1.5 pb-2.5 cursor-grab active:cursor-grabbing'
+            }
+          >
+            {!fullScreen && (
+              <div className="w-10 h-1.5 rounded-full bg-[var(--border-control)]" />
+            )}
+          </div>
+
+          {title && (
+            <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
+              <div className="min-w-0">
+                <span className="ui-sheet-title block">
+                  {title}
+                </span>
+                {subtitle && (
+                  <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+                    {subtitle}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={triggerAnimatedClose}
+                className="ui-icon-btn"
+              >
+                <X size={16} />
+              </button>
+            </div>
           )}
         </div>
 
-        {title && (
-          <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-4">
-            <div className="min-w-0">
-              <span className="ui-sheet-title block">
-                {title}
-              </span>
-              {subtitle && (
-                <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
-                  {subtitle}
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={triggerAnimatedClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
+        {/* Scrollable Middle Content */}
+        <div
+          ref={scrollBodyRef}
+          className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${effectivePaddingClass} ${
+            title && !disablePadding ? 'pt-4' : ''
+          }`}
+        >
+          {bodyClassName ? <div className={bodyClassName}>{children}</div> : children}
+        </div>
+
+        {/* Sticky Bottom Footer */}
+        {footer && (
+          <div
+            className={`shrink-0 z-20 ${surfaceClass} border-t border-[var(--border-subtle)] ${
+              disablePadding
+                ? ''
+                : 'px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]'
+            }`}
+          >
+            {footer}
           </div>
         )}
-
-        {bodyClassName ? <div className={bodyClassName}>{children}</div> : children}
-
-        {footer && <div className="pt-3 mt-2 border-t border-[var(--border-subtle)]">{footer}</div>}
       </div>
     </div>
   );

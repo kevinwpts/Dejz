@@ -73,10 +73,11 @@ import {
   formatIsoTimeStockholm,
   formatSwedishDateHeading,
   getActualBankPaymentDateAndMeta,
+  getItemReceipts,
   getSwedishDateStr,
   parseDateFromSwedishText,
 } from './utils/swedishDate';
-import { SWISH_SVG_DATA_URI, SwishLogo } from './components/SwishLogo';
+import { SWISH_SVG_DATA_URI } from './components/SwishLogo';
 import {
   loadCachedAppState,
   saveCachedAppState,
@@ -178,6 +179,7 @@ function sanitizeTransactionItem(
     pendingSwishRecipient: item.pendingSwishRecipient ?? savedMeta?.pendingSwishRecipient,
     receiptUrl: item.receiptUrl ?? savedMeta?.receiptUrl,
     receiptName: item.receiptName ?? savedMeta?.receiptName,
+    receipts: item.receipts ?? savedMeta?.receipts,
     paymentMethod: item.paymentMethod ?? savedMeta?.paymentMethod,
     note: item.note ?? savedMeta?.note,
   };
@@ -529,6 +531,7 @@ function reconcileFixedExpensesList(params: {
         logo: f.logo || getLogoUrl(finalName, finalCat),
         receiptUrl: f.receiptUrl,
         receiptName: f.receiptName,
+        receipts: idOverride?.receipts || f.receipts,
       };
 
       const existingIdx = findExactSavedMatchIndex(item);
@@ -578,6 +581,7 @@ function reconcileFixedExpensesList(params: {
       logo: curr.logo || getLogoUrl(finalName, finalCat),
       receiptUrl: curr.receiptUrl,
       receiptName: curr.receiptName,
+      receipts: curr.receipts || idOverride?.receipts,
     };
 
     const existingIdx = findExactSavedMatchIndex(candidate);
@@ -595,6 +599,7 @@ function reconcileFixedExpensesList(params: {
         logo: candidate.logo || existing.logo || getLogoUrl(finalName, finalCat),
         receiptUrl: candidate.receiptUrl || existing.receiptUrl,
         receiptName: candidate.receiptName || existing.receiptName,
+        receipts: candidate.receipts || existing.receipts,
       };
       unified[existingIdx] = merged;
       if (
@@ -1287,12 +1292,6 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [selectedHistoryAccountId, setSelectedHistoryAccountId] = useState<string | null>(null);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('main');
-  const [incomingSwishRequest, setIncomingSwishRequest] = useState<{
-    payee: string;
-    amount: number;
-    msg: string;
-    deepLink: string;
-  } | null>(null);
   const [undoToast, setUndoToast] = useState<{
     id: string;
     excluded: boolean;
@@ -1310,27 +1309,6 @@ export const App: React.FC = () => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   }, [activeTab, settingsSubView, selectedHistoryAccountId]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('swish_pay') === '1') {
-      const payee = (params.get('payee') || '').replace(/\D/g, '');
-      const amount = Math.max(1, Math.round(Number(params.get('amount')) || 0));
-      const msg = (params.get('msg') || '').trim();
-      if (payee) {
-        const payload = {
-          version: 1,
-          payee: { value: payee, editable: false },
-          amount: { value: amount, editable: false },
-          message: { value: msg, editable: false },
-        };
-        const deepLink = `swish://payment?data=${encodeURIComponent(JSON.stringify(payload))}`;
-        setIncomingSwishRequest({ payee, amount, msg, deepLink });
-        window.location.href = deepLink;
-      }
-    }
-  }, []);
 
   const initialCache = useMemo(() => loadCachedAppState(), []);
 
@@ -1734,6 +1712,7 @@ export const App: React.FC = () => {
               isWaitingForPackage: prev.isWaitingForPackage ?? tx.isWaitingForPackage,
               receiptUrl: prev.receiptUrl ?? tx.receiptUrl,
               receiptName: prev.receiptName ?? tx.receiptName,
+              receipts: prev.receipts ?? tx.receipts,
               note: prev.note ?? tx.note,
             };
           });
@@ -2036,6 +2015,7 @@ export const App: React.FC = () => {
                   isWaitingForPackage: prev.isWaitingForPackage ?? tx.isWaitingForPackage,
                   receiptUrl: prev.receiptUrl ?? tx.receiptUrl,
                   receiptName: prev.receiptName ?? tx.receiptName,
+                  receipts: prev.receipts ?? tx.receipts,
                   note: prev.note ?? tx.note,
                 };
               })
@@ -2967,6 +2947,7 @@ export const App: React.FC = () => {
         category: data.category,
         paymentMethod: data.paymentMethod,
         name: data.name,
+        receipts: data.receipts,
       },
       data.originalName || data.name,
       validId,
@@ -3157,6 +3138,7 @@ export const App: React.FC = () => {
         category: updated.category,
         paymentMethod: updated.paymentMethod,
         name: updated.name,
+        receipts: updated.receipts,
       },
       rootOriginalName,
       validId,
@@ -3249,8 +3231,16 @@ export const App: React.FC = () => {
   const handleAddTransaction = async (data: Omit<TransactionItem, 'id'>) => {
     const logo = data.logo || getLogoUrl(data.title, data.category);
     const aliases = getMerchantAliases();
+    const newId = 'tx-' + Date.now();
+    if (data.receiptUrl || (data.receipts && data.receipts.length > 0)) {
+      saveTransactionMeta(newId, {
+        receiptUrl: data.receiptUrl,
+        receiptName: data.receiptName,
+        receipts: data.receipts,
+      });
+    }
     const newItem: TransactionItem = sanitizeTransactionItem(
-      { ...data, logo, id: 'tx-' + Date.now() },
+      { ...data, logo, id: newId },
       fixedExpensesRef.current,
       incomesRef.current,
       aliases
@@ -3372,6 +3362,7 @@ export const App: React.FC = () => {
       pendingSwishRecipient: updated.pendingSwishRecipient,
       receiptUrl: updated.receiptUrl,
       receiptName: updated.receiptName,
+      receipts: updated.receipts,
       paymentMethod: updated.paymentMethod,
       note: updated.note,
       customAmount:
@@ -4457,13 +4448,14 @@ export const App: React.FC = () => {
 
               {activeTab === 'receipts' && (
                 <div className="ui-page">
-                  {displayTransactions.filter((t) => Boolean(t.receiptUrl)).length > 0 ||
-                  fixedExpenses.filter((f) => Boolean(f.receiptUrl)).length > 0 ? (
+                  {displayTransactions.some((t) => getItemReceipts(t).length > 0) ||
+                  fixedExpenses.some((f) => getItemReceipts(f).length > 0) ? (
                     <section className="ui-list-card">
                       <div className="divide-y divide-[var(--border-subtle)]">
                         {fixedExpenses
-                          .filter((f) => Boolean(f.receiptUrl))
+                          .filter((f) => getItemReceipts(f).length > 0)
                           .map((exp) => {
+                            const expReceipts = getItemReceipts(exp);
                             const formattedAmt =
                               new Intl.NumberFormat('sv-SE').format(Math.round(exp.amount)) +
                               ' kr';
@@ -4498,11 +4490,17 @@ export const App: React.FC = () => {
                                         className="shrink-0 text-[var(--text-secondary)]"
                                       />
                                       <span className="truncate">{exp.category}</span>
+                                      <span className="shrink-0 text-[var(--text-muted)]">· Fast</span>
                                       <Paperclip
                                         size={11}
                                         weight="bold"
                                         className="text-[var(--text-secondary)] shrink-0"
                                       />
+                                      {expReceipts.length > 1 && (
+                                        <span className="text-[10px] font-bold text-[var(--text-secondary)]">
+                                          {expReceipts.length} st
+                                        </span>
+                                      )}
                                     </span>
                                   </div>
                                 </button>
@@ -4513,23 +4511,25 @@ export const App: React.FC = () => {
                                       -{formattedAmt}
                                     </span>
                                     <span className="ui-row-meta truncate max-w-[110px]">
-                                      {exp.receiptName || 'Kvitto'}
+                                      {expReceipts.length > 1
+                                        ? `${expReceipts.length} kvitton`
+                                        : expReceipts[0]?.name || 'Kvitto'}
                                     </span>
                                   </div>
-                                  {exp.receiptUrl && (
+                                  {expReceipts[0] && (
                                     <button
                                       type="button"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setPreviewReceipt({
-                                          url: exp.receiptUrl!,
-                                          name: exp.receiptName || exp.name || 'Kvitto',
+                                          url: expReceipts[0].url,
+                                          name: expReceipts[0].name || exp.name || 'Kvitto',
                                         });
                                       }}
                                       className="ui-icon-btn"
                                       title="Öppna kvitto"
                                     >
-                                      {exp.receiptUrl.startsWith('data:image/') ? (
+                                      {expReceipts[0].url.startsWith('data:image/') ? (
                                         <Eye size={14} />
                                       ) : (
                                         <FileText size={14} />
@@ -4542,9 +4542,15 @@ export const App: React.FC = () => {
                           })}
 
                         {displayTransactions
-                          .filter((t) => Boolean(t.receiptUrl))
+                          .filter((t) => getItemReceipts(t).length > 0)
                           .map((tx) => {
+                            const txReceipts = getItemReceipts(tx);
                             const isIncome = tx.type === 'income';
+                            const recurring = checkIsRecurringTransaction(
+                              tx,
+                              fixedExpenses,
+                              incomes
+                            );
                             const formattedAmt =
                               new Intl.NumberFormat('sv-SE').format(Math.round(tx.amount)) + ' kr';
                             return (
@@ -4565,7 +4571,7 @@ export const App: React.FC = () => {
                                     category={tx.category}
                                     logoUrl={tx.logo}
                                     size="md"
-                                    isRecurring={false}
+                                    isRecurring={recurring.isRecurring}
                                   />
                                   <div className="min-w-0 flex-1">
                                     <span className="ui-row-title">
@@ -4578,6 +4584,9 @@ export const App: React.FC = () => {
                                         className="shrink-0 text-[var(--text-secondary)]"
                                       />
                                       <span className="truncate">{tx.category}</span>
+                                      {recurring.isRecurring && (
+                                        <span className="shrink-0 text-[var(--text-muted)]">· Fast</span>
+                                      )}
                                       {tx.isHearted && (
                                         <Heart
                                           size={11}
@@ -4592,16 +4601,17 @@ export const App: React.FC = () => {
                                           className="text-amber-500 shrink-0"
                                         />
                                       )}
-                                      {tx.receiptUrl && (
-                                        <Paperclip
-                                          size={11}
-                                          weight="bold"
-                                          className="text-[var(--text-secondary)] shrink-0"
-                                        />
-                                      )}
-                                      {tx.receiptName && (
-                                        <span className="truncate">· {tx.receiptName}</span>
-                                      )}
+                                      <Paperclip
+                                        size={11}
+                                        weight="bold"
+                                        className="text-[var(--text-secondary)] shrink-0"
+                                      />
+                                      <span className="truncate">
+                                        ·{' '}
+                                        {txReceipts.length > 1
+                                          ? `${txReceipts.length} kvitton`
+                                          : txReceipts[0]?.name || 'Kvitto'}
+                                      </span>
                                     </span>
                                   </div>
                                 </button>
@@ -4621,20 +4631,20 @@ export const App: React.FC = () => {
                                         : getTransactionTime(tx)}
                                     </span>
                                   </div>
-                                  {tx.receiptUrl && (
+                                  {txReceipts[0] && (
                                     <button
                                       type="button"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setPreviewReceipt({
-                                          url: tx.receiptUrl!,
-                                          name: tx.receiptName || tx.title || 'Kvitto',
+                                          url: txReceipts[0].url,
+                                          name: txReceipts[0].name || tx.title || 'Kvitto',
                                         });
                                       }}
                                       className="ui-icon-btn"
                                       title="Öppna kvitto"
                                     >
-                                      {tx.receiptUrl.startsWith('data:image/') ? (
+                                      {txReceipts[0].url.startsWith('data:image/') ? (
                                         <Eye size={14} />
                                       ) : (
                                         <FileText size={14} />
@@ -4718,8 +4728,8 @@ export const App: React.FC = () => {
         savedCount={displayTransactions.filter((t) => t.isHearted).length}
         packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
         receiptsCount={
-          displayTransactions.filter((t) => Boolean(t.receiptUrl)).length +
-          fixedExpenses.filter((f) => Boolean(f.receiptUrl)).length
+          displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
+          fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0)
         }
       />
       </div>
@@ -4815,78 +4825,6 @@ export const App: React.FC = () => {
           refreshBankStatus();
         }}
       />
-
-      <BottomSheet
-        isOpen={Boolean(incomingSwishRequest)}
-        onClose={() => {
-          setIncomingSwishRequest(null);
-          if (typeof window !== 'undefined') {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('swish_pay');
-            url.searchParams.delete('payee');
-            url.searchParams.delete('amount');
-            url.searchParams.delete('msg');
-            window.history.replaceState({}, '', url.pathname + url.search);
-          }
-        }}
-        contentClassName="px-6 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] text-center space-y-4"
-        zIndexClass="z-[200]"
-      >
-        {incomingSwishRequest && (
-          <>
-            <div className="w-14 h-14 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto">
-              <SwishLogo size={32} />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-extrabold text-[var(--text-primary)]">
-                Swish-förfrågan
-              </h3>
-              <p className="text-xs text-[var(--text-muted)]">
-                Allt är 100 % förifyllt i Swish
-              </p>
-            </div>
-            <div className="p-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] space-y-1.5">
-              <div className="text-2xl font-display font-extrabold text-[var(--text-primary)] tabular-nums">
-                {incomingSwishRequest.amount} kr
-              </div>
-              {incomingSwishRequest.msg && (
-                <div className="text-xs font-bold text-[var(--text-primary)]">
-                  &ldquo;{incomingSwishRequest.msg}&rdquo;
-                </div>
-              )}
-              <div className="text-[11px] font-medium text-[var(--text-muted)] tabular-nums">
-                Till: {incomingSwishRequest.payee}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <a
-                href={incomingSwishRequest.deepLink}
-                className="ui-btn-primary"
-              >
-                <SwishLogo size={16} />
-                <span>Öppna Swish</span>
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  setIncomingSwishRequest(null);
-                  if (typeof window !== 'undefined') {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('swish_pay');
-                    url.searchParams.delete('payee');
-                    url.searchParams.delete('amount');
-                    url.searchParams.delete('msg');
-                    window.history.replaceState({}, '', url.pathname + url.search);
-                  }
-                }}
-                className="w-full ui-btn-secondary"
-              >
-                Stäng
-              </button>
-            </div>
-          </>
-        )}
-      </BottomSheet>
 
       {/* Floating Undo Toast for Swipe Exclude */}
       {undoToast && (

@@ -746,6 +746,18 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                           {item.items.map((subItem: any, idx: number) => {
                             const isIncome = subItem.type === 'income';
                             const itemName = subItem.title || subItem.name;
+                            const isSubRecurring = Boolean(
+                              subItem.dueDay ||
+                                subItem.payday ||
+                                (subItem.date &&
+                                  checkIsRecurringTransaction(subItem, fixedExpenses, incomes)
+                                    .isRecurring)
+                            );
+                            const isFixedExpItem = Boolean(!isIncome && isSubRecurring);
+                            const hasSubReceipts = Boolean(
+                              (Array.isArray(subItem.receipts) && subItem.receipts.length > 0) ||
+                                subItem.receiptUrl
+                            );
 
                             return (
                               <button
@@ -768,7 +780,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                     category={subItem.category || item.category}
                                     logoUrl={subItem.logo}
                                     size="sm"
-                                    isRecurring={false}
+                                    isRecurring={isSubRecurring}
                                   />
                                   <div className="min-w-0 flex-1">
                                     <span className="ui-row-title text-[13px] sm:text-[13.5px]">
@@ -784,6 +796,11 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                           ? `Den ${subItem.dueDay}:e`
                                           : ''}
                                       </span>
+                                      {isFixedExpItem && (
+                                        <span className="text-[11px] font-medium text-[var(--text-secondary)] shrink-0">
+                                          · Fast
+                                        </span>
+                                      )}
                                       {subItem.isHearted && (
                                         <Heart
                                           size={11}
@@ -798,7 +815,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                           className="text-amber-500 shrink-0"
                                         />
                                       )}
-                                      {subItem.receiptUrl && (
+                                      {hasSubReceipts && (
                                         <Paperclip
                                           size={11}
                                           weight="bold"

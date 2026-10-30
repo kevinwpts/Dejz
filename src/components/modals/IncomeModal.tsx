@@ -241,22 +241,13 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             </button>
           </div>
 
-          {/* Compact Merchant Summary Bar */}
-          <div className="px-3.5 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <ItemLogo
-                name={displayName}
-                category={category}
-                logoUrl={activeIncome?.logo}
-                size="sm"
-                isRecurring={true}
-              />
-              <span className="font-medium text-[13px] text-[var(--text-primary)] truncate">
-                {displayName}
-              </span>
-            </div>
-            <span className="text-xs text-[var(--text-secondary)] tabular-nums shrink-0">
-              {similarInfo.transactions.length} st · {formatKr(similarInfo.totalAmount)}
+          <div className="ui-date-header px-1">
+            <span className="font-medium text-[var(--text-secondary)]">
+              {similarInfo.transactions.length}{' '}
+              {similarInfo.transactions.length === 1 ? 'händelse' : 'händelser'}
+            </span>
+            <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
+              Totalt {formatKr(similarInfo.totalAmount)}
             </span>
           </div>
 

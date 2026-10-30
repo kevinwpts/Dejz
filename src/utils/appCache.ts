@@ -518,6 +518,7 @@ export interface ManualFixedOverride {
   category?: string;
   paymentMethod?: string;
   name?: string;
+  receipts?: { url: string; name: string }[];
 }
 
 /**
@@ -1105,6 +1106,7 @@ export interface TransactionMetaPatch {
   pendingSwishRecipient?: string;
   receiptUrl?: string;
   receiptName?: string;
+  receipts?: { url: string; name: string }[];
   paymentMethod?: string;
   note?: string;
   customAmount?: number;

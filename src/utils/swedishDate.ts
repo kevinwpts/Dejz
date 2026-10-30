@@ -83,12 +83,15 @@ export function formatIsoTimeStockholm(isoOrDate: string | number | Date): strin
   }
 }
 
+const SHORT_MONTHS_SV = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+const SHORT_WEEKDAYS_SV = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
+
 /**
- * Formaterar datumrubriken i transaktionslistan på tydlig & naturlig svenska:
- * - 'Idag, 25 oktober'
- * - 'Igår, 24 oktober'
- * - 'Fredag 23 oktober' (under innevarande år)
- * - 'Måndag 15 december 2025' (för tidigare år)
+ * Formaterar datumrubriken i hela appen på ett modernt och luftigt sätt:
+ * - 'Idag, 30 okt'
+ * - 'Igår, 29 okt'
+ * - 'Mån, 28 sep' (under innevarande år)
+ * - 'Mån, 15 dec 2025' (för tidigare år)
  */
 export function formatSwedishDateHeading(dateStr: string): string {
   if (!dateStr) return 'Okänt datum';
@@ -101,18 +104,13 @@ export function formatSwedishDateHeading(dateStr: string): string {
   const m = parseInt(parts[1], 10) - 1;
   const d = parseInt(parts[2], 10);
 
-  if (isNaN(y) || isNaN(m) || isNaN(d)) return dateStr;
+  if (isNaN(y) || isNaN(m) || isNaN(d) || m < 0 || m > 11) return dateStr;
 
-  // Skapa datumobjekt vid kl 12:00 UTC för att undvika datumskifte vid tidszonskonvertering
   const dateObj = new Date(Date.UTC(y, m, d, 12, 0, 0));
   const currentYear = parseInt(todayStr.slice(0, 4), 10);
 
-  const formattedMonthDay = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: STOCKHOLM_TZ,
-    day: 'numeric',
-    month: 'long',
-    year: y !== currentYear ? 'numeric' : undefined,
-  }).format(dateObj);
+  const shortMonth = SHORT_MONTHS_SV[m] || '';
+  const formattedMonthDay = y !== currentYear ? `${d} ${shortMonth} ${y}` : `${d} ${shortMonth}`;
 
   if (dateStr === todayStr) {
     return `Idag, ${formattedMonthDay}`;
@@ -121,17 +119,13 @@ export function formatSwedishDateHeading(dateStr: string): string {
     return `Igår, ${formattedMonthDay}`;
   }
 
-  const weekday = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: STOCKHOLM_TZ,
-    weekday: 'long',
-  }).format(dateObj);
-
-  const capitalizedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-  return `${capitalizedWeekday} ${formattedMonthDay}`;
+  const weekdayIndex = dateObj.getUTCDay();
+  const shortWeekday = SHORT_WEEKDAYS_SV[weekdayIndex] || '';
+  return `${shortWeekday}, ${formattedMonthDay}`;
 }
 
 /**
- * Formaterar ett datum 'YYYY-MM-DD' till fullständigt svenskt datum (t.ex. '26 oktober 2026')
+ * Formaterar ett datum 'YYYY-MM-DD' till modernt svenskt datum (t.ex. '28 sep 2026')
  */
 export function formatSwedishFullDate(dateStr: string): string {
   if (!dateStr) return '';
@@ -139,14 +133,52 @@ export function formatSwedishFullDate(dateStr: string): string {
   const y = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10) - 1;
   const d = parseInt(parts[2], 10);
-  if (isNaN(y) || isNaN(m) || isNaN(d)) return dateStr;
-  const dateObj = new Date(Date.UTC(y, m, d, 12, 0, 0));
-  return new Intl.DateTimeFormat('sv-SE', {
-    timeZone: STOCKHOLM_TZ,
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(dateObj);
+  if (isNaN(y) || isNaN(m) || isNaN(d) || m < 0 || m > 11) return dateStr;
+  const shortMonth = SHORT_MONTHS_SV[m] || '';
+  return `${d} ${shortMonth} ${y}`;
+}
+
+export interface ReceiptAttachment {
+  url: string;
+  name: string;
+}
+
+/**
+ * Extraherar alla bifogade kvitton från en transaktion eller fast utgift
+ * (kompatibel med både receipts-array och äldre receiptUrl/receiptName).
+ */
+export function getItemReceipts(item: any): ReceiptAttachment[] {
+  if (!item) return [];
+  const result: ReceiptAttachment[] = [];
+  const seenUrls = new Set<string>();
+
+  if (Array.isArray(item.receipts)) {
+    for (const r of item.receipts) {
+      if (r && typeof r.url === 'string' && r.url.trim()) {
+        const trimmedUrl = r.url.trim();
+        if (!seenUrls.has(trimmedUrl)) {
+          seenUrls.add(trimmedUrl);
+          result.push({
+            url: trimmedUrl,
+            name: (typeof r.name === 'string' && r.name.trim()) || 'Bifogat kvitto',
+          });
+        }
+      }
+    }
+  }
+
+  if (typeof item.receiptUrl === 'string' && item.receiptUrl.trim()) {
+    const legacyUrl = item.receiptUrl.trim();
+    if (!seenUrls.has(legacyUrl)) {
+      seenUrls.add(legacyUrl);
+      result.push({
+        url: legacyUrl,
+        name: (typeof item.receiptName === 'string' && item.receiptName.trim()) || 'Bifogat kvitto',
+      });
+    }
+  }
+
+  return result;
 }
 
 /**

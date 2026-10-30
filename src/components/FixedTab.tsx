@@ -202,7 +202,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     category={exp.category}
                     logoUrl={exp.logo}
                     size="md"
-                    isRecurring={false}
+                    isRecurring={true}
                   />
                   <div className="min-w-0 flex-1">
                     <span className="ui-row-title">
@@ -216,9 +216,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       />
                       <span className="truncate">
                         {exp.category || 'Räkningar'}
-                        {exp.isShared && exp.fullAmount && exp.fullAmount > exp.amount
-                          ? ` · Delad (av ${formatKr(exp.fullAmount)})`
-                          : ''}
                       </span>
                     </span>
                   </div>

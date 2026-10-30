@@ -597,6 +597,226 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
     }
   });
 
+  // AI Subscription Cancellation Guide Endpoint
+  const cancelGuideCache = new Map<string, { ts: number; data: any }>();
+
+  app.post('/api/ai/cancel-subscription', aiRateLimit, async (req, res) => {
+    const { name, category, amount, paymentMethod } = req.body || {};
+    const cleanName = typeof name === 'string' ? name.trim().slice(0, 120) : '';
+    if (!cleanName) {
+      return res.status(400).json({ error: 'Namn på utgift saknas' });
+    }
+
+    const cacheKey = `${cleanName.toLowerCase()}|${(category || '').toLowerCase()}|${(paymentMethod || '').toLowerCase()}`;
+    const cached = cancelGuideCache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < 1000 * 60 * 60 * 12) {
+      return res.json(cached.data);
+    }
+
+    const buildFallbackGuide = (rawServiceName: string, cat?: string, method?: string) => {
+      const lower = rawServiceName.toLowerCase();
+      if (lower.includes('apple') || lower.includes('icloud') || lower.includes('itunes') || lower.includes('app store')) {
+        return {
+          serviceName: 'Apple-prenumeration',
+          noticePeriod: 'Avslutas vid slutet av innevarande betalperiod',
+          steps: [
+            'Öppna Inställningar på din iPhone eller iPad och tryck på ditt namn högst upp.',
+            'Tryck på Prenumerationer för att se alla aktiva dragningar kopplade till ditt Apple-ID.',
+            'Välj prenumerationen i listan och tryck på Avbryt prenumeration längst ner.',
+          ],
+          cancelUrl: 'https://apps.apple.com/account/subscriptions',
+          cancelUrlLabel: 'Öppna Apple Prenumerationer',
+          tip: 'Om dragningen tillhör en familjemedlem via Familjedelning syns den under den personens Apple-ID.',
+        };
+      }
+      if (lower.includes('spotify')) {
+        return {
+          serviceName: 'Spotify',
+          noticePeriod: 'Ingen bindningstid – avslutas vid nästa brytdatum',
+          steps: [
+            'Logga in på din kontosida hos Spotify i webbläsaren.',
+            'Skrolla ner till Din plan eller Hantera din prenumeration.',
+            'Klicka på Avbryt prenumeration och bekräfta ditt val.',
+          ],
+          cancelUrl: 'https://www.spotify.com/se/account/overview/',
+          cancelUrlLabel: 'Öppna Spotify Kontosida',
+          tip: 'Om du tecknat Spotify via Apple eller din mobiloperatör avslutar du det där istället.',
+        };
+      }
+      if (lower.includes('netflix')) {
+        return {
+          serviceName: 'Netflix',
+          noticePeriod: 'Ingen bindningstid – avslutas vid slutet av faktureringsperioden',
+          steps: [
+            'Logga in på ditt konto på netflix.com.',
+            'Klicka på din profilikon och välj Konto.',
+            'Klicka på Avsluta medlemskap under Medlemskap och fakturering.',
+          ],
+          cancelUrl: 'https://www.netflix.com/youraccount',
+          cancelUrlLabel: 'Öppna Netflix Konto',
+          tip: 'Du kan fortsätta titta tills den betalda perioden löper ut.',
+        };
+      }
+      if (lower.includes('fitness 24') || lower.includes('fitness24')) {
+        return {
+          serviceName: 'Fitness24Seven',
+          noticePeriod: '2 månaders uppsägningstid',
+          steps: [
+            'Logga in på Mina Sidor hos Fitness24Seven eller i deras app med BankID.',
+            'Gå till Medlemskap och välj Avsluta medlemskap.',
+            'Bekräfta uppsägningen och kontrollera att du får en bekräftelse via e-post.',
+          ],
+          cancelUrl: 'https://se.fitness24seven.com/logga-in/',
+          cancelUrlLabel: 'Logga in på Fitness24Seven',
+          tip: 'Tänk på att inte ta bort autogirot på banken förrän uppsägningstiden är helt betald.',
+        };
+      }
+      if (lower.includes('sats')) {
+        return {
+          serviceName: 'SATS',
+          noticePeriod: '1 månads uppsägningstid utöver innevarande månad',
+          steps: [
+            'Logga in på Mina Sidor på sats.se eller i SATS-appen.',
+            'Gå till Mitt medlemskap och välj Avsluta eller frys medlemskap.',
+            'Följ stegen och spara bekräftelsen som skickas till din mejl.',
+          ],
+          cancelUrl: 'https://www.sats.se/mina-sidor',
+          cancelUrlLabel: 'Öppna SATS Mina Sidor',
+          tip: 'Om du har bindningstid kvar visas slutdatumet inne på Mina Sidor.',
+        };
+      }
+      if (lower.includes('telenor')) {
+        return {
+          serviceName: 'Telenor',
+          noticePeriod: '1 månads uppsägningstid (om ingen bindningstid kvarstår)',
+          steps: [
+            'Logga in på Mitt Telenor med BankID för att kontrollera eventuell bindningstid.',
+            'Kontakta Telenors kundservice via chatt eller telefon (020-222 222) för att registrera uppsägningen.',
+            'Om du ska behålla ditt telefonnummer hos en annan operatör sköter den nya operatören uppsägningen via nummerflytt.',
+          ],
+          cancelUrl: 'https://www.telenor.se/kundservice/uppsagning/',
+          cancelUrlLabel: 'Öppna Telenor Uppsägning',
+          tip: 'Vid byte av mobiloperatör bör du beställa nummerflytt hos nya operatören istället för att säga upp själv.',
+        };
+      }
+      if (lower.includes('bredband2')) {
+        return {
+          serviceName: 'Bredband2',
+          noticePeriod: '1 månads uppsägningstid',
+          steps: [
+            'Logga in med BankID på Mitt Bredband2.',
+            'Gå till dina tjänster eller kontakta kundtjänst via formuläret/chatten inne i inloggat läge.',
+            'Ange önskat slutdatum och invänta skriftlig bekräftelse.',
+          ],
+          cancelUrl: 'https://www.bredband2.com/kundservice/',
+          cancelUrlLabel: 'Öppna Bredband2 Kundservice',
+          tip: 'Om du flyttar kan abonnemanget ofta flyttas med till nya adressen kostnadsfritt.',
+        };
+      }
+
+      const encodedQuery = encodeURIComponent(`${rawServiceName} säga upp abonnemang mina sidor`);
+      return {
+        serviceName: rawServiceName,
+        noticePeriod: 'Kontrollera eventuell bindnings- eller uppsägningstid på Mina Sidor',
+        steps: [
+          `Logga in på Mina Sidor hos ${rawServiceName} (oftast med BankID eller e-post).`,
+          'Gå till Abonnemang, Avtal eller Medlemskap och välj Avsluta / Säg upp.',
+          method?.toLowerCase().includes('autogiro')
+            ? 'Låt autogirot ligga kvar tills sista slutfakturan under uppsägningstiden har dragits.'
+            : 'Kontrollera att du får en skriftlig bekräftelse på uppsägningen via mejl eller sms.',
+        ],
+        cancelUrl: `https://www.google.com/search?q=${encodedQuery}`,
+        cancelUrlLabel: `Hitta uppsägningssida för ${rawServiceName}`,
+        tip: 'Säg alltid upp avtalet direkt hos leverantören innan du tar bort ett eventuellt autogiro eller kort hos banken.',
+      };
+    };
+
+    const ai = getGenAI();
+    if (!ai) {
+      const fallback = buildFallbackGuide(cleanName, category, paymentMethod);
+      return res.json(fallback);
+    }
+
+    try {
+      const prompt = `Du är en svensk privatekonomisk expert som hjälper en användare att säga upp ett abonnemang, medlemskap eller fast avtal i Sverige.
+Utgiftens namn: "${cleanName}"
+Kategori: "${category || 'Okänd'}"
+Belopp: ${Number(amount) || 0} kr/mån
+Betalsätt: "${paymentMethod || 'Okänt'}"
+
+Ta fram en kort, träffsäker och konkret guide på svenska för hur man säger upp eller avslutar "${cleanName}".
+Regler:
+1. "serviceName": Tvättat, naturligt namn på tjänsten/företaget (t.ex. "Apple / App Store", "Fitness24Seven", "Telenor", "Bredband2", "Spotify", "Unionens A-kassa", "Folksam").
+2. "noticePeriod": Kort uppgift om vanlig uppsägningstid hos denna aktör i Sverige (t.ex. "Ingen bindningstid – avslutas vid slutet av betalperioden", "2 månaders uppsägningstid", "1 månads uppsägningstid").
+3. "steps": Exakt 3 korta, tydliga steg-för-steg-instruktioner på svenska för hur man går tillväga (t.ex. var på Mina Sidor, i appen eller via kundservice man avslutar).
+4. "cancelUrl": En riktig, fungerande direktlänk (https://...) till företagets svenska sida för uppsägning, Mina Sidor eller kontohantering (t.ex. https://apps.apple.com/account/subscriptions för Apple, https://www.spotify.com/se/account/overview/ för Spotify, https://www.netflix.com/youraccount för Netflix, eller företagets officiella svenska webbplats/kundservice om du är helt säker på domänen, annars en Google-söklänk https://www.google.com/search?q=...). Hitta aldrig på osäkra undersidor som ger 404 – använd då hellre företagets officiella startsida/mina-sidor eller Google-söklänk.
+5. "cancelUrlLabel": Kort knapptext på svenska (max 35 tecken), t.ex. "Öppna Mina Sidor hos Telenor" eller "Hantera prenumeration hos Apple".
+6. "tip": Ett kort, smart ekonomiskt tips (1 mening) anpassat till tjänsten eller betalsättet (t.ex. om nummerflytt vid mobilabonnemang, att inte spärra autogiro förrän uppsägningstiden löpt ut, eller hur man ser vilken prenumeration en Apple-dragning gäller).`;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              serviceName: { type: Type.STRING },
+              noticePeriod: { type: Type.STRING },
+              steps: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+              },
+              cancelUrl: { type: Type.STRING },
+              cancelUrlLabel: { type: Type.STRING },
+              tip: { type: Type.STRING },
+            },
+            required: ["serviceName", "noticePeriod", "steps", "cancelUrl", "cancelUrlLabel", "tip"],
+          },
+        },
+      });
+
+      const responseText = result.text?.trim() || '{}';
+      const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+
+      const fallback = buildFallbackGuide(cleanName, category, paymentMethod);
+      const data = {
+        serviceName:
+          typeof parsed.serviceName === 'string' && parsed.serviceName.trim()
+            ? parsed.serviceName.trim()
+            : fallback.serviceName,
+        noticePeriod:
+          typeof parsed.noticePeriod === 'string' && parsed.noticePeriod.trim()
+            ? parsed.noticePeriod.trim()
+            : fallback.noticePeriod,
+        steps:
+          Array.isArray(parsed.steps) && parsed.steps.length > 0
+            ? parsed.steps.map((s: any) => String(s).trim()).filter(Boolean).slice(0, 4)
+            : fallback.steps,
+        cancelUrl:
+          typeof parsed.cancelUrl === 'string' && /^https?:\/\//i.test(parsed.cancelUrl.trim())
+            ? parsed.cancelUrl.trim()
+            : fallback.cancelUrl,
+        cancelUrlLabel:
+          typeof parsed.cancelUrlLabel === 'string' && parsed.cancelUrlLabel.trim()
+            ? parsed.cancelUrlLabel.trim()
+            : fallback.cancelUrlLabel,
+        tip:
+          typeof parsed.tip === 'string' && parsed.tip.trim()
+            ? parsed.tip.trim()
+            : fallback.tip,
+      };
+
+      cancelGuideCache.set(cacheKey, { ts: Date.now(), data });
+      return res.json(data);
+    } catch (error) {
+      console.error('[Gemini] cancel-subscription error, using fallback:', error);
+      const fallback = buildFallbackGuide(cleanName, category, paymentMethod);
+      return res.json(fallback);
+    }
+  });
+
 
 
   // User Feedback Endpoint (Persists to Supabase feedback table if available)

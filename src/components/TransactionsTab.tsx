@@ -29,7 +29,7 @@ import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
-import { formatSwedishDateHeading, getSwedishDateStr } from '../utils/swedishDate';
+import { formatSwedishDateHeading, getSwedishDateStr, getItemReceipts } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
 import { isDateInPeriod, PeriodInfo } from '../utils/periodEngine';
 import {
@@ -221,7 +221,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       // 5. Egenskaper & markeringar
       if (selectedAttributes.includes('saved') && !tx.isHearted) return false;
       if (selectedAttributes.includes('packages') && !tx.isWaitingForPackage) return false;
-      if (selectedAttributes.includes('receipts') && !tx.receiptUrl) return false;
+      if (selectedAttributes.includes('receipts') && getItemReceipts(tx).length === 0) return false;
       if (selectedAttributes.includes('large') && Number(tx.amount) < 500) return false;
       if (selectedAttributes.includes('recurring')) {
         const rec = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
@@ -274,7 +274,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     [sortedTransactions]
   );
   const receiptsCount = useMemo(
-    () => sortedTransactions.filter((tx) => Boolean(tx.receiptUrl)).length,
+    () => sortedTransactions.filter((tx) => getItemReceipts(tx).length > 0).length,
     [sortedTransactions]
   );
   const recurringCount = useMemo(
@@ -913,8 +913,8 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     fixedExpenses,
                     incomes
                   );
-                  const isSplit =
-                    tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
+                  const isFixedExpenseTx = Boolean(!isIncome && recurringStatus.isRecurring);
+                  const hasReceipts = getItemReceipts(tx).length > 0;
 
                   return (
                     <SwipeableTxRow
@@ -960,9 +960,9 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                 className="shrink-0"
                               />
                               <span className="truncate">{tx.category}</span>
-                              {isSplit && tx.originalAmount && (
-                                <span className="text-[11px] opacity-80 shrink-0">
-                                  · av {formatKr(tx.originalAmount)}
+                              {isFixedExpenseTx && (
+                                <span className="text-[11px] font-medium text-[var(--text-secondary)] shrink-0">
+                                  · Fast
                                 </span>
                               )}
                               {tx.isHearted && (
@@ -979,19 +979,11 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                   className="text-amber-500 shrink-0 ml-0.5"
                                 />
                               )}
-                              {tx.receiptUrl && (
+                              {hasReceipts && (
                                 <Paperclip
                                   size={11}
                                   weight="bold"
                                   className="text-[var(--text-secondary)] shrink-0 ml-0.5"
-                                />
-                              )}
-                              {isSplit && (
-                                <Users
-                                  size={11}
-                                  weight="fill"
-                                  className="text-emerald-500 shrink-0 ml-0.5"
-                                  title="Delad utgift"
                                 />
                               )}
                             </span>

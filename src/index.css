@@ -1945,11 +1945,11 @@ b {
 
   /* 5. BottomSheet Headers, Heroes & Icon Badges */
   .ui-sheet-header {
-    @apply flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-5;
+    @apply sticky top-0 z-20 bg-[var(--surface-color)] pt-1 flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)] mb-5;
   }
 
   .ui-sheet-sub-header {
-    @apply flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)];
+    @apply sticky top-0 z-20 bg-[var(--surface-color)] pt-1 flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)];
   }
 
   .ui-sheet-title {
@@ -1957,11 +1957,11 @@ b {
   }
 
   .ui-icon-btn {
-    @apply w-8 h-8 rounded-full bg-[var(--bg-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center transition-colors cursor-pointer shrink-0;
+    @apply w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer shrink-0;
   }
 
   .ui-icon-btn-surface {
-    @apply w-8 h-8 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0;
+    @apply w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 flex items-center justify-center transition-all cursor-pointer shrink-0;
   }
 
   .ui-hero-header {
