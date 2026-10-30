@@ -199,21 +199,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* Höger: Samlad kapsel för Sekretessläge, Sök och Notiser (utan 3 separata runda ramar) */}
+          {/* Höger: Separata runda ikonknappar som matchar profil-/tillbakaknappen till vänster */}
           {!hideActions && (
-            <div className="inline-flex items-center gap-0.5 p-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={togglePrivacyBlur}
                 title={privacyBlur ? 'Visa belopp (Sekretessläge aktivt)' : 'Dölj belopp (Sekretessläge)'}
                 aria-label="Sekretessläge"
-                className={`w-8 h-8 rounded-full active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0 ${
+                className={`w-9 h-9 rounded-full border shadow-subtle active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0 ${
                   privacyBlur
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                    : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)]'
                 }`}
               >
-                {privacyBlur ? <EyeSlash size={17} weight="fill" /> : <Eye size={17} weight="regular" />}
+                {privacyBlur ? <EyeSlash size={18} weight="fill" /> : <Eye size={18} weight="regular" />}
               </button>
 
               {!hideSearch && (
@@ -222,9 +222,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={onSearchClick}
                   title="Sök"
                   aria-label="Sök"
-                  className="w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+                  className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
                 >
-                  <MagnifyingGlass size={17} weight="regular" />
+                  <MagnifyingGlass size={18} weight="regular" />
                 </button>
               )}
 
@@ -233,13 +233,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={onNotificationsClick}
                 title="Notiser & insikter"
                 aria-label="Notiser"
-                className="relative w-8 h-8 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+                className="relative w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
               >
-                <Bell size={17} weight="regular" />
+                <Bell size={18} weight="regular" />
                 {hasUnreadNotifications && (
                   <span
                     aria-hidden="true"
-                    className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[var(--surface-color)]"
+                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[var(--surface-color)]"
                   />
                 )}
               </button>

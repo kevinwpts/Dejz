@@ -353,7 +353,7 @@ function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
   if (indicator === "DBIT") {
     numericAmount = -Math.abs(numericAmount);
   } else if (indicator === "CRDT") {
-    if (isReservedStatus && creditorName && !debtorName && !isLikelyIncomingCreditText(description)) {
+    if (isReservedStatus && !debtorName && !isLikelyIncomingCreditText(description)) {
       numericAmount = -Math.abs(numericAmount);
     } else {
       numericAmount = Math.abs(numericAmount);
@@ -1206,13 +1206,20 @@ serve(async (req: Request) => {
             !seenActivePendingKeys.has(pRow.external_key) &&
             pRow.reconciliation_status !== "reserved_replaced"
           ) {
-            await adminClient
-              .from("bank_transactions")
-              .update({
-                reconciliation_status: "reserved_replaced",
-                reservation_disappeared_at: new Date().toISOString(),
-              })
-              .eq("id", pRow.id);
+            const pDateStr = pRow.transaction_date || pRow.booking_date || "";
+            const pMs = pDateStr ? Date.parse(`${pDateStr}T12:00:00Z`) : NaN;
+            const ageDays = Number.isFinite(pMs) ? (Date.now() - pMs) / (1000 * 60 * 60 * 24) : 99;
+            // Endast om reservationen faktiskt försvunnit vid en fullständig första-sidesynk
+            // och antingen är äldre än 5 dagar eller ersatts
+            if (!isIncrementalSync || ageDays > 5) {
+              await adminClient
+                .from("bank_transactions")
+                .update({
+                  reconciliation_status: "reserved_replaced",
+                  reservation_disappeared_at: new Date().toISOString(),
+                })
+                .eq("id", pRow.id);
+            }
           }
         }
       } catch {

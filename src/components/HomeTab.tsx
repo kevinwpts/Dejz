@@ -9,6 +9,7 @@ import {
   Package,
   Paperclip,
   Users,
+  X,
 } from '@phosphor-icons/react';
 import { PeriodInfo, getDueDateInPeriod, isDueDayPaidInPeriod, isDateInPeriod } from '../utils/periodEngine';
 import { ItemLogo } from './ItemLogo';
@@ -229,6 +230,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   isInitialLoading = false,
   onOpenBank,
   onSelectTransaction,
+  onSelectFixed,
   onSelectAccount,
   onToggleHeart,
   onTogglePackage,
@@ -237,6 +239,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 }) => {
   const [showAccounts, setShowAccounts] = useState<boolean>(() => getShowAccountsOnHome());
   const [showCashflowForecast, setShowCashflowForecast] = useState<boolean>(false);
+  const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
+    null
+  );
   const todayStr = useMemo(() => getSwedishDateStr(), []);
   const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
@@ -397,6 +402,29 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
+
+  // Rörliga transaktioner under aktuell löneperiod (för snabbvy vid klick på "Rörligt")
+  const variablePeriodTransactions = useMemo(() => {
+    const deduped = deduplicateTransactions(transactions || []);
+    return deduped
+      .filter((tx) => {
+        if (tx.isExcluded) return false;
+        if (!isDateInPeriod(tx.date, period)) return false;
+        if (tx.type === 'income') {
+          return tx.category === 'Återbetalning';
+        }
+        const recurring = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
+        if (recurring.isRecurring && recurring.type === 'expense') {
+          return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const dCmp = (b.date || '').localeCompare(a.date || '');
+        if (dCmp !== 0) return dCmp;
+        return getTransactionTime(b).localeCompare(getTransactionTime(a));
+      });
+  }, [transactions, period, fixedExpenses, incomes]);
 
   // Group all deduplicated transactions by date (YYYY-MM-DD)
   const transactionsByDate = useMemo(() => {
@@ -699,7 +727,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
         {/* 3-Column Hairline Breakdown (No nested boxes) */}
         <div className="ui-stat-grid pt-4 mt-4 border-t border-[var(--border-subtle)]">
-          <div className="pr-3 text-left min-w-0">
+          <button
+            type="button"
+            onClick={() => setActiveHeroPopup('income')}
+            className="pr-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
+          >
             <span className="ui-stat-label">
               Inkomst
             </span>
@@ -710,9 +742,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 +{formatKr(totalIncome)}
               </span>
             )}
-          </div>
+          </button>
 
-          <div className="px-3 text-left min-w-0">
+          <button
+            type="button"
+            onClick={() => setActiveHeroPopup('fixed')}
+            className="px-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
+          >
             <span className="ui-stat-label">
               Fasta
             </span>
@@ -723,9 +759,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 -{formatKr(totalFixedExpenses)}
               </span>
             )}
-          </div>
+          </button>
 
-          <div className="pl-3 text-left min-w-0">
+          <button
+            type="button"
+            onClick={() => setActiveHeroPopup('variable')}
+            className="pl-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
+          >
             <span className="ui-stat-label">
               Rörligt
             </span>
@@ -736,7 +776,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 -{formatKr(totalVariableSpent)}
               </span>
             )}
-          </div>
+          </button>
         </div>
       </section>
 
@@ -1215,6 +1255,175 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         )}
         </div>
       </section>
+
+      {/* ============================================================== */}
+      {/* SNABBVY-MODAL FÖR INKOMST / FASTA / RÖRLIGT                     */}
+      {/* ============================================================== */}
+      {activeHeroPopup && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-[2px] p-0 sm:p-4 animate-in fade-in duration-150"
+          onClick={() => setActiveHeroPopup(null)}
+        >
+          <div
+            className="w-full sm:max-w-md max-h-[82vh] bg-[var(--surface-color)] border-t sm:border border-[var(--border-subtle)] rounded-t-[26px] sm:rounded-[26px] flex flex-col overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] shrink-0">
+              <h3 className="text-[16px] font-semibold tracking-[-0.015em] text-[var(--text-primary)]">
+                {activeHeroPopup === 'income'
+                  ? 'Inkomst'
+                  : activeHeroPopup === 'fixed'
+                  ? 'Fasta utgifter'
+                  : 'Rörliga utgifter'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setActiveHeroPopup(null)}
+                aria-label="Stäng"
+                className="w-8 h-8 rounded-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto px-5 py-2 divide-y divide-[var(--border-subtle)]">
+              {activeHeroPopup === 'income' && (
+                incomes.length > 0 ? (
+                  incomes.map((inc) => (
+                    <div
+                      key={inc.id}
+                      className="py-3 flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <ItemLogo
+                          name={inc.name}
+                          category={inc.category || 'Lön'}
+                          logoUrl={inc.logo}
+                          size="md"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="ui-row-title">
+                            {inc.name}
+                          </span>
+                          <span className="ui-row-sub">
+                            {inc.category || 'Inkomst'} · Den {inc.payday || 25}:e
+                          </span>
+                        </div>
+                      </div>
+                      <span className="ui-row-amount-income shrink-0">
+                        +{formatKr(inc.amount)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                    Inga inkomster
+                  </div>
+                )
+              )}
+
+              {activeHeroPopup === 'fixed' && (
+                fixedExpenses.length > 0 ? (
+                  fixedExpenses.map((exp) => (
+                    <button
+                      key={exp.id}
+                      type="button"
+                      onClick={() => {
+                        if (onSelectFixed) {
+                          setActiveHeroPopup(null);
+                          onSelectFixed(exp);
+                        }
+                      }}
+                      className="w-full py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1.5 -mx-1.5 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <ItemLogo
+                          name={exp.name}
+                          category={exp.category || 'Räkningar'}
+                          logoUrl={exp.logo}
+                          size="md"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="ui-row-title">
+                            {exp.name}
+                          </span>
+                          <span className="ui-row-sub">
+                            {exp.category || 'Fasta'} · Den {exp.dueDay || 28}:e
+                          </span>
+                        </div>
+                      </div>
+                      <span className="ui-row-amount shrink-0">
+                        -{formatKr(exp.amount)}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                    Inga fasta utgifter
+                  </div>
+                )
+              )}
+
+              {activeHeroPopup === 'variable' && (
+                variablePeriodTransactions.length > 0 ? (
+                  variablePeriodTransactions.map((tx) => {
+                    const isSwish = tx.category === 'Swish' || /^swish\b/i.test(tx.title || '');
+                    const isRefund = tx.type === 'income';
+                    const isPending =
+                      tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
+                    return (
+                      <button
+                        key={tx.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveHeroPopup(null);
+                          onSelectTransaction(tx);
+                        }}
+                        className="w-full py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1.5 -mx-1.5 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {isSwish ? (
+                            <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
+                              <SwishLogo size={20} />
+                            </div>
+                          ) : (
+                            <ItemLogo
+                              name={tx.title}
+                              category={tx.category}
+                              logoUrl={tx.logo}
+                              size="md"
+                            />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">
+                              {tx.title}
+                            </span>
+                            <span className="ui-row-sub">
+                              {formatSwedishDateHeading(tx.date)}
+                              {isPending ? ' · Reserverat' : ` · ${tx.category}`}
+                            </span>
+                          </div>
+                        </div>
+                        <span
+                          className={`shrink-0 ${
+                            isRefund ? 'ui-row-amount-income' : 'ui-row-amount'
+                          }`}
+                        >
+                          {isRefund ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                        </span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                    Inga rörliga utgifter i perioden
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

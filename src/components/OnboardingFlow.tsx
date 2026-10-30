@@ -405,12 +405,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
                   if (mergedExpenses.length > 0) {
                     setSuggestedFixedExpenses((prev) => {
-                      const uncheckedNames = new Set(
-                        prev.filter((p) => !p.checked).map((p) => p.name.toLowerCase())
+                      const uncheckedKeys = new Set(
+                        prev
+                          .filter((p) => !p.checked)
+                          .map((p) => `${p.name.toLowerCase()}_${Math.round(p.amount)}`)
                       );
                       return mergedExpenses.map((item) => ({
                         ...item,
-                        checked: !uncheckedNames.has(item.name.toLowerCase()),
+                        checked: !uncheckedKeys.has(`${item.name.toLowerCase()}_${Math.round(item.amount)}`),
                       }));
                     });
                   }
@@ -579,10 +581,19 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   }, [incomes, suggestedIncomes.length]);
 
   const handleSaveSuggestedFixed = () => {
+    const sameNameCounts = new Map<string, number>();
     suggestedFixedExpenses.forEach((item) => {
-      const existing = fixedExpenses.find(
-        (f) => f.id === item.id || f.name.toLowerCase() === item.name.toLowerCase()
-      );
+      const k = item.name.toLowerCase();
+      sameNameCounts.set(k, (sameNameCounts.get(k) || 0) + 1);
+    });
+
+    suggestedFixedExpenses.forEach((item) => {
+      const hasMultipleSameName = (sameNameCounts.get(item.name.toLowerCase()) || 0) > 1;
+      const existing = fixedExpenses.find((f) => {
+        if (f.id === item.id) return true;
+        if (f.name.toLowerCase() !== item.name.toLowerCase()) return false;
+        return hasMultipleSameName ? Math.round(f.amount) === Math.round(item.amount) : true;
+      });
       if (item.checked) {
         if (!existing) {
           onAddFixed({

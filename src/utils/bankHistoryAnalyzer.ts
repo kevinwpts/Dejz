@@ -593,6 +593,10 @@ export function isInternalTransferOrMicroSavings(
     .toLowerCase()
     .trim();
 
+  const bankCodeDesc = String(rawJson?.bank_transaction_code?.description || '')
+    .trim()
+    .toLowerCase();
+
   if (
     rawJson?.card_transaction ||
     combined.includes('kortköp') ||
@@ -601,20 +605,16 @@ export function isInternalTransferOrMicroSavings(
     combined.includes('bankgiro') ||
     combined.includes('plusgiro') ||
     combined.includes('fakturabetalning') ||
-    combined.includes('swish') ||
-    /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, ''))
+    isLikelySwishTransactionText(combined, rawJson)
   ) {
     return false;
   }
-
-  const bankCodeDesc = String(rawJson?.bank_transaction_code?.description || '')
-    .trim()
-    .toLowerCase();
 
   // SEB och andra svenska banker märker kontoöverföringar med bank_transaction_code.description === "Transfer"
   if (
     bankCodeDesc === 'transfer' ||
     bankCodeDesc === 'internal transfer' ||
+    bankCodeDesc === 'internaltransfer' ||
     bankCodeDesc === 'account transfer'
   ) {
     return true;
@@ -785,6 +785,13 @@ export function findRawBankInternalTransferIds(
   const activeTxs = transactions.filter((tx) => {
     if (!tx || !tx.id) return false;
     if (tx.booking_status === 'CNCL' || tx.booking_status === 'RJCT') return false;
+    // Reserverade kortköp (PDNG/HOLD) som inte redan explicit flaggats som kontoöverföring ska aldrig parmatchas bort som överföringar
+    if (
+      (tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD') &&
+      !internalIds.has(tx.id)
+    ) {
+      return false;
+    }
     if (
       tx.reconciliation_status === 'reserved_replaced' ||
       tx.replaced_by_bank_tx_id ||
@@ -793,10 +800,7 @@ export function findRawBankInternalTransferIds(
       return false;
     }
     const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
-    if (
-      text.includes('swish') ||
-      /(467\d{8}|07\d{8}|123\d{7})/.test(text.replace(/[\s-]/g, ''))
-    ) {
+    if (isLikelySwishTransactionText(text, tx.raw_json)) {
       return false;
     }
     return true;
@@ -1192,13 +1196,105 @@ function normalizeMerchantKey(rawText: string | null | undefined): string {
     .trim();
 }
 
+/**
+ * Extraherar ett giltigt svenskt Swish-mobilnummer (070, 072, 073, 076, 079 eller +467...)
+ * eller 10-siffrigt Swish-företagsnummer (123xxxxxxx).
+ * Matchar ALDRIG bankkontonummer (t.ex. SEB 11-siffriga kontonummer som råkar innehålla "075..."
+ * eller kontonummer + referensnummer som bildar "0753225532").
+ */
+export function extractSwishPhoneNumber(
+  rawText: string | null | undefined,
+  requireStandaloneIfNoSwishKeyword = true
+): string | null {
+  if (!rawText || typeof rawText !== 'string') return null;
+  const trimmed = rawText.trim();
+  if (!trimmed) return null;
+
+  const hasSwishKeyword = /\bswish\b/i.test(trimmed) || trimmed.toLowerCase().includes('swish');
+
+  if (hasSwishKeyword) {
+    // När "swish" finns i texten, leta efter ett fristående svenskt mobilnummer (070/072/073/076/079) eller 123-nummer
+    const tokens = trimmed.replace(/[()]/g, ' ').split(/\s+/);
+    // Prova först sammanhängande siffergrupper i texten
+    const regex = /(?:^|[^\d])(\+?46\s*7[02369](?:[\s-]?\d){7}|07[02369](?:[\s-]?\d){7}|123(?:[\s-]?\d){7})(?:$|[^\d])/i;
+    const match = trimmed.match(regex);
+    if (match && match[1]) {
+      const digits = match[1].replace(/\D/g, '');
+      if (digits.startsWith('467') && digits.length === 11) {
+        return '07' + digits.slice(3);
+      }
+      if ((digits.startsWith('07') || digits.startsWith('123')) && digits.length === 10) {
+        return digits;
+      }
+    }
+    for (const tok of tokens) {
+      const d = tok.replace(/\D/g, '');
+      if (/^467[02369]\d{7}$/.test(d)) return '07' + d.slice(3);
+      if (/^(07[02369]\d{7}|123\d{7})$/.test(d)) return d;
+    }
+    return null;
+  }
+
+  if (requireStandaloneIfNoSwishKeyword) {
+    // Utan ordet "swish" får texten ENBART tolkas som ett Swish-nummer om hela strängen
+    // (efter ev. enkel betalningsprefix) är ett fristående giltigt svenskt mobilnummer (070, 072, 073, 076, 079),
+    // ALDRIG om det är ett 11-siffrigt bankkontonummer eller kontonummer + referens!
+    const candidate = trimmed
+      .replace(/^(betalning|insättning|insattning|från|fran|till)\s+/i, '')
+      .trim();
+    const standaloneRegex = /^(?:\+?46[\s-]*7[02369]|07[02369])(?:[\s-]?\d){7}$/;
+    if (standaloneRegex.test(candidate)) {
+      const digits = candidate.replace(/\D/g, '');
+      if (digits.startsWith('467') && digits.length === 11) {
+        return '07' + digits.slice(3);
+      }
+      if (digits.startsWith('07') && digits.length === 10) {
+        return digits;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Avgör säkert om en transaktionstext är en Swish-transaktion.
+ * Förhindrar att banköverföringar mellan egna konton (t.ex. SEB konto ...0753 + ref) felaktigt klassas som Swish.
+ */
+export function isLikelySwishTransactionText(
+  text: string | null | undefined,
+  rawJson?: any
+): boolean {
+  if (!text || typeof text !== 'string') return false;
+  const lower = text.toLowerCase().trim();
+  if (!lower) return false;
+
+  if (lower.includes('swish')) {
+    return true;
+  }
+
+  const bankCodeDesc = String(rawJson?.bank_transaction_code?.description || '')
+    .trim()
+    .toLowerCase();
+  if (
+    bankCodeDesc === 'transfer' ||
+    bankCodeDesc === 'internal transfer' ||
+    bankCodeDesc === 'internaltransfer' ||
+    bankCodeDesc === 'account transfer'
+  ) {
+    return false;
+  }
+
+  return Boolean(extractSwishPhoneNumber(text, true));
+}
+
 export function formatSwishPhone(rawNumber: string): string {
   const digits = rawNumber.replace(/\D/g, '');
   let swedishDigits = digits;
   if (digits.startsWith('467')) {
     swedishDigits = '07' + digits.slice(3);
   }
-  if (/^07\d{8}$/.test(swedishDigits)) {
+  if (/^07[02369]\d{7}$/.test(swedishDigits)) {
     return `${swedishDigits.slice(0, 3)}-${swedishDigits.slice(3, 6)} ${swedishDigits.slice(6, 8)} ${swedishDigits.slice(8, 10)}`;
   }
   if (/^123\d{7}$/.test(digits)) {
@@ -1214,8 +1310,8 @@ export function formatSwishTitle(
   // 1. Om banken redan har ett separat motpartsnamn som inte bara är "Swish" eller ett telefonnummer
   if (counterpartyName && counterpartyName.trim().length > 0) {
     const cp = counterpartyName.trim();
-    const cpDigits = cp.replace(/[\s()-]/g, '');
-    if (!/^swish$/i.test(cp) && !/^(467\d{8,10}|07\d{8,9}|123\d{7})$/.test(cpDigits)) {
+    const cpPhone = extractSwishPhoneNumber(cp, false);
+    if (!/^swish$/i.test(cp) && !cpPhone && !/^[\d\s()-]+$/.test(cp)) {
       return cleanDisplayMerchantName(cp);
     }
   }
@@ -1223,13 +1319,11 @@ export function formatSwishTitle(
   const raw = String(description || '').trim();
   if (!raw) return 'Swish';
 
-  // 2. Extrahera och formatera eventuellt telefonnummer (t.ex. 46722162125 -> 072-216 21 25)
-  const rawDigits = raw.replace(/[\s()-]/g, '');
-  const phoneMatch = rawDigits.match(/(467\d{8}|07\d{8}|123\d{7})/);
-  let formattedPhone = '';
-  if (phoneMatch) {
-    formattedPhone = formatSwishPhone(phoneMatch[1]);
-  }
+  // 2. Extrahera och formatera eventuellt giltigt Swish-telefonnummer (t.ex. 46722162125 -> 072-216 21 25)
+  const phoneDigits =
+    extractSwishPhoneNumber(`swish ${raw}`, true) ||
+    extractSwishPhoneNumber(`swish ${counterpartyName || ''}`, true);
+  const formattedPhone = phoneDigits ? formatSwishPhone(phoneDigits) : '';
 
   // 3. Extrahera personens/företagets namn från typiska svenska Swish-beskrivningar:
   let cleaned = raw
@@ -1237,7 +1331,9 @@ export function formatSwishTitle(
     .trim();
 
   // Rensa bort telefonnummer
-  cleaned = cleaned.replace(/(467\d{8}|07\d{8}|123\d{7})/g, '').trim();
+  cleaned = cleaned
+    .replace(/(?:\+?46\s*7[02369]|07[02369]|123)(?:[\s-]?\d){7}/g, '')
+    .trim();
   cleaned = cleaned.replace(/^\d+[\s/-]+/, '').trim();
 
   // Rensa bort allt utom faktiska bokstäver för att kontrollera om ett riktigt namn finns
@@ -1660,9 +1756,20 @@ export function categorizeBankTransactionForApp(
     return preferredList[0] || 'Övrigt';
   };
 
+  if (
+    tx.reconciliation_status === 'internal_transfer' ||
+    isInternalTransferOrMicroSavings(tx)
+  ) {
+    return {
+      merchant: 'Överföring mellan egna konton',
+      category: resolveCategory(['Överföring', 'Övrigt']),
+      logo: getLogoUrl('Överföring', 'Överföring'),
+    };
+  }
+
   const isSwishTx =
-    combined.includes('swish') ||
-    /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, ''));
+    isLikelySwishTransactionText(effectiveDesc, tx.raw_json) ||
+    isLikelySwishTransactionText(tx.counterparty_name, tx.raw_json);
 
   if (isSwishTx) {
     const swishTitle = formatSwishTitle(effectiveDesc, tx.counterparty_name);
@@ -1784,8 +1891,7 @@ export function needsAiMerchantCleaning(
   }
 
   if (
-    lower.includes('swish') ||
-    /(467\d{8}|07\d{8}|123\d{7})/.test(lower.replace(/[\s-]/g, '')) ||
+    isLikelySwishTransactionText(lower) ||
     currentCategory === 'Swish'
   ) {
     return false;
@@ -2103,9 +2209,7 @@ function runCoreBankDetection(
             : 'Apple-abonnemang'
           : preset?.name || matchedRule.fallbackName;
 
-      const displayName = matchedRule.splitByExactAmount
-        ? `${baseDisplayName} (${absAmount} kr)`
-        : baseDisplayName;
+      const displayName = baseDisplayName;
 
       const baseKey = isGenericHousingPreset
         ? `housing_${normalizeMerchantKey(cleanedRawName)}`
@@ -3421,23 +3525,25 @@ export function getAutoImportableBankTransactions(
     const categorized = categorizeBankTransactionForApp(tx, availableCategories);
     const isReserved = tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD';
 
-    // If this is a PDNG/HOLD reservation and we already imported a BOOK transaction with same amount & merchant within 4 days, skip it
-    if (isReserved) {
-      const hasMatchingBookedInBatch = toImport.some((imp) => {
-        const sameAmt = Math.abs(Math.abs(Number(imp.amount)) - absAmount) < 0.5;
-        const dayDiff = Math.abs(Number(imp.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
-        const sameMerch =
-          String(imp.merchant || '').toLowerCase().trim() ===
-          String(categorized.merchant || '').toLowerCase().trim();
-        return sameAmt && dayDiff <= 4 && sameMerch;
-      });
-      if (hasMatchingBookedInBatch) {
+    // Om detta är en aktiv reservation (PDNG/HOLD), hoppa ENDAST över den om en bokförd (BOOK)
+    // transaktion i samma batch har exakt samma transaction_id eller entry_reference.
+    if (isReserved && (tx.transaction_id || tx.entry_reference)) {
+      const hasExactSameRefInBatch = relevantBankTxs.some(
+        (other) =>
+          other.id !== tx.id &&
+          other.booking_status === 'BOOK' &&
+          ((tx.transaction_id && other.transaction_id === tx.transaction_id) ||
+            (tx.entry_reference && other.entry_reference === tx.entry_reference))
+      );
+      if (hasExactSameRefInBatch) {
         continue;
       }
     }
 
     const alreadyInApp = existingAppTransactions.some((appTx) => {
       if (appTx.bankTransactionId === tx.id) return true;
+      const hasBankTag =
+        Array.isArray(appTx.tags) && appTx.tags.some((t) => t.startsWith('bank_tx:'));
       if (Array.isArray(appTx.tags)) {
         if (
           appTx.tags.includes(`bank_tx:${tx.id}`) ||
@@ -3446,13 +3552,18 @@ export function getAutoImportableBankTransactions(
           return true;
         }
       }
-      // Also guard against manual/reservation duplicate on same day with same amount and merchant
+      // Om appTx redan är en annan banktransaktion (har eget bankTransactionId / bank_tx-tagg),
+      // är det ett separat köp från banken och får ALDRIG dubblettfiltreras bort på bara belopp/butik!
+      if (appTx.bankTransactionId || hasBankTag) {
+        return false;
+      }
+      // Matcha endast mot manuellt inlagda transaktioner (som saknar bankTransactionId) på samma dag, belopp och butik
       const sameAmount = Math.abs(Math.abs(Number(appTx.amount)) - absAmount) < 0.5;
       const dayDiff = Math.abs(Number(appTx.timestamp) - timestamp) / (1000 * 60 * 60 * 24);
       const sameMerchant =
         String(appTx.merchant || '').toLowerCase().trim() ===
         String(categorized.merchant || '').toLowerCase().trim();
-      return sameAmount && dayDiff <= (isReserved ? 4 : 1.5) && sameMerchant;
+      return sameAmount && dayDiff <= 1.5 && sameMerchant;
     });
 
     if (alreadyInApp) {

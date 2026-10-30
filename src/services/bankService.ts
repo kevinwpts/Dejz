@@ -343,14 +343,20 @@ export function deduplicateBankSyncRows(rows: BankTransactionItem[]): BankTransa
     const hasBalance = Number.isFinite(parsedBal);
     const balanceAfterStr = hasBalance ? parsedBal.toFixed(2) : '';
 
-    // Normalisera beskrivning och telefonnummer
+    // Normalisera beskrivning och telefonnummer (endast giltiga 070/072/073/076/079 eller 123-nummer när swish nämns)
     const descRaw = (r.description || '').trim().toLowerCase();
-    const phoneMatch = descRaw.replace(/[\s()-]/g, '').match(/(467\d{8}|07\d{8}|123\d{7})/);
+    const phoneMatch = descRaw.includes('swish')
+      ? descRaw.replace(/[\s()-]/g, '').match(/(467[02369]\d{7}|07[02369]\d{7}|123\d{7})/)
+      : null;
     const normDesc = phoneMatch
       ? (phoneMatch[1].startsWith('467') ? '07' + phoneMatch[1].slice(3) : phoneMatch[1])
       : descRaw.replace(/\s+/g, ' ');
 
-    const dateAnchor = r.booking_date || r.value_date || r.transaction_date || '';
+    const dateAnchor =
+      r.booking_date ||
+      r.value_date ||
+      r.transaction_date ||
+      (r.created_at ? r.created_at.slice(0, 10) : '');
     const valAnchor = r.value_date || '';
     const numAmt = Number(r.amount || 0).toFixed(2);
     const curr = (r.currency || 'SEK').toUpperCase();
@@ -359,14 +365,10 @@ export function deduplicateBankSyncRows(rows: BankTransactionItem[]): BankTransa
     if (hasBalance) {
       // När saldot efter transaktionen finns (som hos SEB) är kombinationen av
       // bokföringsstatus, datum, belopp, valuta, beskrivning och saldo unikt per fysiskt köp.
-      // Då bevaras ALLA verkliga upprepade transaktioner när man swishar samma belopp flera gånger samma dag
-      // (de har olika saldo efter köpet), medan identiska dubblettrader från upprepade synkningar
-      // (som har exakt samma saldo) slås ihop till en enda post.
-      compKey = `${r.booking_status || 'BOOK'}|${dateAnchor}|${valAnchor}|${numAmt}|${curr}|${normDesc}|${balanceAfterStr}`;
+      compKey = `${r.bank_account_id || ''}|${r.booking_status || 'BOOK'}|${dateAnchor}|${valAnchor}|${numAmt}|${curr}|${normDesc}|${balanceAfterStr}`;
     } else {
-      // Om saldot saknas, använd batch-scoped förekomstnummer så att upprepade transaktioner
-      // i samma synkkörning bevaras som #1, #2, men matchas mot motsvarande i andra synkkörningar
-      const baseKey = `${r.booking_status || 'BOOK'}|${dateAnchor}|${valAnchor}|${numAmt}|${curr}|${normDesc}`;
+      // Om saldot saknas (t.ex. för reserverade belopp PDNG/HOLD), inkludera konto-ID och batch-scoped förekomstnummer
+      const baseKey = `${r.bank_account_id || ''}|${r.booking_status || 'BOOK'}|${dateAnchor}|${valAnchor}|${numAmt}|${curr}|${normDesc}`;
       const batchId = rowBatchMap.get(r.id) || 0;
       const batchKey = `${batchId}::${baseKey}`;
       const occurrence = (batchOccurrenceCounts.get(batchKey) || 0) + 1;

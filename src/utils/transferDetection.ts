@@ -1,5 +1,6 @@
 import { BankAccount } from '../services/bankService';
 import { TransactionItem } from '../components/HomeTab';
+import { isLikelySwishTransactionText } from './bankHistoryAnalyzer';
 
 /**
  * Extraherar kontonummer-varianter (inklusive med och utan clearingnummer), IBAN,
@@ -182,11 +183,24 @@ export function isInternalTransferTransaction(
     combined.includes('bankgiro') ||
     combined.includes('plusgiro') ||
     combined.includes('fakturabetalning') ||
-    combined.includes('swish') ||
-    /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, '')) ||
+    isLikelySwishTransactionText(tx.rawDescription || tx.title || '', rawJson) ||
+    isLikelySwishTransactionText(tx.counterpartyName || '', rawJson) ||
     isConfirmedExternalIncomeOrRefund(combined)
   ) {
     return false;
+  }
+
+  // Om banken explicit flaggat transaktionskoden som Transfer / InternalTransfer:
+  const btcDescEarly = String(rawJson?.bank_transaction_code?.description || '')
+    .toLowerCase()
+    .trim();
+  if (
+    btcDescEarly === 'transfer' ||
+    btcDescEarly === 'internal transfer' ||
+    btcDescEarly === 'internaltransfer' ||
+    btcDescEarly === 'account transfer'
+  ) {
+    return true;
   }
 
   // 2. Tydliga svenska nyckelfraser för överföring mellan egna konton & sparkonton:
@@ -251,7 +265,7 @@ export function isInternalTransferTransaction(
     return true;
   }
 
-  // 4. Om råbeskrivningen eller motpartsnamnet enbart är ett svenskt bankkontonummer (t.ex. "5196 00 507 53" eller "5196-0050753")
+  // 4. Om råbeskrivningen eller motpartsnamnet enbart är ett svenskt bankkontonummer eller kontonummer + referens (t.ex. "5196 00 507 53" eller "56090198013 095739195424")
   const rawCleanedForAcctCheck = (tx.rawDescription || tx.counterpartyName || '')
     .replace(/^(från|fran|till|överföring|overforing|insättning|insattning)\s+/i, '')
     .trim();
@@ -260,7 +274,7 @@ export function isInternalTransferTransaction(
     rawCleanedForAcctCheck.length >= 7 &&
     /^[\d\s.,-]+$/.test(rawCleanedForAcctCheck) &&
     onlyDigitsInRaw.length >= 7 &&
-    onlyDigitsInRaw.length <= 16
+    onlyDigitsInRaw.length <= 32
   ) {
     return true;
   }
@@ -371,13 +385,20 @@ export function findInternalTransferIds(
     if (!tx || !tx.id) return false;
     if (tx.id.startsWith('inc-')) return false;
     if (tx.isExcluded) return false;
+    // Reserverade kortköp (PDNG/HOLD) som inte redan flaggats som överföring får aldrig parmatchas bort
+    if (
+      (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD') &&
+      !internalIds.has(tx.id)
+    ) {
+      return false;
+    }
 
     const combined = `${tx.title || ''} ${tx.rawDescription || ''} ${tx.note || ''} ${tx.counterpartyName || ''} ${tx.category || ''}`.toLowerCase();
     // Swish till/från telefonnummer och bekräftad lön/bidrag/retur ska inte parmatchas som kontoöverföring
     if (
       tx.category === 'Swish' ||
-      combined.includes('swish') ||
-      /(467\d{8}|07\d{8}|123\d{7})/.test(combined.replace(/[\s-]/g, ''))
+      isLikelySwishTransactionText(tx.rawDescription || tx.title || '', tx.rawJson) ||
+      isLikelySwishTransactionText(tx.counterpartyName || '', tx.rawJson)
     ) {
       return false;
     }

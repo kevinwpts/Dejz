@@ -904,7 +904,10 @@ function mapBankTransactionsToAppItems(
     });
   };
 
-  // Pass 1: Explicit DB-koppling eller exakt beloppsmatchning (0–10 dagar)
+  // Pass 1: Koppla ENDAST ersatta reservationer ('reserved_replaced' / replaced_by_bank_tx_id)
+  // eller reservationer som delar exakt samma transaction_id/entry_reference med en bokförd post.
+  // Aktiva reservationer (PDNG/HOLD som fortfarande är reserverade hos banken) ska ALDRIG döljas
+  // via lös belopps-/butiksmatchning!
   for (const bt of pendingCandidates) {
     if (bt.replaced_by_bank_tx_id) {
       const explicitBooked = bookedNegativeTxs.find(
@@ -914,6 +917,26 @@ function mapBankTransactionsToAppItems(
         recordReservationMatch(bt, explicitBooked);
         continue;
       }
+    }
+
+    // Om reservationen fortfarande är aktiv (inte markerad reserved_replaced av banken),
+    // matcha enbart om banken skickat exakt samma icke-tomma transaction_id eller entry_reference på en BOOK-rad.
+    const isAlreadyMarkedReplaced =
+      bt.reconciliation_status === 'reserved_replaced' || Boolean(bt.replaced_by_bank_tx_id);
+
+    if (!isAlreadyMarkedReplaced) {
+      if (bt.transaction_id || bt.entry_reference) {
+        const exactRefBooked = bookedNegativeTxs.find(
+          (b) =>
+            !consumedBookedIdsForPending.has(b.id) &&
+            ((bt.transaction_id && b.transaction_id === bt.transaction_id) ||
+              (bt.entry_reference && b.entry_reference === bt.entry_reference))
+        );
+        if (exactRefBooked) {
+          recordReservationMatch(bt, exactRefBooked);
+        }
+      }
+      continue;
     }
 
     const pendingAmt = Math.round(Math.abs(getNormalizedBankTxAmount(bt)));
@@ -1015,15 +1038,29 @@ function mapBankTransactionsToAppItems(
     }
   }
 
+  const todayIsoForPendingCheck = getSwedishDateStr();
+  const todayMsForPendingCheck = Date.parse(`${todayIsoForPendingCheck}T12:00:00`);
+
   const mappedBankTxs: TransactionItem[] = bankTxs
     .filter((bt) => {
       if (bt.booking_status === 'CNCL' || bt.booking_status === 'RJCT') return false;
-      if (
-        bt.reconciliation_status === 'reserved_replaced' ||
-        bt.replaced_by_bank_tx_id ||
-        settledPendingIds.has(bt.id)
-      ) {
+      if (bt.replaced_by_bank_tx_id || settledPendingIds.has(bt.id)) {
         return false;
+      }
+      // Om en reservation har status 'reserved_replaced' utan att någon bokförd transaktion
+      // matchat den (och utan replaced_by_bank_tx_id), dölj den ENDAST om den är äldre än 7 dagar.
+      // Detta garanterar att färska reserverade köp hos banken aldrig försvinner om bankens API
+      // tillfälligt utelämnat dem eller ändrat datumstämpel under pågående reservation.
+      if (bt.reconciliation_status === 'reserved_replaced') {
+        const pDate = getActualTransactionDate(bt);
+        const pMs = pDate ? Date.parse(`${pDate}T12:00:00`) : NaN;
+        const ageDays =
+          Number.isFinite(pMs) && Number.isFinite(todayMsForPendingCheck)
+            ? (todayMsForPendingCheck - pMs) / (1000 * 60 * 60 * 24)
+            : 99;
+        if (ageDays > 7) {
+          return false;
+        }
       }
       if (bt.reconciliation_status === 'excluded') {
         return false;
@@ -1038,9 +1075,18 @@ function mapBankTransactionsToAppItems(
       const rawAmt = fxInfo.signedSekAmount;
       const isIncome = rawAmt > 0;
       const normAmt = fxInfo.absSekAmount;
-      let catInfo = categorizeBankTransactionForApp(bt);
+      const isRawInternalTransfer =
+        rawInternalTransferIds.has(bt.id) || bt.reconciliation_status === 'internal_transfer';
+      let catInfo = isRawInternalTransfer
+        ? {
+            merchant: 'Överföring mellan egna konton',
+            category: 'Överföring',
+            logo: getLogoUrl('Överföring', 'Överföring'),
+          }
+        : categorizeBankTransactionForApp(bt);
       const reservationMeta = bookedToReservationMeta.get(bt.id);
       if (
+        !isRawInternalTransfer &&
         reservationMeta?.preservedMerchant &&
         isGenericPlaceholderMerchant(catInfo.merchant)
       ) {
@@ -1054,7 +1100,7 @@ function mapBankTransactionsToAppItems(
         };
       }
 
-      if (isIncome) {
+      if (isIncome && !isRawInternalTransfer) {
         const combinedDesc = `${bt.description || ''} ${bt.counterparty_name || ''}`.toLowerCase();
         let incomeCat = 'Inkomst';
         if (

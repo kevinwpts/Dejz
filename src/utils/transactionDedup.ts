@@ -38,14 +38,16 @@ export function normalizeMerchantForDedup(rawName: unknown): string {
   if (typeof rawName !== 'string') return '';
   const str = rawName.toLowerCase();
 
-  // Om titeln innehåller ett telefonnummer (t.ex. 46722162125, 0722162125, 072-216 21 25, 1234567890)
-  const phoneMatch = str.replace(/[\s()-]/g, '').match(/(467\d{8}|07\d{8}|123\d{7})/);
-  if (phoneMatch) {
-    let digits = phoneMatch[1];
-    if (digits.startsWith('467')) {
-      digits = '07' + digits.slice(3);
+  // Om titeln explicit är Swish med ett giltigt svenskt mobilnummer (070, 072, 073, 076, 079) eller 123-nummer
+  if (str.includes('swish')) {
+    const phoneMatch = str.replace(/[\s()-]/g, '').match(/(467[02369]\d{7}|07[02369]\d{7}|123\d{7})/);
+    if (phoneMatch) {
+      let digits = phoneMatch[1];
+      if (digits.startsWith('467')) {
+        digits = '07' + digits.slice(3);
+      }
+      return `swish ${digits}`;
     }
-    return `swish ${digits}`;
   }
 
   return str
@@ -123,67 +125,36 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
         const isItemPending = item.bookingStatus === 'PDNG' || item.bookingStatus === 'HOLD';
         const isExistPending = existing.bookingStatus === 'PDNG' || existing.bookingStatus === 'HOLD';
 
-        // A. Om de delar samma transactionId eller entryReference
+        // A. Om de delar exakt samma transactionId eller entryReference (och samma bokningsstatus)
         if (
-          (item.transactionId && existing.transactionId && item.transactionId === existing.transactionId) ||
-          (item.entryReference && existing.entryReference && item.entryReference === existing.entryReference)
+          isItemPending === isExistPending &&
+          ((item.transactionId && existing.transactionId && item.transactionId === existing.transactionId) ||
+            (item.entryReference && existing.entryReference && item.entryReference === existing.entryReference))
         ) {
           return true;
         }
 
-        // B. Om en är preliminär reservation (PDNG/HOLD) och en är slutgiltigt bokförd (BOOK)
+        // B. Aktiva reservationer (PDNG/HOLD) får ALDRIG slås ihop heuristiskt med bokförda (BOOK)
+        // transaktioner baserat på bara belopp/butiksnamn, eftersom användaren annars tappar
+        // synliga reservationer från banken. Endast om de delar exakt samma icke-volatila referens slås de ihop.
         if (isItemPending !== isExistPending) {
-          const diff = getDaysDiff(itemDate, existDate);
-          if (diff <= 7) {
-            const tokens1 = (itemTitleNorm || '').split(' ').filter((t) => t.length >= 2);
-            const tokens2 = (existTitleNorm || '').split(' ').filter((t) => t.length >= 2);
-            const hasCommonToken = tokens1.some(
-              (t1) => t1.length >= 3 && tokens2.some((t2) => t2.length >= 3 && (t1 === t2 || t1.includes(t2) || t2.includes(t1)))
-            );
-            const titlesMatch =
-              itemTitleNorm === existTitleNorm ||
-              (itemTitleNorm && existTitleNorm && (itemTitleNorm.includes(existTitleNorm) || existTitleNorm.includes(itemTitleNorm))) ||
-              hasCommonToken ||
-              isGenericDedupTitle(itemTitleNorm) ||
-              isGenericDedupTitle(existTitleNorm) ||
-              isGenericDedupTitle(item.title) ||
-              isGenericDedupTitle(existing.title);
-            if (titlesMatch) return true;
+          if (
+            (item.transactionId && existing.transactionId && item.transactionId === existing.transactionId) ||
+            (item.entryReference && existing.entryReference && item.entryReference === existing.entryReference)
+          ) {
+            return true;
           }
-        }
-
-        // C. Om båda har bankens slutgiltiga saldo efter transaktionen (och samma bokningsstatus):
-        if (itemBal !== null && existBal !== null && isItemPending === isExistPending) {
-          if (Math.abs(itemBal - existBal) > 0.005) {
-            // Olika saldo -> detta är två separata verkliga transaktioner!
-            // (T.ex. tre Swish samma dag – saldot ändras efter varje transaktion)
-            return false;
-          }
-          // Exakt samma saldo efter transaktionen -> detta är 100% samma transaktion som synkats två gånger!
-          return true;
-        }
-
-        // D. För Swish ska vi INTE slå ihop dem automatiskt om saldot saknas, för att inte riskera att radera en legitim betalning
-        if (item.category?.toLowerCase() === 'swish' || existing.category?.toLowerCase() === 'swish') {
           return false;
         }
 
-        const diff = getDaysDiff(itemDate, existDate);
-
-        // E. Om den ena posten har ett generiskt namn ("Banktransaktion", "Betalning", "Autogiro") och den andra har ett riktigt namn
-        // med exakt samma belopp inom 2 dagar eller när en är reserverad och en är bokförd:
-        const itemIsGeneric = isGenericDedupTitle(itemTitleNorm) || isGenericDedupTitle(item.title);
-        const existIsGeneric = isGenericDedupTitle(existTitleNorm) || isGenericDedupTitle(existing.title);
-        if (itemIsGeneric !== existIsGeneric && (diff <= 2 || isItemPending !== isExistPending)) {
-          return true;
-        }
-
-        // F. För vanliga kortköp/räkningar: om datum och butiksnamn är identiska, eller samma räkning/hyra (>= 150 kr) inom 5 dagar
-        if (itemTitleNorm && itemTitleNorm === existTitleNorm) {
-          if (itemDate === existDate) {
-            return true;
+        // C. Om båda har bankens slutgiltiga saldo efter transaktionen (och samma bokningsstatus):
+        if (itemBal !== null && existBal !== null) {
+          if (Math.abs(itemBal - existBal) > 0.005) {
+            // Olika saldo -> detta är två separata verkliga transaktioner!
+            return false;
           }
-          if (itemAmt >= 150 && diff <= 5 && (itemBal === null || existBal === null)) {
+          // Samma saldo efter transaktionen på samma datum -> 100% samma transaktion som synkats dubbelt
+          if (itemDate === existDate) {
             return true;
           }
         }

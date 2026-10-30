@@ -333,7 +333,7 @@ export function getActualBankPaymentDateAndMeta(
 
   const isSwish =
     description.toLowerCase().includes('swish') ||
-    /(467\d{8}|07\d{8}|123\d{7})/.test(description.replace(/[\s()-]/g, ''));
+    /^(?:\+?46[\s-]*7[02369]|07[02369])(?:[\s-]?\d){7}$/.test(description.trim());
 
   // 5. Extrahera när transaktionen först registrerades hos oss (created_at i svensk tid).
   // För reserverade köp (PDNG/HOLD) fungerar detta som ett låst ankare om banken saknar
