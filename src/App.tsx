@@ -1371,31 +1371,6 @@ export const App: React.FC = () => {
     () => !hasCachedBankData()
   );
 
-  // Styr när DEJZ-splashskärmen tonas ut mjukt när appen har laddat klart
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const splashEl = document.getElementById('dejz-splash');
-    if (!splashEl) return;
-
-    const hideSplash = () => {
-      splashEl.classList.add('dejz-splash-hide');
-      window.setTimeout(() => {
-        if (splashEl.parentNode) {
-          splashEl.style.display = 'none';
-        }
-      }, 450);
-    };
-
-    if (!isInitialLoading || showLanding) {
-      const minDisplayTimer = window.setTimeout(hideSplash, 650);
-      return () => window.clearTimeout(minDisplayTimer);
-    }
-
-    // Säkerhetstimer så att splashen aldrig fastnar om nätverket är långsamt
-    const fallbackTimer = window.setTimeout(hideSplash, 1800);
-    return () => window.clearTimeout(fallbackTimer);
-  }, [isInitialLoading, showLanding]);
-
   // Refs för tyst automatisk bakgrundssynk & atomär hydrering
   const syncInFlightRef = useRef(false);
   const lastSyncTimestampRef = useRef<number>(0);
@@ -1640,6 +1615,31 @@ export const App: React.FC = () => {
       return true;
     }
   });
+
+  // Styr när DEJZ-splashskärmen tonas ut mjukt när appen har laddat klart
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const splashEl = document.getElementById('dejz-splash');
+    if (!splashEl) return;
+
+    const hideSplash = () => {
+      splashEl.classList.add('dejz-splash-hide');
+      window.setTimeout(() => {
+        if (splashEl) {
+          splashEl.style.display = 'none';
+        }
+      }, 450);
+    };
+
+    if (!isInitialLoading || showLanding || isOnboardingActive) {
+      const minDisplayTimer = window.setTimeout(hideSplash, 550);
+      return () => window.clearTimeout(minDisplayTimer);
+    }
+
+    // Säkerhetstimer så att splashen aldrig fastnar om nätverket är långsamt
+    const fallbackTimer = window.setTimeout(hideSplash, 1200);
+    return () => window.clearTimeout(fallbackTimer);
+  }, [isInitialLoading, showLanding, isOnboardingActive]);
 
   const userIdRef = useRef<string | null>(userId);
   const isDeletingAccountRef = useRef<boolean>(false);

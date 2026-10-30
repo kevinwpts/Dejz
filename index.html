@@ -197,6 +197,19 @@
         <img src="/dejz_mork.png" alt="Dejz" class="dejz-splash-logo" />
       </div>
     </div>
+    <script>
+      (function() {
+        setTimeout(function() {
+          var el = document.getElementById('dejz-splash');
+          if (el && !el.classList.contains('dejz-splash-hide')) {
+            el.classList.add('dejz-splash-hide');
+            setTimeout(function() {
+              if (el) el.style.display = 'none';
+            }, 450);
+          }
+        }, 1600);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
