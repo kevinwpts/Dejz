@@ -364,7 +364,7 @@ h6 {
 
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -374,7 +374,7 @@ h6 {
 }
 
 @utility text-large-amount {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -384,7 +384,7 @@ h6 {
 }
 
 @utility text-list-amount {
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -394,16 +394,16 @@ h6 {
 }
 
 @utility text-page-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.28;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   font-family: var(--font-display);
   color: var(--text-primary);
 }
 
 @utility text-section-title {
-  font-size: 17px;
+  font-size: 14.5px;
   font-weight: 500;
   line-height: 1.32;
   letter-spacing: -0.01em;
@@ -412,7 +412,7 @@ h6 {
 }
 
 @utility text-card-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.38;
   letter-spacing: -0.005em;
@@ -421,16 +421,16 @@ h6 {
 }
 
 @utility text-body {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
-  line-height: 1.52;
+  line-height: 1.5;
   letter-spacing: -0.005em;
   font-family: var(--font-sans);
   color: var(--text-primary);
 }
 
 @utility text-body-medium {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.48;
   letter-spacing: -0.005em;
@@ -439,7 +439,7 @@ h6 {
 }
 
 @utility text-secondary {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.48;
   letter-spacing: -0.003em;
@@ -448,7 +448,7 @@ h6 {
 }
 
 @utility text-label {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.38;
   letter-spacing: 0em;
@@ -457,7 +457,7 @@ h6 {
 }
 
 @utility text-metric-label {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.38;
   letter-spacing: -0.003em;
@@ -483,7 +483,7 @@ h6 {
 }
 
 @utility text-button {
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 500;
   line-height: 1.28;
   letter-spacing: -0.005em;
@@ -1788,15 +1788,15 @@ b {
   }
 
   .ui-section-title {
-    @apply font-display font-semibold text-[17px] sm:text-[18px] tracking-[-0.015em] text-[var(--text-primary)] flex items-center gap-1.5;
+    @apply font-display font-semibold text-[14px] sm:text-[14.5px] tracking-[-0.01em] text-[var(--text-primary)] flex items-center gap-1.5;
   }
 
   .ui-section-meta {
-    @apply text-[12px] font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply text-[11.5px] font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-section-action {
-    @apply py-1.5 px-3.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[12.5px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
+    @apply py-1.5 px-3 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 transition-all flex items-center gap-1 cursor-pointer;
   }
 
   .ui-date-header {
@@ -1820,17 +1820,17 @@ b {
     @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] divide-y divide-[var(--border-subtle)] overflow-hidden;
   }
 
-  /* Admin & Settings Lists — clean 54px rows, regular 15px row titles, subtle dividers */
+  /* Admin & Settings Lists — clean 48px rows, regular 13px row titles, subtle dividers */
   .ui-admin-card {
     @apply bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] overflow-hidden;
   }
 
   .ui-admin-row {
-    @apply relative w-full px-4 py-3.5 sm:py-4 min-h-[54px] flex items-center justify-between gap-3.5 text-[14.5px] font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-admin-row-static {
-    @apply relative w-full px-4 py-3.5 sm:py-4 min-h-[54px] flex items-center justify-between gap-3.5 text-[14.5px] font-normal text-left;
+    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] font-normal text-left;
   }
 
   .ui-admin-row:not(:last-child)::after,
@@ -1854,7 +1854,7 @@ b {
   }
 
   .ui-admin-value {
-    @apply min-w-[2.25rem] text-right text-[13px] font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply min-w-[2.25rem] text-right text-[12px] font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-admin-chevron {
@@ -1866,7 +1866,7 @@ b {
   }
 
   .ui-sheet-group {
-    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-[14px] overflow-hidden;
+    @apply rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] text-[13px] overflow-hidden;
   }
 
   .ui-sheet-box {
@@ -1875,55 +1875,55 @@ b {
 
   /* 3. List Rows & Transaction Rows */
   .ui-tx-row {
-    @apply w-full py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[14.5px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-tx-row-static {
-    @apply w-full py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-[14.5px] text-left;
+    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left;
   }
 
   .ui-row {
-    @apply w-full px-4 py-3.5 min-h-[50px] flex items-center justify-between gap-3 text-[14px] text-left;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left;
   }
 
   .ui-locked-row {
-    @apply w-full px-4 py-3.5 min-h-[50px] flex items-center justify-between gap-3 text-[14px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
   }
 
   .ui-row-btn {
-    @apply w-full px-4 py-3.5 min-h-[50px] flex items-center justify-between gap-3 text-[14px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-input-row {
-    @apply w-full px-4 py-3.5 min-h-[52px] flex items-center justify-between gap-3 text-[14px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
+    @apply w-full px-4 py-3 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
   }
 
   .ui-row-title {
-    @apply font-normal text-[14.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
+    @apply font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
   }
 
   .ui-row-subtitle {
-    @apply text-[12px] font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
+    @apply text-[11.5px] font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
   }
 
   .ui-info-label {
-    @apply text-[14px] font-normal text-[var(--text-secondary)] shrink-0;
+    @apply text-[13px] font-normal text-[var(--text-secondary)] shrink-0;
   }
 
   .ui-info-value {
-    @apply text-[14px] font-normal text-[var(--text-primary)];
+    @apply text-[13px] font-normal text-[var(--text-primary)];
   }
 
   .ui-row-amount {
-    @apply font-display font-semibold text-[14.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
+    @apply font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
   }
 
   .ui-row-amount-income {
-    @apply font-display font-semibold text-[14.5px] tracking-[-0.01em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
+    @apply font-display font-semibold text-[13.5px] tracking-[-0.01em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
   }
 
   .ui-row-meta {
-    @apply text-[11.5px] font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
+    @apply text-[11px] font-normal text-[var(--text-muted)] tabular-nums block mt-0.5;
   }
 
   /* 4. 3-Column Summary & Stat Grids */
@@ -1932,11 +1932,11 @@ b {
   }
 
   .ui-stat-label {
-    @apply text-[12px] font-normal text-[var(--text-secondary)] block truncate;
+    @apply text-[11.5px] font-normal text-[var(--text-secondary)] block truncate;
   }
 
   .ui-stat-value {
-    @apply font-display font-semibold text-[14.5px] sm:text-[15px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
+    @apply font-display font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
   }
 
   .ui-stat-sub {
@@ -1953,7 +1953,7 @@ b {
   }
 
   .ui-sheet-title {
-    @apply font-display font-semibold text-[16px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
+    @apply font-display font-semibold text-[15px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate;
   }
 
   .ui-icon-btn {
@@ -1973,40 +1973,40 @@ b {
   }
 
   .ui-hero-amount {
-    @apply font-display font-semibold text-3xl sm:text-[32px] text-[var(--text-primary)] tabular-nums tracking-[-0.02em];
+    @apply font-display font-semibold text-2xl sm:text-[28px] text-[var(--text-primary)] tabular-nums tracking-[-0.02em];
   }
 
   .ui-hero-amount-income {
-    @apply font-display font-semibold text-3xl sm:text-[32px] text-emerald-600 dark:text-emerald-400 tabular-nums tracking-[-0.02em];
+    @apply font-display font-semibold text-2xl sm:text-[28px] text-emerald-600 dark:text-emerald-400 tabular-nums tracking-[-0.02em];
   }
 
   .ui-icon-badge {
     @apply w-9 h-9 rounded-xl bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)] shrink-0;
   }
 
-  /* 6. Buttons & Confirmation Bars (Full 52px Capsule CTAs & Unified Pill Actions) */
+  /* 6. Buttons & Confirmation Bars (Compact 48px Capsule CTAs & Unified Pill Actions) */
   .ui-btn-primary {
-    @apply w-full h-[52px] px-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[15px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full h-[52px] px-6 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[15px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
-    @apply w-full h-[52px] px-6 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[15px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[13.5px] sm:text-[14px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
-    @apply w-full h-[52px] px-6 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[15px] font-semibold text-rose-600 dark:text-rose-400 hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[13.5px] sm:text-[14px] font-semibold text-rose-600 dark:text-rose-400 hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm {
-    @apply px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[12.5px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply px-3 py-1.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-btn-sm-primary {
-    @apply px-3.5 py-1.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[12.5px] font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply px-3 py-1.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[12px] font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-confirm-danger {
@@ -2027,19 +2027,19 @@ b {
   }
 
   .ui-segmented-tab {
-    @apply py-1.5 px-3 rounded-lg text-[13px] font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
+    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[12.5px] font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
   }
 
   .ui-segmented-tab-active {
-    @apply py-1.5 px-3 rounded-lg text-[13px] font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
+    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[12.5px] font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
   }
 
   .ui-chip {
-    @apply px-3 py-1.5 rounded-full text-[13px] font-normal transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)];
+    @apply px-3 py-1.5 rounded-full text-[12px] font-normal transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--surface-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)];
   }
 
   .ui-chip-active {
-    @apply px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)];
+    @apply px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)];
   }
 
   .ui-search-box {
@@ -2047,19 +2047,19 @@ b {
   }
 
   .ui-search-input {
-    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-base sm:text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-[13.5px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
   }
 
   .ui-box-input {
-    @apply w-full p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--text-primary)] transition-colors;
+    @apply w-full p-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none focus:border-[var(--text-primary)] transition-colors;
   }
 
   .ui-inline-input {
-    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-base sm:text-[14.5px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
+    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-[13.5px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
   }
 
   .ui-inline-amount-input {
-    @apply w-36 bg-transparent border-0 p-0 text-base sm:text-[15px] font-display font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right tabular-nums focus:outline-none transition-colors;
+    @apply w-36 bg-transparent border-0 p-0 text-[14px] font-display font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right tabular-nums focus:outline-none transition-colors;
   }
 
   .ui-payday-slider {
@@ -2122,11 +2122,11 @@ b {
   }
 
   .ui-day-btn {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-sm tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
+    @apply h-10 sm:h-11 rounded-2xl font-display text-[12.5px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
   }
 
   .ui-day-btn-active {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-sm tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
+    @apply h-10 sm:h-11 rounded-2xl font-display text-[12.5px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
   }
 
   /* 8. Empty States */
@@ -2143,11 +2143,11 @@ b {
   }
 
   .ui-empty-title {
-    @apply font-display font-semibold text-[18px] sm:text-[19px] text-[var(--text-primary)] tracking-[-0.015em];
+    @apply font-display font-semibold text-[15px] sm:text-[16px] text-[var(--text-primary)] tracking-[-0.01em];
   }
 
   .ui-empty-sub {
-    @apply text-[13.5px] font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
+    @apply text-[12.5px] font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
   }
 }
 

@@ -1612,11 +1612,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
   const rowTitleClass =
-    'font-normal text-[14.5px] sm:text-[15px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
+    'font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
   const rowSubClass =
-    'font-normal text-[12px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
+    'font-normal text-[11.5px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
   const sectionLabelClass =
-    'px-1 pt-2 pb-0.5 text-[17px] sm:text-[18px] font-semibold tracking-[-0.015em] text-[var(--text-primary)] block';
+    'px-1 pt-1.5 pb-0.5 text-[14px] sm:text-[14.5px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
 
   const savingsGoalsCount = getSavingsGoals().length;
 

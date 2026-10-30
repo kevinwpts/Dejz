@@ -156,12 +156,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 type="button"
                 onClick={onBack || onLogoClick}
-                className="w-10 h-10 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex items-center justify-center focus:outline-none hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer text-[var(--text-primary)] shrink-0 z-10"
+                className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex items-center justify-center focus:outline-none hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer text-[var(--text-primary)] shrink-0 z-10"
                 aria-label="Tillbaka"
               >
-                <CaretLeft size={18} weight="regular" />
+                <CaretLeft size={16} weight="regular" />
               </button>
-              <span className="absolute left-14 right-14 text-center font-display font-semibold text-[16px] tracking-[-0.01em] text-[var(--text-primary)] truncate pointer-events-none">
+              <span className="absolute left-12 right-12 text-center font-display font-semibold text-[14.5px] sm:text-[15px] tracking-[-0.01em] text-[var(--text-primary)] truncate pointer-events-none">
                 {pageTitle}
               </span>
             </>
