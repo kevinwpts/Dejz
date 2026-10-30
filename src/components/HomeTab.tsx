@@ -728,6 +728,45 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {formatKr(kvarAttSpendera)}
             </div>
           )}
+
+          {/* Supertunn visuell indikator för utnyttjat utrymme i perioden */}
+          {!(isInitialLoading && accounts.length === 0) && totalIncome > 0 && (
+            <div className="mt-3.5 h-1.5 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-0.5">
+              {(() => {
+                const fixedRatio = Math.min(100, Math.max(0, (totalFixedExpenses / totalIncome) * 100));
+                const variableRatio = Math.min(
+                  100 - fixedRatio,
+                  Math.max(0, (totalVariableSpent / totalIncome) * 100)
+                );
+                const remainingRatio = Math.max(0, 100 - fixedRatio - variableRatio);
+                return (
+                  <>
+                    {remainingRatio > 0 && (
+                      <div
+                        className="h-full rounded-full bg-emerald-500/85 dark:bg-emerald-400/85 transition-all duration-500"
+                        style={{ width: `${remainingRatio}%` }}
+                        title={`Kvar att spendera (${Math.round(remainingRatio)}%)`}
+                      />
+                    )}
+                    {variableRatio > 0 && (
+                      <div
+                        className="h-full rounded-full bg-[var(--text-primary)]/40 transition-all duration-500"
+                        style={{ width: `${variableRatio}%` }}
+                        title={`Rörligt spenderat (${Math.round(variableRatio)}%)`}
+                      />
+                    )}
+                    {fixedRatio > 0 && (
+                      <div
+                        className="h-full rounded-full bg-[var(--text-muted)]/30 transition-all duration-500"
+                        style={{ width: `${fixedRatio}%` }}
+                        title={`Fasta utgifter (${Math.round(fixedRatio)}%)`}
+                      />
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
         </div>
 
         {/* 3-Column Hairline Breakdown (No nested boxes) */}
@@ -786,7 +825,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* ============================================================== */}
-      {/* MODUL 2: TOTALT SALDO MED MJUK KONTO-ACCORDION                 */}
+      {/* MODUL 2: TOTALT SALDO MED TAKTILA BANK-BRICKS (Idé A)          */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
         <div className="flex items-center justify-between gap-3">
@@ -811,13 +850,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 setShowAccounts(next);
                 setShowAccountsOnHome(next);
               }}
-              className="py-1 px-1.5 text-[12px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
-              title={showAccounts ? 'Dölj kontolista' : 'Visa kontolista'}
+              className="py-1.5 px-2.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              title={showAccounts ? 'Dölj konton' : 'Visa konton'}
             >
-              <span>{showAccounts ? 'Dölj konton' : 'Visa konton'}</span>
+              <span>
+                {showAccounts
+                  ? 'Dölj konton'
+                  : `Konton (${accounts.length})`}
+              </span>
               <CaretDown
-                size={12}
-                weight="regular"
+                size={11}
+                weight="bold"
                 className={`transition-transform duration-200 ${
                   showAccounts ? 'rotate-180' : ''
                 }`}
@@ -826,23 +869,56 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           )}
         </div>
 
-        {/* Mjukt utfällbar lista med anslutna konton */}
+        {/* Supertunn visuell saldofördelning när man har flera konton */}
+        {accounts.length > 1 && totalBalance > 0 && (
+          <div className="mt-3 h-1.5 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-0.5">
+            {accounts.map((acc, idx) => {
+              const positiveSum = accounts.reduce(
+                (s, a) => s + Math.max(0, Number(a.balance) || 0),
+                0
+              );
+              const share =
+                positiveSum > 0
+                  ? (Math.max(0, Number(acc.balance) || 0) / positiveSum) * 100
+                  : 0;
+              if (share <= 0) return null;
+              const palette = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
+              const barColor = palette[idx % palette.length];
+              return (
+                <div
+                  key={acc.id}
+                  className="h-full first:rounded-l-full last:rounded-r-full transition-all duration-500"
+                  style={{
+                    width: `${ Math.max(4, share) }%`,
+                    backgroundColor: barColor,
+                  }}
+                  title={`${acc.name}: ${formatKr(acc.balance)}`}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        {/* Mjukt utfällbara Bank-bricks (Idé A: Horisontella/taktila mini-kontokort) */}
         <div
           className={`grid transition-all duration-200 ease-out ${
-            showAccounts ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'
+            showAccounts ? 'grid-rows-[1fr] opacity-100 mt-3.5' : 'grid-rows-[0fr] opacity-0 mt-0'
           }`}
         >
           <div className="overflow-hidden">
             {accounts.length > 0 ? (
-              <div className="pt-2.5 border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-                {accounts.map((acc) => {
-                  const hasDuplicateName =
-                    accounts.filter(
-                      (other) =>
-                        other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
-                    ).length > 1;
+              <div
+                className={
+                  accounts.length === 1
+                    ? 'grid grid-cols-1 gap-2.5'
+                    : 'flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-0.5'
+                }
+              >
+                {accounts.map((acc, idx) => {
                   const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
                   const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+                  const palette = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899'];
+                  const accentColor = palette[idx % palette.length];
 
                   return (
                     <button
@@ -850,35 +926,61 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       type="button"
                       onClick={() => onSelectAccount?.(acc.id)}
                       title={`Visa transaktioner för ${acc.name}`}
-                      className="w-full py-2.5 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                      className={`relative overflow-hidden rounded-2xl bg-[var(--bg-color)]/90 dark:bg-white/[0.03] border border-[var(--border-subtle)] hover:border-[var(--text-muted)]/40 p-3.5 text-left transition-all cursor-pointer group active:scale-[0.98] snap-start ${
+                        accounts.length === 1
+                          ? 'w-full'
+                          : 'min-w-[205px] sm:min-w-[220px] flex-1'
+                      }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <ItemLogo
-                          name={acc.bankName || acc.name}
-                          category="Bank"
-                          logoUrl={acc.logo}
-                          size="sm"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
-                            {acc.name}
-                          </span>
-                          {(acc.bankName || (hasDuplicateName && last4)) && (
-                            <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
-                              {acc.bankName}
-                              {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
+                      {/* Subtil bank-tonad ambient accent i hörnet */}
+                      <div
+                        className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-15 dark:opacity-20 transition-opacity group-hover:opacity-25"
+                        style={{ backgroundColor: accentColor }}
+                      />
+
+                      {/* Topprad: Banklogga + Kontonamn + •••• 1234 */}
+                      <div className="relative flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <ItemLogo
+                            name={acc.bankName || acc.name}
+                            category="Bank"
+                            logoUrl={acc.logo}
+                            size="sm"
+                          />
+                          <div className="min-w-0">
+                            <span className="font-medium text-[13px] tracking-[-0.01em] leading-tight text-[var(--text-primary)] block truncate">
+                              {acc.name}
                             </span>
-                          )}
+                            <span className="text-[11px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
+                              {acc.bankName || 'Bankkonto'}
+                            </span>
+                          </div>
                         </div>
+
+                        {last4 && (
+                          <span className="font-mono text-[10px] font-medium tracking-wider text-[var(--text-muted)] bg-[var(--surface-color)] px-1.5 py-0.5 rounded-md border border-[var(--border-subtle)] shrink-0">
+                            •••• {last4}
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
-                          {formatKr(acc.balance)}
-                        </span>
+
+                      {/* Bottenrad: Saldo + Diskret pil */}
+                      <div className="relative mt-4 pt-2.5 border-t border-[var(--border-subtle)]/70 flex items-baseline justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          {accounts.length > 1 && (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ backgroundColor: accentColor }}
+                            />
+                          )}
+                          <span className="font-display font-semibold text-[16px] sm:text-[17px] tracking-[-0.015em] text-[var(--text-primary)] tabular-nums">
+                            {formatKr(acc.balance)}
+                          </span>
+                        </div>
                         <CaretRight
                           size={12}
-                          weight="regular"
-                          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                          weight="bold"
+                          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 transition-all shrink-0"
                         />
                       </div>
                     </button>

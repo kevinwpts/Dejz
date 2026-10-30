@@ -90,6 +90,34 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Supertunn visuell linje för Fasta utgifter vs Kvar efter fasta */}
+        {totalIncome > 0 && (
+          <div className="mt-3.5 h-1.5 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-0.5">
+            {(() => {
+              const fixedPct = Math.min(100, Math.max(0, (totalFixedExpenses / totalIncome) * 100));
+              const netPct = Math.max(0, 100 - fixedPct);
+              return (
+                <>
+                  {netPct > 0 && (
+                    <div
+                      className="h-full rounded-full bg-emerald-500/85 dark:bg-emerald-400/85 transition-all duration-500"
+                      style={{ width: `${netPct}%` }}
+                      title={`Kvar efter fasta (${Math.round(netPct)}%)`}
+                    />
+                  )}
+                  {fixedPct > 0 && (
+                    <div
+                      className="h-full rounded-full bg-[var(--text-primary)]/35 transition-all duration-500"
+                      style={{ width: `${fixedPct}%` }}
+                      title={`Fasta utgifter (${Math.round(fixedPct)}%)`}
+                    />
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
       </section>
 
       {/* ============================================================== */}
