@@ -597,15 +597,38 @@ export function isInternalTransferOrMicroSavings(
     .trim()
     .toLowerCase();
 
+  // Mikrolån/mikrospar ("Enkla vardagen" / "ENKLA VARDAG" / "Enkla sparkontot") är alltid intern överföring/sparande
+  if (
+    combined.includes('enkla vardag') ||
+    combined.includes('enkla sparko')
+  ) {
+    return true;
+  }
+
+  // Reserverade kortköp (PDNG/HOLD) som inte är explicit mikrospar/överföring är ALDRIG interna överföringar
+  if (
+    (tx.booking_status === 'PDNG' || tx.booking_status === 'HOLD') &&
+    !combined.includes('överföring') &&
+    !combined.includes('overforing')
+  ) {
+    return false;
+  }
+
   if (
     rawJson?.card_transaction ||
+    bankCodeDesc === 'card purchase' ||
+    bankCodeDesc === 'direct debit' ||
+    bankCodeDesc === 'payment' ||
+    bankCodeDesc === 'instant payment' ||
     combined.includes('kortköp') ||
     combined.includes('kortkop') ||
     combined.includes('autogiro') ||
     combined.includes('bankgiro') ||
     combined.includes('plusgiro') ||
     combined.includes('fakturabetalning') ||
-    isLikelySwishTransactionText(combined, rawJson)
+    isLikelySwishTransactionText(tx.description, rawJson) ||
+    isLikelySwishTransactionText(tx.counterparty_name, rawJson) ||
+    isLikelySwishTransactionText(remittanceText, rawJson)
   ) {
     return false;
   }
@@ -657,15 +680,15 @@ export function isInternalTransferOrMicroSavings(
     return true;
   }
 
-  // Om beskrivningen enbart är ett bankkontonummer eller kontonummer + referens (t.ex. "5196 00 507 53" eller "56090198013 095739195424")
+  // Om beskrivningen är ett bankkontonummer + referens (t.ex. SEB "51960050753 225532192851")
   const rawAcctCandidate = (tx.description || tx.counterparty_name || '')
     .replace(/^(från|fran|till|överföring|overforing|insättning|insattning)\s+/i, '')
     .trim();
   const rawAcctDigits = rawAcctCandidate.replace(/\D+/g, '');
   if (
-    rawAcctCandidate.length >= 7 &&
+    rawAcctCandidate.length >= 15 &&
     /^[\d\s.,-]+$/.test(rawAcctCandidate) &&
-    rawAcctDigits.length >= 7 &&
+    rawAcctDigits.length >= 16 &&
     rawAcctDigits.length <= 32
   ) {
     return true;
@@ -679,7 +702,8 @@ export function isInternalTransferOrMicroSavings(
 
   // På utgående betalningar (DBIT / < 0) är debtor_account användarens eget konto.
   // På inkommande betalningar (CRDT / > 0) är creditor_account användarens eget konto.
-  // Vi får ENDAST jämföra motpartens konto (creditor vid utflöde, debtor vid inflöde) mot userAccounts!
+  // Vi får ENDAST jämföra motpartens konto (creditor vid utflöde, debtor vid inflöde) mot userAccounts,
+  // och ALDRIG matcha mot samma bankkonto som transaktionen själv ligger på (tx.bank_account_id)!
   const txAmt = getNormalizedBankTxAmount(tx);
   const counterpartyBban = txAmt < 0 ? creditorBban : txAmt > 0 ? debtorBban : '';
   const counterpartyIban = txAmt < 0 ? creditorIban : txAmt > 0 ? debtorIban : '';
@@ -695,6 +719,7 @@ export function isInternalTransferOrMicroSavings(
   const txCpLetters = normalizePersonLetters(tx.counterparty_name || '');
 
   for (const acc of userAccounts) {
+    const isSameSourceAccount = Boolean(acc.id && tx.bank_account_id && acc.id === tx.bank_account_id);
     const bbanDigits = (acc.bban || '').replace(/\D+/g, '');
     if (bbanDigits.length >= 6) {
       const variants = [bbanDigits];
@@ -706,7 +731,9 @@ export function isInternalTransferOrMicroSavings(
         variants.some(
           (v) =>
             (combinedDigits.length >= 6 && combinedDigits.includes(v)) ||
-            (counterpartyBban && (counterpartyBban.includes(v) || v.includes(counterpartyBban)))
+            (!isSameSourceAccount &&
+              counterpartyBban &&
+              (counterpartyBban.includes(v) || v.includes(counterpartyBban)))
         )
       ) {
         return true;
@@ -716,7 +743,7 @@ export function isInternalTransferOrMicroSavings(
     const aIban = (acc.iban || '').replace(/\s+/g, '').toUpperCase();
     if (
       aIban.length >= 10 &&
-      (counterpartyIban === aIban ||
+      ((!isSameSourceAccount && counterpartyIban === aIban) ||
         combined.toUpperCase().replace(/\s+/g, '').includes(aIban))
     ) {
       return true;
@@ -799,8 +826,21 @@ export function findRawBankInternalTransferIds(
     ) {
       return false;
     }
-    const text = `${tx.description || ''} ${tx.counterparty_name || ''}`.toLowerCase();
-    if (isLikelySwishTransactionText(text, tx.raw_json)) {
+    if (
+      isLikelySwishTransactionText(tx.description, tx.raw_json) ||
+      isLikelySwishTransactionText(tx.counterparty_name, tx.raw_json)
+    ) {
+      return false;
+    }
+    const btcDesc = String(tx.raw_json?.bank_transaction_code?.description || '')
+      .trim()
+      .toLowerCase();
+    if (
+      btcDesc === 'card purchase' ||
+      btcDesc === 'direct debit' ||
+      btcDesc === 'payment' ||
+      btcDesc === 'instant payment'
+    ) {
       return false;
     }
     return true;
@@ -838,7 +878,7 @@ export function findRawBankInternalTransferIds(
   const consumedInflowIds = new Set<string>();
 
   for (const outTx of outflows) {
-    const outAmt = Math.round(Math.abs(getNormalizedBankTxAmount(outTx)));
+    const outAmt = Math.abs(getNormalizedBankTxAmount(outTx));
     if (outAmt <= 0) continue;
     const outDate = outTx.booking_date || outTx.transaction_date || outTx.value_date || '';
     const outMs = Date.parse(`${outDate}T12:00:00`);
@@ -850,8 +890,8 @@ export function findRawBankInternalTransferIds(
       if (consumedInflowIds.has(inTx.id)) continue;
       if (inTx.id === outTx.id) continue;
 
-      const inAmt = Math.round(Math.abs(getNormalizedBankTxAmount(inTx)));
-      if (inAmt !== outAmt) continue;
+      const inAmt = Math.abs(getNormalizedBankTxAmount(inTx));
+      if (Math.abs(inAmt - outAmt) > 0.01) continue;
 
       const inDate = inTx.booking_date || inTx.transaction_date || inTx.value_date || '';
       const inMs = Date.parse(`${inDate}T12:00:00`);
@@ -1237,18 +1277,20 @@ export function extractSwishPhoneNumber(
 
   if (requireStandaloneIfNoSwishKeyword) {
     // Utan ordet "swish" får texten ENBART tolkas som ett Swish-nummer om hela strängen
-    // (efter ev. enkel betalningsprefix) är ett fristående giltigt svenskt mobilnummer (070, 072, 073, 076, 079),
+    // (efter ev. enkel betalningsprefix) är ett fristående giltigt svenskt mobilnummer (070, 072, 073, 076, 079)
+    // eller ett 10-siffrigt Swish-företagsnummer (123xxxxxxx),
     // ALDRIG om det är ett 11-siffrigt bankkontonummer eller kontonummer + referens!
     const candidate = trimmed
       .replace(/^(betalning|insättning|insattning|från|fran|till)\s+/i, '')
       .trim();
-    const standaloneRegex = /^(?:\+?46[\s-]*7[02369]|07[02369])(?:[\s-]?\d){7}$/;
+    const standaloneRegex =
+      /^(?:(?:\+?46[\s-]*7[02369]|07[02369])(?:[\s-]?\d){7}|123(?:[\s-]?\d){7})$/;
     if (standaloneRegex.test(candidate)) {
       const digits = candidate.replace(/\D/g, '');
       if (digits.startsWith('467') && digits.length === 11) {
         return '07' + digits.slice(3);
       }
-      if (digits.startsWith('07') && digits.length === 10) {
+      if ((digits.startsWith('07') || digits.startsWith('123')) && digits.length === 10) {
         return digits;
       }
     }

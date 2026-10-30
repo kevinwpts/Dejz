@@ -55,6 +55,7 @@ import {
   cleanDisplayMerchantName,
   DetectedFixedExpenseWithEvidence,
   DetectedIncomeWithEvidence,
+  extractSwishPhoneNumber,
   findRawBankInternalTransferIds,
   formatBankAccountNumber,
   formatSwishPhone,
@@ -62,6 +63,7 @@ import {
   getBankAccountTitle,
   getNormalizedBankTxAmount,
   isLikelyCreditCardInvoiceBankTx,
+  isLikelySwishTransactionText,
   needsAiMerchantCleaning,
   resolveBankTxSekAmount,
 } from './utils/bankHistoryAnalyzer';
@@ -190,13 +192,24 @@ function sanitizeTransactionItem(
     .filter(Boolean)
     .join(' ');
 
-  const rawDigits = combinedText.replace(/[\s()-]/g, '');
-  const phoneMatch = rawDigits.match(/(467\d{8}|07\d{8}|123\d{7})/);
+  const isMarkedInternalTransfer =
+    updated.reconciliationStatus === 'internal_transfer' ||
+    Boolean(updated.rawJson?.isInternalTransfer) ||
+    updated.category === 'Överföring';
+
+  const swishPhone = !isMarkedInternalTransfer
+    ? extractSwishPhoneNumber(updated.rawDescription, true) ||
+      extractSwishPhoneNumber(updated.counterpartyName, true) ||
+      extractSwishPhoneNumber(updated.title, false)
+    : null;
 
   const isSwish =
-    Boolean(phoneMatch) ||
-    /swish/i.test(combinedText) ||
-    updated.category === 'Swish';
+    !isMarkedInternalTransfer &&
+    (Boolean(swishPhone) ||
+      isLikelySwishTransactionText(updated.rawDescription, updated.rawJson) ||
+      isLikelySwishTransactionText(updated.counterpartyName, updated.rawJson) ||
+      /swish/i.test(combinedText) ||
+      updated.category === 'Swish');
 
   // Rensa bort eventuell rå bankbeskrivning som av misstag lagts i "Anteckning" (note)
   if (updated.note) {
@@ -240,13 +253,13 @@ function sanitizeTransactionItem(
 
     if (swishTitle && swishTitle !== 'Swish') {
       updated.title = swishTitle;
-    } else if (phoneMatch) {
-      const formattedPhone = formatSwishPhone(phoneMatch[1]);
+    } else if (swishPhone) {
+      const formattedPhone = formatSwishPhone(swishPhone);
       updated.title = `Swish (${formattedPhone})`;
     } else {
       updated.title = 'Swish';
     }
-  } else {
+  } else if (!isMarkedInternalTransfer) {
     const rawBankSource = updated.counterpartyName || updated.rawDescription;
     if (rawBankSource && !isGenericPlaceholderMerchant(rawBankSource)) {
       const prevTitleLower = (updated.title || '').toLowerCase().trim();
@@ -1246,12 +1259,6 @@ function mapBankTransactionsToAppItems(
                     : {}),
                   ...(bt.raw_json?.bank_transaction_code
                     ? { bank_transaction_code: bt.raw_json.bank_transaction_code }
-                    : {}),
-                  ...(bt.raw_json?.creditor_account
-                    ? { creditor_account: bt.raw_json.creditor_account }
-                    : {}),
-                  ...(bt.raw_json?.debtor_account
-                    ? { debtor_account: bt.raw_json.debtor_account }
                     : {}),
                   ...(bt.raw_json?.card_transaction
                     ? {

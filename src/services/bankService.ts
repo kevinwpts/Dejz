@@ -268,11 +268,9 @@ async function ensureActiveSession(): Promise<string | null> {
   return null;
 }
 
-async function invokeEnableBanking<T>(payload: Record<string, unknown>, timeoutMs = 12000): Promise<T> {
-  // Only bootstrap session if connecting a bank (start-auth / exchange-code) and user is not logged out
-  if (payload?.action === 'start-auth' || payload?.action === 'exchange-code') {
-    await ensureActiveSession();
-  }
+async function invokeEnableBanking<T>(payload: Record<string, unknown>, timeoutMs = 45000): Promise<T> {
+  // Ensure active session before invoking Enable Banking Edge Function
+  await ensureActiveSession();
 
   const invokePromise = supabase.functions.invoke('enable-banking', {
     body: payload,

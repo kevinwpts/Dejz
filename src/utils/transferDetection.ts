@@ -18,6 +18,13 @@ function extractOwnAccountSignals(
 
   const GENERIC_ACCOUNT_WORDS = new Set([
     'konto',
+    'privatkonto',
+    'lönekonto',
+    'lonekonto',
+    'transaktionskonto',
+    'personkonto',
+    'allkonto',
+    'brukskonto',
     'sek',
     'eur',
     'seb',
@@ -56,9 +63,9 @@ function extractOwnAccountSignals(
       }
     }
 
-    for (const rawLabel of [acc.custom_name, acc.product, acc.name]) {
+    for (const rawLabel of [acc.custom_name, acc.product]) {
       const cleaned = (rawLabel || '').trim();
-      if (!cleaned || cleaned.length < 3) continue;
+      if (!cleaned || cleaned.length < 4) continue;
       const lower = cleaned.toLowerCase();
       if (GENERIC_ACCOUNT_WORDS.has(lower)) continue;
       if (!/^\d+$/.test(lower.replace(/[\s-]/g, ''))) {
@@ -174,16 +181,43 @@ export function isInternalTransferTransaction(
     .toLowerCase()
     .trim();
 
+  // Mikrospar ("Enkla vardagen" / "ENKLA VARDAG" / "Enkla sparkontot") är alltid en intern överföring/sparande
+  if (
+    combined.includes('enkla vardag') ||
+    combined.includes('enkla sparko')
+  ) {
+    return true;
+  }
+
+  // Reserverade kortköp (PDNG/HOLD) som inte är explicit mikrospar/överföring är ALDRIG interna överföringar
+  if (
+    (tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD') &&
+    !combined.includes('överföring') &&
+    !combined.includes('overforing')
+  ) {
+    return false;
+  }
+
+  const btcDescEarly = String(rawJson?.bank_transaction_code?.description || '')
+    .toLowerCase()
+    .trim();
+
   // 1. Definitivt INTE en intern överföring om det är kortköp, autogiro, bankgiro, plusgiro, Swish eller lön/bidrag:
   if (
     rawJson?.card_transaction ||
+    btcDescEarly === 'card purchase' ||
+    btcDescEarly === 'direct debit' ||
+    btcDescEarly === 'payment' ||
+    btcDescEarly === 'instant payment' ||
     combined.includes('kortköp') ||
     combined.includes('kortkop') ||
     combined.includes('autogiro') ||
     combined.includes('bankgiro') ||
     combined.includes('plusgiro') ||
     combined.includes('fakturabetalning') ||
-    isLikelySwishTransactionText(tx.rawDescription || tx.title || '', rawJson) ||
+    tx.category === 'Swish' ||
+    isLikelySwishTransactionText(tx.rawDescription || '', rawJson) ||
+    isLikelySwishTransactionText(tx.title || '', rawJson) ||
     isLikelySwishTransactionText(tx.counterpartyName || '', rawJson) ||
     isConfirmedExternalIncomeOrRefund(combined)
   ) {
@@ -191,9 +225,6 @@ export function isInternalTransferTransaction(
   }
 
   // Om banken explicit flaggat transaktionskoden som Transfer / InternalTransfer:
-  const btcDescEarly = String(rawJson?.bank_transaction_code?.description || '')
-    .toLowerCase()
-    .trim();
   if (
     btcDescEarly === 'transfer' ||
     btcDescEarly === 'internal transfer' ||
@@ -265,46 +296,62 @@ export function isInternalTransferTransaction(
     return true;
   }
 
-  // 4. Om råbeskrivningen eller motpartsnamnet enbart är ett svenskt bankkontonummer eller kontonummer + referens (t.ex. "5196 00 507 53" eller "56090198013 095739195424")
+  // 4. Om råbeskrivningen är ett bankkontonummer + referens (t.ex. SEB "51960050753 225532192851")
   const rawCleanedForAcctCheck = (tx.rawDescription || tx.counterpartyName || '')
     .replace(/^(från|fran|till|överföring|overforing|insättning|insattning)\s+/i, '')
     .trim();
   const onlyDigitsInRaw = rawCleanedForAcctCheck.replace(/\D+/g, '');
   if (
-    rawCleanedForAcctCheck.length >= 7 &&
+    rawCleanedForAcctCheck.length >= 15 &&
     /^[\d\s.,-]+$/.test(rawCleanedForAcctCheck) &&
-    onlyDigitsInRaw.length >= 7 &&
+    onlyDigitsInRaw.length >= 16 &&
     onlyDigitsInRaw.length <= 32
   ) {
     return true;
   }
 
-  // 5. Matcha mot användarens egna bankkonton (kontonummer, IBAN, kontonamn och personnamn)
+  // 5. Matcha mot användarens egna bankkonton (kontonummer, IBAN och kontonamn i transaktionstexten)
+  // OBS: På utgifter sätter banker (t.ex. SEB) debtor_account till användarens eget källkonto,
+  // och på inkomster sätter de creditor_account till användarens eget mottagarkonto.
+  // Vi får därför ENDAST kolla motpartens konto (creditor vid utgift, debtor vid inkomst) och
+  // exkludera det konto som transaktionen själv ligger på (tx.bankAccountId)!
+  const otherUserAccounts = tx.bankAccountId
+    ? (userAccounts || []).filter((a) => a.id !== tx.bankAccountId)
+    : userAccounts || [];
   const signals = extractOwnAccountSignals(userAccounts, userEmail, userName);
+  const otherAccountSignals = extractOwnAccountSignals(otherUserAccounts, userEmail, userName);
 
   const creditorIban = (rawJson?.creditor_account?.iban || '').replace(/\s+/g, '').toUpperCase();
   const creditorBban = (rawJson?.creditor_account?.other?.identification || '').replace(/\D+/g, '');
   const debtorIban = (rawJson?.debtor_account?.iban || '').replace(/\s+/g, '').toUpperCase();
   const debtorBban = (rawJson?.debtor_account?.other?.identification || '').replace(/\D+/g, '');
+  const counterpartyBban = tx.type === 'income' ? debtorBban : creditorBban;
+  const counterpartyIban = tx.type === 'income' ? debtorIban : creditorIban;
   const combinedDigits = combined.replace(/\D+/g, '');
 
-  // Kontrollera om något av användarens egna kontonummer förekommer i transaktionstexten eller i creditor/debtor
   for (const acctDigits of signals.accountDigitVariants) {
+    if (combinedDigits.length >= 6 && combinedDigits.includes(acctDigits)) {
+      return true;
+    }
+  }
+
+  for (const acctDigits of otherAccountSignals.accountDigitVariants) {
     if (
-      (combinedDigits.length >= 6 && combinedDigits.includes(acctDigits)) ||
-      (creditorBban && (creditorBban.includes(acctDigits) || acctDigits.includes(creditorBban))) ||
-      (debtorBban && (debtorBban.includes(acctDigits) || acctDigits.includes(debtorBban)))
+      counterpartyBban &&
+      (counterpartyBban.includes(acctDigits) || acctDigits.includes(counterpartyBban))
     ) {
       return true;
     }
   }
 
   for (const ownIban of signals.ibanVariants) {
-    if (
-      (creditorIban && creditorIban === ownIban) ||
-      (debtorIban && debtorIban === ownIban) ||
-      combined.toUpperCase().replace(/\s+/g, '').includes(ownIban)
-    ) {
+    if (combined.toUpperCase().replace(/\s+/g, '').includes(ownIban)) {
+      return true;
+    }
+  }
+
+  for (const otherIban of otherAccountSignals.ibanVariants) {
+    if (counterpartyIban && counterpartyIban === otherIban) {
       return true;
     }
   }
@@ -402,6 +449,17 @@ export function findInternalTransferIds(
     ) {
       return false;
     }
+    const btcDesc = String(tx.rawJson?.bank_transaction_code?.description || '')
+      .trim()
+      .toLowerCase();
+    if (
+      btcDesc === 'card purchase' ||
+      btcDesc === 'direct debit' ||
+      btcDesc === 'payment' ||
+      btcDesc === 'instant payment'
+    ) {
+      return false;
+    }
     if (tx.type === 'income' && isConfirmedExternalIncomeOrRefund(combined)) {
       return false;
     }
@@ -414,7 +472,7 @@ export function findInternalTransferIds(
   const consumedInflowIds = new Set<string>();
 
   for (const outTx of outflows) {
-    const outAmt = Math.round(Math.abs(Number(outTx.amount) || 0));
+    const outAmt = Math.abs(Number(outTx.amount) || 0);
     if (outAmt <= 0) continue;
     const outDateMs = Date.parse(`${outTx.date}T12:00:00`);
 
@@ -425,8 +483,8 @@ export function findInternalTransferIds(
       if (consumedInflowIds.has(inTx.id)) continue;
       if (inTx.id === outTx.id) continue;
 
-      const inAmt = Math.round(Math.abs(Number(inTx.amount) || 0));
-      if (inAmt !== outAmt) continue;
+      const inAmt = Math.abs(Number(inTx.amount) || 0);
+      if (Math.abs(inAmt - outAmt) > 0.01) continue;
 
       const inDateMs = Date.parse(`${inTx.date}T12:00:00`);
       const dayDiff =
@@ -439,8 +497,10 @@ export function findInternalTransferIds(
       if (dayDiff > 3) continue;
 
       const differentAccounts =
-        Boolean(outTx.bankAccountName && inTx.bankAccountName) &&
-        outTx.bankAccountName !== inTx.bankAccountName;
+        (Boolean(outTx.bankAccountId && inTx.bankAccountId) &&
+          outTx.bankAccountId !== inTx.bankAccountId) ||
+        (Boolean(outTx.bankAccountName && inTx.bankAccountName) &&
+          outTx.bankAccountName !== inTx.bankAccountName);
 
       const oneAlreadyFlagged =
         internalIds.has(outTx.id) || internalIds.has(inTx.id);
