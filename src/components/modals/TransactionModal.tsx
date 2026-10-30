@@ -31,7 +31,7 @@ import {
   AccountItem,
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon } from '../CategoryIcon';
+import { CategoryIcon, resolveCategoryColor } from '../CategoryIcon';
 import {
   formatSwedishFullDate,
   formatSwedishDateHeading,
@@ -1089,16 +1089,27 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           {/* Hero Receipt Header (Read-only Förhandsgranskning) */}
-          <div className="ui-hero-header mb-5 pb-5">
-            <div className="flex justify-center mb-3.5">
-              <ItemLogo
-                name={activeTx.title}
-                category={activeTx.category}
-                logoUrl={activeTx.logo}
-                size="xl"
-                isRecurring={Boolean(recurringStatus.isRecurring)}
-              />
-            </div>
+          <div className="ui-hero-header relative overflow-hidden mb-5 pb-5">
+            {(() => {
+              const accentColor = resolveCategoryColor(activeTx.category);
+              return (
+                <>
+                  <div
+                    className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full blur-2xl opacity-15 dark:opacity-20"
+                    style={{ backgroundColor: accentColor }}
+                  />
+                  <div className="relative flex justify-center mb-3.5">
+                    <ItemLogo
+                      name={activeTx.title}
+                      category={activeTx.category}
+                      logoUrl={activeTx.logo}
+                      size="xl"
+                      isRecurring={Boolean(recurringStatus.isRecurring)}
+                    />
+                  </div>
+                </>
+              );
+            })()}
 
             <h2 className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] truncate px-4">
               {activeTx.title}

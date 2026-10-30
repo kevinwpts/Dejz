@@ -118,6 +118,8 @@ import {
   extractSavedIncomesFromProfile,
   getTransactionMetaMap,
   saveTransactionMeta,
+  getAccountMetaMap,
+  saveAccountMeta,
   syncAllUserPreferencesToSupabase,
   cancelPendingPreferenceSync,
   clearAllLocalAppData,
@@ -2475,6 +2477,8 @@ export const App: React.FC = () => {
     };
   }, [userId, refreshBankStatus]);
 
+  const [accountMetaVersion, setAccountMetaVersion] = useState(0);
+
   // Konvertera Enable Banking-konton till visningskonton för Hem-fliken
   const accounts: AccountItem[] = useMemo(() => {
     const connMap = new Map<string, { name: string; logo?: string | null }>();
@@ -2484,23 +2488,31 @@ export const App: React.FC = () => {
 
     const activeAccs = bankAccounts.filter((a) => a.is_selected !== false);
     const listToUse = activeAccs.length > 0 ? activeAccs : bankAccounts;
+    const accountMeta = getAccountMetaMap();
 
     return listToUse.map((ba) => {
       const connInfo = connMap.get(ba.connection_id);
       const bankName = connInfo?.name || 'Bank';
-      const displayName = getBankAccountTitle(ba, bankName);
+      const originalName = getBankAccountTitle(ba, bankName);
+      const meta = accountMeta[ba.id];
+      const displayName =
+        meta?.customName && meta.customName.trim()
+          ? meta.customName.trim()
+          : originalName;
       const formattedNumber = formatBankAccountNumber(ba.bban || ba.iban || ba.product || '');
       return {
         id: ba.id,
         name: displayName,
+        originalName,
         accountNumber: formattedNumber,
         bankName,
         balance: Number(ba.balance_amount) || 0,
         type: 'checking' as const,
         logo: connInfo?.logo || getLogoUrl(bankName, 'Bank'),
+        excludeFromTotalBalance: Boolean(meta?.excludeFromTotalBalance),
       };
     });
-  }, [connections, bankAccounts]);
+  }, [connections, bankAccounts, accountMetaVersion]);
 
   const connectedBank = useMemo(() => {
     const activeConns = connections.filter((c) => c.status === 'active');
@@ -2591,7 +2603,9 @@ export const App: React.FC = () => {
 
   // Totalt saldo
   const totalBalance = useMemo(() => {
-    return accounts.reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
+    return accounts
+      .filter((a) => !a.excludeFromTotalBalance)
+      .reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
   }, [accounts]);
 
   // Total inkomst
@@ -4098,6 +4112,10 @@ export const App: React.FC = () => {
                   onSelectAccount={(accountId) => {
                     setSelectedHistoryAccountId(accountId);
                     setActiveTab('transactions');
+                  }}
+                  onUpdateAccountMeta={(accountId, patch) => {
+                    saveAccountMeta(accountId, patch);
+                    setAccountMetaVersion((v) => v + 1);
                   }}
                   onToggleHeart={handleToggleHeart}
                   onTogglePackage={handleTogglePackage}

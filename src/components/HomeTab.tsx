@@ -5,9 +5,11 @@ import {
   CaretDown,
   CaretRight,
   Check,
+  Copy,
   Heart,
   Package,
   Paperclip,
+  PencilSimple,
   Users,
   X,
 } from '@phosphor-icons/react';
@@ -36,11 +38,13 @@ import {
 export interface AccountItem {
   id: string;
   name: string;
+  originalName?: string;
   accountNumber: string;
   bankName: string;
   balance: number;
   type: 'checking' | 'savings';
   logo?: string;
+  excludeFromTotalBalance?: boolean;
 }
 
 export interface IncomeItem {
@@ -212,6 +216,10 @@ interface HomeTabProps {
   onNavigateToFixed: () => void;
   onNavigateToTransactions: () => void;
   onSelectAccount?: (accountId: string) => void;
+  onUpdateAccountMeta?: (
+    accountId: string,
+    patch: { customName?: string; excludeFromTotalBalance?: boolean }
+  ) => void;
   onToggleHeart?: (id: string, isHearted: boolean) => void;
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   onExcludeTransaction?: (id: string, exclude: boolean) => void;
@@ -237,6 +245,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onSelectFixed,
   onSelectIncome,
   onSelectAccount,
+  onUpdateAccountMeta,
   onToggleHeart,
   onTogglePackage,
   onExcludeTransaction,
@@ -247,6 +256,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
+  const [selectedAccountModalId, setSelectedAccountModalId] = useState<string | null>(null);
+  const [isEditingAccountName, setIsEditingAccountName] = useState(false);
+  const [accountNameDraft, setAccountNameDraft] = useState('');
+  const [copiedAccountNumber, setCopiedAccountNumber] = useState(false);
   const todayStr = useMemo(() => getSwedishDateStr(), []);
   const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
@@ -254,6 +267,41 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [daysForwardToLoad, setDaysForwardToLoad] = useState<number>(365);
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
   const [isInboxOpen, setIsInboxOpen] = useState(false);
+
+  const activeModalAccount = useMemo(
+    () =>
+      selectedAccountModalId
+        ? accounts.find((a) => a.id === selectedAccountModalId) || null
+        : null,
+    [accounts, selectedAccountModalId]
+  );
+
+  const activeAccountTransactions = useMemo(() => {
+    if (!activeModalAccount) return [];
+    const deduped = deduplicateTransactions(transactions || []);
+    return deduped
+      .filter((tx) => !tx.isExcluded && doesTransactionMatchAccount(tx, activeModalAccount))
+      .sort((a, b) => {
+        const dCmp = (b.date || '').localeCompare(a.date || '');
+        if (dCmp !== 0) return dCmp;
+        return getTransactionTime(b).localeCompare(getTransactionTime(a));
+      });
+  }, [transactions, activeModalAccount]);
+
+  const activeAccountPeriodStats = useMemo(() => {
+    let incomeSum = 0;
+    let expenseSum = 0;
+    for (const tx of activeAccountTransactions) {
+      if (!isDateInPeriod(tx.date, period)) continue;
+      const amt = Math.abs(Number(tx.amount) || 0);
+      if (tx.type === 'income') {
+        incomeSum += amt;
+      } else {
+        expenseSum += amt;
+      }
+    }
+    return { incomeSum, expenseSum };
+  }, [activeAccountTransactions, period]);
 
   // Initialize reviewed IDs on first run so only transactions from the last 3 days appear as new
   useEffect(() => {
@@ -848,8 +896,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     <button
                       key={acc.id}
                       type="button"
-                      onClick={() => onSelectAccount?.(acc.id)}
-                      title={`Visa transaktioner för ${acc.name}`}
+                      onClick={() => {
+                        setSelectedAccountModalId(acc.id);
+                        setAccountNameDraft(acc.name);
+                        setIsEditingAccountName(false);
+                        setCopiedAccountNumber(false);
+                      }}
+                      title={`Visa kontodetaljer för ${acc.name}`}
                       className="w-full py-2.5 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -863,16 +916,23 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
                             {acc.name}
                           </span>
-                          {(acc.bankName || (hasDuplicateName && last4)) && (
+                          {(acc.bankName || (hasDuplicateName && last4) || acc.excludeFromTotalBalance) && (
                             <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
                               {acc.bankName}
                               {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
+                              {acc.excludeFromTotalBalance ? ' · Ej i totalt' : ''}
                             </span>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
+                        <span
+                          className={`font-display font-semibold text-[13.5px] tracking-[-0.01em] tabular-nums ${
+                            acc.excludeFromTotalBalance
+                              ? 'text-[var(--text-secondary)]'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        >
                           {formatKr(acc.balance)}
                         </span>
                         <CaretRight
@@ -1383,6 +1443,295 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               </div>
             ))}
         </div>
+      </BottomSheet>
+
+      {/* ============================================================== */}
+      {/* KONTOKORT-MODAL (BOTTOM SHEET VID KLICK PÅ KONTO)              */}
+      {/* ============================================================== */}
+      <BottomSheet
+        isOpen={Boolean(activeModalAccount)}
+        onClose={() => {
+          setSelectedAccountModalId(null);
+          setIsEditingAccountName(false);
+        }}
+        title={activeModalAccount?.bankName || 'Konto'}
+      >
+        {activeModalAccount && (
+          <div className="space-y-4">
+            {/* Konto-huvud med logotyp, redigerbart namn och stort saldo */}
+            <div className="flex flex-col items-center text-center pt-1 pb-2">
+              <ItemLogo
+                name={activeModalAccount.bankName || activeModalAccount.name}
+                category="Bank"
+                logoUrl={activeModalAccount.logo}
+                size="lg"
+              />
+
+              {isEditingAccountName ? (
+                <div className="mt-3 w-full max-w-[260px] flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={accountNameDraft}
+                    onChange={(e) => setAccountNameDraft(e.target.value)}
+                    placeholder={activeModalAccount.originalName || activeModalAccount.name}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        onUpdateAccountMeta?.(activeModalAccount.id, {
+                          customName: accountNameDraft.trim(),
+                        });
+                        setIsEditingAccountName(false);
+                      } else if (e.key === 'Escape') {
+                        setIsEditingAccountName(false);
+                      }
+                    }}
+                    className="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[14px] font-medium text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--text-primary)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onUpdateAccountMeta?.(activeModalAccount.id, {
+                        customName: accountNameDraft.trim(),
+                      });
+                      setIsEditingAccountName(false);
+                    }}
+                    className="w-8 h-8 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shrink-0 cursor-pointer"
+                    title="Spara namn"
+                  >
+                    <Check size={14} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingAccountName(false)}
+                    className="w-8 h-8 rounded-xl bg-[var(--surface-raised)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 cursor-pointer"
+                    title="Avbryt"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountNameDraft(activeModalAccount.name);
+                    setIsEditingAccountName(true);
+                  }}
+                  className="mt-2.5 inline-flex items-center gap-1.5 text-[16px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] hover:opacity-80 transition-opacity cursor-pointer"
+                  title="Byt namn på kontot"
+                >
+                  <span>{activeModalAccount.name}</span>
+                  <PencilSimple size={13} className="text-[var(--text-muted)]" />
+                </button>
+              )}
+
+              <div className="font-display text-[28px] sm:text-[32px] font-semibold tracking-[-0.025em] text-[var(--text-primary)] tabular-nums mt-1 leading-tight">
+                {formatKr(activeModalAccount.balance)}
+              </div>
+              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">
+                Aktuellt saldo
+              </span>
+            </div>
+
+            {/* Kontouppgifter & Inställningar */}
+            <div className="rounded-2xl bg-[var(--surface-raised)]/60 border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] px-3.5">
+              {activeModalAccount.accountNumber && (
+                <div className="py-2.5 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                      Kontonummer
+                    </span>
+                    <span className="text-[13px] font-medium text-[var(--text-primary)] tabular-nums">
+                      {activeModalAccount.accountNumber}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (navigator.clipboard && activeModalAccount.accountNumber) {
+                        navigator.clipboard
+                          .writeText(activeModalAccount.accountNumber)
+                          .catch(() => {});
+                        setCopiedAccountNumber(true);
+                        setTimeout(() => setCopiedAccountNumber(false), 2000);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11.5px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
+                  >
+                    {copiedAccountNumber ? (
+                      <>
+                        <Check size={12} weight="bold" className="text-emerald-500" />
+                        <span>Kopierat</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={12} />
+                        <span>Kopiera</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Periodens flöde på kontot */}
+              <div className="py-2.5 grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    Inkomster i perioden
+                  </span>
+                  <span className="font-display text-[13.5px] font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    +{formatKr(activeAccountPeriodStats.incomeSum)}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    Utgifter i perioden
+                  </span>
+                  <span className="font-display text-[13.5px] font-semibold text-[var(--text-primary)] tabular-nums">
+                    -{formatKr(activeAccountPeriodStats.expenseSum)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Räkna med i Totalt saldo */}
+              <div className="py-2.5 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-[13px] font-normal text-[var(--text-primary)] block">
+                    Räkna med i Totalt saldo
+                  </span>
+                  <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    Inkludera kontots saldo på hemskärmen
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!activeModalAccount.excludeFromTotalBalance}
+                  onClick={() => {
+                    onUpdateAccountMeta?.(activeModalAccount.id, {
+                      excludeFromTotalBalance: !activeModalAccount.excludeFromTotalBalance,
+                    });
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                    !activeModalAccount.excludeFromTotalBalance
+                      ? 'bg-[var(--text-primary)]'
+                      : 'bg-[var(--border-subtle)]'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--bg-color)] shadow transition duration-200 ease-in-out ${
+                      !activeModalAccount.excludeFromTotalBalance
+                        ? 'translate-x-5'
+                        : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Senaste händelser på kontot */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5 px-0.5">
+                <span className="text-[12px] font-medium text-[var(--text-secondary)]">
+                  Senaste händelser ({activeAccountTransactions.length})
+                </span>
+                {activeAccountTransactions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetId = activeModalAccount.id;
+                      setSelectedAccountModalId(null);
+                      onSelectAccount?.(targetId);
+                    }}
+                    className="text-[12px] font-medium text-[var(--text-primary)] hover:opacity-75 transition-opacity cursor-pointer"
+                  >
+                    Visa alla
+                  </button>
+                )}
+              </div>
+
+              {activeAccountTransactions.length > 0 ? (
+                <div className="rounded-2xl bg-[var(--surface-raised)]/40 border border-[var(--border-subtle)] px-3 divide-y divide-[var(--border-subtle)]">
+                  {activeAccountTransactions.slice(0, 6).map((tx) => {
+                    const isIncome = tx.type === 'income';
+                    const isPending =
+                      tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
+                    const recurring = checkIsRecurringTransaction(
+                      tx,
+                      fixedExpenses,
+                      incomes
+                    );
+                    return (
+                      <button
+                        key={`acc-tx-${tx.id}`}
+                        type="button"
+                        onClick={() => {
+                          setSelectedAccountModalId(null);
+                          onSelectTransaction(tx);
+                        }}
+                        className="ui-tx-row"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ItemLogo
+                            name={tx.title}
+                            category={tx.category}
+                            logoUrl={tx.logo}
+                            size="md"
+                            isRecurring={recurring.isRecurring}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">{tx.title}</span>
+                            <span className="ui-row-subtitle">
+                              <CategoryIcon
+                                category={tx.category}
+                                size={11}
+                                className="shrink-0"
+                              />
+                              <span className="truncate">{tx.category}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span
+                            className={
+                              isIncome ? 'ui-row-amount-income' : 'ui-row-amount'
+                            }
+                          >
+                            {isIncome
+                              ? `+${formatKr(tx.amount)}`
+                              : `-${formatKr(tx.amount)}`}
+                          </span>
+                          <span className="ui-row-meta">
+                            {isPending
+                              ? 'Reserverat'
+                              : formatSwedishDateHeading(tx.date)}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-[var(--surface-raised)]/40 border border-[var(--border-subtle)] py-6 text-center text-[12.5px] text-[var(--text-secondary)]">
+                  Inga bokförda händelser på detta konto än
+                </div>
+              )}
+            </div>
+
+            {activeAccountTransactions.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const targetId = activeModalAccount.id;
+                  setSelectedAccountModalId(null);
+                  onSelectAccount?.(targetId);
+                }}
+                className="w-full py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[13.5px] font-semibold tracking-[-0.01em] hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+              >
+                Visa alla transaktioner ({activeAccountTransactions.length})
+              </button>
+            )}
+          </div>
+        )}
       </BottomSheet>
     </div>
   );

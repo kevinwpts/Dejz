@@ -1061,10 +1061,45 @@ export function setShowAccountsOnHome(show: boolean): void {
 }
 
 const TRANSACTION_META_KEY = 'dejz_transaction_meta_v1';
+const ACCOUNT_META_KEY = 'dejz_account_meta_v1';
 const CATEGORY_BUDGETS_KEY = 'dejz_category_budgets_v1';
 const SAVINGS_GOALS_KEY = 'dejz_savings_goals_v1';
 const REVIEWED_TX_IDS_KEY = 'dejz_reviewed_tx_ids_v1';
 const PRIVACY_BLUR_KEY = 'dejz_privacy_blur_v1';
+
+export interface AccountMetaPatch {
+  customName?: string;
+  excludeFromTotalBalance?: boolean;
+}
+
+export function getAccountMetaMap(): Record<string, AccountMetaPatch> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(ACCOUNT_META_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveAccountMeta(accountId: string, patch: AccountMetaPatch): void {
+  if (typeof window === 'undefined' || !accountId) return;
+  try {
+    const map = getAccountMetaMap();
+    const existing = map[accountId] || {};
+    const merged: AccountMetaPatch = { ...existing, ...patch };
+    if (merged.customName !== undefined && !merged.customName.trim()) {
+      delete merged.customName;
+    }
+    map[accountId] = merged;
+    localStorage.setItem(ACCOUNT_META_KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
 
 export interface SavingsGoalActivity {
   id: string;
@@ -1257,6 +1292,7 @@ export function collectAllUserPreferences(): Record<string, any> {
     customIncomeCategories: getStoredIncomeCategories(),
     customPaymentMethods: getStoredPaymentMethods(),
     transactionMeta: getTransactionMetaMap(),
+    accountMeta: getAccountMetaMap(),
     categoryBudgets: getCategoryBudgets(),
     savingsGoals: getSavingsGoals(),
     reviewedTransactionIds: Array.from(getReviewedTransactionIds()),
@@ -1454,6 +1490,9 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     }
     if (prefs.transactionMeta && !localStorage.getItem(TRANSACTION_META_KEY)) {
       localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(prefs.transactionMeta));
+    }
+    if (prefs.accountMeta && !localStorage.getItem(ACCOUNT_META_KEY)) {
+      localStorage.setItem(ACCOUNT_META_KEY, JSON.stringify(prefs.accountMeta));
     }
     if (prefs.categoryBudgets && !localStorage.getItem(CATEGORY_BUDGETS_KEY)) {
       localStorage.setItem(CATEGORY_BUDGETS_KEY, JSON.stringify(prefs.categoryBudgets));

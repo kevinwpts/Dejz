@@ -425,48 +425,175 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     return expenseChartSlices.find((s) => s.category === selectedSliceCategory) || null;
   }, [expenseChartSlices, selectedSliceCategory]);
 
-  const donutRadius = 68;
+  const donutRadius = 78;
   const donutCircumference = 2 * Math.PI * donutRadius;
 
   return (
     <div className="ui-page">
-      {/* Sektion 0: Kompakt Periodväljare */}
-      <div className="ui-card p-2 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => setPeriodOffset((prev) => Math.max(-5, prev - 1))}
-          disabled={periodOffset <= -5}
-          className="ui-icon-btn w-9 h-9 rounded-2xl disabled:opacity-30 shrink-0"
-          title="Föregående period"
-        >
-          <CaretLeft size={15} weight="bold" />
-        </button>
+      {/* Sektion 0: Minimalistisk Periodväljare + Frilagd Hero-Cirkel direkt mot bakgrunden */}
+      <div className="pt-0.5 pb-1">
+        {/* Svagt svävande periodväljare utan tung kort-box */}
+        <div className="flex items-center justify-between gap-2 px-1">
+          <button
+            type="button"
+            onClick={() => setPeriodOffset((prev) => Math.max(-5, prev - 1))}
+            disabled={periodOffset <= -5}
+            className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
+            title="Föregående period"
+          >
+            <CaretLeft size={14} weight="bold" />
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setIsPeriodMenuOpen(true)}
-          className="flex-1 py-1.5 px-3 rounded-2xl hover:bg-[var(--bg-color)] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-1.5"
-        >
-          <CalendarBlank size={14} weight="duotone" className="text-[var(--text-secondary)] shrink-0" />
-          <span className="font-display font-bold text-xs sm:text-sm text-[var(--text-primary)] tabular-nums">
-            {computedPeriod.startLabel} – {computedPeriod.endLabel}
-          </span>
-          <CaretDown
-            size={12}
-            weight="bold"
-            className="text-[var(--text-muted)] shrink-0"
-          />
-        </button>
+          <button
+            type="button"
+            onClick={() => setIsPeriodMenuOpen(true)}
+            className="py-1.5 px-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-2xs"
+          >
+            <CalendarBlank
+              size={14}
+              weight="duotone"
+              className="text-[var(--text-secondary)] shrink-0"
+            />
+            <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] tabular-nums">
+              {computedPeriod.startLabel} – {computedPeriod.endLabel}
+            </span>
+            <CaretDown
+              size={11}
+              weight="bold"
+              className="text-[var(--text-muted)] shrink-0"
+            />
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setPeriodOffset((prev) => Math.min(0, prev + 1))}
-          disabled={periodOffset >= 0}
-          className="ui-icon-btn w-9 h-9 rounded-2xl disabled:opacity-30 shrink-0"
-          title="Nästa period"
-        >
-          <CaretRight size={15} weight="bold" />
-        </button>
+          <button
+            type="button"
+            onClick={() => setPeriodOffset((prev) => Math.min(0, prev + 1))}
+            disabled={periodOffset >= 0}
+            className="w-9 h-9 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
+            title="Nästa period"
+          >
+            <CaretRight size={14} weight="bold" />
+          </button>
+        </div>
+
+        {/* Frilagd Interaktiv Hero-Cirkel (Open Canvas utan instängd kort-modul) */}
+        {expenseChartSlices.length > 0 ? (
+          <div className="relative pt-5 pb-3 flex flex-col items-center justify-center">
+            {activeSlice && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSliceCategory(null);
+                  setInspectedCategory(null);
+                }}
+                className="absolute top-3 right-1 px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                Visa alla
+              </button>
+            )}
+
+            <div className="relative w-48 h-48 sm:w-52 sm:h-52 flex items-center justify-center">
+              <svg
+                viewBox="0 0 200 200"
+                className="w-full h-full -rotate-90 overflow-visible"
+              >
+                {/* Subtil bakgrundsring */}
+                <circle
+                  cx="100"
+                  cy="100"
+                  r={donutRadius}
+                  fill="transparent"
+                  stroke="var(--border-subtle)"
+                  strokeWidth="15"
+                />
+
+                {expenseChartSlices.map((slice) => {
+                  const isSelected = selectedSliceCategory === slice.category;
+                  const isDimmed = selectedSliceCategory !== null && !isSelected;
+                  const gap = expenseChartSlices.length > 1 ? 3.5 : 0;
+                  const sliceLength = Math.max(
+                    0,
+                    slice.fraction * donutCircumference - gap
+                  );
+                  const dashOffset = -slice.startFraction * donutCircumference;
+
+                  return (
+                    <circle
+                      key={slice.category}
+                      cx="100"
+                      cy="100"
+                      r={donutRadius}
+                      fill="transparent"
+                      stroke={slice.color}
+                      strokeWidth={isSelected ? 20 : 15}
+                      strokeDasharray={`${sliceLength} ${donutCircumference}`}
+                      strokeDashoffset={dashOffset}
+                      strokeLinecap="butt"
+                      onClick={() =>
+                        setSelectedSliceCategory((prev) =>
+                          prev === slice.category ? null : slice.category
+                        )
+                      }
+                      className={`cursor-pointer transition-all duration-300 ${
+                        isDimmed ? 'opacity-25' : 'opacity-100'
+                      }`}
+                    />
+                  );
+                })}
+              </svg>
+
+              {/* Center-info direkt i den öppna cirkeln */}
+              <button
+                type="button"
+                onClick={() => setSelectedSliceCategory(null)}
+                className="absolute inset-7 rounded-full flex flex-col items-center justify-center text-center px-3 cursor-pointer focus:outline-none"
+              >
+                {activeSlice ? (
+                  <>
+                    <div
+                      className="w-7 h-7 rounded-xl flex items-center justify-center mb-1 transition-transform"
+                      style={{
+                        backgroundColor: `${activeSlice.color}1F`,
+                        color: activeSlice.color,
+                      }}
+                    >
+                      <CategoryIcon
+                        category={activeSlice.category}
+                        size={14}
+                        color={activeSlice.color}
+                      />
+                    </div>
+                    <span className="text-[11.5px] font-medium text-[var(--text-secondary)] truncate max-w-[120px]">
+                      {activeSlice.category}
+                    </span>
+                    <span className="font-display font-semibold text-xl sm:text-[22px] tracking-[-0.02em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                      {formatKr(activeSlice.amount)}
+                    </span>
+                    <span className="text-[11px] font-medium text-[var(--text-muted)] tabular-nums mt-0.5">
+                      {activeSlice.percentage}% av utgifter
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[11.5px] font-normal text-[var(--text-secondary)]">
+                      Utgifter i perioden
+                    </span>
+                    <span className="font-display font-semibold text-xl sm:text-[23px] tracking-[-0.02em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                      {formatKr(totalSpent)}
+                    </span>
+                    <span className="text-[11px] font-normal text-[var(--text-muted)] tabular-nums mt-1">
+                      {expenseChartSlices.length}{' '}
+                      {expenseChartSlices.length === 1 ? 'kategori' : 'kategorier'}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="py-7 text-center">
+            <p className="ui-empty-sub">Inga utgifter att visa i perioden</p>
+          </div>
+        )}
       </div>
 
       {/* Riktigt BottomSheet för Periodväljaren */}
@@ -515,12 +642,13 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         </div>
       </BottomSheet>
 
-      {/* Sektion 1: Översikt (Ren 3-kolumns Bento utan överflödig text) */}
+      {/* Sektion 1: Sammanhållen 3-kolumns Översikt (Inkomst · Utgifter · Kvar) med färgkodad bar */}
       <section className="ui-card-p">
         <div className="ui-stat-grid">
           <div className="pr-3 min-w-0">
-            <span className="ui-stat-label">
-              Inkomst
+            <span className="ui-stat-label flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0" />
+              <span>Inkomst</span>
             </span>
             <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               +{formatKr(periodIncomeTotal)}
@@ -528,22 +656,30 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           </div>
 
           <div className="px-3 min-w-0">
-            <span className="ui-stat-label">
-              Utgifter
+            <span className="ui-stat-label flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 shrink-0" />
+              <span>Utgifter</span>
             </span>
-            <span className="ui-stat-value">
+            <span className="ui-stat-value text-amber-600 dark:text-amber-400">
               -{formatKr(totalSpent)}
             </span>
           </div>
 
           <div className="pl-3 min-w-0">
-            <span className="ui-stat-label">
-              Kvar
+            <span className="ui-stat-label flex items-center gap-1.5">
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  netSavings >= 0
+                    ? 'bg-sky-500 dark:bg-sky-400'
+                    : 'bg-rose-500 dark:bg-rose-400'
+                }`}
+              />
+              <span>Kvar</span>
             </span>
             <span
               className={`ui-stat-value ${
                 netSavings >= 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
+                  ? 'text-sky-600 dark:text-sky-400'
                   : 'text-rose-600 dark:text-rose-400'
               }`}
             >
@@ -551,114 +687,31 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
             </span>
           </div>
         </div>
-      </section>
 
-      {/* Sektion 1.5: Kategorifördelning i cirkel (% per kategori) */}
-      <section className="ui-card p-3.5 sm:p-4">
-        {activeSlice && (
-          <div className="flex justify-end mb-1">
-            <button
-              type="button"
-              onClick={() => setSelectedSliceCategory(null)}
-              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-            >
-              Visa alla
-            </button>
-          </div>
-        )}
-
-        {expenseChartSlices.length > 0 ? (
-          <div>
-            <div className="flex items-center justify-center">
-              {/* Interaktiv Cirkel / Donut */}
-              <div className="relative w-40 h-40 flex items-center justify-center">
-                <svg
-                  viewBox="0 0 180 180"
-                  className="w-full h-full -rotate-90 overflow-visible"
-                >
-                  {/* Bakgrundsring */}
-                  <circle
-                    cx="90"
-                    cy="90"
-                    r={donutRadius}
-                    fill="transparent"
-                    stroke="var(--border-subtle)"
-                    strokeWidth="20"
-                  />
-
-                  {expenseChartSlices.map((slice) => {
-                    const isSelected = selectedSliceCategory === slice.category;
-                    const isDimmed =
-                      selectedSliceCategory !== null && !isSelected;
-                    const gap = expenseChartSlices.length > 1 ? 2.5 : 0;
-                    const sliceLength = Math.max(
-                      0,
-                      slice.fraction * donutCircumference - gap
-                    );
-                    const dashOffset = -slice.startFraction * donutCircumference;
-
-                    return (
-                      <circle
-                        key={slice.category}
-                        cx="90"
-                        cy="90"
-                        r={donutRadius}
-                        fill="transparent"
-                        stroke={slice.color}
-                        strokeWidth={isSelected ? 24 : 20}
-                        strokeDasharray={`${sliceLength} ${donutCircumference}`}
-                        strokeDashoffset={dashOffset}
-                        strokeLinecap="butt"
-                        onClick={() =>
-                          setSelectedSliceCategory((prev) =>
-                            prev === slice.category ? null : slice.category
-                          )
-                        }
-                        className={`cursor-pointer transition-all duration-300 ${
-                          isDimmed ? 'opacity-30' : 'opacity-100'
-                        }`}
-                      />
-                    );
-                  })}
-                </svg>
-
-                {/* Center-info i cirkeln */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedSliceCategory(null)}
-                  className="absolute inset-6 rounded-full flex flex-col items-center justify-center text-center px-2 cursor-pointer"
-                >
-                  {activeSlice ? (
-                    <>
-                      <span className="text-[11px] font-medium text-[var(--text-secondary)] truncate max-w-[105px]">
-                        {activeSlice.category}
-                      </span>
-                      <span className="font-display font-semibold text-lg text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
-                        {activeSlice.percentage}%
-                      </span>
-                      <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums mt-0.5">
-                        {formatKr(activeSlice.amount)}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-[11px] font-medium text-[var(--text-secondary)]">
-                        Utgifter
-                      </span>
-                      <span className="font-display font-semibold text-base text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
-                        {formatKr(totalSpent)}
-                      </span>
-                    </>
+        {periodIncomeTotal > 0 && (
+          <div className="mt-3.5 h-2 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-1">
+            {(() => {
+              const spentPct = Math.min(100, Math.max(0, (totalSpent / periodIncomeTotal) * 100));
+              const remainingPct = Math.max(0, 100 - spentPct);
+              return (
+                <>
+                  {spentPct > 0 && (
+                    <div
+                      className="h-full rounded-full bg-amber-500 dark:bg-amber-400 transition-all duration-500"
+                      style={{ width: `${spentPct}%` }}
+                      title={`Utgifter (${Math.round(spentPct)}%)`}
+                    />
                   )}
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="py-5 text-center">
-            <p className="ui-empty-sub">
-              Inga utgifter att visa i perioden
-            </p>
+                  {remainingPct > 0 && (
+                    <div
+                      className="h-full rounded-full bg-sky-500 dark:bg-sky-400 transition-all duration-500"
+                      style={{ width: `${remainingPct}%` }}
+                      title={`Kvar (${Math.round(remainingPct)}%)`}
+                    />
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </section>
