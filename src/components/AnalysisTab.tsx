@@ -642,12 +642,13 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         </div>
       </BottomSheet>
 
-      {/* Sektion 1: Sammanhållen 3-kolumns Översikt (Inkomst · Utgifter · Kvar) */}
+      {/* Sektion 1: Sammanhållen 3-kolumns Översikt (Inkomst · Utgifter · Kvar) med färgkodad bar */}
       <section className="ui-card-p">
         <div className="ui-stat-grid">
           <div className="pr-3 min-w-0">
-            <span className="ui-stat-label">
-              Inkomst
+            <span className="ui-stat-label flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0" />
+              <span>Inkomst</span>
             </span>
             <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               +{formatKr(periodIncomeTotal)}
@@ -655,22 +656,30 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           </div>
 
           <div className="px-3 min-w-0">
-            <span className="ui-stat-label">
-              Utgifter
+            <span className="ui-stat-label flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 shrink-0" />
+              <span>Utgifter</span>
             </span>
-            <span className="ui-stat-value">
+            <span className="ui-stat-value text-amber-600 dark:text-amber-400">
               -{formatKr(totalSpent)}
             </span>
           </div>
 
           <div className="pl-3 min-w-0">
-            <span className="ui-stat-label">
-              Kvar
+            <span className="ui-stat-label flex items-center gap-1.5">
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  netSavings >= 0
+                    ? 'bg-sky-500 dark:bg-sky-400'
+                    : 'bg-rose-500 dark:bg-rose-400'
+                }`}
+              />
+              <span>Kvar</span>
             </span>
             <span
               className={`ui-stat-value ${
                 netSavings >= 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
+                  ? 'text-sky-600 dark:text-sky-400'
                   : 'text-rose-600 dark:text-rose-400'
               }`}
             >
@@ -678,6 +687,33 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
             </span>
           </div>
         </div>
+
+        {periodIncomeTotal > 0 && (
+          <div className="mt-3.5 h-2 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-1">
+            {(() => {
+              const spentPct = Math.min(100, Math.max(0, (totalSpent / periodIncomeTotal) * 100));
+              const remainingPct = Math.max(0, 100 - spentPct);
+              return (
+                <>
+                  {spentPct > 0 && (
+                    <div
+                      className="h-full rounded-full bg-amber-500 dark:bg-amber-400 transition-all duration-500"
+                      style={{ width: `${spentPct}%` }}
+                      title={`Utgifter (${Math.round(spentPct)}%)`}
+                    />
+                  )}
+                  {remainingPct > 0 && (
+                    <div
+                      className="h-full rounded-full bg-sky-500 dark:bg-sky-400 transition-all duration-500"
+                      style={{ width: `${remainingPct}%` }}
+                      title={`Kvar (${Math.round(remainingPct)}%)`}
+                    />
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
       </section>
 
       {/* Sektion 2: Kategorier (Inline Dropdown / Accordion utan nästlade kort) */}

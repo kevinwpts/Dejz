@@ -25,6 +25,7 @@ import {
 } from './components/SettingsTab';
 import { SavingsGoalsView } from './components/SavingsGoalsView';
 import { MatpriskollenView } from './components/MatpriskollenView';
+import { BankAccountDetailView } from './components/BankAccountDetailView';
 import { LandingPage } from './components/LandingPage';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { ItemLogo } from './components/ItemLogo';
@@ -49,7 +50,7 @@ import {
 } from './services/bankService';
 import { dataService } from './services/dataService';
 import { Frequency } from './types';
-import { getLogoUrl } from './utils/logo';
+import { getLogoUrl, SEB_SVG_DATA_URI } from './utils/logo';
 import {
   analyzeBankTransactionsForOnboarding,
   categorizeBankTransactionForApp,
@@ -2486,10 +2487,20 @@ export const App: React.FC = () => {
     const listToUse = activeAccs.length > 0 ? activeAccs : bankAccounts;
 
     return listToUse.map((ba) => {
-      const connInfo = connMap.get(ba.connection_id);
-      const bankName = connInfo?.name || 'Bank';
-      const displayName = getBankAccountTitle(ba, bankName);
+      const connInfo =
+        connMap.get(ba.connection_id) ||
+        (connections.length > 0
+          ? { name: connections[0].aspsp_name, logo: connections[0].aspsp_logo }
+          : undefined);
+      const rawBankName = connInfo?.name || 'SEB';
       const formattedNumber = formatBankAccountNumber(ba.bban || ba.iban || ba.product || '');
+      const cleanDigits = formattedNumber.replace(/\D/g, '');
+      const isSebBank =
+        rawBankName.toLowerCase().includes('seb') ||
+        rawBankName.toLowerCase().includes('skandinaviska enskilda') ||
+        (cleanDigits.length >= 4 && cleanDigits.startsWith('5'));
+      const bankName = isSebBank ? 'SEB' : rawBankName;
+      const displayName = getBankAccountTitle(ba, bankName);
       return {
         id: ba.id,
         name: displayName,
@@ -2497,7 +2508,7 @@ export const App: React.FC = () => {
         bankName,
         balance: Number(ba.balance_amount) || 0,
         type: 'checking' as const,
-        logo: connInfo?.logo || getLogoUrl(bankName, 'Bank'),
+        logo: isSebBank ? SEB_SVG_DATA_URI : connInfo?.logo || getLogoUrl(bankName, 'Bank'),
       };
     });
   }, [connections, bankAccounts]);
@@ -3978,6 +3989,8 @@ export const App: React.FC = () => {
             ? 'Kvitton'
             : activeTab === 'matpriskollen'
             ? 'Matpriskollen'
+            : activeTab === 'account-detail'
+            ? 'Banköversikt'
             : null
         }
         onBack={() => {
@@ -4097,7 +4110,7 @@ export const App: React.FC = () => {
                   onNavigateToTransactions={() => setActiveTab('transactions')}
                   onSelectAccount={(accountId) => {
                     setSelectedHistoryAccountId(accountId);
-                    setActiveTab('transactions');
+                    setActiveTab('account-detail');
                   }}
                   onToggleHeart={handleToggleHeart}
                   onTogglePackage={handleTogglePackage}
@@ -4105,6 +4118,31 @@ export const App: React.FC = () => {
                   onUpdateTransaction={handleUpdateTransaction}
                 />
               )}
+
+              {activeTab === 'account-detail' && (() => {
+                const detailAcc =
+                  accounts.find((a) => a.id === selectedHistoryAccountId) || accounts[0];
+                if (!detailAcc) return null;
+                return (
+                  <BankAccountDetailView
+                    account={detailAcc}
+                    accounts={accounts}
+                    totalBalance={totalBalance}
+                    transactions={displayTransactions}
+                    fixedExpenses={fixedExpenses}
+                    incomes={incomes}
+                    period={period}
+                    onSelectAccount={(accountId) => setSelectedHistoryAccountId(accountId)}
+                    onSelectTransaction={(tx) => {
+                      setSelectedTransaction(tx);
+                      setIsTxModalOpen(true);
+                    }}
+                    onToggleHeart={handleToggleHeart}
+                    onTogglePackage={handleTogglePackage}
+                    onExcludeTransaction={handleExcludeTransaction}
+                  />
+                );
+              })()}
 
               {activeTab === 'fixed' && (
                 <FixedTab
