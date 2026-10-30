@@ -1612,16 +1612,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
   const rowTitleClass =
-    'font-medium text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-[1.3] text-[var(--text-primary)] block truncate';
+    'font-normal text-[14.5px] sm:text-[15px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
   const rowSubClass =
-    'font-normal text-[11.5px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
+    'font-normal text-[12px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
   const sectionLabelClass =
-    'px-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)] block';
+    'px-1 pt-2 pb-0.5 text-[17px] sm:text-[18px] font-semibold tracking-[-0.015em] text-[var(--text-primary)] block';
 
   const savingsGoalsCount = getSavingsGoals().length;
 
   return (
-    <div className="space-y-4 pb-40 sm:pb-44 animate-slide-in-left">
+    <div className="space-y-5 pb-40 sm:pb-44 animate-slide-in-left">
       {hiddenAvatarInput}
 
       {/* 1. Konto / Profil */}
@@ -1659,7 +1659,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       </div>
 
       {/* 2. Ekonomi */}
-      <section className="space-y-1.5">
+      <section className="space-y-2">
         <span className={sectionLabelClass}>Ekonomi</span>
         <div className="ui-admin-card">
           {/* Bankkonton */}

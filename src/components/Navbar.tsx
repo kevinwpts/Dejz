@@ -126,6 +126,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div
         aria-hidden="true"
         style={{
+          height: 'env(safe-area-inset-top, 0px)',
+          backgroundColor: 'var(--bg-color)',
+        }}
+        className="fixed top-0 left-0 right-0 z-[60] pointer-events-none bg-[var(--bg-color)]"
+      />
+      <div
+        aria-hidden="true"
+        style={{
           height: 'calc(3.5rem + var(--safe-top, env(safe-area-inset-top, 0px)) + 8px)',
         }}
         className="w-full shrink-0"
@@ -133,34 +141,30 @@ export const Navbar: React.FC<NavbarProps> = ({
       <header
         style={{
           paddingTop: 'calc(var(--safe-top, env(safe-area-inset-top, 0px)) + 8px)',
-          backgroundColor: isAtTop ? 'transparent' : 'var(--surface-color)',
-          backdropFilter: isAtTop ? 'none' : 'blur(20px)',
-          WebkitBackdropFilter: isAtTop ? 'none' : 'blur(20px)',
+          backgroundColor: 'var(--bg-color)',
         }}
         className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-250 ease-out ${
           isHidden
             ? '-translate-y-full opacity-0 pointer-events-none'
             : 'translate-y-0 opacity-100'
-        } ${
-          isAtTop
-            ? 'border-b border-transparent'
-            : 'border-b border-[var(--border-subtle)] shadow-subtle'
-        }`}
+        } ${isAtTop ? 'app-header-top' : 'app-header-scrolled'}`}
       >
-        <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-3">
-          {/* Vänster: Tillbakapil + Sidrubrik på undersidor, annars Profilbild */}
+        <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-3">
+          {/* Vänster: Rund tillbakaknapp + centrerad sidrubrik på undersidor, annars Profilbild */}
           {pageTitle ? (
-            <button
-              type="button"
-              onClick={onBack || onLogoClick}
-              className="flex items-center gap-1.5 -ml-1.5 min-w-0 py-1.5 px-1.5 rounded-full focus:outline-none hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer text-[var(--text-primary)]"
-              aria-label="Tillbaka"
-            >
-              <CaretLeft size={19} weight="bold" className="shrink-0" />
-              <span className="font-display font-semibold text-[17.5px] tracking-[-0.01em] truncate">
+            <>
+              <button
+                type="button"
+                onClick={onBack || onLogoClick}
+                className="w-10 h-10 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-subtle flex items-center justify-center focus:outline-none hover:bg-[var(--surface-hover)] active:scale-95 transition-all cursor-pointer text-[var(--text-primary)] shrink-0 z-10"
+                aria-label="Tillbaka"
+              >
+                <CaretLeft size={18} weight="regular" />
+              </button>
+              <span className="absolute left-14 right-14 text-center font-display font-semibold text-[16px] tracking-[-0.01em] text-[var(--text-primary)] truncate pointer-events-none">
                 {pageTitle}
               </span>
-            </button>
+            </>
           ) : (
             <button
               type="button"

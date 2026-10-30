@@ -26,9 +26,12 @@
           }
         }, true);
         try {
+          var pref = localStorage.getItem('dejz_theme_pref');
           var saved = localStorage.getItem('dejz_dark_mode');
-          var onboardingDone = localStorage.getItem('dejz_onboarding_completed') === 'true';
-          var isDark = saved === 'dark' && onboardingDone;
+          var onboardingDone = localStorage.getItem('dejz_onboarding_completed') === 'true' || localStorage.getItem('dejz_onboarding_v2_done') === 'true';
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var effectiveMode = pref === 'system' ? (prefersDark ? 'dark' : 'light') : (pref || saved || 'light');
+          var isDark = effectiveMode === 'dark' && onboardingDone;
           var root = document.documentElement;
           var metaTheme = document.querySelector('meta[name="theme-color"]');
           if (isDark) {
@@ -86,10 +89,10 @@
     <!-- Preload Hero Image for Core Web Vitals (LCP) -->
     <link rel="preload" as="image" href="/dejz_02.png" fetchpriority="high" />
 
-    <!-- Fonts - Plus Jakarta Sans, Outfit & JetBrains Mono -->
+    <!-- Fonts - Poppins & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -130,10 +133,10 @@
         padding: 0;
       }
       html.dark, body.dark {
-        background-color: #0B0F17;
+        background-color: #0A0A0C;
       }
       html.light, body.light, html:not(.dark), body:not(.dark) {
-        background-color: var(--bg-color, #F3F8FC);
+        background-color: var(--bg-color, #F6F6F4);
       }
     </style>
   </head>

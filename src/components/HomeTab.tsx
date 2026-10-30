@@ -680,22 +680,19 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       <section className="ui-card-p">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[var(--text-muted)] font-medium">
+            <span className="text-[13px] text-[var(--text-secondary)] font-normal">
               Kvar att spendera
             </span>
-            <span className="text-xs font-semibold text-[var(--text-secondary)] tabular-nums">
+            <span className="text-[13px] font-normal text-[var(--text-secondary)] tabular-nums">
               {period.startLabel} – {period.endLabel}
             </span>
           </div>
 
           {isInitialLoading && accounts.length === 0 ? (
-            <div className="h-10 w-44 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
+            <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
           ) : (
-            <div className="font-display text-[40px] sm:text-[44px] font-bold tracking-[-0.03em] leading-none text-[var(--text-primary)] tabular-nums mt-1 flex items-baseline">
-              <span>{new Intl.NumberFormat('sv-SE').format(Math.round(kvarAttSpendera))}</span>
-              <span className="text-[20px] sm:text-[22px] font-semibold text-[var(--text-muted)] ml-1.5 tracking-normal">
-                kr
-              </span>
+            <div className="font-display text-[30px] sm:text-[32px] font-semibold tracking-[-0.02em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+              {formatKr(kvarAttSpendera)}
             </div>
           )}
         </div>
@@ -746,20 +743,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO MED MJUK KONTO-ACCORDION                 */}
       {/* ============================================================== */}
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3 sm:px-5 sm:py-3.5">
+      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <span className="text-xs text-[var(--text-secondary)] font-medium block">
+            <span className="text-[13px] text-[var(--text-secondary)] font-normal block">
               Totalt saldo
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-7 w-32 rounded-lg bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <div className="font-display text-2xl sm:text-[26px] font-bold tracking-[-0.02em] text-[var(--text-primary)] tabular-nums mt-0.5 flex items-baseline">
-                <span>{new Intl.NumberFormat('sv-SE').format(Math.round(totalBalance))}</span>
-                <span className="text-[15px] font-semibold text-[var(--text-muted)] ml-1 tracking-normal">
-                  kr
-                </span>
+              <div className="font-display text-[26px] sm:text-[28px] font-semibold tracking-[-0.02em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+                {formatKr(totalBalance)}
               </div>
             )}
           </div>
@@ -772,13 +766,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 setShowAccounts(next);
                 setShowAccountsOnHome(next);
               }}
-              className="py-1 px-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+              className="py-1 px-1.5 text-[13px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
               title={showAccounts ? 'Dölj kontolista' : 'Visa kontolista'}
             >
               <span>{showAccounts ? 'Dölj konton' : 'Visa konton'}</span>
               <CaretDown
                 size={12}
-                weight="bold"
+                weight="regular"
                 className={`transition-transform duration-200 ${
                   showAccounts ? 'rotate-180' : ''
                 }`}
@@ -813,7 +807,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       title={`Visa transaktioner för ${acc.name}`}
                       className="w-full py-2.5 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <ItemLogo
                           name={acc.bankName || acc.name}
                           category="Bank"
@@ -821,11 +815,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           size="sm"
                         />
                         <div className="min-w-0 flex-1">
-                          <span className="font-medium text-[var(--text-primary)] block truncate">
+                          <span className="font-normal text-[14.5px] text-[var(--text-primary)] block truncate">
                             {acc.name}
                           </span>
                           {(acc.bankName || (hasDuplicateName && last4)) && (
-                            <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+                            <span className="text-[12px] font-normal text-[var(--text-secondary)] block truncate">
                               {acc.bankName}
                               {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
                             </span>
@@ -833,12 +827,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="font-display font-semibold text-[var(--text-primary)] tabular-nums">
+                        <span className="font-display font-semibold text-[14.5px] text-[var(--text-primary)] tabular-nums">
                           {formatKr(acc.balance)}
                         </span>
                         <CaretRight
-                          size={12}
-                          weight="bold"
+                          size={13}
+                          weight="regular"
                           className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
                         />
                       </div>
@@ -1026,17 +1020,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 <span
                   className={`text-[11px] leading-none ${
                     isSelected
-                      ? 'text-[var(--bg-color)]/75 font-medium'
+                      ? 'text-[var(--bg-color)]/80 font-normal'
                       : isToday
                       ? 'text-[var(--text-primary)] font-semibold'
-                      : 'text-[var(--text-muted)] font-medium'
+                      : 'text-[var(--text-muted)] font-normal'
                   }`}
                 >
                   {day.topLabel}
                 </span>
                 <span
-                  className={`font-display text-[15px] tabular-nums leading-none mt-1.5 no-privacy-blur ${
-                    isSelected || isToday ? 'font-bold' : 'font-semibold'
+                  className={`font-display text-[14.5px] tabular-nums leading-none mt-1.5 no-privacy-blur ${
+                    isSelected || isToday ? 'font-semibold' : 'font-normal'
                   }`}
                 >
                   {day.dayNum}
