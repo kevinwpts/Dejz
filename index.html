@@ -86,7 +86,8 @@
     <meta name="twitter:image" content="https://dejz.se/dejz_02.png" />
     <meta name="twitter:image:alt" content="Dejz – Personlig ekonomi och budget från lön till lön" />
 
-    <!-- Preload Hero Image for Core Web Vitals (LCP) -->
+    <!-- Preload Hero & Splash Logo for Core Web Vitals (LCP) -->
+    <link rel="preload" as="image" href="/dejz_mork.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/dejz_02.png" fetchpriority="high" />
 
     <!-- Fonts - Poppins & JetBrains Mono -->
@@ -138,9 +139,64 @@
       html.light, body.light, html:not(.dark), body:not(.dark) {
         background-color: var(--bg-color, #F6F6F4);
       }
+
+      #dejz-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #F6F6F4;
+        transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0.42s;
+        will-change: opacity, transform;
+      }
+      html.dark #dejz-splash {
+        background-color: #0A0A0C;
+      }
+      #dejz-splash.dejz-splash-hide {
+        opacity: 0;
+        transform: scale(1.035);
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .dejz-splash-logo-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: dejzSplashIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .dejz-splash-logo {
+        height: 30px;
+        width: auto;
+        object-fit: contain;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      html.dark .dejz-splash-logo {
+        filter: invert(1) brightness(1.08);
+      }
+      @keyframes dejzSplashIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.92) translateY(4px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="dejz-splash" aria-hidden="true">
+      <div class="dejz-splash-logo-wrap">
+        <img src="/dejz_mork.png" alt="Dejz" class="dejz-splash-logo" />
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
