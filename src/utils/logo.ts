@@ -42,9 +42,6 @@ export const checkImage = (url: string, timeoutMs = 2500): Promise<boolean> => {
 
 import { SWISH_SVG_DATA_URI } from '../components/SwishLogo';
 
-export const SEB_SVG_DATA_URI =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23121519'/%3E%3Crect y='110' width='120' height='10' fill='%2360CD18'/%3E%3Cpath d='M33.5 47 C32 44.2 29.2 43 25.5 43 C20.8 43 18 45.4 18 48.8 C18 52.5 21.2 53.8 26 55.2 C31.2 56.7 34.5 58.6 34.5 63.2 C34.5 67.5 31 70.5 25.2 70.5 C21 70.5 18 69 16.2 66.2' stroke='%23FFFFFF' stroke-width='6.2' stroke-linecap='butt' fill='none'/%3E%3Cline x1='43' y1='32' x2='43' y2='82' stroke='%23FFFFFF' stroke-width='3.6'/%3E%3Cpath d='M67 43.5 H53 V70 H67 M53 56.75 H65' stroke='%23FFFFFF' stroke-width='6.2' stroke-linecap='butt' stroke-linejoin='miter' fill='none'/%3E%3Cline x1='77' y1='32' x2='77' y2='82' stroke='%23FFFFFF' stroke-width='3.6'/%3E%3Cpath d='M86 43.5 H95.5 C99.5 43.5 102 45.8 102 49.8 C102 53.8 99.5 56.2 95.5 56.2 H86 M86 56.2 H96.5 C100.8 56.2 103.2 58.8 103.2 63.1 C103.2 67.4 100.8 70 96.5 70 H86 M86 40.4 V73.1' stroke='%23FFFFFF' stroke-width='6.2' stroke-linecap='butt' stroke-linejoin='miter' fill='none'/%3E%3C/svg%3E";
-
 /**
  * Domains where img.logo.dev serves a scraped og:image photograph instead of a logo,
  * or where a specific high-resolution favicon/logo endpoint is verified superior.
@@ -53,7 +50,6 @@ export const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
     'folksam.se': 'https://www.google.com/s2/favicons?domain=https://www.folksam.se&sz=128',
     'getswish.se': SWISH_SVG_DATA_URI,
     'swish.nu': SWISH_SVG_DATA_URI,
-    'seb.se': SEB_SVG_DATA_URI,
 };
 
 /**
@@ -760,10 +756,6 @@ export const KNOWN_BRANDS: Record<string, string> = {
     // --- BANK, KREDIT & INVESTERING ---
     'swedbank': 'swedbank.se',
     'seb': 'seb.se',
-    'skandinaviska enskilda banken': 'seb.se',
-    'seb bank': 'seb.se',
-    'seb privat': 'seb.se',
-    'seb kort': 'seb.se',
     'nordea': 'nordea.se',
     'handelsbanken': 'handelsbanken.se',
     'shb': 'handelsbanken.se',
@@ -1645,20 +1637,6 @@ export function sanitizeLogoUrl(url?: string, name?: string, category?: string):
         if (url.includes(overrideDomain)) {
             return overrideUrl;
         }
-    }
-
-    // Handle Enable Banking directory URLs (e.g., "https://enablebanking.com/brands/SE/SEB/")
-    if (url.includes('enablebanking.com/brands/')) {
-        if (/\/seb(\b|%20|\/|$)/i.test(url)) {
-            return SEB_SVG_DATA_URI;
-        }
-        const decodedUrl = decodeURIComponent(url);
-        const brandPart = decodedUrl.split('/brands/')[1]?.replace(/^[A-Z]{2}\//i, '').replace(/\/$/, '') || '';
-        const knownDomain = findKnownBrandDomain(name || brandPart, category);
-        if (knownDomain) {
-            return getDomainPrimaryLogoUrl(knownDomain);
-        }
-        return undefined;
     }
 
     // If this is an automatic logo URL (logo.dev / google favicons / clearbit) and we have the item's name,

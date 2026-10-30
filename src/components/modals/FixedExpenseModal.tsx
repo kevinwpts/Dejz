@@ -19,7 +19,7 @@ import {
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, AccountItem, TransactionItem, getTransactionTime } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon, resolveCategoryColor } from '../CategoryIcon';
+import { CategoryIcon } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
@@ -1166,27 +1166,16 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
           </div>
 
           {/* Hero Receipt Header (Ren förhandsgranskning utan inline-inputs) */}
-          <div className="ui-hero-header relative overflow-hidden mb-5 pb-5">
-            {(() => {
-              const accentColor = resolveCategoryColor(category);
-              return (
-                <>
-                  <div
-                    className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full blur-2xl opacity-15 dark:opacity-20"
-                    style={{ backgroundColor: accentColor }}
-                  />
-                  <div className="relative flex justify-center mb-3.5">
-                    <ItemLogo
-                      name={displayName}
-                      category={category}
-                      logoUrl={activeExpense?.logo}
-                      size="xl"
-                      isRecurring={true}
-                    />
-                  </div>
-                </>
-              );
-            })()}
+          <div className="ui-hero-header mb-5 pb-5">
+            <div className="flex justify-center mb-3.5">
+              <ItemLogo
+                name={displayName}
+                category={category}
+                logoUrl={activeExpense?.logo}
+                size="xl"
+                isRecurring={true}
+              />
+            </div>
 
             <h2 className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center truncate px-2">
               {displayName}

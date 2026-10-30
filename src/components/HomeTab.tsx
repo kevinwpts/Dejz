@@ -18,7 +18,6 @@ import { SwishLogo } from './SwishLogo';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
-import { SEB_SVG_DATA_URI } from '../utils/logo';
 import {
   formatIsoTimeStockholm,
   formatSwedishDateHeading,
@@ -729,57 +728,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {formatKr(kvarAttSpendera)}
             </div>
           )}
-
-          {/* Tydligt färgkodad indikator för Kvar (Grön), Fasta (Indigoblå) och Rörligt (Amber/Orange) */}
-          {!(isInitialLoading && accounts.length === 0) && totalIncome > 0 && (
-            <div className="mt-3.5 h-2 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-1">
-              {(() => {
-                const fixedRatio = Math.min(100, Math.max(0, (totalFixedExpenses / totalIncome) * 100));
-                const variableRatio = Math.min(
-                  100 - fixedRatio,
-                  Math.max(0, (totalVariableSpent / totalIncome) * 100)
-                );
-                const remainingRatio = Math.max(0, 100 - fixedRatio - variableRatio);
-                return (
-                  <>
-                    {remainingRatio > 0 && (
-                      <div
-                        className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400 transition-all duration-500"
-                        style={{ width: `${remainingRatio}%` }}
-                        title={`Kvar att spendera (${Math.round(remainingRatio)}%)`}
-                      />
-                    )}
-                    {fixedRatio > 0 && (
-                      <div
-                        className="h-full rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-500"
-                        style={{ width: `${fixedRatio}%` }}
-                        title={`Fasta utgifter (${Math.round(fixedRatio)}%)`}
-                      />
-                    )}
-                    {variableRatio > 0 && (
-                      <div
-                        className="h-full rounded-full bg-amber-500 dark:bg-amber-400 transition-all duration-500"
-                        style={{ width: `${variableRatio}%` }}
-                        title={`Rörligt spenderat (${Math.round(variableRatio)}%)`}
-                      />
-                    )}
-                  </>
-                );
-              })()}
-            </div>
-          )}
         </div>
 
-        {/* 3-Column Hairline Breakdown med tydliga färgprickar & beloppsfärger */}
+        {/* 3-Column Hairline Breakdown (No nested boxes) */}
         <div className="ui-stat-grid pt-4 mt-4 border-t border-[var(--border-subtle)]">
           <button
             type="button"
             onClick={() => setActiveHeroPopup('income')}
             className="pr-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
           >
-            <span className="ui-stat-label flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0" />
-              <span>Inkomst</span>
+            <span className="ui-stat-label">
+              Inkomst
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
@@ -795,14 +754,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             onClick={() => setActiveHeroPopup('fixed')}
             className="px-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
           >
-            <span className="ui-stat-label flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0" />
-              <span>Fasta</span>
+            <span className="ui-stat-label">
+              Fasta
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <span className="ui-stat-value text-indigo-600 dark:text-indigo-400">
+              <span className="ui-stat-value">
                 -{formatKr(totalFixedExpenses)}
               </span>
             )}
@@ -813,14 +771,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             onClick={() => setActiveHeroPopup('variable')}
             className="pl-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
           >
-            <span className="ui-stat-label flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 shrink-0" />
-              <span>Rörligt</span>
+            <span className="ui-stat-label">
+              Rörligt
             </span>
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <span className="ui-stat-value text-amber-600 dark:text-amber-400">
+              <span className="ui-stat-value">
                 -{formatKr(totalVariableSpent)}
               </span>
             )}
@@ -829,7 +786,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </section>
 
       {/* ============================================================== */}
-      {/* MODUL 2: TOTALT SALDO & MINA KONTON (Alltid synlig överblick)  */}
+      {/* MODUL 2: TOTALT SALDO MED MJUK KONTO-ACCORDION                 */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
         <div className="flex items-center justify-between gap-3">
@@ -847,152 +804,116 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
 
           {accounts.length > 0 && (
-            <span className="text-[11.5px] font-medium text-[var(--text-muted)] tabular-nums shrink-0">
-              {accounts.length} {accounts.length === 1 ? 'konto' : 'konton'}
-            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const next = !showAccounts;
+                setShowAccounts(next);
+                setShowAccountsOnHome(next);
+              }}
+              className="py-1 px-1.5 text-[12px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+              title={showAccounts ? 'Dölj kontolista' : 'Visa kontolista'}
+            >
+              <span>{showAccounts ? 'Dölj konton' : 'Visa konton'}</span>
+              <CaretDown
+                size={12}
+                weight="regular"
+                className={`transition-transform duration-200 ${
+                  showAccounts ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
           )}
         </div>
 
-        {/* Tydligt färgkodad saldofördelning när man har flera konton */}
-        {accounts.length > 1 && totalBalance > 0 && (
-          <div className="mt-3 h-2 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-1">
-            {accounts.map((acc, idx) => {
-              const positiveSum = accounts.reduce(
-                (s, a) => s + Math.max(0, Number(a.balance) || 0),
-                0
-              );
-              const share =
-                positiveSum > 0
-                  ? (Math.max(0, Number(acc.balance) || 0) / positiveSum) * 100
-                  : 0;
-              if (share <= 0) return null;
-              const palette = ['#10B981', '#38BDF8', '#818CF8', '#F59E0B', '#EC4899'];
-              const barColor = palette[idx % palette.length];
-              return (
-                <div
-                  key={acc.id}
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.max(5, share)}%`,
-                    backgroundColor: barColor,
-                  }}
-                  title={`${acc.name}: ${formatKr(acc.balance)}`}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* Mjukt utfällbar lista med anslutna konton */}
+        <div
+          className={`grid transition-all duration-200 ease-out ${
+            showAccounts ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'
+          }`}
+        >
+          <div className="overflow-hidden">
+            {accounts.length > 0 ? (
+              <div className="pt-2.5 border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+                {accounts.map((acc) => {
+                  const hasDuplicateName =
+                    accounts.filter(
+                      (other) =>
+                        other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
+                    ).length > 1;
+                  const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+                  const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
 
-        {/* Alltid synlig vertikal kontolista med tydlig SEB-logga (ingen horisontell scroll) */}
-        <div className="mt-3.5 pt-3 border-t border-[var(--border-subtle)]">
-          {accounts.length > 0 ? (
-            <div className="divide-y divide-[var(--border-subtle)] -my-1">
-              {accounts.map((acc, idx) => {
-                const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
-                const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
-                const palette = ['#10B981', '#38BDF8', '#818CF8', '#F59E0B', '#EC4899'];
-                const accentColor = palette[idx % palette.length];
-                const isSebAcc =
-                  (acc.bankName || '').toLowerCase().includes('seb') ||
-                  (acc.name || '').toLowerCase().includes('seb') ||
-                  (cleanDigits.length >= 4 && cleanDigits.startsWith('5')) ||
-                  !acc.bankName ||
-                  acc.bankName === 'Bank';
-                const displayBankName = isSebAcc ? 'SEB' : acc.bankName;
-                const displayLogo = isSebAcc ? SEB_SVG_DATA_URI : acc.logo;
-
-                return (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    onClick={() => onSelectAccount?.(acc.id)}
-                    title={`Öppna banköversikt för ${acc.name}`}
-                    className="w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <ItemLogo
-                        name={displayBankName}
-                        category="Bank"
-                        logoUrl={displayLogo}
-                        size="md"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-medium text-[13.5px] sm:text-[14px] tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate">
+                  return (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => onSelectAccount?.(acc.id)}
+                      title={`Visa transaktioner för ${acc.name}`}
+                      className="w-full py-2.5 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <ItemLogo
+                          name={acc.bankName || acc.name}
+                          category="Bank"
+                          logoUrl={acc.logo}
+                          size="sm"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
                             {acc.name}
                           </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11.5px] text-[var(--text-secondary)] mt-0.5">
-                          {accounts.length > 1 && (
-                            <span
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: accentColor }}
-                            />
+                          {(acc.bankName || (hasDuplicateName && last4)) && (
+                            <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
+                              {acc.bankName}
+                              {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
+                            </span>
                           )}
-                          <span className="font-medium text-[var(--text-secondary)]">
-                            {displayBankName}
-                          </span>
-                          {acc.accountNumber ? (
-                            <>
-                              <span className="text-[var(--text-muted)]">·</span>
-                              <span className="font-mono text-[11px] text-[var(--text-muted)] truncate">
-                                {acc.accountNumber}
-                              </span>
-                            </>
-                          ) : last4 ? (
-                            <>
-                              <span className="text-[var(--text-muted)]">·</span>
-                              <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                                •••• {last4}
-                              </span>
-                            </>
-                          ) : null}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-display font-semibold text-[14.5px] sm:text-[15px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
-                        {formatKr(acc.balance)}
-                      </span>
-                      <CaretRight
-                        size={13}
-                        weight="bold"
-                        className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 transition-all shrink-0"
-                      />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          ) : isInitialLoading ? (
-            <div className="space-y-2.5 animate-pulse">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)]" />
-                  <div className="space-y-1.5">
-                    <div className="w-24 h-3 rounded bg-[var(--surface-raised)]" />
-                    <div className="w-16 h-2 rounded bg-[var(--surface-raised)]" />
-                  </div>
-                </div>
-                <div className="w-20 h-3.5 rounded bg-[var(--surface-raised)]" />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
+                          {formatKr(acc.balance)}
+                        </span>
+                        <CaretRight
+                          size={12}
+                          weight="regular"
+                          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs text-[var(--text-secondary)]">
-                Ingen bank ansluten
-              </span>
-              <button
-                type="button"
-                onClick={onOpenBank}
-                className="ui-btn-sm-primary"
-              >
-                <Bank size={14} />
-                <span>Anslut</span>
-              </button>
-            </div>
-          )}
+            ) : isInitialLoading ? (
+              <div className="pt-2.5 border-t border-[var(--border-subtle)] space-y-2.5 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--surface-raised)]" />
+                    <div className="space-y-1.5">
+                      <div className="w-24 h-3 rounded bg-[var(--surface-raised)]" />
+                      <div className="w-16 h-2 rounded bg-[var(--surface-raised)]" />
+                    </div>
+                  </div>
+                  <div className="w-20 h-3.5 rounded bg-[var(--surface-raised)]" />
+                </div>
+              </div>
+            ) : (
+              <div className="pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
+                <span className="text-xs text-[var(--text-secondary)]">
+                  Ingen bank ansluten
+                </span>
+                <button
+                  type="button"
+                  onClick={onOpenBank}
+                  className="ui-btn-sm-primary"
+                >
+                  <Bank size={14} />
+                  <span>Anslut</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

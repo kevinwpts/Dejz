@@ -609,9 +609,8 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           </div>
 
           {/* Hero Receipt Header (Ren förhandsgranskning utan inline-inputs) */}
-          <div className="ui-hero-header relative overflow-hidden mb-5 pb-5">
-            <div className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full bg-emerald-500 blur-2xl opacity-15 dark:opacity-20" />
-            <div className="relative flex justify-center mb-3.5">
+          <div className="ui-hero-header mb-5 pb-5">
+            <div className="flex justify-center mb-3.5">
               <ItemLogo
                 name={displayName}
                 category={category}

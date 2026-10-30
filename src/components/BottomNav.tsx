@@ -23,8 +23,7 @@ export type AppTab =
   | 'saved'
   | 'packages'
   | 'receipts'
-  | 'matpriskollen'
-  | 'account-detail';
+  | 'matpriskollen';
 
 interface BottomNavProps {
   activeTab: AppTab;

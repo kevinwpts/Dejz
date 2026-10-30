@@ -87,15 +87,10 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
 
     if (currentSrc && !imgFailed) {
       const isFullBleedTile =
-        currentSrc.includes('img.logo.dev/') ||
-        currentSrc.startsWith('data:image/jpeg') ||
-        (currentSrc.startsWith('data:image/svg+xml') && currentSrc.includes('viewBox=%270%200%20120%20120%27')) ||
-        (currentSrc.startsWith('data:image/svg+xml') && currentSrc.includes("viewBox='0 0 120 120'"));
+        currentSrc.includes('img.logo.dev/') || currentSrc.startsWith('data:image/jpeg');
       return (
         <div
-          className={`${sizeClasses} ${
-            isFullBleedTile ? 'bg-[#121519]' : 'bg-white'
-          } border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0`}
+          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0`}
         >
           <img
             src={currentSrc}

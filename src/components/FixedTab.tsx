@@ -58,9 +58,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
       <section className="ui-card-p">
         <div className="ui-stat-grid">
           <div className="pr-3 min-w-0">
-            <span className="ui-stat-label flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0" />
-              <span>Inkomster</span>
+            <span className="ui-stat-label">
+              Inkomster
             </span>
             <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               +{formatKr(totalIncome)}
@@ -68,30 +67,22 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           </div>
 
           <div className="px-3 min-w-0">
-            <span className="ui-stat-label flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0" />
-              <span>Fasta utgifter</span>
+            <span className="ui-stat-label">
+              Fasta utgifter
             </span>
-            <span className="ui-stat-value text-indigo-600 dark:text-indigo-400">
+            <span className="ui-stat-value">
               -{formatKr(totalFixedExpenses)}
             </span>
           </div>
 
           <div className="pl-3 min-w-0">
-            <span className="ui-stat-label flex items-center gap-1.5">
-              <span
-                className={`w-2 h-2 rounded-full shrink-0 ${
-                  netAfterFixed >= 0
-                    ? 'bg-sky-500 dark:bg-sky-400'
-                    : 'bg-rose-500 dark:bg-rose-400'
-                }`}
-              />
-              <span>Kvar efter fasta</span>
+            <span className="ui-stat-label">
+              Kvar efter fasta
             </span>
             <span
               className={`ui-stat-value ${
                 netAfterFixed >= 0
-                  ? 'text-sky-600 dark:text-sky-400'
+                  ? ''
                   : 'text-rose-600 dark:text-rose-400'
               }`}
             >
@@ -99,34 +90,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             </span>
           </div>
         </div>
-
-        {/* Tydligt färgkodad linje för Fasta utgifter (Indigo) vs Kvar efter fasta (Sky/Grön) */}
-        {totalIncome > 0 && (
-          <div className="mt-3.5 h-2 w-full rounded-full bg-[var(--bg-color)] overflow-hidden flex gap-1">
-            {(() => {
-              const fixedPct = Math.min(100, Math.max(0, (totalFixedExpenses / totalIncome) * 100));
-              const netPct = Math.max(0, 100 - fixedPct);
-              return (
-                <>
-                  {fixedPct > 0 && (
-                    <div
-                      className="h-full rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-500"
-                      style={{ width: `${fixedPct}%` }}
-                      title={`Fasta utgifter (${Math.round(fixedPct)}%)`}
-                    />
-                  )}
-                  {netPct > 0 && (
-                    <div
-                      className="h-full rounded-full bg-sky-500 dark:bg-sky-400 transition-all duration-500"
-                      style={{ width: `${netPct}%` }}
-                      title={`Kvar efter fasta (${Math.round(netPct)}%)`}
-                    />
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        )}
       </section>
 
       {/* ============================================================== */}
