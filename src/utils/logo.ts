@@ -53,7 +53,6 @@ export const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
     'folksam.se': 'https://www.google.com/s2/favicons?domain=https://www.folksam.se&sz=128',
     'getswish.se': SWISH_SVG_DATA_URI,
     'swish.nu': SWISH_SVG_DATA_URI,
-    'seb.se': SEB_SVG_DATA_URI,
 };
 
 /**
@@ -1083,6 +1082,129 @@ export const KNOWN_BRANDS: Record<string, string> = {
     'panini internazionale': 'panini.nu',
     'sibylla': 'sibylla.se',
     'korvmoj': 'sibylla.se',
+    'holy greens': 'holygreens.se',
+    'holygreens': 'holygreens.se',
+    'joe & the juice': 'joeandthejuice.com',
+    'joe and the juice': 'joeandthejuice.com',
+    'phils burger': 'philsburger.se',
+    "phil's burger": 'philsburger.se',
+    'mister york': 'misteryork.se',
+    'jureskogs': 'jureskogs.se',
+    'tugg burgers': 'tuggburgers.se',
+    'tugg': 'tuggburgers.se',
+    'flippin burgers': 'flippinburgers.se',
+    "flippin' burgers": 'flippinburgers.se',
+    'babas': 'babas.nu',
+    "baba's": 'babas.nu',
+    'gnarly burger': 'gnarlyburger.se',
+    'barrels': 'barrels.se',
+    'bun meat bun': 'bunmeatbun.se',
+    'la neta': 'laneta.se',
+    'mahalo': 'mahalo.se',
+    'pom & flora': 'pomochflora.se',
+    'pom och flora': 'pomochflora.se',
+    'mr cake': 'mrcake.se',
+    'mrcake': 'mrcake.se',
+    'vetekatten': 'vetekatten.se',
+    'vete-katten': 'vetekatten.se',
+    'tössebageriet': 'tosse.se',
+    'tossebageriet': 'tosse.se',
+    'lillebrors bageri': 'lillebrorsbageri.se',
+    'st jakobs': 'stjakobs.se',
+    'jakobs stenugnsbageri': 'stjakobs.se',
+    'st jakobs stenugnsbageri': 'stjakobs.se',
+    'da matteo': 'damatteo.se',
+    'damatteo': 'damatteo.se',
+    'drop coffee': 'dropcoffee.com',
+    'johan & nyström': 'johanochnystrom.se',
+    'johan & nystrom': 'johanochnystrom.se',
+    'johan och nyström': 'johanochnystrom.se',
+    'kahls': 'kahls.se',
+    'tehuset java': 'tehusetjava.se',
+    'stikki nikki': 'stikkinikki.com',
+    'stikkinikki': 'stikkinikki.com',
+    'lejonet & björnen': 'lejonetochbjornen.se',
+    'lejonet och björnen': 'lejonetochbjornen.se',
+    'jensens böfhus': 'jensens.com',
+    'jensens bofhus': 'jensens.com',
+    'texas longhorn': 'texaslonghorn.se',
+    'mugwort': 'mugwortbbq.se',
+    'salladsbaren': 'holygreens.se',
+    'saladbar': 'saladbar.se',
+    'picadeli': 'picadeli.se',
+    'condeco': 'condeco.se',
+    'coffeehouse by george': 'coffeehousebygeorge.se',
+    'hollandia': 'hollandia.se',
+    'steinbrenner & nyberg': 'steinbrenner-nyberg.se',
+    'dahls bageri': 'dahls.se',
+    'pågen': 'pagen.se',
+    'pagen': 'pagen.se',
+    'polarbröd': 'polarbrod.se',
+    'arla': 'arla.se',
+    'skånemejerier': 'skanemejerier.se',
+    'oatly': 'oatly.com',
+    'nocco': 'nocco.com',
+    'barebells': 'barebells.com',
+    'celsius': 'celsiussverige.se',
+    'red bull': 'redbull.com',
+    'vitamin well': 'vitaminwell.com',
+    'ramlösa': 'ramlosa.se',
+    'spendrups': 'spendrups.se',
+    'kopparbergs': 'kopparbergs.se',
+    'cloetta': 'cloetta.se',
+    'marabou': 'marabou.se',
+    'olw': 'olw.se',
+    'estrella': 'estrella.se',
+    'svenskt tenn': 'svenskttenn.com',
+    'bolia': 'bolia.com',
+    'newport': 'newport.se',
+    'bagaren och kocken': 'bagarenochkocken.se',
+    'bagaren & kocken': 'bagarenochkocken.se',
+    'kitchentime': 'kitchentime.se',
+    'søstrene grene': 'sostrenegrene.com',
+    'sostrene grene': 'sostrenegrene.com',
+    'flying tiger': 'flyingtiger.com',
+    'revolutionrace': 'revolutionrace.se',
+    'revolution race': 'revolutionrace.se',
+    'aimn': 'aimn.com',
+    'haglöfs': 'haglofs.com',
+    'haglofs': 'haglofs.com',
+    'fjällräven': 'fjallraven.com',
+    'fjallraven': 'fjallraven.com',
+    'peak performance': 'peakperformance.com',
+    'houdini': 'houdinisportswear.com',
+    'helly hansen': 'hellyhansen.com',
+    'didriksons': 'didriksons.com',
+    'polarn o pyret': 'polarnopyret.se',
+    'dormy': 'dormy.com',
+    'team sportia': 'teamsportia.se',
+    'bikester': 'bikester.se',
+    'cykelkraft': 'cykelkraft.se',
+    'matchi': 'matchi.se',
+    'pdl center': 'pdlcenter.se',
+    'every padel': 'everypadel.com',
+    'bokadirekt': 'bokadirekt.se',
+    'timma': 'timma.se',
+    'timecenter': 'timecenter.se',
+    'steam': 'steampowered.com',
+    'epic games': 'epicgames.com',
+    'riot games': 'riotgames.com',
+    'blizzard': 'blizzard.com',
+    'roblox': 'roblox.com',
+    'ticketmaster': 'ticketmaster.se',
+    'axs': 'axs.com',
+    'eventim': 'eventim.se',
+    'tickster': 'tickster.com',
+    'filmstaden': 'filmstaden.se',
+    'sf bio': 'filmstaden.se',
+    'svenska bio': 'svenskabio.se',
+    'nordisk film bio': 'nfbio.se',
+    'olearys bowling': 'olearys.se',
+    'john scott': 'johnscotts.se',
+    "john scott's": 'johnscotts.se',
+    'kappa bar': 'kappabar.se',
+    'boulebar': 'boulebar.se',
+    'shuffleboard': 'olearys.se',
 
     // --- SHOPPING, KLÄDER, MÖBLER, BYGG & ELEKTRONIK ---
     'ikea': 'ikea.se',
@@ -1515,6 +1637,97 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
     return candidates;
 }
 
+const LEARNED_BRANDS_STORAGE_KEY = 'dejz_learned_brand_domains_v1';
+
+interface LearnedBrandEntry {
+    domain: string;
+    category?: string;
+}
+
+let inMemoryLearnedBrands: Record<string, LearnedBrandEntry> | null = null;
+
+function loadLearnedBrandsMap(): Record<string, LearnedBrandEntry> {
+    if (inMemoryLearnedBrands) return inMemoryLearnedBrands;
+    if (typeof window === 'undefined') {
+        inMemoryLearnedBrands = {};
+        return inMemoryLearnedBrands;
+    }
+    try {
+        const raw = localStorage.getItem(LEARNED_BRANDS_STORAGE_KEY);
+        if (!raw) {
+            inMemoryLearnedBrands = {};
+            return inMemoryLearnedBrands;
+        }
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+            inMemoryLearnedBrands = parsed;
+            return inMemoryLearnedBrands!;
+        }
+    } catch {
+        // ignore
+    }
+    inMemoryLearnedBrands = {};
+    return inMemoryLearnedBrands;
+}
+
+export function saveLearnedBrandDomain(name: string, domain: string, category?: string): void {
+    if (!name || !domain) return;
+    const cleanDom = domain.toLowerCase().trim().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').split('/')[0];
+    if (!cleanDom || !cleanDom.includes('.')) return;
+
+    const map = loadLearnedBrandsMap();
+    const candidates = extractBrandSearchCandidates(name.toLowerCase());
+    const keysToSave = new Set<string>([name.toLowerCase().trim(), ...candidates]);
+
+    for (const k of keysToSave) {
+        if (k && k.length >= 2 && !GENERIC_NON_BRAND_WORDS.has(k)) {
+            map[k] = {
+                domain: cleanDom,
+                category: category || map[k]?.category,
+            };
+            const compact = k.replace(/[^a-z0-9åäö]/g, '');
+            if (compact.length >= 3) {
+                map[compact] = {
+                    domain: cleanDom,
+                    category: category || map[compact]?.category,
+                };
+            }
+        }
+    }
+
+    if (typeof window !== 'undefined') {
+        try {
+            localStorage.setItem(LEARNED_BRANDS_STORAGE_KEY, JSON.stringify(map));
+        } catch {
+            // ignore
+        }
+    }
+}
+
+export function getLearnedBrandDomain(name: string): string | undefined {
+    if (!name || name.trim().length < 2) return undefined;
+    const map = loadLearnedBrandsMap();
+    const candidates = extractBrandSearchCandidates(name.toLowerCase());
+    for (const cand of candidates) {
+        if (map[cand]?.domain) return map[cand].domain;
+        const compact = cand.replace(/[^a-z0-9åäö]/g, '');
+        if (compact.length >= 3 && map[compact]?.domain) return map[compact].domain;
+    }
+    return undefined;
+}
+
+export function getLearnedBrandCategory(name: string): string | undefined {
+    if (!name || name.trim().length < 2) return undefined;
+    const map = loadLearnedBrandsMap();
+    const candidates = extractBrandSearchCandidates(name.toLowerCase());
+    for (const cand of candidates) {
+        if (map[cand]?.category) return map[cand].category;
+        const compact = cand.replace(/[^a-z0-9åäö]/g, '');
+        if (compact.length >= 3 && map[compact]?.category) return map[compact].category;
+    }
+    return undefined;
+}
+
 export function findKnownBrandDomain(name: string, category?: string): string | undefined {
     if (!name || name.trim().length < 2) return undefined;
     const lower = name.toLowerCase().trim();
@@ -1546,8 +1759,6 @@ export function findKnownBrandDomain(name: string, category?: string): string | 
     const candidates = extractBrandSearchCandidates(lower);
 
     // 1. Direct & Compact dictionary match across all extracted candidates first!
-    // This guarantees that "Svea Fastigheter(Hyra)", "Sveafastigheter(Hyra)", "Hyra (Svea Fastigheter)",
-    // "Stena Fastigheter(Hyra)", "Victoria Hem (Hyra)" etc. match their exact company before any short prefix key.
     for (const candidate of candidates) {
         if (KNOWN_BRANDS[candidate]) {
             return KNOWN_BRANDS[candidate];
@@ -1578,7 +1789,13 @@ export function findKnownBrandDomain(name: string, category?: string): string | 
         }
     }
 
-    // 2. Word-boundary matching using length-descending keys (so "svea fastigheter" matches before "svea", "ica maxi" before "ica")
+    // 2. Check learned brand domains from previous online/AI lookups
+    const learnedDomain = getLearnedBrandDomain(lower);
+    if (learnedDomain) {
+        return learnedDomain;
+    }
+
+    // 3. Word-boundary matching using length-descending keys (so "svea fastigheter" matches before "svea", "ica maxi" before "ica")
     const spacedLower = lower.replace(/([([<{])/g, ' $1 ').replace(/([)\]>])/g, ' $1 ');
     const normalized = normalizeInputText(spacedLower);
     const primaryCleanCandidate = candidates[0] || spacedLower;
@@ -1638,6 +1855,9 @@ export function getDomainFallbackLogoUrl(domain: string): string {
  */
 export function sanitizeLogoUrl(url?: string, name?: string, category?: string): string | undefined {
     if (!url || url === 'none') return undefined;
+    if (url === SEB_SVG_DATA_URI || (url.startsWith('data:image/svg+xml') && url.includes('%2360CD18'))) {
+        return getDomainPrimaryLogoUrl('seb.se');
+    }
     if (url.startsWith('data:image')) return url;
 
     // Check if any override domain is inside the URL (e.g., img.logo.dev/folksam.se)
@@ -1650,7 +1870,7 @@ export function sanitizeLogoUrl(url?: string, name?: string, category?: string):
     // Handle Enable Banking directory URLs (e.g., "https://enablebanking.com/brands/SE/SEB/")
     if (url.includes('enablebanking.com/brands/')) {
         if (/\/seb(\b|%20|\/|$)/i.test(url)) {
-            return SEB_SVG_DATA_URI;
+            return getDomainPrimaryLogoUrl('seb.se');
         }
         const decodedUrl = decodeURIComponent(url);
         const brandPart = decodedUrl.split('/brands/')[1]?.replace(/^[A-Z]{2}\//i, '').replace(/\/$/, '') || '';
@@ -1663,19 +1883,10 @@ export function sanitizeLogoUrl(url?: string, name?: string, category?: string):
 
     // If this is an automatic logo URL (logo.dev / google favicons / clearbit) and we have the item's name,
     // verify whether findKnownBrandDomain resolves to a known brand domain (or explicit domain in name).
-    // If not, discard the guessed URL so the item cleanly falls back to its category icon instead of a letter avatar.
     if (name && (url.includes('img.logo.dev/') || url.includes('google.com/s2/favicons') || url.includes('logo.clearbit.com/'))) {
         const knownDomain = findKnownBrandDomain(name, category);
-        if (knownDomain) {
-            if (!url.includes(knownDomain)) {
-                return getDomainPrimaryLogoUrl(knownDomain);
-            }
-        } else {
-            const candidates = extractBrandSearchCandidates(name);
-            const explicitDomain = candidates.find((c) => /^[a-z0-9-]+\.(se|nu|com|org|net|io|app|ai|co)$/i.test(c));
-            if (!explicitDomain) {
-                return undefined;
-            }
+        if (knownDomain && !url.includes(knownDomain)) {
+            return getDomainPrimaryLogoUrl(knownDomain);
         }
     }
 
@@ -1764,7 +1975,7 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
         return SWISH_SVG_DATA_URI;
     }
 
-    // Check known brand domains (including parenthetical/modifier-stripped candidates like "Svea Fastigheter(Hyra)")
+    // Check known brand domains (including parenthetical/modifier-stripped candidates and learned domains)
     const knownDomain = findKnownBrandDomain(title, category);
     if (knownDomain) {
         return getDomainPrimaryLogoUrl(knownDomain);
@@ -1783,6 +1994,7 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
 
 // In-memory cache for async company lookups so repeated lookups are instant
 const resolvedLogoCache = new Map<string, string | null>();
+const inflightLogoLookups = new Map<string, Promise<string | undefined>>();
 
 /**
  * Queries Clearbit's public Company Autocomplete API to resolve domains for companies
@@ -1854,9 +2066,34 @@ async function _lookupCompanyDomainOnline(query: string): Promise<string | undef
     }
 }
 
+async function _lookupCompanyViaBackendAi(query: string, category?: string): Promise<{ domain?: string; category?: string }> {
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch('/api/ai/enrich-merchant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: query,
+                type: category === 'Lön' || category === 'Bidrag' || category === 'Inkomst' ? 'income' : 'expense',
+            }),
+            signal: controller.signal,
+        });
+        clearTimeout(timer);
+        if (!res.ok) return {};
+        const data = await res.json();
+        return {
+            domain: typeof data?.domain === 'string' && data.domain.includes('.') ? data.domain : undefined,
+            category: typeof data?.category === 'string' && data.category ? data.category : undefined,
+        };
+    } catch {
+        return {};
+    }
+}
+
 /**
  * Asynchronous logo search that tests candidate URLs to guarantee image validity,
- * with smart parenthetical/modifier extraction and live online company lookup fallback.
+ * with smart parenthetical/modifier extraction, Clearbit Autocomplete, .se domain probe, and Gemini AI fallback.
  */
 export const fetchLogoForName = async (name: string, category?: string): Promise<string | undefined> => {
     if (!name || name.trim().length < 2) return undefined;
@@ -1878,38 +2115,104 @@ export const fetchLogoForName = async (name: string, category?: string): Promise
     if (resolvedLogoCache.has(cacheKey)) {
         return resolvedLogoCache.get(cacheKey) || undefined;
     }
-
-    // 1. Check known brands first (handles "Svea Fastigheter(Hyra)", "Folksam", "ICA Maxi", "Fitness 24-7", etc.)
-    const knownDomain = findKnownBrandDomain(name, category);
-    if (knownDomain) {
-        const candidateUrls = buildDomainLogoUrls(knownDomain);
-        for (const url of candidateUrls) {
-            if (await checkImage(url)) {
-                resolvedLogoCache.set(cacheKey, url);
-                return url;
-            }
-        }
-        // Even if checkImage timed out due to network, return the reliable fallback URL for known brands
-        const fallbackUrl = getDomainFallbackLogoUrl(knownDomain);
-        resolvedLogoCache.set(cacheKey, fallbackUrl);
-        return fallbackUrl;
+    if (inflightLogoLookups.has(cacheKey)) {
+        return inflightLogoLookups.get(cacheKey);
     }
 
-    // 2. Check if user typed an explicit domain (e.g. "synsam.se")
-    const candidates = extractBrandSearchCandidates(name);
-    for (const candidate of candidates) {
-        if (/^[a-z0-9-]+\.(se|nu|com|org|net|io|app|ai|co)$/i.test(candidate)) {
-            const candidateUrls = buildDomainLogoUrls(candidate);
+    const runLookup = async (): Promise<string | undefined> => {
+        // 1. Check known or learned brands first
+        const knownDomain = findKnownBrandDomain(name, category);
+        if (knownDomain) {
+            const candidateUrls = buildDomainLogoUrls(knownDomain);
             for (const url of candidateUrls) {
                 if (await checkImage(url)) {
                     resolvedLogoCache.set(cacheKey, url);
                     return url;
                 }
             }
+            const fallbackUrl = getDomainFallbackLogoUrl(knownDomain);
+            resolvedLogoCache.set(cacheKey, fallbackUrl);
+            return fallbackUrl;
         }
-    }
 
-    // Do not guess unverified domains via Clearbit or blind .se probes — fall back cleanly to category icon
-    resolvedLogoCache.set(cacheKey, null);
-    return undefined;
+        // 2. Check if user typed an explicit domain (e.g. "synsam.se")
+        const candidates = extractBrandSearchCandidates(name);
+        for (const candidate of candidates) {
+            if (/^[a-z0-9-]+\.(se|nu|com|org|net|io|app|ai|co)$/i.test(candidate)) {
+                const candidateUrls = buildDomainLogoUrls(candidate);
+                for (const url of candidateUrls) {
+                    if (await checkImage(url)) {
+                        saveLearnedBrandDomain(name, candidate);
+                        resolvedLogoCache.set(cacheKey, url);
+                        return url;
+                    }
+                }
+            }
+        }
+
+        const primaryCandidate = (candidates[0] || name.toLowerCase().trim())
+            .replace(/\b(ab|hb|kb|aktiebolag|sverige|sweden)\b/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (primaryCandidate.length < 3 || GENERIC_NON_BRAND_WORDS.has(primaryCandidate)) {
+            resolvedLogoCache.set(cacheKey, null);
+            return undefined;
+        }
+
+        // 3. Query Clearbit Company Autocomplete
+        const onlineDomain = await _lookupCompanyDomainOnline(primaryCandidate);
+        if (onlineDomain) {
+            const candidateUrls = buildDomainLogoUrls(onlineDomain);
+            for (const url of candidateUrls) {
+                if (await checkImage(url)) {
+                    saveLearnedBrandDomain(name, onlineDomain);
+                    resolvedLogoCache.set(cacheKey, url);
+                    return url;
+                }
+            }
+        }
+
+        // 4. Query Backend Gemini AI Enricher (/api/ai/enrich-merchant) for any Swedish company
+        const aiResult = await _lookupCompanyViaBackendAi(name, category);
+        if (aiResult.domain) {
+            const candidateUrls = buildDomainLogoUrls(aiResult.domain);
+            for (const url of candidateUrls) {
+                if (await checkImage(url)) {
+                    saveLearnedBrandDomain(name, aiResult.domain, aiResult.category);
+                    resolvedLogoCache.set(cacheKey, url);
+                    return url;
+                }
+            }
+        }
+
+        // 5. Smart .se domain probe (strictly verified via checkImage which rejects 16x16 default globes)
+        const asciiCompact = primaryCandidate
+            .replace(/[åä]/g, 'a')
+            .replace(/[ö]/g, 'o')
+            .replace(/[^a-z0-9]/g, '');
+        if (asciiCompact.length >= 4 && asciiCompact.length <= 24) {
+            const seDomain = `${asciiCompact}.se`;
+            const googleHighResUrl = `https://www.google.com/s2/favicons?domain=https://www.${seDomain}&sz=128`;
+            if (await checkImage(googleHighResUrl)) {
+                saveLearnedBrandDomain(name, seDomain, aiResult.category);
+                const primaryUrl = getDomainPrimaryLogoUrl(seDomain);
+                if (primaryUrl !== googleHighResUrl && await checkImage(primaryUrl)) {
+                    resolvedLogoCache.set(cacheKey, primaryUrl);
+                    return primaryUrl;
+                }
+                resolvedLogoCache.set(cacheKey, googleHighResUrl);
+                return googleHighResUrl;
+            }
+        }
+
+        resolvedLogoCache.set(cacheKey, null);
+        return undefined;
+    };
+
+    const promise = runLookup().finally(() => {
+        inflightLogoLookups.delete(cacheKey);
+    });
+    inflightLogoLookups.set(cacheKey, promise);
+    return promise;
 };

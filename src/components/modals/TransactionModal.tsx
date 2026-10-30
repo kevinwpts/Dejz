@@ -51,6 +51,7 @@ import {
   compressImageFileToDataUrl,
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -282,6 +283,36 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   }, [initialTransaction, isOpen]);
 
+  // Live AI-kategorisering om ett företagsnamn saknas i den lokala ordlistan
+  useEffect(() => {
+    if (!isOpen || subView !== 'edit') return;
+    const trimmed = title.trim();
+    if (trimmed.length < 3) return;
+    const syncInferred = inferCategoryAndMethodFromName(
+      trimmed,
+      isIncome ? 'income' : 'transaction'
+    );
+    if (syncInferred?.category) return;
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      fetchLogoForName(trimmed, category).then(() => {
+        if (cancelled) return;
+        const aiCat = getLearnedBrandCategory(trimmed);
+        if (aiCat) {
+          setCategory(
+            normalizeCategoryToValid(aiCat, isIncome ? 'income' : 'expense')
+          );
+        }
+      });
+    }, 320);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [title, isOpen, subView, isIncome]);
+
   const resolvedAccountInfo = useMemo(() => {
     if (!activeTx) return null;
     const raw = activeTx.bankAccountName || '';
@@ -433,7 +464,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const isTitleChanged = nextTitle !== activeTx.title;
     const isCategoryChanged = category !== activeTx.category;
 
-    if ((isTitleChanged || isCategoryChanged) && similarInfo.transactions.length > 1) {
+    if (isTitleChanged || isCategoryChanged) {
       setShowSimilarPopup(true);
     } else {
       commitEditChanges('single');
@@ -1645,7 +1676,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
-      {/* CENTRERAD POPUP FÖR ATT UPPDATERA LIKNANDE KÖP                 */}
+      {/* CENTRERAD POPUP FÖR ATT BYTA BAKÅT OCH FRAMÅT I TIDEN          */}
       {/* ============================================================== */}
       {showSimilarPopup &&
         activeTx &&
@@ -1656,15 +1687,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             onClick={() => setShowSimilarPopup(false)}
           >
             <div
-              className="w-full max-w-[330px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
+              className="w-full max-w-[340px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-center space-y-1">
+              <div className="text-center space-y-1.5">
                 <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
-                  Uppdatera alla {similarInfo.transactions.length} liknande köp?
+                  {(title.trim() || activeTx.title) !== activeTx.title
+                    ? 'Byt namn bakåt och framåt i tiden?'
+                    : 'Byt kategori bakåt och framåt i tiden?'}
                 </h3>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Gäller alla köp hos {similarInfo.brandLabel || activeTx.title}
+                  Vill du att ändringen till{' '}
+                  <span className="font-medium text-[var(--text-primary)]">
+                    {title.trim() || activeTx.title}
+                  </span>{' '}
+                  ({category}) ska gälla alla befintliga köp bakåt i tiden och alla framtida köp från{' '}
+                  <span className="font-medium text-[var(--text-secondary)]">
+                    {activeTx.counterpartyName || activeTx.rawDescription || activeTx.title}
+                  </span>
+                  {similarInfo.transactions.length > 1
+                    ? ` (${similarInfo.transactions.length} befintliga händelser)`
+                    : ''}
+                  ?
                 </p>
               </div>
 
@@ -1674,7 +1718,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   onClick={() => commitEditChanges('chain')}
                   className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  Uppdatera alla
+                  Byt bakåt och framåt i tiden
                 </button>
 
                 <button

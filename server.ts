@@ -272,6 +272,7 @@ async function startServer() {
         key: it.key,
         cleanName: titleCased,
         category,
+        domain: '',
       };
     };
 
@@ -281,26 +282,16 @@ async function startServer() {
     }
 
     try {
-      const prompt = `Du är en expert på svenska banktransaktioner och kortterminaler (SEB, Swedbank, Nordea, Handelsbanken).
-Banker skickar ofta obegripliga eller förkortade transaktionsrader såsom:
-- "ZETTLE*GBG KAF" -> cleanName: "Göteborgs Kafé", category: "Mat & dryck"
-- "NYX*SVENSKA" -> cleanName: "Varuautomat (Nyx)", category: "Mat & dryck"
-- "KLARNA*84920" -> cleanName: "Klarna", category: "Shopping"
-- "SUMUP *SÖDER BAGERI" -> cleanName: "Söder Bageri", category: "Mat & dryck"
-- "WL * PARKSTER AB" -> cleanName: "Parkster", category: "Transport"
-
-Uppgift:
+      const prompt = `Du är en expert på svenska företag, butiker, restauranger, tjänster och banktransaktioner (SEB, Swedbank, Nordea, Handelsbanken).
 För varje post i JSON-listan nedan:
-1. Tvätta "rawText" till ett snyggt, naturligt och läsbart svenskt butiks-/företagsnamn ("cleanName").
-   - Ta bort betalväxelprefix som ZETTLE*, IZ*, SUMUP*, NYX*, PAYPAL*, STRIPE*, WL*, SP*, SQ*, NETS*, ADYEN* (om inte själva betalväxeln är mottagaren som i "KLARNA*84920" -> "Klarna" eller "NYX*SVENSKA" -> "Varuautomat (Nyx)").
-   - Ta bort ordernummer, butiksnummer, referenskoder och landskoder (t.ex. "*84920", "1421 SE").
-   - Veckla ut vanliga svenska förkortningar naturligt (t.ex. "GBG" -> "Göteborg", "STHLM" -> "Stockholm", "KAF"/"KAFE" -> "Kafé", "REST" -> "Restaurang", "KOND" -> "Konditori").
-2. Sätt rätt kategori ("category") genom att använda BÅDE butiksnamnet, beloppet ("amount") och klockslaget ("time") för att avgöra köpets karaktär (t.ex. ~115-165 kr runt kl 11:30-13:30 på en okänd kortterminal är nästan alltid lunch -> "Mat & dryck"; småbelopp 15-45 kr på automat/terminal är ofta kaffe/snacks -> "Mat & dryck"). Välj EXAKT ETT av följande giltiga kategorinamn:
+1. Identifiera vilken svensk eller internationell aktör köpet/händelsen gäller och ange deras officiella webbdomän i "domain" (utan https:// eller www., t.ex. "holygreens.se", "ica.se", "espressohouse.com", "parkster.com", "varbergsenergi.se"). Om det är en privatperson eller saknar webbplats, ange "".
+2. Ange ett rent visningsnamn i "cleanName".
+3. Sätt exakt rätt kategori ("category") genom att välja ETT av följande giltiga kategorinamn:
    - Om type === "expense", välj bland: ${JSON.stringify(validExpenseCats)}
    - Om type === "income", välj bland: ${JSON.stringify(validIncomeCats)}
-3. Behåll "key" exakt oförändrad så att svaret kan matchas tillbaka.
+4. Behåll "key" exakt oförändrad.
 
-Transaktioner att tvätta:
+Transaktioner att analysera:
 ${JSON.stringify(batch)}`;
 
       const result = await ai.models.generateContent({
@@ -316,6 +307,7 @@ ${JSON.stringify(batch)}`;
                 key: { type: Type.STRING },
                 cleanName: { type: Type.STRING },
                 category: { type: Type.STRING },
+                domain: { type: Type.STRING },
               },
               required: ["key", "cleanName", "category"],
             },
@@ -331,13 +323,17 @@ ${JSON.stringify(batch)}`;
         return res.json({ results: batch.map(fallbackCleanItem) });
       }
 
-      const byKey = new Map<string, { key: string; cleanName: string; category: string }>();
+      const byKey = new Map<string, { key: string; cleanName: string; category: string; domain?: string }>();
       for (const row of parsed) {
         if (row && typeof row.key === 'string' && typeof row.cleanName === 'string' && row.cleanName.trim()) {
+          const cleanDom = typeof row.domain === 'string'
+            ? row.domain.toLowerCase().trim().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').split('/')[0]
+            : '';
           byKey.set(row.key, {
             key: row.key,
             cleanName: row.cleanName.trim(),
             category: typeof row.category === 'string' && row.category.trim() ? row.category.trim() : 'Övrigt',
+            domain: cleanDom && cleanDom.includes('.') ? cleanDom : '',
           });
         }
       }
@@ -347,6 +343,75 @@ ${JSON.stringify(batch)}`;
     } catch (error) {
       console.error('[Gemini] clean-merchants error, using fallback:', error);
       return res.json({ results: batch.map(fallbackCleanItem) });
+    }
+  });
+
+  // AI Merchant & Company Enricher: Resolves official domain (for logo) and category for any Swedish company
+  app.post('/api/ai/enrich-merchant', aiRateLimit, async (req, res) => {
+    const { name, type, categories } = req.body || {};
+    const query = String(name || '').trim();
+    if (!query || query.length < 2 || query.length > 200) {
+      return res.json({ domain: '', category: '' });
+    }
+
+    const validCats: string[] =
+      Array.isArray(categories) && categories.length > 0
+        ? categories
+        : type === 'income'
+        ? ['Lön', 'Bidrag', 'Pension', 'CSN', 'Swish', 'Återbetalning', 'Övrigt']
+        : ['Mat & dryck', 'Uteliv', 'Shopping', 'Boende', 'Transport', 'Nöje', 'Hälsa', 'Abonnemang', 'Försäkring', 'Räkningar', 'Swish', 'Övrigt'];
+
+    const ai = getGenAI();
+    if (!ai) {
+      return res.json({ domain: '', category: '' });
+    }
+
+    try {
+      const prompt = `Du är en expert på svenska företag, restauranger, butiker, kedjor, bostadsbolag, gym, appar och myndigheter i Sverige.
+Användaren har skrivit eller importerat företaget/transaktionen: "${query}" (typ: ${type === 'income' ? 'inkomst' : 'utgift'}).
+
+Returnera JSON med:
+1. "domain": Företagets officiella webbdomän utan https:// eller www. (t.ex. "holygreens.se" för "Holy Greens", "joeandthejuice.com" för "Joe & The Juice", "misteryork.se" för "Mister York", "brodernas.nu" för "Brödernas", "varbergsenergi.se" för "Varbergs Energi"). Om det inte är ett känt företag eller saknar egen webbdomän, returnera "".
+2. "category": Den mest träffsäkra kategorin ur denna lista: ${JSON.stringify(validCats)}.
+   - Restauranger, salladsbarer (t.ex. Holy Greens), caféer, bagerier, snabbmat, barer -> välj "Uteliv" om det finns i listan, annars "Mat & dryck".
+   - Livsmedelsbutiker (ICA, Coop, Willys, Hemköp, Lidl, Systembolaget) -> "Mat & dryck".
+   - Kläder, inredning, elektronik, e-handel -> "Shopping".
+   - Gym, apotek, vård, tandläkare, frisör, padel -> "Hälsa".
+   - Hyra, BRF, el, vatten, bredband, bolån -> "Boende".
+   - Kollektivtrafik, parkering, bensin, laddning, taxi -> "Transport".
+   - Streaming, appar, mobilabonnemang -> "Abonnemang".
+   - Försäkringsbolag -> "Försäkring".`;
+
+      const result = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              domain: { type: Type.STRING },
+              category: { type: Type.STRING },
+            },
+            required: ["domain", "category"],
+          },
+        },
+      });
+
+      const responseText = result.text?.trim() || '{}';
+      const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+      const cleanDomain = typeof parsed.domain === 'string'
+        ? parsed.domain.toLowerCase().trim().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').split('/')[0]
+        : '';
+
+      return res.json({
+        domain: cleanDomain && cleanDomain.includes('.') ? cleanDomain : '',
+        category: typeof parsed.category === 'string' ? parsed.category.trim() : '',
+      });
+    } catch (error) {
+      console.error('[Gemini] enrich-merchant error:', error);
+      return res.json({ domain: '', category: '' });
     }
   });
 

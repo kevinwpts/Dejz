@@ -1,7 +1,7 @@
 import { BankAccount, BankTransactionItem } from '../services/bankService';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { Config, FixedExpense, Frequency, Income, PaydayType, Transaction, WeekendAdjustment } from '../types';
-import { getLogoUrl } from './logo';
+import { getLogoUrl, getLearnedBrandCategory } from './logo';
 import { getPeriodBoundaries } from './date';
 import { getActualBankPaymentDateAndMeta } from './swedishDate';
 import {
@@ -1194,17 +1194,44 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['willys'], cleanName: 'Willys', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['hemköp', 'hemkop'], cleanName: 'Hemköp', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['lidl'], cleanName: 'Lidl', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
-  { keywords: ['city gross'], cleanName: 'City Gross', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['city gross', 'citygross'], cleanName: 'City Gross', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['mathem'], cleanName: 'Mathem', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['hellofresh', 'hello fresh'], cleanName: 'HelloFresh', preferredCategories: ['Mat & dryck', 'Mat'] },
+  { keywords: ['linas matkasse'], cleanName: 'Linas Matkasse', preferredCategories: ['Mat & dryck', 'Mat'] },
   { keywords: ['systembolaget', 'systembolag', 'systembolage', 'sys.bolaget', 'sysbolaget'], cleanName: 'Systembolaget', preferredCategories: ['Mat & dryck', 'Nöjen', 'Uteliv'] },
   { keywords: ['öresundskraft', 'oresundskraft'], cleanName: 'Öresundskraft AB', preferredCategories: ['Boende', 'Räkningar'] },
+  { keywords: ['holy greens', 'holygreens'], cleanName: 'Holy Greens', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['mcdonalds', 'mcdonald'], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['max burgers', 'max hamburger'], cleanName: 'MAX Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['burger king'], cleanName: 'Burger King', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['bastard burgers'], cleanName: 'Bastard Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['brödernas', 'brodernas'], cleanName: 'Brödernas', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['mister york'], cleanName: 'Mister York', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['phil\'s burger', 'phils burger'], cleanName: "Phil's Burger", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['chopchop', 'chop chop'], cleanName: 'ChopChop', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['sushi yama', 'sushiyama'], cleanName: 'Sushi Yama', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['pinchos'], cleanName: 'Pinchos', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['olearys', "o'learys"], cleanName: "O'Learys", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['vapiano'], cleanName: 'Vapiano', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['basta ', 'basta!'], cleanName: 'Basta', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['taco bar', 'tacobar'], cleanName: 'Taco Bar', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['subway'], cleanName: 'Subway', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['kfc'], cleanName: 'KFC', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['pizza hut', 'pizzahut'], cleanName: 'Pizza Hut', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['dominos', "domino's"], cleanName: "Domino's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['espresso house'], cleanName: 'Espresso House', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['waynes', "wayne's coffee"], cleanName: "Wayne's Coffee", preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['joe & the juice', 'joe and the juice'], cleanName: 'Joe & The Juice', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['fabrique'], cleanName: 'Fabrique', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['gateau'], cleanName: 'Gateau', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['bröd & salt', 'brod & salt', 'brod och salt'], cleanName: 'Bröd & Salt', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['mr cake', 'mrcake'], cleanName: 'MR CAKE', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
+  { keywords: ['starbucks'], cleanName: 'Starbucks', preferredCategories: ['Uteliv', 'Café', 'Mat & dryck'] },
   { keywords: ['pressbyrån', 'pressbyran', 'pressbyra'], cleanName: 'Pressbyrån', preferredCategories: ['Mat & dryck', 'Uteliv'] },
-  { keywords: ['7-eleven'], cleanName: '7-Eleven', preferredCategories: ['Mat & dryck', 'Uteliv'] },
+  { keywords: ['7-eleven', '7 eleven'], cleanName: '7-Eleven', preferredCategories: ['Mat & dryck', 'Uteliv'] },
   { keywords: ['foodora'], cleanName: 'Foodora', preferredCategories: ['Uteliv', 'Mat & dryck'] },
   { keywords: ['wolt'], cleanName: 'Wolt', preferredCategories: ['Uteliv', 'Mat & dryck'] },
+  { keywords: ['uber eats', 'ubereats'], cleanName: 'Uber Eats', preferredCategories: ['Uteliv', 'Mat & dryck'] },
   { keywords: ['circle k'], cleanName: 'Circle K', preferredCategories: ['Transport', 'Bilen'] },
   { keywords: ['okq8'], cleanName: 'OKQ8', preferredCategories: ['Transport', 'Bilen'] },
   { keywords: ['preem'], cleanName: 'Preem', preferredCategories: ['Transport', 'Bilen'] },
@@ -1212,8 +1239,13 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['ingo '], cleanName: 'INGO', preferredCategories: ['Transport', 'Bilen'] },
   { keywords: ['easypark'], cleanName: 'EasyPark', preferredCategories: ['Transport', 'Bilen'] },
   { keywords: ['aimo park', 'apcoa', 'parkster'], cleanName: 'Parkering', preferredCategories: ['Transport', 'Bilen'] },
+  { keywords: ['uber '], cleanName: 'Uber', preferredCategories: ['Transport'] },
+  { keywords: ['bolt '], cleanName: 'Bolt', preferredCategories: ['Transport'] },
+  { keywords: ['voi '], cleanName: 'Voi', preferredCategories: ['Transport'] },
+  { keywords: ['ryde '], cleanName: 'Ryde', preferredCategories: ['Transport'] },
   { keywords: ['apotea'], cleanName: 'Apotea', preferredCategories: ['Hälsa', 'Shopping'] },
-  { keywords: ['apoteket', 'kronans apotek', 'apotek hjärtat', 'hjärtat'], cleanName: 'Apotek', preferredCategories: ['Hälsa', 'Shopping'] },
+  { keywords: ['apoteket', 'kronans apotek', 'apotek hjärtat', 'hjärtat', 'meds '], cleanName: 'Apotek', preferredCategories: ['Hälsa', 'Shopping'] },
+  { keywords: ['bokadirekt'], cleanName: 'Bokadirekt', preferredCategories: ['Hälsa', 'Shopping'] },
   { keywords: ['clas ohlson'], cleanName: 'Clas Ohlson', preferredCategories: ['Shopping', 'Hemmet'] },
   { keywords: ['kjell & co', 'kjell o co'], cleanName: 'Kjell & Company', preferredCategories: ['Shopping', 'Elektronik'] },
   { keywords: ['biltema'], cleanName: 'Biltema', preferredCategories: ['Shopping', 'Transport'] },
@@ -1223,7 +1255,25 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['normal '], cleanName: 'NORMAL', preferredCategories: ['Shopping', 'Hälsa'] },
   { keywords: ['h&m', 'hennes & mauritz'], cleanName: 'H&M', preferredCategories: ['Shopping', 'Kläder'] },
   { keywords: ['zara'], cleanName: 'Zara', preferredCategories: ['Shopping', 'Kläder'] },
+  { keywords: ['åhlens', 'ahlens', 'åhléns'], cleanName: 'Åhléns', preferredCategories: ['Shopping'] },
+  { keywords: ['lagerhaus'], cleanName: 'Lagerhaus', preferredCategories: ['Shopping'] },
+  { keywords: ['granit'], cleanName: 'Granit', preferredCategories: ['Shopping'] },
+  { keywords: ['cervera'], cleanName: 'Cervera', preferredCategories: ['Shopping'] },
+  { keywords: ['hemtex'], cleanName: 'Hemtex', preferredCategories: ['Shopping'] },
+  { keywords: ['akademibokhandeln'], cleanName: 'Akademibokhandeln', preferredCategories: ['Shopping'] },
+  { keywords: ['stadium'], cleanName: 'Stadium', preferredCategories: ['Shopping'] },
+  { keywords: ['intersport'], cleanName: 'Intersport', preferredCategories: ['Shopping'] },
+  { keywords: ['xxl'], cleanName: 'XXL', preferredCategories: ['Shopping'] },
+  { keywords: ['boozt'], cleanName: 'Boozt', preferredCategories: ['Shopping'] },
+  { keywords: ['zalando'], cleanName: 'Zalando', preferredCategories: ['Shopping'] },
+  { keywords: ['lyko'], cleanName: 'Lyko', preferredCategories: ['Shopping', 'Hälsa'] },
+  { keywords: ['kicks'], cleanName: 'KICKS', preferredCategories: ['Shopping', 'Hälsa'] },
+  { keywords: ['sephora'], cleanName: 'Sephora', preferredCategories: ['Shopping', 'Hälsa'] },
+  { keywords: ['rituals'], cleanName: 'Rituals', preferredCategories: ['Shopping', 'Hälsa'] },
   { keywords: ['elgiganten'], cleanName: 'Elgiganten', preferredCategories: ['Shopping', 'Elektronik'] },
+  { keywords: ['netonnet'], cleanName: 'NetOnNet', preferredCategories: ['Shopping', 'Elektronik'] },
+  { keywords: ['webhallen'], cleanName: 'Webhallen', preferredCategories: ['Shopping', 'Elektronik'] },
+  { keywords: ['power '], cleanName: 'POWER', preferredCategories: ['Shopping', 'Elektronik'] },
   { keywords: ['klarna'], cleanName: 'Klarna', preferredCategories: ['Shopping', 'Övrigt'] },
 ];
 
@@ -1822,17 +1872,21 @@ export function categorizeBankTransactionForApp(
     };
   }
 
-  // Behåll bankens faktiska butiksnamn (t.ex. "Hemköp Rydebäck") istället för att skriva över det
-  const cleanedBankName = cleanDisplayMerchantName(
-    tx.counterparty_name || effectiveDesc || 'Kortköp'
-  );
+  // Importera bankens namn rätt av vid synk (utan att skriva om det),
+  // såvida inte användaren själv valt att byta namn bakåt/framåt i tiden (userAlias).
+  const directBankName = (tx.counterparty_name || effectiveDesc || 'Kortköp')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const cleanedBankName = cleanDisplayMerchantName(directBankName);
+  const rawOrCleanBankName = directBankName || cleanedBankName || 'Kortköp';
   const hasReadableBankName =
-    cleanedBankName &&
-    cleanedBankName !== 'Banktransaktion' &&
-    cleanedBankName !== 'Kortköp';
+    rawOrCleanBankName &&
+    rawOrCleanBankName.toLowerCase() !== 'banktransaktion' &&
+    rawOrCleanBankName.toLowerCase() !== 'kortköp';
 
   // Kontrollera användarens sparade merchant-alias / regler först (Merchant Memory)
   const userAlias =
+    resolveMerchantAlias(directBankName) ||
     resolveMerchantAlias(cleanedBankName) ||
     resolveMerchantAlias(tx.counterparty_name || '') ||
     resolveMerchantAlias(effectiveDesc);
@@ -1841,14 +1895,14 @@ export function categorizeBankTransactionForApp(
     return {
       merchant: userAlias.name,
       category: resolvedCat,
-      logo: getLogoUrl(userAlias.name, resolvedCat),
+      logo: getLogoUrl(userAlias.name, resolvedCat) || getLogoUrl(directBankName, resolvedCat),
     };
   }
 
   for (const rule of EVERYDAY_MERCHANT_RULES) {
     if (rule.keywords.some((kw) => combined.includes(kw))) {
       const category = resolveCategory(rule.preferredCategories);
-      const displayMerchant = hasReadableBankName ? cleanedBankName : rule.cleanName;
+      const displayMerchant = hasReadableBankName ? rawOrCleanBankName : rule.cleanName;
       return {
         merchant: displayMerchant,
         category,
@@ -1863,7 +1917,7 @@ export function categorizeBankTransactionForApp(
         ? SWEDISH_EXPENSE_PRESETS.find((p) => p.id === rule.presetId)
         : undefined;
       const fallbackDisplay = preset?.name || rule.fallbackName;
-      const displayName = hasReadableBankName ? cleanedBankName : fallbackDisplay;
+      const displayName = hasReadableBankName ? rawOrCleanBankName : fallbackDisplay;
       const category = resolveCategory([preset?.category || rule.category]);
       return {
         merchant: displayName,
@@ -1873,11 +1927,33 @@ export function categorizeBankTransactionForApp(
     }
   }
 
+  // Kontrollera om vi har en inlärd AI-kategori eller keyword-baserad kategori
+  const learnedCat =
+    getLearnedBrandCategory(directBankName) || getLearnedBrandCategory(cleanedBankName);
+  if (learnedCat) {
+    const category = resolveCategory([learnedCat]);
+    return {
+      merchant: rawOrCleanBankName,
+      category,
+      logo: getLogoUrl(rawOrCleanBankName, category),
+    };
+  }
+
+  const inferredManual = inferCategoryAndMethodFromName(rawOrCleanBankName, 'transaction');
+  if (inferredManual?.category) {
+    const category = resolveCategory([inferredManual.category]);
+    return {
+      merchant: rawOrCleanBankName,
+      category,
+      logo: inferredManual.logo || getLogoUrl(rawOrCleanBankName, category),
+    };
+  }
+
   const category = resolveCategory(['Övrigt']);
   return {
-    merchant: cleanedBankName,
+    merchant: rawOrCleanBankName,
     category,
-    logo: getLogoUrl(cleanedBankName, category),
+    logo: getLogoUrl(rawOrCleanBankName, category),
   };
 }
 
@@ -3835,6 +3911,16 @@ export function inferCategoryAndMethodFromName(
       }
     }
 
+    // 5.5 Check learned AI category cache
+    const learnedCategory = getLearnedBrandCategory(trimmed);
+    if (learnedCategory) {
+      return {
+        category: normalizeCategoryToValid(learnedCategory, 'expense'),
+        paymentMethod: kind === 'transaction' ? 'Kort' : undefined,
+        logo: getLogoUrl(trimmed, learnedCategory),
+      };
+    }
+
   // 6. Broad Swedish category keyword fallback for manual names
   const manualKeywordGroups: Array<{
     keywords: string[];
@@ -4039,17 +4125,26 @@ export function inferCategoryAndMethodFromName(
         'strava',
         'whoop',
         'padel',
+        'matchi',
+        'pdm',
         'apotek',
         'apotea',
+        'meds',
         'tandläkare',
         'tandlakare',
         'tandvård',
         'frisör',
         'frisor',
+        'bokadirekt',
         'massage',
+        'naprapat',
+        'kiropraktor',
+        'kry',
+        'doktor',
+        'vårdcentral',
       ],
       category: 'Hälsa',
-      paymentMethod: 'Autogiro',
+      paymentMethod: kind === 'fixed' ? 'Autogiro' : 'Kort',
     },
     {
       keywords: [
@@ -4084,8 +4179,18 @@ export function inferCategoryAndMethodFromName(
         'leasing',
         'uber',
         'bolt',
+        'voi',
+        'tier',
+        'lime',
+        'ryde',
         'taxi',
         'sj',
+        'vy',
+        'mtrx',
+        'flixbus',
+        'sas',
+        'norwegian',
+        'ryanair',
       ],
       category: 'Transport',
       paymentMethod: kind === 'fixed' ? 'Autogiro' : 'Kort',
@@ -4139,17 +4244,26 @@ export function inferCategoryAndMethodFromName(
         'hemkop',
         'lidl',
         'city gross',
+        'citygross',
         'mathem',
+        'hellofresh',
+        'linas matkasse',
         'systembolaget',
         'mat',
         'livsmedel',
         'handla',
+        'ost',
+        'chark',
+        'fisk',
+        'delikatess',
       ],
       category: 'Mat & dryck',
       paymentMethod: 'Kort',
     },
     {
       keywords: [
+        'holy greens',
+        'holygreens',
         'restaurang',
         'lunch',
         'middag',
@@ -4157,18 +4271,116 @@ export function inferCategoryAndMethodFromName(
         'fika',
         'café',
         'cafe',
+        'kafé',
+        'konditori',
+        'bageri',
         'espresso house',
+        'waynes',
+        'joe & the juice',
+        'fabrique',
+        'gateau',
+        'bröd & salt',
+        'brod & salt',
+        'mr cake',
+        'starbucks',
         'foodora',
         'wolt',
+        'uber eats',
         'mcdonalds',
         'burger king',
+        'max burgers',
+        'bastard burgers',
+        'brödernas',
+        'brodernas',
+        'mister york',
+        'phils burger',
+        'chopchop',
+        'sushi',
+        'sushi yama',
+        'pinchos',
+        'olearys',
+        'vapiano',
+        'basta',
+        'taco bar',
+        'subway',
+        'kfc',
+        'pizza',
+        'pizzeria',
+        'kebab',
+        'falafel',
+        'thai',
+        'wok',
+        'ramen',
+        'poké',
+        'poke',
+        'sallad',
+        'salad',
+        'bistro',
+        'brasserie',
+        'krog',
+        'gästgiveri',
         'uteliv',
         'bar',
         'pub',
+        'nattklubb',
         'bio',
         'filmstaden',
+        'konsert',
+        'ticketmaster',
+        'axs',
+        'liseberg',
+        'gröna lund',
       ],
       category: 'Uteliv',
+      paymentMethod: 'Kort',
+    },
+    {
+      keywords: [
+        'shopping',
+        'kläder',
+        'klader',
+        'skor',
+        'inredning',
+        'möbler',
+        'mobler',
+        'elektronik',
+        'h&m',
+        'zara',
+        'åhléns',
+        'ahlens',
+        'lagerhaus',
+        'granit',
+        'cervera',
+        'hemtex',
+        'ikea',
+        'rusta',
+        'jula',
+        'biltema',
+        'clas ohlson',
+        'kjell',
+        'elgiganten',
+        'netonnet',
+        'webhallen',
+        'power',
+        'stadium',
+        'intersport',
+        'xxl',
+        'boozt',
+        'zalando',
+        'lyko',
+        'kicks',
+        'sephora',
+        'rituals',
+        'normal',
+        'akademibokhandeln',
+        'bokus',
+        'adlibris',
+        'blomsterlandet',
+        'plantagen',
+        'arkenzoo',
+        'musti',
+      ],
+      category: 'Shopping',
       paymentMethod: 'Kort',
     },
   ];

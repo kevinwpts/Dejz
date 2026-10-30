@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl } from '../utils/logo';
+import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl, fetchLogoForName } from '../utils/logo';
 import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 
@@ -32,7 +32,26 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     const resolved = sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
     setCurrentSrc(resolved);
     setImgFailed(false);
-  }, [name, category, logoUrl]);
+
+    if (!resolved && name && name.trim().length >= 3 && !isSwish) {
+      let cancelled = false;
+      const timer = window.setTimeout(() => {
+        fetchLogoForName(name, category)
+          .then((foundUrl) => {
+            if (!cancelled && foundUrl) {
+              setCurrentSrc(foundUrl);
+              setImgFailed(false);
+            }
+          })
+          .catch(() => {});
+      }, 220);
+
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timer);
+      };
+    }
+  }, [name, category, logoUrl, isSwish]);
 
   const handleError = () => {
     const fallback = getFallbackLogoUrl(currentSrc, name, category);
@@ -77,7 +96,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     if (isSwish) {
       return (
         <div
-          className={`${sizeClasses} bg-white border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0`}
+          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0`}
           title="Swish"
         >
           <SwishLogo className="w-[66%] h-[66%] object-contain" />
@@ -93,9 +112,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
         (currentSrc.startsWith('data:image/svg+xml') && currentSrc.includes("viewBox='0 0 120 120'"));
       return (
         <div
-          className={`${sizeClasses} ${
-            isFullBleedTile ? 'bg-[#121519]' : 'bg-white'
-          } border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden shrink-0`}
+          className={`${sizeClasses} bg-white flex items-center justify-center overflow-hidden shrink-0`}
         >
           <img
             src={currentSrc}
@@ -103,8 +120,8 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
             onError={handleError}
             className={
               isFullBleedTile
-                ? 'w-full h-full object-cover'
-                : 'w-[68%] h-[68%] object-contain'
+                ? 'w-full h-full object-cover scale-[1.04]'
+                : 'w-[70%] h-[70%] object-contain'
             }
             loading="lazy"
           />

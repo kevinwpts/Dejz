@@ -37,6 +37,7 @@ import {
   compressImageFileToDataUrl,
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -166,6 +167,31 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     setCancelGuide(null);
     setIsLoadingCancelGuide(false);
   }, [initialExpense, isOpen]);
+
+  // Live AI-kategorisering om en tjänst/butik saknas i den lokala ordlistan
+  useEffect(() => {
+    if (!isOpen || subView !== 'edit') return;
+    const trimmed = name.trim();
+    if (trimmed.length < 3) return;
+    const syncInferred = inferCategoryAndMethodFromName(trimmed, 'fixed');
+    if (syncInferred?.category) return;
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      fetchLogoForName(trimmed, category).then(() => {
+        if (cancelled) return;
+        const aiCat = getLearnedBrandCategory(trimmed);
+        if (aiCat) {
+          setCategory(normalizeCategoryToValid(aiCat, 'expense'));
+        }
+      });
+    }, 320);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [name, isOpen, subView]);
 
   const handleOpenCancelGuide = async () => {
     navigateSubView('cancel-guide', 'forward');

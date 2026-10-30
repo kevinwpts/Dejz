@@ -49,7 +49,7 @@ import {
 } from './services/bankService';
 import { dataService } from './services/dataService';
 import { Frequency } from './types';
-import { getLogoUrl } from './utils/logo';
+import { getLogoUrl, saveLearnedBrandDomain } from './utils/logo';
 import {
   analyzeBankTransactionsForOnboarding,
   categorizeBankTransactionForApp,
@@ -275,61 +275,26 @@ function sanitizeTransactionItem(
       if (recat.merchant && !isGenericPlaceholderMerchant(recat.merchant)) {
         const cleanBankLower = recat.merchant.toLowerCase().trim();
         updated.title = recat.merchant;
-        // Om titeln tidigare blivit felaktigt omskriven (t.ex. "Hemköp Rydebäck" -> "Ryde"), återställ även rätt kategori!
         if (
-          prevTitleLower !== cleanBankLower &&
+          (prevTitleLower !== cleanBankLower || updated.category === 'Övrigt') &&
           recat.category &&
           recat.category !== 'Övrigt'
         ) {
           updated.category = recat.category;
         }
       }
-    } else if (updated.title) {
-      updated.title = cleanDisplayMerchantName(updated.title);
     }
   }
 
-  // 3. Deterministisk matchning mot fasta utgifter, fasta inkomster och exakta alias
+  // 3. Kontrollera först om användaren själv har döpt om eller kategoriserat handlaren (bakåt & framåt i tiden)
   const kind = updated.type === 'income' ? 'income' : 'expense';
-
-  if (updated.type !== 'income' && fixedList && fixedList.length > 0) {
-    const matchedFixed = findMatchingFixedExpense(updated, fixedList);
-    if (matchedFixed) {
-      const amountMatches = isFixedExpenseAmountMatch(matchedFixed, updated.amount);
-      updated.title =
-        savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
-          ? savedMeta.customTitle
-          : amountMatches
-          ? matchedFixed.name
-          : updated.title;
-      updated.category = normalizeCategoryToValid(
-        savedMeta?.customCategory || matchedFixed.category,
-        'expense'
-      );
-      updated.logo = matchedFixed.logo || getLogoUrl(updated.title, updated.category);
-      return updated;
-    }
-  }
-
-  if (updated.type === 'income' && incomeList && incomeList.length > 0) {
-    const matchedInc = findMatchingIncome(updated, incomeList);
-    if (matchedInc) {
-      updated.title =
-        savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
-          ? savedMeta.customTitle
-          : matchedInc.name;
-      updated.category = normalizeCategoryToValid(
-        savedMeta?.customCategory || matchedInc.category,
-        'income'
-      );
-      updated.logo = matchedInc.logo || getLogoUrl(updated.title, updated.category);
-      return updated;
-    }
-  }
-
   const rawAliasSource =
-    updated.rawDescription || updated.counterpartyName || updated.title || '';
-  const aliasMatch = resolveMerchantAlias(rawAliasSource, aliasesOverride);
+    updated.counterpartyName || updated.rawDescription || updated.title || '';
+  const aliasMatch =
+    resolveMerchantAlias(rawAliasSource, aliasesOverride) ||
+    (updated.rawDescription ? resolveMerchantAlias(updated.rawDescription, aliasesOverride) : null) ||
+    (updated.title ? resolveMerchantAlias(updated.title, aliasesOverride) : null);
+
   if (aliasMatch && !isGenericPlaceholderMerchant(aliasMatch.name)) {
     updated.title =
       savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
@@ -339,8 +304,58 @@ function sanitizeTransactionItem(
       savedMeta?.customCategory || aliasMatch.category,
       kind
     );
-    updated.logo = getLogoUrl(updated.title, updated.category);
+    updated.logo =
+      getLogoUrl(updated.title, updated.category) ||
+      getLogoUrl(rawAliasSource, updated.category) ||
+      updated.logo;
     return updated;
+  }
+
+  // 4. Deterministisk matchning mot fasta utgifter och fasta inkomster (behåll bankens namn om inte användaren själv valt ett annat namn!)
+  const hasDirectBankName = Boolean(
+    (updated.counterpartyName && !isGenericPlaceholderMerchant(updated.counterpartyName)) ||
+      (updated.rawDescription && !isGenericPlaceholderMerchant(updated.rawDescription))
+  );
+
+  if (updated.type !== 'income' && fixedList && fixedList.length > 0) {
+    const matchedFixed = findMatchingFixedExpense(updated, fixedList);
+    if (matchedFixed) {
+      const amountMatches = isFixedExpenseAmountMatch(matchedFixed, updated.amount);
+      if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+        updated.title = savedMeta.customTitle;
+      } else if (!hasDirectBankName && amountMatches) {
+        updated.title = matchedFixed.name;
+      }
+      updated.category = normalizeCategoryToValid(
+        savedMeta?.customCategory || matchedFixed.category,
+        'expense'
+      );
+      updated.logo =
+        matchedFixed.logo ||
+        getLogoUrl(matchedFixed.name, updated.category) ||
+        getLogoUrl(updated.title, updated.category);
+      return updated;
+    }
+  }
+
+  if (updated.type === 'income' && incomeList && incomeList.length > 0) {
+    const matchedInc = findMatchingIncome(updated, incomeList);
+    if (matchedInc) {
+      if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+        updated.title = savedMeta.customTitle;
+      } else if (!hasDirectBankName) {
+        updated.title = matchedInc.name;
+      }
+      updated.category = normalizeCategoryToValid(
+        savedMeta?.customCategory || matchedInc.category,
+        'income'
+      );
+      updated.logo =
+        matchedInc.logo ||
+        getLogoUrl(matchedInc.name, updated.category) ||
+        getLogoUrl(updated.title, updated.category);
+      return updated;
+    }
   }
 
   if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
@@ -1470,7 +1485,12 @@ export const App: React.FC = () => {
         continue;
       }
 
-      if (needsAiMerchantCleaning(rawSource, tx.title, tx.category)) {
+      const isUncategorizedOrMissingLogo =
+        tx.category === 'Övrigt' ||
+        !getLogoUrl(tx.title, tx.category) ||
+        needsAiMerchantCleaning(rawSource, tx.title, tx.category);
+
+      if (isUncategorizedOrMissingLogo) {
         if (!candidatesByKey.has(normKey)) {
           candidatesByKey.set(normKey, {
             key: normKey,
@@ -1520,21 +1540,24 @@ export const App: React.FC = () => {
         let anySaved = false;
         for (const resItem of data.results) {
           const orig = candidatesByKey.get(resItem.key);
-          if (!orig || !resItem.cleanName) continue;
-          const cleanTrimmed = String(resItem.cleanName).trim();
-          if (
-            !cleanTrimmed ||
-            isGenericPlaceholderMerchant(cleanTrimmed) ||
-            isGenericPlaceholderMerchant(orig.rawText)
-          ) {
+          if (!orig) continue;
+          const cleanTrimmed = String(resItem.cleanName || '').trim();
+          const domainTrimmed = String(resItem.domain || '').trim();
+          if (isGenericPlaceholderMerchant(orig.rawText)) {
             continue;
           }
           const validCat = normalizeCategoryToValid(
             resItem.category,
             orig.type
           );
-          saveMerchantAlias(orig.rawText, cleanTrimmed, validCat);
-          anySaved = true;
+          // Spara inlärd domän (för företagslogga) och kategori utan att skriva över bankens transaktionsnamn!
+          if (domainTrimmed || (validCat && validCat !== 'Övrigt')) {
+            saveLearnedBrandDomain(orig.rawText, domainTrimmed, validCat);
+            if (cleanTrimmed) {
+              saveLearnedBrandDomain(cleanTrimmed, domainTrimmed, validCat);
+            }
+            anySaved = true;
+          }
         }
 
         if (anySaved && !isDeletingAccountRef.current && userIdRef.current) {
@@ -3329,9 +3352,8 @@ export const App: React.FC = () => {
       options?.categoryTargetIds || (!titleChanged && applyToSimilarIds ? applyToSimilarIds : [])
     );
 
-    // 1. Om användaren uttryckligen valt att byta namn på flera poster (exakt samma butik eller hela kedjan)
-    if (titleChanged && renameScope === 'same-merchant' && existing) {
-      // Spara alias ENDAST för exakt denna butik/plats (t.ex. "Circle K Varberg"), aldrig för andra orter!
+    // 1. Om användaren valt att byta namn bakåt i tiden och framåt i tiden ('same-merchant' eller 'chain')
+    if (titleChanged && (renameScope === 'same-merchant' || renameScope === 'chain') && existing) {
       saveMerchantAlias(existing.title, updated.title, updated.category);
       if (existing.counterpartyName) {
         saveMerchantAlias(existing.counterpartyName, updated.title, updated.category);
@@ -3339,16 +3361,6 @@ export const App: React.FC = () => {
       if (existing.rawDescription) {
         saveMerchantAlias(existing.rawDescription, updated.title, updated.category);
       }
-      for (const tx of transactionsRef.current) {
-        if (renameSet.has(tx.id)) {
-          saveTransactionMeta(tx.id, {
-            customTitle: updated.title,
-            ...(categoryChanged ? { customCategory: updated.category } : {}),
-          });
-        }
-      }
-    } else if (titleChanged && renameScope === 'chain') {
-      // Användaren valde uttryckligen att döpa om ALLA köp i hela kedjan
       for (const tx of transactionsRef.current) {
         if (renameSet.has(tx.id) || tx.id === updated.id) {
           saveMerchantAlias(tx.title, updated.title, updated.category);
@@ -3366,11 +3378,20 @@ export const App: React.FC = () => {
       }
     }
 
-    // 2. Om användaren ändrar KATEGORI (med "Uppdatera liknande köp" påslaget), uppdatera ENDAST kategorin och behåll varje transaktions eget butiksnamn!
-    if (categoryChanged && categorySet.size > 0) {
+    // 2. Om användaren ändrar KATEGORI bakåt och framåt i tiden, spara regeln för både befintliga och framtida transaktioner
+    if (categoryChanged && (categorySet.size > 0 || renameScope !== 'single') && existing) {
+      const targetTitle = titleChanged && renameScope !== 'single' ? updated.title : existing.title;
+      saveMerchantAlias(existing.title, targetTitle, updated.category);
+      if (existing.counterpartyName) {
+        saveMerchantAlias(existing.counterpartyName, targetTitle, updated.category);
+      }
+      if (existing.rawDescription) {
+        saveMerchantAlias(existing.rawDescription, targetTitle, updated.category);
+      }
       for (const tx of transactionsRef.current) {
         if (categorySet.has(tx.id)) {
-          const keepTitle = tx.id === updated.id ? updated.title : tx.title;
+          const keepTitle =
+            tx.id === updated.id || renameSet.has(tx.id) ? updated.title : tx.title;
           saveTransactionMeta(tx.id, { customCategory: updated.category });
           saveMerchantAlias(tx.title, keepTitle, updated.category);
           if (tx.counterpartyName) {
