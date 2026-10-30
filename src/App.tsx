@@ -4072,6 +4072,10 @@ export const App: React.FC = () => {
                     setSelectedFixedExpense(exp);
                     setIsFixedModalOpen(true);
                   }}
+                  onSelectIncome={(inc) => {
+                    setSelectedIncome(inc);
+                    setIsIncomeModalOpen(true);
+                  }}
                   onNavigateToFixed={() => setActiveTab('fixed')}
                   onNavigateToTransactions={() => setActiveTab('transactions')}
                   onSelectAccount={(accountId) => {

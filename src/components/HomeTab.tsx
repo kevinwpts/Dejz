@@ -16,6 +16,7 @@ import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
+import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatIsoTimeStockholm,
@@ -205,6 +206,7 @@ interface HomeTabProps {
   onOpenBank: () => void;
   onSelectTransaction: (tx: TransactionItem) => void;
   onSelectFixed?: (exp: FixedExpenseItem) => void;
+  onSelectIncome?: (inc: IncomeItem) => void;
   onNavigateToFixed: () => void;
   onNavigateToTransactions: () => void;
   onSelectAccount?: (accountId: string) => void;
@@ -231,6 +233,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onOpenBank,
   onSelectTransaction,
   onSelectFixed,
+  onSelectIncome,
   onSelectAccount,
   onToggleHeart,
   onTogglePackage,
@@ -1259,171 +1262,222 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* SNABBVY-MODAL FÖR INKOMST / FASTA / RÖRLIGT                     */}
       {/* ============================================================== */}
-      {activeHeroPopup && (
-        <div
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-[2px] p-0 sm:p-4 animate-in fade-in duration-150"
-          onClick={() => setActiveHeroPopup(null)}
-        >
-          <div
-            className="w-full sm:max-w-md max-h-[82vh] bg-[var(--surface-color)] border-t sm:border border-[var(--border-subtle)] rounded-t-[26px] sm:rounded-[26px] flex flex-col overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)] shrink-0">
-              <h3 className="text-[16px] font-semibold tracking-[-0.015em] text-[var(--text-primary)]">
-                {activeHeroPopup === 'income'
-                  ? 'Inkomst'
-                  : activeHeroPopup === 'fixed'
-                  ? 'Fasta utgifter'
-                  : 'Rörliga utgifter'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setActiveHeroPopup(null)}
-                aria-label="Stäng"
-                className="w-8 h-8 rounded-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                <X size={16} weight="bold" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto px-5 py-2 divide-y divide-[var(--border-subtle)]">
-              {activeHeroPopup === 'income' && (
-                incomes.length > 0 ? (
-                  incomes.map((inc) => (
-                    <div
-                      key={inc.id}
-                      className="py-3 flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <ItemLogo
-                          name={inc.name}
-                          category={inc.category || 'Lön'}
-                          logoUrl={inc.logo}
-                          size="md"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">
-                            {inc.name}
-                          </span>
-                          <span className="ui-row-sub">
-                            {inc.category || 'Inkomst'} · Den {inc.payday || 25}:e
-                          </span>
-                        </div>
+      <BottomSheet
+        isOpen={Boolean(activeHeroPopup)}
+        onClose={() => setActiveHeroPopup(null)}
+        title={
+          activeHeroPopup === 'income'
+            ? 'Inkomst'
+            : activeHeroPopup === 'fixed'
+            ? 'Fasta utgifter'
+            : 'Rörliga utgifter'
+        }
+      >
+        <div className="divide-y divide-[var(--border-subtle)] -mt-2">
+          {activeHeroPopup === 'income' &&
+            (incomes.length > 0 ? (
+              incomes.map((inc) => {
+                const catLabel = inc.category || 'Lön';
+                return (
+                  <button
+                    key={inc.id}
+                    type="button"
+                    onClick={() => {
+                      if (onSelectIncome) {
+                        setActiveHeroPopup(null);
+                        onSelectIncome(inc);
+                      }
+                    }}
+                    className="ui-tx-row"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <ItemLogo
+                        name={inc.name}
+                        category={catLabel}
+                        logoUrl={inc.logo}
+                        size="md"
+                        isRecurring={false}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="ui-row-title">{inc.name}</span>
+                        <span className="ui-row-subtitle">
+                          <CategoryIcon
+                            category={catLabel}
+                            size={11}
+                            className="shrink-0"
+                          />
+                          <span className="truncate">{catLabel}</span>
+                        </span>
                       </div>
-                      <span className="ui-row-amount-income shrink-0">
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="ui-row-amount-income">
                         +{formatKr(inc.amount)}
                       </span>
+                      <span className="ui-row-meta">
+                        Den {inc.payday || 25}:e
+                      </span>
                     </div>
-                  ))
-                ) : (
-                  <div className="py-10 text-center text-[13px] text-[var(--text-secondary)]">
-                    Inga inkomster
-                  </div>
-                )
-              )}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                Inga inkomster
+              </div>
+            ))}
 
-              {activeHeroPopup === 'fixed' && (
-                fixedExpenses.length > 0 ? (
-                  fixedExpenses.map((exp) => (
-                    <button
-                      key={exp.id}
-                      type="button"
-                      onClick={() => {
-                        if (onSelectFixed) {
-                          setActiveHeroPopup(null);
-                          onSelectFixed(exp);
-                        }
-                      }}
-                      className="w-full py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1.5 -mx-1.5 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <ItemLogo
-                          name={exp.name}
-                          category={exp.category || 'Räkningar'}
-                          logoUrl={exp.logo}
-                          size="md"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="ui-row-title">
-                            {exp.name}
+          {activeHeroPopup === 'fixed' &&
+            (fixedExpenses.length > 0 ? (
+              fixedExpenses.map((exp) => {
+                const catLabel = exp.category || 'Räkningar';
+                return (
+                  <button
+                    key={exp.id}
+                    type="button"
+                    onClick={() => {
+                      if (onSelectFixed) {
+                        setActiveHeroPopup(null);
+                        onSelectFixed(exp);
+                      }
+                    }}
+                    className="ui-tx-row"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <ItemLogo
+                        name={exp.name}
+                        category={catLabel}
+                        logoUrl={exp.logo}
+                        size="md"
+                        isRecurring={false}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="ui-row-title">{exp.name}</span>
+                        <span className="ui-row-subtitle">
+                          <CategoryIcon
+                            category={catLabel}
+                            size={11}
+                            className="shrink-0"
+                          />
+                          <span className="truncate">
+                            {catLabel}
+                            {exp.isShared &&
+                            exp.fullAmount &&
+                            exp.fullAmount > exp.amount
+                              ? ` · Delad (av ${formatKr(exp.fullAmount)})`
+                              : ''}
                           </span>
-                          <span className="ui-row-sub">
-                            {exp.category || 'Fasta'} · Den {exp.dueDay || 28}:e
-                          </span>
-                        </div>
+                        </span>
                       </div>
-                      <span className="ui-row-amount shrink-0">
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="ui-row-amount">
                         -{formatKr(exp.amount)}
                       </span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="py-10 text-center text-[13px] text-[var(--text-secondary)]">
-                    Inga fasta utgifter
-                  </div>
-                )
-              )}
+                      <span className="ui-row-meta">
+                        Den {exp.dueDay || 28}:e
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                Inga fasta utgifter
+              </div>
+            ))}
 
-              {activeHeroPopup === 'variable' && (
-                variablePeriodTransactions.length > 0 ? (
-                  variablePeriodTransactions.map((tx) => {
-                    const isSwish = tx.category === 'Swish' || /^swish\b/i.test(tx.title || '');
-                    const isRefund = tx.type === 'income';
-                    const isPending =
-                      tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
-                    return (
-                      <button
-                        key={tx.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveHeroPopup(null);
-                          onSelectTransaction(tx);
-                        }}
-                        className="w-full py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1.5 -mx-1.5 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {isSwish ? (
-                            <div className="w-9 h-9 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
-                              <SwishLogo size={20} />
-                            </div>
-                          ) : (
-                            <ItemLogo
-                              name={tx.title}
-                              category={tx.category}
-                              logoUrl={tx.logo}
-                              size="md"
+          {activeHeroPopup === 'variable' &&
+            (variablePeriodTransactions.length > 0 ? (
+              variablePeriodTransactions.map((tx) => {
+                const isRefund = tx.type === 'income';
+                const isPending =
+                  tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
+                const isSplit =
+                  tx.originalAmount !== undefined &&
+                  tx.originalAmount > tx.amount;
+                return (
+                  <button
+                    key={tx.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveHeroPopup(null);
+                      onSelectTransaction(tx);
+                    }}
+                    className="ui-tx-row"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <ItemLogo
+                        name={tx.title}
+                        category={tx.category}
+                        logoUrl={tx.logo}
+                        size="md"
+                        isRecurring={false}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="ui-row-title">{tx.title}</span>
+                        <span className="ui-row-subtitle">
+                          <CategoryIcon
+                            category={tx.category}
+                            size={11}
+                            className="shrink-0"
+                          />
+                          <span className="truncate">{tx.category}</span>
+                          {isSplit && tx.originalAmount && (
+                            <span className="text-[11px] opacity-80 shrink-0">
+                              · av {formatKr(tx.originalAmount)}
+                            </span>
+                          )}
+                          {tx.isHearted && (
+                            <Heart
+                              size={11}
+                              weight="fill"
+                              className="text-rose-500 shrink-0 ml-0.5"
                             />
                           )}
-                          <div className="min-w-0 flex-1">
-                            <span className="ui-row-title">
-                              {tx.title}
-                            </span>
-                            <span className="ui-row-sub">
-                              {formatSwedishDateHeading(tx.date)}
-                              {isPending ? ' · Reserverat' : ` · ${tx.category}`}
-                            </span>
-                          </div>
-                        </div>
-                        <span
-                          className={`shrink-0 ${
-                            isRefund ? 'ui-row-amount-income' : 'ui-row-amount'
-                          }`}
-                        >
-                          {isRefund ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                          {tx.isWaitingForPackage && (
+                            <Package
+                              size={11}
+                              weight="fill"
+                              className="text-amber-500 shrink-0 ml-0.5"
+                            />
+                          )}
+                          {tx.receiptUrl && (
+                            <Paperclip
+                              size={11}
+                              weight="bold"
+                              className="text-[var(--text-secondary)] shrink-0 ml-0.5"
+                            />
+                          )}
                         </span>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="py-10 text-center text-[13px] text-[var(--text-secondary)]">
-                    Inga rörliga utgifter i perioden
-                  </div>
-                )
-              )}
-            </div>
-          </div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span
+                        className={
+                          isRefund ? 'ui-row-amount-income' : 'ui-row-amount'
+                        }
+                      >
+                        {isRefund
+                          ? `+${formatKr(tx.amount)}`
+                          : `-${formatKr(tx.amount)}`}
+                      </span>
+                      <span className="ui-row-meta">
+                        {isPending
+                          ? 'Reserverat'
+                          : formatSwedishDateHeading(tx.date)}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                Inga rörliga utgifter i perioden
+              </div>
+            ))}
         </div>
-      )}
+      </BottomSheet>
     </div>
   );
 };
