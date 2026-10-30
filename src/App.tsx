@@ -1253,6 +1253,13 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [activeTab, settingsSubView, selectedHistoryAccountId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('swish_pay') === '1') {
       const payee = (params.get('payee') || '').replace(/\D/g, '');
@@ -3882,6 +3889,7 @@ export const App: React.FC = () => {
         userEmail={userEmail}
         userName={userName}
         userAvatar={userAvatar}
+        navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}`}
         hasUnreadNotifications={displayTransactions.some((t) => Boolean(t.isWaitingForPackage))}
         hideActions={activeTab === 'settings'}
         hideSearch={activeTab === 'transactions'}

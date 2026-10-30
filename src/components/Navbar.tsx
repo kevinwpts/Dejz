@@ -7,6 +7,7 @@ interface NavbarProps {
   userName?: string | null;
   userAvatar?: string | null;
   pageTitle?: string | null;
+  navigationKey?: string;
   hasUnreadNotifications?: boolean;
   hideActions?: boolean;
   hideSearch?: boolean;
@@ -22,6 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userName,
   userAvatar,
   pageTitle,
+  navigationKey,
   hasUnreadNotifications = false,
   hideActions = false,
   hideSearch = false,
@@ -36,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isHidden, setIsHidden] = useState(false);
   const [privacyBlur, setPrivacyBlur] = useState<boolean>(() => getPrivacyBlurMode());
   const lastScrollYRef = useRef(0);
+  const suppressScrollHideUntilRef = useRef(0);
   const initialChar = (userName || userEmail || '').trim().charAt(0);
 
   useEffect(() => {
@@ -51,20 +54,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   useEffect(() => {
+    suppressScrollHideUntilRef.current = Date.now() + 220;
     setIsHidden(false);
+    setIsAtTop(true);
+    lastScrollYRef.current = 0;
     if (typeof window !== 'undefined') {
-      const y = Math.max(
-        0,
-        window.scrollY ||
-          window.pageYOffset ||
-          document.documentElement.scrollTop ||
-          document.body.scrollTop ||
-          0
-      );
-      setIsAtTop(y <= 12);
-      lastScrollYRef.current = y;
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }
-  }, [pageTitle]);
+  }, [pageTitle, navigationKey]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -106,6 +105,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       setIsAtTop(false);
 
+      // På undersidor med sidrubrik/tillbakaknapp hålls headern alltid synlig längst upp,
+      // och under pågående sidbyte ignoreras layout-scroll så att headern aldrig döljs av misstag.
+      if (pageTitle || Date.now() < suppressScrollHideUntilRef.current) {
+        setIsHidden(false);
+        lastScrollYRef.current = currentY;
+        return;
+      }
+
       if (delta > 3 && currentY > 36) {
         // Scrollar nedåt -> dölj headern
         setIsHidden(true);
@@ -119,7 +126,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
     return () => window.removeEventListener('scroll', handleScroll, { capture: true });
-  }, []);
+  }, [pageTitle]);
 
   return (
     <>

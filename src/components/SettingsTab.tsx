@@ -179,9 +179,22 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [internalSubView, setInternalSubView] = useState<SettingsSubView>('main');
   const subView = controlledSubView ?? internalSubView;
   const setSubView = (next: SettingsSubView) => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
     setInternalSubView(next);
     if (onSubViewChange) onSubViewChange(next);
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [subView]);
   const [editName, setEditName] = useState(userName || '');
   const [editEmail, setEditEmail] = useState(userEmail || '');
   const [savedMsg, setSavedMsg] = useState(false);

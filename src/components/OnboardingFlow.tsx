@@ -194,6 +194,14 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   // Steg 2: Inline bankanslutning och vyer direkt på sidan
   const [step2View, setStep2View] = useState<'grid' | 'select-accounts'>('grid');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [step, step2View]);
   const [connectingBankName, setConnectingBankName] = useState<string | null>(null);
   const [startingAuth, setStartingAuth] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);

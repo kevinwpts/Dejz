@@ -451,55 +451,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           })}
         </div>
 
-        {/* Snabb kontoväljare om flera konton är kopplade */}
-        {accounts.length > 1 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
-            <button
-              type="button"
-              onClick={() => handleSetAccount(null)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
-                !activeAccount
-                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
-              }`}
-            >
-              Alla konton
-            </button>
-            {accounts.map((acc) => {
-              const isSelected = activeAccount?.id === acc.id;
-              return (
-                <button
-                  key={acc.id}
-                  type="button"
-                  onClick={() => handleSetAccount(isSelected ? null : acc.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 border flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                      : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
-                  }`}
-                >
-                  <span>{formatAccountShortLabel(acc)}</span>
-                  <span
-                    className={`font-display tabular-nums ${
-                      isSelected ? 'opacity-85' : 'text-[var(--text-muted)]'
-                    }`}
-                  >
-                    · {formatKr(acc.balance)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Aktiva filter-brickor (när filter utöver konto eller enkla konto-val är aktiva) */}
+        {/* Aktiva filter-brickor */}
         {(dateRange !== 'all' ||
           selectedCategories.length > 0 ||
           selectedAttributes.length > 0 ||
           selectedPaymentMethod ||
-          (activeAccount && accounts.length <= 1)) && (
+          Boolean(activeAccount)) && (
           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-            {activeAccount && accounts.length <= 1 && (
+            {activeAccount && (
               <button
                 type="button"
                 onClick={() => handleSetAccount(null)}
