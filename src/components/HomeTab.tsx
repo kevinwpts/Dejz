@@ -21,7 +21,11 @@ import { CategoryIcon } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { BottomSheet } from './ui/BottomSheet';
-import { getGoalArtworkTheme } from './ui/VisualArtwork';
+import {
+  getGoalArtworkTheme,
+  GoalArtworkIllustration,
+  TiltedGoalsPromoArtwork,
+} from './ui/VisualArtwork';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatIsoTimeStockholm,
@@ -268,12 +272,23 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     getShowBudgetBreakdownOnHome()
   );
   const [showAccounts, setShowAccounts] = useState<boolean>(() => getShowAccountsOnHome());
-  const [accountsSubTab, setAccountsSubTab] = useState<'accounts' | 'goals'>('accounts');
+  const [showGoals, setShowGoals] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('dejz_show_goals_home');
+      return saved === null ? true : saved === 'true';
+    } catch {
+      return true;
+    }
+  });
   const [showCashflowForecast, setShowCashflowForecast] = useState<boolean>(false);
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
   const savingsGoals = useMemo(() => getSavingsGoals(), [transactions, fixedExpenses, incomes]);
+  const totalSavedInGoals = useMemo(
+    () => savingsGoals.reduce((sum, g) => sum + (Number(g.currentAmount) || 0), 0),
+    [savingsGoals]
+  );
   const [selectedAccountModalId, setSelectedAccountModalId] = useState<string | null>(null);
   const [isEditingAccountName, setIsEditingAccountName] = useState(false);
   const [accountNameDraft, setAccountNameDraft] = useState('');
@@ -808,20 +823,25 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             setShowBudgetBreakdown(next);
             setShowBudgetBreakdownOnHome(next);
           }}
-          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer group focus:outline-none"
+          className="w-full text-left cursor-pointer group focus:outline-none"
           aria-expanded={showBudgetBreakdown}
           title={showBudgetBreakdown ? 'Dölj budgetdetaljer' : 'Visa budgetdetaljer'}
         >
-          <div className="min-w-0">
-            <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
-              Kvar att spendera · {period.startLabel} – {period.endLabel}
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[12px] text-[var(--text-secondary)] font-normal">
+              Kvar att spendera
             </span>
+            <span className="text-[12px] text-[var(--text-secondary)] font-normal tabular-nums text-right">
+              {period.startLabel} – {period.endLabel}
+            </span>
+          </div>
 
+          <div className="flex items-center justify-between gap-3 mt-0.5">
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
               <div
-                className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums mt-0.5 ${
+                className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums ${
                   kvarAttSpendera >= 0
                     ? 'text-[var(--text-primary)]'
                     : 'text-rose-600 dark:text-rose-400'
@@ -830,17 +850,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {formatKr(kvarAttSpendera)}
               </div>
             )}
-          </div>
 
-          <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
-            <CaretDown
-              size={14}
-              weight="regular"
-              className={`transition-transform duration-200 ${
-                showBudgetBreakdown ? 'rotate-180' : ''
-              }`}
-            />
-          </span>
+            <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
+              <CaretDown
+                size={14}
+                weight="regular"
+                className={`transition-transform duration-200 ${
+                  showBudgetBreakdown ? 'rotate-180' : ''
+                }`}
+              />
+            </span>
+          </div>
         </button>
 
         {/* Mjukt utfällbar 3-kolumns översikt (Inkomst · Fasta · Rörligt) */}
@@ -1053,6 +1073,162 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
       </section>
+
+      {/* ============================================================== */}
+      {/* MODUL 2.5: SPARMÅL · BUFFERT & DRÖMMAR                         */}
+      {/* ============================================================== */}
+      {onNavigateToGoals && (
+        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
+          <button
+            type="button"
+            onClick={() => {
+              const next = !showGoals;
+              setShowGoals(next);
+              try {
+                localStorage.setItem('dejz_show_goals_home', String(next));
+              } catch {
+                // ignore
+              }
+            }}
+            className="w-full flex items-center justify-between gap-3 text-left cursor-pointer group focus:outline-none"
+            aria-expanded={showGoals}
+            title={showGoals ? 'Dölj sparmål' : 'Visa sparmål'}
+          >
+            <div className="min-w-0">
+              <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
+                Sparmål
+              </span>
+              <div className="font-display text-[22px] sm:text-[24px] font-semibold tracking-[-0.02em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+                {formatKr(totalSavedInGoals)}
+              </div>
+            </div>
+
+            <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
+              <CaretDown
+                size={14}
+                weight="regular"
+                className={`transition-transform duration-200 ${
+                  showGoals ? 'rotate-180' : ''
+                }`}
+              />
+            </span>
+          </button>
+
+          <div
+            className={`grid transition-all duration-200 ease-out ${
+              showGoals ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="pt-2.5 border-t border-[var(--border-subtle)]">
+                {savingsGoals.length > 0 ? (
+                  <div>
+                    <div className="divide-y divide-[var(--border-subtle)]">
+                      {savingsGoals.map((goal) => {
+                        const pct =
+                          goal.targetAmount > 0
+                            ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+                            : 0;
+                        const theme = getGoalArtworkTheme(goal.artworkId);
+
+                        return (
+                          <button
+                            key={goal.id}
+                            type="button"
+                            onClick={onNavigateToGoals}
+                            className="w-full py-2.5 first:pt-1 flex items-center gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                          >
+                            <div
+                              className="w-9 h-9 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
+                              style={{
+                                backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
+                              }}
+                            >
+                              {goal.customImageUrl ? (
+                                <img
+                                  src={goal.customImageUrl}
+                                  alt={goal.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="absolute -right-2 top-0.5 w-9 h-9">
+                                  <GoalArtworkIllustration artworkId={goal.artworkId} />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
+                                  {goal.name}
+                                </span>
+                                <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
+                                  {formatKr(goal.currentAmount)}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2.5">
+                                <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full transition-all duration-300"
+                                    style={{
+                                      width: `${pct}%`,
+                                      backgroundColor: theme.progressColor,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                                  {pct} %
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="pt-2.5 mt-1 border-t border-[var(--border-subtle)] flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={onNavigateToGoals}
+                        className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Alla sparmål</span>
+                        <CaretRight size={11} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={onNavigateToGoals}
+                        className="text-xs font-medium text-[var(--text-primary)] hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer"
+                      >
+                        <Plus size={12} weight="bold" />
+                        <span>Nytt sparmål</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onNavigateToGoals}
+                    className="w-full pt-1 flex items-center justify-between gap-3 text-left hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] leading-snug block">
+                        Spara till en resa, buffert eller dröm
+                      </span>
+                      <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-0.5">
+                        <span>Skapa ditt första sparmål</span>
+                        <CaretRight size={11} />
+                      </span>
+                    </div>
+                    <TiltedGoalsPromoArtwork />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ============================================================== */}
       {/* MODUL 3: HORISONTELL TIDSLINJE PER DAG (Direkt mot bakgrunden) */}

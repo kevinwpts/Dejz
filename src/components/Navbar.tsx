@@ -11,8 +11,6 @@ interface NavbarProps {
   hasUnreadNotifications?: boolean;
   hideActions?: boolean;
   hideSearch?: boolean;
-  homeViewMode?: 'overview' | 'goals' | null;
-  onChangeHomeViewMode?: (mode: 'overview' | 'goals') => void;
   onBack?: (() => void) | null;
   onLogoClick?: () => void;
   onProfileClick: () => void;
@@ -29,8 +27,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   hasUnreadNotifications = false,
   hideActions = false,
   hideSearch = false,
-  homeViewMode = null,
-  onChangeHomeViewMode,
   onBack,
   onLogoClick,
   onProfileClick,
@@ -202,34 +198,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </span>
             </button>
-          )}
-
-          {/* Mitten: Modern lägesväxlare (Översikt | Sparmål) på startsidan */}
-          {!pageTitle && homeViewMode && onChangeHomeViewMode && (
-            <div className="inline-flex items-center p-0.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)]">
-              <button
-                type="button"
-                onClick={() => onChangeHomeViewMode('overview')}
-                className={`px-3 py-1 rounded-full text-[12px] transition-all cursor-pointer ${
-                  homeViewMode === 'overview'
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-normal'
-                }`}
-              >
-                Översikt
-              </button>
-              <button
-                type="button"
-                onClick={() => onChangeHomeViewMode('goals')}
-                className={`px-3 py-1 rounded-full text-[12px] transition-all cursor-pointer ${
-                  homeViewMode === 'goals'
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-normal'
-                }`}
-              >
-                Sparmål
-              </button>
-            </div>
           )}
 
           {/* Höger: Rena ikonknappar utan vit cirkelbakgrund (döljs på undersidor med pageTitle) */}
