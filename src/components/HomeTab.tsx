@@ -315,10 +315,42 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     },
     [accounts, totalBalance]
   );
-  const totalSavedInGoals = useMemo(
-    () => savingsGoals.reduce((sum, g) => sum + resolveHomeGoalAmount(g), 0),
-    [savingsGoals, resolveHomeGoalAmount]
-  );
+  const totalSavedInGoals = useMemo(() => {
+    const hasTotalLinked = savingsGoals.some((g) => g.linkedAccountId === '__TOTAL__');
+    const seenAccountIds = new Set<string>();
+    let total = 0;
+
+    for (const g of savingsGoals) {
+      if (g.linkedAccountId === '__TOTAL__') {
+        if (!seenAccountIds.has('__TOTAL__')) {
+          seenAccountIds.add('__TOTAL__');
+          total += resolveHomeGoalAmount(g);
+        }
+        continue;
+      }
+      if (g.linkedAccountId) {
+        const matched = accounts.find(
+          (a) =>
+            a.id === g.linkedAccountId ||
+            (g.linkedAccountName &&
+              a.name.trim().toLowerCase() === g.linkedAccountName.trim().toLowerCase())
+        );
+        const key = matched ? matched.id : g.linkedAccountId;
+        if (hasTotalLinked && matched && !matched.excludeFromTotalBalance) {
+          continue;
+        }
+        if (seenAccountIds.has(key)) {
+          continue;
+        }
+        seenAccountIds.add(key);
+        total += resolveHomeGoalAmount(g);
+        continue;
+      }
+      total += resolveHomeGoalAmount(g);
+    }
+
+    return total;
+  }, [savingsGoals, resolveHomeGoalAmount, accounts]);
   const [selectedAccountModalId, setSelectedAccountModalId] = useState<string | null>(null);
   const [isEditingAccountName, setIsEditingAccountName] = useState(false);
   const [accountNameDraft, setAccountNameDraft] = useState('');
@@ -794,8 +826,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     const lastDayOfMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
     const plannedItems: TransactionItem[] = [...actualTxs];
+    const isSelectedInCurrentPeriod = isDateInPeriod(selectedDateKey, period);
 
     for (const inc of incomes) {
+      if (
+        isSelectedInCurrentPeriod &&
+        periodRecurringMatches.matchedIncomeIds.has(inc.id)
+      ) {
+        continue;
+      }
       const effectivePayday = Math.min(Number(inc.payday) || 25, lastDayOfMonth);
       if (effectivePayday === dayOfMonth) {
         plannedItems.push({
@@ -813,6 +852,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }
 
     for (const exp of fixedExpenses) {
+      if (
+        isSelectedInCurrentPeriod &&
+        periodRecurringMatches.matchedFixedIds.has(exp.id)
+      ) {
+        continue;
+      }
       const effectiveDueDay = Math.min(Number(exp.dueDay) || 28, lastDayOfMonth);
       if (effectiveDueDay === dayOfMonth) {
         plannedItems.push({
@@ -831,7 +876,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }
 
     return plannedItems;
-  }, [transactionsByDate, selectedDateKey, todayStr, incomes, fixedExpenses]);
+  }, [
+    transactionsByDate,
+    selectedDateKey,
+    todayStr,
+    incomes,
+    fixedExpenses,
+    period,
+    periodRecurringMatches,
+  ]);
 
   const selectedDayNet = useMemo(() => {
     return selectedDayItems.reduce((acc, item) => {
@@ -1304,11 +1357,20 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               const dayOfMonth = parseInt(parts[2], 10);
               const lastDayOfMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
+              const isDayInCurrentPeriod = isDateInPeriod(day.dateKey, period);
               const hasPlannedIncome = incomes.some(
-                (inc) => Math.min(Number(inc.payday) || 25, lastDayOfMonth) === dayOfMonth
+                (inc) =>
+                  !(
+                    isDayInCurrentPeriod &&
+                    periodRecurringMatches.matchedIncomeIds.has(inc.id)
+                  ) && Math.min(Number(inc.payday) || 25, lastDayOfMonth) === dayOfMonth
               );
               const hasPlannedExpense = fixedExpenses.some(
-                (exp) => Math.min(Number(exp.dueDay) || 28, lastDayOfMonth) === dayOfMonth
+                (exp) =>
+                  !(
+                    isDayInCurrentPeriod &&
+                    periodRecurringMatches.matchedFixedIds.has(exp.id)
+                  ) && Math.min(Number(exp.dueDay) || 28, lastDayOfMonth) === dayOfMonth
               );
 
               if (hasPlannedIncome || hasPlannedExpense) {
@@ -1540,69 +1602,134 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       >
         <div className="divide-y divide-[var(--border-subtle)] -mt-2">
           {activeHeroPopup === 'income' &&
-            (incomes.length > 0 ? (
-              incomes.map((inc) => {
-                const catLabel = inc.category || 'Lön';
+            (() => {
+              const extraIncomeTxs = deduplicateTransactions(transactions || []).filter(
+                (tx) =>
+                  !tx.isExcluded &&
+                  tx.type === 'income' &&
+                  !(typeof tx.id === 'string' && tx.id.startsWith('inc-')) &&
+                  isDateInPeriod(tx.date, period) &&
+                  !periodRecurringMatches.claimedIncomeTxIds.has(tx.id) &&
+                  tx.category !== 'Återbetalning' &&
+                  tx.category !== 'Swish' &&
+                  !/swish/i.test(tx.title || '')
+              );
+
+              if (incomes.length === 0 && extraIncomeTxs.length === 0) {
                 return (
-                  <button
-                    key={inc.id}
-                    type="button"
-                    onClick={() => {
-                      if (onSelectIncome) {
-                        setActiveHeroPopup(null);
-                        onSelectIncome(inc);
-                      }
-                    }}
-                    className="ui-tx-row"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <ItemLogo
-                        name={inc.name}
-                        category={catLabel}
-                        logoUrl={inc.logo}
-                        size="md"
-                        isRecurring={false}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title">{inc.name}</span>
-                        <span className="ui-row-subtitle">
-                          <CategoryIcon
-                            category={catLabel}
-                            size={11}
-                            className="shrink-0"
-                          />
-                          <span className="truncate">{catLabel}</span>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      {(() => {
-                        const matchedTx = periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
-                        const effectiveAmt = matchedTx
-                          ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
-                          : inc.amount;
-                        return (
-                          <>
-                            <span className="ui-row-amount-income">
-                              +{formatKr(effectiveAmt)}
-                            </span>
-                            <span className="ui-row-meta">
-                              {matchedTx
-                                ? `Inkommen · ${formatSwedishDateHeading(matchedTx.date)}`
-                                : `Den ${inc.payday || 25}:e`}
-                            </span>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </button>
+                  <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                    Inga inkomster
+                  </div>
                 );
-              })
-            ) : (
-              <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
-                Inga inkomster
-              </div>
-            ))}
+              }
+
+              return (
+                <>
+                  {incomes.map((inc) => {
+                    const catLabel = inc.category || 'Lön';
+                    return (
+                      <button
+                        key={inc.id}
+                        type="button"
+                        onClick={() => {
+                          if (onSelectIncome) {
+                            setActiveHeroPopup(null);
+                            onSelectIncome(inc);
+                          }
+                        }}
+                        className="ui-tx-row"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ItemLogo
+                            name={inc.name}
+                            category={catLabel}
+                            logoUrl={inc.logo}
+                            size="md"
+                            isRecurring={false}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">{inc.name}</span>
+                            <span className="ui-row-subtitle">
+                              <CategoryIcon
+                                category={catLabel}
+                                size={11}
+                                className="shrink-0"
+                              />
+                              <span className="truncate">{catLabel}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          {(() => {
+                            const matchedTx =
+                              periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
+                            const effectiveAmt = matchedTx
+                              ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
+                              : inc.amount;
+                            return (
+                              <>
+                                <span className="ui-row-amount-income">
+                                  +{formatKr(effectiveAmt)}
+                                </span>
+                                <span className="ui-row-meta">
+                                  {matchedTx
+                                    ? `Inkommen · ${formatSwedishDateHeading(matchedTx.date)}`
+                                    : `Den ${inc.payday || 25}:e`}
+                                </span>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </button>
+                    );
+                  })}
+
+                  {extraIncomeTxs.map((tx) => {
+                    const catLabel = tx.category || 'Övrig inkomst';
+                    return (
+                      <button
+                        key={tx.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveHeroPopup(null);
+                          onSelectTransaction(tx);
+                        }}
+                        className="ui-tx-row"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ItemLogo
+                            name={tx.title}
+                            category={catLabel}
+                            logoUrl={tx.logo}
+                            size="md"
+                            isRecurring={false}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <span className="ui-row-title">{tx.title}</span>
+                            <span className="ui-row-subtitle">
+                              <CategoryIcon
+                                category={catLabel}
+                                size={11}
+                                className="shrink-0"
+                              />
+                              <span className="truncate">{catLabel}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="ui-row-amount-income">
+                            +{formatKr(tx.amount)}
+                          </span>
+                          <span className="ui-row-meta">
+                            Inkommen · {formatSwedishDateHeading(tx.date)}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </>
+              );
+            })()}
 
           {activeHeroPopup === 'fixed' &&
             (fixedExpenses.length > 0 ? (

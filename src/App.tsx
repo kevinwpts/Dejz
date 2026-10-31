@@ -2842,16 +2842,45 @@ export const App: React.FC = () => {
     }
   }, [fixedExpenses, periodRecurringMatches]);
 
-  // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp)
+  // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp + eventuella extra engångsinkomster i perioden)
   const totalIncome = useMemo(() => {
-    return incomes.reduce((sum, inc) => {
+    const fixedIncomesSum = incomes.reduce((sum, inc) => {
       const matchedTx = periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
       if (matchedTx) {
         return sum + Math.round(Math.abs(Number(matchedTx.amount) || 0));
       }
       return sum + (Number(inc.amount) || 0);
     }, 0);
-  }, [incomes, periodRecurringMatches]);
+
+    let extraPeriodIncomesSum = 0;
+    for (const t of periodTransactions) {
+      if (t.type !== 'income' || t.isExcluded) continue;
+      if (isTransactionManuallyExcluded(t.id)) continue;
+      if (typeof t.id === 'string' && t.id.startsWith('inc-')) continue;
+      if (periodRecurringMatches.claimedIncomeTxIds.has(t.id)) continue;
+      if (t.category === 'Återbetalning') continue;
+      if (t.category === 'Swish' || /swish/i.test(t.title || '')) continue;
+      if (
+        excludeInternalTransfers &&
+        (internalTransferIds.has(t.id) ||
+          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
+      ) {
+        continue;
+      }
+      extraPeriodIncomesSum += Math.round(Math.abs(Number(t.amount) || 0));
+    }
+
+    return fixedIncomesSum + extraPeriodIncomesSum;
+  }, [
+    incomes,
+    periodTransactions,
+    periodRecurringMatches,
+    excludeInternalTransfers,
+    internalTransferIds,
+    bankAccounts,
+    userEmail,
+    userName,
+  ]);
 
   // Totala fasta kostnader under aktuell period (faktiskt bokfört belopp för räkningar som redan dragits, annars mallbelopp)
   const totalFixedExpenses = useMemo(() => {
@@ -2953,7 +2982,9 @@ export const App: React.FC = () => {
   // - Räknar av butiksreturer ('Återbetalning') samt mottagna Swish-utläggsersättningar som inte redan länkats till ett specifikt köp.
   const totalVariableSpent = useMemo(() => {
     let grossSpent = 0;
-    let storeRefundsAndSwishReimbursements = 0;
+    let storeRefunds = 0;
+    let unlinkedSwishReimbursements = 0;
+    let unlinkedManualSplitReductions = 0;
 
     const alreadyLinkedSwishIds = new Set<string>();
     for (const tx of transactions) {
@@ -2980,13 +3011,13 @@ export const App: React.FC = () => {
 
       if (t.type === 'income') {
         if (t.category === 'Återbetalning') {
-          storeRefundsAndSwishReimbursements += Math.abs(Number(t.amount) || 0);
+          storeRefunds += Math.abs(Number(t.amount) || 0);
         } else if (
           (t.category === 'Swish' || /swish/i.test(t.title || '')) &&
           !periodRecurringMatches.claimedIncomeTxIds.has(t.id) &&
           !alreadyLinkedSwishIds.has(t.id)
         ) {
-          storeRefundsAndSwishReimbursements += Math.abs(Number(t.amount) || 0);
+          unlinkedSwishReimbursements += Math.abs(Number(t.amount) || 0);
         }
         continue;
       }
@@ -2995,10 +3026,26 @@ export const App: React.FC = () => {
         continue;
       }
 
+      if (
+        !t.linkedSwishTxId &&
+        typeof t.originalAmount === 'number' &&
+        t.originalAmount > (Number(t.amount) || 0)
+      ) {
+        unlinkedManualSplitReductions += Math.max(
+          0,
+          t.originalAmount - (Number(t.amount) || 0)
+        );
+      }
+
       grossSpent += Number(t.amount) || 0;
     }
 
-    return Math.max(0, grossSpent - storeRefundsAndSwishReimbursements);
+    const effectiveSwishDeduction = Math.max(
+      0,
+      unlinkedSwishReimbursements - unlinkedManualSplitReductions
+    );
+
+    return Math.max(0, grossSpent - storeRefunds - effectiveSwishDeduction);
   }, [
     transactions,
     periodTransactions,

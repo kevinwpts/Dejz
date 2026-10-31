@@ -258,7 +258,42 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     );
   }, [artworkSearch]);
 
-  const totalSaved = savingsGoals.reduce((sum, g) => sum + resolveGoalAmount(g), 0);
+  const totalSaved = useMemo(() => {
+    const hasTotalLinked = savingsGoals.some((g) => g.linkedAccountId === '__TOTAL__');
+    const seenAccountIds = new Set<string>();
+    let sum = 0;
+
+    for (const g of savingsGoals) {
+      if (g.linkedAccountId === '__TOTAL__') {
+        if (!seenAccountIds.has('__TOTAL__')) {
+          seenAccountIds.add('__TOTAL__');
+          sum += resolveGoalAmount(g);
+        }
+        continue;
+      }
+      if (g.linkedAccountId) {
+        const matched = accounts.find(
+          (a) =>
+            a.id === g.linkedAccountId ||
+            (g.linkedAccountName &&
+              a.name.trim().toLowerCase() === g.linkedAccountName.trim().toLowerCase())
+        );
+        const key = matched ? matched.id : g.linkedAccountId;
+        if (hasTotalLinked && matched && !matched.excludeFromTotalBalance) {
+          continue;
+        }
+        if (seenAccountIds.has(key)) {
+          continue;
+        }
+        seenAccountIds.add(key);
+        sum += resolveGoalAmount(g);
+        continue;
+      }
+      sum += resolveGoalAmount(g);
+    }
+
+    return sum;
+  }, [savingsGoals, accounts, effectiveTotalBalance]);
   const totalTarget = savingsGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
 
   // ============================================================================
