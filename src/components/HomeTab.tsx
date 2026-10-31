@@ -344,9 +344,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   // Spenderingstakt (Burn-rate) & Kassaprognos fram till nästa lön
   const cashflowInsight = useMemo(() => {
     const disposableBudget = Math.max(0, totalIncome - totalFixedExpenses);
-    const totalDays = Math.max(1, period.totalDays);
+    const totalDays = Math.max(1, period.daysTotal || period.totalDays || 30);
     const daysRemaining = Math.max(0, period.daysRemaining);
-    const daysPassed = Math.max(1, Math.min(totalDays, totalDays - daysRemaining));
+    const daysPassed = Math.max(
+      1,
+      Math.min(totalDays, period.daysElapsed || totalDays - daysRemaining)
+    );
 
     const idealDailySpend = disposableBudget > 0 ? disposableBudget / totalDays : 0;
     const expectedVariableByToday = idealDailySpend * daysPassed;

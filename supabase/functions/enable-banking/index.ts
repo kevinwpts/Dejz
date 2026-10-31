@@ -316,7 +316,11 @@ function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
     null;
   const indicator = rawIndicator ? String(rawIndicator).toUpperCase().trim() : null;
 
-  const creditorName = tx?.creditor?.name || tx?.creditor_name || null;
+  const cardAcceptorName =
+    tx?.card_transaction?.acceptor_name ||
+    tx?.card_transaction?.merchant_name ||
+    null;
+  const creditorName = tx?.creditor?.name || tx?.creditor_name || cardAcceptorName || null;
   const debtorName = tx?.debtor?.name || tx?.debtor_name || null;
 
   let remittance = "";
@@ -340,6 +344,7 @@ function extractCounterpartyAndDescription(tx: any, occurrenceIndex = 1): {
   const description =
     remittance ||
     prelimCounterparty ||
+    cardAcceptorName ||
     tx?.additional_information ||
     tx?.bank_transaction_code?.description ||
     "Banktransaktion";
@@ -618,7 +623,37 @@ serve(async (req: Request) => {
       const stateToken = base64UrlEncodeBytes(randomBytes);
 
       const expiresAt = new Date(Date.now() + 20 * 60 * 1000).toISOString(); // 20 minutes validity
-      const validUntilDate = new Date(Date.now() + 89 * 24 * 60 * 60 * 1000).toISOString(); // 89 days consent validity
+
+      // Determine optimal consent validity (up to 180 days per updated EU PSD2 RTS Art. 10a,
+      // respecting the specific ASPSP's maximum_consent_validity if reported)
+      let consentSeconds = 179 * 24 * 60 * 60; // Default attempt: ~180 days (with 1-day safety margin)
+      const fallback89DaysIso = new Date(Date.now() + 89 * 24 * 60 * 60 * 1000).toISOString();
+      try {
+        const aspspsData = await enableBankingRequest(
+          `/aspsps?country=${encodeURIComponent(aspspCountry)}`,
+          {
+            method: "GET",
+            environment: requestedEnv,
+            psuIpAddress,
+            psuUserAgent,
+          },
+        );
+        const matchedAspsp = Array.isArray(aspspsData?.aspsps)
+          ? aspspsData.aspsps.find(
+              (b: any) =>
+                String(b?.name || "").toLowerCase() === aspspName.toLowerCase(),
+            )
+          : null;
+        const maxValiditySec = Number(matchedAspsp?.maximum_consent_validity);
+        if (Number.isFinite(maxValiditySec) && maxValiditySec > 86400) {
+          // Subtract 1 hour margin so clock skew never exceeds bank's max limit
+          consentSeconds = Math.min(180 * 86400 - 3600, Math.max(86400, maxValiditySec - 3600));
+        }
+      } catch {
+        // Fallback if /aspsps lookup fails
+        consentSeconds = 89 * 24 * 60 * 60;
+      }
+      const validUntilDate = new Date(Date.now() + consentSeconds * 1000).toISOString();
 
       const { error: stateInsertError } = await adminClient
         .from("bank_auth_states")
@@ -652,9 +687,9 @@ serve(async (req: Request) => {
         ? requestedRedirectUrl
         : configuredRedirectUrl;
 
-      const buildAuthPayload = (targetRedirectUrl: string) => ({
+      const buildAuthPayload = (targetRedirectUrl: string, targetValidUntil: string) => ({
         access: {
-          valid_until: validUntilDate,
+          valid_until: targetValidUntil,
         },
         aspsp: {
           name: aspspName,
@@ -666,27 +701,39 @@ serve(async (req: Request) => {
         language: "sv",
       });
 
+      const requestAuthWithFallback = async (targetRedirectUrl: string) => {
+        try {
+          return await enableBankingRequest("/auth", {
+            method: "POST",
+            body: buildAuthPayload(targetRedirectUrl, validUntilDate),
+            environment: requestedEnv,
+            psuIpAddress,
+            psuUserAgent,
+          });
+        } catch (err: any) {
+          // If the bank rejects a >90d consent validity, retry immediately with 89 days
+          if (validUntilDate !== fallback89DaysIso) {
+            return await enableBankingRequest("/auth", {
+              method: "POST",
+              body: buildAuthPayload(targetRedirectUrl, fallback89DaysIso),
+              environment: requestedEnv,
+              psuIpAddress,
+              psuUserAgent,
+            });
+          }
+          throw err;
+        }
+      };
+
       let authResponse: any;
       try {
-        authResponse = await enableBankingRequest("/auth", {
-          method: "POST",
-          body: buildAuthPayload(redirectUrlUsed),
-          environment: requestedEnv,
-          psuIpAddress,
-          psuUserAgent,
-        });
+        authResponse = await requestAuthWithFallback(redirectUrlUsed);
       } catch (firstErr: any) {
         // If the current preview origin is not yet registered in Enable Banking's Redirect URLs,
         // fall back seamlessly to the configured production redirect URL (https://dejz.se/bank/callback).
         if (redirectUrlUsed !== configuredRedirectUrl) {
           redirectUrlUsed = configuredRedirectUrl;
-          authResponse = await enableBankingRequest("/auth", {
-            method: "POST",
-            body: buildAuthPayload(redirectUrlUsed),
-            environment: requestedEnv,
-            psuIpAddress,
-            psuUserAgent,
-          });
+          authResponse = await requestAuthWithFallback(redirectUrlUsed);
         } else {
           throw firstErr;
         }
@@ -1209,9 +1256,11 @@ serve(async (req: Request) => {
             const pDateStr = pRow.transaction_date || pRow.booking_date || "";
             const pMs = pDateStr ? Date.parse(`${pDateStr}T12:00:00Z`) : NaN;
             const ageDays = Number.isFinite(pMs) ? (Date.now() - pMs) / (1000 * 60 * 60 * 24) : 99;
-            // Endast om reservationen faktiskt försvunnit vid en fullständig första-sidesynk
-            // och antingen är äldre än 5 dagar eller ersatts
-            if (!isIncrementalSync || ageDays > 5) {
+            const isWithinSyncedWindow =
+              !hitPageLimitWithMoreRemaining && (!pDateStr || pDateStr >= dateFrom);
+            // Markera som ersatt direkt om reservationen låg inom det synkade datumfönstret
+            // (t.ex. de senaste 14 dagarna vid inkrementell synk) och inte längre finns kvar som PDNG/HOLD hos banken
+            if (!isIncrementalSync || isWithinSyncedWindow || ageDays > 5) {
               await adminClient
                 .from("bank_transactions")
                 .update({
@@ -1847,16 +1896,31 @@ serve(async (req: Request) => {
       try {
         const { data: sessions } = await adminClient
           .from("bank_provider_sessions")
-          .select("provider_session_id")
+          .select("provider_session_id, connection_id")
           .eq("user_id", user.id);
+
+        const { data: userConns } = await adminClient
+          .from("bank_connections")
+          .select("id, environment")
+          .eq("user_id", user.id);
+        const envByConnId = new Map<string, "production" | "sandbox">();
+        for (const c of userConns || []) {
+          envByConnId.set(c.id, c.environment === "sandbox" ? "sandbox" : "production");
+        }
 
         if (Array.isArray(sessions) && sessions.length > 0) {
           for (const s of sessions) {
             if (s.provider_session_id) {
               try {
+                const envToUse = envByConnId.get(s.connection_id) || "production";
                 await enableBankingRequest(
                   `/sessions/${encodeURIComponent(s.provider_session_id)}`,
-                  { method: "DELETE" },
+                  {
+                    method: "DELETE",
+                    environment: envToUse,
+                    psuIpAddress,
+                    psuUserAgent,
+                  },
                 );
               } catch {
                 // Best-effort revocation

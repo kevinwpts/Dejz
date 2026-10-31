@@ -332,8 +332,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
   const prevPeriodVariableTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions);
-    return deduped.filter((t) => {
-      if (t.isExcluded || t.type === 'income') return false;
+    const prevTxs = deduped.filter((t) => {
+      if (t.isExcluded) return false;
       if (isTransactionManuallyExcluded(t.id)) return false;
       if (
         excludeInternalTransfers &&
@@ -342,9 +342,13 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       ) {
         return false;
       }
-      if (!isDateInPeriod(t.date, prevComputedPeriod)) return false;
-      const recurring = checkIsRecurringTransaction(t, fixedExpenses, incomes);
-      if (recurring.isRecurring && recurring.type === 'expense') return false;
+      return isDateInPeriod(t.date, prevComputedPeriod);
+    });
+    const prevRec = reconcilePeriodRecurringMatches(prevTxs, fixedExpenses, incomes);
+    return prevTxs.filter((t) => {
+      if (t.type === 'income') return false;
+      if (t.category === 'Sparande') return false;
+      if (prevRec.claimedFixedTxIds.has(t.id)) return false;
       return true;
     });
   }, [
@@ -366,7 +370,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
     if (periodOffset === 0) {
       // Compare up to the same number of elapsed days in the period
-      const elapsedDays = Math.max(1, computedPeriod.daysPassed);
+      const elapsedDays = Math.max(1, computedPeriod.daysElapsed || computedPeriod.daysPassed || 1);
       const prevCutoff = new Date(prevComputedPeriod.startDate);
       prevCutoff.setDate(prevCutoff.getDate() + elapsedDays);
       const prevCutoffStr = `${prevCutoff.getFullYear()}-${String(
@@ -396,7 +400,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         diff,
         prevSum: prevFullSum,
         isCurrentPeriod: false,
-        elapsedDays: computedPeriod.totalDays,
+        elapsedDays: computedPeriod.daysTotal || computedPeriod.totalDays || 30,
       };
     }
   }, [

@@ -19,6 +19,8 @@ export interface PeriodInfo {
   daysTotal: number;
   daysElapsed: number;
   daysRemaining: number;
+  totalDays: number;
+  daysPassed: number;
   startLabel: string;
   endLabel: string;
   nextPayLabel: string;
@@ -304,6 +306,8 @@ export function calculateCurrentPeriod(
     daysTotal,
     daysElapsed,
     daysRemaining,
+    totalDays: daysTotal,
+    daysPassed: daysElapsed,
     startLabel,
     endLabel,
     nextPayLabel,

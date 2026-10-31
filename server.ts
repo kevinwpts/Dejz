@@ -183,12 +183,12 @@ async function startServer() {
     const validExpenseCats: string[] =
       Array.isArray(expenseCategories) && expenseCategories.length > 0
         ? expenseCategories
-        : ['Mat & dryck', 'Shopping', 'Boende', 'Transport', 'Nöje', 'Hälsa', 'Abonnemang', 'Försäkring', 'Räkningar', 'Swish', 'Övrigt'];
+        : ['Mat & dryck', 'Uteliv', 'Shopping', 'Boende', 'Transport', 'Nöje', 'Hälsa', 'Abonnemang', 'Försäkring', 'Räkningar', 'Sparande', 'Swish', 'Övrigt'];
 
     const validIncomeCats: string[] =
       Array.isArray(incomeCategories) && incomeCategories.length > 0
         ? incomeCategories
-        : ['Lön', 'Bidrag', 'Swish', 'Övrigt'];
+        : ['Lön', 'Bidrag', 'CSN', 'Pension', 'Swish', 'Återbetalning', 'Övrigt'];
 
     const batch = items.slice(0, 40).map((it: any) => ({
       key: String(it?.key || '').trim(),
@@ -261,6 +261,8 @@ async function startServer() {
           category = validExpenseCats.find((c) => c.toLowerCase().includes('hälsa')) || 'Hälsa';
         } else if (/(bio|teater|konsert|museum|bowling|padel|golf|event|biljett|spel)/.test(lower)) {
           category = validExpenseCats.find((c) => c.toLowerCase().includes('nöje')) || 'Nöje';
+        } else if (/(avanza|nordnet|lysa|opti|savr|levler|montrose|isk|fond|sparande)/.test(lower)) {
+          category = validExpenseCats.find((c) => c.toLowerCase().includes('sparande')) || 'Sparande';
         } else if (/(butik|shop|store|design|mode|kläder|skor|blommor|optik|glas|bok|leksak)/.test(lower)) {
           category = validExpenseCats.find((c) => c.toLowerCase().includes('shopping')) || 'Shopping';
         } else {
@@ -359,7 +361,7 @@ ${JSON.stringify(batch)}`;
         ? categories
         : type === 'income'
         ? ['Lön', 'Bidrag', 'Pension', 'CSN', 'Swish', 'Återbetalning', 'Övrigt']
-        : ['Mat & dryck', 'Uteliv', 'Shopping', 'Boende', 'Transport', 'Nöje', 'Hälsa', 'Abonnemang', 'Försäkring', 'Räkningar', 'Swish', 'Övrigt'];
+        : ['Mat & dryck', 'Uteliv', 'Shopping', 'Boende', 'Transport', 'Nöje', 'Hälsa', 'Abonnemang', 'Försäkring', 'Räkningar', 'Sparande', 'Swish', 'Övrigt'];
 
     const ai = getGenAI();
     if (!ai) {
@@ -367,11 +369,11 @@ ${JSON.stringify(batch)}`;
     }
 
     try {
-      const prompt = `Du är en expert på svenska företag, restauranger, butiker, kedjor, bostadsbolag, gym, appar och myndigheter i Sverige.
+      const prompt = `Du är en expert på svenska företag, restauranger, butiker, kedjor, bostadsbolag, gym, investeringsplattformar, appar och myndigheter i Sverige.
 Användaren har skrivit eller importerat företaget/transaktionen: "${query}" (typ: ${type === 'income' ? 'inkomst' : 'utgift'}).
 
 Returnera JSON med:
-1. "domain": Företagets officiella webbdomän utan https:// eller www. (t.ex. "holygreens.se" för "Holy Greens", "joeandthejuice.com" för "Joe & The Juice", "misteryork.se" för "Mister York", "brodernas.nu" för "Brödernas", "varbergsenergi.se" för "Varbergs Energi"). Om det inte är ett känt företag eller saknar egen webbdomän, returnera "".
+1. "domain": Företagets officiella webbdomän utan https:// eller www. (t.ex. "holygreens.se" för "Holy Greens", "joeandthejuice.com" för "Joe & The Juice", "misteryork.se" för "Mister York", "brodernas.nu" för "Brödernas", "varbergsenergi.se" för "Varbergs Energi", "avanza.se" för "Avanza"). Om det är en bostadsrättsförening (Brf), samfällighet eller privatperson som saknar egen företagslogga/webbplats, returnera "".
 2. "category": Den mest träffsäkra kategorin ur denna lista: ${JSON.stringify(validCats)}.
    - Restauranger, salladsbarer (t.ex. Holy Greens), caféer, bagerier, snabbmat, barer -> välj "Uteliv" om det finns i listan, annars "Mat & dryck".
    - Livsmedelsbutiker (ICA, Coop, Willys, Hemköp, Lidl, Systembolaget) -> "Mat & dryck".
@@ -380,7 +382,9 @@ Returnera JSON med:
    - Hyra, BRF, el, vatten, bredband, bolån -> "Boende".
    - Kollektivtrafik, parkering, bensin, laddning, taxi -> "Transport".
    - Streaming, appar, mobilabonnemang -> "Abonnemang".
-   - Försäkringsbolag -> "Försäkring".`;
+   - Försäkringsbolag -> "Försäkring".
+   - Investeringar, aktier, fonder och sparplattformar (Avanza, Nordnet, Lysa, Opti, SAVR, Levler, Montrose) -> "Sparande" (om det finns i listan).
+   - Om typen är "inkomst" och transaktionen kommer från en vanlig butik/e-handel (t.ex. ICA, H&M, Zara, Apotea, Zalando, Klarna) är det en retur/återköp -> "Återbetalning".`;
 
       const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",

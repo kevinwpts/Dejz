@@ -11,6 +11,7 @@ export interface RecurringMatchResult {
   type?: 'expense' | 'income';
   matchedName?: string;
   matchedItemId?: string;
+  matchedItem?: FixedExpenseItem | IncomeItem;
 }
 
 const EVERYDAY_GROCERY_OR_FOOD_KEYWORDS = [
@@ -419,6 +420,7 @@ export function checkIsRecurringTransaction(
         type: 'expense',
         matchedName: matchedExp.name,
         matchedItemId: matchedExp.id,
+        matchedItem: matchedExp,
       };
     }
   }
@@ -439,6 +441,7 @@ export function checkIsRecurringTransaction(
         type: 'income',
         matchedName: matchedInc.name,
         matchedItemId: matchedInc.id,
+        matchedItem: matchedInc,
       };
     }
   }
@@ -709,7 +712,9 @@ export function findSimilarTransactionsForTransaction(
     }
 
     const txType = tx.type === 'income' ? 'income' : 'expense';
-    if (txType !== targetType) continue;
+    const isStoreRefundForExpense =
+      targetType === 'expense' && txType === 'income' && tx.category === 'Återbetalning';
+    if (txType !== targetType && !isStoreRefundForExpense) continue;
 
     const otherTitleNorm = normalizeMerchantKey(tx.title || '');
     const otherRawNorm = normalizeMerchantKey(
@@ -785,8 +790,21 @@ export function findSimilarTransactionsForTransaction(
   matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   sameMerchant.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-  const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
-  const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;
+  const totalAmount = Math.max(
+    0,
+    matched.reduce((sum, t) => {
+      const amt = Math.abs(Number(t.amount) || 0);
+      if (targetType === 'expense' && t.type === 'income' && t.category === 'Återbetalning') {
+        return sum - amt;
+      }
+      return sum + amt;
+    }, 0)
+  );
+  const expenseCount =
+    targetType === 'expense'
+      ? matched.filter((t) => t.type !== 'income').length || matched.length
+      : matched.length;
+  const averageAmount = expenseCount > 0 ? Math.round(totalAmount / expenseCount) : 0;
 
   const brandLabel =
     matchedFixed?.name ||
