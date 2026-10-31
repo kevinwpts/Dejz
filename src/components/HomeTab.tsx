@@ -1205,105 +1205,69 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <div className="overflow-hidden">
               <div className="pt-2.5 border-t border-[var(--border-subtle)]">
                 {savingsGoals.length > 0 ? (
-                  <div>
-                    <div className="divide-y divide-[var(--border-subtle)]">
-                      {savingsGoals.map((goal) => {
-                        const effectiveGoalAmt = resolveHomeGoalAmount(goal);
-                        const linkedLabel =
-                          goal.linkedAccountId === '__TOTAL__'
-                            ? 'Totalsaldo'
-                            : goal.linkedAccountId
-                            ? accounts.find((a) => a.id === goal.linkedAccountId)?.name ||
-                              goal.linkedAccountName ||
-                              null
-                            : null;
-                        const pct =
-                          goal.targetAmount > 0
-                            ? Math.min(100, Math.round((effectiveGoalAmt / goal.targetAmount) * 100))
-                            : 0;
-                        const theme = getGoalArtworkTheme(goal.artworkId);
+                  <div className="divide-y divide-[var(--border-subtle)]">
+                    {savingsGoals.map((goal) => {
+                      const effectiveGoalAmt = resolveHomeGoalAmount(goal);
+                      const pct =
+                        goal.targetAmount > 0
+                          ? Math.min(100, Math.round((effectiveGoalAmt / goal.targetAmount) * 100))
+                          : 0;
+                      const theme = getGoalArtworkTheme(goal.artworkId);
 
-                        return (
-                          <button
-                            key={goal.id}
-                            type="button"
-                            onClick={onNavigateToGoals}
-                            className="w-full py-2.5 first:pt-1 flex items-center gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                      return (
+                        <button
+                          key={goal.id}
+                          type="button"
+                          onClick={onNavigateToGoals}
+                          className="w-full py-2.5 first:pt-1 last:pb-0.5 flex items-center gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                        >
+                          <div
+                            className="w-9 h-9 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
+                            style={{
+                              backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
+                            }}
                           >
-                            <div
-                              className="w-9 h-9 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
-                              style={{
-                                backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
-                              }}
-                            >
-                              {goal.customImageUrl ? (
-                                <img
-                                  src={goal.customImageUrl}
-                                  alt={goal.name}
-                                  className="w-full h-full object-cover"
+                            {goal.customImageUrl ? (
+                              <img
+                                src={goal.customImageUrl}
+                                alt={goal.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="absolute -right-2 top-0.5 w-9 h-9">
+                                <GoalArtworkIllustration artworkId={goal.artworkId} />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
+                                {goal.name}
+                              </span>
+                              <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
+                                {formatKr(effectiveGoalAmt)}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2.5">
+                              <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-300"
+                                  style={{
+                                    width: `${pct}%`,
+                                    backgroundColor: theme.progressColor,
+                                  }}
                                 />
-                              ) : (
-                                <div className="absolute -right-2 top-0.5 w-9 h-9">
-                                  <GoalArtworkIllustration artworkId={goal.artworkId} />
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <div className="flex items-baseline justify-between gap-2">
-                                <div className="min-w-0 flex items-baseline gap-1.5">
-                                  <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
-                                    {goal.name}
-                                  </span>
-                                  {linkedLabel && (
-                                    <span className="text-[11px] text-[var(--text-secondary)] truncate shrink-0">
-                                      · {linkedLabel}
-                                    </span>
-                                  )}
-                                </div>
-                                <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
-                                  {formatKr(effectiveGoalAmt)}
-                                </span>
                               </div>
-
-                              <div className="flex items-center gap-2.5">
-                                <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
-                                  <div
-                                    className="h-full rounded-full transition-all duration-300"
-                                    style={{
-                                      width: `${pct}%`,
-                                      backgroundColor: theme.progressColor,
-                                    }}
-                                  />
-                                </div>
-                                <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
-                                  {pct} %
-                                </span>
-                              </div>
+                              <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                                {pct} %
+                              </span>
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="pt-2.5 mt-1 border-t border-[var(--border-subtle)] flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={onNavigateToGoals}
-                        className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Alla sparmål</span>
-                        <CaretRight size={11} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={onNavigateToGoals}
-                        className="text-xs font-medium text-[var(--text-primary)] hover:opacity-75 transition-opacity flex items-center gap-1 cursor-pointer"
-                      >
-                        <Plus size={12} weight="bold" />
-                        <span>Nytt sparmål</span>
-                      </button>
-                    </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <button
