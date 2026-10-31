@@ -140,6 +140,13 @@ export function findAllMatchingFixedExpensesByMerchant(
   if (!tx || !fixedExpenses || fixedExpenses.length === 0) return [];
 
   const isStr = typeof tx === 'string';
+  if (!isStr && tx.linkedFixedExpenseId) {
+    const explicitExp = fixedExpenses.find((e) => e.id === tx.linkedFixedExpenseId);
+    if (explicitExp) {
+      return [explicitExp];
+    }
+  }
+
   const txTitleNorm = normalizeMerchantKey(isStr ? tx : tx.title || '');
   const combinedNorm = normalizeMerchantKey(
     isStr
@@ -154,22 +161,30 @@ export function findAllMatchingFixedExpensesByMerchant(
     for (const exp of fixedExpenses) {
       const expNameNorm = normalizeMerchantKey(exp.name);
       const expOrigNorm = exp.originalName ? normalizeMerchantKey(exp.originalName) : '';
+      const aliasNorms = (exp.linkedAliases || [])
+        .map((a) => normalizeMerchantKey(a))
+        .filter((a) => a.length >= 2);
       if (!expNameNorm) continue;
 
       if (
         txTitleNorm === expNameNorm ||
-        (expOrigNorm && txTitleNorm === expOrigNorm)
+        (expOrigNorm && txTitleNorm === expOrigNorm) ||
+        aliasNorms.some((a) => txTitleNorm === a || combinedNorm.includes(a))
       ) {
         matches.push(exp);
         continue;
       }
 
-      if (isGrocery && !isEverydayGroceryPurchase(expNameNorm)) {
+      if (isGrocery && !isEverydayGroceryPurchase(expNameNorm) && aliasNorms.length === 0) {
         continue;
       }
 
       let matchedThisExp = false;
-      const candidateNames = [exp.name, exp.originalName].filter(Boolean) as string[];
+      const candidateNames = [
+        exp.name,
+        exp.originalName,
+        ...(exp.linkedAliases || []),
+      ].filter(Boolean) as string[];
       for (const candName of candidateNames) {
         if (matchedThisExp) break;
         const variants = extractMerchantKeyVariants(candName);
@@ -210,6 +225,11 @@ export function findMatchingFixedExpense(
   if (!tx || !fixedExpenses || fixedExpenses.length === 0) return null;
 
   const isStr = typeof tx === 'string';
+  if (!isStr && tx.linkedFixedExpenseId) {
+    const explicitExp = fixedExpenses.find((e) => e.id === tx.linkedFixedExpenseId);
+    if (explicitExp) return explicitExp;
+  }
+
   const txTitleNorm = normalizeMerchantKey(isStr ? tx : tx.title || '');
   const txAmt = !isStr ? Math.round(Math.abs(Number(tx.amount) || 0)) : 0;
 
@@ -272,6 +292,11 @@ export function findMatchingIncome(
   if (!tx || !incomes || incomes.length === 0) return null;
 
   const isStr = typeof tx === 'string';
+  if (!isStr && tx.linkedIncomeId) {
+    const explicitInc = incomes.find((i) => i.id === tx.linkedIncomeId);
+    if (explicitInc) return explicitInc;
+  }
+
   const txTitleNorm = normalizeMerchantKey(isStr ? tx : tx.title || '');
   const combinedNorm = normalizeMerchantKey(
     isStr
@@ -283,16 +308,24 @@ export function findMatchingIncome(
     for (const inc of incomes) {
       const incNameNorm = normalizeMerchantKey(inc.name);
       const incOrigNorm = inc.originalName ? normalizeMerchantKey(inc.originalName) : '';
+      const aliasNorms = (inc.linkedAliases || [])
+        .map((a) => normalizeMerchantKey(a))
+        .filter((a) => a.length >= 2);
       if (!incNameNorm) continue;
 
       if (
         txTitleNorm === incNameNorm ||
-        (incOrigNorm && txTitleNorm === incOrigNorm)
+        (incOrigNorm && txTitleNorm === incOrigNorm) ||
+        aliasNorms.some((a) => txTitleNorm === a || combinedNorm.includes(a))
       ) {
         return inc;
       }
 
-      const candidateNames = [inc.name, inc.originalName].filter(Boolean) as string[];
+      const candidateNames = [
+        inc.name,
+        inc.originalName,
+        ...(inc.linkedAliases || []),
+      ].filter(Boolean) as string[];
       for (const candName of candidateNames) {
         const variants = extractMerchantKeyVariants(candName);
         for (const v of variants) {
@@ -400,14 +433,16 @@ export function checkIsRecurringTransaction(
     const allMatchedExps = findAllMatchingFixedExpensesByMerchant(tx, fixedExpenses);
     const matchedExp = findMatchingFixedExpense(tx, fixedExpenses);
     if (matchedExp) {
+      const isExplicitlyLinked = tx.linkedFixedExpenseId === matchedExp.id;
       const hasExactAmountMatch =
-        allMatchedExps.length > 0
+        isExplicitlyLinked ||
+        (allMatchedExps.length > 0
           ? allMatchedExps.some((exp) => isFixedExpenseAmountMatch(exp, txAmt))
-          : isFixedExpenseAmountMatch(matchedExp, txAmt);
+          : isFixedExpenseAmountMatch(matchedExp, txAmt));
 
       // För hybrid-handlare (t.ex. Apple, Klarna, Google, Amazon, kollektivtrafik) där man både kan ha
       // ett fast abonnemang OCH göra engångsköp: kräv att beloppet stämmer överens med den fasta utgiften!
-      if (!hasExactAmountMatch && isHybridSubscriptionAndOneOffMerchant(tx)) {
+      if (!isExplicitlyLinked && !hasExactAmountMatch && isHybridSubscriptionAndOneOffMerchant(tx)) {
         return {
           isRecurring: false,
           hasExactAmountMatch: false,
@@ -434,7 +469,9 @@ export function checkIsRecurringTransaction(
     if (matchedInc) {
       const incAmt = Math.round(Math.abs(Number(matchedInc.amount) || 0));
       const hasExactAmountMatch =
-        txAmt <= 0 || Math.abs(incAmt - txAmt) <= Math.max(25, Math.round(incAmt * 0.1));
+        tx.linkedIncomeId === matchedInc.id ||
+        txAmt <= 0 ||
+        Math.abs(incAmt - txAmt) <= Math.max(25, Math.round(incAmt * 0.1));
       return {
         isRecurring: true,
         hasExactAmountMatch,
@@ -504,18 +541,20 @@ export function reconcilePeriodRecurringMatches(
 
   for (const exp of fixedExpenses) {
     for (const tx of expenseTxs) {
+      if (tx.linkedFixedExpenseId && tx.linkedFixedExpenseId !== exp.id) continue;
+      const isExplicitlyLinked = tx.linkedFixedExpenseId === exp.id;
       const candidatesForTx = findAllMatchingFixedExpensesByMerchant(tx, [exp]);
       const fallbackMatch =
         candidatesForTx.length === 0 ? findMatchingFixedExpense(tx, [exp]) : candidatesForTx[0];
-      if (!fallbackMatch || fallbackMatch.id !== exp.id) continue;
+      if (!isExplicitlyLinked && (!fallbackMatch || fallbackMatch.id !== exp.id)) continue;
 
       const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
       const exactAmtMatch = isFixedExpenseAmountMatch(exp, txAmt);
-      if (!exactAmtMatch && isHybridSubscriptionAndOneOffMerchant(tx)) {
+      if (!isExplicitlyLinked && !exactAmtMatch && isHybridSubscriptionAndOneOffMerchant(tx)) {
         continue;
       }
 
-      const amtDist = getFixedExpenseAmountDistance(exp, txAmt);
+      const amtDist = isExplicitlyLinked ? -1 : getFixedExpenseAmountDistance(exp, txAmt);
       const txDay = parseInt((tx.date || '').slice(8, 10), 10) || 27;
       const dueDay = Number(exp.dueDay) || 27;
       const rawDayDiff = Math.abs(txDay - dueDay);

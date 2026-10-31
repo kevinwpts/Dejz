@@ -90,6 +90,11 @@ interface TransactionModalProps {
   onDelete?: (id: string) => void;
   onExclude?: (id: string, exclude: boolean) => void;
   onMarkAsFixed?: (tx: TransactionItem, kind: 'expense' | 'income') => void;
+  onLinkToFixed?: (
+    tx: TransactionItem,
+    item: FixedExpenseItem | IncomeItem | null,
+    kind: 'expense' | 'income'
+  ) => void;
   onToggleHeart?: (id: string, isHearted: boolean) => void;
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   isInternalTransfer?: boolean;
@@ -101,6 +106,7 @@ type ModalSubView =
   | 'category-picker'
   | 'payment-picker'
   | 'date-picker'
+  | 'link-fixed-picker'
   | 'similar'
   | 'swish'
   | 'receipt-preview';
@@ -188,6 +194,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onDelete,
   onExclude,
   onMarkAsFixed,
+  onLinkToFixed,
   onToggleHeart,
   onTogglePackage,
 }) => {
@@ -224,7 +231,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [logoPrefTick, setLogoPrefTick] = useState(0);
 
   const navigateSubView = (next: ModalSubView, dir: 'forward' | 'back' = 'forward') => {
-    if (next === 'receipt-preview' && (subView === 'details' || subView === 'edit')) {
+    if (
+      (next === 'receipt-preview' || next === 'link-fixed-picker') &&
+      (subView === 'details' || subView === 'edit')
+    ) {
       setPickerReturnView(subView);
     }
     setNavDirection(dir);
@@ -1096,6 +1106,119 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       )}
 
       {/* ============================================================== */}
+      {/* SUB-VIEW 6: KOPPLA TILL BEFINTLIG FAST UTGIFT / INKOMST        */}
+      {/* ============================================================== */}
+      {subView === 'link-fixed-picker' && activeTx && (
+        <div className={`${slideAnimClass} space-y-4`}>
+          <div className="ui-sheet-sub-header">
+            <button
+              type="button"
+              onClick={() => navigateSubView(pickerReturnView, 'back')}
+              title="Tillbaka"
+              aria-label="Tillbaka"
+              className="ui-icon-btn"
+            >
+              <CaretLeft size={15} weight="bold" />
+            </button>
+            <span className="ui-sheet-title">
+              {isIncome ? 'Koppla till fast inkomst' : 'Koppla till fast utgift'}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-icon-btn"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <p className="text-xs text-[var(--text-secondary)] px-1 leading-relaxed">
+            {isIncome
+              ? 'Välj vilken av dina fasta inkomster denna bankhändelse tillhör så paras de ihop automatiskt nu och framåt.'
+              : 'Har du lagt in en fast utgift manuellt (t.ex. gym eller el) men banken skriver ett annat namn? Välj vilken fast post denna händelse tillhör så paras de ihop nu och framåt.'}
+          </p>
+
+          <div className="ui-sheet-group">
+            {(isIncome ? incomes : fixedExpenses).map((item) => {
+              const isMatched =
+                (isIncome
+                  ? activeTx.linkedIncomeId === item.id
+                  : activeTx.linkedFixedExpenseId === item.id) ||
+                recurringStatus.matchedItemId === item.id;
+              const dayNum = 'dueDay' in item ? item.dueDay : item.payday;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    if (onLinkToFixed) {
+                      onLinkToFixed(activeTx, item, isIncome ? 'income' : 'expense');
+                    }
+                    navigateSubView(pickerReturnView, 'back');
+                  }}
+                  className="ui-row-btn"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <ItemLogo
+                      name={item.name}
+                      category={item.category}
+                      logoUrl={item.logo}
+                      size="md"
+                      isRecurring={true}
+                    />
+                    <div className="min-w-0 flex-1 text-left">
+                      <span
+                        className={`block truncate ${
+                          isMatched
+                            ? 'font-medium text-[var(--text-primary)]'
+                            : 'font-normal text-[var(--text-primary)]'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      <span className="text-[11px] text-[var(--text-secondary)] tabular-nums">
+                        {formatKr(item.amount)}/mån · Den {dayNum}:e
+                      </span>
+                    </div>
+                  </div>
+                  {isMatched && (
+                    <Check size={14} weight="bold" className="text-emerald-500 shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+
+            {(activeTx.linkedFixedExpenseId || activeTx.linkedIncomeId) && onLinkToFixed && (
+              <button
+                type="button"
+                onClick={() => {
+                  onLinkToFixed(activeTx, null, isIncome ? 'income' : 'expense');
+                  navigateSubView(pickerReturnView, 'back');
+                }}
+                className="ui-row-btn text-rose-500"
+              >
+                <span className="font-medium">Ta bort koppling till fast post</span>
+              </button>
+            )}
+          </div>
+
+          {onMarkAsFixed && (
+            <button
+              type="button"
+              onClick={() => onMarkAsFixed(activeTx, isIncome ? 'income' : 'expense')}
+              className="ui-btn-secondary w-full flex items-center justify-center gap-1.5"
+            >
+              <Plus size={14} weight="bold" />
+              <span>
+                Skapa som ny fast {isIncome ? 'inkomst' : 'utgift'} ({activeTx.title})
+              </span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ============================================================== */}
       {/* HUVUDVY 1: FÖRHANDSGRANSKNING (Ren läsvy utan redigeringsfält) */}
       {/* ============================================================== */}
       {subView === 'details' && !isCreateMode && activeTx && (
@@ -1351,6 +1474,34 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </span>
               </button>
 
+              {(isIncome ? incomes.length > 0 : fixedExpenses.length > 0) && onLinkToFixed && (
+                <button
+                  type="button"
+                  onClick={() => navigateSubView('link-fixed-picker', 'forward')}
+                  className="ui-row-btn"
+                >
+                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-2 min-w-0">
+                    <ArrowsClockwise
+                      size={15}
+                      className={
+                        recurringStatus.isRecurring
+                          ? 'text-emerald-500 shrink-0'
+                          : 'text-[var(--text-secondary)] shrink-0'
+                      }
+                    />
+                    <span className="truncate">
+                      {recurringStatus.isRecurring && recurringStatus.matchedName
+                        ? `Tillhör fast ${isIncome ? 'inkomst' : 'utgift'}: ${recurringStatus.matchedName}`
+                        : `Koppla till befintlig fast ${isIncome ? 'inkomst' : 'utgift'}`}
+                    </span>
+                  </span>
+                  <span className="text-[var(--text-secondary)] font-normal flex items-center gap-1 shrink-0">
+                    <span>{recurringStatus.isRecurring ? 'Ändra' : 'Välj'}</span>
+                    <CaretRight size={13} className="text-[var(--text-muted)]" />
+                  </span>
+                </button>
+              )}
+
               {onMarkAsFixed && (
                 <button
                   type="button"
@@ -1360,14 +1511,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="ui-row-btn"
                 >
                   <span className="font-normal text-[var(--text-primary)] flex items-center gap-2 shrink-0">
-                    <ArrowsClockwise
+                    <Plus
                       size={15}
                       className="text-[var(--text-secondary)] shrink-0"
                     />
                     <span>
-                      {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
-                        ? `Lägg till som egen fast ${isIncome ? 'inkomst' : 'utgift'}`
-                        : `Gör till fast ${isIncome ? 'inkomst' : 'utgift'}`}
+                      {recurringStatus.isRecurring
+                        ? `Lägg till som ny egen fast ${isIncome ? 'inkomst' : 'utgift'}`
+                        : `Gör till ny fast ${isIncome ? 'inkomst' : 'utgift'}`}
                     </span>
                   </span>
                   <CaretRight size={13} className="text-[var(--text-muted)] shrink-0" />
@@ -1774,6 +1925,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   </div>
                 )}
 
+                {(isIncome ? incomes.length > 0 : fixedExpenses.length > 0) && onLinkToFixed && (
+                  <button
+                    type="button"
+                    onClick={() => navigateSubView('link-fixed-picker', 'forward')}
+                    className="ui-row-btn"
+                  >
+                    <span className="ui-info-label shrink-0">Koppla till fast</span>
+                    <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
+                      <span className="truncate">
+                        {recurringStatus.isRecurring && recurringStatus.matchedName
+                          ? recurringStatus.matchedName
+                          : 'Välj befintlig'}
+                      </span>
+                      <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
+                    </span>
+                  </button>
+                )}
+
                 {onMarkAsFixed && (
                   <button
                     type="button"
@@ -1800,12 +1969,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     }}
                     className="ui-row-btn"
                   >
-                    <span className="ui-info-label shrink-0">Återkommande</span>
+                    <span className="ui-info-label shrink-0">Ny fast post</span>
                     <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
                       <ArrowsClockwise size={13} />
                       <span>
-                        {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
-                          ? `Lägg till som egen fast ${isIncome ? 'inkomst' : 'utgift'}`
+                        {recurringStatus.isRecurring
+                          ? `Skapa ny egen fast ${isIncome ? 'inkomst' : 'utgift'}`
                           : `Gör till fast ${isIncome ? 'inkomst' : 'utgift'}`}
                       </span>
                       <CaretRight size={12} className="text-[var(--text-muted)]" />

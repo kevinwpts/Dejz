@@ -518,6 +518,8 @@ export interface ManualFixedOverride {
   category?: string;
   paymentMethod?: string;
   name?: string;
+  linkedAliases?: string[];
+  linkedGoalId?: string;
   receipts?: { url: string; name: string }[];
 }
 
@@ -629,6 +631,7 @@ export interface ManualIncomeOverride {
   payday?: number;
   category?: string;
   name?: string;
+  linkedAliases?: string[];
 }
 
 export function getManualIncomeOverrides(): Record<string, ManualIncomeOverride> {
@@ -1183,6 +1186,8 @@ export interface TransactionMetaPatch {
   customAmount?: number;
   originalAmount?: number;
   linkedSwishTxId?: string;
+  linkedFixedExpenseId?: string;
+  linkedIncomeId?: string;
   isSharedExpense?: boolean;
 }
 

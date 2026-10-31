@@ -5,7 +5,6 @@ import {
   Check,
   CaretRight,
   Users,
-  PiggyBank,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
@@ -22,12 +21,7 @@ import {
   getMemberKey,
 } from '../utils/householdSync';
 import { getSavingsGoals } from '../utils/appCache';
-import {
-  getGoalArtworkTheme,
-  GoalArtworkIllustration,
-  EmptyClusterArtwork,
-  TiltedGoalsPromoArtwork,
-} from './ui/VisualArtwork';
+import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
 interface FixedTabProps {
   period: PeriodInfo;
@@ -66,7 +60,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   onAddFixed,
   onOpenDiscover,
   onOpenHousehold,
-  onOpenGoals,
 }) => {
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -80,7 +73,13 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     return [...fixedExpenses].sort((a, b) => (a.dueDay || 27) - (b.dueDay || 27));
   }, [fixedExpenses]);
 
-  const savingsGoals = useMemo(() => getSavingsGoals(), [fixedExpenses, incomes]);
+  const savingsGoalsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const g of getSavingsGoals()) {
+      map.set(g.id, g.name);
+    }
+    return map;
+  }, [fixedExpenses, transactions]);
 
   const periodMatches = useMemo(() => {
     const periodTxs = transactions.filter((t) => isDateInPeriod(t.date, period));
@@ -312,6 +311,12 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             sortedIncomes.map((inc) => {
               const catLabel = inc.category || 'Lön';
               const received = isIncomeReceived(inc);
+              const matchedTx = periodMatches?.matchedIncomeTxByIncId?.get(inc.id);
+              const actualReceivedAmt = matchedTx
+                ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
+                : Math.round(Number(inc.amount) || 0);
+              const hasVariableDiff =
+                Boolean(matchedTx) && actualReceivedAmt !== Math.round(Number(inc.amount) || 0);
 
               return (
                 <button
@@ -344,10 +349,14 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                   </div>
                   <div className="text-right shrink-0">
                     <span className="ui-row-amount-income">
-                      +{formatKr(inc.amount)}
+                      +{formatKr(actualReceivedAmt)}
                     </span>
                     <span className="ui-row-meta flex items-center justify-end gap-1">
-                      <span>Den {inc.payday}:e</span>
+                      <span>
+                        {hasVariableDiff
+                          ? `Riktvärde ${formatKr(inc.amount)}`
+                          : `Den ${inc.payday}:e`}
+                      </span>
                       {received && (
                         <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                           · Utbetald
@@ -405,6 +414,20 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           {sortedExpenses.length > 0 ? (
             sortedExpenses.map((exp) => {
               const paid = isExpensePaid(exp);
+              const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
+              const shareRatio =
+                exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+                  ? exp.amount / exp.fullAmount
+                  : 1;
+              const actualPaidAmt = matchedTx
+                ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
+                : Math.round(Number(exp.amount) || 0);
+              const hasVariableDiff =
+                Boolean(matchedTx) && actualPaidAmt !== Math.round(Number(exp.amount) || 0);
+              const linkedGoalName = exp.linkedGoalId
+                ? savingsGoalsMap.get(exp.linkedGoalId)
+                : undefined;
+
               return (
                 <button
                   key={exp.id}
@@ -433,6 +456,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         <span className="truncate">
                           {exp.category || 'Räkningar'}
                           {exp.isShared ? ' · Delad' : ''}
+                          {linkedGoalName ? ` · Sparmål: ${linkedGoalName}` : ''}
                         </span>
                       </span>
                     </div>
@@ -440,10 +464,14 @@ export const FixedTab: React.FC<FixedTabProps> = ({
 
                   <div className="text-right shrink-0">
                     <span className="ui-row-amount">
-                      -{formatKr(exp.amount)}
+                      -{formatKr(actualPaidAmt)}
                     </span>
                     <span className="ui-row-meta flex items-center justify-end gap-1">
-                      <span>Den {exp.dueDay}:e</span>
+                      <span>
+                        {hasVariableDiff
+                          ? `Riktvärde ${formatKr(exp.amount)}`
+                          : `Den ${exp.dueDay}:e`}
+                      </span>
                       {paid && (
                         <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                           · Betald
@@ -476,106 +504,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           )}
         </div>
       </section>
-
-      {/* ============================================================== */}
-      {/* SEKTION 3: SPARMÅL & BUFFERT                                   */}
-      {/* ============================================================== */}
-      {onOpenGoals && (
-        <section className="ui-section">
-          <div className="ui-section-header">
-            <h2 className="ui-section-title">
-              Sparmål & buffert
-            </h2>
-            <button
-              type="button"
-              onClick={onOpenGoals}
-              className="ui-section-action"
-            >
-              <Plus size={13} weight="bold" />
-              <span>{savingsGoals.length > 0 ? 'Hantera' : 'Skapa mål'}</span>
-            </button>
-          </div>
-
-          {savingsGoals.length > 0 ? (
-            <div className="ui-list-card">
-              {savingsGoals.map((goal) => {
-                const pct =
-                  goal.targetAmount > 0
-                    ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
-                    : 0;
-                const theme = getGoalArtworkTheme(goal.artworkId);
-                return (
-                  <button
-                    key={goal.id}
-                    type="button"
-                    onClick={onOpenGoals}
-                    className="w-full py-3.5 flex items-center gap-3.5 text-left hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    <div
-                      className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
-                      style={{
-                        backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
-                      }}
-                    >
-                      {goal.customImageUrl ? (
-                        <img
-                          src={goal.customImageUrl}
-                          alt={goal.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="absolute -right-2 top-0.5 w-10 h-10">
-                          <GoalArtworkIllustration artworkId={goal.artworkId} />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <span className="ui-row-title truncate">{goal.name}</span>
-                        <span className="font-display font-semibold text-[13.5px] text-[var(--text-primary)] tabular-nums shrink-0">
-                          {formatKr(goal.currentAmount)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{
-                              width: `${pct}%`,
-                              backgroundColor: theme.progressColor,
-                            }}
-                          />
-                        </div>
-                        <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
-                          {pct} %
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenGoals}
-              className="w-full ui-card-p flex items-center justify-between gap-4 text-left hover:opacity-95 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <div className="min-w-0 flex-1">
-                <span className="font-display font-medium text-sm text-[var(--text-primary)] leading-snug block">
-                  Spara till en resa, en pryl eller din nästa stora grej
-                </span>
-                <span className="text-xs text-[var(--text-secondary)] block mt-1">
-                  Skapa ditt första sparmål
-                </span>
-              </div>
-              <TiltedGoalsPromoArtwork />
-            </button>
-          )}
-        </section>
-      )}
     </div>
   );
 };

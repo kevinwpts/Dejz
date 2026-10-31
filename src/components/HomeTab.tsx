@@ -65,6 +65,7 @@ export interface IncomeItem {
   id: string;
   name: string;
   originalName?: string;
+  linkedAliases?: string[];
   amount: number;
   payday: number;
   category: string;
@@ -76,6 +77,8 @@ export interface FixedExpenseItem {
   id: string;
   name: string;
   originalName?: string;
+  linkedAliases?: string[];
+  linkedGoalId?: string;
   amount: number;
   fullAmount?: number;
   isShared?: boolean;
@@ -95,6 +98,8 @@ export interface TransactionItem {
   amount: number;
   originalAmount?: number;
   linkedSwishTxId?: string;
+  linkedFixedExpenseId?: string;
+  linkedIncomeId?: string;
   category: string;
   date: string;
   time?: string;

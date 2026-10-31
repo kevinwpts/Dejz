@@ -36,6 +36,7 @@ import {
   normalizeCategoryToValid,
   syncAllUserPreferencesToSupabase,
   compressImageFileToDataUrl,
+  getSavingsGoals,
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
 import {
@@ -66,6 +67,7 @@ type ModalSubView =
   | 'category-picker'
   | 'day-picker'
   | 'payment-picker'
+  | 'goal-picker'
   | 'share-picker'
   | 'receipt-preview'
   | 'similar'
@@ -110,6 +112,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [dueDay, setDueDay] = useState<number>(27);
   const [category, setCategory] = useState('Räkningar');
   const [paymentMethod, setPaymentMethod] = useState('Autogiro');
+  const [linkedGoalId, setLinkedGoalId] = useState<string>('');
   const [draftReceipts, setDraftReceipts] = useState<ReceiptAttachment[]>([]);
   const [previewReceipt, setPreviewReceipt] = useState<ReceiptAttachment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -125,6 +128,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       next === 'category-picker' ||
       next === 'day-picker' ||
       next === 'payment-picker' ||
+      next === 'goal-picker' ||
       next === 'receipt-preview'
     ) {
       if (subView === 'edit' || subView === 'details') {
@@ -147,6 +151,8 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     return stored;
   }, [isOpen, paymentMethod]);
 
+  const availableGoals = useMemo(() => getSavingsGoals(), [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     if (initialExpense) {
@@ -155,6 +161,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setDueDay(initialExpense.dueDay || 27);
       setCategory(normalizeCategoryToValid(initialExpense.category || 'Räkningar', 'expense'));
       setPaymentMethod(initialExpense.paymentMethod || 'Autogiro');
+      setLinkedGoalId(initialExpense.linkedGoalId || '');
       setDraftReceipts(getItemReceipts(initialExpense));
       setSubView('details');
       setPickerReturnView('details');
@@ -164,6 +171,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setDueDay(27);
       setCategory('Räkningar');
       setPaymentMethod('Autogiro');
+      setLinkedGoalId('');
       setDraftReceipts([]);
       setSubView('edit');
       setPickerReturnView('edit');
@@ -306,6 +314,8 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     const nextCategory = overrides?.category !== undefined ? overrides.category : category;
     const nextPaymentMethod =
       overrides?.paymentMethod !== undefined ? overrides.paymentMethod : paymentMethod;
+    const nextLinkedGoalId =
+      overrides?.linkedGoalId !== undefined ? overrides.linkedGoalId : linkedGoalId;
     const nextReceipts = overrides?.receipts !== undefined ? overrides.receipts : draftReceipts;
 
     onUpdate({
@@ -315,6 +325,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       dueDay: nextDueDay,
       category: nextCategory,
       paymentMethod: nextPaymentMethod,
+      linkedGoalId: nextLinkedGoalId || undefined,
       receipts: nextReceipts && nextReceipts.length > 0 ? nextReceipts : undefined,
       receiptUrl: nextReceipts && nextReceipts.length > 0 ? nextReceipts[0].url : undefined,
       receiptName: nextReceipts && nextReceipts.length > 0 ? nextReceipts[0].name : undefined,
@@ -332,6 +343,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
         dueDay: Number(dueDay) || 27,
         category: category || 'Räkningar',
         paymentMethod: paymentMethod || 'Autogiro',
+        linkedGoalId: linkedGoalId || undefined,
         receipts: draftReceipts.length > 0 ? draftReceipts : undefined,
         receiptUrl: draftReceipts.length > 0 ? draftReceipts[0].url : undefined,
         receiptName: draftReceipts.length > 0 ? draftReceipts[0].name : undefined,
@@ -875,6 +887,102 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       )}
 
       {/* ============================================================== */}
+      {/* SUB-VIEW 5: SPARMÅLSVÄLJARE                                    */}
+      {/* ============================================================== */}
+      {subView === 'goal-picker' && (
+        <div className={`${slideAnimClass} space-y-4`}>
+          <div className="ui-sheet-sub-header">
+            <button
+              type="button"
+              onClick={() => navigateSubView(pickerReturnView, 'back')}
+              title="Tillbaka"
+              aria-label="Tillbaka"
+              className="ui-icon-btn"
+            >
+              <CaretLeft size={15} weight="bold" />
+            </button>
+            <span className="ui-sheet-title">
+              Koppla till sparmål
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-icon-btn"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <p className="text-xs text-[var(--text-secondary)] px-1 leading-relaxed">
+            När denna fasta post (t.ex. månadssparande till Avanza eller sparkonto) dras på kontot läggs beloppet automatiskt till på det valda sparmålet.
+          </p>
+
+          <div className="ui-sheet-group">
+            <button
+              type="button"
+              onClick={() => {
+                setLinkedGoalId('');
+                if (pickerReturnView === 'details') {
+                  commitInlineChanges({ linkedGoalId: '' });
+                }
+                navigateSubView(pickerReturnView, 'back');
+              }}
+              className="ui-row-btn"
+            >
+              <span
+                className={`truncate ${
+                  !linkedGoalId
+                    ? 'font-medium text-[var(--text-primary)]'
+                    : 'font-normal text-[var(--text-secondary)]'
+                }`}
+              >
+                Inget sparmål
+              </span>
+              {!linkedGoalId && (
+                <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+              )}
+            </button>
+
+            {availableGoals.map((g) => {
+              const isSel = g.id === linkedGoalId;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => {
+                    setLinkedGoalId(g.id);
+                    if (pickerReturnView === 'details') {
+                      commitInlineChanges({ linkedGoalId: g.id });
+                    }
+                    navigateSubView(pickerReturnView, 'back');
+                  }}
+                  className="ui-row-btn"
+                >
+                  <div className="min-w-0 text-left">
+                    <span
+                      className={`block truncate ${
+                        isSel
+                          ? 'font-medium text-[var(--text-primary)]'
+                          : 'font-normal text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {g.name}
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)] tabular-nums">
+                      {formatKr(g.currentAmount)} av {formatKr(g.targetAmount)}
+                    </span>
+                  </div>
+                  {isSel && (
+                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
       {/* SUB-VIEW 6: INBYGGD KVITTO-VISNING                             */}
       {/* ============================================================== */}
       {subView === 'receipt-preview' && previewReceipt && (
@@ -1051,7 +1159,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             <div className="border-t border-[var(--border-subtle)] pt-3.5">
               <label className="block cursor-text">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
-                  Belopp per månad
+                  Belopp per månad (eller snitt/riktvärde)
                 </span>
                 <div className="flex items-baseline justify-between gap-2">
                   <input
@@ -1066,6 +1174,9 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                     kr/mån
                   </span>
                 </div>
+                <span className="text-[11px] text-[var(--text-muted)] block mt-1">
+                  Vid rörlig räkning (t.ex. el) reserveras detta belopp tills månadens faktiska dragning sker.
+                </span>
               </label>
             </div>
           </div>
@@ -1107,6 +1218,22 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 <CaretRight size={12} className="text-[var(--text-muted)]" />
               </span>
             </button>
+
+            {availableGoals.length > 0 && (
+              <button
+                type="button"
+                onClick={() => navigateSubView('goal-picker', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="ui-info-label shrink-0">Kopplat sparmål</span>
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
+                  <span className="truncate">
+                    {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget'}
+                  </span>
+                  <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
+                </span>
+              </button>
+            )}
 
             <div className="ui-row">
               <span className="ui-info-label">
@@ -1302,6 +1429,22 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   -{formatKr((Number(amount) || 0) * 12)}/år
                 </span>
               </div>
+
+              {availableGoals.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => navigateSubView('goal-picker', 'forward')}
+                  className="ui-row-btn"
+                >
+                  <span className="ui-info-label">Sparmål</span>
+                  <span className="ui-info-value flex items-center gap-1.5">
+                    <span>
+                      {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget valt'}
+                    </span>
+                    <CaretRight size={12} className="text-[var(--text-muted)]" />
+                  </span>
+                </button>
+              )}
 
               {resolvedAccountInfo && (
                 <div className="ui-row">

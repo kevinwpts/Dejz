@@ -131,6 +131,8 @@ import {
   clearAllLocalAppData,
   getStoredExpenseCategories,
   getStoredIncomeCategories,
+  getSavingsGoals,
+  saveSavingsGoals,
 } from './utils/appCache';
 import {
   findInternalTransferIds,
@@ -196,6 +198,14 @@ function sanitizeTransactionItem(
     receipts: item.receipts ?? savedMeta?.receipts,
     paymentMethod: item.paymentMethod ?? savedMeta?.paymentMethod,
     note: item.note ?? savedMeta?.note,
+    linkedFixedExpenseId:
+      item.linkedFixedExpenseId !== undefined
+        ? item.linkedFixedExpenseId
+        : savedMeta?.linkedFixedExpenseId,
+    linkedIncomeId:
+      item.linkedIncomeId !== undefined
+        ? item.linkedIncomeId
+        : savedMeta?.linkedIncomeId,
   };
   const todayStr = getSwedishDateStr();
 
@@ -563,6 +573,8 @@ function reconcileFixedExpensesList(params: {
         receiptUrl: f.receiptUrl,
         receiptName: f.receiptName,
         receipts: idOverride?.receipts || f.receipts,
+        linkedAliases: idOverride?.linkedAliases || f.linkedAliases,
+        linkedGoalId: idOverride?.linkedGoalId ?? f.linkedGoalId,
       };
 
       const existingIdx = findExactSavedMatchIndex(item);
@@ -613,6 +625,8 @@ function reconcileFixedExpensesList(params: {
       receiptUrl: curr.receiptUrl,
       receiptName: curr.receiptName,
       receipts: curr.receipts || idOverride?.receipts,
+      linkedAliases: curr.linkedAliases || idOverride?.linkedAliases,
+      linkedGoalId: curr.linkedGoalId ?? idOverride?.linkedGoalId,
     };
 
     const existingIdx = findExactSavedMatchIndex(candidate);
@@ -631,6 +645,8 @@ function reconcileFixedExpensesList(params: {
         receiptUrl: candidate.receiptUrl || existing.receiptUrl,
         receiptName: candidate.receiptName || existing.receiptName,
         receipts: candidate.receipts || existing.receipts,
+        linkedAliases: candidate.linkedAliases || existing.linkedAliases,
+        linkedGoalId: candidate.linkedGoalId ?? existing.linkedGoalId,
       };
       unified[existingIdx] = merged;
       if (
@@ -742,9 +758,10 @@ function reconcileIncomesList(params: {
       );
       if (deletedIds.has(validId)) continue;
 
-      const finalName = (i.name || origName).trim();
-      const finalCat = normalizeCategoryToValid(i.category || 'Lön', 'income');
-      const finalPayday = i.deductionDay || i.payday || targetPayday || 25;
+      const idOverride = overrides[`id:${validId}`];
+      const finalName = (i.name || idOverride?.name || origName).trim();
+      const finalCat = normalizeCategoryToValid(i.category || idOverride?.category || 'Lön', 'income');
+      const finalPayday = i.deductionDay || i.payday || idOverride?.payday || targetPayday || 25;
 
       if (isValidUuid(i.id)) {
         dbIds.add(i.id);
@@ -758,6 +775,7 @@ function reconcileIncomesList(params: {
         payday: finalPayday,
         category: finalCat,
         logo: i.logo || getLogoUrl(finalName, finalCat),
+        linkedAliases: idOverride?.linkedAliases || i.linkedAliases,
       };
 
       if (findExactSavedIncomeIndex(item) === -1) {
@@ -778,6 +796,7 @@ function reconcileIncomesList(params: {
     );
     if (deletedIds.has(validId)) continue;
 
+    const idOverride = overrides[`id:${validId}`];
     const finalName = curr.name.trim();
     const finalCat = normalizeCategoryToValid(curr.category || 'Lön', 'income');
     const finalPayday = curr.payday || targetPayday || 25;
@@ -790,6 +809,7 @@ function reconcileIncomesList(params: {
       payday: finalPayday,
       category: finalCat,
       logo: curr.logo || getLogoUrl(finalName, finalCat),
+      linkedAliases: curr.linkedAliases || idOverride?.linkedAliases,
     };
 
     const existingIdx = findExactSavedIncomeIndex(candidate);
@@ -805,6 +825,7 @@ function reconcileIncomesList(params: {
         ...candidate,
         id: existing.id,
         logo: candidate.logo || existing.logo || getLogoUrl(finalName, finalCat),
+        linkedAliases: candidate.linkedAliases || existing.linkedAliases,
       };
       unified[existingIdx] = merged;
       if (
@@ -2768,6 +2789,59 @@ export const App: React.FC = () => {
     return reconcilePeriodRecurringMatches(periodTransactions, fixedExpenses, incomes);
   }, [periodTransactions, fixedExpenses, incomes]);
 
+  // Automatisk påfyllning av Sparmål när en kopplad fast utgift (t.ex. Avanza månadssparande) matchas i perioden:
+  // Varje unik banktransaktion bokförs högst en gång på målet via `tx-goal-${matchedTx.id}`.
+  useEffect(() => {
+    const linkedExps = fixedExpenses.filter((e) => e.linkedGoalId);
+    if (linkedExps.length === 0) return;
+
+    const goals = getSavingsGoals();
+    if (!goals || goals.length === 0) return;
+
+    let mutated = false;
+    const nextGoals = goals.map((goal) => {
+      let updatedGoal = goal;
+      for (const exp of linkedExps) {
+        if (exp.linkedGoalId !== goal.id) continue;
+        const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+        if (!matchedTx) continue;
+
+        const activityId = `tx-goal-${matchedTx.id}`;
+        const alreadyCredited = (updatedGoal.activities || []).some(
+          (a) => a.id === activityId
+        );
+        if (alreadyCredited) continue;
+
+        const shareRatio =
+          exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+            ? exp.amount / exp.fullAmount
+            : 1;
+        const creditAmt = Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio);
+        if (creditAmt <= 0) continue;
+
+        mutated = true;
+        updatedGoal = {
+          ...updatedGoal,
+          currentAmount: (Number(updatedGoal.currentAmount) || 0) + creditAmt,
+          activities: [
+            {
+              id: activityId,
+              text: `${exp.name} (+${creditAmt.toLocaleString('sv-SE')} kr)`,
+              date: matchedTx.date,
+              amount: creditAmt,
+            },
+            ...(updatedGoal.activities || []),
+          ],
+        };
+      }
+      return updatedGoal;
+    });
+
+    if (mutated) {
+      saveSavingsGoals(nextGoals);
+    }
+  }, [fixedExpenses, periodRecurringMatches]);
+
   // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp)
   const totalIncome = useMemo(() => {
     return incomes.reduce((sum, inc) => {
@@ -2988,6 +3062,7 @@ export const App: React.FC = () => {
         payday: data.payday,
         category: data.category,
         name: data.name,
+        linkedAliases: data.linkedAliases,
       },
       data.originalName || data.name,
       validId,
@@ -3039,6 +3114,7 @@ export const App: React.FC = () => {
         payday: updated.payday,
         category: updated.category,
         name: updated.name,
+        linkedAliases: updated.linkedAliases,
       },
       rootOriginalName,
       validId,
@@ -3127,6 +3203,8 @@ export const App: React.FC = () => {
         paymentMethod: data.paymentMethod,
         name: data.name,
         receipts: data.receipts,
+        linkedAliases: data.linkedAliases,
+        linkedGoalId: data.linkedGoalId,
       },
       data.originalName || data.name,
       validId,
@@ -3220,6 +3298,72 @@ export const App: React.FC = () => {
         category: tx.category || 'Lön',
         logo: tx.logo,
       });
+    }
+  };
+
+  const handleLinkTransactionToFixed = async (
+    tx: TransactionItem,
+    targetItem: FixedExpenseItem | IncomeItem | null,
+    kind: 'expense' | 'income'
+  ) => {
+    const rawCandidate = (tx.counterpartyName || tx.rawDescription || tx.title || '').trim();
+
+    if (kind === 'expense') {
+      const nextLinkedId = targetItem ? targetItem.id : '';
+      saveTransactionMeta(tx.id, { linkedFixedExpenseId: nextLinkedId });
+
+      if (targetItem) {
+        const exp = targetItem as FixedExpenseItem;
+        const currentAliases = Array.isArray(exp.linkedAliases) ? exp.linkedAliases : [];
+        const updatedAliases =
+          rawCandidate && !currentAliases.includes(rawCandidate)
+            ? [...currentAliases, rawCandidate]
+            : currentAliases;
+        await handleUpdateFixed({
+          ...exp,
+          linkedAliases: updatedAliases,
+        });
+      }
+
+      setTransactions((prev) => {
+        const next = prev.map((item) =>
+          item.id === tx.id ? { ...item, linkedFixedExpenseId: nextLinkedId } : item
+        );
+        transactionsRef.current = next;
+        saveCachedAppState({ userId: userIdRef.current, transactions: next });
+        return next;
+      });
+      setSelectedTransaction((prev) =>
+        prev && prev.id === tx.id ? { ...prev, linkedFixedExpenseId: nextLinkedId } : prev
+      );
+    } else {
+      const nextLinkedId = targetItem ? targetItem.id : '';
+      saveTransactionMeta(tx.id, { linkedIncomeId: nextLinkedId });
+
+      if (targetItem) {
+        const inc = targetItem as IncomeItem;
+        const currentAliases = Array.isArray(inc.linkedAliases) ? inc.linkedAliases : [];
+        const updatedAliases =
+          rawCandidate && !currentAliases.includes(rawCandidate)
+            ? [...currentAliases, rawCandidate]
+            : currentAliases;
+        await handleUpdateIncome({
+          ...inc,
+          linkedAliases: updatedAliases,
+        });
+      }
+
+      setTransactions((prev) => {
+        const next = prev.map((item) =>
+          item.id === tx.id ? { ...item, linkedIncomeId: nextLinkedId } : item
+        );
+        transactionsRef.current = next;
+        saveCachedAppState({ userId: userIdRef.current, transactions: next });
+        return next;
+      });
+      setSelectedTransaction((prev) =>
+        prev && prev.id === tx.id ? { ...prev, linkedIncomeId: nextLinkedId } : prev
+      );
     }
   };
 
@@ -3318,6 +3462,8 @@ export const App: React.FC = () => {
         paymentMethod: updated.paymentMethod,
         name: updated.name,
         receipts: updated.receipts,
+        linkedAliases: updated.linkedAliases,
+        linkedGoalId: updated.linkedGoalId,
       },
       rootOriginalName,
       validId,
@@ -5016,6 +5162,7 @@ export const App: React.FC = () => {
         onDelete={handleDeleteTransaction}
         onExclude={handleExcludeTransaction}
         onMarkAsFixed={handleMarkAsFixed}
+        onLinkToFixed={handleLinkTransactionToFixed}
         onToggleHeart={handleToggleHeart}
         onTogglePackage={handleTogglePackage}
       />
