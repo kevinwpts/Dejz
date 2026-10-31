@@ -1072,6 +1072,185 @@ Regler:
     }
   });
 
+  // ==============================================================
+  // SHARED HOUSEHOLD BUDGET API (Multi-user sync via Invite Code)
+  // ==============================================================
+  const householdMemoryStore = new Map<string, any>(); // keyed by inviteCode
+
+  async function persistHouseholdToProfiles(household: any) {
+    if (!household || !household.inviteCode) return;
+    householdMemoryStore.set(String(household.inviteCode).toUpperCase().trim(), household);
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return;
+
+    const memberEmails = Object.keys(household.members || {})
+      .map((e) => e.toLowerCase().trim())
+      .filter((e) => e.includes('@') && !e.endsWith('@demo.dejz'));
+
+    await Promise.allSettled(
+      memberEmails.map(async (em) => {
+        const { data: rows } = await supabaseAdmin
+          .from('profiles')
+          .select('id, user_preferences')
+          .ilike('email', em);
+        for (const row of rows || []) {
+          const prefs =
+            row.user_preferences && typeof row.user_preferences === 'object'
+              ? { ...row.user_preferences }
+              : {};
+          prefs.household = household;
+          await supabaseAdmin
+            .from('profiles')
+            .update({ user_preferences: prefs })
+            .eq('id', row.id);
+        }
+      })
+    );
+  }
+
+  async function findHouseholdByInviteCode(rawCode: string) {
+    const code = String(rawCode || '').replace(/\s+/g, '').toUpperCase();
+    if (!code) return null;
+    if (householdMemoryStore.has(code)) {
+      return householdMemoryStore.get(code);
+    }
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return null;
+    try {
+      const { data: rows } = await supabaseAdmin
+        .from('profiles')
+        .select('user_preferences')
+        .not('user_preferences', 'is', null)
+        .limit(500);
+      for (const row of rows || []) {
+        const hh = row?.user_preferences?.household;
+        if (hh && String(hh.inviteCode || '').replace(/\s+/g, '').toUpperCase() === code) {
+          householdMemoryStore.set(code, hh);
+          return hh;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  }
+
+  app.post('/api/household/sync', async (req, res) => {
+    try {
+      const { household } = req.body || {};
+      if (!household || !household.inviteCode) {
+        return res.status(400).json({ error: 'Missing household payload' });
+      }
+      const code = String(household.inviteCode).replace(/\s+/g, '').toUpperCase();
+      const existing = await findHouseholdByInviteCode(code);
+      const merged = existing
+        ? {
+            ...existing,
+            ...household,
+            members: {
+              ...(existing.members || {}),
+              ...(household.members || {}),
+            },
+            updatedAt: new Date().toISOString(),
+          }
+        : {
+            ...household,
+            inviteCode: code,
+            updatedAt: new Date().toISOString(),
+          };
+
+      await persistHouseholdToProfiles(merged);
+      return res.json({ household: merged });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Sync failed' });
+    }
+  });
+
+  app.post('/api/household/join', async (req, res) => {
+    try {
+      const { inviteCode, memberSummary, memberFixedExpenses, memberSavingsGoals } = req.body || {};
+      const code = String(inviteCode || '').replace(/\s+/g, '').toUpperCase();
+      if (!code || !memberSummary || !memberSummary.email) {
+        return res.status(400).json({ error: 'Ange en giltig 6-siffrig inbjudningskod.' });
+      }
+
+      const existing = await findHouseholdByInviteCode(code);
+      if (!existing) {
+        return res.status(404).json({
+          error: 'Hittade inget hushåll med den koden. Kontrollera koden med din partner.',
+        });
+      }
+
+      const memberKey = String(memberSummary.email).toLowerCase().trim();
+      const nextMembers = {
+        ...(existing.members || {}),
+        [memberKey]: {
+          ...memberSummary,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+
+      // Merge shared fixed expenses without duplicating by normalized name
+      const existingFixed = Array.isArray(existing.sharedFixedExpenses)
+        ? [...existing.sharedFixedExpenses]
+        : [];
+      const incomingFixed = Array.isArray(memberFixedExpenses) ? memberFixedExpenses : [];
+      for (const item of incomingFixed) {
+        if (!item || !item.name) continue;
+        const alreadyExists = existingFixed.some(
+          (f: any) =>
+            f.id === item.id ||
+            String(f.name || '').toLowerCase().trim() === String(item.name || '').toLowerCase().trim()
+        );
+        if (!alreadyExists) {
+          existingFixed.push(item);
+        }
+      }
+
+      // Merge shared savings goals without duplicating by ID or name
+      const existingGoals = Array.isArray(existing.sharedSavingsGoals)
+        ? [...existing.sharedSavingsGoals]
+        : [];
+      const incomingGoals = Array.isArray(memberSavingsGoals) ? memberSavingsGoals : [];
+      for (const g of incomingGoals) {
+        if (!g || !g.name) continue;
+        const alreadyExists = existingGoals.some(
+          (eg: any) =>
+            eg.id === g.id ||
+            String(eg.name || '').toLowerCase().trim() === String(g.name || '').toLowerCase().trim()
+        );
+        if (!alreadyExists) {
+          existingGoals.push(g);
+        }
+      }
+
+      const updatedHousehold = {
+        ...existing,
+        inviteCode: code,
+        members: nextMembers,
+        sharedFixedExpenses: existingFixed,
+        sharedSavingsGoals: existingGoals,
+        updatedAt: new Date().toISOString(),
+      };
+
+      await persistHouseholdToProfiles(updatedHousehold);
+      return res.json({ household: updatedHousehold });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Kunde inte ansluta till hushåll' });
+    }
+  });
+
+  app.get('/api/household/state', async (req, res) => {
+    try {
+      const code = String(req.query.code || '').replace(/\s+/g, '').toUpperCase();
+      if (!code) return res.json({ household: null });
+      const hh = await findHouseholdByInviteCode(code);
+      return res.json({ household: hh || null });
+    } catch {
+      return res.json({ household: null });
+    }
+  });
+
   // Delete Account (Full permanent deletion of all user traces, storage files, public rows & auth.users)
   app.post('/api/auth/delete-account', async (req, res) => {
     const { userId, secondaryUserId, email } = req.body || {};

@@ -15,6 +15,11 @@ import {
   isDueDayPaidInPeriod,
 } from '../utils/periodEngine';
 import { reconcilePeriodRecurringMatches } from '../utils/recurring';
+import {
+  getHouseholdState,
+  calculateHouseholdSettlement,
+  getMemberKey,
+} from '../utils/householdSync';
 import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
 interface FixedTabProps {
@@ -25,11 +30,14 @@ interface FixedTabProps {
   totalFixedExpenses: number;
   transactions?: TransactionItem[];
   accounts?: AccountItem[];
+  userEmail?: string | null;
+  userName?: string | null;
   onSelectIncome: (inc: IncomeItem) => void;
   onSelectFixed: (exp: FixedExpenseItem) => void;
   onAddIncome?: () => void;
   onAddFixed?: () => void;
   onOpenDiscover?: () => void;
+  onOpenHousehold?: () => void;
   onDeleteIncome: (id: string) => void;
   onDeleteFixed: (id: string) => void;
   onUpdateFixed?: (exp: FixedExpenseItem) => void;
@@ -42,11 +50,14 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   totalIncome,
   totalFixedExpenses,
   transactions = [],
+  userEmail,
+  userName,
   onSelectIncome,
   onSelectFixed,
   onAddIncome,
   onAddFixed,
   onOpenDiscover,
+  onOpenHousehold,
 }) => {
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -194,8 +205,83 @@ export const FixedTab: React.FC<FixedTabProps> = ({
       </section>
 
       {/* ============================================================== */}
-      {/* GENVÄG: UPPTÄCK FASTA KOSTNADER FRÅN BANKHISTORIK              */}
+      {/* GENVÄG: UPPTÄCK FASTA KOSTNADER & DELAD BUDGET                 */}
       {/* ============================================================== */}
+      {(() => {
+        const hh = getHouseholdState();
+        if (!onOpenHousehold) return null;
+        if (!hh) {
+          const sharedCount = fixedExpenses.filter((f) => f.isShared).length;
+          if (sharedCount === 0) return null;
+          return (
+            <button
+              type="button"
+              onClick={onOpenHousehold}
+              className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Users size={17} weight="fill" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
+                    Synka delad budget med din partner
+                  </span>
+                  <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+                    Du har {sharedCount} {sharedCount === 1 ? 'delad fast utgift' : 'delade fasta utgifter'} · Bjud in med kod
+                  </span>
+                </div>
+              </div>
+              <CaretRight
+                size={14}
+                weight="bold"
+                className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
+              />
+            </button>
+          );
+        }
+
+        const settlement = calculateHouseholdSettlement(
+          hh,
+          getMemberKey(userEmail, userName),
+          period.startDate
+        );
+        return (
+          <button
+            type="button"
+            onClick={onOpenHousehold}
+            className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Users size={17} weight="fill" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
+                  {hh.name} · Delad budget
+                </span>
+                <span className="text-[11px] text-[var(--text-secondary)] block truncate tabular-nums">
+                  {settlement.isSettledForCurrentPeriod
+                    ? 'Perioden är markerad som utjämnad'
+                    : settlement.partnerMember
+                    ? Math.abs(settlement.netBalance) < 5
+                      ? 'Ni ligger helt jämnt i perioden'
+                      : settlement.netBalance > 0
+                      ? `${settlement.partnerMember.name} är skyldig dig ${formatKr(settlement.netBalance)}`
+                      : `Du är skyldig ${settlement.partnerMember.name} ${formatKr(Math.abs(settlement.netBalance))}`
+                    : `Totalt delat: ${formatKr(settlement.combinedTotalShared)} · Kod ${hh.inviteCode}`}
+                </span>
+              </div>
+            </div>
+            <CaretRight
+              size={14}
+              weight="bold"
+              className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
+            />
+          </button>
+        );
+      })()}
+
       {onOpenDiscover && transactions.length > 0 && (
         <button
           type="button"

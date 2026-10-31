@@ -43,6 +43,10 @@ import { BottomSheet } from './components/ui/BottomSheet';
 import { EmptyClusterArtwork } from './components/ui/VisualArtwork';
 import { supabase } from './supabaseClient';
 import {
+  getHouseholdState,
+  subscribeToHouseholdRealtime,
+} from './utils/householdSync';
+import {
   bankService,
   BankConnection,
   BankAccount,
@@ -184,6 +188,7 @@ function sanitizeTransactionItem(
     isHearted: item.isHearted ?? savedMeta?.isHearted,
     isWaitingForPackage: item.isWaitingForPackage ?? savedMeta?.isWaitingForPackage,
     isWaitingForSwish: item.isWaitingForSwish ?? savedMeta?.isWaitingForSwish,
+    isSharedExpense: item.isSharedExpense ?? savedMeta?.isSharedExpense,
     pendingSwishAmount: item.pendingSwishAmount ?? savedMeta?.pendingSwishAmount,
     pendingSwishRecipient: item.pendingSwishRecipient ?? savedMeta?.pendingSwishRecipient,
     receiptUrl: item.receiptUrl ?? savedMeta?.receiptUrl,
@@ -1383,6 +1388,20 @@ export const App: React.FC = () => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   }, [activeTab, settingsSubView, selectedHistoryAccountId]);
+
+  // Realtidssynk för Delad budget (Hushåll)
+  useEffect(() => {
+    const hh = getHouseholdState();
+    if (!hh || !hh.householdId || !hh.inviteCode) return;
+    const unsubscribe = subscribeToHouseholdRealtime(
+      hh.householdId,
+      hh.inviteCode,
+      () => {
+        setAccountMetaVersion((v) => v + 1);
+      }
+    );
+    return unsubscribe;
+  }, [activeTab, settingsSubView]);
 
   const initialCache = useMemo(() => loadCachedAppState(), []);
 
@@ -4251,6 +4270,8 @@ export const App: React.FC = () => {
                   totalFixedExpenses={totalFixedExpenses}
                   transactions={displayTransactions}
                   accounts={accounts}
+                  userEmail={userEmail}
+                  userName={userName}
                   onSelectIncome={(inc) => {
                     setSelectedIncome(inc);
                     setIsIncomeModalOpen(true);
@@ -4269,6 +4290,10 @@ export const App: React.FC = () => {
                   }}
                   onOpenDiscover={() => {
                     setSettingsSubView('discover');
+                    setActiveTab('settings');
+                  }}
+                  onOpenHousehold={() => {
+                    setSettingsSubView('household');
                     setActiveTab('settings');
                   }}
                   onDeleteIncome={handleDeleteIncome}

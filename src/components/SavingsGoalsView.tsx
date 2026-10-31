@@ -26,7 +26,7 @@ import {
   TiltedGoalsPromoArtwork,
 } from './ui/VisualArtwork';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
-
+import { getHouseholdState, pushHouseholdSyncToServer } from '../utils/householdSync';
 import { TransactionItem } from './HomeTab';
 
 interface SavingsGoalsViewProps {
@@ -78,6 +78,14 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const updateGoals = (next: SavingsGoalItem[]) => {
     setSavingsGoals(next);
     saveSavingsGoals(next);
+    const hh = getHouseholdState();
+    if (hh) {
+      void pushHouseholdSyncToServer({
+        ...hh,
+        sharedSavingsGoals: next,
+        updatedAt: new Date().toISOString(),
+      });
+    }
     if (onGoalsChanged) onGoalsChanged(next);
   };
 
@@ -226,6 +234,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             : `Tog ut ${formatKr(amt)}`,
           date: todayIso,
           amount: isDeposit ? amt : -amt,
+          authorInitials: userInitials,
+          authorName: userName || 'Jag',
         };
         return {
           ...g,
@@ -406,11 +416,12 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               >
                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
                   <div className="w-10 h-10 rounded-full bg-[#34D399]/20 text-emerald-600 dark:bg-[#34D399] dark:text-[#052E22] font-display font-bold text-xs flex items-center justify-center shrink-0">
-                    {userInitials}
+                    {act.authorInitials || userInitials}
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="ui-row-title block">{act.text}</span>
                     <span className="ui-row-subtitle block">
+                      {act.authorName ? `${act.authorName} · ` : ''}
                       {formatSwedishDateHeading(act.date)}
                     </span>
                   </div>

@@ -29,12 +29,15 @@ import {
   DownloadSimple,
   PiggyBank,
   Sparkle,
+  Users,
 } from '@phosphor-icons/react';
 import { bankService, BankConnection, BankAccount } from '../services/bankService';
 import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
 import { SavingsGoalsView } from './SavingsGoalsView';
 import { RecurringDiscoveryView } from './RecurringDiscoveryView';
+import { HouseholdBudgetView } from './HouseholdBudgetView';
+import { getHouseholdState } from '../utils/householdSync';
 import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
@@ -95,6 +98,7 @@ interface SettingsTabProps {
 
 export type SettingsSubView =
   | 'main'
+  | 'household'
   | 'discover'
   | 'categories'
   | 'goals'
@@ -113,6 +117,7 @@ export type SettingsSubView =
 
 export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, string> = {
   profile: 'Profil',
+  household: 'Delad budget',
   discover: 'Hitta fasta poster',
   categories: 'Kategorier',
   goals: 'Sparmål & buffert',
@@ -482,12 +487,30 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
 
   // ==========================================
+  // SUB-VIEW: DELAD BUDGET (HUSHÅLL)
+  // ==========================================
+  if (subView === 'household') {
+    return (
+      <HouseholdBudgetView
+        period={period}
+        userEmail={userEmail}
+        userName={userName}
+        userAvatar={userAvatar}
+        incomes={incomes}
+        fixedExpenses={fixedExpenses}
+        transactions={transactions}
+        onAddFixed={onAddFixed}
+      />
+    );
+  }
+
+  // ==========================================
   // SUB-VIEW: SPARMÅL & BUFFERT
   // ==========================================
   if (subView === 'goals') {
     return (
       <div className="animate-slide-in-right">
-        <SavingsGoalsView userName={userName} />
+        <SavingsGoalsView userName={userName} transactions={transactions} />
       </div>
     );
   }
@@ -1713,6 +1736,34 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
             <div className="ui-admin-right">
               <span className="ui-admin-value">Den {targetPayday}:e</span>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
+          </button>
+
+          {/* Delad budget (Hushåll) */}
+          <button
+            type="button"
+            onClick={() => setSubView('household')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Users size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Delad budget</span>
+            </div>
+            <div className="ui-admin-right">
+              <span
+                className={`ui-admin-value ${
+                  getHouseholdState()
+                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                    : ''
+                }`}
+              >
+                {getHouseholdState() ? 'Aktiv' : 'Bjud in'}
+              </span>
               <span className="ui-admin-chevron">
                 <CaretRight size={13} />
               </span>

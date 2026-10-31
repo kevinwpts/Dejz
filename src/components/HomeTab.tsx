@@ -98,6 +98,7 @@ export interface TransactionItem {
   isHearted?: boolean;
   isWaitingForPackage?: boolean;
   isWaitingForSwish?: boolean;
+  isSharedExpense?: boolean;
   pendingSwishAmount?: number;
   pendingSwishRecipient?: string;
   paymentMethod?: string;

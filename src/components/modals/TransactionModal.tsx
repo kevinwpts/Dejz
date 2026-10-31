@@ -52,7 +52,9 @@ import {
   getSavingsGoals,
   saveSavingsGoals,
   SavingsGoalItem,
+  saveTransactionMeta,
 } from '../../utils/appCache';
+import { getHouseholdState } from '../../utils/householdSync';
 import {
   inferCategoryAndMethodFromName,
   cleanDisplayMerchantName,
@@ -1370,6 +1372,37 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   </span>
                   <CaretRight size={13} className="text-[var(--text-muted)] shrink-0" />
                 </button>
+              )}
+
+              {!isIncome && getHouseholdState() && (
+                <div className="ui-row">
+                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-2">
+                    <UserPlus size={15} className="text-[var(--text-secondary)] shrink-0" />
+                    <span>Delat utlägg i hushållet</span>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(activeTx.isSharedExpense)}
+                    onClick={() => {
+                      const nextVal = !activeTx.isSharedExpense;
+                      saveTransactionMeta(activeTx.id, { isSharedExpense: nextVal });
+                      if (onUpdate) {
+                        onUpdate({ ...activeTx, isSharedExpense: nextVal });
+                      }
+                      setLogoPrefTick((t) => t + 1);
+                    }}
+                    className={`ui-switch ${
+                      activeTx.isSharedExpense ? 'ui-switch-on' : 'ui-switch-off'
+                    }`}
+                  >
+                    <span
+                      className={`ui-switch-thumb ${
+                        activeTx.isSharedExpense ? 'ui-switch-thumb-on' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
               )}
 
               {(() => {

@@ -1106,6 +1106,8 @@ export interface SavingsGoalActivity {
   text: string;
   date: string;
   amount?: number;
+  authorInitials?: string;
+  authorName?: string;
 }
 
 export interface SavingsGoalItem {
@@ -1158,6 +1160,7 @@ export interface TransactionMetaPatch {
   customAmount?: number;
   originalAmount?: number;
   linkedSwishTxId?: string;
+  isSharedExpense?: boolean;
 }
 
 const RECEIPTS_VAULT_KEY = 'dejz_receipts_vault_v1';
@@ -1421,6 +1424,7 @@ export function collectAllUserPreferences(): Record<string, any> {
     learnedBrandDomains: safeParse('dejz_learned_brand_domains_v1', {}),
     mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
     swishContacts: safeParse('dejz_swish_contacts', []),
+    household: safeParse('dejz_household_state_v1', null),
     weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
     darkMode: localStorage.getItem('dejz_dark_mode') || 'light',
     updatedAt: new Date().toISOString(),
@@ -1622,6 +1626,13 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     }
     if (Array.isArray(prefs.savingsGoals) && !localStorage.getItem(SAVINGS_GOALS_KEY)) {
       localStorage.setItem(SAVINGS_GOALS_KEY, JSON.stringify(prefs.savingsGoals));
+    }
+    if (
+      prefs.household &&
+      typeof prefs.household === 'object' &&
+      !localStorage.getItem('dejz_household_state_v1')
+    ) {
+      localStorage.setItem('dejz_household_state_v1', JSON.stringify(prefs.household));
     }
     if (Array.isArray(prefs.reviewedTransactionIds) && !localStorage.getItem(REVIEWED_TX_IDS_KEY)) {
       localStorage.setItem(REVIEWED_TX_IDS_KEY, JSON.stringify(prefs.reviewedTransactionIds));
