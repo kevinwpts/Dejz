@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Plus,
   Minus,
@@ -6,6 +7,7 @@ import {
   Trash,
   Check,
   CaretLeft,
+  ArrowRight,
   MagnifyingGlass,
   ImageSquare,
   X,
@@ -39,6 +41,8 @@ interface SavingsGoalsViewProps {
   totalBalance?: number;
 }
 
+type GoalWizardStep = 1 | 2 | 3 | 4;
+
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   onGoalsChanged,
   userName,
@@ -49,9 +53,10 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoalItem[]>(() => getSavingsGoals());
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
 
-  // Create / Edit Modal State
+  // Create / Edit Wizard State (Onboarding-style step-by-step)
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [modalStep, setModalStep] = useState<'form' | 'artwork' | 'created'>('form');
+  const [wizardStep, setWizardStep] = useState<GoalWizardStep>(1);
+  const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
   const [goalNameInput, setGoalNameInput] = useState('');
   const [goalTargetInput, setGoalTargetInput] = useState('');
@@ -60,7 +65,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [goalArtworkId, setGoalArtworkId] = useState<string>('piggy');
   const [goalCustomImage, setGoalCustomImage] = useState<string | undefined>(undefined);
   const [artworkSearch, setArtworkSearch] = useState('');
-  const [newlyCreatedGoalId, setNewlyCreatedGoalId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Deposit / Withdraw / Rule Sheet State
@@ -137,6 +141,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     return null;
   };
 
+  const navigateWizardStep = (next: GoalWizardStep, dir: 'forward' | 'back') => {
+    setSlideDir(dir);
+    setWizardStep(next);
+  };
+
   const openCreateGoal = () => {
     setEditingGoalId(null);
     setGoalNameInput('');
@@ -146,7 +155,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalArtworkId('piggy');
     setGoalCustomImage(undefined);
     setArtworkSearch('');
-    setModalStep('form');
+    setSlideDir('forward');
+    setWizardStep(1);
     setIsGoalModalOpen(true);
   };
 
@@ -159,7 +169,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalArtworkId(goal.artworkId || 'piggy');
     setGoalCustomImage(goal.customImageUrl);
     setArtworkSearch('');
-    setModalStep('form');
+    setSlideDir('forward');
+    setWizardStep(1);
     setIsGoalModalOpen(true);
   };
 
@@ -238,8 +249,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         ],
       };
       updateGoals([...savingsGoals, newGoal]);
-      setNewlyCreatedGoalId(newId);
-      setModalStep('created');
+      setIsGoalModalOpen(false);
+      setSelectedGoalId(newId);
     }
   };
 
@@ -688,526 +699,512 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   }
 
   // ============================================================================
-  // MODAL HELPER (Handles Form Step, Artwork Picker Step #8, and "Mål skapat" #1)
+  // ONBOARDING-STYLE STEP-BY-STEP GOAL WIZARD (Steps 1 -> 2 -> 3 -> 4)
   // ============================================================================
   function renderGoalModal() {
-    const activeTheme = getGoalArtworkTheme(goalArtworkId);
+    if (!isGoalModalOpen || typeof document === 'undefined') return null;
 
-    return (
-      <BottomSheet
-        isOpen={isGoalModalOpen}
-        onClose={() => {
-          setIsGoalModalOpen(false);
-          setModalStep('form');
-        }}
-        title={
-          modalStep === 'artwork'
-            ? undefined
-            : modalStep === 'created'
-            ? undefined
-            : editingGoalId
-            ? 'Redigera sparmål'
-            : 'Nytt sparmål'
-        }
-      >
-        <input
-          ref={galleryInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleGalleryUpload}
-          className="hidden"
-        />
+    const pageAnimClass =
+      slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
 
-        {/* STEP 3: "Mål skapat" Confirmation Screen (Exact match to Lunar Screenshot #1) */}
-        {modalStep === 'created' && (
-          <div className="py-8 flex flex-col items-center justify-between min-h-[340px] text-center animate-fade-in">
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="w-24 h-24 rounded-full border-[3.5px] border-[var(--text-primary)] flex items-center justify-center mb-5 animate-scale-in">
-                <Check size={42} weight="bold" className="text-[var(--text-primary)]" />
-              </div>
-              <h3 className="font-display font-semibold text-xl text-[var(--text-primary)]">
-                Mål skapat
-              </h3>
-            </div>
+    return createPortal(
+      <div className="fixed inset-0 z-[200] bg-[var(--bg-color)] text-[var(--text-primary)]">
+        <div className="h-dvh max-h-dvh flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none">
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleGalleryUpload}
+            className="hidden"
+          />
 
-            <button
-              type="button"
-              onClick={() => {
-                setIsGoalModalOpen(false);
-                setModalStep('form');
-                if (newlyCreatedGoalId) {
-                  setSelectedGoalId(newlyCreatedGoalId);
-                }
-              }}
-              className="w-full py-3.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm transition-transform active:scale-[0.98] cursor-pointer mt-6"
-            >
-              Klart
-            </button>
-          </div>
-        )}
-
-        {/* STEP 2: Artwork Picker ("Vilken bild passar till ditt mål?" – Lunar Screenshot #8) */}
-        {modalStep === 'artwork' && (
-          <div className="space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between">
+          {/* 1. TOP HEADER (Pinned / Non-scrolling, exact match to OnboardingFlow) */}
+          <header className="shrink-0 space-y-3 pb-1">
+            <div className="flex items-center justify-between h-9">
               <button
                 type="button"
-                onClick={() => setModalStep('form')}
-                className="w-9 h-9 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] cursor-pointer"
+                onClick={() => {
+                  if (wizardStep > 1) {
+                    navigateWizardStep((wizardStep - 1) as GoalWizardStep, 'back');
+                  } else {
+                    setIsGoalModalOpen(false);
+                  }
+                }}
+                className="p-1.5 -ml-1.5 text-[var(--text-primary)] flex items-center justify-center hover:opacity-70 active:scale-95 transition-all cursor-pointer"
+                aria-label="Tillbaka"
               >
-                <CaretLeft size={16} weight="bold" />
+                <CaretLeft size={18} weight="bold" />
               </button>
-              <button
-                type="button"
-                onClick={() => setIsGoalModalOpen(false)}
-                className="w-9 h-9 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
 
-            <div>
-              <h3 className="font-display font-bold text-xl text-[var(--text-primary)] tracking-tight">
-                Vilken bild passar till ditt mål?
-              </h3>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">
-                Sök efter den perfekta bilden till ditt mål
-              </p>
-            </div>
-
-            {/* Search bar */}
-            <div className="relative">
-              <MagnifyingGlass
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-              />
-              <input
-                type="text"
-                value={artworkSearch}
-                onChange={(e) => setArtworkSearch(e.target.value)}
-                placeholder="Sök efter bild"
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
-              />
-            </div>
-
-            {/* 3x3 Grid: Tile 1 = Upload from gallery, Tiles 2..9 = Curated Artworks */}
-            <div className="grid grid-cols-3 gap-2.5">
-              <button
-                type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                className={`aspect-square rounded-2xl p-2.5 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative overflow-hidden ${
-                  goalCustomImage
-                    ? 'ring-2 ring-[var(--text-primary)]'
-                    : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
-                }`}
-              >
-                {goalCustomImage ? (
-                  <>
-                    <img
-                      src={goalCustomImage}
-                      alt="Uppladdad"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center p-2">
-                      <ImageSquare size={22} weight="bold" className="text-white mb-1" />
-                      <span className="text-[10.5px] font-medium text-white leading-tight">
-                        Byt bild
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <ImageSquare
-                      size={22}
-                      weight="regular"
-                      className="text-[var(--text-primary)] mb-1.5"
-                    />
-                    <span className="text-[10.5px] font-medium text-[var(--text-primary)] leading-tight">
-                      Ladda upp bild från galleriet
-                    </span>
-                  </>
+              <div className="flex items-center gap-2">
+                {editingGoalId && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="p-1.5 text-rose-500 hover:opacity-75 active:scale-95 transition-all cursor-pointer"
+                    aria-label="Ta bort sparmål"
+                    title="Ta bort sparmål"
+                  >
+                    <Trash size={18} weight="regular" />
+                  </button>
                 )}
-              </button>
-
-              {filteredArtworks.map((art) => {
-                const isSelected = !goalCustomImage && goalArtworkId === art.id;
-                return (
-                  <button
-                    key={art.id}
-                    type="button"
-                    onClick={() => {
-                      setGoalCustomImage(undefined);
-                      setGoalArtworkId(art.id);
-                    }}
-                    title={art.label}
-                    style={{ backgroundColor: art.tileBg }}
-                    className={`aspect-square rounded-2xl p-2 flex items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
-                      isSelected
-                        ? 'ring-[2.5px] ring-[var(--text-primary)] scale-[0.98]'
-                        : 'opacity-90 hover:opacity-100'
-                    }`}
-                  >
-                    <GoalArtworkIllustration artworkId={art.id} className="w-full h-full" />
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setModalStep('form')}
-              className="w-full py-3.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm transition-transform active:scale-[0.98] cursor-pointer mt-2"
-            >
-              Fortsätt
-            </button>
-          </div>
-        )}
-
-        {/* STEP 1: Goal Form */}
-        {modalStep === 'form' && (
-          <div className="space-y-4">
-            {!editingGoalId && (
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Buffert', target: 30000, art: 'piggy' },
-                  { label: 'Semester', target: 15000, art: 'beach' },
-                  { label: 'Kontantinsats', target: 150000, art: 'house' },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() => {
-                      setGoalNameInput(preset.label);
-                      setGoalTargetInput(String(preset.target));
-                      setGoalArtworkId(preset.art);
-                    }}
-                    className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                      goalNameInput === preset.label
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                        : 'bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                    }`}
-                  >
-                    <span className="font-display font-semibold text-xs block">
-                      {preset.label}
-                    </span>
-                    <span
-                      className={`text-[10.5px] tabular-nums block mt-0.5 ${
-                        goalNameInput === preset.label
-                          ? 'opacity-80'
-                          : 'text-[var(--text-muted)]'
-                      }`}
-                    >
-                      {formatKr(preset.target)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Artwork selector preview + Name + Target */}
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
-              <div className="flex items-center gap-3.5">
                 <button
                   type="button"
-                  onClick={() => setModalStep('artwork')}
-                  title="Välj bild för ditt mål"
-                  style={{
-                    backgroundColor: goalCustomImage ? undefined : activeTheme.tileBg,
-                  }}
-                  className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center shrink-0 relative group cursor-pointer border border-black/10 dark:border-white/10"
+                  onClick={() => setIsGoalModalOpen(false)}
+                  className="p-1.5 -mr-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+                  aria-label="Stäng"
                 >
-                  {goalCustomImage ? (
-                    <img
-                      src={goalCustomImage}
-                      alt="Målbild"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <GoalArtworkIllustration
-                      artworkId={goalArtworkId}
-                      className="w-12 h-12"
-                    />
-                  )}
-                  <span className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-semibold text-white transition-opacity">
-                    Byt
-                  </span>
+                  <X size={18} weight="bold" />
                 </button>
+              </div>
+            </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-0.5">
-                      Namn på mål
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setModalStep('artwork')}
-                      className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      Välj bild
-                    </button>
-                  </div>
+            {/* En enda lång sammanhängande progress-bar utan stegtext */}
+            <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${
+                  wizardStep === 1
+                    ? 'w-1/4'
+                    : wizardStep === 2
+                    ? 'w-2/4'
+                    : wizardStep === 3
+                    ? 'w-3/4'
+                    : 'w-full'
+                }`}
+              />
+            </div>
+          </header>
+
+          {/* ============================================================== */}
+          {/* STEG 1: VAD SPARAR DU TILL?                                    */}
+          {/* ============================================================== */}
+          {wizardStep === 1 && (
+            <form
+              key="goal-step-1"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!goalNameInput.trim()) return;
+                navigateWizardStep(2, 'forward');
+              }}
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <div className="shrink-0 pt-6 pb-4">
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Vad sparar du till?
+                </h1>
+              </div>
+
+              <div className="my-auto py-4">
+                <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
                   <input
                     type="text"
-                    autoFocus={!editingGoalId}
+                    autoFocus
+                    required
+                    placeholder="t.ex. Resa, Buffert eller Ny bil..."
                     value={goalNameInput}
                     onChange={(e) => setGoalNameInput(e.target.value)}
-                    placeholder="t.ex. PlayStation eller Resa"
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="border-t border-[var(--border-subtle)] pt-3.5">
-                <label className="block cursor-text">
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-0.5">
-                    Målbelopp
-                  </span>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={goalTargetInput}
-                      onChange={(e) =>
-                        setGoalTargetInput(e.target.value.replace(/[^\d]/g, ''))
-                      }
-                      placeholder="5000"
-                      className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
-                    />
-                    <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
-                      kr
-                    </span>
-                  </div>
-                </label>
+              <div className="shrink-0 pt-3">
+                <button
+                  type="submit"
+                  disabled={!goalNameInput.trim()}
+                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+                >
+                  <span>Fortsätt</span>
+                  <ArrowRight size={16} weight="bold" />
+                </button>
               </div>
-            </div>
+            </form>
+          )}
 
-            {/* Sparat hittills / Välj konto eller totalsaldo */}
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
-              <div>
-                <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-2">
-                  Vad representerar sparandet?
-                </span>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
-                  {/* Alternativ 1: Ange fritt (Manuellt belopp) */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGoalLinkedAccountId(undefined);
-                    }}
-                    className={`w-full px-3 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
-                      !goalLinkedAccountId
-                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                        : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                    }`}
-                  >
-                    <div className="min-w-0">
-                      <span className="text-xs font-semibold block">
-                        Eget valt belopp
-                      </span>
-                      <span
-                        className={`text-[10.5px] block ${
-                          !goalLinkedAccountId
-                            ? 'text-[var(--bg-color)]/75'
-                            : 'text-[var(--text-secondary)]'
-                        }`}
-                      >
-                        Fyll i startbelopp och lägg till själv
-                      </span>
-                    </div>
-                    {!goalLinkedAccountId && <Check size={14} weight="bold" className="shrink-0" />}
-                  </button>
+          {/* ============================================================== */}
+          {/* STEG 2: VÄLJ BILD TILL DITT MÅL (Sök + 3x3 grid som Onboarding)*/}
+          {/* ============================================================== */}
+          {wizardStep === 2 && (
+            <div
+              key="goal-step-2"
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <div className="shrink-0 pt-6 pb-3">
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Välj bild till ditt mål
+                </h1>
+              </div>
 
-                  {/* Alternativ 2: Totalsaldo */}
-                  {(accounts.length > 0 || effectiveTotalBalance > 0) && (
+              <div className="flex-1 min-h-0 flex flex-col justify-center space-y-3 py-1">
+                {/* Sökfält direkt på samma sida */}
+                <div className="relative shrink-0">
+                  <MagnifyingGlass
+                    size={15}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                  />
+                  <input
+                    type="text"
+                    value={artworkSearch}
+                    onChange={(e) => setArtworkSearch(e.target.value)}
+                    placeholder="Sök bild..."
+                    className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                  />
+                  {artworkSearch.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setGoalLinkedAccountId('__TOTAL__');
-                        setGoalCurrentInput(String(effectiveTotalBalance));
-                      }}
-                      className={`w-full px-3 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
-                        goalLinkedAccountId === '__TOTAL__'
-                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                          : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
-                      }`}
+                      onClick={() => setArtworkSearch('')}
+                      aria-label="Rensa sökning"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                            goalLinkedAccountId === '__TOTAL__'
-                              ? 'bg-[var(--bg-color)]/15 text-[var(--bg-color)]'
-                              : 'bg-[var(--bg-color)] text-[var(--text-primary)]'
-                          }`}
-                        >
-                          <Bank size={14} weight="bold" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-xs font-semibold block truncate">
-                            Totalsaldo (alla konton)
-                          </span>
-                          <span
-                            className={`text-[10.5px] tabular-nums block ${
-                              goalLinkedAccountId === '__TOTAL__'
-                                ? 'text-[var(--bg-color)]/75'
-                                : 'text-[var(--text-secondary)]'
-                            }`}
-                          >
-                            {formatKr(effectiveTotalBalance)} · Synkas automatiskt
-                          </span>
-                        </div>
-                      </div>
-                      {goalLinkedAccountId === '__TOTAL__' && (
-                        <Check size={14} weight="bold" className="shrink-0" />
-                      )}
+                      <X size={14} weight="bold" />
                     </button>
                   )}
+                </div>
 
-                  {/* Alternativ 3..N: Specifikt bankkonto */}
-                  {accounts.map((acc) => {
-                    const isSelected = goalLinkedAccountId === acc.id;
-                    const accBal = Math.max(0, Math.round(Number(acc.balance) || 0));
+                {/* 3x3 Grid: Tile 1 = Ladda upp bild, Tiles 2..9 = Illustrationer */}
+                <div className="grid grid-cols-3 gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className={`aspect-square rounded-2xl p-2.5 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative overflow-hidden ${
+                      goalCustomImage
+                        ? 'ring-2 ring-[var(--text-primary)]'
+                        : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
+                    }`}
+                  >
+                    {goalCustomImage ? (
+                      <>
+                        <img
+                          src={goalCustomImage}
+                          alt="Uppladdad"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center p-2">
+                          <ImageSquare size={22} weight="bold" className="text-white mb-1" />
+                          <span className="text-[10.5px] font-medium text-white leading-tight">
+                            Byt bild
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <ImageSquare
+                          size={22}
+                          weight="regular"
+                          className="text-[var(--text-primary)] mb-1.5"
+                        />
+                        <span className="text-[10.5px] font-medium text-[var(--text-primary)] leading-tight">
+                          Egen bild
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+                  {filteredArtworks.map((art) => {
+                    const isSelected = !goalCustomImage && goalArtworkId === art.id;
                     return (
                       <button
-                        key={acc.id}
+                        key={art.id}
                         type="button"
                         onClick={() => {
-                          setGoalLinkedAccountId(acc.id);
-                          setGoalCurrentInput(String(accBal));
+                          setGoalCustomImage(undefined);
+                          setGoalArtworkId(art.id);
                         }}
-                        className={`w-full px-3 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                        title={art.label}
+                        style={{ backgroundColor: art.tileBg }}
+                        className={`aspect-square rounded-2xl p-2 flex items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
                           isSelected
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                            : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                            ? 'ring-[2.5px] ring-[var(--text-primary)] scale-[0.98]'
+                            : 'opacity-90 hover:opacity-100'
                         }`}
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <ItemLogo
-                            name={acc.bankName || acc.name}
-                            category="Bank"
-                            logoUrl={acc.logo}
-                            size="sm"
-                          />
-                          <div className="min-w-0">
-                            <span className="text-xs font-semibold block truncate">
-                              {acc.name}
-                            </span>
-                            <span
-                              className={`text-[10.5px] tabular-nums block truncate ${
-                                isSelected
-                                  ? 'text-[var(--bg-color)]/75'
-                                  : 'text-[var(--text-secondary)]'
-                              }`}
-                            >
-                              {formatKr(accBal)}
-                              {acc.bankName ? ` · ${acc.bankName}` : ''}
-                            </span>
+                        <GoalArtworkIllustration artworkId={art.id} className="w-full h-full" />
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shadow-sm">
+                            <Check size={11} weight="bold" />
                           </div>
-                        </div>
-                        {isSelected && <Check size={14} weight="bold" className="shrink-0" />}
+                        )}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {!goalLinkedAccountId ? (
-                <div className="pt-3 border-t border-[var(--border-subtle)] space-y-3">
-                  <label className="block cursor-text">
-                    <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-0.5">
-                      Sparat hittills
-                    </span>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={goalCurrentInput}
-                        onChange={(e) =>
-                          setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
-                        }
-                        placeholder="0"
-                        className="w-full bg-transparent border-0 p-0 font-display font-bold text-xl sm:text-2xl text-emerald-600 dark:text-emerald-400 placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
-                      />
-                      <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
-                        kr
-                      </span>
-                    </div>
-                  </label>
-
-                  <div className="grid grid-cols-3 gap-2 pt-1">
-                    {[500, 1000, 2500].map((addAmt) => (
-                      <button
-                        key={addAmt}
-                        type="button"
-                        onClick={() => {
-                          const curr = Math.max(0, Math.round(Number(goalCurrentInput) || 0));
-                          setGoalCurrentInput(String(curr + addAmt));
-                        }}
-                        className="py-2 px-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-display font-semibold text-[var(--text-primary)] tabular-nums transition-colors cursor-pointer"
-                      >
-                        +{new Intl.NumberFormat('sv-SE').format(addAmt)} kr
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
-                  <div>
-                    <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
-                      Nuvarande saldo på valt konto
-                    </span>
-                    <span className="text-[11px] text-[var(--text-secondary)] block mt-0.5">
-                      Uppdateras automatiskt när ditt saldo ändras
-                    </span>
-                  </div>
-                  <span className="font-display font-bold text-lg text-emerald-600 dark:text-emerald-400 tabular-nums shrink-0">
-                    {formatKr(Number(goalCurrentInput) || 0)}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
-                onClick={handleSaveGoal}
-                className="ui-btn-primary"
-              >
-                <Check size={14} weight="bold" />
-                <span>{editingGoalId ? 'Spara ändringar' : 'Skapa mål'}</span>
-              </button>
-
-              {editingGoalId && (
+              <div className="shrink-0 pt-3">
                 <button
                   type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="ui-btn-danger"
+                  onClick={() => navigateWizardStep(3, 'forward')}
+                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                 >
-                  <Trash size={14} />
-                  <span>Ta bort sparmål</span>
+                  <span>Fortsätt</span>
+                  <ArrowRight size={16} weight="bold" />
                 </button>
-              )}
+              </div>
             </div>
+          )}
 
-            <ConfirmDialog
-              isOpen={showDeleteConfirm}
-              title="Ta bort sparmål?"
-              description={`${goalNameInput || 'Sparmålet'} tas bort.`}
-              confirmLabel="Ta bort"
-              onConfirm={() => {
-                const next = savingsGoals.filter((g) => g.id !== editingGoalId);
-                updateGoals(next);
-                if (selectedGoalId === editingGoalId) {
-                  setSelectedGoalId(null);
-                }
-                setShowDeleteConfirm(false);
-                setIsGoalModalOpen(false);
+          {/* ============================================================== */}
+          {/* STEG 3: VAD ÄR DITT MÅLBELOPP?                                 */}
+          {/* ============================================================== */}
+          {wizardStep === 3 && (
+            <form
+              key="goal-step-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!(Number(goalTargetInput) > 0)) return;
+                navigateWizardStep(4, 'forward');
               }}
-              onCancel={() => setShowDeleteConfirm(false)}
-            />
-          </div>
-        )}
-      </BottomSheet>
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <div className="shrink-0 pt-6 pb-4">
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Vad är ditt målbelopp?
+                </h1>
+              </div>
+
+              <div className="my-auto py-4">
+                <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors flex items-baseline justify-between gap-3">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoFocus
+                    required
+                    placeholder="10 000"
+                    value={goalTargetInput}
+                    onChange={(e) =>
+                      setGoalTargetInput(e.target.value.replace(/[^\d]/g, ''))
+                    }
+                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
+                  />
+                  <span className="font-display font-semibold text-base text-[var(--text-muted)] shrink-0">
+                    kr
+                  </span>
+                </div>
+              </div>
+
+              <div className="shrink-0 pt-3">
+                <button
+                  type="submit"
+                  disabled={!(Number(goalTargetInput) > 0)}
+                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+                >
+                  <span>Fortsätt</span>
+                  <ArrowRight size={16} weight="bold" />
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ============================================================== */}
+          {/* STEG 4: HUR VILL DU FÖLJA SPARANDET? (Kontoval som Onboarding) */}
+          {/* ============================================================== */}
+          {wizardStep === 4 && (
+            <div
+              key="goal-step-4"
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <div className="shrink-0 pt-6 pb-4">
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Hur vill du följa sparandet?
+                </h1>
+              </div>
+
+              {/* Scrollbar lista i samma stil som Välj konton i Onboarding */}
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
+                {/* Alternativ 1: Eget valt belopp */}
+                <div
+                  className={`rounded-2xl border transition-all ${
+                    !goalLinkedAccountId
+                      ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
+                      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setGoalLinkedAccountId(undefined)}
+                    className="w-full p-4 flex items-center gap-3.5 text-left cursor-pointer"
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                        !goalLinkedAccountId
+                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      {!goalLinkedAccountId && <Check size={12} weight="bold" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                        Eget valt belopp
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+                        Fyll i startbelopp och lägg till själv
+                      </span>
+                    </div>
+                  </button>
+
+                  {!goalLinkedAccountId && (
+                    <div className="px-4 pb-4 pt-2 border-t border-[var(--border-subtle)]">
+                      <label className="block cursor-text">
+                        <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
+                          Sparat hittills
+                        </span>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={goalCurrentInput}
+                            onChange={(e) =>
+                              setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
+                            }
+                            placeholder="0"
+                            className="w-full bg-transparent border-0 p-0 font-display font-bold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
+                          />
+                          <span className="font-display font-semibold text-xs text-[var(--text-muted)] shrink-0">
+                            kr
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                {/* Alternativ 2: Totalsaldo */}
+                {(accounts.length > 0 || effectiveTotalBalance > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGoalLinkedAccountId('__TOTAL__');
+                      setGoalCurrentInput(String(effectiveTotalBalance));
+                    }}
+                    className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                      goalLinkedAccountId === '__TOTAL__'
+                        ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
+                        : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                        goalLinkedAccountId === '__TOTAL__'
+                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      {goalLinkedAccountId === '__TOTAL__' && (
+                        <Check size={12} weight="bold" />
+                      )}
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                      <Bank size={15} weight="regular" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                        Totalsaldo
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+                        Alla konton · Synkas automatiskt
+                      </span>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+                      {formatKr(effectiveTotalBalance)}
+                    </span>
+                  </button>
+                )}
+
+                {/* Alternativ 3..N: Specifikt bankkonto */}
+                {accounts.map((acc) => {
+                  const isSelected = goalLinkedAccountId === acc.id;
+                  const accBal = Math.max(0, Math.round(Number(acc.balance) || 0));
+                  const hasDuplicateName =
+                    accounts.filter(
+                      (other) =>
+                        other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
+                    ).length > 1;
+                  const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+                  const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+
+                  return (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => {
+                        setGoalLinkedAccountId(acc.id);
+                        setGoalCurrentInput(String(accBal));
+                      }}
+                      className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
+                          : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
+                      }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                          isSelected
+                            ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                            : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                        }`}
+                      >
+                        {isSelected && <Check size={12} weight="bold" />}
+                      </div>
+                      <ItemLogo
+                        name={acc.bankName || acc.name}
+                        category="Bank"
+                        logoUrl={acc.logo}
+                        size="sm"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                          {acc.name}
+                        </span>
+                        {(acc.bankName || (hasDuplicateName && last4)) && (
+                          <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5 truncate">
+                            {acc.bankName}
+                            {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+                        {formatKr(accBal)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Pinnad knapp */}
+              <div className="shrink-0 pt-3">
+                <button
+                  type="button"
+                  disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
+                  onClick={handleSaveGoal}
+                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                >
+                  <Check size={16} weight="bold" />
+                  <span>{editingGoalId ? 'Spara ändringar' : 'Skapa sparmål'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <ConfirmDialog
+            isOpen={showDeleteConfirm}
+            title="Ta bort sparmål?"
+            description={`${goalNameInput || 'Sparmålet'} tas bort.`}
+            confirmLabel="Ta bort"
+            onConfirm={() => {
+              const next = savingsGoals.filter((g) => g.id !== editingGoalId);
+              updateGoals(next);
+              if (selectedGoalId === editingGoalId) {
+                setSelectedGoalId(null);
+              }
+              setShowDeleteConfirm(false);
+              setIsGoalModalOpen(false);
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+          />
+        </div>
+      </div>,
+      document.body
     );
   }
 
