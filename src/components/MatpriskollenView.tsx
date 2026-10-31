@@ -181,24 +181,97 @@ function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number): num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+const MPK_COORDS_STORAGE_KEY = 'mpk_saved_coords_v1';
+
+async function fetchMpkJson<T = any>(localUrls: string[], upstreamUrl: string): Promise<T | null> {
+  // 1. Try local/serverless API routes first (Express in dev / Vercel serverless in prod)
+  for (const localUrl of localUrls) {
+    try {
+      const res = await fetch(localUrl, {
+        headers: { Accept: 'application/json' },
+      });
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      if (res.ok && contentType.includes('json')) {
+        return (await res.json()) as T;
+      }
+    } catch {
+      // Fall through to next candidate
+    }
+  }
+
+  // 2. Fallback: try direct upstream and CORS-safe JSON proxies if static hosting returned index.html
+  const fallbackUrls = [
+    upstreamUrl,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(upstreamUrl)}`,
+    `https://corsproxy.io/?${encodeURIComponent(upstreamUrl)}`,
+  ];
+
+  for (const url of fallbackUrls) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (!text || text.trim().startsWith('<')) continue;
+      return JSON.parse(text) as T;
+    } catch {
+      // Try next fallback
+    }
+  }
+
+  return null;
+}
+
 export const MatpriskollenView: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'stores' | 'deals'>('stores');
-  const [coords, setCoords] = useState<{ lat: number; lon: number; label: string }>({
-    lat: 56.0465,
-    lon: 12.6945,
-    label: 'Helsingborg',
+  const [coords, setCoords] = useState<{ lat: number; lon: number; label: string }>(() => {
+    try {
+      const raw = localStorage.getItem(MPK_COORDS_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (
+          parsed &&
+          Number.isFinite(Number(parsed.lat)) &&
+          Number.isFinite(Number(parsed.lon)) &&
+          typeof parsed.label === 'string'
+        ) {
+          return {
+            lat: Number(parsed.lat),
+            lon: Number(parsed.lon),
+            label: parsed.label,
+          };
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return {
+      lat: 56.0465,
+      lon: 12.6945,
+      label: 'Helsingborg',
+    };
   });
 
   // Voi-style interactive map state (independent pan/zoom camera)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number }>({
-    lat: 56.0465,
-    lon: 12.6945,
+    lat: coords.lat,
+    lon: coords.lon,
   });
   const [mapZoom, setMapZoom] = useState<number>(13);
   const [isMapExpanded, setIsMapExpanded] = useState<boolean>(false);
+  const [showMap, setShowMap] = useState<boolean>(false);
   const [previewStore, setPreviewStore] = useState<MpkStore | null>(null);
   const [isDraggingMap, setIsDraggingMap] = useState<boolean>(false);
   const [locatingGps, setLocatingGps] = useState(false);
+
+  // City search state
+  const [isCitySearchOpen, setIsCitySearchOpen] = useState(false);
+  const [cityQuery, setCityQuery] = useState('');
+  const [cityResults, setCityResults] = useState<
+    Array<{ name: string; lat: number; lon: number }>
+  >([]);
+  const [searchingCities, setSearchingCities] = useState(false);
 
   const [stores, setStores] = useState<MpkStore[]>([]);
   const [loadingStores, setLoadingStores] = useState(false);
@@ -244,14 +317,35 @@ export const MatpriskollenView: React.FC = () => {
   });
   const lastTapTimeRef = useRef<number>(0);
 
-  const fetchStores = async (lat: number, lon: number) => {
+  const updateSelectedCoords = (next: { lat: number; lon: number; label: string }) => {
+    setCoords(next);
+    setMapCenter({ lat: next.lat, lon: next.lon });
+    setMapZoom(13);
+    setPreviewStore(null);
+    try {
+      localStorage.setItem(MPK_COORDS_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    loadLocationData(next.lat, next.lon);
+  };
+
+  const fetchStores = async (lat: number, lon: number): Promise<MpkStore[]> => {
     setLoadingStores(true);
     try {
-      const res = await fetch(`/api/matpriskollen/stores?lat=${lat}&lon=${lon}&limit=35`);
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
+      const upstreamUrl = `https://matpriskollen.se/api/v1/stores?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=35`;
+      const data = await fetchMpkJson<any[]>(
+        [`/api/matpriskollen/stores?lat=${lat}&lon=${lon}&limit=35`],
+        upstreamUrl
+      );
       const valid: MpkStore[] = (Array.isArray(data) ? data : [])
-        .filter((s: any) => s && s.name && typeof s.lat === 'number' && typeof s.lon === 'number')
+        .filter(
+          (s: any) =>
+            s &&
+            s.name &&
+            Number.isFinite(Number(s.lat)) &&
+            Number.isFinite(Number(s.lon))
+        )
         .map((s: any) => ({
           id: s.id,
           key: String(s.key || s.id),
@@ -264,21 +358,78 @@ export const MatpriskollenView: React.FC = () => {
           lon: Number(s.lon),
         }));
       setStores(valid);
+      return valid;
     } catch {
       setStores([]);
+      return [];
     } finally {
       setLoadingStores(false);
     }
   };
 
-  const fetchNearbyOffers = async (lat: number, lon: number) => {
+  const fetchNearbyOffers = async (
+    lat: number,
+    lon: number,
+    fallbackStores?: MpkStore[]
+  ) => {
     setLoadingMultiOffers(true);
     try {
-      const res = await fetch(`/api/matpriskollen/nearby-offers?lat=${lat}&lon=${lon}`);
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
-      const raw = Array.isArray(data?.offers) ? data.offers : [];
-      setMultiStoreOffers(raw);
+      // 1. Try server-side aggregated nearby-offers endpoint first
+      try {
+        const res = await fetch(`/api/matpriskollen/nearby-offers?lat=${lat}&lon=${lon}`, {
+          headers: { Accept: 'application/json' },
+        });
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (res.ok && ct.includes('json')) {
+          const data = await res.json();
+          const raw = Array.isArray(data?.offers) ? data.offers : [];
+          if (raw.length > 0) {
+            setMultiStoreOffers(raw);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to per-store aggregation
+      }
+
+      // 2. Fallback: aggregate offers from top nearby stores directly
+      const sourceStores = (fallbackStores && fallbackStores.length > 0
+        ? fallbackStores
+        : stores
+      )
+        .filter((s) => s.key && s.offerCount > 0)
+        .slice(0, 8);
+
+      if (sourceStores.length === 0) {
+        setMultiStoreOffers([]);
+        return;
+      }
+
+      const perStore = await Promise.all(
+        sourceStores.map(async (st) => {
+          const upstreamUrl = `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(st.key)}/offers?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=100`;
+          const d = await fetchMpkJson<any>(
+            [
+              `/api/matpriskollen/offers?storeKey=${encodeURIComponent(st.key)}&lat=${lat}&lon=${lon}&limit=100`,
+              `/api/matpriskollen/stores/${encodeURIComponent(st.key)}/offers?lat=${lat}&lon=${lon}&limit=100`,
+            ],
+            upstreamUrl
+          );
+          const arr = Array.isArray(d?.offers) ? d.offers : [];
+          return arr.map((o: any) => ({
+            ...o,
+            storeKey: st.key,
+            storeName: st.name,
+            chainName: st.chainName,
+            storeLogo: st.imageUrl,
+            storeDist: st.dist,
+            storeLat: st.lat,
+            storeLon: st.lon,
+          }));
+        })
+      );
+
+      setMultiStoreOffers(perStore.flat());
     } catch {
       setMultiStoreOffers([]);
     } finally {
@@ -286,16 +437,24 @@ export const MatpriskollenView: React.FC = () => {
     }
   };
 
+  const loadLocationData = async (lat: number, lon: number) => {
+    const loadedStores = await fetchStores(lat, lon);
+    await fetchNearbyOffers(lat, lon, loadedStores);
+  };
+
   const fetchOffersForStore = async (store: MpkStore) => {
     setSelectedStore(store);
     setSelectedOfferCategory('Alla');
     setLoadingOffers(true);
     try {
-      const res = await fetch(
-        `/api/matpriskollen/stores/${encodeURIComponent(store.key)}/offers?lat=${coords.lat}&lon=${coords.lon}&limit=100`
+      const upstreamUrl = `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(store.key)}/offers?lat=${encodeURIComponent(coords.lat)}&lon=${encodeURIComponent(coords.lon)}&limit=100`;
+      const data = await fetchMpkJson<any>(
+        [
+          `/api/matpriskollen/offers?storeKey=${encodeURIComponent(store.key)}&lat=${coords.lat}&lon=${coords.lon}&limit=100`,
+          `/api/matpriskollen/stores/${encodeURIComponent(store.key)}/offers?lat=${coords.lat}&lon=${coords.lon}&limit=100`,
+        ],
+        upstreamUrl
       );
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
       const rawOffers = Array.isArray(data?.offers) ? data.offers : [];
       setStoreOffers(
         rawOffers.map((o: any) => ({
@@ -315,9 +474,43 @@ export const MatpriskollenView: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchStores(coords.lat, coords.lon);
-    fetchNearbyOffers(coords.lat, coords.lon);
+    loadLocationData(coords.lat, coords.lon);
   }, []);
+
+  // Live city search debounce
+  useEffect(() => {
+    const q = cityQuery.trim();
+    if (q.length < 2) {
+      setCityResults([]);
+      return;
+    }
+    const timer = window.setTimeout(async () => {
+      setSearchingCities(true);
+      try {
+        const upstreamUrl = `https://matpriskollen.se/api/geo/local?city=${encodeURIComponent(q)}`;
+        const data = await fetchMpkJson<any[]>(
+          [`/api/matpriskollen/cities?city=${encodeURIComponent(q)}`],
+          upstreamUrl
+        );
+        const mapped = (Array.isArray(data) ? data : [])
+          .filter((c: any) => c && Number.isFinite(Number(c.lat)) && Number.isFinite(Number(c.lon)))
+          .map((c: any) => ({
+            name: String(
+              c.display_name || c.address?.city || c.address?.municipality || q
+            ).replace(/\s*\([^)]*\)\s*/g, ' '),
+            lat: Number(c.lat),
+            lon: Number(c.lon),
+          }))
+          .slice(0, 8);
+        setCityResults(mapped);
+      } catch {
+        setCityResults([]);
+      } finally {
+        setSearchingCities(false);
+      }
+    }, 240);
+    return () => window.clearTimeout(timer);
+  }, [cityQuery]);
 
   // Attach non-passive wheel listener on map container so wheel zoom doesn't scroll page
   useEffect(() => {
@@ -331,7 +524,7 @@ export const MatpriskollenView: React.FC = () => {
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [activeSubTab, selectedStore]);
+  }, [activeSubTab, selectedStore, showMap]);
 
   const requestUserLocation = () => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
@@ -343,14 +536,9 @@ export const MatpriskollenView: React.FC = () => {
           lon: pos.coords.longitude,
           label: 'Din plats',
         };
-        setCoords(next);
-        setMapCenter({ lat: next.lat, lon: next.lon });
-        setMapZoom(13);
-        setPreviewStore(null);
         setSelectedStore(null);
         setLocatingGps(false);
-        fetchStores(next.lat, next.lon);
-        fetchNearbyOffers(next.lat, next.lon);
+        updateSelectedCoords(next);
       },
       () => {
         setLocatingGps(false);
@@ -478,10 +666,7 @@ export const MatpriskollenView: React.FC = () => {
       lon: mapCenter.lon,
       label: 'Valt kartområde',
     };
-    setCoords(next);
-    setPreviewStore(null);
-    fetchStores(next.lat, next.lon);
-    fetchNearbyOffers(next.lat, next.lon);
+    updateSelectedCoords(next);
   };
 
   const filteredStores = useMemo(() => {
@@ -960,44 +1145,122 @@ export const MatpriskollenView: React.FC = () => {
       </div>
 
       {/* Plats- & stadsväljare */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-        <button
-          type="button"
-          onClick={requestUserLocation}
-          className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
-            coords.label === 'Din plats'
-              ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-              : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-          }`}
-        >
-          <NavigationArrow size={12} weight="fill" className={locatingGps ? 'animate-spin' : ''} />
-          <span>{locatingGps ? 'Hämtar plats...' : 'Nära mig'}</span>
-        </button>
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          <button
+            type="button"
+            onClick={requestUserLocation}
+            className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
+              coords.label === 'Din plats'
+                ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+            }`}
+          >
+            <NavigationArrow size={12} weight="fill" className={locatingGps ? 'animate-spin' : ''} />
+            <span>{locatingGps ? 'Hämtar plats...' : 'Nära mig'}</span>
+          </button>
 
-        {SWEDISH_CITIES.map((city) => {
-          const isSelected = coords.label === city.name;
-          return (
-            <button
-              key={city.name}
-              type="button"
-              onClick={() => {
-                setCoords({ lat: city.lat, lon: city.lon, label: city.name });
-                setMapCenter({ lat: city.lat, lon: city.lon });
-                setMapZoom(13);
-                setPreviewStore(null);
-                fetchStores(city.lat, city.lon);
-                fetchNearbyOffers(city.lat, city.lon);
-              }}
-              className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold shrink-0 transition-all cursor-pointer ${
-                isSelected
-                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                  : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              {city.name}
-            </button>
-          );
-        })}
+          <button
+            type="button"
+            onClick={() => setIsCitySearchOpen((v) => !v)}
+            className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
+              isCitySearchOpen ||
+              (coords.label !== 'Din plats' &&
+                !SWEDISH_CITIES.some((c) => c.name === coords.label))
+                ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+            }`}
+          >
+            <MapPin size={12} weight="fill" />
+            <span>
+              {coords.label !== 'Din plats' &&
+              !SWEDISH_CITIES.some((c) => c.name === coords.label)
+                ? coords.label
+                : 'Sök ort'}
+            </span>
+          </button>
+
+          {SWEDISH_CITIES.map((city) => {
+            const isSelected = coords.label === city.name;
+            return (
+              <button
+                key={city.name}
+                type="button"
+                onClick={() => {
+                  setIsCitySearchOpen(false);
+                  updateSelectedCoords({ lat: city.lat, lon: city.lon, label: city.name });
+                }}
+                className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold shrink-0 transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                    : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {city.name}
+              </button>
+            );
+          })}
+        </div>
+
+        {isCitySearchOpen && (
+          <div className="rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2.5 space-y-2 animate-fade-in">
+            <div className="relative">
+              <MagnifyingGlass
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              />
+              <input
+                type="text"
+                value={cityQuery}
+                onChange={(e) => setCityQuery(e.target.value)}
+                placeholder="Skriv valfri svensk stad eller ort (t.ex. Lund, Halmstad, Umeå)..."
+                className="w-full pl-8 pr-8 py-2 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
+                autoFocus
+              />
+              {cityQuery && (
+                <button
+                  type="button"
+                  onClick={() => setCityQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                >
+                  <X size={12} weight="bold" />
+                </button>
+              )}
+            </div>
+            {searchingCities ? (
+              <div className="py-2 text-center text-[11px] text-[var(--text-muted)] flex items-center justify-center gap-1.5">
+                <ArrowsClockwise size={12} className="animate-spin" />
+                <span>Söker ort...</span>
+              </div>
+            ) : cityResults.length > 0 ? (
+              <div className="divide-y divide-[var(--border-subtle)] max-h-48 overflow-y-auto">
+                {cityResults.map((c, i) => (
+                  <button
+                    key={`${c.name}-${i}`}
+                    type="button"
+                    onClick={() => {
+                      setIsCitySearchOpen(false);
+                      setCityQuery('');
+                      updateSelectedCoords({
+                        lat: c.lat,
+                        lon: c.lon,
+                        label: c.name.split(',')[0].trim(),
+                      });
+                    }}
+                    className="w-full py-2 px-2 flex items-center justify-between text-left text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] rounded-lg cursor-pointer"
+                  >
+                    <span className="truncate">{c.name}</span>
+                    <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
+                  </button>
+                ))}
+              </div>
+            ) : cityQuery.trim().length >= 2 ? (
+              <p className="py-1.5 text-center text-[11px] text-[var(--text-muted)]">
+                Inga orter hittades för &ldquo;{cityQuery.trim()}&rdquo;
+              </p>
+            ) : null}
+          </div>
+        )}
       </div>
 
       {/* ALLTID SYNLIG VARUSÖK: Sök på en vara och få upp billigaste i närheten direkt */}
@@ -1191,8 +1454,165 @@ export const MatpriskollenView: React.FC = () => {
               <h2 className="ui-section-title">
                 Butiker nära {coords.label} ({filteredStores.length})
               </h2>
-              <span className="text-[11px] text-[var(--text-muted)]">Matpriskollen</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowMap((v) => !v)}
+                  className="px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-primary)] flex items-center gap-1 hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                >
+                  <Compass size={12} weight="bold" />
+                  <span>{showMap ? 'Dölj karta' : 'Visa karta'}</span>
+                </button>
+              </div>
             </div>
+
+            {showMap && (
+              <div className="mb-3 rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-color)] relative shadow-subtle">
+                <div
+                  ref={mapContainerRef}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  className={`relative w-full ${
+                    isMapExpanded ? 'h-80' : 'h-52'
+                  } overflow-hidden select-none touch-none ${
+                    isDraggingMap ? 'cursor-grabbing' : 'cursor-grab'
+                  }`}
+                >
+                  {/* Tiles */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {mapRenderData.tiles.map((t) => (
+                      <React.Fragment key={t.key}>
+                        <img
+                          src={t.lightUrl}
+                          alt=""
+                          draggable={false}
+                          className="absolute w-64 h-64 max-w-none dark:hidden"
+                          style={{
+                            left: `calc(50% + ${t.dx}px)`,
+                            top: `calc(50% + ${t.dy}px)`,
+                          }}
+                        />
+                        <img
+                          src={t.darkUrl}
+                          alt=""
+                          draggable={false}
+                          className="absolute w-64 h-64 max-w-none hidden dark:block"
+                          style={{
+                            left: `calc(50% + ${t.dx}px)`,
+                            top: `calc(50% + ${t.dy}px)`,
+                          }}
+                        />
+                      </React.Fragment>
+                    ))}
+                  </div>
+
+                  {/* Store Pins */}
+                  {mapRenderData.pins.map(({ store, sx, sy }) => {
+                    const matchedDeal = cheapestOfferByStoreKey.get(store.key);
+                    const isSelectedPin = previewStore?.key === store.key;
+                    return (
+                      <button
+                        key={store.key}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (dragStateRef.current.moved) return;
+                          setPreviewStore(store);
+                        }}
+                        style={{
+                          left: `calc(50% + ${sx}px)`,
+                          top: `calc(50% + ${sy}px)`,
+                        }}
+                        className={`absolute -translate-x-1/2 -translate-y-1/2 z-10 transition-transform cursor-pointer ${
+                          isSelectedPin ? 'scale-110 z-20' : 'hover:scale-105'
+                        }`}
+                      >
+                        <div className="px-2 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] shadow-md flex items-center gap-1.5">
+                          <ItemLogo
+                            name={store.name}
+                            category="Mat & dryck"
+                            logoUrl={store.imageUrl}
+                            size="sm"
+                          />
+                          <span className="text-[10.5px] font-bold text-[var(--text-primary)] whitespace-nowrap">
+                            {matchedDeal ? matchedDeal.price : store.offerCount}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+
+                  {/* Map Controls */}
+                  <div className="absolute right-2.5 top-2.5 z-20 flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsMapExpanded((v) => !v)}
+                      className="w-8 h-8 rounded-xl bg-[var(--surface-color)]/90 backdrop-blur-md border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shadow-sm cursor-pointer"
+                    >
+                      {isMapExpanded ? <CornersIn size={14} /> : <CornersOut size={14} />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMapZoom((z) => Math.min(17, z + 1))}
+                      className="w-8 h-8 rounded-xl bg-[var(--surface-color)]/90 backdrop-blur-md border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shadow-sm cursor-pointer"
+                    >
+                      <Plus size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMapZoom((z) => Math.max(9, z - 1))}
+                      className="w-8 h-8 rounded-xl bg-[var(--surface-color)]/90 backdrop-blur-md border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shadow-sm cursor-pointer"
+                    >
+                      <Minus size={14} />
+                    </button>
+                  </div>
+
+                  {hasPannedAway && (
+                    <button
+                      type="button"
+                      onClick={handleSearchThisArea}
+                      className="absolute top-2.5 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[11px] font-semibold shadow-md cursor-pointer"
+                    >
+                      Sök i detta område
+                    </button>
+                  )}
+                </div>
+
+                {previewStore && (
+                  <div className="p-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3 bg-[var(--surface-color)]">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <ItemLogo
+                        name={previewStore.name}
+                        category="Mat & dryck"
+                        logoUrl={previewStore.imageUrl}
+                        size="sm"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                          {previewStore.name}
+                        </p>
+                        <p className="text-[11px] text-[var(--text-muted)]">
+                          {previewStore.offerCount} erbjudanden
+                          {previewStore.dist ? ` · ${previewStore.dist} km` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fetchOffersForStore(previewStore)}
+                      className="px-3 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold shrink-0 cursor-pointer"
+                    >
+                      Visa butik
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="relative mb-2">
               <MagnifyingGlass
@@ -1251,11 +1671,21 @@ export const MatpriskollenView: React.FC = () => {
                   </button>
                 ))
               ) : (
-                <div className="py-10 text-center">
-                  <Storefront size={32} weight="light" className="ui-empty-icon mb-1.5" />
+                <div className="py-10 text-center space-y-3">
+                  <Storefront size={32} weight="light" className="ui-empty-icon mb-1.5 mx-auto" />
                   <p className="text-xs font-medium text-[var(--text-secondary)]">
                     Inga butiker hittades för detta val
                   </p>
+                  {stores.length === 0 && (
+                    <button
+                      type="button"
+                      onClick={() => loadLocationData(coords.lat, coords.lon)}
+                      className="px-3.5 py-1.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <ArrowsClockwise size={13} weight="bold" />
+                      <span>Försök igen</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>

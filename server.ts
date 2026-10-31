@@ -127,7 +127,7 @@ async function startServer() {
 
     try {
       const result = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-3-flash-preview",
         contents: `Analysera följande ekonomiska transaktion och returnera ett JSON-objekt. 
         Inmatning: "${text}"
         
@@ -295,7 +295,7 @@ Transaktioner att analysera:
 ${JSON.stringify(batch)}`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -383,7 +383,7 @@ Returnera JSON med:
    - Försäkringsbolag -> "Försäkring".`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -469,7 +469,7 @@ Kandidater att analysera:
 ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
 
       const result = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -549,7 +549,7 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
     }
 
     try {
-      const modelsToTry = ["gemini-3.5-transcribe", "gemini-3.8-flash", "gemini-flash-latest"];
+      const modelsToTry = ["gemini-3.5-transcribe", "gemini-3-flash-preview", "gemini-flash-latest"];
       let lastError = null;
 
       for (const modelName of modelsToTry) {
@@ -1420,12 +1420,14 @@ Regler:
     }
   });
 
-  app.get('/api/matpriskollen/stores/:storeKey/offers', async (req, res) => {
+  const handleStoreOffersRequest = async (storeKey: string, req: express.Request, res: express.Response) => {
     try {
-      const { storeKey } = req.params;
+      if (!storeKey) {
+        return res.status(400).json({ storeName: '', offers: [] });
+      }
       const lat = Number(req.query.lat) || 56.0465;
       const lon = Number(req.query.lon) || 12.6945;
-      const limit = Math.min(120, Math.max(1, Number(req.query.limit) || 80));
+      const limit = Math.min(120, Math.max(1, Number(req.query.limit) || 100));
       const upstream = await fetch(
         `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(storeKey)}/offers?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=${limit}`,
         {
@@ -1444,6 +1446,15 @@ Regler:
       console.error('[Matpriskollen] offers error:', e);
       res.json({ storeName: '', offers: [] });
     }
+  };
+
+  app.get('/api/matpriskollen/offers', async (req, res) => {
+    const storeKey = String(req.query.storeKey || req.query.key || '').trim();
+    await handleStoreOffersRequest(storeKey, req, res);
+  });
+
+  app.get('/api/matpriskollen/stores/:storeKey/offers', async (req, res) => {
+    await handleStoreOffersRequest(req.params.storeKey, req, res);
   });
 
   app.get('/api/matpriskollen/cities', async (req, res) => {
