@@ -50,7 +50,11 @@ import {
   syncAllUserPreferencesToSupabase,
   compressImageFileToDataUrl,
 } from '../../utils/appCache';
-import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import {
+  inferCategoryAndMethodFromName,
+  cleanDisplayMerchantName,
+  formatSwishTitle,
+} from '../../utils/bankHistoryAnalyzer';
 import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
 
 interface TransactionModalProps {
@@ -406,6 +410,43 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         activeTx.rawDescription ||
         activeTx.counterpartyName ||
         activeTx.bankAccountName)
+  );
+
+  // Orörd originaltext direkt från banken (visas alltid som referens under "Banktext")
+  const rawBankText = (() => {
+    if (!activeTx) return '';
+    const desc = (activeTx.rawDescription || '').trim();
+    const cp = (activeTx.counterpartyName || '').trim();
+    if (
+      desc &&
+      cp &&
+      desc.toLowerCase() !== cp.toLowerCase() &&
+      !desc.toLowerCase().includes(cp.toLowerCase()) &&
+      !cp.toLowerCase().includes(desc.toLowerCase())
+    ) {
+      return `${cp} · ${desc}`;
+    }
+    return desc || cp || '';
+  })();
+
+  // Bankens städade standardnamn (för att kunna återställa om användaren döpt om händelsen)
+  const defaultCleanBankTitle = (() => {
+    if (!activeTx) return '';
+    const rawSource = (activeTx.counterpartyName || activeTx.rawDescription || '').trim();
+    if (!rawSource) return '';
+    if (activeTx.category === 'Swish' || /swish/i.test(rawSource)) {
+      return formatSwishTitle(activeTx.rawDescription || rawSource, activeTx.counterpartyName);
+    }
+    const cleaned = cleanDisplayMerchantName(rawSource);
+    return cleaned && cleaned !== 'Banktransaktion' ? cleaned : rawSource;
+  })();
+
+  const isAggregatorTx = Boolean(
+    activeTx &&
+      (/\b(klarna|swish|paypal|qliro|walley|trustly)\b/i.test(
+        `${activeTx.rawDescription || ''} ${activeTx.counterpartyName || ''} ${activeTx.title || ''}`
+      ) ||
+        activeTx.category === 'Swish')
   );
 
   const commitEditChanges = (applyScope: 'single' | 'same-merchant' | 'chain') => {
@@ -1204,16 +1245,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
               )}
 
-              {activeTx.rawDescription &&
-                activeTx.rawDescription.trim().toLowerCase() !==
-                  activeTx.title.trim().toLowerCase() && (
-                  <div className="ui-row">
-                    <span className="ui-info-label">Banktext</span>
-                    <span className="ui-info-value text-right truncate max-w-[210px] text-[var(--text-secondary)] font-normal">
-                      {activeTx.rawDescription.trim()}
-                    </span>
-                  </div>
-                )}
+              {rawBankText && (
+                <div className="ui-row items-start py-2.5">
+                  <span className="ui-info-label shrink-0 pt-0.5">Banktext</span>
+                  <span className="ui-info-value text-right break-words max-w-[230px] sm:max-w-[265px] text-[var(--text-secondary)] font-normal leading-snug">
+                    {rawBankText}
+                  </span>
+                </div>
+              )}
 
               {note && (
                 <div className="ui-row">
@@ -1402,6 +1441,27 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   />
                 </div>
               </label>
+
+              {!isCreateMode && rawBankText && (
+                <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[var(--text-muted)]">
+                  <span className="truncate" title={rawBankText}>
+                    Banktext:{' '}
+                    <span className="font-medium text-[var(--text-secondary)]">
+                      {rawBankText}
+                    </span>
+                  </span>
+                  {defaultCleanBankTitle &&
+                    title.trim().toLowerCase() !== defaultCleanBankTitle.toLowerCase() && (
+                      <button
+                        type="button"
+                        onClick={() => setTitle(defaultCleanBankTitle)}
+                        className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[10.5px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                      >
+                        Återställ ({defaultCleanBankTitle})
+                      </button>
+                    )}
+                </div>
+              )}
 
               <div className="border-t border-[var(--border-subtle)] pt-3.5">
                 {!isBankSynced ? (
@@ -1681,66 +1741,145 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       {showSimilarPopup &&
         activeTx &&
         typeof document !== 'undefined' &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[260] flex items-center justify-center p-5 bg-black/45 backdrop-blur-xs animate-fade-in"
-            onClick={() => setShowSimilarPopup(false)}
-          >
+        (() => {
+          const nextTitleTrimmed = title.trim() || activeTx.title;
+          const isTitleChanged = nextTitleTrimmed !== activeTx.title;
+          const bankOriginLabel =
+            defaultCleanBankTitle ||
+            activeTx.counterpartyName ||
+            activeTx.rawDescription ||
+            activeTx.title;
+          const hasDistinctChainVsStore =
+            similarInfo.transactions.length > similarInfo.sameMerchantTransactions.length &&
+            similarInfo.sameMerchantTransactions.length >= 1;
+
+          return createPortal(
             <div
-              className="w-full max-w-[340px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-[260] flex items-center justify-center p-5 bg-black/45 backdrop-blur-xs animate-fade-in"
+              onClick={() => setShowSimilarPopup(false)}
             >
-              <div className="text-center space-y-1.5">
-                <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
-                  {(title.trim() || activeTx.title) !== activeTx.title
-                    ? 'Byt namn bakåt och framåt i tiden?'
-                    : 'Byt kategori bakåt och framåt i tiden?'}
-                </h3>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Vill du att ändringen till{' '}
-                  <span className="font-medium text-[var(--text-primary)]">
-                    {title.trim() || activeTx.title}
-                  </span>{' '}
-                  ({category}) ska gälla alla befintliga köp bakåt i tiden och alla framtida köp från{' '}
-                  <span className="font-medium text-[var(--text-secondary)]">
-                    {activeTx.counterpartyName || activeTx.rawDescription || activeTx.title}
-                  </span>
-                  {similarInfo.transactions.length > 1
-                    ? ` (${similarInfo.transactions.length} befintliga händelser)`
-                    : ''}
-                  ?
-                </p>
+              <div
+                className="w-full max-w-[348px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="text-center space-y-1.5">
+                  <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
+                    {isTitleChanged
+                      ? isAggregatorTx
+                        ? 'Ändra namn på köpet?'
+                        : 'Byt namn bakåt och framåt i tiden?'
+                      : 'Byt kategori bakåt och framåt i tiden?'}
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                    {isTitleChanged && isAggregatorTx ? (
+                      <>
+                        Köp via{' '}
+                        <span className="font-medium text-[var(--text-secondary)]">
+                          {bankOriginLabel}
+                        </span>{' '}
+                        gäller oftast olika saker från gång till gång. Vill du ändra till{' '}
+                        <span className="font-medium text-[var(--text-primary)]">
+                          {nextTitleTrimmed}
+                        </span>{' '}
+                        ({category}) endast för detta köp eller för alla?
+                      </>
+                    ) : (
+                      <>
+                        Vill du att ändringen till{' '}
+                        <span className="font-medium text-[var(--text-primary)]">
+                          {nextTitleTrimmed}
+                        </span>{' '}
+                        ({category}) ska gälla alla befintliga köp bakåt i tiden och alla framtida köp från{' '}
+                        <span className="font-medium text-[var(--text-secondary)]">
+                          {bankOriginLabel}
+                        </span>
+                        {similarInfo.transactions.length > 1
+                          ? ` (${similarInfo.transactions.length} befintliga händelser)`
+                          : ''}
+                        ?
+                      </>
+                    )}
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  {isTitleChanged && isAggregatorTx ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('single')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Endast detta köp (rekommenderas)
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('chain')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Byt bakåt och framåt i tiden
+                      </button>
+                    </>
+                  ) : hasDistinctChainVsStore ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('same-merchant')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Byt för {bankOriginLabel} ({similarInfo.sameMerchantTransactions.length} st + framtida)
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('chain')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Byt för hela kedjan {similarInfo.brandLabel} ({similarInfo.transactions.length} st)
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('single')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Endast detta köp
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('chain')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Byt bakåt och framåt i tiden
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('single')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Endast detta köp
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowSimilarPopup(false)}
+                    className="w-full py-2 rounded-2xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+                  >
+                    Avbryt
+                  </button>
+                </div>
               </div>
-
-              <div className="space-y-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => commitEditChanges('chain')}
-                  className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  Byt bakåt och framåt i tiden
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => commitEditChanges('single')}
-                  className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  Endast detta köp
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowSimilarPopup(false)}
-                  className="w-full py-2 rounded-2xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
-                >
-                  Avbryt
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
+            </div>,
+            document.body
+          );
+        })()}
     </BottomSheet>
   );
 };

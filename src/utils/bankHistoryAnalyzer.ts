@@ -1599,6 +1599,11 @@ const ACRONYM_BRANDS: Record<string, string> = {
   hm: 'H&M',
   bmw: 'BMW',
   dnb: 'DNB',
+  seb: 'SEB',
+  sbab: 'SBAB',
+  xxl: 'XXL',
+  kfc: 'KFC',
+  tv4: 'TV4',
   se: 'SE',
 };
 
@@ -1608,6 +1613,8 @@ const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {
   rydeback: 'Rydebäck',
   malmo: 'Malmö',
   goteborg: 'Göteborg',
+  gbg: 'Göteborg',
+  sthlm: 'Stockholm',
   vasteras: 'Västerås',
   orebro: 'Örebro',
   linkoping: 'Linköping',
@@ -1633,7 +1640,7 @@ const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {
   skovde: 'Skövde',
   vaxjo: 'Växjö',
   kalmar: 'Kalmar',
-   Kristianstad: 'Kristianstad',
+  kristianstad: 'Kristianstad',
   hassleholm: 'Hässleholm',
   landskrona: 'Landskrona',
   trelleborg: 'Trelleborg',
@@ -1695,6 +1702,9 @@ const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {
   emporia: 'Emporia',
   triangeln: 'Triangeln',
   center: 'Center',
+  nara: 'Nära',
+  kafe: 'Kafé',
+  kaf: 'Kafé',
 };
 
 export function cleanDisplayMerchantName(rawText: string | null | undefined): string {
@@ -1709,18 +1719,53 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
     origLower.includes('intern overforing') ||
     /^(överföring|overforing|överf\.?|overf\.?)\b/i.test(origLower);
 
-  // 1. Rensa bort tekniska prefix och inledande BG/PG/referensnummer från banker och kortterminaler
+  // 1. Rensa bort tekniska prefix och inledande BG/PG/datum/referensnummer från banker
   cleaned = cleaned
-    .replace(/^(AUTOGIRO|BG|PG|BANKGIRO|PLUSGIRO|KORTKÖP|KORTKOP|BETALNING|RESERVATION|KÖP|INBETALNING|UTBETALNING|ÖVERFÖRING|OVERFORING)\s*[:#-]?\s*(\d[\d\s-]{2,}\s+)?/i, '')
-    .replace(/^\d[\d\s-]{4,}\s+/, '') // Rensa bort inledande referensnummer om det följs av text
+    .replace(
+      /^(AUTOGIRO|BG|PG|BANKGIRO|PLUSGIRO|KORTKÖP|KORTKOP|BETALNING|RESERVATION|PRELIMINÄR|PRELIMINAR|KÖP|INBETALNING|UTBETALNING|ÖVERFÖRING|OVERFORING)\s*(?:BG|PG)?\s*[:#-]?\s*(\d[\d\s.-]{2,}\s+)?/i,
+      ''
+    )
+    .replace(/^\d{6}\s+/, '') // Inledande 6-siffrigt datum t.ex. "261028 "
+    .replace(/^\d[\d\s-]{4,}\s+/, '') // Inledande referensnummer om det följs av text
     .replace(/^[*#._-]+\s*/, '')
     .trim();
 
-  // 2. Rensa bort terminalsuffix som landskod och slutsiffror allra sist på raden
+  // 2. Hantera Klarna-prefix snyggt (t.ex. "KLARNA*849203" -> "Klarna", "KLARNA*BOOZT" -> "Klarna · Boozt")
+  if (/^klarna\s*[*#_-]/i.test(cleaned)) {
+    const afterKlarna = cleaned.replace(/^klarna\s*[*#_-]+\s*/i, '').trim();
+    if (!afterKlarna || /^[\d\s#*-]+$/.test(afterKlarna)) {
+      return 'Klarna';
+    }
+    const subCleaned = cleanDisplayMerchantName(afterKlarna);
+    if (subCleaned && subCleaned !== 'Banktransaktion' && subCleaned.toLowerCase() !== 'klarna') {
+      return `Klarna · ${subCleaned}`;
+    }
+    return 'Klarna';
+  }
+
+  // 3. Rensa bort kortterminal-/betalväxelprefix (ZETTLE*, SUMUP*, NYX*, STRIPE*, BAMBORA*, PAYPAL*, SQ*, WL* etc.)
+  cleaned = cleaned
+    .replace(
+      /^(ZETTLE|IZETTLE|IZ|SUMUP|PAYPAL|STRIPE|SQ|SP|WL|BAMBORA|NETS|ADYEN|TRUSTLY|QCK|BILLO)\s*[*#_-]+\s*/i,
+      ''
+    )
+    .replace(/^NYX\s*[*#_-]+\s*(SVENSKA\s*)?/i, 'Varuautomat ')
+    .trim();
+
+  // 4. Rensa bort terminalsuffix som landskod, slutsiffror och bolagsändelser allra sist på raden
   cleaned = cleaned
     .replace(/\s+(SE|SWE|SWEDEN)$/i, '')
     .replace(/\s+\d{3,}\s*$/, '') // T.ex. " 1421", " 0124" endast allra sist på raden
+    .replace(/\s+(SE|SWE|SWEDEN)$/i, '')
     .trim();
+
+  // Ta bort avslutande bolagsform (AB, AKTIEBOLAG, HB, KB, PUBL) när ett riktigt företagsnamn står framför
+  const withoutCorpSuffix = cleaned
+    .replace(/\s+(AKTIEBOLAG|AB|A\.B\.|HB|KB|PUBL)$/i, '')
+    .trim();
+  if (withoutCorpSuffix.length >= 2 && /[a-zA-ZåäöÅÄÖ]/.test(withoutCorpSuffix)) {
+    cleaned = withoutCorpSuffix;
+  }
 
   if (!cleaned || /^[\d\s*-]+$/.test(cleaned)) {
     return isExplicitTransferText ? 'Överföring' : 'Banktransaktion';
@@ -1728,12 +1773,12 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
 
   const lower = cleaned.toLowerCase().trim();
 
-  // 3. Kontrollera mot ordbok ENBART om hela raden exakt motsvarar ett avhugget/kort butiksnamn
+  // 5. Kontrollera mot ordbok om hela raden matchar ett känt varumärke eller avhugget butiksnamn
   if (KNOWN_MERCHANT_NAMES_MAP[lower]) {
     return KNOWN_MERCHANT_NAMES_MAP[lower];
   }
 
-  // 4. Ta bort avhuggna enbokstavsrester mitt i banksträngar när nästa ord börjar på samma bokstav
+  // 6. Ta bort avhuggna enbokstavsrester mitt i banksträngar när nästa ord börjar på samma bokstav
   // (t.ex. "HEMKOP HELSINGBORG R RYDEBACK" -> där "R" är slutet på det 20-teckenstrunkerade fältet före ortfältet "RYDEBACK")
   const rawWords = cleaned.split(/\s+/);
   const dedupedWords: string[] = [];
@@ -1753,7 +1798,7 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
     dedupedWords.push(curr);
   }
 
-  // 5. Universell svensk Title Case, ortsnamnsåterställning & bolagsändelser
+  // 7. Universell svensk Title Case, ortsnamnsåterställning & förkortningar
   const formattedWords = dedupedWords.map((w, idx) => {
     const punctuationMatch = w.match(/^([^a-zA-ZåäöÅÄÖ0-9]*)(.*?)([^a-zA-ZåäöÅÄÖ0-9]*)$/);
     const prefix = punctuationMatch ? punctuationMatch[1] : '';
@@ -1872,13 +1917,16 @@ export function categorizeBankTransactionForApp(
     };
   }
 
-  // Importera bankens namn rätt av vid synk (utan att skriva om det),
-  // såvida inte användaren själv valt att byta namn bakåt/framåt i tiden (userAlias).
+  // Tvätta bankens råa namn lätt och smart (ta bort ZETTLE*, KORTKÖP, SE, AB och fixa VERSALER -> Title Case)
+  // samtidigt som specifika butiksnamn bevaras och originaltexten sparas på transaktionskortet.
   const directBankName = (tx.counterparty_name || effectiveDesc || 'Kortköp')
     .replace(/\s+/g, ' ')
     .trim();
   const cleanedBankName = cleanDisplayMerchantName(directBankName);
-  const rawOrCleanBankName = directBankName || cleanedBankName || 'Kortköp';
+  const rawOrCleanBankName =
+    cleanedBankName && cleanedBankName !== 'Banktransaktion'
+      ? cleanedBankName
+      : directBankName || 'Kortköp';
   const hasReadableBankName =
     rawOrCleanBankName &&
     rawOrCleanBankName.toLowerCase() !== 'banktransaktion' &&
