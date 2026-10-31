@@ -4246,6 +4246,7 @@ export const App: React.FC = () => {
                   }}
                   onNavigateToFixed={() => setActiveTab('fixed')}
                   onNavigateToTransactions={() => setActiveTab('transactions')}
+                  onNavigateToGoals={() => setActiveTab('goals')}
                   onSelectAccount={(accountId) => {
                     setSelectedHistoryAccountId(accountId);
                     setActiveTab('transactions');
@@ -4296,6 +4297,7 @@ export const App: React.FC = () => {
                     setSettingsSubView('household');
                     setActiveTab('settings');
                   }}
+                  onOpenGoals={() => setActiveTab('goals')}
                   onDeleteIncome={handleDeleteIncome}
                   onDeleteFixed={handleDeleteFixed}
                   onUpdateFixed={handleUpdateFixed}

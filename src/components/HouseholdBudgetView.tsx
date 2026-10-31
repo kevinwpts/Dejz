@@ -364,7 +364,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
       <div className="ui-page animate-slide-in-right">
         <section className="ui-card p-5 space-y-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-indigo-500/12 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
               <Users size={22} weight="duotone" />
             </div>
             <div className="min-w-0 flex-1">
@@ -459,7 +459,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
       <section className="ui-card p-5 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block">
+            <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
               Synkad hushållsbudget
             </span>
             <h2 className="font-display font-bold text-base sm:text-lg text-[var(--text-primary)]">
@@ -490,7 +490,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
         <div className="grid grid-cols-2 gap-2.5">
           <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-display font-bold text-xs flex items-center justify-center shrink-0 uppercase">
+              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-display font-bold text-xs flex items-center justify-center shrink-0 uppercase">
                 {(myMember.name || 'J').slice(0, 2)}
               </div>
               <div className="min-w-0">
@@ -629,7 +629,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
       <section className="ui-card p-5 space-y-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Scales size={18} weight="duotone" className="text-indigo-500 shrink-0" />
+            <Scales size={18} weight="duotone" className="text-[var(--text-secondary)] shrink-0" />
             <h3 className="font-display font-semibold text-sm text-[var(--text-primary)]">
               Utjämning i löneperioden
             </h3>

@@ -10,6 +10,8 @@ import {
   Package,
   Paperclip,
   PencilSimple,
+  PiggyBank,
+  Plus,
   Users,
   X,
 } from '@phosphor-icons/react';
@@ -19,6 +21,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { BottomSheet } from './ui/BottomSheet';
+import { getGoalArtworkTheme } from './ui/VisualArtwork';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   formatIsoTimeStockholm,
@@ -32,8 +35,11 @@ import {
   reconcilePeriodRecurringMatches,
 } from '../utils/recurring';
 import {
+  getShowBudgetBreakdownOnHome,
+  setShowBudgetBreakdownOnHome,
   getShowAccountsOnHome,
   setShowAccountsOnHome,
+  getSavingsGoals,
   getReviewedTransactionIds,
   hasInitializedReviewedTransactions,
   markTransactionsReviewed,
@@ -220,6 +226,7 @@ interface HomeTabProps {
   onSelectIncome?: (inc: IncomeItem) => void;
   onNavigateToFixed: () => void;
   onNavigateToTransactions: () => void;
+  onNavigateToGoals?: () => void;
   onSelectAccount?: (accountId: string) => void;
   onUpdateAccountMeta?: (
     accountId: string,
@@ -249,6 +256,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onSelectTransaction,
   onSelectFixed,
   onSelectIncome,
+  onNavigateToGoals,
   onSelectAccount,
   onUpdateAccountMeta,
   onToggleHeart,
@@ -256,11 +264,16 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onExcludeTransaction,
   onUpdateTransaction,
 }) => {
+  const [showBudgetBreakdown, setShowBudgetBreakdown] = useState<boolean>(() =>
+    getShowBudgetBreakdownOnHome()
+  );
   const [showAccounts, setShowAccounts] = useState<boolean>(() => getShowAccountsOnHome());
+  const [accountsSubTab, setAccountsSubTab] = useState<'accounts' | 'goals'>('accounts');
   const [showCashflowForecast, setShowCashflowForecast] = useState<boolean>(false);
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
+  const savingsGoals = useMemo(() => getSavingsGoals(), [transactions, fixedExpenses, incomes]);
   const [selectedAccountModalId, setSelectedAccountModalId] = useState<string | null>(null);
   const [isEditingAccountName, setIsEditingAccountName] = useState(false);
   const [accountNameDraft, setAccountNameDraft] = useState('');
@@ -788,85 +801,118 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* MODUL 1: KVAR ATT SPENDERA (Hero Bento Card)                   */}
       {/* ============================================================== */}
       <section className="ui-card-p">
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[12px] text-[var(--text-secondary)] font-normal">
-              Kvar att spendera
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
+              Kvar att spendera · {period.startLabel} – {period.endLabel}
             </span>
-            <span className="text-[12px] font-normal text-[var(--text-secondary)] tabular-nums">
-              {period.startLabel} – {period.endLabel}
-            </span>
+
+            {isInitialLoading && accounts.length === 0 ? (
+              <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
+            ) : (
+              <div
+                className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums mt-0.5 ${
+                  kvarAttSpendera >= 0
+                    ? 'text-[var(--text-primary)]'
+                    : 'text-rose-600 dark:text-rose-400'
+                }`}
+              >
+                {formatKr(kvarAttSpendera)}
+              </div>
+            )}
           </div>
 
-          {isInitialLoading && accounts.length === 0 ? (
-            <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
-          ) : (
-            <div className="font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
-              {formatKr(kvarAttSpendera)}
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !showBudgetBreakdown;
+              setShowBudgetBreakdown(next);
+              setShowBudgetBreakdownOnHome(next);
+            }}
+            className="py-1 px-1.5 text-[12px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+            title={showBudgetBreakdown ? 'Dölj budgetdetaljer' : 'Visa budgetdetaljer'}
+          >
+            <span>{showBudgetBreakdown ? 'Dölj detaljer' : 'Visa detaljer'}</span>
+            <CaretDown
+              size={12}
+              weight="regular"
+              className={`transition-transform duration-200 ${
+                showBudgetBreakdown ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
         </div>
 
-        {/* 3-Column Hairline Breakdown (No nested boxes) */}
-        <div className="ui-stat-grid pt-4 mt-4 border-t border-[var(--border-subtle)]">
-          <button
-            type="button"
-            onClick={() => setActiveHeroPopup('income')}
-            className="pr-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
-          >
-            <span className="ui-stat-label">
-              Inkomst
-            </span>
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
-                +{formatKr(totalIncome)}
-              </span>
-            )}
-          </button>
+        {/* Mjukt utfällbar 3-kolumns översikt (Inkomst · Fasta · Rörligt) */}
+        <div
+          className={`grid transition-all duration-200 ease-out ${
+            showBudgetBreakdown
+              ? 'grid-rows-[1fr] opacity-100 mt-3.5'
+              : 'grid-rows-[0fr] opacity-0 mt-0'
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="ui-stat-grid pt-3.5 border-t border-[var(--border-subtle)]">
+              <button
+                type="button"
+                onClick={() => setActiveHeroPopup('income')}
+                className="pr-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
+              >
+                <span className="ui-stat-label">
+                  Inkomst
+                </span>
+                {isInitialLoading && accounts.length === 0 ? (
+                  <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                ) : (
+                  <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+                    +{formatKr(totalIncome)}
+                  </span>
+                )}
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveHeroPopup('fixed')}
-            className="px-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
-          >
-            <span className="ui-stat-label">
-              Fasta
-            </span>
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <span className="ui-stat-value">
-                -{formatKr(totalFixedExpenses)}
-              </span>
-            )}
-          </button>
+              <button
+                type="button"
+                onClick={() => setActiveHeroPopup('fixed')}
+                className="px-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
+              >
+                <span className="ui-stat-label">
+                  Fasta
+                </span>
+                {isInitialLoading && accounts.length === 0 ? (
+                  <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                ) : (
+                  <span className="ui-stat-value text-[var(--text-primary)]">
+                    -{formatKr(totalFixedExpenses)}
+                  </span>
+                )}
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveHeroPopup('variable')}
-            className="pl-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
-          >
-            <span className="ui-stat-label">
-              Rörligt
-            </span>
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <span className="ui-stat-value">
-                -{formatKr(totalVariableSpent)}
-              </span>
-            )}
-          </button>
+              <button
+                type="button"
+                onClick={() => setActiveHeroPopup('variable')}
+                className="pl-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
+              >
+                <span className="ui-stat-label">
+                  Rörligt
+                </span>
+                {isInitialLoading && accounts.length === 0 ? (
+                  <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                ) : (
+                  <span className="ui-stat-value text-[var(--text-primary)]">
+                    -{formatKr(totalVariableSpent)}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ============================================================== */}
-      {/* MODUL 2: TOTALT SALDO MED MJUK KONTO-ACCORDION                 */}
+      {/* MODUL 2: TOTALT SALDO · KONTON & SPARMÅL                       */}
       {/* ============================================================== */}
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
               Totalt saldo
@@ -880,7 +926,25 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             )}
           </div>
 
-          {accounts.length > 0 && (
+          <div className="flex items-center gap-2 shrink-0">
+            {!showAccounts && onNavigateToGoals && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAccountsSubTab('goals');
+                  setShowAccounts(true);
+                  setShowAccountsOnHome(true);
+                }}
+                className="py-1 px-2 text-[12px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer"
+                title="Visa sparmål"
+              >
+                <PiggyBank size={13} weight="regular" />
+                <span>
+                  Sparmål{savingsGoals.length > 0 ? ` (${savingsGoals.length})` : ''}
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => {
@@ -889,7 +953,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 setShowAccountsOnHome(next);
               }}
               className="py-1 px-1.5 text-[12px] font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
-              title={showAccounts ? 'Dölj kontolista' : 'Visa kontolista'}
+              title={showAccounts ? 'Dölj konton & sparmål' : 'Visa konton & sparmål'}
             >
               <span>{showAccounts ? 'Dölj konton' : 'Visa konton'}</span>
               <CaretDown
@@ -900,108 +964,225 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 }`}
               />
             </button>
-          )}
+          </div>
         </div>
 
-        {/* Mjukt utfällbar lista med anslutna konton */}
+        {/* Mjukt utfällbar lista med Konton & Sparmål */}
         <div
           className={`grid transition-all duration-200 ease-out ${
             showAccounts ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'
           }`}
         >
           <div className="overflow-hidden">
-            {accounts.length > 0 ? (
-              <div className="pt-2.5 border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-                {accounts.map((acc) => {
-                  const hasDuplicateName =
-                    accounts.filter(
-                      (other) =>
-                        other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
-                    ).length > 1;
-                  const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
-                  const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+            <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2.5">
+              {/* Modern Segmented Switcher: Konton | Sparmål */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="inline-flex items-center p-0.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+                  <button
+                    type="button"
+                    onClick={() => setAccountsSubTab('accounts')}
+                    className={`px-3 py-1 rounded-[10px] text-[11.5px] transition-all cursor-pointer ${
+                      accountsSubTab === 'accounts'
+                        ? 'bg-[var(--surface-color)] text-[var(--text-primary)] font-medium shadow-2xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-normal'
+                    }`}
+                  >
+                    Konton{accounts.length > 0 ? ` (${accounts.length})` : ''}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAccountsSubTab('goals')}
+                    className={`px-3 py-1 rounded-[10px] text-[11.5px] inline-flex items-center gap-1 transition-all cursor-pointer ${
+                      accountsSubTab === 'goals'
+                        ? 'bg-[var(--surface-color)] text-[var(--text-primary)] font-medium shadow-2xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-normal'
+                    }`}
+                  >
+                    <span>
+                      Sparmål{savingsGoals.length > 0 ? ` (${savingsGoals.length})` : ''}
+                    </span>
+                  </button>
+                </div>
 
-                  return (
-                    <button
-                      key={acc.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedAccountModalId(acc.id);
-                        setAccountNameDraft(acc.name);
-                        setIsEditingAccountName(false);
-                        setCopiedAccountNumber(false);
-                      }}
-                      title={`Visa kontodetaljer för ${acc.name}`}
-                      className="w-full py-2.5 first:pt-0.5 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <ItemLogo
-                          name={acc.bankName || acc.name}
-                          category="Bank"
-                          logoUrl={acc.logo}
-                          size="sm"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
-                            {acc.name}
-                          </span>
-                          {(acc.bankName || (hasDuplicateName && last4) || acc.excludeFromTotalBalance) && (
-                            <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
-                              {acc.bankName}
-                              {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
-                              {acc.excludeFromTotalBalance ? ' · Ej i totalt' : ''}
+                {accountsSubTab === 'goals' && onNavigateToGoals && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToGoals}
+                    className="text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <Plus size={11} weight="bold" />
+                    <span>{savingsGoals.length > 0 ? 'Alla sparmål' : 'Skapa mål'}</span>
+                  </button>
+                )}
+              </div>
+
+              {accountsSubTab === 'accounts' ? (
+                accounts.length > 0 ? (
+                  <div className="divide-y divide-[var(--border-subtle)]">
+                    {accounts.map((acc) => {
+                      const hasDuplicateName =
+                        accounts.filter(
+                          (other) =>
+                            other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
+                        ).length > 1;
+                      const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+                      const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+
+                      return (
+                        <button
+                          key={acc.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedAccountModalId(acc.id);
+                            setAccountNameDraft(acc.name);
+                            setIsEditingAccountName(false);
+                            setCopiedAccountNumber(false);
+                          }}
+                          title={`Visa kontodetaljer för ${acc.name}`}
+                          className="w-full py-2.5 first:pt-1 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <ItemLogo
+                              name={acc.bankName || acc.name}
+                              category="Bank"
+                              logoUrl={acc.logo}
+                              size="sm"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
+                                {acc.name}
+                              </span>
+                              {(acc.bankName ||
+                                (hasDuplicateName && last4) ||
+                                acc.excludeFromTotalBalance) && (
+                                <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
+                                  {acc.bankName}
+                                  {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
+                                  {acc.excludeFromTotalBalance ? ' · Ej i totalt' : ''}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span
+                              className={`font-display font-semibold text-[13.5px] tracking-[-0.01em] tabular-nums ${
+                                acc.excludeFromTotalBalance
+                                  ? 'text-[var(--text-secondary)]'
+                                  : 'text-[var(--text-primary)]'
+                              }`}
+                            >
+                              {formatKr(acc.balance)}
                             </span>
-                          )}
+                            <CaretRight
+                              size={12}
+                              weight="regular"
+                              className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : isInitialLoading ? (
+                  <div className="space-y-2.5 animate-pulse pt-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--surface-raised)]" />
+                        <div className="space-y-1.5">
+                          <div className="w-24 h-3 rounded bg-[var(--surface-raised)]" />
+                          <div className="w-16 h-2 rounded bg-[var(--surface-raised)]" />
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span
-                          className={`font-display font-semibold text-[13.5px] tracking-[-0.01em] tabular-nums ${
-                            acc.excludeFromTotalBalance
-                              ? 'text-[var(--text-secondary)]'
-                              : 'text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {formatKr(acc.balance)}
-                        </span>
-                        <CaretRight
-                          size={12}
-                          weight="regular"
-                          className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : isInitialLoading ? (
-              <div className="pt-2.5 border-t border-[var(--border-subtle)] space-y-2.5 animate-pulse">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[var(--surface-raised)]" />
-                    <div className="space-y-1.5">
-                      <div className="w-24 h-3 rounded bg-[var(--surface-raised)]" />
-                      <div className="w-16 h-2 rounded bg-[var(--surface-raised)]" />
+                      <div className="w-20 h-3.5 rounded bg-[var(--surface-raised)]" />
                     </div>
                   </div>
-                  <div className="w-20 h-3.5 rounded bg-[var(--surface-raised)]" />
+                ) : (
+                  <div className="pt-1 flex items-center justify-between gap-3">
+                    <span className="text-xs text-[var(--text-secondary)]">
+                      Ingen bank ansluten
+                    </span>
+                    <button
+                      type="button"
+                      onClick={onOpenBank}
+                      className="ui-btn-sm-primary"
+                    >
+                      <Bank size={14} />
+                      <span>Anslut</span>
+                    </button>
+                  </div>
+                )
+              ) : savingsGoals.length > 0 ? (
+                <div className="divide-y divide-[var(--border-subtle)]">
+                  {savingsGoals.map((goal) => {
+                    const pct =
+                      goal.targetAmount > 0
+                        ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+                        : 0;
+                    const theme = getGoalArtworkTheme(goal.artworkId);
+                    return (
+                      <button
+                        key={goal.id}
+                        type="button"
+                        onClick={onNavigateToGoals}
+                        className="w-full py-2.5 first:pt-1 last:pb-0.5 flex items-center justify-between gap-2.5 text-left text-xs sm:text-[13px] hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white"
+                            style={{ backgroundColor: theme.heroBg }}
+                          >
+                            <PiggyBank size={15} weight="fill" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
+                              {goal.name}
+                            </span>
+                            <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5 tabular-nums">
+                              {pct} % av {formatKr(goal.targetAmount)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] tabular-nums text-emerald-600 dark:text-emerald-400">
+                            {formatKr(goal.currentAmount)}
+                          </span>
+                          <CaretRight
+                            size={12}
+                            weight="regular"
+                            className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
-            ) : (
-              <div className="pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
-                <span className="text-xs text-[var(--text-secondary)]">
-                  Ingen bank ansluten
-                </span>
+              ) : (
                 <button
                   type="button"
-                  onClick={onOpenBank}
-                  className="ui-btn-sm-primary"
+                  onClick={onNavigateToGoals}
+                  className="w-full py-2.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] rounded-xl px-1 -mx-1 transition-colors cursor-pointer group"
                 >
-                  <Bank size={14} />
-                  <span>Anslut</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                      <PiggyBank size={15} weight="regular" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-normal text-[13px] text-[var(--text-primary)] block truncate">
+                        Skapa ditt första sparmål
+                      </span>
+                      <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
+                        Buffert, resa eller drömköp
+                      </span>
+                    </div>
+                  </div>
+                  <CaretRight
+                    size={12}
+                    weight="regular"
+                    className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
+                  />
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </section>

@@ -1038,7 +1038,30 @@ export function saveStoredPaymentMethods(methods: PaymentMethodItem[]): void {
   }
 }
 
-// --- Show Accounts Eye Toggle Persistence (Totalt saldo i Hemfliken) ---
+// --- Show Accounts & Budget Breakdown Toggle Persistence (Hemfliken) ---
+const SHOW_BUDGET_BREAKDOWN_ON_HOME_KEY = 'dejz_show_budget_breakdown_on_home';
+
+export function getShowBudgetBreakdownOnHome(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const stored = localStorage.getItem(SHOW_BUDGET_BREAKDOWN_ON_HOME_KEY);
+    if (stored === null) return true;
+    return stored === 'true';
+  } catch {
+    return true;
+  }
+}
+
+export function setShowBudgetBreakdownOnHome(show: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(SHOW_BUDGET_BREAKDOWN_ON_HOME_KEY, String(show));
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
 export function getShowAccountsOnHome(): boolean {
   if (typeof window === 'undefined') return true;
   try {
