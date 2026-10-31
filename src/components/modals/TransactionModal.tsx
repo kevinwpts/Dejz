@@ -49,6 +49,9 @@ import {
   normalizeCategoryToValid,
   syncAllUserPreferencesToSupabase,
   compressImageFileToDataUrl,
+  getSavingsGoals,
+  saveSavingsGoals,
+  SavingsGoalItem,
 } from '../../utils/appCache';
 import {
   inferCategoryAndMethodFromName,
@@ -1324,7 +1327,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
             )}
 
-            {/* Liknande transaktioner */}
+            {/* Liknande transaktioner & Snabbåtgärder */}
             <div className="ui-sheet-group">
               <button
                 type="button"
@@ -1345,6 +1348,93 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   <CaretRight size={13} className="text-[var(--text-muted)]" />
                 </span>
               </button>
+
+              {onMarkAsFixed && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onMarkAsFixed(activeTx, isIncome ? 'income' : 'expense')
+                  }
+                  className="ui-row-btn"
+                >
+                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-2 shrink-0">
+                    <ArrowsClockwise
+                      size={15}
+                      className="text-[var(--text-secondary)] shrink-0"
+                    />
+                    <span>
+                      {recurringStatus.isRecurring && recurringStatus.hasExactAmountMatch
+                        ? `Lägg till som egen fast ${isIncome ? 'inkomst' : 'utgift'}`
+                        : `Gör till fast ${isIncome ? 'inkomst' : 'utgift'}`}
+                    </span>
+                  </span>
+                  <CaretRight size={13} className="text-[var(--text-muted)] shrink-0" />
+                </button>
+              )}
+
+              {(() => {
+                const goals: SavingsGoalItem[] = getSavingsGoals();
+                if (goals.length === 0 || (activeTx.category !== 'Sparande' && isIncome)) {
+                  return null;
+                }
+                const txActId = `tx-goal-${activeTx.id}`;
+                const linkedGoal = goals.find((g) =>
+                  (g.activities || []).some((a) => a.id === txActId)
+                );
+
+                return (
+                  <div className="ui-row flex-col items-stretch gap-2 py-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
+                        <Sparkle size={14} weight="fill" className="text-emerald-500 shrink-0" />
+                        <span>
+                          {linkedGoal
+                            ? `Kopplad till sparmål: ${linkedGoal.name}`
+                            : 'Räkna in mot sparmål'}
+                        </span>
+                      </span>
+                    </div>
+                    {!linkedGoal && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {goals.map((g) => (
+                          <button
+                            key={g.id}
+                            type="button"
+                            onClick={() => {
+                              const amt = Math.round(Math.abs(Number(activeTx.amount) || 0));
+                              if (amt <= 0) return;
+                              const nextGoals = goals.map((item) => {
+                                if (item.id !== g.id) return item;
+                                return {
+                                  ...item,
+                                  currentAmount: (Number(item.currentAmount) || 0) + amt,
+                                  activities: [
+                                    {
+                                      id: txActId,
+                                      text: `${activeTx.title} (+${formatKr(amt)})`,
+                                      date:
+                                        activeTx.date ||
+                                        new Date().toISOString().slice(0, 10),
+                                      amount: amt,
+                                    },
+                                    ...(item.activities || []),
+                                  ],
+                                };
+                              });
+                              saveSavingsGoals(nextGoals);
+                              setLogoPrefTick((t) => t + 1);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <Plus size={11} weight="bold" className="text-emerald-500" />
+                            <span>{g.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

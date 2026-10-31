@@ -4267,6 +4267,10 @@ export const App: React.FC = () => {
                     setSelectedFixedExpense(null);
                     setIsFixedModalOpen(true);
                   }}
+                  onOpenDiscover={() => {
+                    setSettingsSubView('discover');
+                    setActiveTab('settings');
+                  }}
                   onDeleteIncome={handleDeleteIncome}
                   onDeleteFixed={handleDeleteFixed}
                   onUpdateFixed={handleUpdateFixed}
@@ -4330,7 +4334,12 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {activeTab === 'goals' && <SavingsGoalsView userName={userName} />}
+              {activeTab === 'goals' && (
+                <SavingsGoalsView
+                  userName={userName}
+                  transactions={displayTransactions}
+                />
+              )}
 
               {activeTab === 'matpriskollen' && <MatpriskollenView />}
 

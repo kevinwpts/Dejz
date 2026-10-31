@@ -545,6 +545,40 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
             )}
           </div>
         )}
+
+        {/* Live-summering vid aktiv sökning eller filtrering */}
+        {(searchQuery.trim().length > 0 ||
+          activeFilterCount > 0 ||
+          typeTab !== 'all' ||
+          Boolean(activeAccount)) && (
+          <div className="rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-3.5 py-2 flex items-center justify-between gap-2 text-xs tabular-nums">
+            <span className="text-[var(--text-secondary)]">
+              <span className="font-semibold text-[var(--text-primary)]">
+                {filteredTransactions.length}
+              </span>{' '}
+              {filteredTransactions.length === 1 ? 'händelse' : 'händelser'}
+            </span>
+            {(() => {
+              const netSum = filteredTransactions.reduce((sum, tx) => {
+                const amt = Number(tx.amount) || 0;
+                return tx.type === 'income' ? sum + amt : sum - amt;
+              }, 0);
+              const absStr =
+                new Intl.NumberFormat('sv-SE').format(Math.round(Math.abs(netSum))) + ' kr';
+              return (
+                <span
+                  className={`font-display font-semibold ${
+                    netSum > 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-[var(--text-primary)]'
+                  }`}
+                >
+                  Totalt {netSum > 0 ? `+${absStr}` : netSum < 0 ? `-${absStr}` : '0 kr'}
+                </span>
+              );
+            })()}
+          </div>
+        )}
       </div>
 
       {/* ============================================================== */}

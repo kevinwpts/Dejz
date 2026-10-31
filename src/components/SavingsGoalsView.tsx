@@ -27,14 +27,18 @@ import {
 } from './ui/VisualArtwork';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
 
+import { TransactionItem } from './HomeTab';
+
 interface SavingsGoalsViewProps {
   onGoalsChanged?: (goals: SavingsGoalItem[]) => void;
   userName?: string | null;
+  transactions?: TransactionItem[];
 }
 
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   onGoalsChanged,
   userName,
+  transactions = [],
 }) => {
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoalItem[]>(() => getSavingsGoals());
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
@@ -476,6 +480,75 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 ))}
               </div>
             </div>
+
+            {transferMode === 'deposit' &&
+              (() => {
+                const existingActIds = new Set(
+                  (selectedGoal.activities || []).map((a) => a.id)
+                );
+                const recentSavingsTxs = transactions
+                  .filter(
+                    (t) =>
+                      t.category === 'Sparande' &&
+                      !existingActIds.has(`tx-goal-${t.id}`)
+                  )
+                  .slice(0, 4);
+                if (recentSavingsTxs.length === 0) return null;
+                return (
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block px-1">
+                      Eller välj en spar-händelse från banken
+                    </span>
+                    <div className="space-y-1.5">
+                      {recentSavingsTxs.map((tx) => {
+                        const amt = Math.round(Math.abs(Number(tx.amount) || 0));
+                        return (
+                          <button
+                            key={tx.id}
+                            type="button"
+                            onClick={() => {
+                              const next = savingsGoals.map((g) => {
+                                if (g.id !== selectedGoal.id) return g;
+                                return {
+                                  ...g,
+                                  currentAmount: g.currentAmount + amt,
+                                  activities: [
+                                    {
+                                      id: `tx-goal-${tx.id}`,
+                                      text: `${tx.title} (+${formatKr(amt)})`,
+                                      date:
+                                        tx.date ||
+                                        new Date().toISOString().slice(0, 10),
+                                      amount: amt,
+                                    },
+                                    ...(g.activities || activities),
+                                  ],
+                                };
+                              });
+                              updateGoals(next);
+                              setTransferMode(null);
+                              setTransferAmountInput('');
+                            }}
+                            className="w-full rounded-xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2 text-left transition-colors cursor-pointer"
+                          >
+                            <div className="min-w-0">
+                              <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
+                                {tx.title}
+                              </span>
+                              <span className="text-[11px] text-[var(--text-secondary)] block">
+                                {formatSwedishDateHeading(tx.date)}
+                              </span>
+                            </div>
+                            <span className="font-display font-bold text-xs text-emerald-600 dark:text-emerald-400 tabular-nums shrink-0">
+                              +{formatKr(amt)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
             <button
               type="button"

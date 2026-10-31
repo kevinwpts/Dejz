@@ -117,6 +117,8 @@ interface SheetEditorState {
   category: string;
   paymentMethod?: string;
   logo?: string;
+  isShared?: boolean;
+  fullAmount?: string;
 }
 
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
@@ -176,7 +178,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     if (initialWeekendHandling) return initialWeekendHandling;
     try {
       const saved = localStorage.getItem('dejz_weekend_handling');
-      if (saved === 'before' || saved === 'after' || saved === 'exact') return saved;
+      if (saved === 'before' || saved === 'after' || saved === 'none') return saved;
+      if (saved === 'exact') return 'none';
     } catch {
       // ignore
     }
@@ -228,6 +231,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       checked: boolean;
       logo?: string;
       isFromBank?: boolean;
+      isShared?: boolean;
+      fullAmount?: number;
     }[]
   >([]);
 
@@ -603,6 +608,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             category: item.category,
             paymentMethod: item.paymentMethod || 'Autogiro',
             logo: item.logo,
+            isShared: item.isShared,
+            fullAmount: item.fullAmount,
           });
         } else if (
           onUpdateFixed &&
@@ -610,6 +617,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             existing.dueDay !== item.dueDay ||
             existing.name !== item.name ||
             existing.category !== item.category ||
+            existing.isShared !== item.isShared ||
+            existing.fullAmount !== item.fullAmount ||
             existing.paymentMethod !== (item.paymentMethod || existing.paymentMethod))
         ) {
           onUpdateFixed({
@@ -620,6 +629,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             category: item.category || existing.category,
             paymentMethod: item.paymentMethod || existing.paymentMethod || 'Autogiro',
             logo: item.logo || existing.logo,
+            isShared: item.isShared,
+            fullAmount: item.fullAmount,
           });
         }
       } else if (existing) {
@@ -1013,6 +1024,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     category: string;
     paymentMethod?: string;
     logo?: string;
+    isShared?: boolean;
+    fullAmount?: number;
   }) => {
     setSheetSubView('main');
     setSheetNavDir('forward');
@@ -1026,6 +1039,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       category: normalizeCategoryToValid(item.category || 'Räkningar', 'expense'),
       paymentMethod: item.paymentMethod || 'Autogiro',
       logo: item.logo,
+      isShared: Boolean(item.isShared),
+      fullAmount: item.fullAmount ? String(Math.round(item.fullAmount)) : String(Math.round(item.amount * 2)),
     });
   };
 
@@ -1125,6 +1140,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       const nextCat = normalizeCategoryToValid(sheetEditor.category || 'Räkningar', 'expense');
       const nextMethod = sheetEditor.paymentMethod || 'Autogiro';
       const nextLogo = sheetEditor.logo || getLogoUrl(cleanTitle, nextCat);
+      const nextIsShared = Boolean(sheetEditor.isShared);
+      const nextFullAmt = nextIsShared
+        ? Math.max(cleanAmt, Math.round(Number(sheetEditor.fullAmount) || cleanAmt * 2))
+        : undefined;
       if (sheetEditor.mode === 'add') {
         onAddFixed({
           name: cleanTitle,
@@ -1133,6 +1152,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           category: nextCat,
           paymentMethod: nextMethod,
           logo: nextLogo,
+          isShared: nextIsShared,
+          fullAmount: nextFullAmt,
         });
         setSuggestedFixedExpenses((prev) => [
           ...prev,
@@ -1145,6 +1166,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             paymentMethod: nextMethod,
             logo: nextLogo,
             checked: true,
+            isShared: nextIsShared,
+            fullAmount: nextFullAmt,
           },
         ]);
       } else if (sheetEditor.id) {
@@ -1161,6 +1184,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   paymentMethod: nextMethod,
                   logo: nextLogo,
                   checked: true,
+                  isShared: nextIsShared,
+                  fullAmount: nextFullAmt,
                 }
               : item
           )
@@ -1180,6 +1205,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               category: nextCat,
               paymentMethod: nextMethod,
               logo: nextLogo,
+              isShared: nextIsShared,
+              fullAmount: nextFullAmt,
             });
           }
         }
@@ -1715,7 +1742,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         -{formatKr(item.amount)}
                       </span>
                       <span className="ui-row-meta">
-                        Den {item.dueDay}:e
+                        {item.isShared ? `Delad · Den ${item.dueDay}:e` : `Den ${item.dueDay}:e`}
                       </span>
                     </div>
                   </button>
@@ -1733,7 +1760,23 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </button>
           </div>
 
-          <div className="shrink-0 pt-3">
+          <div className="shrink-0 pt-3 space-y-2">
+            {suggestedFixedExpenses.some((f) => f.checked) && (
+              <div className="flex items-center justify-between px-1 text-xs text-[var(--text-secondary)]">
+                <span>
+                  {suggestedFixedExpenses.filter((f) => f.checked).length} valda fasta utgifter
+                </span>
+                <span className="font-display font-semibold text-[var(--text-primary)] tabular-nums">
+                  -
+                  {formatKr(
+                    suggestedFixedExpenses
+                      .filter((f) => f.checked)
+                      .reduce((sum, f) => sum + (Number(f.amount) || 0), 0)
+                  )}
+                  /mån
+                </span>
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSaveSuggestedFixed}
@@ -1853,7 +1896,23 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             </button>
           </div>
 
-          <div className="shrink-0 pt-3">
+          <div className="shrink-0 pt-3 space-y-2">
+            {suggestedIncomes.some((i) => i.checked) && (
+              <div className="flex items-center justify-between px-1 text-xs text-[var(--text-secondary)]">
+                <span>
+                  {suggestedIncomes.filter((i) => i.checked).length} valda inkomster
+                </span>
+                <span className="font-display font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  +
+                  {formatKr(
+                    suggestedIncomes
+                      .filter((i) => i.checked)
+                      .reduce((sum, i) => sum + (Number(i.amount) || 0), 0)
+                  )}
+                  /mån
+                </span>
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSaveSuggestedIncomes}
@@ -1917,7 +1976,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 role="switch"
                 aria-checked={weekendHandling === 'before'}
                 onClick={() =>
-                  setWeekendHandling((prev) => (prev === 'before' ? 'exact' : 'before'))
+                  setWeekendHandling((prev) => (prev === 'before' ? 'none' : 'before'))
                 }
                 className={`ui-switch ${weekendHandling === 'before' ? 'ui-switch-on' : 'ui-switch-off'}`}
               >
@@ -2367,6 +2426,59 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       <CaretRight size={12} className="text-[var(--text-muted)]" />
                     </span>
                   </button>
+
+                  {sheetEditor.type === 'fixed' && (
+                    <div className="ui-row">
+                      <div className="min-w-0">
+                        <span className="text-[var(--text-muted)] block">Dela utgift (50 %)</span>
+                        {sheetEditor.isShared && (
+                          <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block">
+                            Din andel: {formatKr(Number(sheetEditor.amount) || 0)}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={Boolean(sheetEditor.isShared)}
+                        onClick={() =>
+                          setSheetEditor((prev) => {
+                            if (!prev) return prev;
+                            const nextShared = !prev.isShared;
+                            const currAmt = Math.max(0, Math.round(Number(prev.amount) || 0));
+                            if (nextShared) {
+                              const half = Math.max(1, Math.round(currAmt / 2));
+                              return {
+                                ...prev,
+                                isShared: true,
+                                fullAmount: String(currAmt),
+                                amount: String(half),
+                              };
+                            } else {
+                              const restored = Math.max(
+                                currAmt,
+                                Math.round(Number(prev.fullAmount) || currAmt * 2)
+                              );
+                              return {
+                                ...prev,
+                                isShared: false,
+                                amount: String(restored),
+                              };
+                            }
+                          })
+                        }
+                        className={`ui-switch ${
+                          sheetEditor.isShared ? 'ui-switch-on' : 'ui-switch-off'
+                        }`}
+                      >
+                        <span
+                          className={`ui-switch-thumb ${
+                            sheetEditor.isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Actions */}

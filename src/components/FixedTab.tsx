@@ -1,11 +1,20 @@
 import React, { useMemo } from 'react';
 import {
   Plus,
+  Sparkle,
+  Check,
+  CaretRight,
+  Users,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
-import { PeriodInfo } from '../utils/periodEngine';
+import {
+  PeriodInfo,
+  isDateInPeriod,
+  isDueDayPaidInPeriod,
+} from '../utils/periodEngine';
+import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
 interface FixedTabProps {
@@ -20,6 +29,7 @@ interface FixedTabProps {
   onSelectFixed: (exp: FixedExpenseItem) => void;
   onAddIncome?: () => void;
   onAddFixed?: () => void;
+  onOpenDiscover?: () => void;
   onDeleteIncome: (id: string) => void;
   onDeleteFixed: (id: string) => void;
   onUpdateFixed?: (exp: FixedExpenseItem) => void;
@@ -31,10 +41,12 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   fixedExpenses,
   totalIncome,
   totalFixedExpenses,
+  transactions = [],
   onSelectIncome,
   onSelectFixed,
   onAddIncome,
   onAddFixed,
+  onOpenDiscover,
 }) => {
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -47,6 +59,42 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   const sortedExpenses = useMemo(() => {
     return [...fixedExpenses].sort((a, b) => (a.dueDay || 27) - (b.dueDay || 27));
   }, [fixedExpenses]);
+
+  const periodMatches = useMemo(() => {
+    const periodTxs = transactions.filter((t) => isDateInPeriod(t.date, period));
+    return reconcilePeriodRecurringMatches(periodTxs, fixedExpenses, incomes);
+  }, [transactions, period, fixedExpenses, incomes]);
+
+  const isExpensePaid = (exp: FixedExpenseItem) => {
+    return (
+      periodMatches.matchedFixedIds.has(exp.id) ||
+      isDueDayPaidInPeriod(exp.dueDay || 27, period)
+    );
+  };
+
+  const isIncomeReceived = (inc: IncomeItem) => {
+    return (
+      periodMatches.matchedIncomeIds.has(inc.id) ||
+      isDueDayPaidInPeriod(inc.payday || 25, period)
+    );
+  };
+
+  const paidStats = useMemo(() => {
+    let paidCount = 0;
+    let remainingSum = 0;
+    for (const exp of fixedExpenses) {
+      if (isExpensePaid(exp)) {
+        paidCount += 1;
+      } else {
+        remainingSum += Number(exp.amount) || 0;
+      }
+    }
+    return {
+      paidCount,
+      totalCount: fixedExpenses.length,
+      remainingSum,
+    };
+  }, [fixedExpenses, periodMatches, period]);
 
   const netAfterFixed = totalIncome - totalFixedExpenses;
 
@@ -127,7 +175,53 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             })()}
           </div>
         )}
+
+        {paidStats.totalCount > 0 && (
+          <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 text-xs text-[var(--text-secondary)] tabular-nums">
+            <span className="flex items-center gap-1.5">
+              <Check size={13} weight="bold" className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>
+                {paidStats.paidCount} av {paidStats.totalCount} fasta utgifter betalda i perioden
+              </span>
+            </span>
+            <span className="font-medium text-[var(--text-primary)] shrink-0">
+              {paidStats.remainingSum > 0
+                ? `${formatKr(paidStats.remainingSum)} kvar`
+                : 'Alla dragna'}
+            </span>
+          </div>
+        )}
       </section>
+
+      {/* ============================================================== */}
+      {/* GENVÄG: UPPTÄCK FASTA KOSTNADER FRÅN BANKHISTORIK              */}
+      {/* ============================================================== */}
+      {onOpenDiscover && transactions.length > 0 && (
+        <button
+          type="button"
+          onClick={onOpenDiscover}
+          className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <Sparkle size={17} weight="fill" />
+            </div>
+            <div className="min-w-0">
+              <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
+                Upptäck fasta kostnader
+              </span>
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+                Hitta abonnemang och räkningar automatiskt från dina bankköp
+              </span>
+            </div>
+          </div>
+          <CaretRight
+            size={14}
+            weight="bold"
+            className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
+          />
+        </button>
+      )}
 
       {/* ============================================================== */}
       {/* SEKTION 1: INKOMSTER                                           */}
@@ -153,6 +247,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           {sortedIncomes.length > 0 ? (
             sortedIncomes.map((inc) => {
               const catLabel = inc.category || 'Lön';
+              const received = isIncomeReceived(inc);
 
               return (
                 <button
@@ -187,8 +282,14 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     <span className="ui-row-amount-income">
                       +{formatKr(inc.amount)}
                     </span>
-                    <span className="ui-row-meta">
-                      Den {inc.payday}:e
+                    <span className="ui-row-meta flex items-center justify-end gap-1.5">
+                      <span>Den {inc.payday}:e</span>
+                      {received && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
+                          <Check size={9} weight="bold" />
+                          <span>Utbetald</span>
+                        </span>
+                      )}
                     </span>
                   </div>
                 </button>
@@ -239,48 +340,63 @@ export const FixedTab: React.FC<FixedTabProps> = ({
 
         <div className="ui-list-card">
           {sortedExpenses.length > 0 ? (
-            sortedExpenses.map((exp) => (
-              <button
-                key={exp.id}
-                type="button"
-                onClick={() => onSelectFixed(exp)}
-                className="ui-tx-row"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <ItemLogo
-                    name={exp.name}
-                    category={exp.category}
-                    logoUrl={exp.logo}
-                    size="md"
-                    isRecurring={true}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <span className="ui-row-title">
-                      {exp.name}
-                    </span>
-                    <span className="ui-row-subtitle flex items-center gap-1">
-                      <CategoryIcon
-                        category={exp.category || 'Räkningar'}
-                        size={11}
-                        className="shrink-0 text-[var(--text-secondary)]"
-                      />
-                      <span className="truncate">
-                        {exp.category || 'Räkningar'}
+            sortedExpenses.map((exp) => {
+              const paid = isExpensePaid(exp);
+              return (
+                <button
+                  key={exp.id}
+                  type="button"
+                  onClick={() => onSelectFixed(exp)}
+                  className="ui-tx-row"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <ItemLogo
+                      name={exp.name}
+                      category={exp.category}
+                      logoUrl={exp.logo}
+                      size="md"
+                      isRecurring={true}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <span className="ui-row-title flex items-center gap-1.5">
+                        <span className="truncate">{exp.name}</span>
+                        {exp.isShared && (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-indigo-500/12 text-indigo-600 dark:text-indigo-400 text-[10px] font-semibold shrink-0">
+                            <Users size={10} weight="bold" />
+                            <span>Delad</span>
+                          </span>
+                        )}
                       </span>
+                      <span className="ui-row-subtitle flex items-center gap-1">
+                        <CategoryIcon
+                          category={exp.category || 'Räkningar'}
+                          size={11}
+                          className="shrink-0 text-[var(--text-secondary)]"
+                        />
+                        <span className="truncate">
+                          {exp.category || 'Räkningar'}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <span className="ui-row-amount">
+                      -{formatKr(exp.amount)}
+                    </span>
+                    <span className="ui-row-meta flex items-center justify-end gap-1.5">
+                      <span>Den {exp.dueDay}:e</span>
+                      {paid && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
+                          <Check size={9} weight="bold" />
+                          <span>Betald</span>
+                        </span>
+                      )}
                     </span>
                   </div>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="ui-row-amount">
-                    -{formatKr(exp.amount)}
-                  </span>
-                  <span className="ui-row-meta">
-                    Den {exp.dueDay}:e
-                  </span>
-                </div>
-              </button>
-            ))
+                </button>
+              );
+            })
           ) : (
             <div className="py-9 px-4 text-center">
               <EmptyClusterArtwork variant="fixed" />

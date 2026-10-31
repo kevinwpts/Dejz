@@ -875,6 +875,31 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         )}
       </section>
 
+      {/* Dedikerat kort för Sparat & investerat i perioden (exkluderat från konsumtion) */}
+      {savingsTransactions.length > 0 && (
+        <section className="rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <CategoryIcon category="Sparande" size={17} />
+            </div>
+            <div className="min-w-0">
+              <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
+                Sparat & investerat i perioden
+              </span>
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+                {savingsTransactions.length}{' '}
+                {savingsTransactions.length === 1 ? 'överföring' : 'överföringar'} · Räknas ej som konsumtion
+              </span>
+            </div>
+          </div>
+          <span className="font-display font-bold text-sm sm:text-[15px] text-emerald-600 dark:text-emerald-400 tabular-nums shrink-0">
+            {formatKr(
+              savingsTransactions.reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0)
+            )}
+          </span>
+        </section>
+      )}
+
       {/* Sektion 2: Kategorier (Inline Dropdown / Accordion utan nästlade kort) */}
       <section className="ui-list-card px-0">
         {categoryBreakdown.length > 0 ? (
@@ -955,6 +980,23 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <div className="overflow-hidden">
                       {isExpanded && (
                         <div className="divide-y divide-[var(--border-subtle)]">
+                          {item.items.length > 0 && (
+                            <div className="pl-7 sm:pl-9 pr-4 sm:pr-5 py-2 flex items-center justify-between text-[11px] text-[var(--text-secondary)] tabular-nums bg-[var(--surface-color)]/50">
+                              <span>
+                                {item.items.length}{' '}
+                                {item.isIncomeCategory
+                                  ? item.items.length === 1
+                                    ? 'inbetalning'
+                                    : 'inbetalningar'
+                                  : item.items.length === 1
+                                  ? 'post'
+                                  : 'poster'}
+                              </span>
+                              <span>
+                                Snitt {formatKr(item.amount / Math.max(1, item.items.length))}
+                              </span>
+                            </div>
+                          )}
                           {item.items.map((subItem: any, idx: number) => {
                             const isIncome = subItem.type === 'income';
                             const itemName = subItem.title || subItem.name;
