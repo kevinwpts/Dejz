@@ -7,6 +7,7 @@ import {
   Trash,
   Check,
   CaretLeft,
+  CaretRight,
   ArrowRight,
   MagnifyingGlass,
   ImageSquare,
@@ -41,7 +42,61 @@ interface SavingsGoalsViewProps {
   totalBalance?: number;
 }
 
-type GoalWizardStep = 1 | 2 | 3 | 4;
+type GoalWizardStep = 'edit-hub' | 1 | 2 | 3 | 4 | 5;
+
+function inferArtworkFromGoalName(rawName: string): string {
+  const q = rawName.trim().toLowerCase();
+  if (!q) return 'piggy';
+
+  if (
+    /hus|lägenhet|bostad|kontantinsats|hem|renovering|stuga|villa|radhus|soffa|möbler/.test(q)
+  ) {
+    return 'house';
+  }
+  if (
+    /semester|sol|strand|bad|sommarresa|spanien|grekland|italien|mallorca|kreta|cypern|thailand/.test(
+      q
+    )
+  ) {
+    return 'beach';
+  }
+  if (
+    /resa|utlandsresa|flyg|världen|äventyr|japan|usa|new york|london|paris|weekend|tåg/.test(q)
+  ) {
+    return 'globe';
+  }
+  if (/kassaskåp|trygghet|pension|nödfond|säkerhet|skatt/.test(q)) {
+    return 'safe';
+  }
+  if (/bröllop|fest|födelsedag|kalas|fira|jubileum|student|examen|konsert/.test(q)) {
+    return 'celebration';
+  }
+  if (/jul|julklapp|nyår|midsommar|högtid|framtid|kalender|vinter/.test(q)) {
+    return 'calendar';
+  }
+  if (
+    /shopping|kläder|klocka|väska|skor|mode|present|dator|macbook|iphone|telefon|mobil|kamera|bil|mc|cykel/.test(
+      q
+    )
+  ) {
+    return 'shopping';
+  }
+
+  for (const art of GOAL_ARTWORKS) {
+    if (art.keywords.some((kw) => q.includes(kw.toLowerCase()))) {
+      return art.id;
+    }
+  }
+  return 'piggy';
+}
+
+function formatInputThousands(rawDigits: string): string {
+  const digits = rawDigits.replace(/[^\d]/g, '');
+  if (!digits) return '';
+  const num = Number(digits);
+  if (!Number.isFinite(num)) return '';
+  return new Intl.NumberFormat('sv-SE').format(num);
+}
 
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   onGoalsChanged,
@@ -64,6 +119,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [goalLinkedAccountId, setGoalLinkedAccountId] = useState<string | undefined>(undefined);
   const [goalArtworkId, setGoalArtworkId] = useState<string>('piggy');
   const [goalCustomImage, setGoalCustomImage] = useState<string | undefined>(undefined);
+  const [hasManuallyPickedArtwork, setHasManuallyPickedArtwork] = useState(false);
   const [artworkSearch, setArtworkSearch] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -154,6 +210,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalLinkedAccountId(undefined);
     setGoalArtworkId('piggy');
     setGoalCustomImage(undefined);
+    setHasManuallyPickedArtwork(false);
     setArtworkSearch('');
     setSlideDir('forward');
     setWizardStep(1);
@@ -168,9 +225,10 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalLinkedAccountId(goal.linkedAccountId);
     setGoalArtworkId(goal.artworkId || 'piggy');
     setGoalCustomImage(goal.customImageUrl);
+    setHasManuallyPickedArtwork(true);
     setArtworkSearch('');
     setSlideDir('forward');
-    setWizardStep(1);
+    setWizardStep('edit-hub');
     setIsGoalModalOpen(true);
   };
 
@@ -180,6 +238,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     try {
       const dataUrl = await compressImageFileToDataUrl(file, 640, 0.82);
       setGoalCustomImage(dataUrl);
+      setHasManuallyPickedArtwork(true);
     } catch {
       // ignore
     }
@@ -699,13 +758,97 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   }
 
   // ============================================================================
-  // ONBOARDING-STYLE STEP-BY-STEP GOAL WIZARD (Steps 1 -> 2 -> 3 -> 4)
+  // ONBOARDING-STYLE STEP-BY-STEP GOAL WIZARD + DIRECT EDIT HUB
   // ============================================================================
   function renderGoalModal() {
     if (!isGoalModalOpen || typeof document === 'undefined') return null;
 
+    const activeTheme = getGoalArtworkTheme(goalArtworkId);
     const pageAnimClass =
       slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
+
+    const matchedLinkedAccount = goalLinkedAccountId
+      ? accounts.find((a) => a.id === goalLinkedAccountId)
+      : undefined;
+
+    const previewSavedAmount =
+      goalLinkedAccountId === '__TOTAL__'
+        ? effectiveTotalBalance
+        : matchedLinkedAccount
+        ? Math.max(0, Math.round(Number(matchedLinkedAccount.balance) || 0))
+        : Math.max(0, Math.round(Number(goalCurrentInput) || 0));
+
+    const previewTargetAmount = Math.max(0, Math.round(Number(goalTargetInput) || 0));
+    const previewPct =
+      previewTargetAmount > 0
+        ? Math.min(100, Math.round((previewSavedAmount / previewTargetAmount) * 100))
+        : 0;
+
+    const totalStepsForCreate = !goalLinkedAccountId ? 5 : 4;
+    const progressWidthClass =
+      wizardStep === 1
+        ? 'w-1/4'
+        : wizardStep === 2
+        ? 'w-2/4'
+        : wizardStep === 3
+        ? 'w-3/4'
+        : wizardStep === 4
+        ? totalStepsForCreate === 5
+          ? 'w-4/5'
+          : 'w-full'
+        : 'w-full';
+
+    const handleBackNavigation = () => {
+      if (editingGoalId) {
+        if (wizardStep === 'edit-hub') {
+          setIsGoalModalOpen(false);
+        } else if (wizardStep === 5) {
+          navigateWizardStep(4, 'back');
+        } else {
+          navigateWizardStep('edit-hub', 'back');
+        }
+        return;
+      }
+
+      if (wizardStep === 5) {
+        navigateWizardStep(4, 'back');
+      } else if (typeof wizardStep === 'number' && wizardStep > 1) {
+        navigateWizardStep((wizardStep - 1) as GoalWizardStep, 'back');
+      } else {
+        setIsGoalModalOpen(false);
+      }
+    };
+
+    const renderGoalContextPill = (showTarget = false) => (
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] max-w-full">
+        <div
+          className="w-5 h-5 rounded-full overflow-hidden relative shrink-0"
+          style={{
+            backgroundColor: goalCustomImage ? undefined : activeTheme.tileBg,
+          }}
+        >
+          {goalCustomImage ? (
+            <img
+              src={goalCustomImage}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-5 h-5">
+              <GoalArtworkIllustration artworkId={goalArtworkId} />
+            </div>
+          )}
+        </div>
+        <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+          {goalNameInput.trim() || 'Nytt sparmål'}
+        </span>
+        {showTarget && previewTargetAmount > 0 && (
+          <span className="text-xs text-[var(--text-muted)] tabular-nums shrink-0">
+            · {formatKr(previewTargetAmount)}
+          </span>
+        )}
+      </div>
+    );
 
     return createPortal(
       <div className="fixed inset-0 z-[200] bg-[var(--bg-color)] text-[var(--text-primary)]">
@@ -723,13 +866,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             <div className="flex items-center justify-between h-9">
               <button
                 type="button"
-                onClick={() => {
-                  if (wizardStep > 1) {
-                    navigateWizardStep((wizardStep - 1) as GoalWizardStep, 'back');
-                  } else {
-                    setIsGoalModalOpen(false);
-                  }
-                }}
+                onClick={handleBackNavigation}
                 className="p-1.5 -ml-1.5 text-[var(--text-primary)] flex items-center justify-center hover:opacity-70 active:scale-95 transition-all cursor-pointer"
                 aria-label="Tillbaka"
               >
@@ -759,21 +896,155 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               </div>
             </div>
 
-            {/* En enda lång sammanhängande progress-bar utan stegtext */}
-            <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-              <div
-                className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${
-                  wizardStep === 1
-                    ? 'w-1/4'
-                    : wizardStep === 2
-                    ? 'w-2/4'
-                    : wizardStep === 3
-                    ? 'w-3/4'
-                    : 'w-full'
-                }`}
-              />
-            </div>
+            {/* En enda lång sammanhängande progress-bar vid skapande */}
+            {wizardStep !== 'edit-hub' && !editingGoalId && (
+              <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+                <div
+                  className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${progressWidthClass}`}
+                />
+              </div>
+            )}
           </header>
+
+          {/* ============================================================== */}
+          {/* EDIT HUB: DIREKTÖVERSIKT VID REDIGERING AV BEFINTLIGT SPARMÅL  */}
+          {/* ============================================================== */}
+          {wizardStep === 'edit-hub' && (
+            <div
+              key="goal-edit-hub"
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <div className="shrink-0 pt-4 pb-3">
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Redigera sparmål
+                </h1>
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 pr-0.5">
+                {/* Live Hero Preview Card */}
+                <button
+                  type="button"
+                  onClick={() => navigateWizardStep(2, 'forward')}
+                  className="w-full relative rounded-3xl overflow-hidden p-5 min-h-[136px] flex flex-col justify-between text-left text-white shadow-sm cursor-pointer group"
+                  style={{
+                    background: goalCustomImage ? '#111827' : activeTheme.heroBg,
+                  }}
+                >
+                  {goalCustomImage ? (
+                    <>
+                      <img
+                        src={goalCustomImage}
+                        alt={goalNameInput}
+                        className="absolute inset-0 w-full h-full object-cover opacity-55"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20" />
+                    </>
+                  ) : (
+                    <div
+                      className="absolute -right-8 top-1 w-36 h-36 pointer-events-none select-none opacity-95 transition-transform duration-200 group-hover:scale-105"
+                      aria-hidden="true"
+                    >
+                      <GoalArtworkIllustration artworkId={goalArtworkId} />
+                    </div>
+                  )}
+
+                  <div className="relative z-10 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-[11px] font-medium text-white/90">
+                      <ImageSquare size={13} weight="bold" />
+                      <span>Byt bild</span>
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 mt-5 space-y-2">
+                    <div className="max-w-[68%]">
+                      <span className="text-xs font-medium text-white/90 block truncate">
+                        {goalNameInput || 'Mitt sparmål'}
+                      </span>
+                      <span className="font-display font-bold text-2xl text-white tabular-nums tracking-tight block">
+                        {formatKr(previewSavedAmount)}
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-black/30 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${previewPct}%`,
+                          backgroundColor: activeTheme.progressColor,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </button>
+
+                {/* Klickbara rader för att hoppa direkt till önskad del */}
+                <div className="rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => navigateWizardStep(1, 'forward')}
+                    className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
+                        Namn på mål
+                      </span>
+                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate mt-0.5">
+                        {goalNameInput || 'Ange namn'}
+                      </span>
+                    </div>
+                    <CaretRight size={15} className="text-[var(--text-muted)] shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigateWizardStep(3, 'forward')}
+                    className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
+                        Målbelopp
+                      </span>
+                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums block mt-0.5">
+                        {formatKr(previewTargetAmount)}
+                      </span>
+                    </div>
+                    <CaretRight size={15} className="text-[var(--text-muted)] shrink-0" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigateWizardStep(4, 'forward')}
+                    className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  >
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
+                        Hur sparandet följs
+                      </span>
+                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate mt-0.5">
+                        {goalLinkedAccountId === '__TOTAL__'
+                          ? `Totalsaldo (${formatKr(effectiveTotalBalance)})`
+                          : matchedLinkedAccount
+                          ? `${matchedLinkedAccount.name} (${formatKr(previewSavedAmount)})`
+                          : `Eget valt belopp (${formatKr(previewSavedAmount)})`}
+                      </span>
+                    </div>
+                    <CaretRight size={15} className="text-[var(--text-muted)] shrink-0" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="shrink-0 pt-3">
+                <button
+                  type="button"
+                  disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
+                  onClick={handleSaveGoal}
+                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                >
+                  <Check size={16} weight="bold" />
+                  <span>Spara ändringar</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* ============================================================== */}
           {/* STEG 1: VAD SPARAR DU TILL?                                    */}
@@ -784,6 +1055,13 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!goalNameInput.trim()) return;
+                if (editingGoalId) {
+                  navigateWizardStep('edit-hub', 'back');
+                  return;
+                }
+                if (!hasManuallyPickedArtwork && !goalCustomImage) {
+                  setGoalArtworkId(inferArtworkFromGoalName(goalNameInput));
+                }
                 navigateWizardStep(2, 'forward');
               }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
@@ -814,29 +1092,74 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   disabled={!goalNameInput.trim()}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
                 >
-                  <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
+                  {editingGoalId ? (
+                    <>
+                      <Check size={16} weight="bold" />
+                      <span>Klar</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Fortsätt</span>
+                      <ArrowRight size={16} weight="bold" />
+                    </>
+                  )}
                 </button>
               </div>
             </form>
           )}
 
           {/* ============================================================== */}
-          {/* STEG 2: VÄLJ BILD TILL DITT MÅL (Sök + 3x3 grid som Onboarding)*/}
+          {/* STEG 2: VÄLJ BILD TILL DITT MÅL (Live-kort + Sök + 3x3 grid)   */}
           {/* ============================================================== */}
           {wizardStep === 2 && (
             <div
               key="goal-step-2"
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-3">
+              <div className="shrink-0 pt-5 pb-2">
                 <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                   Välj bild till ditt mål
                 </h1>
               </div>
 
-              <div className="flex-1 min-h-0 flex flex-col justify-center space-y-3 py-1">
-                {/* Sökfält direkt på samma sida */}
+              {/* Fast topp-ankrad yta så sökfältet aldrig hoppar */}
+              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 py-1 pr-0.5">
+                {/* Live förhandsvisning av målkortet med namnet från Steg 1 */}
+                <div
+                  className="relative rounded-2xl overflow-hidden px-4 py-3.5 min-h-[82px] flex items-center justify-between text-white shadow-sm transition-colors duration-200"
+                  style={{
+                    background: goalCustomImage ? '#111827' : activeTheme.heroBg,
+                  }}
+                >
+                  {goalCustomImage ? (
+                    <>
+                      <img
+                        src={goalCustomImage}
+                        alt={goalNameInput}
+                        className="absolute inset-0 w-full h-full object-cover opacity-55"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/20" />
+                    </>
+                  ) : (
+                    <div
+                      className="absolute -right-5 -top-2 w-24 h-24 pointer-events-none select-none opacity-95"
+                      aria-hidden="true"
+                    >
+                      <GoalArtworkIllustration artworkId={goalArtworkId} />
+                    </div>
+                  )}
+
+                  <div className="relative z-10 min-w-0 max-w-[68%]">
+                    <span className="text-[11px] font-medium text-white/75 block">
+                      Förhandsvisning
+                    </span>
+                    <span className="font-display font-bold text-base sm:text-lg text-white block truncate mt-0.5">
+                      {goalNameInput.trim() || 'Mitt sparmål'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sökfält (alltid fast på samma plats) */}
                 <div className="relative shrink-0">
                   <MagnifyingGlass
                     size={15}
@@ -862,7 +1185,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 </div>
 
                 {/* 3x3 Grid: Tile 1 = Ladda upp bild, Tiles 2..9 = Illustrationer */}
-                <div className="grid grid-cols-3 gap-2.5 shrink-0">
+                <div className="grid grid-cols-3 gap-2.5 content-start">
                   <button
                     type="button"
                     onClick={() => galleryInputRef.current?.click()}
@@ -909,6 +1232,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                         onClick={() => {
                           setGoalCustomImage(undefined);
                           setGoalArtworkId(art.id);
+                          setHasManuallyPickedArtwork(true);
                         }}
                         title={art.label}
                         style={{ backgroundColor: art.tileBg }}
@@ -933,18 +1257,31 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               <div className="shrink-0 pt-3">
                 <button
                   type="button"
-                  onClick={() => navigateWizardStep(3, 'forward')}
+                  onClick={() =>
+                    editingGoalId
+                      ? navigateWizardStep('edit-hub', 'back')
+                      : navigateWizardStep(3, 'forward')
+                  }
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                 >
-                  <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
+                  {editingGoalId ? (
+                    <>
+                      <Check size={16} weight="bold" />
+                      <span>Klar</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Fortsätt</span>
+                      <ArrowRight size={16} weight="bold" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           )}
 
           {/* ============================================================== */}
-          {/* STEG 3: VAD ÄR DITT MÅLBELOPP?                                 */}
+          {/* STEG 3: VAD ÄR DITT MÅLBELOPP? (Fintech-siffra utan ruta)      */}
           {/* ============================================================== */}
           {wizardStep === 3 && (
             <form
@@ -952,34 +1289,47 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!(Number(goalTargetInput) > 0)) return;
+                if (editingGoalId) {
+                  navigateWizardStep('edit-hub', 'back');
+                  return;
+                }
                 navigateWizardStep(4, 'forward');
               }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-4">
+              <div className="shrink-0 pt-6 pb-2 space-y-3">
+                {renderGoalContextPill(false)}
                 <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                   Vad är ditt målbelopp?
                 </h1>
               </div>
 
-              <div className="my-auto py-4">
-                <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors flex items-baseline justify-between gap-3">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoFocus
-                    required
-                    placeholder="10 000"
-                    value={goalTargetInput}
-                    onChange={(e) =>
-                      setGoalTargetInput(e.target.value.replace(/[^\d]/g, ''))
-                    }
-                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
-                  />
-                  <span className="font-display font-semibold text-base text-[var(--text-muted)] shrink-0">
-                    kr
-                  </span>
-                </div>
+              <div className="my-auto py-6 flex flex-col items-center justify-center">
+                <label className="w-full flex flex-col items-center justify-center cursor-text">
+                  <div className="flex items-baseline justify-center gap-2 w-full">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoFocus
+                      required
+                      placeholder="10 000"
+                      value={formatInputThousands(goalTargetInput)}
+                      onChange={(e) =>
+                        setGoalTargetInput(e.target.value.replace(/[^\d]/g, ''))
+                      }
+                      style={{
+                        width: `${Math.max(
+                          5,
+                          (formatInputThousands(goalTargetInput) || '10 000').length
+                        )}ch`,
+                      }}
+                      className="max-w-[80%] bg-transparent border-0 p-0 text-center font-display font-bold text-4xl sm:text-5xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/35 tabular-nums tracking-tight focus:outline-none"
+                    />
+                    <span className="font-display font-semibold text-xl sm:text-2xl text-[var(--text-muted)] shrink-0">
+                      kr
+                    </span>
+                  </div>
+                </label>
               </div>
 
               <div className="shrink-0 pt-3">
@@ -988,86 +1338,67 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   disabled={!(Number(goalTargetInput) > 0)}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
                 >
-                  <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
+                  {editingGoalId ? (
+                    <>
+                      <Check size={16} weight="bold" />
+                      <span>Klar</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Fortsätt</span>
+                      <ArrowRight size={16} weight="bold" />
+                    </>
+                  )}
                 </button>
               </div>
             </form>
           )}
 
           {/* ============================================================== */}
-          {/* STEG 4: HUR VILL DU FÖLJA SPARANDET? (Kontoval som Onboarding) */}
+          {/* STEG 4: HUR VILL DU FÖLJA SPARANDET? (Rena valkort)            */}
           {/* ============================================================== */}
           {wizardStep === 4 && (
             <div
               key="goal-step-4"
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-4">
+              <div className="shrink-0 pt-6 pb-4 space-y-3">
+                {renderGoalContextPill(true)}
                 <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
                   Hur vill du följa sparandet?
                 </h1>
               </div>
 
-              {/* Scrollbar lista i samma stil som Välj konton i Onboarding */}
+              {/* Rena valkort utan inbäddade formulärfält */}
               <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
                 {/* Alternativ 1: Eget valt belopp */}
-                <div
-                  className={`rounded-2xl border transition-all ${
+                <button
+                  type="button"
+                  onClick={() => setGoalLinkedAccountId(undefined)}
+                  className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
                     !goalLinkedAccountId
                       ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
                       : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
                   }`}
                 >
-                  <button
-                    type="button"
-                    onClick={() => setGoalLinkedAccountId(undefined)}
-                    className="w-full p-4 flex items-center gap-3.5 text-left cursor-pointer"
+                  <div
+                    className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                      !goalLinkedAccountId
+                        ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                        : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                    }`}
                   >
-                    <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
-                        !goalLinkedAccountId
-                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                      }`}
-                    >
-                      {!goalLinkedAccountId && <Check size={12} weight="bold" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
-                        Eget valt belopp
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)] block mt-0.5">
-                        Fyll i startbelopp och lägg till själv
-                      </span>
-                    </div>
-                  </button>
-
-                  {!goalLinkedAccountId && (
-                    <div className="px-4 pb-4 pt-2 border-t border-[var(--border-subtle)]">
-                      <label className="block cursor-text">
-                        <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
-                          Sparat hittills
-                        </span>
-                        <div className="flex items-baseline justify-between gap-2">
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            value={goalCurrentInput}
-                            onChange={(e) =>
-                              setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
-                            }
-                            placeholder="0"
-                            className="w-full bg-transparent border-0 p-0 font-display font-bold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
-                          />
-                          <span className="font-display font-semibold text-xs text-[var(--text-muted)] shrink-0">
-                            kr
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-                  )}
-                </div>
+                    {!goalLinkedAccountId && <Check size={12} weight="bold" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                      Eget valt belopp
+                    </span>
+                    <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+                      Välj startbelopp i nästa steg och uppdatera själv
+                    </span>
+                  </div>
+                </button>
 
                 {/* Alternativ 2: Totalsaldo */}
                 {(accounts.length > 0 || effectiveTotalBalance > 0) && (
@@ -1173,17 +1504,100 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
               {/* Pinnad knapp */}
               <div className="shrink-0 pt-3">
+                {!goalLinkedAccountId ? (
+                  <button
+                    type="button"
+                    onClick={() => navigateWizardStep(5, 'forward')}
+                    className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                  >
+                    <span>Fortsätt</span>
+                    <ArrowRight size={16} weight="bold" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
+                    onClick={() => {
+                      if (editingGoalId) {
+                        navigateWizardStep('edit-hub', 'back');
+                      } else {
+                        handleSaveGoal();
+                      }
+                    }}
+                    className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                  >
+                    <Check size={16} weight="bold" />
+                    <span>{editingGoalId ? 'Klar' : 'Skapa sparmål'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* STEG 5: HUR MYCKET HAR DU SPARAT HITTILLS? (Vid eget belopp)   */}
+          {/* ============================================================== */}
+          {wizardStep === 5 && (
+            <form
+              key="goal-step-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (editingGoalId) {
+                  navigateWizardStep('edit-hub', 'back');
+                  return;
+                }
+                handleSaveGoal();
+              }}
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <div className="shrink-0 pt-6 pb-2 space-y-3">
+                {renderGoalContextPill(true)}
+                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+                  Hur mycket har du sparat hittills?
+                </h1>
+              </div>
+
+              <div className="my-auto py-6 flex flex-col items-center justify-center">
+                <label className="w-full flex flex-col items-center justify-center cursor-text">
+                  <div className="flex items-baseline justify-center gap-2 w-full">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoFocus
+                      placeholder="0"
+                      value={formatInputThousands(goalCurrentInput)}
+                      onChange={(e) =>
+                        setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
+                      }
+                      style={{
+                        width: `${Math.max(
+                          2,
+                          (formatInputThousands(goalCurrentInput) || '0').length
+                        )}ch`,
+                      }}
+                      className="max-w-[80%] bg-transparent border-0 p-0 text-center font-display font-bold text-4xl sm:text-5xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/35 tabular-nums tracking-tight focus:outline-none"
+                    />
+                    <span className="font-display font-semibold text-xl sm:text-2xl text-[var(--text-muted)] shrink-0">
+                      kr
+                    </span>
+                  </div>
+                  <span className="text-xs text-[var(--text-muted)] mt-3">
+                    Lämna på 0 kr om du börjar från noll
+                  </span>
+                </label>
+              </div>
+
+              <div className="shrink-0 pt-3">
                 <button
-                  type="button"
+                  type="submit"
                   disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
-                  onClick={handleSaveGoal}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                 >
                   <Check size={16} weight="bold" />
-                  <span>{editingGoalId ? 'Spara ändringar' : 'Skapa sparmål'}</span>
+                  <span>{editingGoalId ? 'Klar' : 'Skapa sparmål'}</span>
                 </button>
               </div>
-            </div>
+            </form>
           )}
 
           <ConfirmDialog
