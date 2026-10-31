@@ -477,13 +477,17 @@ export function reconcilePeriodRecurringMatches(
 ): {
   claimedFixedTxIds: Set<string>;
   matchedFixedTxByExpId: Map<string, TransactionItem>;
+  matchedFixedIds: Set<string>;
   claimedIncomeTxIds: Set<string>;
   matchedIncomeTxByIncId: Map<string, TransactionItem>;
+  matchedIncomeIds: Set<string>;
 } {
   const claimedFixedTxIds = new Set<string>();
   const matchedFixedTxByExpId = new Map<string, TransactionItem>();
+  const matchedFixedIds = new Set<string>();
   const claimedIncomeTxIds = new Set<string>();
   const matchedIncomeTxByIncId = new Map<string, TransactionItem>();
+  const matchedIncomeIds = new Set<string>();
 
   const expenseTxs = periodTransactions.filter((t) => t && !t.isExcluded && t.type !== 'income');
   const incomeTxs = periodTransactions.filter(
@@ -530,6 +534,7 @@ export function reconcilePeriodRecurringMatches(
     if (matchedFixedTxByExpId.has(pair.exp.id)) continue;
     if (claimedFixedTxIds.has(pair.tx.id)) continue;
     matchedFixedTxByExpId.set(pair.exp.id, pair.tx);
+    matchedFixedIds.add(pair.exp.id);
     claimedFixedTxIds.add(pair.tx.id);
   }
 
@@ -573,6 +578,7 @@ export function reconcilePeriodRecurringMatches(
     if (matchedIncomeTxByIncId.has(pair.inc.id)) continue;
     if (claimedIncomeTxIds.has(pair.tx.id)) continue;
     matchedIncomeTxByIncId.set(pair.inc.id, pair.tx);
+    matchedIncomeIds.add(pair.inc.id);
     claimedIncomeTxIds.add(pair.tx.id);
   }
 
@@ -586,8 +592,10 @@ export function reconcilePeriodRecurringMatches(
   return {
     claimedFixedTxIds,
     matchedFixedTxByExpId,
+    matchedFixedIds,
     claimedIncomeTxIds,
     matchedIncomeTxByIncId,
+    matchedIncomeIds,
   };
 }
 

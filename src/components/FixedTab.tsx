@@ -78,15 +78,19 @@ export const FixedTab: React.FC<FixedTabProps> = ({
 
   const isExpensePaid = (exp: FixedExpenseItem) => {
     return (
-      periodMatches.matchedFixedIds.has(exp.id) ||
-      isDueDayPaidInPeriod(exp.dueDay || 27, period)
+      Boolean(
+        periodMatches?.matchedFixedTxByExpId?.has(exp.id) ||
+          periodMatches?.matchedFixedIds?.has(exp.id)
+      ) || isDueDayPaidInPeriod(exp.dueDay || 27, period)
     );
   };
 
   const isIncomeReceived = (inc: IncomeItem) => {
     return (
-      periodMatches.matchedIncomeIds.has(inc.id) ||
-      isDueDayPaidInPeriod(inc.payday || 25, period)
+      Boolean(
+        periodMatches?.matchedIncomeTxByIncId?.has(inc.id) ||
+          periodMatches?.matchedIncomeIds?.has(inc.id)
+      ) || isDueDayPaidInPeriod(inc.payday || 25, period)
     );
   };
 
