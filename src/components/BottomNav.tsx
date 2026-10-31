@@ -61,12 +61,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       badge: undefined,
     },
     {
-      id: 'goals' as AppTab,
-      label: 'Sparmål & buffert',
-      icon: PiggyBank,
-      badge: goalsCount > 0 ? goalsCount : undefined,
-    },
-    {
       id: 'saved' as AppTab,
       label: 'Sparade köp',
       icon: Heart,
@@ -170,7 +164,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive = activeTab === tab.id && !isMenuOpen;
+            const isActive =
+              (activeTab === tab.id || (tab.id === 'home' && activeTab === 'goals')) &&
+              !isMenuOpen;
             return (
               <button
                 key={tab.id}

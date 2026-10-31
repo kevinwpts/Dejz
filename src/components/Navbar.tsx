@@ -11,6 +11,8 @@ interface NavbarProps {
   hasUnreadNotifications?: boolean;
   hideActions?: boolean;
   hideSearch?: boolean;
+  homeViewMode?: 'overview' | 'goals' | null;
+  onChangeHomeViewMode?: (mode: 'overview' | 'goals') => void;
   onBack?: (() => void) | null;
   onLogoClick?: () => void;
   onProfileClick: () => void;
@@ -27,6 +29,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   hasUnreadNotifications = false,
   hideActions = false,
   hideSearch = false,
+  homeViewMode = null,
+  onChangeHomeViewMode,
   onBack,
   onLogoClick,
   onProfileClick,
@@ -156,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             : 'translate-y-0 opacity-100'
         } ${isAtTop ? 'app-header-top' : 'app-header-scrolled'}`}
       >
-        <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-2">
           {/* Vänster: Tillbakaknapp + centrerad sidrubrik på undersidor, annars Profilbild */}
           {pageTitle ? (
             <>
@@ -179,7 +183,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onProfileClick}
               title={userName || userEmail || 'Profil & inställningar'}
               aria-label="Profil & inställningar"
-              className="flex items-center gap-2.5 py-1 pr-2 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group"
+              className="flex items-center gap-2.5 py-1 pr-1 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group shrink-0"
             >
               <span className="w-9 h-9 rounded-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
                 {userAvatar && !imgError ? (
@@ -198,6 +202,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </span>
             </button>
+          )}
+
+          {/* Mitten: Modern lägesväxlare (Översikt | Sparmål) på startsidan */}
+          {!pageTitle && homeViewMode && onChangeHomeViewMode && (
+            <div className="inline-flex items-center p-0.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)]">
+              <button
+                type="button"
+                onClick={() => onChangeHomeViewMode('overview')}
+                className={`px-3 py-1 rounded-full text-[12px] transition-all cursor-pointer ${
+                  homeViewMode === 'overview'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-normal'
+                }`}
+              >
+                Översikt
+              </button>
+              <button
+                type="button"
+                onClick={() => onChangeHomeViewMode('goals')}
+                className={`px-3 py-1 rounded-full text-[12px] transition-all cursor-pointer ${
+                  homeViewMode === 'goals'
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-normal'
+                }`}
+              >
+                Sparmål
+              </button>
+            </div>
           )}
 
           {/* Höger: Rena ikonknappar utan vit cirkelbakgrund (döljs på undersidor med pageTitle) */}

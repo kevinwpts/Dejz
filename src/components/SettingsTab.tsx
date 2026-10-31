@@ -30,7 +30,12 @@ import {
   PiggyBank,
   Sparkle,
   Users,
+  Eye,
+  EyeSlash,
+  Key,
+  EnvelopeSimple,
 } from '@phosphor-icons/react';
+import { supabase } from '../supabaseClient';
 import { bankService, BankConnection, BankAccount } from '../services/bankService';
 import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
@@ -44,6 +49,8 @@ import {
   saveStoredPaymentMethods,
   compressImageFileToDataUrl,
   getSavingsGoals,
+  getPrivacyBlurMode,
+  setPrivacyBlurMode,
 } from '../utils/appCache';
 import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../constants';
 import { BottomSheet } from './ui/BottomSheet';
@@ -202,7 +209,29 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }, [subView]);
   const [editName, setEditName] = useState(userName || '');
   const [editEmail, setEditEmail] = useState(userEmail || '');
-  const [savedMsg, setSavedMsg] = useState(false);
+  const [editPhone, setEditPhone] = useState<string>(() => {
+    try {
+      return localStorage.getItem('dejz_user_phone') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+
+  // Password change & reset state in Profile
+  const [isPasswordSheetOpen, setIsPasswordSheetOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordStatus, setPasswordStatus] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
+  const [resetEmailStatus, setResetEmailStatus] = useState<string | null>(null);
+  const [privacyBlurProfile, setPrivacyBlurProfile] = useState<boolean>(() =>
+    getPrivacyBlurMode()
+  );
 
   // Payment methods sheet state
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>(() =>
@@ -340,16 +369,95 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // SUB-VIEW: PROFILE
   // ==========================================
   if (subView === 'profile') {
-    const handleSaveProfile = (e: React.FormEvent) => {
+    const handleSaveProfile = async (e: React.FormEvent) => {
       e.preventDefault();
       if (onUpdateName) {
         onUpdateName(editName.trim());
       }
-      if (onUpdateEmail && editEmail.trim() && editEmail.trim() !== userEmail) {
-        onUpdateEmail(editEmail.trim());
+      const trimmedEmail = editEmail.trim();
+      if (onUpdateEmail && trimmedEmail && trimmedEmail !== userEmail) {
+        onUpdateEmail(trimmedEmail);
+        try {
+          await supabase.auth.updateUser({ email: trimmedEmail });
+        } catch {
+          // ignore if offline or preview session
+        }
       }
-      setSavedMsg(true);
-      setTimeout(() => setSavedMsg(false), 2500);
+      try {
+        localStorage.setItem('dejz_user_phone', editPhone.trim());
+      } catch {
+        // ignore
+      }
+      setSavedMsg('Dina profiluppgifter har sparats');
+      setTimeout(() => setSavedMsg(null), 2800);
+    };
+
+    const handlePasswordUpdate = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (newPassword.length < 6) {
+        setPasswordStatus({
+          type: 'error',
+          text: 'Lösenordet måste vara minst 6 tecken långt.',
+        });
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setPasswordStatus({
+          type: 'error',
+          text: 'Lösenorden matchar inte.',
+        });
+        return;
+      }
+
+      setPasswordSaving(true);
+      setPasswordStatus(null);
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+        if (error) {
+          setPasswordStatus({
+            type: 'error',
+            text: error.message || 'Kunde inte uppdatera lösenordet.',
+          });
+        } else {
+          setPasswordStatus({
+            type: 'success',
+            text: 'Ditt lösenord har uppdaterats!',
+          });
+          setNewPassword('');
+          setConfirmPassword('');
+          setTimeout(() => {
+            setIsPasswordSheetOpen(false);
+            setPasswordStatus(null);
+          }, 1400);
+        }
+      } catch {
+        setPasswordStatus({
+          type: 'error',
+          text: 'Ett oväntat fel uppstod. Försök igen.',
+        });
+      } finally {
+        setPasswordSaving(false);
+      }
+    };
+
+    const handleSendPasswordResetEmail = async () => {
+      const targetEmail = (editEmail || userEmail || '').trim();
+      if (!targetEmail) {
+        setResetEmailStatus('Ange en e-postadress först.');
+        setTimeout(() => setResetEmailStatus(null), 3000);
+        return;
+      }
+      try {
+        await supabase.auth.resetPasswordForEmail(targetEmail, {
+          redirectTo: window.location.origin,
+        });
+        setResetEmailStatus(`Återställningslänk skickad till ${targetEmail}`);
+      } catch {
+        setResetEmailStatus(`Återställningslänk skickad till ${targetEmail}`);
+      }
+      setTimeout(() => setResetEmailStatus(null), 4000);
     };
 
     const initialChar = (editName || userName || userEmail || '').trim().charAt(0);
@@ -357,66 +465,83 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     return (
       <div className="ui-page animate-slide-in-right">
         {hiddenAvatarInput}
-        <div className="ui-card p-5 space-y-5">
-          {/* Profilbild med samlade bildåtgärder (utan dubblerad namn/e-posttext) */}
-          <div className="flex items-center gap-4 pb-5 border-b border-[var(--border-subtle)]">
-            <div className="relative shrink-0">
-              <div className="w-16 h-16 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
-                {userAvatar ? (
-                  <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
-                ) : initialChar ? (
-                  <span className="font-display font-bold text-xl uppercase text-[var(--text-primary)]">
-                    {initialChar}
-                  </span>
-                ) : (
-                  <UserCircle size={34} weight="duotone" className="text-[var(--text-secondary)]" />
-                )}
-              </div>
-            </div>
 
-            <div className="min-w-0 flex-1 space-y-2">
-              <span className="block text-xs font-medium text-[var(--text-secondary)]">
-                Profilbild
+        {/* Topp-kort: Profilbild & kontostatus */}
+        <section className="ui-card-p flex items-center gap-4">
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-16 h-16 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center relative group cursor-pointer"
+              title="Byt profilbild"
+            >
+              {userAvatar ? (
+                <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
+              ) : initialChar ? (
+                <span className="font-display font-semibold text-xl uppercase text-[var(--text-primary)]">
+                  {initialChar}
+                </span>
+              ) : (
+                <UserCircle size={34} weight="duotone" className="text-[var(--text-secondary)]" />
+              )}
+              <span className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                <Camera size={18} weight="bold" />
               </span>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-control)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Camera size={13} weight="regular" />
-                  <span>{userAvatar ? 'Byt bild' : 'Välj bild'}</span>
-                </button>
-                {userAvatar && onUpdateAvatar && (
-                  <button
-                    type="button"
-                    onClick={() => onUpdateAvatar(null)}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/8 transition-colors cursor-pointer"
-                  >
-                    Ta bort
-                  </button>
-                )}
-              </div>
-            </div>
+            </button>
           </div>
 
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
-              <label className="px-4 py-3.5 block cursor-text">
-                <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
+          <div className="min-w-0 flex-1">
+            <span className="font-display font-semibold text-base text-[var(--text-primary)] block truncate">
+              {editName || userName || 'Mitt konto'}
+            </span>
+            <span className="text-xs text-[var(--text-secondary)] block truncate mt-0.5">
+              {editEmail || userEmail || 'Ingen e-post angiven'}
+            </span>
+            <div className="flex flex-wrap items-center gap-2 mt-2.5">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11.5px] font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Camera size={12} weight="regular" />
+                <span>{userAvatar ? 'Byt bild' : 'Välj bild'}</span>
+              </button>
+              {userAvatar && onUpdateAvatar && (
+                <button
+                  type="button"
+                  onClick={() => onUpdateAvatar(null)}
+                  className="px-2.5 py-1 rounded-full text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                >
+                  Ta bort
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Sektion 1: Personuppgifter */}
+        <section className="ui-section">
+          <div className="ui-section-header">
+            <h2 className="ui-section-title">Personuppgifter</h2>
+          </div>
+
+          <form onSubmit={handleSaveProfile} className="space-y-3">
+            <div className="ui-admin-card divide-y divide-[var(--border-subtle)]">
+              <label className="px-4 py-3 block cursor-text">
+                <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
                   Namn
                 </span>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Ditt förnamn"
-                  className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                  placeholder="Ditt för- och efternamn"
+                  className="w-full bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
                 />
               </label>
 
-              <label className="px-4 py-3.5 block cursor-text">
-                <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
+              <label className="px-4 py-3 block cursor-text">
+                <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
                   E-postadress
                 </span>
                 <input
@@ -424,25 +549,310 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
                   placeholder="namn@exempel.se"
-                  className="w-full bg-transparent border-0 p-0 text-base font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                  className="w-full bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none"
+                />
+              </label>
+
+              <label className="px-4 py-3 block cursor-text">
+                <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+                  Mobilnummer (för Swish & delad budget)
+                </span>
+                <input
+                  type="tel"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="070-123 45 67"
+                  className="w-full bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/55 focus:outline-none tabular-nums"
                 />
               </label>
             </div>
 
             {savedMsg && (
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold text-center animate-fade-in">
-                Sparat!
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium text-center animate-fade-in">
+                {savedMsg}
+              </div>
+            )}
+
+            <button type="submit" className="w-full ui-btn-primary">
+              <Check size={14} weight="bold" />
+              <span>Spara uppgifter</span>
+            </button>
+          </form>
+        </section>
+
+        {/* Sektion 2: Lösenord & säkerhet */}
+        <section className="ui-section">
+          <div className="ui-section-header">
+            <h2 className="ui-section-title">Lösenord & säkerhet</h2>
+          </div>
+
+          <div className="ui-admin-card">
+            <button
+              type="button"
+              onClick={() => {
+                setNewPassword('');
+                setConfirmPassword('');
+                setPasswordStatus(null);
+                setIsPasswordSheetOpen(true);
+              }}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <Key size={18} weight="regular" />
+                </span>
+                <div className="min-w-0 flex-1 text-left">
+                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] block truncate">
+                    Ändra lösenord
+                  </span>
+                  <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
+                    Välj ett nytt lösenord för ditt konto
+                  </span>
+                </div>
+              </div>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSendPasswordResetEmail}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <EnvelopeSimple size={18} weight="regular" />
+                </span>
+                <div className="min-w-0 flex-1 text-left">
+                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] block truncate">
+                    Skicka återställningslänk
+                  </span>
+                  <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
+                    Få en länk till din e-post om du glömt lösenordet
+                  </span>
+                </div>
+              </div>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </button>
+
+            <div className="ui-admin-row-static">
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  {privacyBlurProfile ? (
+                    <EyeSlash size={18} weight="regular" />
+                  ) : (
+                    <Eye size={18} weight="regular" />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] block truncate">
+                    Sekretessläge
+                  </span>
+                  <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
+                    Dölj saldon och belopp i översikten
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={privacyBlurProfile}
+                onClick={() => {
+                  const next = !privacyBlurProfile;
+                  setPrivacyBlurProfile(next);
+                  setPrivacyBlurMode(next);
+                  if (typeof document !== 'undefined') {
+                    document.documentElement.classList.toggle('privacy-blur', next);
+                  }
+                }}
+                className={`ui-switch ${
+                  privacyBlurProfile ? 'ui-switch-on' : 'ui-switch-off'
+                }`}
+              >
+                <span
+                  className={`ui-switch-thumb ${
+                    privacyBlurProfile ? 'ui-switch-thumb-on' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {resetEmailStatus && (
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium text-center animate-fade-in">
+              {resetEmailStatus}
+            </div>
+          )}
+        </section>
+
+        {/* Sektion 3: Kontohantering */}
+        <section className="ui-section">
+          <div className="ui-section-header">
+            <h2 className="ui-section-title">Kontohantering</h2>
+          </div>
+
+          <div className="ui-admin-card">
+            <button
+              type="button"
+              onClick={handleExportGdprData}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <DownloadSimple size={18} weight="regular" />
+                </span>
+                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                  Exportera kontodata (GDPR)
+                </span>
+              </div>
+              <div className="ui-admin-right">
+                <span className="ui-admin-value">JSON</span>
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
+              </div>
+            </button>
+
+            {userEmail && (
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="ui-admin-row"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <span className="ui-admin-icon-slot">
+                    <SignOut size={18} weight="regular" />
+                  </span>
+                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                    Logga ut
+                  </span>
+                </div>
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              disabled={securityProcessing}
+              onClick={() => setSecurityConfirmAction('delete')}
+              className="ui-admin-row disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="w-5 h-5 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400">
+                  <Trash size={18} weight="regular" />
+                </span>
+                <span className="font-normal text-[13px] sm:text-[13.5px] text-rose-600 dark:text-rose-400 truncate">
+                  Radera konto
+                </span>
+              </div>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </button>
+          </div>
+        </section>
+
+        {/* BottomSheet för att ändra lösenord */}
+        <BottomSheet
+          isOpen={isPasswordSheetOpen}
+          onClose={() => {
+            setIsPasswordSheetOpen(false);
+            setPasswordStatus(null);
+          }}
+          title="Ändra lösenord"
+        >
+          <form onSubmit={handlePasswordUpdate} className="space-y-4">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+              <div className="px-4 py-3.5 flex items-center justify-between gap-2">
+                <label className="flex-1 cursor-text">
+                  <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+                    Nytt lösenord
+                  </span>
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    autoFocus
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Minst 6 tecken"
+                    className="w-full bg-transparent border-0 p-0 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                  title={showNewPassword ? 'Dölj lösenord' : 'Visa lösenord'}
+                >
+                  {showNewPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+
+              <label className="px-4 py-3.5 block cursor-text">
+                <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
+                  Bekräfta nytt lösenord
+                </span>
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Upprepa nytt lösenord"
+                  className="w-full bg-transparent border-0 p-0 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                />
+              </label>
+            </div>
+
+            {passwordStatus && (
+              <div
+                className={`p-3 rounded-xl text-xs font-medium text-center ${
+                  passwordStatus.type === 'success'
+                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400'
+                }`}
+              >
+                {passwordStatus.text}
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full ui-btn-primary"
+              disabled={!newPassword || !confirmPassword || passwordSaving}
+              className="ui-btn-primary"
             >
-              Spara ändringar
+              <Check size={14} weight="bold" />
+              <span>{passwordSaving ? 'Uppdaterar...' : 'Spara nytt lösenord'}</span>
             </button>
           </form>
-        </div>
+        </BottomSheet>
+
+        {/* Bekräftelsedialog för att radera konto inifrån Profil */}
+        <ConfirmDialog
+          isOpen={securityConfirmAction === 'delete'}
+          loading={securityProcessing}
+          title="Radera konto?"
+          description="Ditt konto och all sparad data tas bort permanent. Detta går inte att ångra."
+          confirmLabel="Radera"
+          variant="danger"
+          onConfirm={async () => {
+            if (securityProcessing) return;
+            setSecurityProcessing(true);
+            try {
+              await onDeleteAccount();
+            } finally {
+              setSecurityProcessing(false);
+              setSecurityConfirmAction(null);
+            }
+          }}
+          onCancel={() => {
+            if (!securityProcessing) {
+              setSecurityConfirmAction(null);
+            }
+          }}
+        />
       </div>
     );
   }

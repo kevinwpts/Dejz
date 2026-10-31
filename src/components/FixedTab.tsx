@@ -22,7 +22,12 @@ import {
   getMemberKey,
 } from '../utils/householdSync';
 import { getSavingsGoals } from '../utils/appCache';
-import { getGoalArtworkTheme, EmptyClusterArtwork } from './ui/VisualArtwork';
+import {
+  getGoalArtworkTheme,
+  GoalArtworkIllustration,
+  EmptyClusterArtwork,
+  TiltedGoalsPromoArtwork,
+} from './ui/VisualArtwork';
 
 interface FixedTabProps {
   period: PeriodInfo;
@@ -491,9 +496,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             </button>
           </div>
 
-          <div className="ui-list-card">
-            {savingsGoals.length > 0 ? (
-              savingsGoals.map((goal) => {
+          {savingsGoals.length > 0 ? (
+            <div className="ui-list-card">
+              {savingsGoals.map((goal) => {
                 const pct =
                   goal.targetAmount > 0
                     ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
@@ -504,65 +509,71 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                     key={goal.id}
                     type="button"
                     onClick={onOpenGoals}
-                    className="ui-tx-row"
+                    className="w-full py-3.5 flex items-center gap-3.5 text-left hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white"
-                        style={{ backgroundColor: theme.heroBg }}
-                      >
-                        <PiggyBank size={18} weight="fill" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title truncate block">
-                          {goal.name}
-                        </span>
-                        <span className="ui-row-subtitle tabular-nums">
-                          {pct} % av {formatKr(goal.targetAmount)}
-                        </span>
-                      </div>
+                    <div
+                      className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
+                      style={{
+                        backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
+                      }}
+                    >
+                      {goal.customImageUrl ? (
+                        <img
+                          src={goal.customImageUrl}
+                          alt={goal.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute -right-2 top-0.5 w-10 h-10">
+                          <GoalArtworkIllustration artworkId={goal.artworkId} />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <span className="ui-row-amount text-emerald-600 dark:text-emerald-400">
-                        {formatKr(goal.currentAmount)}
-                      </span>
-                      <span className="ui-row-meta">
-                        {goal.monthlyContribution
-                          ? `+${formatKr(goal.monthlyContribution)}/mån`
-                          : 'Sparmål'}
-                      </span>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="ui-row-title truncate">{goal.name}</span>
+                        <span className="font-display font-semibold text-[13.5px] text-[var(--text-primary)] tabular-nums shrink-0">
+                          {formatKr(goal.currentAmount)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: theme.progressColor,
+                            }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                          {pct} %
+                        </span>
+                      </div>
                     </div>
                   </button>
                 );
-              })
-            ) : (
-              <button
-                type="button"
-                onClick={onOpenGoals}
-                className="w-full py-4 flex items-center justify-between gap-3 text-left cursor-pointer group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-                    <PiggyBank size={17} weight="regular" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
-                      Sätt upp ett sparmål eller buffert
-                    </span>
-                    <span className="text-[11px] text-[var(--text-secondary)] block truncate">
-                      Följ dina mål och månadssparande direkt i budgeten
-                    </span>
-                  </div>
-                </div>
-                <CaretRight
-                  size={14}
-                  weight="bold"
-                  className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
-                />
-              </button>
-            )}
-          </div>
+              })}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenGoals}
+              className="w-full ui-card-p flex items-center justify-between gap-4 text-left hover:opacity-95 active:scale-[0.99] transition-all cursor-pointer"
+            >
+              <div className="min-w-0 flex-1">
+                <span className="font-display font-medium text-sm text-[var(--text-primary)] leading-snug block">
+                  Spara till en resa, en pryl eller din nästa stora grej
+                </span>
+                <span className="text-xs text-[var(--text-secondary)] block mt-1">
+                  Skapa ditt första sparmål
+                </span>
+              </div>
+              <TiltedGoalsPromoArtwork />
+            </button>
+          )}
         </section>
       )}
     </div>

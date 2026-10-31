@@ -4114,13 +4114,17 @@ export const App: React.FC = () => {
         hasUnreadNotifications={false}
         hideActions={activeTab === 'settings'}
         hideSearch={activeTab === 'transactions'}
+        homeViewMode={
+          activeTab === 'home' ? 'overview' : activeTab === 'goals' ? 'goals' : null
+        }
+        onChangeHomeViewMode={(mode) => {
+          setActiveTab(mode === 'goals' ? 'goals' : 'home');
+        }}
         pageTitle={
           activeTab === 'settings'
             ? settingsSubView === 'main'
               ? 'Inställningar'
               : SETTINGS_SUBVIEW_TITLES[settingsSubView]
-            : activeTab === 'goals'
-            ? 'Sparmål & buffert'
             : activeTab === 'saved'
             ? 'Sparade köp'
             : activeTab === 'packages'
