@@ -1160,11 +1160,67 @@ export interface TransactionMetaPatch {
   linkedSwishTxId?: string;
 }
 
+const RECEIPTS_VAULT_KEY = 'dejz_receipts_vault_v1';
+
+interface ReceiptVaultEntry {
+  receiptUrl?: string;
+  receiptName?: string;
+  receipts?: { url: string; name: string }[];
+}
+
+function getReceiptsVaultMap(): Record<string, ReceiptVaultEntry> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(RECEIPTS_VAULT_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export function getTransactionMetaMap(): Record<string, TransactionMetaPatch> {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(TRANSACTION_META_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const baseMap: Record<string, TransactionMetaPatch> = raw ? JSON.parse(raw) : {};
+    const vaultMap = getReceiptsVaultMap();
+    for (const [id, rEntry] of Object.entries(vaultMap)) {
+      if (rEntry) {
+        baseMap[id] = { ...(baseMap[id] || {}), ...rEntry };
+      }
+    }
+    return baseMap;
+  } catch {
+    return {};
+  }
+}
+
+export function getLightweightTransactionMetaMapForSync(): Record<string, TransactionMetaPatch> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(TRANSACTION_META_KEY);
+    const baseMap: Record<string, TransactionMetaPatch> = raw ? JSON.parse(raw) : {};
+    const lightMap: Record<string, TransactionMetaPatch> = {};
+    for (const [id, entry] of Object.entries(baseMap)) {
+      if (!entry || typeof entry !== 'object') continue;
+      const { receiptUrl, receiptName, receipts, ...rest } = entry;
+      // Keep non-Base64 external receipt URLs if any, strip bulky inline data:image strings from general pref payload
+      const cleanEntry: TransactionMetaPatch = { ...rest };
+      if (receiptUrl && !receiptUrl.startsWith('data:')) {
+        cleanEntry.receiptUrl = receiptUrl;
+        cleanEntry.receiptName = receiptName;
+      }
+      if (Array.isArray(receipts)) {
+        const externalOnly = receipts.filter((r) => r?.url && !r.url.startsWith('data:'));
+        if (externalOnly.length > 0) {
+          cleanEntry.receipts = externalOnly;
+        }
+      }
+      if (Object.keys(cleanEntry).length > 0) {
+        lightMap[id] = cleanEntry;
+      }
+    }
+    return lightMap;
   } catch {
     return {};
   }
@@ -1173,10 +1229,75 @@ export function getTransactionMetaMap(): Record<string, TransactionMetaPatch> {
 export function saveTransactionMeta(id: string, patch: TransactionMetaPatch): void {
   if (typeof window === 'undefined' || !id) return;
   try {
-    const map = getTransactionMetaMap();
-    map[id] = { ...(map[id] || {}), ...patch };
-    localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(map));
+    const raw = localStorage.getItem(TRANSACTION_META_KEY);
+    const baseMap: Record<string, TransactionMetaPatch> = raw ? JSON.parse(raw) : {};
+    const merged: TransactionMetaPatch = { ...(baseMap[id] || {}), ...patch };
+
+    // Separate Base64 receipt attachments into RECEIPTS_VAULT_KEY so TRANSACTION_META_KEY stays fast & compact
+    if (
+      patch.receipts !== undefined ||
+      patch.receiptUrl !== undefined ||
+      patch.receiptName !== undefined
+    ) {
+      const vault = getReceiptsVaultMap();
+      if (merged.receipts && merged.receipts.length > 0) {
+        vault[id] = {
+          receiptUrl: merged.receiptUrl || merged.receipts[0]?.url,
+          receiptName: merged.receiptName || merged.receipts[0]?.name,
+          receipts: merged.receipts,
+        };
+      } else if (merged.receiptUrl) {
+        vault[id] = {
+          receiptUrl: merged.receiptUrl,
+          receiptName: merged.receiptName,
+        };
+      } else {
+        delete vault[id];
+      }
+      try {
+        localStorage.setItem(RECEIPTS_VAULT_KEY, JSON.stringify(vault));
+      } catch {
+        // ignore quota errors
+      }
+    }
+
+    const { receiptUrl: _ru, receiptName: _rn, receipts: _rc, ...lightPatch } = merged;
+    if (Object.keys(lightPatch).length > 0) {
+      baseMap[id] = lightPatch;
+    } else {
+      delete baseMap[id];
+    }
+
+    localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(baseMap));
     syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Permanently copies any user metadata (customTitle, customCategory, note, receipts, Swish split, heart, package)
+ * from a replaced pending transaction ID (`bank-${pendingId}`) to the settled booked transaction ID (`bank-${bookedId}`).
+ */
+export function migratePendingMetaToBooked(pendingTxId: string, bookedTxId: string): void {
+  if (typeof window === 'undefined' || !pendingTxId || !bookedTxId || pendingTxId === bookedTxId) {
+    return;
+  }
+  try {
+    const fullMap = getTransactionMetaMap();
+    const pendingMeta = fullMap[pendingTxId];
+    if (!pendingMeta || Object.keys(pendingMeta).length === 0) return;
+
+    const existingBookedMeta = fullMap[bookedTxId] || {};
+    const needsMigration = Object.keys(pendingMeta).some(
+      (k) => (existingBookedMeta as any)[k] === undefined
+    );
+    if (needsMigration) {
+      saveTransactionMeta(bookedTxId, {
+        ...pendingMeta,
+        ...existingBookedMeta,
+      });
+    }
   } catch {
     // ignore
   }
@@ -1291,11 +1412,13 @@ export function collectAllUserPreferences(): Record<string, any> {
     customExpenseCategories: getStoredExpenseCategories(),
     customIncomeCategories: getStoredIncomeCategories(),
     customPaymentMethods: getStoredPaymentMethods(),
-    transactionMeta: getTransactionMetaMap(),
+    transactionMeta: getLightweightTransactionMetaMapForSync(),
     accountMeta: getAccountMetaMap(),
     categoryBudgets: getCategoryBudgets(),
     savingsGoals: getSavingsGoals(),
     reviewedTransactionIds: Array.from(getReviewedTransactionIds()),
+    preferCategoryIconMerchants: safeParse('dejz_prefer_category_icon_merchants_v1', []),
+    learnedBrandDomains: safeParse('dejz_learned_brand_domains_v1', {}),
     mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
     swishContacts: safeParse('dejz_swish_contacts', []),
     weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
@@ -1502,6 +1625,25 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
     }
     if (Array.isArray(prefs.reviewedTransactionIds) && !localStorage.getItem(REVIEWED_TX_IDS_KEY)) {
       localStorage.setItem(REVIEWED_TX_IDS_KEY, JSON.stringify(prefs.reviewedTransactionIds));
+    }
+    if (
+      Array.isArray(prefs.preferCategoryIconMerchants) &&
+      !localStorage.getItem('dejz_prefer_category_icon_merchants_v1')
+    ) {
+      localStorage.setItem(
+        'dejz_prefer_category_icon_merchants_v1',
+        JSON.stringify(prefs.preferCategoryIconMerchants)
+      );
+    }
+    if (
+      prefs.learnedBrandDomains &&
+      typeof prefs.learnedBrandDomains === 'object' &&
+      !localStorage.getItem('dejz_learned_brand_domains_v1')
+    ) {
+      localStorage.setItem(
+        'dejz_learned_brand_domains_v1',
+        JSON.stringify(prefs.learnedBrandDomains)
+      );
     }
     if (
       Array.isArray(prefs.customExpenseCategories) &&

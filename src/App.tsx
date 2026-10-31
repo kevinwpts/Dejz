@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   calculateCurrentPeriod,
+  getActualPayday,
   PeriodInfo,
   WeekendHandlingMode,
   isDateInPeriod,
@@ -118,6 +119,7 @@ import {
   extractSavedIncomesFromProfile,
   getTransactionMetaMap,
   saveTransactionMeta,
+  migratePendingMetaToBooked,
   getAccountMetaMap,
   saveAccountMeta,
   syncAllUserPreferencesToSupabase,
@@ -136,10 +138,11 @@ import {
   findMatchingIncome,
   findAllMatchingFixedExpensesByMerchant,
   isFixedExpenseAmountMatch,
+  reconcilePeriodRecurringMatches,
 } from './utils/recurring';
 
-const AUTO_SYNC_COOLDOWN_MS = 45_000; // Minst 45 sek mellan automatiska bakgrundssynkningar
-const AUTO_SYNC_INTERVAL_MS = 120_000; // Synka automatiskt var 2:a minut när användaren är aktiv i appen
+const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
+const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
 
 function getActualTransactionDate(bt: BankTransactionItem): string {
   return getActualBankPaymentDateAndMeta(bt).paymentDate;
@@ -156,6 +159,9 @@ function sanitizeTransactionItem(
   const metaMap = getTransactionMetaMap();
   const fallbackMeta = fallbackMetaId ? metaMap[fallbackMetaId] : undefined;
   const primaryMeta = item.id ? metaMap[item.id] : undefined;
+  if (fallbackMetaId && fallbackMeta && item.id && fallbackMetaId !== item.id) {
+    migratePendingMetaToBooked(fallbackMetaId, item.id);
+  }
   const savedMeta =
     fallbackMeta || primaryMeta
       ? { ...(fallbackMeta || {}), ...(primaryMeta || {}) }
@@ -271,11 +277,13 @@ function sanitizeTransactionItem(
       const recat = categorizeBankTransactionForApp({
         description: updated.rawDescription || '',
         counterparty_name: updated.counterpartyName || '',
+        raw_json: updated.rawJson,
       } as any);
       if (recat.merchant && !isGenericPlaceholderMerchant(recat.merchant)) {
         const cleanBankLower = recat.merchant.toLowerCase().trim();
         updated.title = recat.merchant;
         if (
+          updated.type !== 'income' &&
           (prevTitleLower !== cleanBankLower || updated.category === 'Övrigt') &&
           recat.category &&
           recat.category !== 'Övrigt'
@@ -444,12 +452,12 @@ function getPayDatesForIncome(
   const currentMonth = parseInt(todayStockholm.slice(5, 7), 10) - 1;
 
   for (let offset = 0; offset <= 5; offset++) {
-    const d = new Date(currentYear, currentMonth - offset, day);
-    if (beforeWeekend) {
-      const dow = d.getDay();
-      if (dow === 6) d.setDate(d.getDate() - 1);
-      if (dow === 0) d.setDate(d.getDate() - 2);
-    }
+    const d = getActualPayday(
+      currentYear,
+      currentMonth - offset,
+      day,
+      beforeWeekend ? 'before' : 'none'
+    );
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const dayStr = String(d.getDate()).padStart(2, '0');
@@ -1138,6 +1146,25 @@ function mapBankTransactionsToAppItems(
 
       if (isIncome && !isRawInternalTransfer) {
         const combinedDesc = `${bt.description || ''} ${bt.counterparty_name || ''}`.toLowerCase();
+        const isCardRefund = Boolean(bt.raw_json?.card_transaction);
+        const isMatchedRetailOrExpenseMerchant =
+          Boolean(catInfo.category) &&
+          ![
+            'Övrigt',
+            'Inkomst',
+            'Lön',
+            'Swish',
+            'CSN',
+            'Försäkringskassan',
+            'Pension',
+            'Skatteåterbäring',
+            'Utdelning',
+            'Bidrag',
+            'Återbetalning',
+            'Överföring',
+            'Sparande',
+          ].includes(catInfo.category);
+
         let incomeCat = 'Inkomst';
         if (
           combinedDesc.includes('lön') ||
@@ -1159,12 +1186,20 @@ function mapBankTransactionsToAppItems(
         } else if (combinedDesc.includes('pension')) {
           incomeCat = 'Pension';
         } else if (
+          combinedDesc.includes('skatteverket') ||
+          combinedDesc.includes('skatteåterbäring') ||
+          combinedDesc.includes('skatteaterbaring')
+        ) {
+          incomeCat = 'Skatteåterbäring';
+        } else if (
           combinedDesc.includes('återbetalning') ||
           combinedDesc.includes('aterbetalning') ||
           combinedDesc.includes('retur') ||
           combinedDesc.includes('refund') ||
           combinedDesc.includes('återköp') ||
-          combinedDesc.includes('aterkop')
+          combinedDesc.includes('aterkop') ||
+          isCardRefund ||
+          isMatchedRetailOrExpenseMerchant
         ) {
           incomeCat = 'Återbetalning';
         }
@@ -1172,6 +1207,8 @@ function mapBankTransactionsToAppItems(
         const cleanName =
           incomeCat === 'Swish'
             ? formatSwishTitle(bt.description, bt.counterparty_name)
+            : catInfo.merchant && !isGenericPlaceholderMerchant(catInfo.merchant)
+            ? catInfo.merchant
             : cleanDisplayMerchantName(
                 bt.counterparty_name || bt.description || 'Insättning'
               );
@@ -1283,11 +1320,30 @@ function mapBankTransactionsToAppItems(
                   ...(bt.raw_json?.bank_transaction_code
                     ? { bank_transaction_code: bt.raw_json.bank_transaction_code }
                     : {}),
+                  ...(bt.raw_json?.proprietary_bank_transaction_code
+                    ? {
+                        proprietary_bank_transaction_code:
+                          bt.raw_json.proprietary_bank_transaction_code,
+                      }
+                    : {}),
+                  ...(bt.raw_json?.merchant_category_code
+                    ? { merchant_category_code: bt.raw_json.merchant_category_code }
+                    : {}),
+                  ...(bt.raw_json?.mcc ? { mcc: bt.raw_json.mcc } : {}),
                   ...(bt.raw_json?.card_transaction
                     ? {
                         card_transaction: {
                           transaction_date_time:
                             bt.raw_json.card_transaction.transaction_date_time || true,
+                          ...(bt.raw_json.card_transaction.merchant_category_code
+                            ? {
+                                merchant_category_code:
+                                  bt.raw_json.card_transaction.merchant_category_code,
+                              }
+                            : {}),
+                          ...(bt.raw_json.card_transaction.mcc
+                            ? { mcc: bt.raw_json.card_transaction.mcc }
+                            : {}),
                         },
                       }
                     : {}),
@@ -2631,16 +2687,6 @@ export const App: React.FC = () => {
       .reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
   }, [accounts]);
 
-  // Total inkomst
-  const totalIncome = useMemo(() => {
-    return incomes.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
-  }, [incomes]);
-
-  // Totala fasta kostnader
-  const totalFixedExpenses = useMemo(() => {
-    return fixedExpenses.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
-  }, [fixedExpenses]);
-
   // Alla interna överföringar (enskilda och parvisa mellan egna konton)
   const internalTransferIds = useMemo(() => {
     if (!excludeInternalTransfers) return new Set<string>();
@@ -2695,6 +2741,39 @@ export const App: React.FC = () => {
     fixedExpenses,
     incomes,
   ]);
+
+  // 1-till-1-matchning mellan periodens faktiska banktransaktioner och fasta utgifter/inkomster:
+  // Varje fast utgift kan högst kopplas till 1 transaktion per period, och när en fast inkomst/utgift
+  // väl har bokförts används dess faktiska belopp under perioden.
+  const periodRecurringMatches = useMemo(() => {
+    return reconcilePeriodRecurringMatches(periodTransactions, fixedExpenses, incomes);
+  }, [periodTransactions, fixedExpenses, incomes]);
+
+  // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp)
+  const totalIncome = useMemo(() => {
+    return incomes.reduce((sum, inc) => {
+      const matchedTx = periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
+      if (matchedTx) {
+        return sum + Math.round(Math.abs(Number(matchedTx.amount) || 0));
+      }
+      return sum + (Number(inc.amount) || 0);
+    }, 0);
+  }, [incomes, periodRecurringMatches]);
+
+  // Totala fasta kostnader under aktuell period (faktiskt bokfört belopp för räkningar som redan dragits, annars mallbelopp)
+  const totalFixedExpenses = useMemo(() => {
+    return fixedExpenses.reduce((sum, exp) => {
+      const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+      if (matchedTx) {
+        const shareRatio =
+          exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+            ? exp.amount / exp.fullAmount
+            : 1;
+        return sum + Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio);
+      }
+      return sum + (Number(exp.amount) || 0);
+    }, 0);
+  }, [fixedExpenses, periodRecurringMatches]);
 
   // Enhetlig transaktionslista för både Hem ("Senaste transaktioner"), Historik och Sök:
   // Garanterar att antalet reserverade transaktioner och historikrader alltid är 100% identiskt oavsett flik.
@@ -2776,11 +2855,24 @@ export const App: React.FC = () => {
     userName,
   ]);
 
-  // Totala rörliga köp under aktuell period (exkludera fasta utgifter så de inte räknas dubbelt,
-  // och räkna av bekräftade butiksreturer/återköp så att "Kvar att spendera" ökar vid retur)
+  // Totala rörliga köp under aktuell period:
+  // - Exkluderar ENDAST den specifika transaktion som matchats 1-till-1 mot varje fast utgift (så att 2:a köpet hos samma handlare eller engångsköp hos Apple/Klarna alltid räknas i Rörligt).
+  // - Räknar av butiksreturer ('Återbetalning') samt mottagna Swish-utläggsersättningar som inte redan länkats till ett specifikt köp.
   const totalVariableSpent = useMemo(() => {
     let grossSpent = 0;
-    let storeRefunds = 0;
+    let storeRefundsAndSwishReimbursements = 0;
+
+    const alreadyLinkedSwishIds = new Set<string>();
+    for (const tx of transactions) {
+      if (tx.linkedSwishTxId) {
+        alreadyLinkedSwishIds.add(tx.linkedSwishTxId);
+      }
+    }
+    for (const tx of periodTransactions) {
+      if (tx.linkedSwishTxId) {
+        alreadyLinkedSwishIds.add(tx.linkedSwishTxId);
+      }
+    }
 
     for (const t of periodTransactions) {
       if (t.isExcluded) continue;
@@ -2795,29 +2887,34 @@ export const App: React.FC = () => {
 
       if (t.type === 'income') {
         if (t.category === 'Återbetalning') {
-          storeRefunds += Math.abs(Number(t.amount) || 0);
+          storeRefundsAndSwishReimbursements += Math.abs(Number(t.amount) || 0);
+        } else if (
+          (t.category === 'Swish' || /swish/i.test(t.title || '')) &&
+          !periodRecurringMatches.claimedIncomeTxIds.has(t.id) &&
+          !alreadyLinkedSwishIds.has(t.id)
+        ) {
+          storeRefundsAndSwishReimbursements += Math.abs(Number(t.amount) || 0);
         }
         continue;
       }
 
-      const recurring = checkIsRecurringTransaction(t, fixedExpenses, incomes);
-      if (recurring.isRecurring && recurring.type === 'expense') {
+      if (periodRecurringMatches.claimedFixedTxIds.has(t.id)) {
         continue;
       }
 
       grossSpent += Number(t.amount) || 0;
     }
 
-    return Math.max(0, grossSpent - storeRefunds);
+    return Math.max(0, grossSpent - storeRefundsAndSwishReimbursements);
   }, [
+    transactions,
     periodTransactions,
+    periodRecurringMatches,
     excludeInternalTransfers,
     internalTransferIds,
     bankAccounts,
     userEmail,
     userName,
-    fixedExpenses,
-    incomes,
   ]);
 
   // Kvar att spendera under aktuell period

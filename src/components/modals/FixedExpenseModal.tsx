@@ -34,10 +34,17 @@ import {
   getStoredExpenseCategories,
   getStoredPaymentMethods,
   normalizeCategoryToValid,
+  syncAllUserPreferencesToSupabase,
   compressImageFileToDataUrl,
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
-import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
+import {
+  fetchLogoForName,
+  getLearnedBrandCategory,
+  getLogoUrl,
+  isMerchantCategoryIconPreferred,
+  setMerchantCategoryIconPreferred,
+} from '../../utils/logo';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -107,6 +114,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [previewReceipt, setPreviewReceipt] = useState<ReceiptAttachment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showFullAccount, setShowFullAccount] = useState(false);
+  const [logoPrefTick, setLogoPrefTick] = useState(0);
   const [cancelGuide, setCancelGuide] = useState<CancelGuideData | null>(null);
   const [isLoadingCancelGuide, setIsLoadingCancelGuide] = useState(false);
   const cancelGuideCacheRef = useRef<Record<string, CancelGuideData>>({});
@@ -1007,6 +1015,38 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 />
               </div>
             </label>
+
+            {(() => {
+              void logoPrefTick;
+              const targetMerchantName = (name || activeExpense?.name || '').trim();
+              if (!targetMerchantName) return null;
+              const prefersCategoryIcon = isMerchantCategoryIconPreferred(targetMerchantName);
+              const hasCompanyLogo = Boolean(
+                getLogoUrl(targetMerchantName, category) || activeExpense?.logo
+              );
+              if (!hasCompanyLogo && !prefersCategoryIcon) return null;
+              return (
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    Visningsikon för {targetMerchantName}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMerchantCategoryIconPreferred(
+                        targetMerchantName,
+                        !prefersCategoryIcon
+                      );
+                      setLogoPrefTick((t) => t + 1);
+                      syncAllUserPreferencesToSupabase();
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                  >
+                    {prefersCategoryIcon ? 'Visa företagslogga' : 'Visa kategori-ikon'}
+                  </button>
+                </div>
+              );
+            })()}
 
             <div className="border-t border-[var(--border-subtle)] pt-3.5">
               <label className="block cursor-text">

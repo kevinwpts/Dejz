@@ -1615,9 +1615,9 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
         }
     }
 
-    // 3. Segments split by dash / slash / colon / pipe (e.g. "Hyra - Svea Fastigheter" or "Svea Fastigheter / Hyra")
-    if (/\s[-–—/:|]\s|:\s/.test(outsideParens || trimmed)) {
-        const parts = (outsideParens || trimmed).split(/\s*[-–—/:|]\s*/).filter(Boolean);
+    // 3. Segments split by dash / slash / colon / pipe / middle dot (e.g. "Hyra - Svea Fastigheter", "Klarna · Apotea")
+    if (/\s[-–—/:|·•]\s|:\s/.test(outsideParens || trimmed)) {
+        const parts = (outsideParens || trimmed).split(/\s*[-–—/:|·•]\s*/).filter(Boolean);
         for (const part of parts) {
             const strippedPart = stripGenericModifiers(part);
             if (strippedPart) addCandidate(strippedPart);
@@ -1638,6 +1638,61 @@ export function extractBrandSearchCandidates(rawInput: string): string[] {
 }
 
 const LEARNED_BRANDS_STORAGE_KEY = 'dejz_learned_brand_domains_v1';
+const PREFER_CATEGORY_ICON_STORAGE_KEY = 'dejz_prefer_category_icon_merchants_v1';
+
+function normalizeMerchantIconPrefKey(name: string): string {
+    return (name || '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+export function getPreferCategoryIconMerchants(): Set<string> {
+    if (typeof window === 'undefined') return new Set();
+    try {
+        const raw = localStorage.getItem(PREFER_CATEGORY_ICON_STORAGE_KEY);
+        if (!raw) return new Set();
+        const parsed = JSON.parse(raw);
+        return new Set(Array.isArray(parsed) ? parsed : []);
+    } catch {
+        return new Set();
+    }
+}
+
+export function isMerchantCategoryIconPreferred(name?: string): boolean {
+    if (!name || !name.trim()) return false;
+    const set = getPreferCategoryIconMerchants();
+    if (set.size === 0) return false;
+    const key = normalizeMerchantIconPrefKey(name);
+    if (set.has(key)) return true;
+    const candidates = extractBrandSearchCandidates(key);
+    for (const c of candidates) {
+        if (set.has(c)) return true;
+    }
+    return false;
+}
+
+export function setMerchantCategoryIconPreferred(name: string, preferCategoryIcon: boolean): void {
+    if (typeof window === 'undefined' || !name || !name.trim()) return;
+    try {
+        const set = getPreferCategoryIconMerchants();
+        const key = normalizeMerchantIconPrefKey(name);
+        const candidates = extractBrandSearchCandidates(key);
+        if (preferCategoryIcon) {
+            set.add(key);
+            if (candidates[0]) set.add(candidates[0]);
+        } else {
+            set.delete(key);
+            for (const c of candidates) {
+                set.delete(c);
+            }
+        }
+        localStorage.setItem(PREFER_CATEGORY_ICON_STORAGE_KEY, JSON.stringify(Array.from(set)));
+        window.dispatchEvent(new CustomEvent('dejz-logo-pref-changed'));
+    } catch {
+        // ignore
+    }
+}
 
 interface LearnedBrandEntry {
     domain: string;
@@ -2091,12 +2146,22 @@ async function _lookupCompanyViaBackendAi(query: string, category?: string): Pro
     }
 }
 
+const LOCAL_OR_NON_BRAND_REGEX =
+    /\b(brf|bostadsrättsförening|bostadsrattsforening|bostadsrättsföreningen|bostadsrattsforeningen|samfällighet|samfallighet|samfällighetsförening|vägförening|vagforening|pizzeria|gatukök|gatukok|grillkiosk|herrfrisör|damfrisör|frisörsalong|frisorsalong|barbershop|skrädderi|skradderi|kemtvätt|kemtvatt|bilverkstad|däckverkstad|dackverkstad|städservice|stadservice|flyttstäd|flyttstad|byggservice|måleri|maleri|rörservice|rorservice|elservice|blomsterhandel|begravningsbyrå|begravningsbyra)\b/i;
+
+function isLikelyLocalOrNonBrandEntity(candidate: string): boolean {
+    if (!candidate) return true;
+    if (LOCAL_OR_NON_BRAND_REGEX.test(candidate)) return true;
+    return false;
+}
+
 /**
  * Asynchronous logo search that tests candidate URLs to guarantee image validity,
  * with smart parenthetical/modifier extraction, Clearbit Autocomplete, .se domain probe, and Gemini AI fallback.
  */
 export const fetchLogoForName = async (name: string, category?: string): Promise<string | undefined> => {
     if (!name || name.trim().length < 2) return undefined;
+    if (isMerchantCategoryIconPreferred(name)) return undefined;
     
     // If it's already an explicit URL or data URI, sanitize & verify it
     if (name.startsWith('data:image')) {
@@ -2155,7 +2220,11 @@ export const fetchLogoForName = async (name: string, category?: string): Promise
             .replace(/\s+/g, ' ')
             .trim();
 
-        if (primaryCandidate.length < 3 || GENERIC_NON_BRAND_WORDS.has(primaryCandidate)) {
+        if (
+            primaryCandidate.length < 3 ||
+            GENERIC_NON_BRAND_WORDS.has(primaryCandidate) ||
+            isLikelyLocalOrNonBrandEntity(primaryCandidate)
+        ) {
             resolvedLogoCache.set(cacheKey, null);
             return undefined;
         }

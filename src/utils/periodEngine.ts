@@ -54,7 +54,80 @@ const WEEKDAY_NAMES = [
 ];
 
 /**
- * Returnerar det faktiska utbetalningsdatumet för en given månad med vald helghantering.
+ * Beräknar påskdagen (Easter Sunday) för ett givet år enligt Butcher-Meeus algoritm.
+ */
+function getEasterSunday(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month, day, 0, 0, 0, 0);
+}
+
+/**
+ * Returnerar namnet på svensk röd dag eller bankfri afton (julafton, midsommarafton, nyårsafton),
+ * eller null om datumet är en vanlig helgfri vardag.
+ */
+export function getSwedishHolidayName(date: Date): string | null {
+  const y = date.getFullYear();
+  const m = date.getMonth(); // 0-11
+  const d = date.getDate();
+
+  // Fasta svenska helgdagar & bankfria aftnar
+  if (m === 0 && d === 1) return 'nyårsdagen';
+  if (m === 0 && d === 6) return 'trettondedag jul';
+  if (m === 4 && d === 1) return 'första maj';
+  if (m === 5 && d === 6) return 'nationaldagen';
+  if (m === 11 && d === 24) return 'julafton';
+  if (m === 11 && d === 25) return 'juldagen';
+  if (m === 11 && d === 26) return 'annandag jul';
+  if (m === 11 && d === 31) return 'nyårsafton';
+
+  // Midsommarafton (fredagen mellan 19 och 25 juni - bankfri dag i Sverige)
+  if (m === 5 && d >= 19 && d <= 25 && date.getDay() === 5) {
+    return 'midsommarafton';
+  }
+  // Midsommardagen (lördagen mellan 20 och 26 juni)
+  if (m === 5 && d >= 20 && d <= 26 && date.getDay() === 6) {
+    return 'midsommardagen';
+  }
+
+  // Rörliga helgdagar kring påsk och Kristi himmelsfärd
+  const easter = getEasterSunday(y);
+  const diffDays = Math.round(
+    (Date.UTC(y, m, d) - Date.UTC(easter.getFullYear(), easter.getMonth(), easter.getDate())) /
+      (1000 * 60 * 60 * 24)
+  );
+  if (diffDays === -2) return 'långfredagen';
+  if (diffDays === 0) return 'påskdagen';
+  if (diffDays === 1) return 'annandag påsk';
+  if (diffDays === 39) return 'Kristi himmelsfärdsdag';
+
+  return null;
+}
+
+/**
+ * Kontrollerar om ett datum är lördag, söndag eller svensk bankfri helgdag/afton.
+ */
+export function isSwedishNonBankingDay(date: Date): boolean {
+  const dow = date.getDay();
+  if (dow === 0 || dow === 6) return true;
+  return getSwedishHolidayName(date) !== null;
+}
+
+/**
+ * Returnerar det faktiska utbetalningsdatumet för en given månad med vald helghantering
+ * (inklusive svenska röda dagar samt julafton, midsommarafton och nyårsafton).
  */
 export function getActualPayday(
   year: number,
@@ -67,23 +140,18 @@ export function getActualPayday(
   const clampedDay = Math.min(Math.max(1, targetDay), lastDayOfMonth);
 
   const date = new Date(year, month, clampedDay, 0, 0, 0, 0);
-  const dayOfWeek = date.getDay(); // 0 = Sön, 6 = Lör
 
   if (weekendHandling === 'before') {
-    if (dayOfWeek === 6) {
-      // Lördag -> betalas ut fredagen före
+    let guard = 0;
+    while (isSwedishNonBankingDay(date) && guard < 10) {
       date.setDate(date.getDate() - 1);
-    } else if (dayOfWeek === 0) {
-      // Söndag -> betalas ut fredagen före
-      date.setDate(date.getDate() - 2);
+      guard++;
     }
   } else if (weekendHandling === 'after') {
-    if (dayOfWeek === 6) {
-      // Lördag -> betalas ut måndagen efter
-      date.setDate(date.getDate() + 2);
-    } else if (dayOfWeek === 0) {
-      // Söndag -> betalas ut måndagen efter
+    let guard = 0;
+    while (isSwedishNonBankingDay(date) && guard < 10) {
       date.setDate(date.getDate() + 1);
+      guard++;
     }
   }
 
@@ -179,14 +247,20 @@ export function calculateCurrentPeriod(
 
   if (nominalNextDate.getTime() !== nextPayday.getTime()) {
     isAdjusted = true;
-    const nominalDayName = WEEKDAY_NAMES[nominalNextDate.getDay()];
+    const holidayName = getSwedishHolidayName(nominalNextDate);
+    const nominalDayName = holidayName || WEEKDAY_NAMES[nominalNextDate.getDay()];
     const actualDayName = WEEKDAY_NAMES[nextPayday.getDay()];
-    adjustmentNote = `Den ${nominalNextDate.getDate()}:e är en ${nominalDayName} – nästa lön kommer ${actualDayName} ${nextPayday.getDate()} ${MONTH_NAMES_SHORT[nextPayday.getMonth()]}`;
+    adjustmentNote = `Den ${nominalNextDate.getDate()}:e är ${
+      holidayName ? holidayName : `en ${nominalDayName}`
+    } – nästa lön kommer ${actualDayName} ${nextPayday.getDate()} ${MONTH_NAMES_SHORT[nextPayday.getMonth()]}`;
   } else if (nominalStartDate.getTime() !== periodStart.getTime()) {
     isAdjusted = true;
-    const nominalDayName = WEEKDAY_NAMES[nominalStartDate.getDay()];
+    const holidayName = getSwedishHolidayName(nominalStartDate);
+    const nominalDayName = holidayName || WEEKDAY_NAMES[nominalStartDate.getDay()];
     const actualDayName = WEEKDAY_NAMES[periodStart.getDay()];
-    adjustmentNote = `Den ${nominalStartDate.getDate()}:e var en ${nominalDayName} – perioden startade ${actualDayName} ${periodStart.getDate()} ${MONTH_NAMES_SHORT[periodStart.getMonth()]}`;
+    adjustmentNote = `Den ${nominalStartDate.getDate()}:e var ${
+      holidayName ? holidayName : `en ${nominalDayName}`
+    } – perioden startade ${actualDayName} ${periodStart.getDate()} ${MONTH_NAMES_SHORT[periodStart.getMonth()]}`;
   }
 
   // Beräkna antal dagar med UTC-datum så sommar-/vintertid aldrig ger avrundningsfel

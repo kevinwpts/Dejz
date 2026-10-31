@@ -332,6 +332,44 @@ export function findMatchingIncome(
   return null;
 }
 
+const HYBRID_SUBSCRIPTION_AND_ONEOFF_KEYWORDS = [
+  'apple',
+  'itunes',
+  'app store',
+  'google',
+  'youtube',
+  'klarna',
+  'qliro',
+  'walley',
+  'svea',
+  'amazon',
+  'paypal',
+  'swish',
+  'ica',
+  'coop',
+  'sj ',
+  'sl ',
+  'skånetrafiken',
+  'skanetrafiken',
+  'västtrafik',
+  'vasttrafik',
+  'easypark',
+  'aimo',
+  'parkster',
+  'uber',
+  'bolt',
+  'foodora',
+  'wolt',
+];
+
+function isHybridSubscriptionAndOneOffMerchant(tx: Partial<TransactionItem>): boolean {
+  const combined = `${tx.title || ''} ${tx.rawDescription || ''} ${tx.counterpartyName || ''}`
+    .toLowerCase()
+    .trim();
+  if (!combined) return false;
+  return HYBRID_SUBSCRIPTION_AND_ONEOFF_KEYWORDS.some((kw) => combined.includes(kw));
+}
+
 /**
  * Checks if a transaction represents a recurring fixed expense or income.
  * Matches against known fixed expenses and incomes registered in the app.
@@ -365,6 +403,16 @@ export function checkIsRecurringTransaction(
         allMatchedExps.length > 0
           ? allMatchedExps.some((exp) => isFixedExpenseAmountMatch(exp, txAmt))
           : isFixedExpenseAmountMatch(matchedExp, txAmt);
+
+      // För hybrid-handlare (t.ex. Apple, Klarna, Google, Amazon, kollektivtrafik) där man både kan ha
+      // ett fast abonnemang OCH göra engångsköp: kräv att beloppet stämmer överens med den fasta utgiften!
+      if (!hasExactAmountMatch && isHybridSubscriptionAndOneOffMerchant(tx)) {
+        return {
+          isRecurring: false,
+          hasExactAmountMatch: false,
+        };
+      }
+
       return {
         isRecurring: true,
         hasExactAmountMatch,
@@ -377,6 +425,9 @@ export function checkIsRecurringTransaction(
 
   // 2. Match against fixed incomes (when not an explicit expense, or if income)
   if (tx.type === 'income') {
+    if (tx.category === 'Återbetalning') {
+      return { isRecurring: false, hasExactAmountMatch: false };
+    }
     const matchedInc = findMatchingIncome(tx, incomes);
     if (matchedInc) {
       const incAmt = Math.round(Math.abs(Number(matchedInc.amount) || 0));
@@ -395,6 +446,7 @@ export function checkIsRecurringTransaction(
   // 3. Fallback for salary income (always recurring)
   if (
     tx.type === 'income' &&
+    tx.category !== 'Återbetalning' &&
     (txCat === 'lön' ||
       txTitle.includes('lön') ||
       txRaw.includes('lön') ||
@@ -405,6 +457,135 @@ export function checkIsRecurringTransaction(
   }
 
   return { isRecurring: false, hasExactAmountMatch: false };
+}
+
+/**
+ * Säkerställer 1-till-1-matchning mellan periodens faktiska banktransaktioner och användarens
+ * fasta utgifter respektive fasta inkomster:
+ * - Varje fast utgift kan sluka HÖGST 1 transaktion per löneperiod (den som bäst matchar belopp & förfallodag).
+ *   Om användaren gör 2 köp hos samma företag under samma period räknas det extra köpet som rörlig utgift!
+ * - Returnerar även de faktiska bokförda transaktionerna per fast utgift/inkomst så att pågående period
+ *   alltid använder det faktiska beloppet så fort räkningen/lönen har bokförts.
+ */
+export function reconcilePeriodRecurringMatches(
+  periodTransactions: TransactionItem[] = [],
+  fixedExpenses: FixedExpenseItem[] = [],
+  incomes: IncomeItem[] = []
+): {
+  claimedFixedTxIds: Set<string>;
+  matchedFixedTxByExpId: Map<string, TransactionItem>;
+  claimedIncomeTxIds: Set<string>;
+  matchedIncomeTxByIncId: Map<string, TransactionItem>;
+} {
+  const claimedFixedTxIds = new Set<string>();
+  const matchedFixedTxByExpId = new Map<string, TransactionItem>();
+  const claimedIncomeTxIds = new Set<string>();
+  const matchedIncomeTxByIncId = new Map<string, TransactionItem>();
+
+  const expenseTxs = periodTransactions.filter((t) => t && !t.isExcluded && t.type !== 'income');
+  const incomeTxs = periodTransactions.filter(
+    (t) => t && !t.isExcluded && t.type === 'income' && t.category !== 'Återbetalning'
+  );
+
+  // 1. Koppla högst 1 transaktion per fast utgift (bästa belopps- och förfallodagsmatchning först)
+  const candidatePairs: {
+    exp: FixedExpenseItem;
+    tx: TransactionItem;
+    amtDist: number;
+    dayDist: number;
+  }[] = [];
+
+  for (const exp of fixedExpenses) {
+    for (const tx of expenseTxs) {
+      const candidatesForTx = findAllMatchingFixedExpensesByMerchant(tx, [exp]);
+      const fallbackMatch =
+        candidatesForTx.length === 0 ? findMatchingFixedExpense(tx, [exp]) : candidatesForTx[0];
+      if (!fallbackMatch || fallbackMatch.id !== exp.id) continue;
+
+      const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
+      const exactAmtMatch = isFixedExpenseAmountMatch(exp, txAmt);
+      if (!exactAmtMatch && isHybridSubscriptionAndOneOffMerchant(tx)) {
+        continue;
+      }
+
+      const amtDist = getFixedExpenseAmountDistance(exp, txAmt);
+      const txDay = parseInt((tx.date || '').slice(8, 10), 10) || 27;
+      const dueDay = Number(exp.dueDay) || 27;
+      const rawDayDiff = Math.abs(txDay - dueDay);
+      const dayDist = Math.min(rawDayDiff, 31 - rawDayDiff);
+
+      candidatePairs.push({ exp, tx, amtDist, dayDist });
+    }
+  }
+
+  candidatePairs.sort((a, b) => {
+    if (a.amtDist !== b.amtDist) return a.amtDist - b.amtDist;
+    return a.dayDist - b.dayDist;
+  });
+
+  for (const pair of candidatePairs) {
+    if (matchedFixedTxByExpId.has(pair.exp.id)) continue;
+    if (claimedFixedTxIds.has(pair.tx.id)) continue;
+    matchedFixedTxByExpId.set(pair.exp.id, pair.tx);
+    claimedFixedTxIds.add(pair.tx.id);
+  }
+
+  // Även explicita "fix-"-poster räknas som fasta
+  for (const tx of expenseTxs) {
+    if (tx.id?.startsWith('fix-')) {
+      claimedFixedTxIds.add(tx.id);
+    }
+  }
+
+  // 2. Koppla högst 1 transaktion per fast inkomst
+  const incomePairs: {
+    inc: IncomeItem;
+    tx: TransactionItem;
+    amtDist: number;
+  }[] = [];
+
+  for (const inc of incomes) {
+    for (const tx of incomeTxs) {
+      const matched = findMatchingIncome(tx, [inc]);
+      const isSalaryFallback =
+        !matched &&
+        (inc.category === 'Lön' || /lön/i.test(inc.name)) &&
+        (tx.category === 'Lön' ||
+          /lön|salary|löneutbetalning/i.test(`${tx.title || ''} ${tx.rawDescription || ''}`));
+      if ((!matched || matched.id !== inc.id) && !isSalaryFallback) continue;
+
+      const incAmt = Math.round(Math.abs(Number(inc.amount) || 0));
+      const txAmt = Math.round(Math.abs(Number(tx.amount) || 0));
+      incomePairs.push({
+        inc,
+        tx,
+        amtDist: Math.abs(incAmt - txAmt),
+      });
+    }
+  }
+
+  incomePairs.sort((a, b) => a.amtDist - b.amtDist);
+
+  for (const pair of incomePairs) {
+    if (matchedIncomeTxByIncId.has(pair.inc.id)) continue;
+    if (claimedIncomeTxIds.has(pair.tx.id)) continue;
+    matchedIncomeTxByIncId.set(pair.inc.id, pair.tx);
+    claimedIncomeTxIds.add(pair.tx.id);
+  }
+
+  for (const tx of incomeTxs) {
+    const rec = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
+    if (rec.isRecurring && rec.type === 'income') {
+      claimedIncomeTxIds.add(tx.id);
+    }
+  }
+
+  return {
+    claimedFixedTxIds,
+    matchedFixedTxByExpId,
+    claimedIncomeTxIds,
+    matchedIncomeTxByIncId,
+  };
 }
 
 const KNOWN_MERCHANT_CHAINS: { key: string; label: string; patterns: RegExp[] }[] = [

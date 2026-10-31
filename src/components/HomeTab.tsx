@@ -26,7 +26,11 @@ import {
   getSwedishDateStr,
   getYesterdaySwedishDateStr,
 } from '../utils/swedishDate';
-import { checkIsRecurringTransaction, findMatchingFixedExpense } from '../utils/recurring';
+import {
+  checkIsRecurringTransaction,
+  findMatchingFixedExpense,
+  reconcilePeriodRecurringMatches,
+} from '../utils/recurring';
 import {
   getShowAccountsOnHome,
   setShowAccountsOnHome,
@@ -456,18 +460,39 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
 
+  const periodRecurringMatches = useMemo(() => {
+    const deduped = deduplicateTransactions(transactions || []).filter(
+      (tx) => !tx.isExcluded && isDateInPeriod(tx.date, period)
+    );
+    return reconcilePeriodRecurringMatches(deduped, fixedExpenses, incomes);
+  }, [transactions, period, fixedExpenses, incomes]);
+
   // Rörliga transaktioner under aktuell löneperiod (för snabbvy vid klick på "Rörligt")
   const variablePeriodTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions || []);
+    const alreadyLinkedSwishIds = new Set<string>();
+    for (const tx of deduped) {
+      if (tx.linkedSwishTxId) {
+        alreadyLinkedSwishIds.add(tx.linkedSwishTxId);
+      }
+    }
+
     return deduped
       .filter((tx) => {
         if (tx.isExcluded) return false;
         if (!isDateInPeriod(tx.date, period)) return false;
         if (tx.type === 'income') {
-          return tx.category === 'Återbetalning';
+          if (tx.category === 'Återbetalning') return true;
+          if (
+            (tx.category === 'Swish' || /swish/i.test(tx.title || '')) &&
+            !periodRecurringMatches.claimedIncomeTxIds.has(tx.id) &&
+            !alreadyLinkedSwishIds.has(tx.id)
+          ) {
+            return true;
+          }
+          return false;
         }
-        const recurring = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
-        if (recurring.isRecurring && recurring.type === 'expense') {
+        if (periodRecurringMatches.claimedFixedTxIds.has(tx.id)) {
           return false;
         }
         return true;
@@ -477,7 +502,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         if (dCmp !== 0) return dCmp;
         return getTransactionTime(b).localeCompare(getTransactionTime(a));
       });
-  }, [transactions, period, fixedExpenses, incomes]);
+  }, [transactions, period, periodRecurringMatches]);
 
   // Group all deduplicated transactions by date (YYYY-MM-DD)
   const transactionsByDate = useMemo(() => {
@@ -1277,12 +1302,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="ui-row-amount-income">
-                        +{formatKr(inc.amount)}
-                      </span>
-                      <span className="ui-row-meta">
-                        Den {inc.payday || 25}:e
-                      </span>
+                      {(() => {
+                        const matchedTx = periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
+                        const effectiveAmt = matchedTx
+                          ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
+                          : inc.amount;
+                        return (
+                          <>
+                            <span className="ui-row-amount-income">
+                              +{formatKr(effectiveAmt)}
+                            </span>
+                            <span className="ui-row-meta">
+                              {matchedTx
+                                ? `Inkommen · ${formatSwedishDateHeading(matchedTx.date)}`
+                                : `Den ${inc.payday || 25}:e`}
+                            </span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </button>
                 );
@@ -1297,6 +1334,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             (fixedExpenses.length > 0 ? (
               fixedExpenses.map((exp) => {
                 const catLabel = exp.category || 'Räkningar';
+                const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+                const shareRatio =
+                  exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+                    ? exp.amount / exp.fullAmount
+                    : 1;
+                const effectiveAmt = matchedTx
+                  ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
+                  : exp.amount;
                 return (
                   <button
                     key={exp.id}
@@ -1338,10 +1383,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     </div>
                     <div className="text-right shrink-0">
                       <span className="ui-row-amount">
-                        -{formatKr(exp.amount)}
+                        -{formatKr(effectiveAmt)}
                       </span>
                       <span className="ui-row-meta">
-                        Den {exp.dueDay || 28}:e
+                        {matchedTx
+                          ? `Betald · ${formatSwedishDateHeading(matchedTx.date)}`
+                          : `Den ${exp.dueDay || 28}:e`}
                       </span>
                     </div>
                   </button>

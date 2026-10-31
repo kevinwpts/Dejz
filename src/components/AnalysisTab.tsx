@@ -28,11 +28,15 @@ import { deduplicateTransactions } from '../utils/transactionDedup';
 import {
   isTransactionManuallyExcluded,
 } from '../utils/appCache';
-import { checkIsRecurringTransaction } from '../utils/recurring';
+import {
+  checkIsRecurringTransaction,
+  reconcilePeriodRecurringMatches,
+} from '../utils/recurring';
 import {
   findInternalTransferIds,
   isInternalTransferTransaction,
 } from '../utils/transferDetection';
+import { categorizeBankTransactionForApp } from '../utils/bankHistoryAnalyzer';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
 
 interface AnalysisTabProps {
@@ -126,10 +130,33 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     userName,
   ]);
 
+  const periodRecurringMatches = useMemo(() => {
+    return reconcilePeriodRecurringMatches(periodTransactions, fixedExpenses, incomes);
+  }, [periodTransactions, fixedExpenses, incomes]);
+
+  const alreadyLinkedSwishIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const tx of transactions) {
+      if (tx.linkedSwishTxId) ids.add(tx.linkedSwishTxId);
+    }
+    for (const tx of periodTransactions) {
+      if (tx.linkedSwishTxId) ids.add(tx.linkedSwishTxId);
+    }
+    return ids;
+  }, [transactions, periodTransactions]);
+
   const periodIncomesList = useMemo(() => {
-    // För historiska perioder med faktiska banktransaktioner: använd de inkomster som faktiskt kom in då
+    // För historiska perioder med faktiska banktransaktioner: använd de inkomster som faktiskt kom in då (exkl. butiksreturer/återbetalningar och Swish-utlägg)
     if (periodOffset < 0 && periodTransactions.length > 0) {
-      const txIncomes = periodTransactions.filter((t) => t.type === 'income');
+      const txIncomes = periodTransactions.filter(
+        (t) =>
+          t.type === 'income' &&
+          t.category !== 'Återbetalning' &&
+          !(
+            (t.category === 'Swish' || /swish/i.test(t.title || '')) &&
+            !periodRecurringMatches.claimedIncomeTxIds.has(t.id)
+          )
+      );
       if (txIncomes.length > 0) {
         return txIncomes.map((tx) => {
           const recurring = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
@@ -151,21 +178,29 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       }
     }
 
-    return incomes.map((inc) => ({
-      ...inc,
-      type: 'income' as const,
-      amount: inc.amount,
-    }));
-  }, [incomes, fixedExpenses, periodOffset, periodTransactions, targetPayday]);
+    return incomes.map((inc) => {
+      const matchedTx = periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
+      return {
+        ...inc,
+        type: 'income' as const,
+        amount: matchedTx ? Math.round(Math.abs(Number(matchedTx.amount) || 0)) : inc.amount,
+      };
+    });
+  }, [
+    incomes,
+    fixedExpenses,
+    periodOffset,
+    periodTransactions,
+    periodRecurringMatches,
+    targetPayday,
+  ]);
 
   const periodFixedList = useMemo(() => {
-    // För historiska perioder med faktiska transaktioner: använd periodens faktiska fasta utgifter
+    // För historiska perioder med faktiska transaktioner: använd periodens faktiska fasta utgifter (1-till-1-matchade)
     if (periodOffset < 0 && periodTransactions.length > 0) {
-      const recurringExpenseTxs = periodTransactions.filter((t) => {
-        if (t.type === 'income') return false;
-        const recurring = checkIsRecurringTransaction(t, fixedExpenses, incomes);
-        return recurring.isRecurring && recurring.type === 'expense';
-      });
+      const recurringExpenseTxs = periodTransactions.filter((t) =>
+        periodRecurringMatches.claimedFixedTxIds.has(t.id)
+      );
 
       if (recurringExpenseTxs.length > 0) {
         return recurringExpenseTxs.map((tx) => {
@@ -197,38 +232,91 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       }
     }
 
-    return fixedExpenses.map((exp) => ({
-      ...exp,
-      type: 'expense' as const,
-      amount: exp.amount,
-    }));
-  }, [fixedExpenses, incomes, periodOffset, periodTransactions]);
+    return fixedExpenses.map((exp) => {
+      const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+      const shareRatio =
+        exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+          ? exp.amount / exp.fullAmount
+          : 1;
+      const effectiveAmt = matchedTx
+        ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
+        : exp.amount;
+      return {
+        ...exp,
+        type: 'expense' as const,
+        amount: effectiveAmt,
+      };
+    });
+  }, [fixedExpenses, incomes, periodOffset, periodTransactions, periodRecurringMatches]);
 
+  // Rörliga konsumtionsutgifter (exkl. 1-till-1-matchade fasta utgifter samt exkl. aktivt Sparande så att Avanza/Lysa-sparande inte straffas som utgift)
   const variableTransactions = useMemo(() => {
     return periodTransactions.filter((t) => {
       if (t.type === 'income') return false;
-      const recurring = checkIsRecurringTransaction(t, fixedExpenses, incomes);
-      if (recurring.isRecurring && recurring.type === 'expense') {
+      if (t.category === 'Sparande') return false;
+      if (periodRecurringMatches.claimedFixedTxIds.has(t.id)) {
         return false;
       }
       return true;
     });
-  }, [periodTransactions, fixedExpenses, incomes]);
+  }, [periodTransactions, periodRecurringMatches]);
+
+  // Aktivt sparande under perioden (t.ex. överföringar till Avanza, Nordnet, Lysa)
+  const savingsTransactions = useMemo(() => {
+    return periodTransactions.filter(
+      (t) =>
+        t.type !== 'income' &&
+        t.category === 'Sparande' &&
+        !periodRecurringMatches.claimedFixedTxIds.has(t.id)
+    );
+  }, [periodTransactions, periodRecurringMatches]);
+
+  // Returer ('Återbetalning') samt mottagna Swish-utläggsersättningar under perioden
+  const reimbursementTransactions = useMemo(() => {
+    return periodTransactions.filter((t) => {
+      if (t.type !== 'income') return false;
+      if (t.category === 'Återbetalning') return true;
+      if (
+        (t.category === 'Swish' || /swish/i.test(t.title || '')) &&
+        !periodRecurringMatches.claimedIncomeTxIds.has(t.id) &&
+        !alreadyLinkedSwishIds.has(t.id)
+      ) {
+        return true;
+      }
+      return false;
+    });
+  }, [periodTransactions, periodRecurringMatches, alreadyLinkedSwishIds]);
 
   const periodIncomeTotal = useMemo(() => {
-    const txIncomes = periodTransactions.filter((t) => t.type === 'income');
+    const txIncomes = periodTransactions.filter(
+      (t) =>
+        t.type === 'income' &&
+        t.category !== 'Återbetalning' &&
+        !(
+          (t.category === 'Swish' || /swish/i.test(t.title || '')) &&
+          !periodRecurringMatches.claimedIncomeTxIds.has(t.id)
+        )
+    );
     const baseIncomes = periodIncomesList.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
     const txIncSum = txIncomes.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
     return Math.max(baseIncomes, txIncSum);
-  }, [periodTransactions, periodIncomesList]);
+  }, [periodTransactions, periodIncomesList, periodRecurringMatches]);
 
   const periodFixedTotal = useMemo(() => {
-    return periodFixedList.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+    return periodFixedList.reduce(
+      (sum, f) => sum + (f.category === 'Sparande' ? 0 : Number(f.amount) || 0),
+      0
+    );
   }, [periodFixedList]);
 
   const periodVariableTotal = useMemo(() => {
-    return variableTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-  }, [variableTransactions]);
+    const rawSpent = variableTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    const refunds = reimbursementTransactions.reduce(
+      (sum, t) => sum + (Number(t.amount) || 0),
+      0
+    );
+    return Math.max(0, rawSpent - refunds);
+  }, [variableTransactions, reimbursementTransactions]);
 
   const totalSpent = periodFixedTotal + periodVariableTotal;
   const netSavings = periodIncomeTotal - totalSpent;
@@ -333,7 +421,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     return map;
   }, [prevPeriodVariableTransactions, periodFixedList]);
 
-  // Category breakdown
+  // Category breakdown (med avräkning av butiksreturer/återköp per handlarkategori så cirkeldiagrammet matchar Rörligt netto)
   const categoryBreakdown = useMemo(() => {
     const map = new Map<
       string,
@@ -356,6 +444,67 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
       existing.amount += amt;
       existing.items.push(exp);
       map.set(cat, existing);
+    }
+
+    // Lägg även till aktivt sparande (Avanza/Nordnet/Lysa) i listan utan att det räknas som konsumtion i cirkeldiagrammet
+    for (const savTx of savingsTransactions) {
+      const cat = 'Sparande';
+      const amt = Number(savTx.amount) || 0;
+      const existing = map.get(cat) || { amount: 0, isIncomeCategory: false, items: [] };
+      existing.amount += amt;
+      existing.items.push(savTx);
+      map.set(cat, existing);
+    }
+
+    // Dra av returer ('Återbetalning') och Swish-utlägg från motsvarande utgiftskategori i diagrammet
+    for (const refTx of reimbursementTransactions) {
+      const refAmt = Math.abs(Number(refTx.amount) || 0);
+      if (refAmt <= 0) continue;
+
+      let targetCat = '';
+      if (refTx.category === 'Återbetalning') {
+        const inferred = categorizeBankTransactionForApp({
+          description: refTx.rawDescription || refTx.title || '',
+          counterparty_name: refTx.counterpartyName || refTx.title || '',
+          raw_json: refTx.rawJson,
+        } as any);
+        if (
+          inferred.category &&
+          inferred.category !== 'Övrigt' &&
+          inferred.category !== 'Återbetalning' &&
+          map.has(inferred.category) &&
+          !map.get(inferred.category)?.isIncomeCategory
+        ) {
+          targetCat = inferred.category;
+        }
+      } else if (refTx.category === 'Swish' && map.has('Swish')) {
+        targetCat = 'Swish';
+      }
+
+      if (!targetCat) {
+        // Fallback: dra av från den största rörliga utgiftskategorin i perioden (exkl. Räkningar/Boende/Sparande)
+        let largestCat = '';
+        let largestAmt = 0;
+        for (const [catName, entry] of map.entries()) {
+          if (
+            !entry.isIncomeCategory &&
+            catName !== 'Räkningar' &&
+            catName !== 'Boende' &&
+            catName !== 'Sparande' &&
+            entry.amount > largestAmt
+          ) {
+            largestAmt = entry.amount;
+            largestCat = catName;
+          }
+        }
+        targetCat = largestCat;
+      }
+
+      if (targetCat && map.has(targetCat)) {
+        const entry = map.get(targetCat)!;
+        entry.amount = Math.max(0, entry.amount - refAmt);
+        entry.items.push(refTx);
+      }
     }
 
     for (const inc of periodIncomesList) {
@@ -381,14 +530,20 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         }
         return b.amount - a.amount;
       });
-  }, [variableTransactions, periodFixedList, periodIncomesList]);
+  }, [
+    variableTransactions,
+    periodFixedList,
+    savingsTransactions,
+    reimbursementTransactions,
+    periodIncomesList,
+  ]);
 
   const [selectedSliceCategory, setSelectedSliceCategory] = useState<string | null>(null);
 
-  // Utgiftskategorier med procentandel för cirkeldiagrammet (alltid samma kategorifärg som i övriga appen)
+  // Utgiftskategorier med procentandel för cirkeldiagrammet (exkl. Sparande som inte är konsumtion)
   const expenseChartSlices = useMemo(() => {
     const expenseCats = categoryBreakdown.filter(
-      (c) => !c.isIncomeCategory && c.amount > 0
+      (c) => !c.isIncomeCategory && c.category !== 'Sparande' && c.amount > 0
     );
     const sum = expenseCats.reduce((acc, c) => acc + c.amount, 0);
     if (sum <= 0) return [];

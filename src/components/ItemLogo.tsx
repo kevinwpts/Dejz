@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
-import { getLogoUrl, getFallbackLogoUrl, sanitizeLogoUrl, fetchLogoForName } from '../utils/logo';
+import {
+  getLogoUrl,
+  getFallbackLogoUrl,
+  sanitizeLogoUrl,
+  fetchLogoForName,
+  isMerchantCategoryIconPreferred,
+} from '../utils/logo';
 import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 
@@ -19,16 +25,38 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   size = 'md',
   isRecurring = false,
 }) => {
-  const isSwish =
-    (category || '').toLowerCase() === 'swish' ||
-    (name || '').toLowerCase().includes('swish') ||
-    Boolean(logoUrl && (logoUrl.includes('swish') || logoUrl.includes('getswish')));
+  const [preferCatIcon, setPreferCatIcon] = useState<boolean>(() =>
+    Boolean(logoUrl === 'none' || isMerchantCategoryIconPreferred(name))
+  );
 
-  const initialSrc = sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
+  useEffect(() => {
+    setPreferCatIcon(Boolean(logoUrl === 'none' || isMerchantCategoryIconPreferred(name)));
+    const handlePrefChange = () => {
+      setPreferCatIcon(Boolean(logoUrl === 'none' || isMerchantCategoryIconPreferred(name)));
+    };
+    window.addEventListener('dejz-logo-pref-changed', handlePrefChange);
+    return () => window.removeEventListener('dejz-logo-pref-changed', handlePrefChange);
+  }, [name, logoUrl]);
+
+  const isSwish =
+    !preferCatIcon &&
+    ((category || '').toLowerCase() === 'swish' ||
+      (name || '').toLowerCase().includes('swish') ||
+      Boolean(logoUrl && (logoUrl.includes('swish') || logoUrl.includes('getswish'))));
+
+  const initialSrc = preferCatIcon
+    ? undefined
+    : sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
   const [currentSrc, setCurrentSrc] = useState<string | undefined>(initialSrc);
   const [imgFailed, setImgFailed] = useState(false);
 
   useEffect(() => {
+    if (preferCatIcon) {
+      setCurrentSrc(undefined);
+      setImgFailed(false);
+      return;
+    }
+
     const resolved = sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
     setCurrentSrc(resolved);
     setImgFailed(false);
@@ -51,7 +79,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
         window.clearTimeout(timer);
       };
     }
-  }, [name, category, logoUrl, isSwish]);
+  }, [name, category, logoUrl, isSwish, preferCatIcon]);
 
   const handleError = () => {
     const fallback = getFallbackLogoUrl(currentSrc, name, category);
@@ -59,6 +87,16 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
       setCurrentSrc(fallback);
     } else {
       setImgFailed(true);
+    }
+  };
+
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (
+      (img.naturalWidth <= 1 && img.naturalHeight <= 1) ||
+      (currentSrc && currentSrc.includes('sz=128') && img.naturalWidth <= 16 && img.naturalHeight <= 16)
+    ) {
+      handleError();
     }
   };
 
@@ -104,7 +142,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
       );
     }
 
-    if (currentSrc && !imgFailed) {
+    if (!preferCatIcon && currentSrc && !imgFailed) {
       const isFullBleedTile =
         currentSrc.includes('img.logo.dev/') ||
         currentSrc.startsWith('data:image/jpeg') ||
@@ -117,6 +155,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
           <img
             src={currentSrc}
             alt={name}
+            onLoad={handleLoad}
             onError={handleError}
             className={
               isFullBleedTile
@@ -158,3 +197,4 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     </div>
   );
 };
+

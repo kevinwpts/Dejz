@@ -1275,6 +1275,14 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['webhallen'], cleanName: 'Webhallen', preferredCategories: ['Shopping', 'Elektronik'] },
   { keywords: ['power '], cleanName: 'POWER', preferredCategories: ['Shopping', 'Elektronik'] },
   { keywords: ['klarna'], cleanName: 'Klarna', preferredCategories: ['Shopping', 'Övrigt'] },
+  { keywords: ['avanza'], cleanName: 'Avanza', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['nordnet'], cleanName: 'Nordnet', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['lysa '], cleanName: 'Lysa', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['opti '], cleanName: 'Opti', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['savr'], cleanName: 'SAVR', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['levler'], cleanName: 'Levler', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['montrose'], cleanName: 'Montrose', preferredCategories: ['Sparande', 'Överföring'] },
+  { keywords: ['borgo'], cleanName: 'Borgo', preferredCategories: ['Sparande', 'Överföring'] },
 ];
 
 function normalizeMerchantKey(rawText: string | null | undefined): string {
@@ -1997,12 +2005,135 @@ export function categorizeBankTransactionForApp(
     };
   }
 
+  // Steg 5: Utnyttja bankens MCC-kod (Merchant Category Code, ISO 18245) från Enable Banking raw_json
+  const mccPreferredCategories = resolveCategoryFromMccCode(tx.raw_json);
+  if (mccPreferredCategories && mccPreferredCategories.length > 0) {
+    const category = resolveCategory(mccPreferredCategories);
+    return {
+      merchant: rawOrCleanBankName,
+      category,
+      logo: getLogoUrl(rawOrCleanBankName, category),
+    };
+  }
+
   const category = resolveCategory(['Övrigt']);
   return {
     merchant: rawOrCleanBankName,
     category,
     logo: getLogoUrl(rawOrCleanBankName, category),
   };
+}
+
+/**
+ * Mappar bankens ISO 18245 MCC-kod (Merchant Category Code) eller bank_transaction_code
+ * till rätt svensk kategori när handlaren är en okänd lokal butik, restaurang eller utlandsköp.
+ */
+export function resolveCategoryFromMccCode(rawJson: any): string[] | null {
+  if (!rawJson || typeof rawJson !== 'object') return null;
+
+  const rawMcc =
+    rawJson.merchant_category_code ??
+    rawJson.mcc ??
+    rawJson.card_transaction?.merchant_category_code ??
+    rawJson.card_transaction?.mcc ??
+    rawJson.bank_transaction_code?.sub_family_code ??
+    rawJson.proprietary_bank_transaction_code;
+
+  if (rawMcc !== undefined && rawMcc !== null) {
+    const mccMatch = String(rawMcc).trim().match(/\b(\d{4})\b/);
+    if (mccMatch) {
+      const code = parseInt(mccMatch[1], 10);
+
+      // Livsmedel, bageri, kiosk, restaurang, café, bar & snabbmat
+      if (
+        (code >= 5411 && code <= 5499) ||
+        code === 5300 ||
+        (code >= 5811 && code <= 5814)
+      ) {
+        return ['Mat & dryck', 'Mat', 'Uteliv'];
+      }
+
+      // Kollektivtrafik, tåg, taxi, parkering, trängselavgift, bensinstation, bilverkstad, hyrbil
+      if (
+        (code >= 4111 && code <= 4131) ||
+        code === 4784 ||
+        code === 4789 ||
+        (code >= 5511 && code <= 5599) ||
+        (code >= 7512 && code <= 7549)
+      ) {
+        return ['Transport', 'Bilen'];
+      }
+
+      // Flygbolag (3000–3350, 4511), hotell (3501–3838, 7011) & resebyråer (4722)
+      if (
+        (code >= 3000 && code <= 3838) ||
+        code === 4511 ||
+        code === 4722 ||
+        code === 7011
+      ) {
+        return ['Nöje', 'Transport'];
+      }
+
+      // Apotek, läkare, tandläkare, optiker, frisör, skönhetsvård, spa & gym
+      if (
+        code === 5912 ||
+        (code >= 8011 && code <= 8099) ||
+        code === 7230 ||
+        code === 7297 ||
+        code === 7298 ||
+        code === 7997
+      ) {
+        return ['Hälsa'];
+      }
+
+      // Kläder, skor, varuhus, möbler, inredning, elektronik, bokhandel, sport & hobby
+      if (
+        code === 5200 ||
+        code === 5211 ||
+        code === 5251 ||
+        code === 5261 ||
+        code === 5311 ||
+        code === 5331 ||
+        code === 5399 ||
+        (code >= 5611 && code <= 5699) ||
+        (code >= 5712 && code <= 5735) ||
+        (code >= 5940 && code <= 5999)
+      ) {
+        return ['Shopping'];
+      }
+
+      // Digitala prenumerationer, spel, bio, teater, evenemang & nöjesparker
+      if (
+        (code >= 5815 && code <= 5818) ||
+        (code >= 7829 && code <= 7841) ||
+        (code >= 7911 && code <= 7999)
+      ) {
+        return ['Nöje', 'Abonnemang'];
+      }
+
+      // Telekom, bredband & TV
+      if (code === 4812 || code === 4814 || code === 4816 || code === 4899) {
+        return ['Abonnemang', 'Räkningar'];
+      }
+
+      // El, vatten, fjärrvärme, skatt & myndighetsavgifter
+      if (code === 4900 || code === 9311 || code === 9399) {
+        return ['Räkningar', 'Boende'];
+      }
+
+      // Försäkring
+      if (code === 6300 || code === 5960) {
+        return ['Försäkring', 'Räkningar'];
+      }
+
+      // Fastighetsförvaltning / Hyra
+      if (code === 6513) {
+        return ['Boende'];
+      }
+    }
+  }
+
+  return null;
 }
 
 const AI_SKIP_GENERIC_PLACEHOLDERS = new Set([

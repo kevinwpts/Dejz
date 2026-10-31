@@ -180,6 +180,15 @@ export function compactBankTxRawJson(raw: any): any {
   if (raw.bank_transaction_code && typeof raw.bank_transaction_code === 'object') {
     compact.bank_transaction_code = raw.bank_transaction_code;
   }
+  if (raw.proprietary_bank_transaction_code !== undefined) {
+    compact.proprietary_bank_transaction_code = raw.proprietary_bank_transaction_code;
+  }
+  if (raw.merchant_category_code !== undefined) {
+    compact.merchant_category_code = raw.merchant_category_code;
+  }
+  if (raw.mcc !== undefined) {
+    compact.mcc = raw.mcc;
+  }
   if (raw.creditor_account && typeof raw.creditor_account === 'object') {
     compact.creditor_account = raw.creditor_account;
   }
@@ -192,6 +201,10 @@ export function compactBankTxRawJson(raw: any): any {
       transaction_date_time: raw.card_transaction.transaction_date_time,
       transaction_date: raw.card_transaction.transaction_date,
       time: raw.card_transaction.time,
+      merchant_category_code: raw.card_transaction.merchant_category_code,
+      mcc: raw.card_transaction.mcc,
+      acceptor_name: raw.card_transaction.acceptor_name,
+      merchant_name: raw.card_transaction.merchant_name,
     };
   }
   if (raw.remittance_information !== undefined) {
