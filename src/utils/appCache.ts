@@ -1141,6 +1141,8 @@ export interface SavingsGoalItem {
   name: string;
   targetAmount: number;
   currentAmount: number;
+  linkedAccountId?: string;
+  linkedAccountName?: string;
   monthlyContribution?: number;
   artworkId?: string;
   customImageUrl?: string;

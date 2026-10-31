@@ -4511,6 +4511,8 @@ export const App: React.FC = () => {
                 <SavingsGoalsView
                   userName={userName}
                   transactions={displayTransactions}
+                  accounts={accounts}
+                  totalBalance={totalBalance}
                 />
               )}
 

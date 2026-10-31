@@ -9,6 +9,7 @@ import {
   MagnifyingGlass,
   ImageSquare,
   X,
+  Bank,
 } from '@phosphor-icons/react';
 import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
@@ -27,18 +28,23 @@ import {
 } from './ui/VisualArtwork';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
 import { getHouseholdState, pushHouseholdSyncToServer } from '../utils/householdSync';
-import { TransactionItem } from './HomeTab';
+import { TransactionItem, AccountItem } from './HomeTab';
+import { ItemLogo } from './ItemLogo';
 
 interface SavingsGoalsViewProps {
   onGoalsChanged?: (goals: SavingsGoalItem[]) => void;
   userName?: string | null;
   transactions?: TransactionItem[];
+  accounts?: AccountItem[];
+  totalBalance?: number;
 }
 
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   onGoalsChanged,
   userName,
   transactions = [],
+  accounts = [],
+  totalBalance,
 }) => {
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoalItem[]>(() => getSavingsGoals());
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
@@ -50,6 +56,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [goalNameInput, setGoalNameInput] = useState('');
   const [goalTargetInput, setGoalTargetInput] = useState('');
   const [goalCurrentInput, setGoalCurrentInput] = useState('');
+  const [goalLinkedAccountId, setGoalLinkedAccountId] = useState<string | undefined>(undefined);
   const [goalArtworkId, setGoalArtworkId] = useState<string>('piggy');
   const [goalCustomImage, setGoalCustomImage] = useState<string | undefined>(undefined);
   const [artworkSearch, setArtworkSearch] = useState('');
@@ -89,11 +96,53 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     if (onGoalsChanged) onGoalsChanged(next);
   };
 
+  const effectiveTotalBalance = useMemo(() => {
+    if (typeof totalBalance === 'number') return Math.max(0, Math.round(totalBalance));
+    return Math.max(
+      0,
+      Math.round(
+        accounts
+          .filter((a) => !a.excludeFromTotalBalance)
+          .reduce((s, a) => s + (Number(a.balance) || 0), 0)
+      )
+    );
+  }, [totalBalance, accounts]);
+
+  const resolveGoalAmount = (goal: SavingsGoalItem): number => {
+    if (goal.linkedAccountId === '__TOTAL__') {
+      return accounts.length > 0 || typeof totalBalance === 'number'
+        ? effectiveTotalBalance
+        : Math.max(0, Math.round(Number(goal.currentAmount) || 0));
+    }
+    if (goal.linkedAccountId) {
+      const matchedAcc = accounts.find(
+        (a) =>
+          a.id === goal.linkedAccountId ||
+          (goal.linkedAccountName &&
+            a.name.trim().toLowerCase() === goal.linkedAccountName.trim().toLowerCase())
+      );
+      if (matchedAcc) {
+        return Math.max(0, Math.round(Number(matchedAcc.balance) || 0));
+      }
+    }
+    return Math.max(0, Math.round(Number(goal.currentAmount) || 0));
+  };
+
+  const resolveGoalLinkedLabel = (goal: SavingsGoalItem): string | null => {
+    if (goal.linkedAccountId === '__TOTAL__') return 'Totalsaldo';
+    if (goal.linkedAccountId) {
+      const matchedAcc = accounts.find((a) => a.id === goal.linkedAccountId);
+      return matchedAcc?.name || goal.linkedAccountName || 'Kopplat konto';
+    }
+    return null;
+  };
+
   const openCreateGoal = () => {
     setEditingGoalId(null);
     setGoalNameInput('');
     setGoalTargetInput('');
     setGoalCurrentInput('');
+    setGoalLinkedAccountId(undefined);
     setGoalArtworkId('piggy');
     setGoalCustomImage(undefined);
     setArtworkSearch('');
@@ -105,7 +154,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setEditingGoalId(goal.id);
     setGoalNameInput(goal.name);
     setGoalTargetInput(String(goal.targetAmount));
-    setGoalCurrentInput(String(goal.currentAmount));
+    setGoalCurrentInput(String(resolveGoalAmount(goal)));
+    setGoalLinkedAccountId(goal.linkedAccountId);
     setGoalArtworkId(goal.artworkId || 'piggy');
     setGoalCustomImage(goal.customImageUrl);
     setArtworkSearch('');
@@ -128,7 +178,22 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const handleSaveGoal = () => {
     const cleanName = goalNameInput.trim();
     const cleanTarget = Math.max(1, Math.round(Number(goalTargetInput) || 0));
-    const cleanCurr = Math.max(0, Math.round(Number(goalCurrentInput) || 0));
+    const matchedAcc = goalLinkedAccountId
+      ? accounts.find((a) => a.id === goalLinkedAccountId)
+      : undefined;
+    const cleanCurr =
+      goalLinkedAccountId === '__TOTAL__'
+        ? effectiveTotalBalance
+        : matchedAcc
+        ? Math.max(0, Math.round(Number(matchedAcc.balance) || 0))
+        : Math.max(0, Math.round(Number(goalCurrentInput) || 0));
+    const linkedName =
+      goalLinkedAccountId === '__TOTAL__'
+        ? 'Totalsaldo'
+        : matchedAcc
+        ? matchedAcc.name
+        : undefined;
+
     if (!cleanName || cleanTarget <= 0) return;
 
     const todayIso = new Date().toISOString().slice(0, 10);
@@ -141,6 +206,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               name: cleanName,
               targetAmount: cleanTarget,
               currentAmount: cleanCurr,
+              linkedAccountId: goalLinkedAccountId,
+              linkedAccountName: linkedName,
               artworkId: goalArtworkId,
               customImageUrl: goalCustomImage,
             }
@@ -155,13 +222,17 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         name: cleanName,
         targetAmount: cleanTarget,
         currentAmount: cleanCurr,
+        linkedAccountId: goalLinkedAccountId,
+        linkedAccountName: linkedName,
         artworkId: goalArtworkId,
         customImageUrl: goalCustomImage,
         createdAt: todayIso,
         activities: [
           {
             id: `act-${Date.now()}`,
-            text: 'Du har skapat ditt mål',
+            text: linkedName
+              ? `Skapade mål kopplat till ${linkedName}`
+              : 'Du har skapat ditt mål',
             date: todayIso,
           },
         ],
@@ -187,7 +258,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     );
   }, [artworkSearch]);
 
-  const totalSaved = savingsGoals.reduce((sum, g) => sum + (Number(g.currentAmount) || 0), 0);
+  const totalSaved = savingsGoals.reduce((sum, g) => sum + resolveGoalAmount(g), 0);
   const totalTarget = savingsGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
 
   // ============================================================================
@@ -195,9 +266,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   // ============================================================================
   if (selectedGoal) {
     const theme = getGoalArtworkTheme(selectedGoal.artworkId);
+    const effectiveSelectedAmount = resolveGoalAmount(selectedGoal);
+    const linkedLabel = resolveGoalLinkedLabel(selectedGoal);
     const pct =
       selectedGoal.targetAmount > 0
-        ? Math.min(100, Math.round((selectedGoal.currentAmount / selectedGoal.targetAmount) * 100))
+        ? Math.min(100, Math.round((effectiveSelectedAmount / selectedGoal.targetAmount) * 100))
         : 0;
     const activities =
       selectedGoal.activities && selectedGoal.activities.length > 0
@@ -298,10 +371,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 {selectedGoal.name}
               </span>
               <span className="font-display font-bold text-3xl sm:text-4xl text-white tabular-nums tracking-tight block mt-0.5">
-                {formatKr(selectedGoal.currentAmount)}
+                {formatKr(effectiveSelectedAmount)}
               </span>
               <span className="text-xs text-white/75 tabular-nums block mt-0.5">
                 av {formatKr(selectedGoal.targetAmount)}
+                {linkedLabel ? ` · ${linkedLabel}` : ''}
               </span>
             </div>
 
@@ -872,44 +946,189 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               </div>
             </div>
 
-            {/* Sparat hittills */}
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3">
-              <label className="block cursor-text">
-                <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-0.5">
-                  Sparat hittills
+            {/* Sparat hittills / Välj konto eller totalsaldo */}
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
+              <div>
+                <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-2">
+                  Vad representerar sparandet?
                 </span>
-                <div className="flex items-baseline justify-between gap-2">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={goalCurrentInput}
-                    onChange={(e) =>
-                      setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
-                    }
-                    placeholder="0"
-                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-xl sm:text-2xl text-emerald-600 dark:text-emerald-400 placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
-                  />
-                  <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
-                    kr
-                  </span>
-                </div>
-              </label>
-
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                {[500, 1000, 2500].map((addAmt) => (
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
+                  {/* Alternativ 1: Ange fritt (Manuellt belopp) */}
                   <button
-                    key={addAmt}
                     type="button"
                     onClick={() => {
-                      const curr = Math.max(0, Math.round(Number(goalCurrentInput) || 0));
-                      setGoalCurrentInput(String(curr + addAmt));
+                      setGoalLinkedAccountId(undefined);
                     }}
-                    className="py-2 px-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-display font-semibold text-[var(--text-primary)] tabular-nums transition-colors cursor-pointer"
+                    className={`w-full px-3 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                      !goalLinkedAccountId
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                        : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                    }`}
                   >
-                    +{new Intl.NumberFormat('sv-SE').format(addAmt)} kr
+                    <div className="min-w-0">
+                      <span className="text-xs font-semibold block">
+                        Eget valt belopp
+                      </span>
+                      <span
+                        className={`text-[10.5px] block ${
+                          !goalLinkedAccountId
+                            ? 'text-[var(--bg-color)]/75'
+                            : 'text-[var(--text-secondary)]'
+                        }`}
+                      >
+                        Fyll i startbelopp och lägg till själv
+                      </span>
+                    </div>
+                    {!goalLinkedAccountId && <Check size={14} weight="bold" className="shrink-0" />}
                   </button>
-                ))}
+
+                  {/* Alternativ 2: Totalsaldo */}
+                  {(accounts.length > 0 || effectiveTotalBalance > 0) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGoalLinkedAccountId('__TOTAL__');
+                        setGoalCurrentInput(String(effectiveTotalBalance));
+                      }}
+                      className={`w-full px-3 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                        goalLinkedAccountId === '__TOTAL__'
+                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                          : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                            goalLinkedAccountId === '__TOTAL__'
+                              ? 'bg-[var(--bg-color)]/15 text-[var(--bg-color)]'
+                              : 'bg-[var(--bg-color)] text-[var(--text-primary)]'
+                          }`}
+                        >
+                          <Bank size={14} weight="bold" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-semibold block truncate">
+                            Totalsaldo (alla konton)
+                          </span>
+                          <span
+                            className={`text-[10.5px] tabular-nums block ${
+                              goalLinkedAccountId === '__TOTAL__'
+                                ? 'text-[var(--bg-color)]/75'
+                                : 'text-[var(--text-secondary)]'
+                            }`}
+                          >
+                            {formatKr(effectiveTotalBalance)} · Synkas automatiskt
+                          </span>
+                        </div>
+                      </div>
+                      {goalLinkedAccountId === '__TOTAL__' && (
+                        <Check size={14} weight="bold" className="shrink-0" />
+                      )}
+                    </button>
+                  )}
+
+                  {/* Alternativ 3..N: Specifikt bankkonto */}
+                  {accounts.map((acc) => {
+                    const isSelected = goalLinkedAccountId === acc.id;
+                    const accBal = Math.max(0, Math.round(Number(acc.balance) || 0));
+                    return (
+                      <button
+                        key={acc.id}
+                        type="button"
+                        onClick={() => {
+                          setGoalLinkedAccountId(acc.id);
+                          setGoalCurrentInput(String(accBal));
+                        }}
+                        className={`w-full px-3 py-2.5 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                            : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <ItemLogo
+                            name={acc.bankName || acc.name}
+                            category="Bank"
+                            logoUrl={acc.logo}
+                            size="sm"
+                          />
+                          <div className="min-w-0">
+                            <span className="text-xs font-semibold block truncate">
+                              {acc.name}
+                            </span>
+                            <span
+                              className={`text-[10.5px] tabular-nums block truncate ${
+                                isSelected
+                                  ? 'text-[var(--bg-color)]/75'
+                                  : 'text-[var(--text-secondary)]'
+                              }`}
+                            >
+                              {formatKr(accBal)}
+                              {acc.bankName ? ` · ${acc.bankName}` : ''}
+                            </span>
+                          </div>
+                        </div>
+                        {isSelected && <Check size={14} weight="bold" className="shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+
+              {!goalLinkedAccountId ? (
+                <div className="pt-3 border-t border-[var(--border-subtle)] space-y-3">
+                  <label className="block cursor-text">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-0.5">
+                      Sparat hittills
+                    </span>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={goalCurrentInput}
+                        onChange={(e) =>
+                          setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
+                        }
+                        placeholder="0"
+                        className="w-full bg-transparent border-0 p-0 font-display font-bold text-xl sm:text-2xl text-emerald-600 dark:text-emerald-400 placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
+                      />
+                      <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
+                        kr
+                      </span>
+                    </div>
+                  </label>
+
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    {[500, 1000, 2500].map((addAmt) => (
+                      <button
+                        key={addAmt}
+                        type="button"
+                        onClick={() => {
+                          const curr = Math.max(0, Math.round(Number(goalCurrentInput) || 0));
+                          setGoalCurrentInput(String(curr + addAmt));
+                        }}
+                        className="py-2 px-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-display font-semibold text-[var(--text-primary)] tabular-nums transition-colors cursor-pointer"
+                      >
+                        +{new Intl.NumberFormat('sv-SE').format(addAmt)} kr
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
+                      Nuvarande saldo på valt konto
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)] block mt-0.5">
+                      Uppdateras automatiskt när ditt saldo ändras
+                    </span>
+                  </div>
+                  <span className="font-display font-bold text-lg text-emerald-600 dark:text-emerald-400 tabular-nums shrink-0">
+                    {formatKr(Number(goalCurrentInput) || 0)}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2.5">
@@ -1001,11 +1220,13 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             <div className="ui-list-card">
               {savingsGoals.map((goal) => {
                 const theme = getGoalArtworkTheme(goal.artworkId);
+                const effectiveAmt = resolveGoalAmount(goal);
+                const linkedLabel = resolveGoalLinkedLabel(goal);
                 const pct =
                   goal.targetAmount > 0
                     ? Math.min(
                         100,
-                        Math.round((goal.currentAmount / goal.targetAmount) * 100)
+                        Math.round((effectiveAmt / goal.targetAmount) * 100)
                       )
                     : 0;
                 return (
@@ -1038,9 +1259,16 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                     {/* Goal Title + Amount + Progress Bar + Percentage */}
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex items-baseline justify-between gap-3">
-                        <span className="ui-row-title truncate">{goal.name}</span>
+                        <div className="min-w-0 flex items-baseline gap-1.5">
+                          <span className="ui-row-title truncate">{goal.name}</span>
+                          {linkedLabel && (
+                            <span className="text-[11px] text-[var(--text-secondary)] truncate shrink-0">
+                              · {linkedLabel}
+                            </span>
+                          )}
+                        </div>
                         <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums shrink-0">
-                          {formatKr(goal.currentAmount)}
+                          {formatKr(effectiveAmt)}
                         </span>
                       </div>
 

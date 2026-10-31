@@ -289,10 +289,35 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
-  const savingsGoals = useMemo(() => getSavingsGoals(), [transactions, fixedExpenses, incomes]);
+  const savingsGoals = useMemo(
+    () => getSavingsGoals(),
+    [transactions, fixedExpenses, incomes, accounts, totalBalance]
+  );
+  const resolveHomeGoalAmount = useCallback(
+    (g: (typeof savingsGoals)[number]): number => {
+      if (g.linkedAccountId === '__TOTAL__') {
+        return accounts.length > 0 || totalBalance > 0
+          ? Math.max(0, Math.round(Number(totalBalance) || 0))
+          : Math.max(0, Math.round(Number(g.currentAmount) || 0));
+      }
+      if (g.linkedAccountId) {
+        const matched = accounts.find(
+          (a) =>
+            a.id === g.linkedAccountId ||
+            (g.linkedAccountName &&
+              a.name.trim().toLowerCase() === g.linkedAccountName.trim().toLowerCase())
+        );
+        if (matched) {
+          return Math.max(0, Math.round(Number(matched.balance) || 0));
+        }
+      }
+      return Math.max(0, Math.round(Number(g.currentAmount) || 0));
+    },
+    [accounts, totalBalance]
+  );
   const totalSavedInGoals = useMemo(
-    () => savingsGoals.reduce((sum, g) => sum + (Number(g.currentAmount) || 0), 0),
-    [savingsGoals]
+    () => savingsGoals.reduce((sum, g) => sum + resolveHomeGoalAmount(g), 0),
+    [savingsGoals, resolveHomeGoalAmount]
   );
   const [selectedAccountModalId, setSelectedAccountModalId] = useState<string | null>(null);
   const [isEditingAccountName, setIsEditingAccountName] = useState(false);
@@ -1130,9 +1155,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   <div>
                     <div className="divide-y divide-[var(--border-subtle)]">
                       {savingsGoals.map((goal) => {
+                        const effectiveGoalAmt = resolveHomeGoalAmount(goal);
+                        const linkedLabel =
+                          goal.linkedAccountId === '__TOTAL__'
+                            ? 'Totalsaldo'
+                            : goal.linkedAccountId
+                            ? accounts.find((a) => a.id === goal.linkedAccountId)?.name ||
+                              goal.linkedAccountName ||
+                              null
+                            : null;
                         const pct =
                           goal.targetAmount > 0
-                            ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+                            ? Math.min(100, Math.round((effectiveGoalAmt / goal.targetAmount) * 100))
                             : 0;
                         const theme = getGoalArtworkTheme(goal.artworkId);
 
@@ -1164,11 +1198,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
                             <div className="min-w-0 flex-1 space-y-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
-                                  {goal.name}
-                                </span>
+                                <div className="min-w-0 flex items-baseline gap-1.5">
+                                  <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
+                                    {goal.name}
+                                  </span>
+                                  {linkedLabel && (
+                                    <span className="text-[11px] text-[var(--text-secondary)] truncate shrink-0">
+                                      · {linkedLabel}
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
-                                  {formatKr(goal.currentAmount)}
+                                  {formatKr(effectiveGoalAmt)}
                                 </span>
                               </div>
 
