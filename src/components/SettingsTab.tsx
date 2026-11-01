@@ -101,6 +101,8 @@ interface SettingsTabProps {
   ) => void;
   subView?: SettingsSubView;
   onSubViewChange?: (view: SettingsSubView) => void;
+  selectedGoalId?: string | null;
+  onSelectGoalId?: (goalId: string | null) => void;
 }
 
 export type SettingsSubView =
@@ -187,6 +189,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onCategoryMutated,
   subView: controlledSubView,
   onSubViewChange,
+  selectedGoalId,
+  onSelectGoalId,
 }) => {
   const [internalSubView, setInternalSubView] = useState<SettingsSubView>('main');
   const subView = controlledSubView ?? internalSubView;
@@ -920,7 +924,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'goals') {
     return (
       <div className="animate-slide-in-right">
-        <SavingsGoalsView userName={userName} transactions={transactions} />
+        <SavingsGoalsView
+          userName={userName}
+          transactions={transactions}
+          accounts={accounts}
+          selectedGoalId={selectedGoalId}
+          onSelectGoalId={onSelectGoalId}
+        />
       </div>
     );
   }

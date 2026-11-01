@@ -7,7 +7,6 @@ import {
   Trash,
   Check,
   CaretLeft,
-  CaretRight,
   ArrowRight,
   MagnifyingGlass,
   ImageSquare,
@@ -27,7 +26,6 @@ import {
   getGoalArtworkTheme,
   GoalArtworkIllustration,
   EmptyClusterArtwork,
-  TiltedGoalsPromoArtwork,
 } from './ui/VisualArtwork';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
 import { getHouseholdState, pushHouseholdSyncToServer } from '../utils/householdSync';
@@ -40,9 +38,11 @@ interface SavingsGoalsViewProps {
   transactions?: TransactionItem[];
   accounts?: AccountItem[];
   totalBalance?: number;
+  selectedGoalId?: string | null;
+  onSelectGoalId?: (goalId: string | null) => void;
 }
 
-type GoalWizardStep = 'edit-hub' | 1 | 2 | 3 | 4 | 5;
+type CreateWizardStep = 1 | 2 | 3 | 4 | 5;
 
 function inferArtworkFromGoalName(rawName: string): string {
   const q = rawName.trim().toLowerCase();
@@ -98,21 +98,47 @@ function formatInputThousands(rawDigits: string): string {
   return new Intl.NumberFormat('sv-SE').format(num);
 }
 
+function cleanActivityLabel(text: string, hasAmount: boolean): string {
+  if (!hasAmount) return text;
+  if (/^satte in\s+[\d\s\u00A0]+kr$/i.test(text.trim())) {
+    return 'Insättning';
+  }
+  if (/^tog ut\s+[\d\s\u00A0]+kr$/i.test(text.trim())) {
+    return 'Uttag';
+  }
+  return text.replace(/\s*\([+-]?[\d\s\u00A0]+kr\)\s*$/i, '').trim() || text;
+}
+
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   onGoalsChanged,
   userName,
   transactions = [],
   accounts = [],
   totalBalance,
+  selectedGoalId: controlledSelectedGoalId,
+  onSelectGoalId,
 }) => {
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoalItem[]>(() => getSavingsGoals());
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [internalSelectedGoalId, setInternalSelectedGoalId] = useState<string | null>(null);
 
-  // Create / Edit Wizard State (Onboarding-style step-by-step)
-  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [wizardStep, setWizardStep] = useState<GoalWizardStep>(1);
+  const selectedGoalId =
+    controlledSelectedGoalId !== undefined ? controlledSelectedGoalId : internalSelectedGoalId;
+
+  const setSelectedGoalId = (nextId: string | null) => {
+    setInternalSelectedGoalId(nextId);
+    onSelectGoalId?.(nextId);
+  };
+
+  // Create Wizard State (Onboarding-style step-by-step, ONLY for creating new goals)
+  const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState<CreateWizardStep>(1);
   const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
+
+  // Direct Edit BottomSheet State (Smooth 1-view sheet for editing existing goals)
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+
+  // Shared Form Fields for Create / Edit
   const [goalNameInput, setGoalNameInput] = useState('');
   const [goalTargetInput, setGoalTargetInput] = useState('');
   const [goalCurrentInput, setGoalCurrentInput] = useState('');
@@ -123,8 +149,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [artworkSearch, setArtworkSearch] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Deposit / Withdraw / Rule Sheet State
-  const [transferMode, setTransferMode] = useState<'deposit' | 'withdraw' | 'rule' | null>(null);
+  // Deposit / Withdraw Sheet State (for manual goals)
+  const [transferMode, setTransferMode] = useState<'deposit' | 'withdraw' | null>(null);
   const [transferAmountInput, setTransferAmountInput] = useState('');
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -197,7 +223,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     return null;
   };
 
-  const navigateWizardStep = (next: GoalWizardStep, dir: 'forward' | 'back') => {
+  const navigateWizardStep = (next: CreateWizardStep, dir: 'forward' | 'back') => {
     setSlideDir(dir);
     setWizardStep(next);
   };
@@ -214,7 +240,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setArtworkSearch('');
     setSlideDir('forward');
     setWizardStep(1);
-    setIsGoalModalOpen(true);
+    setIsEditSheetOpen(false);
+    setIsCreateWizardOpen(true);
   };
 
   const openEditGoal = (goal: SavingsGoalItem) => {
@@ -227,9 +254,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalCustomImage(goal.customImageUrl);
     setHasManuallyPickedArtwork(true);
     setArtworkSearch('');
-    setSlideDir('forward');
-    setWizardStep('edit-hub');
-    setIsGoalModalOpen(true);
+    setIsCreateWizardOpen(false);
+    setIsEditSheetOpen(true);
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,7 +310,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           : g
       );
       updateGoals(next);
-      setIsGoalModalOpen(false);
+      setIsEditSheetOpen(false);
+      setIsCreateWizardOpen(false);
     } else {
       const newId = `goal-${Date.now()}`;
       const newGoal: SavingsGoalItem = {
@@ -308,7 +335,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         ],
       };
       updateGoals([...savingsGoals, newGoal]);
-      setIsGoalModalOpen(false);
+      setIsCreateWizardOpen(false);
       setSelectedGoalId(newId);
     }
   };
@@ -366,13 +393,282 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   }, [savingsGoals, accounts, effectiveTotalBalance]);
   const totalTarget = savingsGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
 
+  const sharedHiddenFileInput = (
+    <input
+      ref={galleryInputRef}
+      type="file"
+      accept="image/*"
+      onChange={handleGalleryUpload}
+      className="hidden"
+    />
+  );
+
   // ============================================================================
-  // GOAL DETAIL VIEW (Lunar Screenshot #4: Colored Hero + Cropped Artwork + Actions)
+  // DIRECT EDIT GOAL BOTTOM SHEET (Smooth 1-view editor without onboarding steps)
+  // ============================================================================
+  function renderEditGoalSheet() {
+    return (
+      <>
+        <BottomSheet
+          isOpen={isEditSheetOpen}
+          onClose={() => setIsEditSheetOpen(false)}
+          title="Redigera sparmål"
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveGoal();
+            }}
+            className="space-y-4"
+          >
+            {/* 1. Direktinmatning av Namn, Målbelopp och (vid eget belopp) Sparat hittills */}
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+              <label className="px-4 py-3 block cursor-text">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] block mb-0.5">
+                  Namn
+                </span>
+                <input
+                  type="text"
+                  required
+                  value={goalNameInput}
+                  onChange={(e) => setGoalNameInput(e.target.value)}
+                  placeholder="t.ex. Resa eller Buffert"
+                  className="w-full bg-transparent border-0 p-0 font-display font-semibold text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                />
+              </label>
+
+              <label className="px-4 py-3 block cursor-text">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] block mb-0.5">
+                  Målbelopp
+                </span>
+                <div className="flex items-baseline justify-between gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={formatInputThousands(goalTargetInput)}
+                    onChange={(e) =>
+                      setGoalTargetInput(e.target.value.replace(/[^\d]/g, ''))
+                    }
+                    placeholder="10 000"
+                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
+                  />
+                  <span className="text-xs font-medium text-[var(--text-muted)] shrink-0">
+                    kr
+                  </span>
+                </div>
+              </label>
+
+              {!goalLinkedAccountId && (
+                <label className="px-4 py-3 block cursor-text">
+                  <span className="text-[11px] font-medium text-[var(--text-secondary)] block mb-0.5">
+                    Sparat hittills
+                  </span>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatInputThousands(goalCurrentInput)}
+                      onChange={(e) =>
+                        setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
+                      }
+                      placeholder="0"
+                      className="w-full bg-transparent border-0 p-0 font-display font-semibold text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
+                    />
+                    <span className="text-xs font-medium text-[var(--text-muted)] shrink-0">
+                      kr
+                    </span>
+                  </div>
+                </label>
+              )}
+            </div>
+
+            {/* 2. Hur sparandet följs */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] block px-1">
+                Hur sparandet följs
+              </span>
+              <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setGoalLinkedAccountId(undefined)}
+                  className="w-full px-3.5 py-2.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                >
+                  <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                    Eget valt belopp
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {!goalLinkedAccountId && (
+                      <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                    )}
+                  </div>
+                </button>
+
+                {(accounts.length > 0 || effectiveTotalBalance > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGoalLinkedAccountId('__TOTAL__');
+                      setGoalCurrentInput(String(effectiveTotalBalance));
+                    }}
+                    className="w-full px-3.5 py-2.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                  >
+                    <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                      Totalsaldo
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+                        {formatKr(effectiveTotalBalance)}
+                      </span>
+                      {goalLinkedAccountId === '__TOTAL__' && (
+                        <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                      )}
+                    </div>
+                  </button>
+                )}
+
+                {accounts.map((acc) => {
+                  const isSelected = goalLinkedAccountId === acc.id;
+                  const accBal = Math.max(0, Math.round(Number(acc.balance) || 0));
+                  const hasDuplicateName =
+                    accounts.filter(
+                      (other) =>
+                        other.name.trim().toLowerCase() === acc.name.trim().toLowerCase()
+                    ).length > 1;
+                  const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
+                  const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+
+                  return (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => {
+                        setGoalLinkedAccountId(acc.id);
+                        setGoalCurrentInput(String(accBal));
+                      }}
+                      className="w-full px-3.5 py-2.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                    >
+                      <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                        {acc.name}
+                        {hasDuplicateName && last4 ? ` (•••• ${last4})` : ''}
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+                          {formatKr(accBal)}
+                        </span>
+                        {isSelected && (
+                          <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Bild / ikontema direkt i samma vy */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] block px-1">
+                Bild
+              </span>
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className={`w-12 h-12 rounded-2xl shrink-0 flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
+                    goalCustomImage
+                      ? 'ring-2 ring-[var(--text-primary)]'
+                      : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
+                  }`}
+                  title="Välj egen bild"
+                >
+                  {goalCustomImage ? (
+                    <img
+                      src={goalCustomImage}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ImageSquare size={18} className="text-[var(--text-primary)]" />
+                  )}
+                </button>
+
+                {GOAL_ARTWORKS.map((art) => {
+                  const isSelected = !goalCustomImage && goalArtworkId === art.id;
+                  return (
+                    <button
+                      key={art.id}
+                      type="button"
+                      onClick={() => {
+                        setGoalCustomImage(undefined);
+                        setGoalArtworkId(art.id);
+                      }}
+                      title={art.label}
+                      style={{ backgroundColor: art.tileBg }}
+                      className={`w-12 h-12 rounded-2xl p-1.5 shrink-0 flex items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
+                        isSelected
+                          ? 'ring-2 ring-[var(--text-primary)] scale-95'
+                          : 'opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <GoalArtworkIllustration artworkId={art.id} className="w-full h-full" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Spara / Ta bort */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="submit"
+                disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
+                className="w-full ui-btn-primary disabled:opacity-40"
+              >
+                <Check size={14} weight="bold" />
+                <span>Spara ändringar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full py-2.5 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Trash size={14} />
+                <span>Ta bort sparmål</span>
+              </button>
+            </div>
+          </form>
+        </BottomSheet>
+
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          title="Ta bort sparmål?"
+          description={`${goalNameInput || 'Sparmålet'} tas bort.`}
+          confirmLabel="Ta bort"
+          onConfirm={() => {
+            const next = savingsGoals.filter((g) => g.id !== editingGoalId);
+            updateGoals(next);
+            if (selectedGoalId === editingGoalId) {
+              setSelectedGoalId(null);
+            }
+            setShowDeleteConfirm(false);
+            setIsEditSheetOpen(false);
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      </>
+    );
+  }
+
+  // ============================================================================
+  // GOAL DETAIL VIEW (Colored Hero + Actions + Clean Activity)
   // ============================================================================
   if (selectedGoal) {
     const theme = getGoalArtworkTheme(selectedGoal.artworkId);
     const effectiveSelectedAmount = resolveGoalAmount(selectedGoal);
     const linkedLabel = resolveGoalLinkedLabel(selectedGoal);
+    const isLinkedToAccount = Boolean(selectedGoal.linkedAccountId);
     const pct =
       selectedGoal.targetAmount > 0
         ? Math.min(100, Math.round((effectiveSelectedAmount / selectedGoal.targetAmount) * 100))
@@ -390,26 +686,18 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
     const handleConfirmTransfer = () => {
       const amt = Math.max(0, Math.round(Number(transferAmountInput) || 0));
-      if (amt <= 0 && transferMode !== 'rule') return;
+      if (amt <= 0 || !transferMode) return;
       const todayIso = new Date().toISOString().slice(0, 10);
 
       const next = savingsGoals.map((g) => {
         if (g.id !== selectedGoal.id) return g;
-        if (transferMode === 'rule') {
-          return {
-            ...g,
-            monthlyContribution: amt > 0 ? amt : undefined,
-          };
-        }
         const isDeposit = transferMode === 'deposit';
         const nextAmount = isDeposit
           ? g.currentAmount + amt
           : Math.max(0, g.currentAmount - amt);
         const newAct = {
           id: `act-${Date.now()}`,
-          text: isDeposit
-            ? `Satte in ${formatKr(amt)}`
-            : `Tog ut ${formatKr(amt)}`,
+          text: isDeposit ? 'Insättning' : 'Uttag',
           date: todayIso,
           amount: isDeposit ? amt : -amt,
           authorInitials: userInitials,
@@ -429,9 +717,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
     return (
       <div className="ui-page animate-fade-in">
+        {sharedHiddenFileInput}
+
         {/* Top Colored Hero Card with Cropped Right Artwork */}
         <section
-          className="relative rounded-3xl overflow-hidden p-5 sm:p-6 min-h-[230px] flex flex-col justify-between text-white shadow-sm"
+          className="relative rounded-3xl overflow-hidden p-5 sm:p-6 min-h-[210px] flex flex-col justify-between text-white shadow-sm"
           style={{
             background: selectedGoal.customImageUrl
               ? '#111827'
@@ -448,7 +738,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20" />
             </>
           ) : (
-            /* Cropped Right-Edge Illustration (Exact match to Lunar Screenshot #4) */
             <div
               className="absolute -right-12 top-3 w-52 h-52 sm:w-56 sm:h-56 pointer-events-none select-none opacity-95"
               aria-hidden="true"
@@ -457,21 +746,22 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             </div>
           )}
 
-          {/* Top Bar inside Hero */}
-          <div className="relative z-10 flex items-center justify-between">
+          {/* Top Bar inside Hero: Edit button on the right (Navbar above handles Back) */}
+          <div className="relative z-10 flex items-center justify-end">
             <button
               type="button"
-              onClick={() => setSelectedGoalId(null)}
-              aria-label="Tillbaka till sparmål"
-              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md flex items-center justify-center text-white transition-colors cursor-pointer"
+              onClick={() => openEditGoal(selectedGoal)}
+              aria-label="Redigera sparmål"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/25 hover:bg-black/35 backdrop-blur-md text-xs font-medium text-white transition-colors cursor-pointer"
             >
-              <CaretLeft size={18} weight="bold" />
+              <PencilSimple size={13} weight="bold" />
+              <span>Redigera</span>
             </button>
           </div>
 
           {/* Bottom Goal Stats + Progress Bar inside Hero */}
           <div className="relative z-10 mt-10 space-y-3">
-            <div className="max-w-[65%]">
+            <div className="max-w-[68%]">
               <span className="text-sm font-medium text-white/90 block truncate">
                 {selectedGoal.name}
               </span>
@@ -496,91 +786,35 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           </div>
         </section>
 
-        {/* 3 Circular Action Buttons: Sätt in · Ta ut · Redigera */}
-        <section className="flex items-center justify-start gap-7 px-2 py-1">
-          <button
-            type="button"
-            onClick={() => {
-              setTransferAmountInput('');
-              setTransferMode('deposit');
-            }}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shadow-sm group-active:scale-95 transition-transform">
-              <Plus size={20} weight="bold" />
-            </div>
-            <span className="text-xs font-medium text-[var(--text-primary)]">
-              Sätt in
-            </span>
-          </button>
-
-          <button
-            type="button"
-            disabled={selectedGoal.currentAmount <= 0}
-            onClick={() => {
-              setTransferAmountInput('');
-              setTransferMode('withdraw');
-            }}
-            className="flex flex-col items-center gap-2 group cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <div className="w-12 h-12 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center group-active:scale-95 transition-transform">
-              <Minus size={20} weight="bold" />
-            </div>
-            <span className="text-xs font-medium text-[var(--text-secondary)]">
-              Ta ut
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => openEditGoal(selectedGoal)}
-            className="flex flex-col items-center gap-2 group cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center group-active:scale-95 transition-transform">
-              <PencilSimple size={18} weight="regular" />
-            </div>
-            <span className="text-xs font-medium text-[var(--text-secondary)]">
-              Redigera
-            </span>
-          </button>
-        </section>
-
-        {/* Regler (Månadssparande) */}
-        <section className="ui-section">
-          <div className="ui-section-header">
-            <h2 className="ui-section-title">Regler</h2>
-          </div>
-          <div className="ui-card-p">
+        {/* Manual Deposit / Withdraw Buttons ONLY when goal uses Eget valt belopp */}
+        {!isLinkedToAccount && (
+          <section className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
               onClick={() => {
-                setTransferAmountInput(
-                  selectedGoal.monthlyContribution
-                    ? String(selectedGoal.monthlyContribution)
-                    : ''
-                );
-                setTransferMode('rule');
+                setTransferAmountInput('');
+                setTransferMode('deposit');
               }}
-              className="w-full flex items-center gap-3.5 text-left hover:opacity-85 transition-opacity cursor-pointer"
+              className="py-3 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                <Plus size={18} weight="regular" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="ui-row-title block">
-                  {selectedGoal.monthlyContribution
-                    ? `Månadssparande: ${formatKr(selectedGoal.monthlyContribution)}/mån`
-                    : 'Lägg till regel'}
-                </span>
-                {selectedGoal.monthlyContribution && (
-                  <span className="ui-row-subtitle block">
-                    Tryck för att ändra ditt månadssparande
-                  </span>
-                )}
-              </div>
+              <Plus size={15} weight="bold" />
+              <span>Sätt in</span>
             </button>
-          </div>
-        </section>
+
+            <button
+              type="button"
+              disabled={selectedGoal.currentAmount <= 0}
+              onClick={() => {
+                setTransferAmountInput('');
+                setTransferMode('withdraw');
+              }}
+              className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Minus size={15} weight="bold" />
+              <span>Ta ut</span>
+            </button>
+          </section>
+        )}
 
         {/* Aktivitet */}
         <section className="ui-section">
@@ -588,63 +822,65 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             <h2 className="ui-section-title">Aktivitet</h2>
           </div>
           <div className="ui-list-card">
-            {activities.map((act) => (
-              <div
-                key={act.id}
-                className="py-3.5 flex items-center justify-between gap-3.5"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-[#34D399]/20 text-emerald-600 dark:bg-[#34D399] dark:text-[#052E22] font-display font-bold text-xs flex items-center justify-center shrink-0">
-                    {act.authorInitials || userInitials}
+            {activities.map((act) => {
+              const hasAmt = act.amount !== undefined;
+              const displayLabel = cleanActivityLabel(act.text, hasAmt);
+              return (
+                <div
+                  key={act.id}
+                  className="py-3.5 flex items-center justify-between gap-3.5"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-[#34D399]/20 text-emerald-600 dark:bg-[#34D399] dark:text-[#052E22] font-display font-bold text-xs flex items-center justify-center shrink-0">
+                      {act.authorInitials || userInitials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="ui-row-title block truncate">{displayLabel}</span>
+                      <span className="ui-row-subtitle block">
+                        {act.authorName ? `${act.authorName} · ` : ''}
+                        {formatSwedishDateHeading(act.date)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="ui-row-title block">{act.text}</span>
-                    <span className="ui-row-subtitle block">
-                      {act.authorName ? `${act.authorName} · ` : ''}
-                      {formatSwedishDateHeading(act.date)}
+                  {hasAmt && act.amount !== undefined && (
+                    <span
+                      className={`ui-row-amount shrink-0 ${
+                        act.amount > 0 ? 'ui-row-amount-income' : ''
+                      }`}
+                    >
+                      {act.amount > 0
+                        ? `+${formatKr(act.amount)}`
+                        : `-${formatKr(Math.abs(act.amount))}`}
                     </span>
-                  </div>
+                  )}
                 </div>
-                {act.amount !== undefined && (
-                  <span
-                    className={`ui-row-amount ${
-                      act.amount > 0 ? 'ui-row-amount-income' : ''
-                    }`}
-                  >
-                    {act.amount > 0
-                      ? `+${formatKr(act.amount)}`
-                      : `-${formatKr(Math.abs(act.amount))}`}
-                  </span>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
-        {/* Sheet for Sätt in / Ta ut / Regel */}
+        {/* Sheet for Sätt in / Ta ut */}
         <BottomSheet
           isOpen={transferMode !== null}
           onClose={() => setTransferMode(null)}
           title={
             transferMode === 'deposit'
               ? 'Sätt in på sparmål'
-              : transferMode === 'withdraw'
-              ? 'Ta ut från sparmål'
-              : 'Månadssparande'
+              : 'Ta ut från sparmål'
           }
         >
           <div className="space-y-4">
             <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
               <label className="block cursor-text">
                 <span className="text-[11px] font-semibold text-[var(--text-muted)] block mb-1">
-                  {transferMode === 'rule' ? 'Belopp per månad' : 'Belopp'}
+                  Belopp
                 </span>
                 <div className="flex items-baseline justify-between gap-2">
                   <input
                     type="text"
                     inputMode="numeric"
                     autoFocus
-                    value={transferAmountInput}
+                    value={formatInputThousands(transferAmountInput)}
                     onChange={(e) =>
                       setTransferAmountInput(e.target.value.replace(/[^\d]/g, ''))
                     }
@@ -656,19 +892,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   </span>
                 </div>
               </label>
-
-              <div className="grid grid-cols-3 gap-2 pt-3 mt-3 border-t border-[var(--border-subtle)]">
-                {[250, 500, 1000].map((presetAmt) => (
-                  <button
-                    key={presetAmt}
-                    type="button"
-                    onClick={() => setTransferAmountInput(String(presetAmt))}
-                    className="py-2 px-2.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-display font-semibold text-[var(--text-primary)] tabular-nums transition-colors cursor-pointer"
-                  >
-                    {new Intl.NumberFormat('sv-SE').format(presetAmt)} kr
-                  </button>
-                ))}
-              </div>
             </div>
 
             {transferMode === 'deposit' &&
@@ -705,7 +928,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                                   activities: [
                                     {
                                       id: `tx-goal-${tx.id}`,
-                                      text: `${tx.title} (+${formatKr(amt)})`,
+                                      text: tx.title,
                                       date:
                                         tx.date ||
                                         new Date().toISOString().slice(0, 10),
@@ -751,38 +974,22 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           </div>
         </BottomSheet>
 
-        {/* Render Edit Goal Modal if opened from Detail View */}
-        {renderGoalModal()}
+        {renderEditGoalSheet()}
       </div>
     );
   }
 
   // ============================================================================
-  // ONBOARDING-STYLE STEP-BY-STEP GOAL WIZARD + DIRECT EDIT HUB
+  // ONBOARDING-STYLE STEP-BY-STEP WIZARD (Exclusively for creating new goals)
   // ============================================================================
-  function renderGoalModal() {
-    if (!isGoalModalOpen || typeof document === 'undefined') return null;
+  function renderCreateWizardModal() {
+    if (!isCreateWizardOpen || typeof document === 'undefined') return null;
 
     const activeTheme = getGoalArtworkTheme(goalArtworkId);
     const pageAnimClass =
       slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
 
-    const matchedLinkedAccount = goalLinkedAccountId
-      ? accounts.find((a) => a.id === goalLinkedAccountId)
-      : undefined;
-
-    const previewSavedAmount =
-      goalLinkedAccountId === '__TOTAL__'
-        ? effectiveTotalBalance
-        : matchedLinkedAccount
-        ? Math.max(0, Math.round(Number(matchedLinkedAccount.balance) || 0))
-        : Math.max(0, Math.round(Number(goalCurrentInput) || 0));
-
     const previewTargetAmount = Math.max(0, Math.round(Number(goalTargetInput) || 0));
-    const previewPct =
-      previewTargetAmount > 0
-        ? Math.min(100, Math.round((previewSavedAmount / previewTargetAmount) * 100))
-        : 0;
 
     const totalStepsForCreate = !goalLinkedAccountId ? 5 : 4;
     const progressWidthClass =
@@ -799,23 +1006,12 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         : 'w-full';
 
     const handleBackNavigation = () => {
-      if (editingGoalId) {
-        if (wizardStep === 'edit-hub') {
-          setIsGoalModalOpen(false);
-        } else if (wizardStep === 5) {
-          navigateWizardStep(4, 'back');
-        } else {
-          navigateWizardStep('edit-hub', 'back');
-        }
-        return;
-      }
-
       if (wizardStep === 5) {
         navigateWizardStep(4, 'back');
-      } else if (typeof wizardStep === 'number' && wizardStep > 1) {
-        navigateWizardStep((wizardStep - 1) as GoalWizardStep, 'back');
+      } else if (wizardStep > 1) {
+        navigateWizardStep((wizardStep - 1) as CreateWizardStep, 'back');
       } else {
-        setIsGoalModalOpen(false);
+        setIsCreateWizardOpen(false);
       }
     };
 
@@ -853,14 +1049,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     return createPortal(
       <div className="fixed inset-0 z-[200] bg-[var(--bg-color)] text-[var(--text-primary)]">
         <div className="h-dvh max-h-dvh flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none">
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleGalleryUpload}
-            className="hidden"
-          />
-
           {/* 1. TOP HEADER (Pinned / Non-scrolling, exact match to OnboardingFlow) */}
           <header className="shrink-0 space-y-3 pb-1">
             <div className="flex items-center justify-between h-9">
@@ -873,178 +1061,26 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 <CaretLeft size={18} weight="bold" />
               </button>
 
-              <div className="flex items-center gap-2">
-                {editingGoalId && (
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="p-1.5 text-rose-500 hover:opacity-75 active:scale-95 transition-all cursor-pointer"
-                    aria-label="Ta bort sparmål"
-                    title="Ta bort sparmål"
-                  >
-                    <Trash size={18} weight="regular" />
-                  </button>
-                )}
+              {wizardStep > 1 ? (
                 <button
                   type="button"
-                  onClick={() => setIsGoalModalOpen(false)}
+                  onClick={() => setIsCreateWizardOpen(false)}
                   className="p-1.5 -mr-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center active:scale-95 transition-all cursor-pointer"
-                  aria-label="Stäng"
+                  aria-label="Avbryt"
                 >
                   <X size={18} weight="bold" />
                 </button>
-              </div>
+              ) : (
+                <div className="w-7" />
+              )}
             </div>
 
-            {/* En enda lång sammanhängande progress-bar vid skapande */}
-            {wizardStep !== 'edit-hub' && !editingGoalId && (
-              <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-                <div
-                  className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${progressWidthClass}`}
-                />
-              </div>
-            )}
+            <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${progressWidthClass}`}
+              />
+            </div>
           </header>
-
-          {/* ============================================================== */}
-          {/* EDIT HUB: DIREKTÖVERSIKT VID REDIGERING AV BEFINTLIGT SPARMÅL  */}
-          {/* ============================================================== */}
-          {wizardStep === 'edit-hub' && (
-            <div
-              key="goal-edit-hub"
-              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-            >
-              <div className="shrink-0 pt-4 pb-3">
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Redigera sparmål
-                </h1>
-              </div>
-
-              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 pr-0.5">
-                {/* Live Hero Preview Card */}
-                <button
-                  type="button"
-                  onClick={() => navigateWizardStep(2, 'forward')}
-                  className="w-full relative rounded-3xl overflow-hidden p-5 min-h-[136px] flex flex-col justify-between text-left text-white shadow-sm cursor-pointer group"
-                  style={{
-                    background: goalCustomImage ? '#111827' : activeTheme.heroBg,
-                  }}
-                >
-                  {goalCustomImage ? (
-                    <>
-                      <img
-                        src={goalCustomImage}
-                        alt={goalNameInput}
-                        className="absolute inset-0 w-full h-full object-cover opacity-55"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/20" />
-                    </>
-                  ) : (
-                    <div
-                      className="absolute -right-8 top-1 w-36 h-36 pointer-events-none select-none opacity-95 transition-transform duration-200 group-hover:scale-105"
-                      aria-hidden="true"
-                    >
-                      <GoalArtworkIllustration artworkId={goalArtworkId} />
-                    </div>
-                  )}
-
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/25 backdrop-blur-md text-[11px] font-medium text-white/90">
-                      <ImageSquare size={13} weight="bold" />
-                      <span>Byt bild</span>
-                    </span>
-                  </div>
-
-                  <div className="relative z-10 mt-5 space-y-2">
-                    <div className="max-w-[68%]">
-                      <span className="text-xs font-medium text-white/90 block truncate">
-                        {goalNameInput || 'Mitt sparmål'}
-                      </span>
-                      <span className="font-display font-bold text-2xl text-white tabular-nums tracking-tight block">
-                        {formatKr(previewSavedAmount)}
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 rounded-full bg-black/30 overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${previewPct}%`,
-                          backgroundColor: activeTheme.progressColor,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </button>
-
-                {/* Klickbara rader för att hoppa direkt till önskad del */}
-                <div className="rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => navigateWizardStep(1, 'forward')}
-                    className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                  >
-                    <div className="min-w-0">
-                      <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
-                        Namn på mål
-                      </span>
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate mt-0.5">
-                        {goalNameInput || 'Ange namn'}
-                      </span>
-                    </div>
-                    <CaretRight size={15} className="text-[var(--text-muted)] shrink-0" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => navigateWizardStep(3, 'forward')}
-                    className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                  >
-                    <div className="min-w-0">
-                      <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
-                        Målbelopp
-                      </span>
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums block mt-0.5">
-                        {formatKr(previewTargetAmount)}
-                      </span>
-                    </div>
-                    <CaretRight size={15} className="text-[var(--text-muted)] shrink-0" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => navigateWizardStep(4, 'forward')}
-                    className="w-full px-4 py-3.5 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                  >
-                    <div className="min-w-0">
-                      <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
-                        Hur sparandet följs
-                      </span>
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate mt-0.5">
-                        {goalLinkedAccountId === '__TOTAL__'
-                          ? `Totalsaldo (${formatKr(effectiveTotalBalance)})`
-                          : matchedLinkedAccount
-                          ? `${matchedLinkedAccount.name} (${formatKr(previewSavedAmount)})`
-                          : `Eget valt belopp (${formatKr(previewSavedAmount)})`}
-                      </span>
-                    </div>
-                    <CaretRight size={15} className="text-[var(--text-muted)] shrink-0" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="shrink-0 pt-3">
-                <button
-                  type="button"
-                  disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
-                  onClick={handleSaveGoal}
-                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
-                >
-                  <Check size={16} weight="bold" />
-                  <span>Spara ändringar</span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* ============================================================== */}
           {/* STEG 1: VAD SPARAR DU TILL?                                    */}
@@ -1055,10 +1091,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!goalNameInput.trim()) return;
-                if (editingGoalId) {
-                  navigateWizardStep('edit-hub', 'back');
-                  return;
-                }
                 if (!hasManuallyPickedArtwork && !goalCustomImage) {
                   setGoalArtworkId(inferArtworkFromGoalName(goalNameInput));
                 }
@@ -1092,17 +1124,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   disabled={!goalNameInput.trim()}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
                 >
-                  {editingGoalId ? (
-                    <>
-                      <Check size={16} weight="bold" />
-                      <span>Klar</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Fortsätt</span>
-                      <ArrowRight size={16} weight="bold" />
-                    </>
-                  )}
+                  <span>Fortsätt</span>
+                  <ArrowRight size={16} weight="bold" />
                 </button>
               </div>
             </form>
@@ -1122,11 +1145,10 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 </h1>
               </div>
 
-              {/* Fast topp-ankrad yta så sökfältet aldrig hoppar */}
               <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 py-1 pr-0.5">
-                {/* Live förhandsvisning av målkortet med namnet från Steg 1 */}
+                {/* Live förhandsvisning av målkortet utan onödig etikett */}
                 <div
-                  className="relative rounded-2xl overflow-hidden px-4 py-3.5 min-h-[82px] flex items-center justify-between text-white shadow-sm transition-colors duration-200"
+                  className="relative rounded-2xl overflow-hidden px-4 py-4 min-h-[76px] flex items-center justify-between text-white shadow-sm transition-colors duration-200"
                   style={{
                     background: goalCustomImage ? '#111827' : activeTheme.heroBg,
                   }}
@@ -1150,16 +1172,13 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   )}
 
                   <div className="relative z-10 min-w-0 max-w-[68%]">
-                    <span className="text-[11px] font-medium text-white/75 block">
-                      Förhandsvisning
-                    </span>
-                    <span className="font-display font-bold text-base sm:text-lg text-white block truncate mt-0.5">
-                      {goalNameInput.trim() || 'Mitt sparmål'}
+                    <span className="font-display font-bold text-base sm:text-lg text-white block truncate">
+                      {goalNameInput.trim() || 'Nytt sparmål'}
                     </span>
                   </div>
                 </div>
 
-                {/* Sökfält (alltid fast på samma plats) */}
+                {/* Sökfält */}
                 <div className="relative shrink-0">
                   <MagnifyingGlass
                     size={15}
@@ -1184,7 +1203,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   )}
                 </div>
 
-                {/* 3x3 Grid: Tile 1 = Ladda upp bild, Tiles 2..9 = Illustrationer */}
+                {/* 3x3 Grid: Tile 1 = Egen bild, Tiles 2..9 = Illustrationer */}
                 <div className="grid grid-cols-3 gap-2.5 content-start">
                   <button
                     type="button"
@@ -1257,24 +1276,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               <div className="shrink-0 pt-3">
                 <button
                   type="button"
-                  onClick={() =>
-                    editingGoalId
-                      ? navigateWizardStep('edit-hub', 'back')
-                      : navigateWizardStep(3, 'forward')
-                  }
+                  onClick={() => navigateWizardStep(3, 'forward')}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                 >
-                  {editingGoalId ? (
-                    <>
-                      <Check size={16} weight="bold" />
-                      <span>Klar</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Fortsätt</span>
-                      <ArrowRight size={16} weight="bold" />
-                    </>
-                  )}
+                  <span>Fortsätt</span>
+                  <ArrowRight size={16} weight="bold" />
                 </button>
               </div>
             </div>
@@ -1289,10 +1295,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!(Number(goalTargetInput) > 0)) return;
-                if (editingGoalId) {
-                  navigateWizardStep('edit-hub', 'back');
-                  return;
-                }
                 navigateWizardStep(4, 'forward');
               }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
@@ -1338,17 +1340,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   disabled={!(Number(goalTargetInput) > 0)}
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
                 >
-                  {editingGoalId ? (
-                    <>
-                      <Check size={16} weight="bold" />
-                      <span>Klar</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Fortsätt</span>
-                      <ArrowRight size={16} weight="bold" />
-                    </>
-                  )}
+                  <span>Fortsätt</span>
+                  <ArrowRight size={16} weight="bold" />
                 </button>
               </div>
             </form>
@@ -1369,7 +1362,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 </h1>
               </div>
 
-              {/* Rena valkort utan inbäddade formulärfält */}
               <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
                 {/* Alternativ 1: Eget valt belopp */}
                 <button
@@ -1453,6 +1445,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                     ).length > 1;
                   const cleanDigits = (acc.accountNumber || '').replace(/\D/g, '');
                   const last4 = cleanDigits.length >= 4 ? cleanDigits.slice(-4) : '';
+                  const showBankSub =
+                    Boolean(acc.bankName) &&
+                    !acc.name.toLowerCase().includes((acc.bankName || '').toLowerCase());
 
                   return (
                     <button
@@ -1487,10 +1482,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                         <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
                           {acc.name}
                         </span>
-                        {(acc.bankName || (hasDuplicateName && last4)) && (
+                        {(showBankSub || (hasDuplicateName && last4)) && (
                           <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5 truncate">
-                            {acc.bankName}
-                            {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
+                            {showBankSub ? acc.bankName : ''}
+                            {showBankSub && hasDuplicateName && last4 ? ' · ' : ''}
+                            {hasDuplicateName && last4 ? `•••• ${last4}` : ''}
                           </span>
                         )}
                       </div>
@@ -1502,7 +1498,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 })}
               </div>
 
-              {/* Pinnad knapp */}
               <div className="shrink-0 pt-3">
                 {!goalLinkedAccountId ? (
                   <button
@@ -1517,17 +1512,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   <button
                     type="button"
                     disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
-                    onClick={() => {
-                      if (editingGoalId) {
-                        navigateWizardStep('edit-hub', 'back');
-                      } else {
-                        handleSaveGoal();
-                      }
-                    }}
+                    onClick={handleSaveGoal}
                     className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                   >
                     <Check size={16} weight="bold" />
-                    <span>{editingGoalId ? 'Klar' : 'Skapa sparmål'}</span>
+                    <span>Skapa sparmål</span>
                   </button>
                 )}
               </div>
@@ -1542,10 +1531,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               key="goal-step-5"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (editingGoalId) {
-                  navigateWizardStep('edit-hub', 'back');
-                  return;
-                }
                 handleSaveGoal();
               }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
@@ -1594,28 +1579,11 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                 >
                   <Check size={16} weight="bold" />
-                  <span>{editingGoalId ? 'Klar' : 'Skapa sparmål'}</span>
+                  <span>Skapa sparmål</span>
                 </button>
               </div>
             </form>
           )}
-
-          <ConfirmDialog
-            isOpen={showDeleteConfirm}
-            title="Ta bort sparmål?"
-            description={`${goalNameInput || 'Sparmålet'} tas bort.`}
-            confirmLabel="Ta bort"
-            onConfirm={() => {
-              const next = savingsGoals.filter((g) => g.id !== editingGoalId);
-              updateGoals(next);
-              if (selectedGoalId === editingGoalId) {
-                setSelectedGoalId(null);
-              }
-              setShowDeleteConfirm(false);
-              setIsGoalModalOpen(false);
-            }}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
         </div>
       </div>,
       document.body
@@ -1623,11 +1591,14 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   }
 
   // ============================================================================
-  // MAIN GOALS LIST VIEW (Lunar Screenshots #3, #5, #6)
+  // MAIN GOALS LIST VIEW (Clean, zero duplicate cards or redundant buttons)
   // ============================================================================
   return (
     <div className="ui-page animate-fade-in">
-      {savingsGoals.length > 0 && (
+      {sharedHiddenFileInput}
+
+      {/* Visa endast summeringskortet när man har fler än 1 mål så beloppet inte upprepas två gånger i rad */}
+      {savingsGoals.length > 1 && (
         <section className="ui-card-p">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -1648,149 +1619,108 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         </section>
       )}
 
-      <section className="ui-section">
-        <div className="ui-section-header">
-          <h2 className="ui-section-title">Mål</h2>
+      {savingsGoals.length > 0 ? (
+        <section className="ui-section">
+          <div className="ui-section-header">
+            <h2 className="ui-section-title">Mål</h2>
+            <button
+              type="button"
+              onClick={openCreateGoal}
+              className="ui-section-action"
+            >
+              <Plus size={13} weight="bold" />
+              <span>Lägg till</span>
+            </button>
+          </div>
+
+          <div className="ui-list-card">
+            {savingsGoals.map((goal) => {
+              const theme = getGoalArtworkTheme(goal.artworkId);
+              const effectiveAmt = resolveGoalAmount(goal);
+              const pct =
+                goal.targetAmount > 0
+                  ? Math.min(
+                      100,
+                      Math.round((effectiveAmt / goal.targetAmount) * 100)
+                    )
+                  : 0;
+              return (
+                <button
+                  key={goal.id}
+                  type="button"
+                  onClick={() => setSelectedGoalId(goal.id)}
+                  className="w-full py-4 flex items-center gap-3.5 text-left hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                >
+                  <div
+                    className="w-11 h-11 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
+                    style={{
+                      backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
+                    }}
+                  >
+                    {goal.customImageUrl ? (
+                      <img
+                        src={goal.customImageUrl}
+                        alt={goal.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute -right-2.5 top-0.5 w-11 h-11">
+                        <GoalArtworkIllustration artworkId={goal.artworkId} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="ui-row-title truncate">{goal.name}</span>
+                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums shrink-0">
+                        {formatKr(effectiveAmt)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-300"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: theme.progressColor,
+                          }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                        {pct} %
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : (
+        <section className="ui-card-p py-10 px-6 text-center">
+          <EmptyClusterArtwork variant="savings" />
+          <p className="font-display font-semibold text-base text-[var(--text-primary)] mt-1">
+            Spara till dina drömmar
+          </p>
+          <p className="text-xs text-[var(--text-secondary)] max-w-[260px] mx-auto mt-1.5 mb-5 leading-relaxed">
+            Skapa ditt första sparmål för att börja följa dina framsteg
+          </p>
           <button
             type="button"
             onClick={openCreateGoal}
-            className="ui-section-action"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={13} weight="bold" />
-            <span>Lägg till</span>
+            <Plus size={14} weight="bold" />
+            <span>Nytt sparmål</span>
           </button>
-        </div>
+        </section>
+      )}
 
-        {savingsGoals.length > 0 ? (
-          <div className="space-y-3">
-            <div className="ui-list-card">
-              {savingsGoals.map((goal) => {
-                const theme = getGoalArtworkTheme(goal.artworkId);
-                const effectiveAmt = resolveGoalAmount(goal);
-                const linkedLabel = resolveGoalLinkedLabel(goal);
-                const pct =
-                  goal.targetAmount > 0
-                    ? Math.min(
-                        100,
-                        Math.round((effectiveAmt / goal.targetAmount) * 100)
-                      )
-                    : 0;
-                return (
-                  <button
-                    key={goal.id}
-                    type="button"
-                    onClick={() => setSelectedGoalId(goal.id)}
-                    className="w-full py-4 flex items-center gap-3.5 text-left hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    {/* Circular Goal Avatar with Cropped Right Artwork (Lunar Screenshot #3) */}
-                    <div
-                      className="w-11 h-11 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
-                      style={{
-                        backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
-                      }}
-                    >
-                      {goal.customImageUrl ? (
-                        <img
-                          src={goal.customImageUrl}
-                          alt={goal.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="absolute -right-2.5 top-0.5 w-11 h-11">
-                          <GoalArtworkIllustration artworkId={goal.artworkId} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Goal Title + Amount + Progress Bar + Percentage */}
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <div className="min-w-0 flex items-baseline gap-1.5">
-                          <span className="ui-row-title truncate">{goal.name}</span>
-                          {linkedLabel && (
-                            <span className="text-[11px] text-[var(--text-secondary)] truncate shrink-0">
-                              · {linkedLabel}
-                            </span>
-                          )}
-                        </div>
-                        <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums shrink-0">
-                          {formatKr(effectiveAmt)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{
-                              width: `${pct}%`,
-                              backgroundColor: theme.progressColor,
-                            }}
-                          />
-                        </div>
-                        <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
-                          {pct} %
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Promo Banner Card ("Spara till en resa, en pryl eller din nästa stora grej" – Lunar Screenshot #6) */}
-            <button
-              type="button"
-              onClick={openCreateGoal}
-              className="w-full ui-card-p flex items-center justify-between gap-4 text-left hover:opacity-95 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <div className="min-w-0 flex-1">
-                <span className="font-display font-medium text-sm text-[var(--text-primary)] leading-snug block">
-                  Spara till en resa, en pryl eller din nästa stora grej
-                </span>
-              </div>
-              <TiltedGoalsPromoArtwork />
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3.5">
-            {/* Empty State Card ("Spara till dina drömmar" – Lunar Screenshot #5) */}
-            <div className="ui-card-p py-9 px-6 text-center">
-              <EmptyClusterArtwork variant="savings" />
-              <p className="font-display font-semibold text-base text-[var(--text-primary)] mt-1">
-                Spara till dina drömmar
-              </p>
-              <p className="text-xs text-[var(--text-secondary)] max-w-[260px] mx-auto mt-1.5 mb-5 leading-relaxed">
-                Skapa ditt första sparande för att börja följa dina framsteg
-              </p>
-              <button
-                type="button"
-                onClick={openCreateGoal}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
-              >
-                <Plus size={14} weight="bold" />
-                <span>Lägg till sparande</span>
-              </button>
-            </div>
-
-            {/* Promo Card ("Spara till en resa, en pryl eller din nästa stora grej" – Lunar Screenshot #6) */}
-            <button
-              type="button"
-              onClick={openCreateGoal}
-              className="w-full ui-card-p flex items-center justify-between gap-4 text-left hover:opacity-95 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <div className="min-w-0 flex-1">
-                <span className="font-display font-medium text-sm text-[var(--text-primary)] leading-snug block">
-                  Spara till en resa, en pryl eller din nästa stora grej
-                </span>
-              </div>
-              <TiltedGoalsPromoArtwork />
-            </button>
-          </div>
-        )}
-      </section>
-
-      {renderGoalModal()}
+      {renderCreateWizardModal()}
+      {renderEditGoalSheet()}
     </div>
   );
 };
+

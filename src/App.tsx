@@ -2597,6 +2597,7 @@ export const App: React.FC = () => {
   }, [userId, refreshBankStatus]);
 
   const [accountMetaVersion, setAccountMetaVersion] = useState(0);
+  const [selectedGoalIdInView, setSelectedGoalIdInView] = useState<string | null>(null);
 
   // Konvertera Enable Banking-konton till visningskonton för Hem-fliken
   const accounts: AccountItem[] = useMemo(() => {
@@ -4303,7 +4304,7 @@ export const App: React.FC = () => {
         userEmail={userEmail}
         userName={userName}
         userAvatar={userAvatar}
-        navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}`}
+        navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}:${selectedGoalIdInView || ''}`}
         hasUnreadNotifications={false}
         hideActions={activeTab === 'settings'}
         hideSearch={activeTab === 'transactions'}
@@ -4325,6 +4326,13 @@ export const App: React.FC = () => {
             : null
         }
         onBack={() => {
+          if (
+            selectedGoalIdInView &&
+            (activeTab === 'goals' || (activeTab === 'settings' && settingsSubView === 'goals'))
+          ) {
+            setSelectedGoalIdInView(null);
+            return;
+          }
           if (activeTab === 'settings' && settingsSubView !== 'main') {
             setSettingsSubView('main');
           } else {
@@ -4334,12 +4342,14 @@ export const App: React.FC = () => {
         onLogoClick={() => {
           setIsSearchModalOpen(false);
           setIsNotificationsModalOpen(false);
+          setSelectedGoalIdInView(null);
           setSettingsSubView('main');
           setActiveTab('home');
         }}
         onProfileClick={() => {
           setIsSearchModalOpen(false);
           setIsNotificationsModalOpen(false);
+          setSelectedGoalIdInView(null);
           setSettingsSubView('main');
           setActiveTab('settings');
         }}
@@ -4439,7 +4449,10 @@ export const App: React.FC = () => {
                   }}
                   onNavigateToFixed={() => setActiveTab('fixed')}
                   onNavigateToTransactions={() => setActiveTab('transactions')}
-                  onNavigateToGoals={() => setActiveTab('goals')}
+                  onNavigateToGoals={() => {
+                    setSelectedGoalIdInView(null);
+                    setActiveTab('goals');
+                  }}
                   onSelectAccount={(accountId) => {
                     setSelectedHistoryAccountId(accountId);
                     setActiveTab('transactions');
@@ -4560,6 +4573,8 @@ export const App: React.FC = () => {
                   transactions={displayTransactions}
                   accounts={accounts}
                   totalBalance={totalBalance}
+                  selectedGoalId={selectedGoalIdInView}
+                  onSelectGoalId={setSelectedGoalIdInView}
                 />
               )}
 
@@ -5108,7 +5123,12 @@ export const App: React.FC = () => {
                   onStartOnboarding={() => setIsOnboardingActive(true)}
                   onCategoryMutated={handleCategoryMutated}
                   subView={settingsSubView}
-                  onSubViewChange={setSettingsSubView}
+                  onSubViewChange={(next) => {
+                    setSelectedGoalIdInView(null);
+                    setSettingsSubView(next);
+                  }}
+                  selectedGoalId={selectedGoalIdInView}
+                  onSelectGoalId={setSelectedGoalIdInView}
                 />
               )}
           </>
