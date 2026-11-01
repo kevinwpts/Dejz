@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
+  ArrowCounterClockwise,
   Bank,
   CalendarBlank,
   CaretDown,
@@ -461,8 +462,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const todayStr = useMemo(() => getSwedishDateStr(), []);
   const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
-  const [daysBackToLoad, setDaysBackToLoad] = useState<number>(365);
-  const [daysForwardToLoad, setDaysForwardToLoad] = useState<number>(365);
+  const [isTodayScrolledOut, setIsTodayScrolledOut] = useState<boolean>(false);
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
   const [isInboxOpen, setIsInboxOpen] = useState(false);
 
@@ -709,9 +709,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   }, [transactions, todayStr]);
 
   const isInitialScrollDoneRef = useRef(false);
-  const prevScrollWidthRef = useRef<number | null>(null);
 
-  // Generate continuous horizontal timeline days with past days on the left, Idag in the middle, and upcoming days on the right
+  // Generate continuous horizontal timeline days (90 days back, Idag in the middle, 35 days forward)
   const timelineDays = useMemo(() => {
     const parts = todayStr.split('-');
     const baseYear = parseInt(parts[0], 10);
@@ -719,52 +718,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     const baseDay = parseInt(parts[2], 10);
     const todayDate = new Date(Date.UTC(baseYear, baseMonth, baseDay, 12, 0, 0));
 
-    // Find oldest and newest dates so the timeline is always continuous
-    let earliestDateStr = todayStr;
-    let latestDateStr = todayStr;
-    for (const key of transactionsByDate.keys()) {
-      if (/^\d{4}-\d{2}-\d{2}$/.test(key)) {
-        if (key < earliestDateStr) earliestDateStr = key;
-        if (key > latestDateStr) latestDateStr = key;
-      }
-    }
-    if (selectedDateKey && selectedDateKey < earliestDateStr) {
-      earliestDateStr = selectedDateKey;
-    }
-    if (selectedDateKey && selectedDateKey > latestDateStr) {
-      latestDateStr = selectedDateKey;
-    }
-
-    const eParts = earliestDateStr.split('-');
-    const earliestDate = new Date(
-      Date.UTC(
-        parseInt(eParts[0], 10),
-        parseInt(eParts[1], 10) - 1,
-        parseInt(eParts[2], 10),
-        12,
-        0,
-        0
-      )
-    );
-    const diffDaysFromEarliest =
-      Math.ceil((todayDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)) + 60;
-
-    const lParts = latestDateStr.split('-');
-    const latestDate = new Date(
-      Date.UTC(
-        parseInt(lParts[0], 10),
-        parseInt(lParts[1], 10) - 1,
-        parseInt(lParts[2], 10),
-        12,
-        0,
-        0
-      )
-    );
-    const diffDaysToLatest =
-      Math.ceil((latestDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24)) + 60;
-
-    const totalPastDays = Math.max(daysBackToLoad, diffDaysFromEarliest, 365);
-    const totalFutureDays = Math.max(daysForwardToLoad, diffDaysToLatest, 365);
+    const totalPastDays = 90;
+    const totalFutureDays = 35;
 
     const result: {
       dateKey: string;
@@ -809,63 +764,51 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }
 
     return result;
-  }, [
-    transactionsByDate,
-    todayStr,
-    yesterdayStr,
-    selectedDateKey,
-    daysBackToLoad,
-    daysForwardToLoad,
-  ]);
+  }, [todayStr, yesterdayStr]);
 
-  // Keep scroll position anchored when prepending older days to the left
-  useEffect(() => {
+  const centerDateButton = useCallback((dateKey: string, behavior: ScrollBehavior) => {
+    const btn = dayButtonRefs.current[dateKey];
     const container = timelineScrollRef.current;
-    if (container && prevScrollWidthRef.current !== null) {
-      const widthDiff = container.scrollWidth - prevScrollWidthRef.current;
-      if (widthDiff > 0) {
-        container.scrollLeft += widthDiff;
-      }
-      prevScrollWidthRef.current = null;
-    }
-  }, [timelineDays]);
+    if (!btn || !container) return;
+    const containerRect = container.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    const offset =
+      btnRect.left -
+      containerRect.left -
+      containerRect.width / 2 +
+      btnRect.width / 2;
+    container.scrollBy({ left: offset, behavior });
+  }, []);
+
+  const handleJumpToToday = useCallback(() => {
+    setSelectedDateKey(todayStr);
+    setIsTodayScrolledOut(false);
+    centerDateButton(todayStr, 'smooth');
+  }, [todayStr, centerDateButton]);
 
   // Center the selected date button (starts with Idag right in the middle)
   useEffect(() => {
-    const centerSelectedButton = (behavior: ScrollBehavior) => {
-      const btn = dayButtonRefs.current[selectedDateKey];
-      const container = timelineScrollRef.current;
-      if (!btn || !container) return;
-      const containerRect = container.getBoundingClientRect();
-      const btnRect = btn.getBoundingClientRect();
-      const offset =
-        btnRect.left -
-        containerRect.left -
-        containerRect.width / 2 +
-        btnRect.width / 2;
-      container.scrollBy({ left: offset, behavior });
-    };
-
     if (!isInitialScrollDoneRef.current) {
-      centerSelectedButton('auto');
+      centerDateButton(selectedDateKey, 'auto');
       const rafId = requestAnimationFrame(() => {
-        centerSelectedButton('auto');
+        centerDateButton(selectedDateKey, 'auto');
         isInitialScrollDoneRef.current = true;
       });
       return () => cancelAnimationFrame(rafId);
     }
 
-    centerSelectedButton('smooth');
-  }, [selectedDateKey]);
+    centerDateButton(selectedDateKey, 'smooth');
+  }, [selectedDateKey, centerDateButton]);
 
   const handleTimelineScroll = () => {
-    const el = timelineScrollRef.current;
-    if (!el) return;
-    if (el.scrollLeft <= 240 && prevScrollWidthRef.current === null) {
-      prevScrollWidthRef.current = el.scrollWidth;
-      setDaysBackToLoad((prev) => prev + 180);
-    } else if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 240) {
-      setDaysForwardToLoad((prev) => prev + 180);
+    const container = timelineScrollRef.current;
+    const todayBtn = dayButtonRefs.current[todayStr];
+    if (!container || !todayBtn) return;
+    const cRect = container.getBoundingClientRect();
+    const bRect = todayBtn.getBoundingClientRect();
+    const isOut = bRect.right < cRect.left + 16 || bRect.left > cRect.right - 16;
+    if (isOut !== isTodayScrolledOut) {
+      setIsTodayScrolledOut(isOut);
     }
   };
 
@@ -1581,16 +1524,32 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </div>
 
         {/* Vald dags händelser samlade i ett enhetligt listkort med generöst mellanrum till tidslinjen */}
-        <div className="mt-3.5 sm:mt-4">
-        {selectedDayItems.length > 0 ? (
-          <div className="space-y-1.5">
+        <div className="mt-3.5 sm:mt-4 space-y-1.5">
+          {!isInitialLoading && (
             <div className="ui-date-header px-1">
-              <span>{formatSwedishDateHeading(selectedDateKey)}</span>
-              <span className="tabular-nums font-medium text-[var(--text-secondary)]">
-                {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '-' : ''}
-                {formatKr(Math.abs(selectedDayNet))}
-              </span>
+              <div className="flex items-center gap-2 min-w-0">
+                <span>{formatSwedishDateHeading(selectedDateKey)}</span>
+                {(selectedDateKey !== todayStr || isTodayScrolledOut) && (
+                  <button
+                    type="button"
+                    onClick={handleJumpToToday}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
+                  >
+                    <ArrowCounterClockwise size={11} weight="bold" />
+                    <span>Idag</span>
+                  </button>
+                )}
+              </div>
+              {selectedDayItems.length > 0 && (
+                <span className="tabular-nums font-medium text-[var(--text-secondary)]">
+                  {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '-' : ''}
+                  {formatKr(Math.abs(selectedDayNet))}
+                </span>
+              )}
             </div>
+          )}
+        {selectedDayItems.length > 0 ? (
+          <div>
             <div className="ui-list-card">
             {selectedDayItems.map((tx) => {
               const isIncome = tx.type === 'income';
