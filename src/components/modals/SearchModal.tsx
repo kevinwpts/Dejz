@@ -13,6 +13,7 @@ import {
   FixedExpenseItem,
   IncomeItem,
   getTransactionTime,
+  compareTransactionsChronologically,
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
@@ -119,11 +120,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           matchesAmount(tx.amount)
         );
       })
-      .sort((a, b) => {
-        const dateCmp = (b.date || '').localeCompare(a.date || '');
-        if (dateCmp !== 0) return dateCmp;
-        return getTransactionTime(b).localeCompare(getTransactionTime(a));
-      });
+      .sort(compareTransactionsChronologically);
 
     const filteredFixed = fixedExpenses.filter((f) => {
       if (quickFilter === 'large' || quickFilter === 'saved') return false;

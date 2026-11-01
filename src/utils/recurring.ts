@@ -1,4 +1,9 @@
-import { TransactionItem, FixedExpenseItem, IncomeItem } from '../components/HomeTab';
+import {
+  TransactionItem,
+  FixedExpenseItem,
+  IncomeItem,
+  compareTransactionsChronologically,
+} from '../components/HomeTab';
 import {
   extractMerchantKeyVariants,
   isGenericPlaceholderMerchant,
@@ -886,8 +891,8 @@ export function findSimilarTransactionsForTransaction(
     }
   }
 
-  matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  sameMerchant.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  matched.sort(compareTransactionsChronologically);
+  sameMerchant.sort(compareTransactionsChronologically);
 
   const totalAmount = Math.max(
     0,
@@ -951,7 +956,7 @@ export function findTransactionsForFixedExpense(
     return false;
   });
 
-  matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  matched.sort(compareTransactionsChronologically);
 
   const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
   const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;
@@ -988,7 +993,7 @@ export function findTransactionsForIncome(
     return Boolean(hit && hit.id === income.id);
   });
 
-  matched.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  matched.sort(compareTransactionsChronologically);
 
   const totalAmount = matched.reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
   const averageAmount = matched.length > 0 ? Math.round(totalAmount / matched.length) : 0;

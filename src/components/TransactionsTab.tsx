@@ -20,6 +20,7 @@ import {
   TransactionItem,
   AccountItem,
   getTransactionTime,
+  compareTransactionsChronologically,
   FixedExpenseItem,
   IncomeItem,
   doesTransactionMatchAccount,
@@ -129,14 +130,10 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
   }, [todayStr]);
   const thisMonthPrefix = useMemo(() => todayStr.slice(0, 7), [todayStr]);
 
-  // Sortera alla transaktioner strikt efter köpdatum och köptid
+  // Sortera alla transaktioner strikt efter köpdatum och faktisk kronologisk ordning under dagen
   const sortedTransactions = useMemo(() => {
     const deduped = deduplicateTransactions(transactions);
-    return deduped.sort((a, b) => {
-      const dateCmp = (b.date || '').localeCompare(a.date || '');
-      if (dateCmp !== 0) return dateCmp;
-      return getTransactionTime(b).localeCompare(getTransactionTime(a));
-    });
+    return deduped.sort(compareTransactionsChronologically);
   }, [transactions]);
 
   const activeAccount = useMemo(
@@ -310,7 +307,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
 
     for (const dateKey of sortedDateKeys) {
       const items = map.get(dateKey)!;
-      items.sort((a, b) => getTransactionTime(b).localeCompare(getTransactionTime(a)));
+      items.sort(compareTransactionsChronologically);
       const net = items.reduce((acc, item) => {
         const amt = Number(item.amount) || 0;
         return item.type === 'income' ? acc + amt : acc - amt;

@@ -15,6 +15,7 @@ import {
   FixedExpenseItem,
   TransactionItem,
   getTransactionTime,
+  compareTransactionsChronologically,
 } from './components/HomeTab';
 import { FixedTab } from './components/FixedTab';
 import { AnalysisTab } from './components/AnalysisTab';
@@ -278,6 +279,23 @@ function sanitizeTransactionItem(
     updated.date = updated.valueDate;
   } else if (updated.date && updated.date > todayStr) {
     updated.date = todayStr;
+  }
+
+  // Om en banktransaktion har ett cachat påhittat klockslag från äldre version utan faktisk tidsstämpel i bankens data, rensa det
+  if (updated.id?.startsWith('bank-') && updated.time && updated.time !== 'Planerad') {
+    const verifiedBankTime = extractBankTxTime(
+      {
+        raw_json: updated.rawJson,
+        description: updated.rawDescription || null,
+      } as BankTransactionItem,
+      new Map(),
+      updated.date || '',
+      updated.category || '',
+      updated.title || ''
+    );
+    if (!verifiedBankTime) {
+      updated.time = '';
+    }
   }
 
   // 2. Swish-titelsanitering eller direkt banknamn i snygg Title Case
@@ -1365,6 +1383,7 @@ function mapBankTransactionsToAppItems(
           valueDate: bt.value_date || undefined,
           bankAccountId: bt.bank_account_id || undefined,
           bankAccountName,
+          createdAt: bt.created_at || undefined,
           rawJson:
             bt.raw_json || rawInternalTransferIds.has(bt.id)
               ? {
@@ -1389,11 +1408,21 @@ function mapBankTransactionsToAppItems(
                     ? { merchant_category_code: bt.raw_json.merchant_category_code }
                     : {}),
                   ...(bt.raw_json?.mcc ? { mcc: bt.raw_json.mcc } : {}),
+                  ...(typeof bt.raw_json?.transaction_date_time === 'string'
+                    ? { transaction_date_time: bt.raw_json.transaction_date_time }
+                    : {}),
+                  ...(typeof bt.raw_json?.execution_date_time === 'string'
+                    ? { execution_date_time: bt.raw_json.execution_date_time }
+                    : {}),
                   ...(bt.raw_json?.card_transaction
                     ? {
                         card_transaction: {
-                          transaction_date_time:
-                            bt.raw_json.card_transaction.transaction_date_time || true,
+                          ...(typeof bt.raw_json.card_transaction.transaction_date_time === 'string'
+                            ? {
+                                transaction_date_time:
+                                  bt.raw_json.card_transaction.transaction_date_time,
+                              }
+                            : {}),
                           ...(bt.raw_json.card_transaction.merchant_category_code
                             ? {
                                 merchant_category_code:
@@ -1406,6 +1435,7 @@ function mapBankTransactionsToAppItems(
                         },
                       }
                     : {}),
+                  exactSignedSekAmount: rawAmt,
                 }
               : undefined,
         },
@@ -1418,7 +1448,134 @@ function mapBankTransactionsToAppItems(
       );
     });
 
-  return deduplicateTransactions(mappedBankTxs);
+  const dedupedBankTxs = deduplicateTransactions(mappedBankTxs);
+
+  // Rekonstruera faktisk intradagsordning per dag (äldst = lägst sortOrder, nyast = högst sortOrder)
+  // med hjälp av bankens saldokedja (balance_after_transaction), synkningstidpunkt (created_at) och entry_reference.
+  const byDate = new Map<string, TransactionItem[]>();
+  for (const tx of dedupedBankTxs) {
+    const d = tx.date || '';
+    const arr = byDate.get(d) || [];
+    arr.push(tx);
+    byDate.set(d, arr);
+  }
+
+  for (const [, dayItems] of byDate.entries()) {
+    if (dayItems.length <= 1) {
+      if (dayItems[0]) dayItems[0].sortOrder = 0;
+      continue;
+    }
+
+    // Steg 1: Grundsortera från äldst till nyast via faktisk tid, synk-batch (10s fönster) och entry_reference
+    dayItems.sort((a, b) => {
+      const timeA = getTransactionTime(a);
+      const timeB = getTransactionTime(b);
+      if (timeA && timeB && timeA !== timeB) {
+        return timeA.localeCompare(timeB);
+      }
+      if (a.createdAt && b.createdAt) {
+        const msA = Date.parse(a.createdAt);
+        const msB = Date.parse(b.createdAt);
+        if (Number.isFinite(msA) && Number.isFinite(msB) && Math.abs(msA - msB) > 10_000) {
+          return msA - msB;
+        }
+      }
+      if (a.entryReference && b.entryReference && a.entryReference !== b.entryReference) {
+        return a.entryReference.localeCompare(b.entryReference);
+      }
+      if (a.createdAt && b.createdAt && a.createdAt !== b.createdAt) {
+        return a.createdAt.localeCompare(b.createdAt);
+      }
+      return 0;
+    });
+
+    // Steg 2: Om banken skickat balance_after_transaction på ett konto under dagen,
+    // verifiera och förfina ordningen med den exakta saldokedjan (beforeBalance -> afterBalance).
+    const byAcc = new Map<string, TransactionItem[]>();
+    for (const tx of dayItems) {
+      const accKey = tx.bankAccountId || tx.bankAccountName || '__default__';
+      const list = byAcc.get(accKey) || [];
+      list.push(tx);
+      byAcc.set(accKey, list);
+    }
+
+    for (const [, accItems] of byAcc.entries()) {
+      const withBal = accItems.filter((t) => {
+        const bal = Number(t.rawJson?.balance_after_transaction?.amount);
+        return Number.isFinite(bal);
+      });
+      if (withBal.length >= 2) {
+        const meta = withBal.map((t) => {
+          const after = Number(t.rawJson.balance_after_transaction.amount);
+          const signed =
+            typeof t.rawJson?.exactSignedSekAmount === 'number'
+              ? t.rawJson.exactSignedSekAmount
+              : t.type === 'income'
+              ? Number(t.amount) || 0
+              : -(Number(t.amount) || 0);
+          return {
+            tx: t,
+            before: Math.round((after - signed) * 100),
+            after: Math.round(after * 100),
+          };
+        });
+
+        // Bygg riktad kedja där tx[i].after === tx[j].before
+        const nextOf = new Map<string, string>();
+        const prevOf = new Map<string, string>();
+        for (let i = 0; i < meta.length; i++) {
+          for (let j = 0; j < meta.length; j++) {
+            if (i === j) continue;
+            if (
+              Math.abs(meta[i].after - meta[j].before) <= 5 &&
+              !nextOf.has(meta[i].tx.id) &&
+              !prevOf.has(meta[j].tx.id)
+            ) {
+              nextOf.set(meta[i].tx.id, meta[j].tx.id);
+              prevOf.set(meta[j].tx.id, meta[i].tx.id);
+              break;
+            }
+          }
+        }
+
+        if (nextOf.size > 0) {
+          const byId = new Map(withBal.map((t) => [t.id, t]));
+          const visited = new Set<string>();
+          const orderedChain: TransactionItem[] = [];
+          for (const item of withBal) {
+            if (!prevOf.has(item.id) && !visited.has(item.id)) {
+              let curr: string | undefined = item.id;
+              while (curr && !visited.has(curr)) {
+                visited.add(curr);
+                const found = byId.get(curr);
+                if (found) orderedChain.push(found);
+                curr = nextOf.get(curr);
+              }
+            }
+          }
+          for (const item of withBal) {
+            if (!visited.has(item.id)) {
+              orderedChain.push(item);
+            }
+          }
+          if (orderedChain.length === withBal.length) {
+            let ptr = 0;
+            for (let k = 0; k < dayItems.length; k++) {
+              if (byId.has(dayItems[k].id)) {
+                dayItems[k] = orderedChain[ptr++];
+              }
+            }
+          }
+        }
+      }
+    }
+
+    dayItems.forEach((tx, idx) => {
+      tx.sortOrder = idx;
+    });
+  }
+
+  return dedupedBankTxs;
 }
 
 export const App: React.FC = () => {
@@ -1952,11 +2109,7 @@ export const App: React.FC = () => {
             );
 
           const combinedTxs = deduplicateTransactions([...uniqueBankTxs, ...nonBankPrev]);
-          combinedTxs.sort((a, b) => {
-            const dCmp = b.date.localeCompare(a.date);
-            if (dCmp !== 0) return dCmp;
-            return getTransactionTime(b).localeCompare(getTransactionTime(a));
-          });
+          combinedTxs.sort(compareTransactionsChronologically);
 
           if (!userIdRef.current || isDeletingAccountRef.current || userIdRef.current !== activeUid) {
             return { connections: [], accounts: [] };
@@ -2206,15 +2359,10 @@ export const App: React.FC = () => {
                   category: cat,
                   date: dateStr,
                   time:
-                    explicitTime ||
-                    getTransactionTime({
-                      id: t.id,
-                      title,
-                      category: cat,
-                      date: dateStr,
-                      note: t.note,
-                      amount: Math.abs(Number(t.amount) || 0),
-                    }),
+                    explicitTime && explicitTime !== '00:00' && explicitTime !== '12:00'
+                      ? explicitTime
+                      : '',
+                  createdAt: t.timestamp || undefined,
                   note: t.note,
                   logo: t.logo || getLogoUrl(title, cat),
                 },
@@ -2250,11 +2398,7 @@ export const App: React.FC = () => {
             : [];
 
         const combinedTxs = deduplicateTransactions([...uniqueBankTxs, ...mappedDbTxs]);
-        combinedTxs.sort((a, b) => {
-          const dCmp = b.date.localeCompare(a.date);
-          if (dCmp !== 0) return dCmp;
-          return getTransactionTime(b).localeCompare(getTransactionTime(a));
-        });
+        combinedTxs.sort(compareTransactionsChronologically);
 
         if (isDeletingAccountRef.current || userIdRef.current !== uid) {
           return { connections: [], accounts: [] };
@@ -2886,11 +3030,7 @@ export const App: React.FC = () => {
 
     const list = deduplicateTransactions(sanitized);
 
-    list.sort((a, b) => {
-      const dCmp = (b.date || '').localeCompare(a.date || '');
-      if (dCmp !== 0) return dCmp;
-      return getTransactionTime(b).localeCompare(getTransactionTime(a));
-    });
+    list.sort(compareTransactionsChronologically);
     return list;
   }, [
     transactions,
@@ -3072,18 +3212,14 @@ export const App: React.FC = () => {
             type: 'income',
             category: inc.category || 'Lön',
             date: pDate,
-            time: '08:00',
+            time: '',
             logo: inc.logo || getLogoUrl(inc.name, inc.category || 'Lön'),
           });
         }
       }
     }
     const deduped = deduplicateTransactions(combined);
-    deduped.sort((a, b) => {
-      const dCmp = (b.date || '').localeCompare(a.date || '');
-      if (dCmp !== 0) return dCmp;
-      return getTransactionTime(b).localeCompare(getTransactionTime(a));
-    });
+    deduped.sort(compareTransactionsChronologically);
     return deduped;
   }, [
     transactions,

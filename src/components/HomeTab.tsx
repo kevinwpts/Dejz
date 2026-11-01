@@ -136,6 +136,8 @@ export interface TransactionItem {
   valueDate?: string;
   bankAccountId?: string;
   bankAccountName?: string;
+  createdAt?: string;
+  sortOrder?: number;
   rawJson?: any;
 }
 
@@ -206,18 +208,52 @@ export function getTransactionTime(
     }
   }
 
-  // 3. Om banken enbart skickade bokföringsdatum utan klockslag (PSD2 standard för bokförda poster),
-  // generera ett deterministiskt, konsekvent klockslag baserat på transaktionens unika nyckel
-  const seedStr = `${tx.id || ''}|${tx.date || ''}|${tx.title || ''}|${tx.amount || 0}`;
-  let hash = 2166136261;
-  for (let i = 0; i < seedStr.length; i++) {
-    hash ^= seedStr.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
+  // 3. Om banken enbart skickade bokföringsdatum utan klockslag (PSD2 standard för SEB m.fl.),
+  // returnera tom sträng — hitta aldrig på ett påhittat klockslag.
+  return '';
+}
+
+export function compareTransactionsChronologically(
+  a: TransactionItem,
+  b: TransactionItem
+): number {
+  const dateCmp = (b.date || '').localeCompare(a.date || '');
+  if (dateCmp !== 0) return dateCmp;
+
+  const timeA = getTransactionTime(a);
+  const timeB = getTransactionTime(b);
+  if (timeA && timeB && timeA !== timeB) {
+    return timeB.localeCompare(timeA);
   }
-  const absHash = Math.abs(hash);
-  const hour = 8 + (absHash % 13); // 08:00 - 20:59
-  const minute = (Math.floor(absHash / 17) % 60);
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+  if (
+    typeof a.sortOrder === 'number' &&
+    typeof b.sortOrder === 'number' &&
+    a.sortOrder !== b.sortOrder
+  ) {
+    return b.sortOrder - a.sortOrder;
+  }
+
+  // Om den ena transaktionen hämtades vid en senare synkning än den andra (> 10 sek skillnad),
+  // har den inträffat senare under dagen och ska ligga överst.
+  if (a.createdAt && b.createdAt) {
+    const msA = Date.parse(a.createdAt);
+    const msB = Date.parse(b.createdAt);
+    if (Number.isFinite(msA) && Number.isFinite(msB) && Math.abs(msB - msA) > 10_000) {
+      return msB - msA;
+    }
+  }
+
+  // Bankens sekventiella bokföringsreferens (t.ex. SEB entry_reference) ökar kronologiskt under dagen
+  if (a.entryReference && b.entryReference && a.entryReference !== b.entryReference) {
+    return b.entryReference.localeCompare(a.entryReference);
+  }
+
+  if (a.createdAt && b.createdAt && a.createdAt !== b.createdAt) {
+    return b.createdAt.localeCompare(a.createdAt);
+  }
+
+  return 0;
 }
 
 interface HomeTabProps {
@@ -443,11 +479,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     const deduped = deduplicateTransactions(transactions || []);
     return deduped
       .filter((tx) => !tx.isExcluded && doesTransactionMatchAccount(tx, activeModalAccount))
-      .sort((a, b) => {
-        const dCmp = (b.date || '').localeCompare(a.date || '');
-        if (dCmp !== 0) return dCmp;
-        return getTransactionTime(b).localeCompare(getTransactionTime(a));
-      });
+      .sort(compareTransactionsChronologically);
   }, [transactions, activeModalAccount]);
 
   const activeAccountPeriodStats = useMemo(() => {
@@ -486,11 +518,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     const deduped = deduplicateTransactions(transactions || []);
     return deduped
       .filter((tx) => !tx.isExcluded && !reviewedIds.has(tx.id))
-      .sort((a, b) => {
-        const dCmp = (b.date || '').localeCompare(a.date || '');
-        if (dCmp !== 0) return dCmp;
-        return getTransactionTime(b).localeCompare(getTransactionTime(a));
-      })
+      .sort(compareTransactionsChronologically)
       .slice(0, 20);
   }, [transactions, reviewedIds]);
 
@@ -658,11 +686,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         }
         return true;
       })
-      .sort((a, b) => {
-        const dCmp = (b.date || '').localeCompare(a.date || '');
-        if (dCmp !== 0) return dCmp;
-        return getTransactionTime(b).localeCompare(getTransactionTime(a));
-      });
+      .sort(compareTransactionsChronologically);
   }, [transactions, period, periodRecurringMatches]);
 
   // Group all deduplicated transactions by date (YYYY-MM-DD)
@@ -678,7 +702,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }
 
     for (const [, items] of map.entries()) {
-      items.sort((a, b) => getTransactionTime(b).localeCompare(getTransactionTime(a)));
+      items.sort(compareTransactionsChronologically);
     }
 
     return map;
