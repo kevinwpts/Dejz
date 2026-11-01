@@ -25,7 +25,7 @@ import {
   SETTINGS_SUBVIEW_TITLES,
 } from './components/SettingsTab';
 import { SavingsGoalsView } from './components/SavingsGoalsView';
-import { MatpriskollenView } from './components/MatpriskollenView';
+import { FriendsChatView } from './components/FriendsChatView';
 import { LandingPage } from './components/LandingPage';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { ItemLogo } from './components/ItemLogo';
@@ -46,6 +46,11 @@ import {
   getHouseholdState,
   subscribeToHouseholdRealtime,
 } from './utils/householdSync';
+import {
+  connectFriendsChatWebSocket,
+  getTotalUnreadChatCount,
+  normalizeSocialUserKey,
+} from './utils/friendsChatSync';
 import {
   bankService,
   BankConnection,
@@ -1699,6 +1704,28 @@ export const App: React.FC = () => {
   const [userAvatar, setUserAvatar] = useState<string | null>(
     () => initialCache?.userAvatar || null
   );
+  const [selectedChatFriendKey, setSelectedChatFriendKey] = useState<string | null>(null);
+  const [socialTick, setSocialTick] = useState(0);
+
+  // Realtids-WebSocket för Vänner & Chatt
+  useEffect(() => {
+    const onSocialUpdate = () => setSocialTick((t) => t + 1);
+    window.addEventListener('dejz:social-updated', onSocialUpdate);
+    const disconnectWs = connectFriendsChatWebSocket({
+      userEmail,
+      userName,
+      userAvatar,
+    });
+    return () => {
+      window.removeEventListener('dejz:social-updated', onSocialUpdate);
+      disconnectWs();
+    };
+  }, [userEmail, userName, userAvatar]);
+
+  const friendsUnreadCount = useMemo(() => {
+    void socialTick;
+    return getTotalUnreadChatCount(normalizeSocialUserKey(userEmail, userName));
+  }, [userEmail, userName, socialTick]);
 
   // Landningssida & Onboarding
   const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(() => {
@@ -4321,8 +4348,8 @@ export const App: React.FC = () => {
             ? 'Väntar på paket'
             : activeTab === 'receipts'
             ? 'Kvitton'
-            : activeTab === 'matpriskollen'
-            ? 'Matpriskollen'
+            : activeTab === 'friends'
+            ? 'Vänner & chatt'
             : null
         }
         onBack={() => {
@@ -4578,7 +4605,23 @@ export const App: React.FC = () => {
                 />
               )}
 
-              {activeTab === 'matpriskollen' && <MatpriskollenView />}
+              {activeTab === 'friends' && (
+                <FriendsChatView
+                  period={period}
+                  userEmail={userEmail}
+                  userName={userName}
+                  userAvatar={userAvatar}
+                  transactions={displayTransactions}
+                  fixedExpenses={fixedExpenses}
+                  incomes={incomes}
+                  initialSelectedFriendKey={selectedChatFriendKey}
+                  onOpenHousehold={() => {
+                    setSettingsSubView('household');
+                    setActiveTab('settings');
+                  }}
+                  onOpenGoals={() => setActiveTab('goals')}
+                />
+              )}
 
               {activeTab === 'saved' && (
                 <div className="ui-page">
@@ -5129,6 +5172,10 @@ export const App: React.FC = () => {
                   }}
                   selectedGoalId={selectedGoalIdInView}
                   onSelectGoalId={setSelectedGoalIdInView}
+                  onOpenFriendsChat={(friendKey) => {
+                    setSelectedChatFriendKey(friendKey || null);
+                    setActiveTab('friends');
+                  }}
                 />
               )}
           </>
@@ -5141,8 +5188,12 @@ export const App: React.FC = () => {
           setIsSearchModalOpen(false);
           setIsNotificationsModalOpen(false);
           setSettingsSubView('main');
+          if (tab !== 'friends') {
+            setSelectedChatFriendKey(null);
+          }
           setActiveTab(tab);
         }}
+        friendsUnreadCount={friendsUnreadCount}
         savedCount={displayTransactions.filter((t) => t.isHearted).length}
         packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
         receiptsCount={

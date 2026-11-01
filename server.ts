@@ -1,4 +1,6 @@
 import express from "express";
+import http from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import cors from "cors";
 import fs from "fs";
@@ -1505,159 +1507,623 @@ Regler:
     res.send(svg);
   });
 
-  // Matpriskollen live data proxy endpoints (no API key required)
-  const mpkNearbyCache = new Map<string, { ts: number; payload: any }>();
+  // ==============================================================
+  // FRIENDS & REAL-TIME CHAT API + WEBSOCKET SERVER
+  // ==============================================================
+  interface SocialUserRecord {
+    userKey: string;
+    email: string;
+    name: string;
+    avatar?: string | null;
+    phone?: string;
+    friendCode: string;
+    friends: string[]; // array of friend userKeys
+    lastSeen: string;
+  }
 
-  app.get('/api/matpriskollen/stores', async (req, res) => {
-    try {
-      const lat = Number(req.query.lat) || 56.0465;
-      const lon = Number(req.query.lon) || 12.6945;
-      const limit = Math.min(40, Math.max(1, Number(req.query.limit) || 25));
-      const upstream = await fetch(
-        `https://matpriskollen.se/api/v1/stores?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=${limit}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
-          },
-        }
-      );
-      if (!upstream.ok) {
-        return res.status(upstream.status).json([]);
-      }
-      const data = await upstream.json();
-      res.json(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error('[Matpriskollen] stores error:', e);
-      res.json([]);
+  interface SocialChatMessage {
+    id: string;
+    roomId: string;
+    senderKey: string;
+    senderName: string;
+    senderAvatar?: string | null;
+    text: string;
+    createdAt: string;
+    replyTo?: {
+      id: string;
+      senderName: string;
+      text: string;
+    };
+    reactions?: Record<string, string[]>; // emoji -> array of userKeys
+    readBy?: string[];
+    attachment?: {
+      kind: 'expense_split' | 'household_invite' | 'savings_goal';
+      title: string;
+      amount?: number;
+      fullAmount?: number;
+      category?: string;
+      date?: string;
+      inviteCode?: string;
+      householdName?: string;
+      goalName?: string;
+      goalCurrent?: number;
+      goalTarget?: number;
+      settled?: boolean;
+      settledAt?: string;
+      settledBy?: string;
+    };
+  }
+
+  const socialUsersByKey = new Map<string, SocialUserRecord>();
+  const socialUsersByCode = new Map<string, string>(); // friendCode -> userKey
+  const socialChatRooms = new Map<string, SocialChatMessage[]>(); // roomId -> messages
+  const connectedSocketsByUser = new Map<string, Set<WebSocket>>(); // userKey -> active sockets
+
+  function normalizeUserKey(raw?: string | null, fallbackName?: string | null): string {
+    const clean = String(raw || '').trim().toLowerCase();
+    if (clean) return clean;
+    const nameSlug = String(fallbackName || 'anvandare')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9åäö]/gi, '_')
+      .replace(/_+/g, '_');
+    return `${nameSlug || 'jag'}@local.dejz`;
+  }
+
+  function deterministicFriendCode(userKey: string): string {
+    let hash = 2166136261;
+    for (let i = 0; i < userKey.length; i++) {
+      hash ^= userKey.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
     }
-  });
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let code = '';
+    let n = Math.abs(hash);
+    for (let i = 0; i < 6; i++) {
+      code += chars[n % chars.length];
+      n = Math.floor(n / chars.length) + i * 7;
+    }
+    return code;
+  }
 
-  app.get('/api/matpriskollen/nearby-offers', async (req, res) => {
-    try {
-      const lat = Number(req.query.lat) || 56.0465;
-      const lon = Number(req.query.lon) || 12.6945;
-      const cacheKey = `${lat.toFixed(2)},${lon.toFixed(2)}`;
-      const cached = mpkNearbyCache.get(cacheKey);
-      if (cached && Date.now() - cached.ts < 5 * 60 * 1000) {
-        return res.json(cached.payload);
-      }
+  function buildRoomId(userA: string, userB: string): string {
+    const a = normalizeUserKey(userA);
+    const b = normalizeUserKey(userB);
+    return a < b ? `dm:${a}::${b}` : `dm:${b}::${a}`;
+  }
 
-      const storesRes = await fetch(
-        `https://matpriskollen.se/api/v1/stores?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=25`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
-          },
+  function isUserOnline(userKey: string): boolean {
+    const set = connectedSocketsByUser.get(normalizeUserKey(userKey));
+    return Boolean(set && set.size > 0);
+  }
+
+  function ensureSocialUser(params: {
+    userKey: string;
+    email?: string | null;
+    name?: string | null;
+    avatar?: string | null;
+    phone?: string | null;
+  }): SocialUserRecord {
+    const key = normalizeUserKey(params.userKey, params.name);
+    const existing = socialUsersByKey.get(key);
+    const code = existing?.friendCode || deterministicFriendCode(key);
+    const displayName =
+      String(params.name || '').trim() ||
+      existing?.name ||
+      (key.includes('@') ? key.split('@')[0] : 'Vän');
+
+    const updated: SocialUserRecord = {
+      userKey: key,
+      email: String(params.email || existing?.email || key).trim().toLowerCase(),
+      name: displayName,
+      avatar: params.avatar !== undefined ? params.avatar : existing?.avatar || null,
+      phone: params.phone !== undefined ? String(params.phone || '').trim() : existing?.phone,
+      friendCode: code,
+      friends: existing?.friends || [],
+      lastSeen: new Date().toISOString(),
+    };
+
+    socialUsersByKey.set(key, updated);
+    socialUsersByCode.set(code.toUpperCase(), key);
+    return updated;
+  }
+
+  function sendToUserSockets(userKey: string, payload: any) {
+    const key = normalizeUserKey(userKey);
+    const sockets = connectedSocketsByUser.get(key);
+    if (!sockets || sockets.size === 0) return;
+    const raw = JSON.stringify(payload);
+    for (const ws of sockets) {
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(raw);
+        } catch {
+          // ignore
         }
-      );
-      if (!storesRes.ok) {
-        return res.json({ offers: [] });
       }
-      const rawStores = await storesRes.json();
-      const validStores = (Array.isArray(rawStores) ? rawStores : [])
-        .filter((s: any) => s && s.key && Number(s.offerCount) > 0)
-        .slice(0, 12);
+    }
+  }
 
-      const perStoreOffers = await Promise.all(
-        validStores.map(async (st: any) => {
-          try {
-            const r = await fetch(
-              `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(st.key)}/offers?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=120`,
-              {
-                headers: {
-                  Accept: 'application/json',
-                  'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
-                },
-              }
-            );
-            if (!r.ok) return [];
-            const d = await r.json();
-            const arr = Array.isArray(d?.offers) ? d.offers : [];
-            return arr.map((o: any) => ({
-              ...o,
-              storeKey: String(st.key),
-              storeName: String(st.name || ''),
-              chainName: String(st.chainName || ''),
-              storeLogo: st.imageUrl || undefined,
-              storeDist: st.dist ? String(st.dist) : undefined,
-              storeLat: Number(st.lat),
-              storeLon: Number(st.lon),
-            }));
-          } catch {
-            return [];
+  function broadcastRoomEvent(roomId: string, payload: any) {
+    if (roomId.startsWith('dm:')) {
+      const parts = roomId.slice(3).split('::');
+      for (const p of parts) {
+        if (p) sendToUserSockets(p, payload);
+      }
+    }
+  }
+
+  function serializeFriendSummary(friendKey: string, viewerKey: string) {
+    const rec =
+      socialUsersByKey.get(friendKey) ||
+      ensureSocialUser({ userKey: friendKey, name: friendKey.split('@')[0] });
+    const roomId = buildRoomId(viewerKey, friendKey);
+    const msgs = socialChatRooms.get(roomId) || [];
+    const lastMessage = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+    const unreadCount = msgs.filter(
+      (m) => m.senderKey !== viewerKey && !(m.readBy || []).includes(viewerKey)
+    ).length;
+
+    return {
+      userKey: rec.userKey,
+      email: rec.email,
+      name: rec.name,
+      avatar: rec.avatar || null,
+      phone: rec.phone || '',
+      friendCode: rec.friendCode,
+      online: isUserOnline(rec.userKey),
+      lastSeen: rec.lastSeen,
+      roomId,
+      lastMessage,
+      unreadCount,
+    };
+  }
+
+  async function hydrateSocialFromSupabaseIfNeeded(userKey: string) {
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return;
+    try {
+      const { data: rows } = await supabaseAdmin
+        .from('profiles')
+        .select('email, full_name, avatar_url, my_swish_phone, user_preferences')
+        .not('email', 'is', null)
+        .limit(200);
+
+      for (const row of rows || []) {
+        const em = String(row.email || '').trim().toLowerCase();
+        if (!em) continue;
+        const prefs = row.user_preferences && typeof row.user_preferences === 'object' ? row.user_preferences : {};
+        const u = ensureSocialUser({
+          userKey: em,
+          email: em,
+          name: row.full_name || prefs.userName || em.split('@')[0],
+          avatar: row.avatar_url || prefs.userAvatar || null,
+          phone: row.my_swish_phone || prefs.phone || '',
+        });
+        if (Array.isArray(prefs.socialFriends)) {
+          for (const fk of prefs.socialFriends) {
+            const normFk = normalizeUserKey(fk);
+            if (normFk && normFk !== u.userKey && !u.friends.includes(normFk)) {
+              u.friends.push(normFk);
+            }
           }
-        })
-      );
-
-      const payload = {
-        storeCount: validStores.length,
-        offers: perStoreOffers.flat(),
-      };
-      mpkNearbyCache.set(cacheKey, { ts: Date.now(), payload });
-      res.json(payload);
-    } catch (e) {
-      console.error('[Matpriskollen] nearby-offers error:', e);
-      res.json({ storeCount: 0, offers: [] });
-    }
-  });
-
-  const handleStoreOffersRequest = async (storeKey: string, req: express.Request, res: express.Response) => {
-    try {
-      if (!storeKey) {
-        return res.status(400).json({ storeName: '', offers: [] });
-      }
-      const lat = Number(req.query.lat) || 56.0465;
-      const lon = Number(req.query.lon) || 12.6945;
-      const limit = Math.min(120, Math.max(1, Number(req.query.limit) || 100));
-      const upstream = await fetch(
-        `https://matpriskollen.se/api/v1/stores/${encodeURIComponent(storeKey)}/offers?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&limit=${limit}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
-          },
         }
-      );
-      if (!upstream.ok) {
-        return res.status(upstream.status).json({ storeName: '', offers: [] });
-      }
-      const data = await upstream.json();
-      res.json(data || { storeName: '', offers: [] });
-    } catch (e) {
-      console.error('[Matpriskollen] offers error:', e);
-      res.json({ storeName: '', offers: [] });
-    }
-  };
-
-  app.get('/api/matpriskollen/offers', async (req, res) => {
-    const storeKey = String(req.query.storeKey || req.query.key || '').trim();
-    await handleStoreOffersRequest(storeKey, req, res);
-  });
-
-  app.get('/api/matpriskollen/stores/:storeKey/offers', async (req, res) => {
-    await handleStoreOffersRequest(req.params.storeKey, req, res);
-  });
-
-  app.get('/api/matpriskollen/cities', async (req, res) => {
-    try {
-      const city = String(req.query.city || '').trim();
-      if (city.length < 2) return res.json([]);
-      const upstream = await fetch(
-        `https://matpriskollen.se/api/geo/local?city=${encodeURIComponent(city)}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
-          },
+        if (prefs.socialRooms && typeof prefs.socialRooms === 'object') {
+          for (const [rId, rMsgs] of Object.entries(prefs.socialRooms)) {
+            if (Array.isArray(rMsgs)) {
+              const existingMsgs = socialChatRooms.get(rId) || [];
+              const byId = new Map<string, SocialChatMessage>();
+              for (const m of existingMsgs) byId.set(m.id, m);
+              for (const m of rMsgs as SocialChatMessage[]) {
+                if (m && m.id) byId.set(m.id, m);
+              }
+              const merged = Array.from(byId.values()).sort((a, b) =>
+                String(a.createdAt || '').localeCompare(String(b.createdAt || ''))
+              );
+              socialChatRooms.set(rId, merged);
+            }
+          }
         }
-      );
-      if (!upstream.ok) return res.json([]);
-      const data = await upstream.json();
-      res.json(Array.isArray(data) ? data : []);
+      }
     } catch {
-      res.json([]);
+      // ignore
+    }
+  }
+
+  async function persistSocialForUser(userKey: string) {
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return;
+    const rec = socialUsersByKey.get(userKey);
+    if (!rec || !rec.email.includes('@') || rec.email.endsWith('@local.dejz')) return;
+    try {
+      const { data: rows } = await supabaseAdmin
+        .from('profiles')
+        .select('id, user_preferences')
+        .ilike('email', rec.email);
+      for (const row of rows || []) {
+        const prefs =
+          row.user_preferences && typeof row.user_preferences === 'object'
+            ? { ...row.user_preferences }
+            : {};
+        prefs.socialFriends = rec.friends;
+        const myRooms: Record<string, SocialChatMessage[]> = {};
+        for (const fk of rec.friends) {
+          const rId = buildRoomId(rec.userKey, fk);
+          const msgs = socialChatRooms.get(rId);
+          if (msgs && msgs.length > 0) {
+            myRooms[rId] = msgs.slice(-100);
+          }
+        }
+        prefs.socialRooms = myRooms;
+        await supabaseAdmin
+          .from('profiles')
+          .update({ user_preferences: prefs })
+          .eq('id', row.id);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  let hasHydratedSocialDirectory = false;
+
+  app.post('/api/friends/sync', async (req, res) => {
+    try {
+      const { userEmail, userName, userAvatar, userPhone, localFriends, localRooms } = req.body || {};
+      const myKey = normalizeUserKey(userEmail, userName);
+
+      if (!hasHydratedSocialDirectory) {
+        hasHydratedSocialDirectory = true;
+        await hydrateSocialFromSupabaseIfNeeded(myKey);
+      }
+
+      const me = ensureSocialUser({
+        userKey: myKey,
+        email: userEmail || myKey,
+        name: userName,
+        avatar: userAvatar,
+        phone: userPhone,
+      });
+
+      // Merge any locally cached friends & rooms
+      if (Array.isArray(localFriends)) {
+        for (const lf of localFriends) {
+          if (!lf || !lf.userKey) continue;
+          const fKey = normalizeUserKey(lf.userKey, lf.name);
+          if (fKey === myKey) continue;
+          ensureSocialUser({
+            userKey: fKey,
+            email: lf.email || fKey,
+            name: lf.name,
+            avatar: lf.avatar,
+            phone: lf.phone,
+          });
+          if (!me.friends.includes(fKey)) {
+            me.friends.push(fKey);
+          }
+          const fRec = socialUsersByKey.get(fKey);
+          if (fRec && !fRec.friends.includes(myKey)) {
+            fRec.friends.push(myKey);
+          }
+        }
+      }
+
+      if (localRooms && typeof localRooms === 'object') {
+        for (const [rId, rMsgs] of Object.entries(localRooms)) {
+          if (!Array.isArray(rMsgs)) continue;
+          const existing = socialChatRooms.get(rId) || [];
+          const byId = new Map<string, SocialChatMessage>();
+          for (const m of existing) byId.set(m.id, m);
+          for (const m of rMsgs as SocialChatMessage[]) {
+            if (m && m.id) byId.set(m.id, m);
+          }
+          socialChatRooms.set(
+            rId,
+            Array.from(byId.values()).sort((a, b) =>
+              String(a.createdAt || '').localeCompare(String(b.createdAt || ''))
+            )
+          );
+        }
+      }
+
+      // Auto-link household partner if user belongs to a household
+      for (const hh of householdMemoryStore.values()) {
+        if (hh && hh.members && hh.members[myKey]) {
+          for (const [mKey, mVal] of Object.entries(hh.members as Record<string, any>)) {
+            const normM = normalizeUserKey(mKey, mVal?.name);
+            if (normM && normM !== myKey) {
+              ensureSocialUser({
+                userKey: normM,
+                email: mVal?.email || normM,
+                name: mVal?.name || 'Partner',
+                avatar: mVal?.avatar || null,
+              });
+              if (!me.friends.includes(normM)) me.friends.push(normM);
+            }
+          }
+        }
+      }
+
+      const friendsList = me.friends.map((fk) => serializeFriendSummary(fk, myKey));
+      const roomsPayload: Record<string, SocialChatMessage[]> = {};
+      for (const fk of me.friends) {
+        const rId = buildRoomId(myKey, fk);
+        roomsPayload[rId] = socialChatRooms.get(rId) || [];
+      }
+
+      return res.json({
+        me: {
+          userKey: me.userKey,
+          email: me.email,
+          name: me.name,
+          avatar: me.avatar,
+          phone: me.phone,
+          friendCode: me.friendCode,
+        },
+        friends: friendsList,
+        rooms: roomsPayload,
+      });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Sync error' });
+    }
+  });
+
+  app.post('/api/friends/add', async (req, res) => {
+    try {
+      const { userEmail, userName, query, customName, customPhone } = req.body || {};
+      const myKey = normalizeUserKey(userEmail, userName);
+      const me = ensureSocialUser({ userKey: myKey, email: userEmail, name: userName });
+
+      const rawQ = String(query || '').trim();
+      if (!rawQ && !customName) {
+        return res.status(400).json({ error: 'Ange namn, e-post, mobilnummer eller vänkod.' });
+      }
+
+      const upperQ = rawQ.replace(/\s+/g, '').toUpperCase();
+      let targetUser: SocialUserRecord | undefined;
+
+      // 1. Check by friend code
+      if (socialUsersByCode.has(upperQ)) {
+        const foundKey = socialUsersByCode.get(upperQ)!;
+        targetUser = socialUsersByKey.get(foundKey);
+      }
+
+      // 2. Check by email, phone, or exact name in directory
+      if (!targetUser && rawQ) {
+        const lowerQ = rawQ.toLowerCase();
+        const digitsQ = rawQ.replace(/\D/g, '');
+        for (const u of socialUsersByKey.values()) {
+          if (u.userKey === myKey) continue;
+          if (
+            u.email.toLowerCase() === lowerQ ||
+            u.userKey.toLowerCase() === lowerQ ||
+            u.name.toLowerCase() === lowerQ ||
+            (digitsQ.length >= 7 && (u.phone || '').replace(/\D/g, '').endsWith(digitsQ.slice(-7)))
+          ) {
+            targetUser = u;
+            break;
+          }
+        }
+      }
+
+      // 3. If not in memory yet, create a contact/friend entry so the user can chat, split expenses & invite immediately
+      if (!targetUser) {
+        const isEmail = rawQ.includes('@');
+        const isPhone = /^\+?[\d\s-]{6,}$/.test(rawQ);
+        const derivedName =
+          String(customName || '').trim() ||
+          (isEmail
+            ? rawQ.split('@')[0].replace(/[._-]/g, ' ')
+            : !isPhone && rawQ.length > 0
+            ? rawQ
+            : 'Vän');
+        const cleanTitleName = derivedName
+          .split(' ')
+          .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+          .join(' ');
+        const generatedKey = isEmail
+          ? rawQ.toLowerCase()
+          : isPhone
+          ? `${rawQ.replace(/\D/g, '')}@phone.dejz`
+          : `${cleanTitleName.toLowerCase().replace(/[^a-z0-9]/g, '_')}@friend.dejz`;
+
+        if (generatedKey === myKey) {
+          return res.status(400).json({ error: 'Du kan inte lägga till dig själv som vän.' });
+        }
+
+        targetUser = ensureSocialUser({
+          userKey: generatedKey,
+          email: isEmail ? rawQ.toLowerCase() : generatedKey,
+          name: cleanTitleName,
+          phone: isPhone ? rawQ : String(customPhone || '').trim(),
+        });
+      }
+
+      if (targetUser.userKey === myKey) {
+        return res.status(400).json({ error: 'Du kan inte lägga till dig själv som vän.' });
+      }
+
+      if (!me.friends.includes(targetUser.userKey)) {
+        me.friends.push(targetUser.userKey);
+      }
+      if (!targetUser.friends.includes(myKey)) {
+        targetUser.friends.push(myKey);
+      }
+
+      const roomId = buildRoomId(myKey, targetUser.userKey);
+      if (!socialChatRooms.has(roomId)) {
+        socialChatRooms.set(roomId, []);
+      }
+
+      await Promise.allSettled([
+        persistSocialForUser(myKey),
+        persistSocialForUser(targetUser.userKey),
+      ]);
+
+      // Notify both users in real time via WebSocket
+      sendToUserSockets(targetUser.userKey, {
+        type: 'friend:added',
+        friend: serializeFriendSummary(myKey, targetUser.userKey),
+      });
+      sendToUserSockets(myKey, {
+        type: 'friend:added',
+        friend: serializeFriendSummary(targetUser.userKey, myKey),
+      });
+
+      return res.json({
+        friend: serializeFriendSummary(targetUser.userKey, myKey),
+        roomId,
+        messages: socialChatRooms.get(roomId) || [],
+      });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Kunde inte lägga till vän' });
+    }
+  });
+
+  app.post('/api/friends/remove', async (req, res) => {
+    try {
+      const { userEmail, userName, friendKey } = req.body || {};
+      const myKey = normalizeUserKey(userEmail, userName);
+      const normFriend = normalizeUserKey(friendKey);
+      const me = socialUsersByKey.get(myKey);
+      if (me) {
+        me.friends = me.friends.filter((k) => k !== normFriend);
+      }
+      const other = socialUsersByKey.get(normFriend);
+      if (other) {
+        other.friends = other.friends.filter((k) => k !== myKey);
+      }
+      await Promise.allSettled([persistSocialForUser(myKey), persistSocialForUser(normFriend)]);
+      return res.json({ success: true });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Remove failed' });
+    }
+  });
+
+  function upsertChatMessageInRoom(msg: SocialChatMessage): SocialChatMessage {
+    const list = socialChatRooms.get(msg.roomId) || [];
+    const existingIdx = list.findIndex((m) => m.id === msg.id);
+    if (existingIdx >= 0) {
+      list[existingIdx] = { ...list[existingIdx], ...msg };
+      socialChatRooms.set(msg.roomId, list);
+      return list[existingIdx];
+    }
+    const nextMsg: SocialChatMessage = {
+      ...msg,
+      readBy: Array.isArray(msg.readBy) ? msg.readBy : [msg.senderKey],
+      reactions: msg.reactions || {},
+    };
+    list.push(nextMsg);
+    socialChatRooms.set(msg.roomId, list);
+    return nextMsg;
+  }
+
+  app.post('/api/chat/send', async (req, res) => {
+    try {
+      const { message } = req.body || {};
+      if (!message || !message.id || !message.roomId || !message.senderKey) {
+        return res.status(400).json({ error: 'Invalid message payload' });
+      }
+      const saved = upsertChatMessageInRoom(message);
+      broadcastRoomEvent(saved.roomId, {
+        type: 'chat:message',
+        message: saved,
+      });
+
+      if (saved.roomId.startsWith('dm:')) {
+        const parts = saved.roomId.slice(3).split('::');
+        for (const p of parts) {
+          void persistSocialForUser(p);
+        }
+      }
+
+      return res.json({ message: saved });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Send failed' });
+    }
+  });
+
+  app.post('/api/chat/react', async (req, res) => {
+    try {
+      const { roomId, messageId, userKey, emoji } = req.body || {};
+      const normUser = normalizeUserKey(userKey);
+      const list = socialChatRooms.get(String(roomId || '')) || [];
+      const target = list.find((m) => m.id === messageId);
+      if (!target) return res.status(404).json({ error: 'Message not found' });
+
+      const reactions = { ...(target.reactions || {}) };
+      const currentUsers = new Set(reactions[emoji] || []);
+      if (currentUsers.has(normUser)) {
+        currentUsers.delete(normUser);
+      } else {
+        currentUsers.add(normUser);
+      }
+      if (currentUsers.size === 0) {
+        delete reactions[emoji];
+      } else {
+        reactions[emoji] = Array.from(currentUsers);
+      }
+      target.reactions = reactions;
+
+      broadcastRoomEvent(target.roomId, {
+        type: 'chat:message:updated',
+        message: target,
+      });
+      return res.json({ message: target });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Reaction failed' });
+    }
+  });
+
+  app.post('/api/chat/settle', async (req, res) => {
+    try {
+      const { roomId, messageId, settledBy } = req.body || {};
+      const list = socialChatRooms.get(String(roomId || '')) || [];
+      const target = list.find((m) => m.id === messageId);
+      if (!target || !target.attachment) {
+        return res.status(404).json({ error: 'Attachment not found' });
+      }
+      target.attachment = {
+        ...target.attachment,
+        settled: !target.attachment.settled,
+        settledAt: new Date().toISOString(),
+        settledBy: String(settledBy || 'Vän'),
+      };
+
+      broadcastRoomEvent(target.roomId, {
+        type: 'chat:message:updated',
+        message: target,
+      });
+      return res.json({ message: target });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Settle failed' });
+    }
+  });
+
+  app.post('/api/chat/read', async (req, res) => {
+    try {
+      const { roomId, userKey } = req.body || {};
+      const normUser = normalizeUserKey(userKey);
+      const list = socialChatRooms.get(String(roomId || '')) || [];
+      let changed = false;
+      for (const m of list) {
+        const rb = new Set(m.readBy || []);
+        if (!rb.has(normUser)) {
+          rb.add(normUser);
+          m.readBy = Array.from(rb);
+          changed = true;
+        }
+      }
+      if (changed) {
+        broadcastRoomEvent(String(roomId), {
+          type: 'chat:read',
+          roomId: String(roomId),
+          userKey: normUser,
+        });
+      }
+      return res.json({ success: true });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message || 'Read update failed' });
     }
   });
 
@@ -1700,7 +2166,109 @@ Regler:
     }
   });
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const httpServer = http.createServer(app);
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  wss.on('connection', (ws: WebSocket) => {
+    let boundUserKey: string | null = null;
+
+    ws.on('message', (raw) => {
+      try {
+        const data = JSON.parse(String(raw));
+        if (!data || typeof data.type !== 'string') return;
+
+        if (data.type === 'user:identify') {
+          const uKey = normalizeUserKey(data.userEmail || data.userKey, data.userName);
+          boundUserKey = uKey;
+          const uRec = ensureSocialUser({
+            userKey: uKey,
+            email: data.userEmail || uKey,
+            name: data.userName,
+            avatar: data.userAvatar,
+          });
+          let set = connectedSocketsByUser.get(uKey);
+          if (!set) {
+            set = new Set<WebSocket>();
+            connectedSocketsByUser.set(uKey, set);
+          }
+          set.add(ws);
+
+          // Broadcast online presence to friends
+          for (const fk of uRec.friends) {
+            sendToUserSockets(fk, {
+              type: 'presence:update',
+              userKey: uKey,
+              online: true,
+              lastSeen: new Date().toISOString(),
+            });
+          }
+          return;
+        }
+
+        if (data.type === 'chat:typing' && data.roomId && boundUserKey) {
+          broadcastRoomEvent(String(data.roomId), {
+            type: 'chat:typing',
+            roomId: String(data.roomId),
+            userKey: boundUserKey,
+            userName: data.userName || 'Vän',
+            isTyping: Boolean(data.isTyping),
+          });
+          return;
+        }
+
+        if (data.type === 'chat:message' && data.message) {
+          const saved = upsertChatMessageInRoom(data.message);
+          broadcastRoomEvent(saved.roomId, {
+            type: 'chat:message',
+            message: saved,
+          });
+          return;
+        }
+
+        if (data.type === 'chat:read' && data.roomId && boundUserKey) {
+          const list = socialChatRooms.get(String(data.roomId)) || [];
+          for (const m of list) {
+            const rb = new Set(m.readBy || []);
+            rb.add(boundUserKey);
+            m.readBy = Array.from(rb);
+          }
+          broadcastRoomEvent(String(data.roomId), {
+            type: 'chat:read',
+            roomId: String(data.roomId),
+            userKey: boundUserKey,
+          });
+          return;
+        }
+      } catch {
+        // ignore malformed ws message
+      }
+    });
+
+    ws.on('close', () => {
+      if (!boundUserKey) return;
+      const set = connectedSocketsByUser.get(boundUserKey);
+      if (set) {
+        set.delete(ws);
+        if (set.size === 0) {
+          connectedSocketsByUser.delete(boundUserKey);
+          const uRec = socialUsersByKey.get(boundUserKey);
+          if (uRec) {
+            uRec.lastSeen = new Date().toISOString();
+            for (const fk of uRec.friends) {
+              sendToUserSockets(fk, {
+                type: 'presence:update',
+                userKey: boundUserKey,
+                online: false,
+                lastSeen: uRec.lastSeen,
+              });
+            }
+          }
+        }
+      }
+    });
+  });
+
+  httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

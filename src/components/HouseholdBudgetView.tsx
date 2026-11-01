@@ -9,6 +9,7 @@ import {
   SignOut,
   ArrowsLeftRight,
   UserPlus,
+  ChatCircleDots,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
 import { PeriodInfo } from '../utils/periodEngine';
@@ -30,6 +31,11 @@ import {
   calculateHouseholdSettlement,
   pushHouseholdSyncToServer,
 } from '../utils/householdSync';
+import {
+  SocialFriend,
+  getStoredFriends,
+  sendChatMessage,
+} from '../utils/friendsChatSync';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 
 interface HouseholdBudgetViewProps {
@@ -41,6 +47,7 @@ interface HouseholdBudgetViewProps {
   fixedExpenses: FixedExpenseItem[];
   transactions: TransactionItem[];
   onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<any> | void;
+  onOpenFriendsChat?: (friendKey?: string | null) => void;
 }
 
 export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
@@ -52,8 +59,10 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
   fixedExpenses,
   transactions,
   onAddFixed,
+  onOpenFriendsChat,
 }) => {
   const [household, setHousehold] = useState<HouseholdState | null>(() => getHouseholdState());
+  const [friends, setFriends] = useState<SocialFriend[]>(() => getStoredFriends());
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
@@ -85,9 +94,76 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     const onUpdate = () => {
       setHousehold(getHouseholdState());
     };
+    const onSocialUpdate = () => {
+      setFriends(getStoredFriends());
+    };
     window.addEventListener('dejz:household-updated', onUpdate);
-    return () => window.removeEventListener('dejz:household-updated', onUpdate);
+    window.addEventListener('dejz:social-updated', onSocialUpdate);
+    return () => {
+      window.removeEventListener('dejz:household-updated', onUpdate);
+      window.removeEventListener('dejz:social-updated', onSocialUpdate);
+    };
   }, []);
+
+  const handleQuickConnectFriendToHousehold = async (friend: SocialFriend) => {
+    const code = household?.inviteCode || generateInviteCode();
+    const defaultCats = household?.sharedCategories || ['Mat & dryck', 'Boende', 'Räkningar'];
+    const mySummary = computeMyHouseholdSummary({
+      userEmail,
+      userName,
+      userAvatar,
+      period,
+      incomes,
+      fixedExpenses,
+      transactions,
+      sharedCategories: defaultCats,
+    });
+
+    const partnerMember: HouseholdMemberSummary = {
+      email: friend.email || friend.key,
+      name: friend.name,
+      avatar: friend.avatar || null,
+      totalIncome: 29500,
+      sharedFixedPaid: 0,
+      sharedVariableSpent: 0,
+      sharedExpensesList: [],
+      updatedAt: new Date().toISOString(),
+    };
+
+    const nextHh: HouseholdState = {
+      householdId: household?.householdId || `hh-${code}`,
+      inviteCode: code,
+      name: household?.name || `${mySummary.name} & ${friend.name}`,
+      splitMode: household?.splitMode || 'equal',
+      sharedCategories: defaultCats,
+      members: {
+        ...(household?.members || {}),
+        [myKey]: mySummary,
+        [friend.key]: partnerMember,
+      },
+      sharedFixedExpenses: fixedExpenses.filter((f) => f.isShared),
+      sharedSavingsGoals: getSavingsGoals(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setHousehold(nextHh);
+    saveHouseholdStateLocal(nextHh);
+    await pushHouseholdSyncToServer(nextHh);
+
+    await sendChatMessage({
+      myKey,
+      myName: mySummary.name || 'Jag',
+      myAvatar: userAvatar,
+      friendKey: friend.key,
+      text: `Jag har kopplat ihop dig med vår delade budget (${nextHh.name})!`,
+      sharedPayload: {
+        kind: 'household_invite',
+        title: nextHh.name,
+        inviteCode: nextHh.inviteCode,
+        householdName: nextHh.name,
+      },
+    });
+  };
 
   // Recompute my member summary whenever my incomes, fixedExpenses, transactions, or sharedCategories change
   useEffect(() => {
@@ -385,6 +461,27 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
             <Plus size={15} weight="bold" />
             <span>Skapa gemensamt hushåll</span>
           </button>
+
+          {friends.length > 0 && (
+            <div className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
+              <span className="text-[11.5px] font-medium text-[var(--text-secondary)] block">
+                Eller starta direkt med en vän från din vänlista:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {friends.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => handleQuickConnectFriendToHousehold(f)}
+                    className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <UserPlus size={13} className="text-emerald-500" />
+                    <span>Starta med {f.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="ui-card p-5 space-y-3.5">
@@ -505,30 +602,48 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
           </div>
 
           {partnerMember ? (
-            <button
-              type="button"
-              onClick={() => {
-                setPartnerNameInput(partnerMember.name);
-                setPartnerIncomeInput(String(partnerMember.totalIncome || ''));
-                setPartnerPaidInput(String(partnerTotalPaid || ''));
-                setIsEditingPartner((v) => !v);
-              }}
-              className="rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] p-3.5 text-left transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPartnerNameInput(partnerMember.name);
+                  setPartnerIncomeInput(String(partnerMember.totalIncome || ''));
+                  setPartnerPaidInput(String(partnerTotalPaid || ''));
+                  setIsEditingPartner((v) => !v);
+                }}
+                className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
+              >
                 <div className="w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-display font-bold text-xs flex items-center justify-center shrink-0 uppercase">
                   {(partnerMember.name || 'P').slice(0, 2)}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
                     {partnerMember.name}
                   </span>
-                  <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block">
+                  <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block truncate">
                     Inkomst: {formatKr(partnerMember.totalIncome)}
                   </span>
                 </div>
-              </div>
-            </button>
+              </button>
+              {onOpenFriendsChat && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const matchedFriend = friends.find(
+                      (f) =>
+                        f.key === partnerMember.email ||
+                        f.name.toLowerCase().trim() ===
+                          partnerMember.name.toLowerCase().trim()
+                    );
+                    onOpenFriendsChat(matchedFriend ? matchedFriend.key : null);
+                  }}
+                  className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0 cursor-pointer"
+                  title={`Chatta med ${partnerMember.name}`}
+                >
+                  <ChatCircleDots size={15} />
+                </button>
+              )}
+            </div>
           ) : (
             <button
               type="button"
@@ -548,12 +663,33 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                   Lägg till partner
                 </span>
                 <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
-                  Dela kod eller ange manuellt
+                  Välj vän eller dela kod
                 </span>
               </div>
             </button>
           )}
         </div>
+
+        {!partnerMember && friends.length > 0 && (
+          <div className="pt-1 flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-[11px] text-[var(--text-secondary)]">
+              Lägg till direkt från dina vänner:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {friends.map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => handleQuickConnectFriendToHousehold(f)}
+                  className="px-2.5 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus size={11} weight="bold" className="text-emerald-500" />
+                  <span>{f.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Formulär för att ange/uppdatera partners inkomst & utlägg manuellt (eller innan partnern loggat in) */}
         {isEditingPartner && (

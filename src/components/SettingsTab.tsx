@@ -103,6 +103,7 @@ interface SettingsTabProps {
   onSubViewChange?: (view: SettingsSubView) => void;
   selectedGoalId?: string | null;
   onSelectGoalId?: (goalId: string | null) => void;
+  onOpenFriendsChat?: (friendKey?: string | null) => void;
 }
 
 export type SettingsSubView =
@@ -191,6 +192,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onSubViewChange,
   selectedGoalId,
   onSelectGoalId,
+  onOpenFriendsChat,
 }) => {
   const [internalSubView, setInternalSubView] = useState<SettingsSubView>('main');
   const subView = controlledSubView ?? internalSubView;
@@ -914,6 +916,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         fixedExpenses={fixedExpenses}
         transactions={transactions}
         onAddFixed={onAddFixed}
+        onOpenFriendsChat={onOpenFriendsChat}
       />
     );
   }
@@ -2189,6 +2192,27 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </span>
             </div>
           </button>
+
+          {/* Vänner & chatt */}
+          {onOpenFriendsChat && (
+            <button
+              type="button"
+              onClick={() => onOpenFriendsChat(null)}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <ChatCircleText size={18} weight="regular" />
+                </span>
+                <span className={rowTitleClass}>Vänner & chatt</span>
+              </div>
+              <div className="ui-admin-right">
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
+              </div>
+            </button>
+          )}
 
           {/* Hitta fasta poster (kortad rubrik med bevarad betydelse) */}
           <button

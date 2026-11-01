@@ -9,7 +9,7 @@ import {
   Package,
   Paperclip,
   PiggyBank,
-  ShoppingCart,
+  ChatCircleDots,
   CaretRight,
 } from '@phosphor-icons/react';
 
@@ -23,7 +23,7 @@ export type AppTab =
   | 'saved'
   | 'packages'
   | 'receipts'
-  | 'matpriskollen'
+  | 'friends'
   | 'account-detail';
 
 interface BottomNavProps {
@@ -33,6 +33,7 @@ interface BottomNavProps {
   savedCount?: number;
   packagesCount?: number;
   receiptsCount?: number;
+  friendsUnreadCount?: number;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -42,6 +43,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   savedCount = 0,
   packagesCount = 0,
   receiptsCount = 0,
+  friendsUnreadCount = 0,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -55,10 +57,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   const menuItems = [
     {
-      id: 'matpriskollen' as AppTab,
-      label: 'Matpriskollen',
-      icon: ShoppingCart,
-      badge: undefined,
+      id: 'friends' as AppTab,
+      label: 'Vänner & chatt',
+      icon: ChatCircleDots,
+      badge: friendsUnreadCount > 0 ? friendsUnreadCount : undefined,
     },
     {
       id: 'saved' as AppTab,
@@ -200,7 +202,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
-            <SquaresFour size={20} weight={isMoreActive ? 'fill' : 'regular'} />
+            <span className="relative inline-flex">
+              <SquaresFour size={20} weight={isMoreActive ? 'fill' : 'regular'} />
+              {friendsUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--surface-color)]" />
+              )}
+            </span>
             <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
               Mer
             </span>

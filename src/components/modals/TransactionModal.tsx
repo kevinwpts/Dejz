@@ -1224,7 +1224,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       {subView === 'details' && !isCreateMode && activeTx && (
         <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
           {/* Top Header */}
-          <div className="ui-sheet-header mb-5">
+          <div className="ui-sheet-header !mb-0">
             <div className="flex items-center gap-1">
               {onToggleHeart && (
                 <button
@@ -1296,13 +1296,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           {/* Hero Receipt Header (Read-only Förhandsgranskning) */}
-          <div className="ui-hero-header relative overflow-hidden mb-5 pb-5">
+          <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
             {(() => {
               const accentColor = resolveCategoryColor(activeTx.category);
               return (
                 <>
                   <div
-                    className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full blur-2xl opacity-15 dark:opacity-20"
+                    className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full blur-2xl opacity-15 dark:opacity-20"
                     style={{ backgroundColor: accentColor }}
                   />
                   <div className="relative flex justify-center mb-3.5">
@@ -1743,38 +1743,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     )}
                 </div>
               )}
-
-              {(() => {
-                void logoPrefTick;
-                const targetMerchantName = (title || activeTx?.title || '').trim();
-                if (!targetMerchantName) return null;
-                const prefersCategoryIcon = isMerchantCategoryIconPreferred(targetMerchantName);
-                const hasCompanyLogo = Boolean(
-                  getLogoUrl(targetMerchantName, category) || activeTx?.logo
-                );
-                if (!hasCompanyLogo && !prefersCategoryIcon) return null;
-                return (
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <span className="text-[11px] text-[var(--text-muted)]">
-                      Visningsikon för {targetMerchantName}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMerchantCategoryIconPreferred(
-                          targetMerchantName,
-                          !prefersCategoryIcon
-                        );
-                        setLogoPrefTick((t) => t + 1);
-                        syncAllUserPreferencesToSupabase();
-                      }}
-                      className="px-2.5 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
-                    >
-                      {prefersCategoryIcon ? 'Visa företagslogga' : 'Visa kategori-ikon'}
-                    </button>
-                  </div>
-                );
-              })()}
 
               <div className="border-t border-[var(--border-subtle)] pt-3.5">
                 {!isBankSynced ? (
