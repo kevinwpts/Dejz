@@ -3109,9 +3109,9 @@ export const App: React.FC = () => {
     userName,
   ]);
 
-  // Kvar att spendera under aktuell period
+  // Kvar att spendera under aktuell period (kan vara negativt om man gått över budget)
   const kvarAttSpendera = useMemo(() => {
-    return Math.max(0, totalIncome - totalFixedExpenses - totalVariableSpent);
+    return totalIncome - totalFixedExpenses - totalVariableSpent;
   }, [totalIncome, totalFixedExpenses, totalVariableSpent]);
 
   // Dagsbudget

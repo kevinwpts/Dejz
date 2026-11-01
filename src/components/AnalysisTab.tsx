@@ -744,9 +744,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <span className="font-display font-semibold text-xl sm:text-[22px] tracking-[-0.02em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                       {formatKr(activeSlice.amount)}
                     </span>
-                    <span className="text-[11px] font-medium text-[var(--text-muted)] tabular-nums mt-0.5">
-                      {activeSlice.percentage}% av utgifter
-                    </span>
                   </>
                 ) : (
                   <>

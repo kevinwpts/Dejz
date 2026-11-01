@@ -99,7 +99,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   maxWidthClass = 'max-w-md',
   maxHeightClass = 'max-h-[90dvh]',
   surfaceClass = 'bg-[var(--surface-color)]',
-  paddingClass = 'px-5 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]',
+  paddingClass = 'px-5 pt-0 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]',
   contentClassName,
   zIndexClass = 'z-[110]',
   disablePadding = false,
