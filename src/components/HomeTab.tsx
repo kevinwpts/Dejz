@@ -48,6 +48,7 @@ import {
   hasInitializedReviewedTransactions,
   markTransactionsReviewed,
 } from '../utils/appCache';
+import { hasConnectedHouseholdPartner } from '../utils/householdSync';
 
 export interface AccountItem {
   id: string;
@@ -1700,8 +1701,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               fixedExpenses.map((exp) => {
                 const catLabel = exp.category || 'Räkningar';
                 const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+                const isPartnerConnected = hasConnectedHouseholdPartner();
                 const shareRatio =
-                  exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+                  isPartnerConnected && exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
                     ? exp.amount / exp.fullAmount
                     : 1;
                 const effectiveAmt = matchedTx
@@ -1737,7 +1739,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           />
                           <span className="truncate">
                             {catLabel}
-                            {exp.isShared &&
+                            {isPartnerConnected &&
+                            exp.isShared &&
                             exp.fullAmount &&
                             exp.fullAmount > exp.amount
                               ? ` · Delad (av ${formatKr(exp.fullAmount)})`
@@ -1772,6 +1775,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 const isPending =
                   tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
                 const isSplit =
+                  hasConnectedHouseholdPartner() &&
                   tx.originalAmount !== undefined &&
                   tx.originalAmount > tx.amount;
                 return (

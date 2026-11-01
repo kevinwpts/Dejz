@@ -54,7 +54,7 @@ import {
   SavingsGoalItem,
   saveTransactionMeta,
 } from '../../utils/appCache';
-import { getHouseholdState } from '../../utils/householdSync';
+import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 import {
   inferCategoryAndMethodFromName,
   cleanDisplayMerchantName,
@@ -232,7 +232,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const navigateSubView = (next: ModalSubView, dir: 'forward' | 'back' = 'forward') => {
     if (
-      (next === 'receipt-preview' || next === 'link-fixed-picker') &&
+      (next === 'category-picker' ||
+        next === 'payment-picker' ||
+        next === 'receipt-preview' ||
+        next === 'link-fixed-picker') &&
       (subView === 'details' || subView === 'edit')
     ) {
       setPickerReturnView(subView);
@@ -738,7 +741,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <div className="ui-sheet-sub-header">
             <button
               type="button"
-              onClick={() => navigateSubView('edit', 'back')}
+              onClick={() => navigateSubView(pickerReturnView, 'back')}
               title="Tillbaka"
               aria-label="Tillbaka"
               className="ui-icon-btn"
@@ -766,7 +769,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="button"
                   onClick={() => {
                     setCategory(c);
-                    navigateSubView('edit', 'back');
+                    if (pickerReturnView === 'details' && activeTx && onUpdate) {
+                      saveTransactionMeta(activeTx.id, { customCategory: c });
+                      onUpdate({ ...activeTx, category: c });
+                    }
+                    navigateSubView(pickerReturnView, 'back');
                   }}
                   className="ui-row-btn"
                 >
@@ -800,7 +807,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <div className="ui-sheet-sub-header">
             <button
               type="button"
-              onClick={() => navigateSubView('edit', 'back')}
+              onClick={() => navigateSubView(pickerReturnView, 'back')}
               title="Tillbaka"
               aria-label="Tillbaka"
               className="ui-icon-btn"
@@ -828,7 +835,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="button"
                   onClick={() => {
                     setPaymentMethod(m);
-                    navigateSubView('edit', 'back');
+                    if (pickerReturnView === 'details' && activeTx && onUpdate) {
+                      saveTransactionMeta(activeTx.id, { paymentMethod: m });
+                      onUpdate({ ...activeTx, paymentMethod: m });
+                    }
+                    navigateSubView(pickerReturnView, 'back');
                   }}
                   className="ui-row-btn"
                 >
@@ -1132,12 +1143,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </button>
           </div>
 
-          <p className="text-xs text-[var(--text-secondary)] px-1 leading-relaxed">
-            {isIncome
-              ? 'Välj vilken av dina fasta inkomster denna bankhändelse tillhör så paras de ihop automatiskt nu och framåt.'
-              : 'Har du lagt in en fast utgift manuellt (t.ex. gym eller el) men banken skriver ett annat namn? Välj vilken fast post denna händelse tillhör så paras de ihop nu och framåt.'}
-          </p>
-
           <div className="ui-sheet-group">
             {(isIncome ? incomes : fixedExpenses).map((item) => {
               const isMatched =
@@ -1342,22 +1347,32 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           <div className="space-y-3">
-            {/* Förhandsgranskningstabell (endast läsvy) */}
+            {/* Förhandsgranskningstabell med 1-trycks snabbval */}
             <div className="ui-sheet-group">
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('category-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Kategori</span>
                 <span className="ui-info-value flex items-center gap-1.5">
-                  <CategoryIcon category={activeTx.category} size={13} />
-                  <span>{activeTx.category}</span>
+                  <CategoryIcon category={category || activeTx.category} size={13} />
+                  <span>{category || activeTx.category}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('payment-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Betalsätt</span>
-                <span className="ui-info-value">
-                  {getDefaultPaymentMethodForTx(activeTx)}
+                <span className="ui-info-value flex items-center gap-1.5">
+                  <span>{paymentMethod || getDefaultPaymentMethodForTx(activeTx)}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
               {resolvedAccountInfo && (
                 <div className="ui-row">
@@ -1398,12 +1413,25 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
               )}
 
-              {isExcluded && (
+              {onExclude && (
                 <div className="ui-row">
-                  <span className="ui-info-label">Budget</span>
-                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                    Räknas ej i budget
-                  </span>
+                  <span className="ui-info-label">Räkna i budget</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!isExcluded}
+                    onClick={() => {
+                      onExclude(activeTx.id, !isExcluded);
+                      setLogoPrefTick((t) => t + 1);
+                    }}
+                    className={`ui-switch ${!isExcluded ? 'ui-switch-on' : 'ui-switch-off'}`}
+                  >
+                    <span
+                      className={`ui-switch-thumb ${
+                        !isExcluded ? 'ui-switch-thumb-on' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
               )}
             </div>
@@ -1474,6 +1502,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </span>
               </button>
 
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="ui-row-btn"
+              >
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-2 shrink-0">
+                  <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
+                  <span>{draftReceipts.length > 0 ? 'Bifoga fler kvitton' : 'Bifoga kvitto'}</span>
+                </span>
+                <CaretRight size={13} className="text-[var(--text-muted)] shrink-0" />
+              </button>
+
               {(isIncome ? incomes.length > 0 : fixedExpenses.length > 0) && onLinkToFixed && (
                 <button
                   type="button"
@@ -1525,7 +1565,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </button>
               )}
 
-              {!isIncome && getHouseholdState() && (
+              {!isIncome && hasConnectedHouseholdPartner() && (
                 <div className="ui-row">
                   <span className="font-normal text-[var(--text-primary)] flex items-center gap-2">
                     <UserPlus size={15} className="text-[var(--text-secondary)] shrink-0" />

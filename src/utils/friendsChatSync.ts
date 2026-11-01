@@ -112,6 +112,10 @@ export function getStoredMyFriendCode(): string {
   }
 }
 
+export function getMyFriendInviteCode(_email?: string | null): string {
+  return formatFriendCodeDisplay(getStoredMyFriendCode());
+}
+
 export function saveStoredMyFriendCode(code: string): void {
   if (!code) return;
   try {

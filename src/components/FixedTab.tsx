@@ -17,6 +17,7 @@ import {
 import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import {
   getHouseholdState,
+  hasConnectedHouseholdPartner,
   calculateHouseholdSettlement,
   getMemberKey,
 } from '../utils/householdSync';
@@ -61,6 +62,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   onOpenDiscover,
   onOpenHousehold,
 }) => {
+  const [fixedFilter, setFixedFilter] = React.useState<'all' | 'unpaid' | 'paid' | 'shared'>('all');
+
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
@@ -186,43 +189,15 @@ export const FixedTab: React.FC<FixedTabProps> = ({
       {/* ============================================================== */}
       {(() => {
         const hh = getHouseholdState();
-        if (!onOpenHousehold) return null;
-        if (!hh) {
-          const sharedCount = fixedExpenses.filter((f) => f.isShared).length;
-          if (sharedCount === 0) return null;
-          return (
-            <button
-              type="button"
-              onClick={onOpenHousehold}
-              className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-                  <Users size={17} weight="regular" />
-                </div>
-                <div className="min-w-0">
-                  <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
-                    Synka delad budget med din partner
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)] block truncate">
-                    Du har {sharedCount} {sharedCount === 1 ? 'delad fast utgift' : 'delade fasta utgifter'} · Bjud in med kod
-                  </span>
-                </div>
-              </div>
-              <CaretRight
-                size={14}
-                weight="bold"
-                className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
-              />
-            </button>
-          );
-        }
+        if (!onOpenHousehold || !hh || !hasConnectedHouseholdPartner(hh)) return null;
 
         const settlement = calculateHouseholdSettlement(
           hh,
           getMemberKey(userEmail, userName),
           period.startDate
         );
+        if (!settlement.partnerMember) return null;
+
         return (
           <button
             type="button"
@@ -240,13 +215,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 <span className="text-[11px] text-[var(--text-secondary)] block truncate tabular-nums">
                   {settlement.isSettledForCurrentPeriod
                     ? 'Perioden är markerad som utjämnad'
-                    : settlement.partnerMember
-                    ? Math.abs(settlement.netBalance) < 5
-                      ? 'Ni ligger helt jämnt i perioden'
-                      : settlement.netBalance > 0
-                      ? `${settlement.partnerMember.name} är skyldig dig ${formatKr(settlement.netBalance)}`
-                      : `Du är skyldig ${settlement.partnerMember.name} ${formatKr(Math.abs(settlement.netBalance))}`
-                    : `Totalt delat: ${formatKr(settlement.combinedTotalShared)} · Kod ${hh.inviteCode}`}
+                    : Math.abs(settlement.netBalance) < 5
+                    ? 'Ni ligger helt jämnt i perioden'
+                    : settlement.netBalance > 0
+                    ? `${settlement.partnerMember.name} är skyldig dig ${formatKr(settlement.netBalance)}`
+                    : `Du är skyldig ${settlement.partnerMember.name} ${formatKr(Math.abs(settlement.netBalance))}`}
                 </span>
               </div>
             </div>
@@ -266,17 +239,12 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-              <Sparkle size={17} weight="regular" />
+            <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+              <Sparkle size={16} weight="regular" />
             </div>
-            <div className="min-w-0">
-              <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
-                Upptäck fasta kostnader
-              </span>
-              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
-                Hitta abonnemang och räkningar automatiskt från dina bankköp
-              </span>
-            </div>
+            <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate">
+              Hitta abonnemang från bankköp
+            </span>
           </div>
           <CaretRight
             size={14}
@@ -410,78 +378,130 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           )}
         </div>
 
-        <div className="ui-list-card">
-          {sortedExpenses.length > 0 ? (
-            sortedExpenses.map((exp) => {
-              const paid = isExpensePaid(exp);
-              const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
-              const shareRatio =
-                exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
-                  ? exp.amount / exp.fullAmount
-                  : 1;
-              const actualPaidAmt = matchedTx
-                ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
-                : Math.round(Number(exp.amount) || 0);
-              const hasVariableDiff =
-                Boolean(matchedTx) && actualPaidAmt !== Math.round(Number(exp.amount) || 0);
-              const linkedGoalName = exp.linkedGoalId
-                ? savingsGoalsMap.get(exp.linkedGoalId)
-                : undefined;
-
+        {sortedExpenses.length > 1 && (
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {[
+              { id: 'all' as const, label: `Alla (${sortedExpenses.length})` },
+              {
+                id: 'unpaid' as const,
+                label: `Kvar att dras (${sortedExpenses.filter((e) => !isExpensePaid(e)).length})`,
+              },
+              {
+                id: 'paid' as const,
+                label: `Betalda (${sortedExpenses.filter((e) => isExpensePaid(e)).length})`,
+              },
+              ...(hasConnectedHouseholdPartner() && sortedExpenses.some((e) => e.isShared)
+                ? [
+                    {
+                      id: 'shared' as const,
+                      label: `Delade (${sortedExpenses.filter((e) => e.isShared).length})`,
+                    },
+                  ]
+                : []),
+            ].map((tab) => {
+              const active = fixedFilter === tab.id;
               return (
                 <button
-                  key={exp.id}
+                  key={tab.id}
                   type="button"
-                  onClick={() => onSelectFixed(exp)}
-                  className="ui-tx-row"
+                  onClick={() => setFixedFilter(tab.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                    active
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                      : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+                  }`}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <ItemLogo
-                      name={exp.name}
-                      category={exp.category}
-                      logoUrl={exp.logo}
-                      size="md"
-                      isRecurring={true}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="ui-row-title truncate block">
-                        {exp.name}
-                      </span>
-                      <span className="ui-row-subtitle flex items-center gap-1">
-                        <CategoryIcon
-                          category={exp.category || 'Räkningar'}
-                          size={11}
-                          className="shrink-0 text-[var(--text-secondary)]"
-                        />
-                        <span className="truncate">
-                          {exp.category || 'Räkningar'}
-                          {exp.isShared ? ' · Delad' : ''}
-                          {linkedGoalName ? ` · Sparmål: ${linkedGoalName}` : ''}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <span className="ui-row-amount">
-                      -{formatKr(actualPaidAmt)}
-                    </span>
-                    <span className="ui-row-meta flex items-center justify-end gap-1">
-                      <span>
-                        {hasVariableDiff
-                          ? `Riktvärde ${formatKr(exp.amount)}`
-                          : `Den ${exp.dueDay}:e`}
-                      </span>
-                      {paid && (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                          · Betald
-                        </span>
-                      )}
-                    </span>
-                  </div>
+                  {tab.label}
                 </button>
               );
-            })
+            })}
+          </div>
+        )}
+
+        <div className="ui-list-card">
+          {sortedExpenses.length > 0 ? (
+            sortedExpenses
+              .filter((exp) => {
+                if (fixedFilter === 'unpaid') return !isExpensePaid(exp);
+                if (fixedFilter === 'paid') return isExpensePaid(exp);
+                if (fixedFilter === 'shared') return Boolean(exp.isShared);
+                return true;
+              })
+              .map((exp) => {
+                const paid = isExpensePaid(exp);
+                const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
+                const isPartnerConnected = hasConnectedHouseholdPartner();
+                const shareRatio =
+                  isPartnerConnected && exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
+                    ? exp.amount / exp.fullAmount
+                    : 1;
+                const actualPaidAmt = matchedTx
+                  ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
+                  : Math.round(Number(exp.amount) || 0);
+                const hasVariableDiff =
+                  Boolean(matchedTx) && actualPaidAmt !== Math.round(Number(exp.amount) || 0);
+                const linkedGoalName = exp.linkedGoalId
+                  ? savingsGoalsMap.get(exp.linkedGoalId)
+                  : undefined;
+
+                return (
+                  <button
+                    key={exp.id}
+                    type="button"
+                    onClick={() => onSelectFixed(exp)}
+                    className="ui-tx-row"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <ItemLogo
+                        name={exp.name}
+                        category={exp.category}
+                        logoUrl={exp.logo}
+                        size="md"
+                        isRecurring={true}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className="ui-row-title truncate block">
+                          {exp.name}
+                        </span>
+                        <span className="ui-row-subtitle flex items-center gap-1">
+                          <CategoryIcon
+                            category={exp.category || 'Räkningar'}
+                            size={11}
+                            className="shrink-0 text-[var(--text-secondary)]"
+                          />
+                          <span className="truncate">
+                            {exp.category || 'Räkningar'}
+                            {isPartnerConnected && exp.isShared
+                              ? exp.fullAmount && exp.fullAmount > exp.amount
+                                ? ` · Delad (Totalt ${formatKr(exp.fullAmount)})`
+                                : ' · Delad'
+                              : ''}
+                            {linkedGoalName ? ` · Sparmål: ${linkedGoalName}` : ''}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="ui-row-amount">
+                        -{formatKr(actualPaidAmt)}
+                      </span>
+                      <span className="ui-row-meta flex items-center justify-end gap-1">
+                        <span>
+                          {hasVariableDiff
+                            ? `Riktvärde ${formatKr(exp.amount)}`
+                            : `Den ${exp.dueDay}:e`}
+                        </span>
+                        {paid && (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            · Betald
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
           ) : (
             <div className="py-9 px-4 text-center">
               <EmptyClusterArtwork variant="fixed" />

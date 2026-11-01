@@ -34,6 +34,8 @@ import {
   EyeSlash,
   Key,
   EnvelopeSimple,
+  Copy,
+  SlidersHorizontal,
 } from '@phosphor-icons/react';
 import { supabase } from '../supabaseClient';
 import { bankService, BankConnection, BankAccount } from '../services/bankService';
@@ -42,7 +44,9 @@ import { CategorySettings } from './CategorySettings';
 import { SavingsGoalsView } from './SavingsGoalsView';
 import { RecurringDiscoveryView } from './RecurringDiscoveryView';
 import { HouseholdBudgetView } from './HouseholdBudgetView';
-import { getHouseholdState } from '../utils/householdSync';
+import { AdminPanelView } from './AdminSimulator';
+import { hasConnectedHouseholdPartner } from '../utils/householdSync';
+import { getMyFriendInviteCode } from '../utils/friendsChatSync';
 import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
@@ -104,10 +108,20 @@ interface SettingsTabProps {
   selectedGoalId?: string | null;
   onSelectGoalId?: (goalId: string | null) => void;
   onOpenFriendsChat?: (friendKey?: string | null) => void;
+  splitSimulatorActive?: boolean;
+  onToggleSplitSimulator?: (active: boolean) => void;
+  onStartCreateGoalWizard?: () => void;
+  onOpenAddFixedModal?: () => void;
+  onOpenPreviewFixedModal?: () => void;
+  onOpenAddIncomeModal?: () => void;
+  onOpenAddTransactionModal?: () => void;
+  onOpenPreviewTransactionModal?: () => void;
+  onApplyFixedExpenses?: (next: FixedExpenseItem[]) => void;
 }
 
 export type SettingsSubView =
   | 'main'
+  | 'admin'
   | 'household'
   | 'discover'
   | 'categories'
@@ -120,14 +134,16 @@ export type SettingsSubView =
   | 'preferences'
   | 'profile'
   | 'feedback'
+  | 'legal'
   | 'privacy'
   | 'terms'
   | 'psd2'
   | 'cookies';
 
 export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, string> = {
+  admin: 'Admin & Testsimulator',
   profile: 'Profil',
-  household: 'Delad budget',
+  household: 'Delad ekonomi',
   discover: 'Hitta fasta poster',
   categories: 'Kategorier',
   goals: 'Sparmål & buffert',
@@ -137,7 +153,8 @@ export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, s
   appearance: 'Utseende',
   preferences: 'Överföringar',
   security: 'Data & säkerhet',
-  feedback: 'Skicka feedback',
+  feedback: 'Hjälp & feedback',
+  legal: 'Villkor & integritet',
   privacy: 'Integritetspolicy',
   terms: 'Användarvillkor',
   psd2: 'Open Banking',
@@ -193,6 +210,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   selectedGoalId,
   onSelectGoalId,
   onOpenFriendsChat,
+  splitSimulatorActive = false,
+  onToggleSplitSimulator,
+  onStartCreateGoalWizard,
+  onOpenAddFixedModal,
+  onOpenPreviewFixedModal,
+  onOpenAddIncomeModal,
+  onOpenAddTransactionModal,
+  onOpenPreviewTransactionModal,
+  onApplyFixedExpenses,
 }) => {
   const [internalSubView, setInternalSubView] = useState<SettingsSubView>('main');
   const subView = controlledSubView ?? internalSubView;
@@ -525,6 +551,34 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
         </section>
 
+        {/* Personlig kod för vänner & delad ekonomi */}
+        <section className="ui-section">
+          <div className="ui-admin-card">
+            <div className="ui-admin-row-static">
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] font-normal text-[var(--text-secondary)] block">
+                  Din personliga kod
+                </span>
+                <span className="font-display font-bold text-sm tracking-wider text-[var(--text-primary)] tabular-nums block mt-0.5">
+                  {getMyFriendInviteCode(userEmail)}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText(getMyFriendInviteCode(userEmail));
+                  setSavedMsg('Personlig kod kopierad');
+                  setTimeout(() => setSavedMsg(null), 2000);
+                }}
+                className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              >
+                <Copy size={13} />
+                <span>Kopiera</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
         {/* Sektion 1: Personuppgifter */}
         <section className="ui-section">
           <div className="ui-section-header">
@@ -561,7 +615,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
               <label className="px-4 py-3 block cursor-text">
                 <span className="text-[11px] font-normal text-[var(--text-secondary)] block mb-0.5">
-                  Mobilnummer (för Swish & delad budget)
+                  Mobilnummer
                 </span>
                 <input
                   type="tel"
@@ -607,14 +661,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <span className="ui-admin-icon-slot">
                   <Key size={18} weight="regular" />
                 </span>
-                <div className="min-w-0 flex-1 text-left">
-                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] block truncate">
-                    Ändra lösenord
-                  </span>
-                  <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
-                    Välj ett nytt lösenord för ditt konto
-                  </span>
-                </div>
+                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                  Ändra lösenord
+                </span>
               </div>
               <span className="ui-admin-chevron">
                 <CaretRight size={13} />
@@ -630,14 +679,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <span className="ui-admin-icon-slot">
                   <EnvelopeSimple size={18} weight="regular" />
                 </span>
-                <div className="min-w-0 flex-1 text-left">
-                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] block truncate">
-                    Skicka återställningslänk
-                  </span>
-                  <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
-                    Få en länk till din e-post om du glömt lösenordet
-                  </span>
-                </div>
+                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                  Skicka återställningslänk
+                </span>
               </div>
               <span className="ui-admin-chevron">
                 <CaretRight size={13} />
@@ -653,14 +697,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     <Eye size={18} weight="regular" />
                   )}
                 </span>
-                <div className="min-w-0 flex-1">
-                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] block truncate">
-                    Sekretessläge
-                  </span>
-                  <span className="text-[11.5px] text-[var(--text-secondary)] block truncate">
-                    Dölj saldon och belopp i översikten
-                  </span>
-                </div>
+                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                  Sekretessläge (dölj belopp)
+                </span>
               </div>
               <button
                 type="button"
@@ -692,75 +731,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               {resetEmailStatus}
             </div>
           )}
-        </section>
-
-        {/* Sektion 3: Kontohantering */}
-        <section className="ui-section">
-          <div className="ui-section-header">
-            <h2 className="ui-section-title">Kontohantering</h2>
-          </div>
-
-          <div className="ui-admin-card">
-            <button
-              type="button"
-              onClick={handleExportGdprData}
-              className="ui-admin-row"
-            >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <DownloadSimple size={18} weight="regular" />
-                </span>
-                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
-                  Exportera kontodata (GDPR)
-                </span>
-              </div>
-              <div className="ui-admin-right">
-                <span className="ui-admin-value">JSON</span>
-                <span className="ui-admin-chevron">
-                  <CaretRight size={13} />
-                </span>
-              </div>
-            </button>
-
-            {userEmail && (
-              <button
-                type="button"
-                onClick={onSignOut}
-                className="ui-admin-row"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <span className="ui-admin-icon-slot">
-                    <SignOut size={18} weight="regular" />
-                  </span>
-                  <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
-                    Logga ut
-                  </span>
-                </div>
-                <span className="ui-admin-chevron">
-                  <CaretRight size={13} />
-                </span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              disabled={securityProcessing}
-              onClick={() => setSecurityConfirmAction('delete')}
-              className="ui-admin-row disabled:opacity-50"
-            >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="w-5 h-5 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400">
-                  <Trash size={18} weight="regular" />
-                </span>
-                <span className="font-normal text-[13px] sm:text-[13.5px] text-rose-600 dark:text-rose-400 truncate">
-                  Radera konto
-                </span>
-              </div>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </button>
-          </div>
         </section>
 
         {/* BottomSheet för att ändra lösenord */}
@@ -1769,6 +1739,111 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </button>
           </form>
         </div>
+
+        {onStartOnboarding && (
+          <div className="ui-admin-card">
+            <button
+              type="button"
+              onClick={onStartOnboarding}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <Compass size={18} weight="regular" />
+                </span>
+                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                  Visa introduktionsguiden igen
+                </span>
+              </div>
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ==========================================
+  // SUB-VIEW: VILLKOR & INTEGRITET (Samlad juridikvy)
+  // ==========================================
+  if (subView === 'legal') {
+    return (
+      <div className="ui-page animate-slide-in-right">
+        <div className="ui-admin-card">
+          <button
+            type="button"
+            onClick={() => setSubView('privacy')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <LockKey size={18} weight="regular" />
+              </span>
+              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                Integritetspolicy
+              </span>
+            </div>
+            <span className="ui-admin-chevron">
+              <CaretRight size={13} />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubView('terms')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <FileText size={18} weight="regular" />
+              </span>
+              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                Användarvillkor
+              </span>
+            </div>
+            <span className="ui-admin-chevron">
+              <CaretRight size={13} />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubView('psd2')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Scales size={18} weight="regular" />
+              </span>
+              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                Open Banking (PSD2)
+              </span>
+            </div>
+            <span className="ui-admin-chevron">
+              <CaretRight size={13} />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubView('cookies')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <Cookie size={18} weight="regular" />
+              </span>
+              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                Cookies & lagring
+              </span>
+            </div>
+            <span className="ui-admin-chevron">
+              <CaretRight size={13} />
+            </span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -2063,6 +2138,44 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
+  // SUB-VIEW: ADMIN & TESTSIMULATOR
+  // ==========================================
+  if (subView === 'admin') {
+    return (
+      <div className="pb-28 animate-slide-in-right">
+        <AdminPanelView
+          period={period}
+          userEmail={userEmail}
+          userName={userName}
+          userAvatar={userAvatar}
+          incomes={incomes}
+          fixedExpenses={fixedExpenses}
+          transactions={transactions}
+          splitSimulatorActive={splitSimulatorActive}
+          onToggleSplitSimulator={(act) => onToggleSplitSimulator?.(act)}
+          onRestartOnboarding={() => onStartOnboarding?.()}
+          onStartCreateGoalWizard={() => {
+            if (onStartCreateGoalWizard) {
+              onStartCreateGoalWizard();
+            } else {
+              setSubView('goals');
+            }
+          }}
+          onOpenAddFixed={() => onOpenAddFixedModal?.()}
+          onOpenPreviewFixed={() => onOpenPreviewFixedModal?.()}
+          onOpenDiscoverSubscriptions={() => setSubView('discover')}
+          onOpenAddIncome={() => onOpenAddIncomeModal?.()}
+          onOpenAddTransaction={() => onOpenAddTransactionModal?.()}
+          onOpenPreviewTransaction={() => onOpenPreviewTransactionModal?.()}
+          onOpenFriendsChat={() => onOpenFriendsChat?.()}
+          onOpenHouseholdBudget={() => setSubView('household')}
+          onApplyFixedExpenses={onApplyFixedExpenses}
+        />
+      </div>
+    );
+  }
+
+  // ==========================================
   // MAIN SETTINGS & PROFILE MENU (Clean grouped layout with generous breathing room)
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
@@ -2072,8 +2185,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     'font-normal text-[11.5px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
   const sectionLabelClass =
     'px-1 pt-1.5 pb-0.5 text-[14px] sm:text-[14.5px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
-
-  const savingsGoalsCount = getSavingsGoals().length;
 
   return (
     <div className="space-y-5 pb-40 sm:pb-44 animate-slide-in-left">
@@ -2165,7 +2276,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
-          {/* Delad budget (Hushåll) */}
+          {/* Delad ekonomi (Hushåll) */}
           <button
             type="button"
             onClick={() => setSubView('household')}
@@ -2175,58 +2286,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <Users size={18} weight="regular" />
               </span>
-              <span className={rowTitleClass}>Delad budget</span>
+              <span className={rowTitleClass}>Delad ekonomi</span>
             </div>
             <div className="ui-admin-right">
               <span
                 className={`ui-admin-value ${
-                  getHouseholdState()
+                  hasConnectedHouseholdPartner()
                     ? 'text-emerald-600 dark:text-emerald-400 font-medium'
                     : ''
                 }`}
               >
-                {getHouseholdState() ? 'Aktiv' : 'Bjud in'}
+                {hasConnectedHouseholdPartner() ? 'Aktiv' : 'Bjud in'}
               </span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Vänner & chatt */}
-          {onOpenFriendsChat && (
-            <button
-              type="button"
-              onClick={() => onOpenFriendsChat(null)}
-              className="ui-admin-row"
-            >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <ChatCircleText size={18} weight="regular" />
-                </span>
-                <span className={rowTitleClass}>Vänner & chatt</span>
-              </div>
-              <div className="ui-admin-right">
-                <span className="ui-admin-chevron">
-                  <CaretRight size={13} />
-                </span>
-              </div>
-            </button>
-          )}
-
-          {/* Hitta fasta poster (kortad rubrik med bevarad betydelse) */}
-          <button
-            type="button"
-            onClick={() => setSubView('discover')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <Sparkle size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Hitta fasta poster</span>
-            </div>
-            <div className="ui-admin-right">
               <span className="ui-admin-chevron">
                 <CaretRight size={13} />
               </span>
@@ -2252,28 +2323,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
-          {/* Sparmål & buffert */}
-          <button
-            type="button"
-            onClick={() => setSubView('goals')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <PiggyBank size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Sparmål & buffert</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-value">
-                {savingsGoalsCount > 0 ? `${savingsGoalsCount} st` : ''}
-              </span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
           {/* Betalsätt */}
           <button
             type="button"
@@ -2293,13 +2342,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
-          {/* Dölj överföringar */}
+          {/* Dölj egna överföringar */}
           <div className="ui-admin-row-static">
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <span className="ui-admin-icon-slot">
                 <ArrowsLeftRight size={18} weight="regular" />
               </span>
-              <span className={rowTitleClass}>Dölj överföringar</span>
+              <span className={rowTitleClass}>Dölj egna överföringar</span>
             </div>
             {onToggleExcludeInternalTransfers && (
               <button
@@ -2322,9 +2371,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         </div>
       </section>
 
-      {/* 3. Konto & app */}
+      {/* 3. App & konto */}
       <section className="space-y-1.5">
-        <span className={sectionLabelClass}>Konto & app</span>
+        <span className={sectionLabelClass}>App & konto</span>
         <div className="ui-admin-card">
           {/* Utseende */}
           <button
@@ -2356,46 +2405,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
-          {/* Skicka feedback */}
-          <button
-            type="button"
-            onClick={() => setSubView('feedback')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <ChatCircleText size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Skicka feedback</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Introduktion */}
-          {onStartOnboarding && (
-            <button
-              type="button"
-              onClick={onStartOnboarding}
-              className="ui-admin-row"
-            >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <Compass size={18} weight="regular" />
-                </span>
-                <span className={rowTitleClass}>Introduktion</span>
-              </div>
-              <div className="ui-admin-right">
-                <span className="ui-admin-chevron">
-                  <CaretRight size={13} />
-                </span>
-              </div>
-            </button>
-          )}
-
           {/* Data & säkerhet */}
           <button
             type="button"
@@ -2414,23 +2423,37 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </span>
             </div>
           </button>
-        </div>
-      </section>
 
-      {/* 4. Juridik & integritet */}
-      <section className="space-y-1.5">
-        <span className={sectionLabelClass}>Juridik & integritet</span>
-        <div className="ui-admin-card">
+          {/* Hjälp & feedback */}
           <button
             type="button"
-            onClick={() => setSubView('privacy')}
+            onClick={() => setSubView('feedback')}
+            className="ui-admin-row"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <span className="ui-admin-icon-slot">
+                <ChatCircleText size={18} weight="regular" />
+              </span>
+              <span className={rowTitleClass}>Hjälp & feedback</span>
+            </div>
+            <div className="ui-admin-right">
+              <span className="ui-admin-chevron">
+                <CaretRight size={13} />
+              </span>
+            </div>
+          </button>
+
+          {/* Villkor & integritet */}
+          <button
+            type="button"
+            onClick={() => setSubView('legal')}
             className="ui-admin-row"
           >
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <span className="ui-admin-icon-slot">
                 <LockKey size={18} weight="regular" />
               </span>
-              <span className={rowTitleClass}>Integritetspolicy</span>
+              <span className={rowTitleClass}>Villkor & integritet</span>
             </div>
             <div className="ui-admin-right">
               <span className="ui-admin-chevron">
@@ -2439,54 +2462,28 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
+          {/* Admin & Testsimulator */}
           <button
             type="button"
-            onClick={() => setSubView('terms')}
+            onClick={() => setSubView('admin')}
             className="ui-admin-row"
           >
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <span className="ui-admin-icon-slot">
-                <FileText size={18} weight="regular" />
+                <SlidersHorizontal size={18} weight="regular" />
               </span>
-              <span className={rowTitleClass}>Användarvillkor</span>
+              <span className={rowTitleClass}>Admin & Testsimulator</span>
             </div>
             <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
+              <span
+                className={`ui-admin-value ${
+                  splitSimulatorActive
+                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                    : ''
+                }`}
+              >
+                {splitSimulatorActive ? 'Split-Screen På' : 'Scenarion & flöden'}
               </span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSubView('psd2')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <Scales size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Open Banking</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSubView('cookies')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <Cookie size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Cookies & lagring</span>
-            </div>
-            <div className="ui-admin-right">
               <span className="ui-admin-chevron">
                 <CaretRight size={13} />
               </span>

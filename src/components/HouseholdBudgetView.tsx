@@ -4,12 +4,11 @@ import {
   Copy,
   Check,
   Plus,
-  Scales,
-  Sparkle,
   SignOut,
-  ArrowsLeftRight,
   UserPlus,
   ChatCircleDots,
+  SlidersHorizontal,
+  CaretRight,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
 import { PeriodInfo } from '../utils/periodEngine';
@@ -34,8 +33,11 @@ import {
 import {
   SocialFriend,
   getStoredFriends,
+  saveStoredFriends,
+  getMyFriendInviteCode,
   sendChatMessage,
 } from '../utils/friendsChatSync';
+import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 
 interface HouseholdBudgetViewProps {
@@ -63,23 +65,21 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
 }) => {
   const [household, setHousehold] = useState<HouseholdState | null>(() => getHouseholdState());
   const [friends, setFriends] = useState<SocialFriend[]>(() => getStoredFriends());
+  const [isJoinSheetOpen, setIsJoinSheetOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedSwishAmt, setCopiedSwishAmt] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-
-  // Manual partner editor (if user wants to enter partner's income/shared outlays or test with a partner)
-  const [partnerNameInput, setPartnerNameInput] = useState('');
-  const [partnerIncomeInput, setPartnerIncomeInput] = useState('');
-  const [partnerPaidInput, setPartnerPaidInput] = useState('');
-  const [isEditingPartner, setIsEditingPartner] = useState(false);
+  const [partnerNameForJoin, setPartnerNameForJoin] = useState('');
 
   const formatKr = (amount: number) =>
     `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
 
   const myKey = useMemo(() => getMemberKey(userEmail, userName), [userEmail, userName]);
+  const myPersonalCode = useMemo(() => getMyFriendInviteCode(userEmail), [userEmail]);
 
   const expenseCategories = useMemo(
     () =>
@@ -89,7 +89,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     []
   );
 
-  // Listen for realtime updates
   useEffect(() => {
     const onUpdate = () => {
       setHousehold(getHouseholdState());
@@ -133,7 +132,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     const nextHh: HouseholdState = {
       householdId: household?.householdId || `hh-${code}`,
       inviteCode: code,
-      name: household?.name || `${mySummary.name} & ${friend.name}`,
+      name: `${mySummary.name} & ${friend.name}`,
       splitMode: household?.splitMode || 'equal',
       sharedCategories: defaultCats,
       members: {
@@ -148,6 +147,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
 
     setHousehold(nextHh);
     saveHouseholdStateLocal(nextHh);
+    setIsSettingsOpen(false);
     await pushHouseholdSyncToServer(nextHh);
 
     await sendChatMessage({
@@ -165,7 +165,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     });
   };
 
-  // Recompute my member summary whenever my incomes, fixedExpenses, transactions, or sharedCategories change
   useEffect(() => {
     if (!household) return;
     const mySummary = computeMyHouseholdSummary({
@@ -230,7 +229,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     const newHh: HouseholdState = {
       householdId: `hh-${code}`,
       inviteCode: code,
-      name: 'Vårt hushåll',
+      name: 'Delad budget',
       splitMode: 'equal',
       sharedCategories: defaultCats,
       members: {
@@ -248,8 +247,8 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
   const handleJoinHousehold = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCode = joinCodeInput.replace(/\s+/g, '').toUpperCase();
-    if (cleanCode.length < 4) {
-      setJoinError('Ange en giltig 6-siffrig inbjudningskod.');
+    if (cleanCode.length < 3) {
+      setJoinError('Ange din partners kod eller e-post.');
       return;
     }
     setJoining(true);
@@ -279,93 +278,83 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data?.household) {
-        setJoinError(
-          data?.error || 'Kunde inte hitta något hushåll med den koden. Kontrollera koden.'
-        );
-        setJoining(false);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.household) {
+        const joinedHh: HouseholdState = data.household;
+        saveHouseholdStateLocal(joinedHh);
+        setHousehold(joinedHh);
+        setIsJoinSheetOpen(false);
+
+        // Ensure partner is also in friends list so chat & household stay 100% unified
+        const otherEntry = Object.entries(joinedHh.members || {}).find(([k]) => k !== myKey);
+        if (otherEntry) {
+          const [otherKey, otherMem] = otherEntry;
+          const existingFriends = getStoredFriends();
+          if (!existingFriends.some((f) => f.key === otherKey)) {
+            const nextFriends: SocialFriend[] = [
+              {
+                key: otherKey,
+                name: otherMem.name || 'Partner',
+                email: otherMem.email,
+                addedAt: new Date().toISOString(),
+              },
+              ...existingFriends,
+            ];
+            saveStoredFriends(nextFriends);
+            setFriends(nextFriends);
+          }
+        }
+
+        if (onAddFixed && Array.isArray(joinedHh.sharedFixedExpenses)) {
+          for (const sf of joinedHh.sharedFixedExpenses) {
+            const exists = fixedExpenses.some(
+              (f) => f.name.toLowerCase().trim() === sf.name.toLowerCase().trim()
+            );
+            if (!exists) {
+              await onAddFixed({
+                name: sf.name,
+                amount: sf.amount,
+                fullAmount: sf.fullAmount,
+                isShared: true,
+                dueDay: sf.dueDay || 27,
+                category: sf.category || 'Boende',
+                paymentMethod: sf.paymentMethod || 'Autogiro',
+              });
+            }
+          }
+        }
+
+        if (Array.isArray(joinedHh.sharedSavingsGoals) && joinedHh.sharedSavingsGoals.length > 0) {
+          saveSavingsGoals(joinedHh.sharedSavingsGoals);
+        }
         return;
       }
 
-      const joinedHh: HouseholdState = data.household;
-      saveHouseholdStateLocal(joinedHh);
-      setHousehold(joinedHh);
-
-      // Merge any shared fixed expenses from partner that we don't have locally yet
-      if (onAddFixed && Array.isArray(joinedHh.sharedFixedExpenses)) {
-        for (const sf of joinedHh.sharedFixedExpenses) {
-          const exists = fixedExpenses.some(
-            (f) => f.name.toLowerCase().trim() === sf.name.toLowerCase().trim()
-          );
-          if (!exists) {
-            await onAddFixed({
-              name: sf.name,
-              amount: sf.amount,
-              fullAmount: sf.fullAmount,
-              isShared: true,
-              dueDay: sf.dueDay || 27,
-              category: sf.category || 'Boende',
-              paymentMethod: sf.paymentMethod || 'Autogiro',
-            });
-          }
-        }
+      // Unified fallback: if entering a friend code (e.g. DJZ 482) or email directly, create/add friend & connect household in one step
+      const cleanName = partnerNameForJoin.trim() || 'Partner';
+      const friendKey = cleanCode.includes('@')
+        ? cleanCode.toLowerCase()
+        : `friend-${cleanCode.toLowerCase()}`;
+      const existingFriends = getStoredFriends();
+      let friendObj = existingFriends.find((f) => f.key === friendKey);
+      if (!friendObj) {
+        friendObj = {
+          key: friendKey,
+          name: cleanName,
+          email: cleanCode.includes('@') ? cleanCode.toLowerCase() : undefined,
+          addedAt: new Date().toISOString(),
+        };
+        const nextFriends = [friendObj, ...existingFriends];
+        saveStoredFriends(nextFriends);
+        setFriends(nextFriends);
       }
-
-      if (Array.isArray(joinedHh.sharedSavingsGoals) && joinedHh.sharedSavingsGoals.length > 0) {
-        saveSavingsGoals(joinedHh.sharedSavingsGoals);
-      }
+      await handleQuickConnectFriendToHousehold(friendObj);
+      setIsJoinSheetOpen(false);
     } catch {
       setJoinError('Kunde inte ansluta just nu. Försök igen.');
     } finally {
       setJoining(false);
     }
-  };
-
-  const handleAddOrUpdateManualPartner = async () => {
-    if (!household) return;
-    const pName = partnerNameInput.trim() || 'Partner';
-    const pInc = Math.max(0, Math.round(Number(partnerIncomeInput) || 29500));
-    const pPaid = Math.max(0, Math.round(Number(partnerPaidInput) || 4800));
-    const partnerKey = 'partner@demo.dejz';
-
-    const partnerMember: HouseholdMemberSummary = {
-      email: partnerKey,
-      name: pName,
-      totalIncome: pInc,
-      sharedFixedPaid: Math.round(pPaid * 0.5),
-      sharedVariableSpent: Math.round(pPaid * 0.5),
-      sharedExpensesList:
-        pPaid > 0
-          ? [
-              {
-                id: 'partner-shared-1',
-                title: `${pName}s gemensamma utlägg`,
-                amount: Math.round(pPaid / 2),
-                fullAmount: pPaid,
-                category: 'Mat & dryck',
-                kind: 'variable',
-                paidByEmail: partnerKey,
-                paidByName: pName,
-              },
-            ]
-          : [],
-      isDemoPartner: true,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const nextHh: HouseholdState = {
-      ...household,
-      members: {
-        ...(household.members || {}),
-        [partnerKey]: partnerMember,
-      },
-      updatedAt: new Date().toISOString(),
-    };
-
-    setHousehold(nextHh);
-    setIsEditingPartner(false);
-    await pushHouseholdSyncToServer(nextHh);
   };
 
   const handleToggleSharedCategory = async (catName: string) => {
@@ -430,83 +419,145 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     saveHouseholdStateLocal(null);
     setHousehold(null);
     setShowLeaveConfirm(false);
+    setIsSettingsOpen(false);
   };
 
+  const settlement = useMemo(
+    () =>
+      household
+        ? calculateHouseholdSettlement(household, myKey, period.startDate)
+        : null,
+    [household, myKey, period.startDate]
+  );
+
   // ==============================================================
-  // VIEW 1: NOT CONNECTED TO A HOUSEHOLD YET
+  // VIEW 1: CLEAN ONBOARDING CARD WHEN NOT CONNECTED YET
   // ==============================================================
-  if (!household) {
+  if (!household || !settlement || !settlement.partnerMember) {
     return (
       <div className="ui-page animate-slide-in-right">
-        <section className="ui-card p-5 space-y-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-              <Users size={22} weight="duotone" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="font-display font-bold text-base text-[var(--text-primary)]">
-                Delad budget för två
-              </h2>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-                Synka fasta utgifter, gemensamma matköp och sparmål med din partner. Appen räknar automatiskt ut vem som har lagt ut vad under löneperioden.
-              </p>
-            </div>
+        <section className="ui-card-p py-8 text-center space-y-5">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center mx-auto">
+            <Users size={22} weight="duotone" />
           </div>
 
-          <button
-            type="button"
-            onClick={handleCreateHousehold}
-            className="w-full ui-btn-primary"
-          >
-            <Plus size={15} weight="bold" />
-            <span>Skapa gemensamt hushåll</span>
-          </button>
+          <div className="space-y-1 max-w-[250px] mx-auto">
+            <h2 className="font-display font-semibold text-base text-[var(--text-primary)]">
+              Delad ekonomi
+            </h2>
+            <p className="text-xs text-[var(--text-secondary)]">
+              Dela fasta räkningar och gemensamma köp med din partner.
+            </p>
+          </div>
 
           {friends.length > 0 && (
-            <div className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
-              <span className="text-[11.5px] font-medium text-[var(--text-secondary)] block">
-                Eller starta direkt med en vän från din vänlista:
+            <div className="space-y-2 max-w-[280px] mx-auto">
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
+                Välj partner från dina vänner
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap justify-center gap-1.5">
                 {friends.map((f) => (
                   <button
                     key={f.key}
                     type="button"
                     onClick={() => handleQuickConnectFriendToHousehold(f)}
-                    className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer transition-colors"
+                    className="px-3.5 py-2 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer transition-colors"
                   >
                     <UserPlus size={13} className="text-emerald-500" />
-                    <span>Starta med {f.name}</span>
+                    <span>Dela med {f.name}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
+
+          <div className="space-y-2.5 max-w-[260px] mx-auto">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-4 py-3 text-left flex items-center justify-between gap-2">
+              <div>
+                <span className="text-[11px] text-[var(--text-secondary)] block">
+                  Din personliga kod
+                </span>
+                <span className="font-display font-bold text-sm tracking-wider text-[var(--text-primary)] tabular-nums">
+                  {myPersonalCode}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText(myPersonalCode);
+                  setCopiedCode(true);
+                  setTimeout(() => setCopiedCode(false), 1800);
+                }}
+                className="px-3 py-1.5 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer transition-colors"
+              >
+                {copiedCode ? (
+                  <>
+                    <Check size={13} weight="bold" className="text-emerald-500" />
+                    <span>Kopierad</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} />
+                    <span>Kopiera</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setJoinError(null);
+                setJoinCodeInput('');
+                setPartnerNameForJoin('');
+                setIsJoinSheetOpen(true);
+              }}
+              className="w-full ui-btn-primary"
+            >
+              <UserPlus size={15} weight="bold" />
+              <span>Anslut partner med kod</span>
+            </button>
+          </div>
         </section>
 
-        <section className="ui-card p-5 space-y-3.5">
-          <div>
-            <h3 className="font-display font-semibold text-sm text-[var(--text-primary)]">
-              Har din partner redan en kod?
-            </h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-              Skriv in den 6-siffriga inbjudningskoden från din partners app för att koppla ihop era budgetar.
-            </p>
-          </div>
+        <BottomSheet
+          isOpen={isJoinSheetOpen}
+          onClose={() => setIsJoinSheetOpen(false)}
+          title="Anslut partner"
+        >
+          <form onSubmit={handleJoinHousehold} className="space-y-3.5">
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] overflow-hidden">
+              <label className="block px-4 py-3 cursor-text">
+                <span className="text-[11px] text-[var(--text-secondary)] block mb-0.5">
+                  Partners namn
+                </span>
+                <input
+                  type="text"
+                  autoFocus
+                  value={partnerNameForJoin}
+                  onChange={(e) => setPartnerNameForJoin(e.target.value)}
+                  placeholder="T.ex. Alex"
+                  className="w-full bg-transparent border-0 p-0 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                />
+              </label>
 
-          <form onSubmit={handleJoinHousehold} className="space-y-3">
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={7}
-              value={joinCodeInput}
-              onChange={(e) => {
-                setJoinCodeInput(e.target.value.replace(/[^0-9A-Za-z\s]/g, ''));
-                setJoinError(null);
-              }}
-              placeholder="T.ex. 482 910"
-              className="w-full rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-4 py-3 font-display font-bold text-base tracking-widest text-center text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none focus:border-[var(--text-primary)]"
-            />
+              <label className="block px-4 py-3 cursor-text">
+                <span className="text-[11px] text-[var(--text-secondary)] block mb-0.5">
+                  Partners kod eller e-post
+                </span>
+                <input
+                  type="text"
+                  value={joinCodeInput}
+                  onChange={(e) => {
+                    setJoinCodeInput(e.target.value);
+                    setJoinError(null);
+                  }}
+                  placeholder={myPersonalCode}
+                  required
+                  className="w-full bg-transparent border-0 p-0 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none uppercase"
+                />
+              </label>
+            </div>
 
             {joinError && (
               <p className="text-xs font-medium text-rose-600 dark:text-rose-400 text-center">
@@ -516,21 +567,21 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
 
             <button
               type="submit"
-              disabled={joining || joinCodeInput.trim().length < 4}
-              className="w-full ui-btn-secondary disabled:opacity-40"
+              disabled={joining || joinCodeInput.trim().length < 3}
+              className="w-full ui-btn-primary disabled:opacity-40"
             >
-              {joining ? 'Ansluter...' : 'Anslut med kod'}
+              <Check size={14} weight="bold" />
+              <span>{joining ? 'Ansluter...' : 'Anslut'}</span>
             </button>
           </form>
-        </section>
+        </BottomSheet>
       </div>
     );
   }
 
   // ==============================================================
-  // VIEW 2: ACTIVE HOUSEHOLD DASHBOARD
+  // VIEW 2: CLEAN ACTIVE SHARED BUDGET OVERVIEW
   // ==============================================================
-  const settlement = calculateHouseholdSettlement(household, myKey, period.startDate);
   const {
     myMember,
     partnerMember,
@@ -540,7 +591,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     partnerTotalPaid,
     combinedTotalShared,
     myFairShare,
-    partnerFairShare,
     netBalance,
     isSettledForCurrentPeriod,
   } = settlement;
@@ -550,383 +600,229 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     ...(partnerMember?.sharedExpensesList || []),
   ];
 
+  const isBalanced = Math.abs(netBalance) < 5;
+
   return (
     <div className="ui-page animate-slide-in-right">
-      {/* 1. Hushållskort + Inbjudningskod + Medlemmar */}
-      <section className="ui-card p-5 space-y-4">
+      {/* 1. Single Calm Hero Summary Card */}
+      <section className="ui-card-p space-y-5">
+        {/* Top Row: Avatars + Names & Settings Button */}
         <div className="flex items-center justify-between gap-2">
-          <div>
-            <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
-              Synkad hushållsbudget
-            </span>
-            <h2 className="font-display font-bold text-base sm:text-lg text-[var(--text-primary)]">
-              {household.name}
-            </h2>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard?.writeText(household.inviteCode);
-              setCopiedCode(true);
-              setTimeout(() => setCopiedCode(false), 2000);
-            }}
-            className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-display font-bold text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer tabular-nums"
-            title="Kopiera inbjudningskod"
-          >
-            <span>Kod: {formatInviteCodeDisplay(household.inviteCode)}</span>
-            {copiedCode ? (
-              <Check size={13} weight="bold" className="text-emerald-500" />
-            ) : (
-              <Copy size={13} className="text-[var(--text-secondary)]" />
-            )}
-          </button>
-        </div>
-
-        {/* Medlemmar */}
-        <div className="grid grid-cols-2 gap-2.5">
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-display font-bold text-xs flex items-center justify-center shrink-0 uppercase">
-                {(myMember.name || 'J').slice(0, 2)}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex -space-x-2 shrink-0">
+              <div className="w-7 h-7 rounded-full bg-[var(--bg-color)] border-2 border-[var(--surface-color)] flex items-center justify-center font-display font-semibold text-[11px] text-[var(--text-primary)] uppercase">
+                {(myMember.name || 'J').slice(0, 1)}
               </div>
-              <div className="min-w-0">
-                <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
-                  {myMember.name} (Du)
-                </span>
-                <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block">
-                  Inkomst: {formatKr(myMember.totalIncome)}
-                </span>
-              </div>
+              {partnerMember ? (
+                <div className="w-7 h-7 rounded-full bg-emerald-500/15 border-2 border-[var(--surface-color)] flex items-center justify-center font-display font-semibold text-[11px] text-emerald-600 dark:text-emerald-400 uppercase">
+                  {(partnerMember.name || 'P').slice(0, 1)}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsOpen(true)}
+                  className="w-7 h-7 rounded-full bg-[var(--bg-color)] border-2 border-dashed border-[var(--border-control)] flex items-center justify-center text-[var(--text-secondary)] cursor-pointer"
+                  title="Bjud in partner"
+                >
+                  <Plus size={11} weight="bold" />
+                </button>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <span className="font-medium text-xs text-[var(--text-primary)] truncate block">
+                {partnerMember
+                  ? `${myMember.name} & ${partnerMember.name}`
+                  : `${myMember.name} · Väntar på partner`}
+              </span>
             </div>
           </div>
 
-          {partnerMember ? (
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {partnerMember && onOpenFriendsChat && (
               <button
                 type="button"
                 onClick={() => {
-                  setPartnerNameInput(partnerMember.name);
-                  setPartnerIncomeInput(String(partnerMember.totalIncome || ''));
-                  setPartnerPaidInput(String(partnerTotalPaid || ''));
-                  setIsEditingPartner((v) => !v);
+                  const matchedFriend = friends.find(
+                    (f) =>
+                      f.key === partnerMember.email ||
+                      f.name.toLowerCase().trim() ===
+                        partnerMember.name.toLowerCase().trim()
+                  );
+                  onOpenFriendsChat(matchedFriend ? matchedFriend.key : null);
                 }}
-                className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                title={`Chatta med ${partnerMember.name}`}
               >
-                <div className="w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-display font-bold text-xs flex items-center justify-center shrink-0 uppercase">
-                  {(partnerMember.name || 'P').slice(0, 2)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
-                    {partnerMember.name}
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block truncate">
-                    Inkomst: {formatKr(partnerMember.totalIncome)}
-                  </span>
-                </div>
+                <ChatCircleDots size={15} />
               </button>
-              {onOpenFriendsChat && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const matchedFriend = friends.find(
-                      (f) =>
-                        f.key === partnerMember.email ||
-                        f.name.toLowerCase().trim() ===
-                          partnerMember.name.toLowerCase().trim()
-                    );
-                    onOpenFriendsChat(matchedFriend ? matchedFriend.key : null);
-                  }}
-                  className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0 cursor-pointer"
-                  title={`Chatta med ${partnerMember.name}`}
-                >
-                  <ChatCircleDots size={15} />
-                </button>
-              )}
-            </div>
-          ) : (
+            )}
+
             <button
               type="button"
               onClick={() => {
-                setPartnerNameInput('Partner');
-                setPartnerIncomeInput('29500');
-                setPartnerPaidInput('4800');
-                setIsEditingPartner(true);
+                if (partnerMember) {
+                  setPartnerNameInput(partnerMember.name);
+                  setPartnerIncomeInput(String(partnerMember.totalIncome || ''));
+                  setPartnerPaidInput(String(partnerTotalPaid || ''));
+                }
+                setIsSettingsOpen(true);
               }}
-              className="rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-dashed border-[var(--border-control)] p-3.5 text-left flex items-center gap-2.5 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
-                <UserPlus size={15} weight="bold" />
-              </div>
-              <div className="min-w-0">
-                <span className="font-display font-semibold text-xs text-[var(--text-primary)] block truncate">
-                  Lägg till partner
-                </span>
-                <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
-                  Välj vän eller dela kod
-                </span>
-              </div>
+              <SlidersHorizontal size={13} />
+              <span>{partnerMember ? 'Inställningar' : 'Bjud in'}</span>
             </button>
-          )}
+          </div>
         </div>
 
-        {!partnerMember && friends.length > 0 && (
-          <div className="pt-1 flex items-center justify-between gap-2 flex-wrap">
-            <span className="text-[11px] text-[var(--text-secondary)]">
-              Lägg till direkt från dina vänner:
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {friends.map((f) => (
+        {/* Center Hero Focal Number */}
+        <div className="text-center py-1 space-y-1.5">
+          {!partnerMember ? (
+            <>
+              <span className="text-xs text-[var(--text-secondary)] block">
+                Totalt delat i perioden
+              </span>
+              <div className="font-display font-bold text-3xl tracking-tight text-[var(--text-primary)] tabular-nums">
+                {formatKr(combinedTotalShared)}
+              </div>
+              <span className="text-xs text-[var(--text-secondary)] block tabular-nums">
+                Din andel ({Math.round(myShareRatio * 100)} %): {formatKr(myFairShare)}
+              </span>
+              <div className="pt-2 flex justify-center">
                 <button
-                  key={f.key}
                   type="button"
-                  onClick={() => handleQuickConnectFriendToHousehold(f)}
-                  className="px-2.5 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer"
+                  onClick={() => setIsSettingsOpen(true)}
+                  className="px-4 py-2 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Plus size={11} weight="bold" className="text-emerald-500" />
-                  <span>{f.name}</span>
+                  <UserPlus size={14} weight="bold" />
+                  <span>Koppla ihop med partner</span>
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
+            </>
+          ) : isSettledForCurrentPeriod || isBalanced ? (
+            <>
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block">
+                {isSettledForCurrentPeriod ? 'Utjämnat i perioden ✓' : 'Ni ligger helt jämnt'}
+              </span>
+              <div className="font-display font-bold text-3xl tracking-tight text-[var(--text-primary)] tabular-nums">
+                0 kr
+              </div>
+              <span className="text-xs text-[var(--text-secondary)] block tabular-nums">
+                Totalt delat: {formatKr(combinedTotalShared)}
+              </span>
+              {isSettledForCurrentPeriod && (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={handleToggleSettled}
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline cursor-pointer"
+                  >
+                    Ångra markering
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="text-xs text-[var(--text-secondary)] block">
+                {netBalance > 0
+                  ? `${partnerMember.name} är skyldig dig`
+                  : `Du är skyldig ${partnerMember.name}`}
+              </span>
+              <div className="font-display font-bold text-3xl tracking-tight text-[var(--text-primary)] tabular-nums">
+                {formatKr(Math.abs(netBalance))}
+              </div>
+              <span className="text-xs text-[var(--text-secondary)] block tabular-nums">
+                Totalt delat: {formatKr(combinedTotalShared)} · Fördelning{' '}
+                {Math.round(myShareRatio * 100)}/{Math.round(partnerShareRatio * 100)} %
+              </span>
 
-        {/* Formulär för att ange/uppdatera partners inkomst & utlägg manuellt (eller innan partnern loggat in) */}
-        {isEditingPartner && (
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3 animate-fade-in">
-            <span className="text-xs font-semibold text-[var(--text-primary)] block">
-              Ange eller simulera partners uppgifter
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <label className="block">
-                <span className="text-[11px] text-[var(--text-secondary)] block mb-1">
-                  Partners namn
-                </span>
-                <input
-                  type="text"
-                  value={partnerNameInput}
-                  onChange={(e) => setPartnerNameInput(e.target.value)}
-                  placeholder="Alex"
-                  className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] text-[var(--text-secondary)] block mb-1">
-                  Nettoinkomst (kr/mån)
-                </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={partnerIncomeInput}
-                  onChange={(e) =>
-                    setPartnerIncomeInput(e.target.value.replace(/[^\d]/g, ''))
-                  }
-                  placeholder="29500"
-                  className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-3 py-2 text-xs tabular-nums text-[var(--text-primary)] focus:outline-none"
-                />
-              </label>
-              <label className="block">
-                <span className="text-[11px] text-[var(--text-secondary)] block mb-1">
-                  Partners utlägg i perioden
-                </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={partnerPaidInput}
-                  onChange={(e) =>
-                    setPartnerPaidInput(e.target.value.replace(/[^\d]/g, ''))
-                  }
-                  placeholder="4800"
-                  className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-3 py-2 text-xs tabular-nums text-[var(--text-primary)] focus:outline-none"
-                />
-              </label>
-            </div>
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setIsEditingPartner(false)}
-                className="px-3 py-1.5 rounded-xl text-xs font-medium text-[var(--text-secondary)] cursor-pointer"
-              >
-                Avbryt
-              </button>
-              <button
-                type="button"
-                onClick={handleAddOrUpdateManualPartner}
-                className="px-4 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold cursor-pointer"
-              >
-                Spara partner
-              </button>
-            </div>
-          </div>
-        )}
-      </section>
+              <div className="pt-2.5 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleToggleSettled}
+                  className="px-4 py-2 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Check size={13} weight="bold" />
+                  <span>Markera som utjämnat</span>
+                </button>
 
-      {/* 2. Utjämningskalkyl ("Vem är skyldig vem?" i perioden) */}
-      <section className="ui-card p-5 space-y-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Scales size={18} weight="duotone" className="text-[var(--text-secondary)] shrink-0" />
-            <h3 className="font-display font-semibold text-sm text-[var(--text-primary)]">
-              Utjämning i löneperioden
-            </h3>
-          </div>
-          <span className="text-[11px] font-medium text-[var(--text-secondary)] tabular-nums">
-            Totalt delat: {formatKr(combinedTotalShared)}
-          </span>
-        </div>
-
-        {/* Fördelningsmodell: 50/50 vs Procentuellt efter lön */}
-        <div className="ui-segmented grid-cols-2">
-          <button
-            type="button"
-            onClick={() => handleChangeSplitMode('equal')}
-            className={`ui-segmented-tab ${
-              household.splitMode === 'equal' ? 'ui-segmented-tab-active' : ''
-            }`}
-          >
-            Dela lika (50 / 50)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleChangeSplitMode('income')}
-            className={`ui-segmented-tab ${
-              household.splitMode === 'income' ? 'ui-segmented-tab-active' : ''
-            }`}
-          >
-            Efter inkomst ({Math.round(myShareRatio * 100)} / {Math.round(partnerShareRatio * 100)} %)
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5 text-xs tabular-nums">
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-1">
-            <span className="text-[11px] text-[var(--text-secondary)] block">
-              {myMember.name} har betalat
-            </span>
-            <span className="font-display font-bold text-base text-[var(--text-primary)] block">
-              {formatKr(myTotalPaid)}
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)] block">
-              Andel ({Math.round(myShareRatio * 100)} %): {formatKr(myFairShare)}
-            </span>
-          </div>
-
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-1">
-            <span className="text-[11px] text-[var(--text-secondary)] block">
-              {partnerMember ? `${partnerMember.name} har betalat` : 'Partner har betalat'}
-            </span>
-            <span className="font-display font-bold text-base text-[var(--text-primary)] block">
-              {formatKr(partnerTotalPaid)}
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)] block">
-              Andel ({Math.round(partnerShareRatio * 100)} %): {formatKr(partnerFairShare)}
-            </span>
-          </div>
-        </div>
-
-        {/* Resultat-banner: Vem ska Swisha vem? */}
-        <div
-          className={`rounded-2xl p-4 border flex items-center justify-between gap-3 ${
-            isSettledForCurrentPeriod || Math.abs(netBalance) < 5
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-              : 'bg-[var(--bg-color)] border-[var(--border-subtle)] text-[var(--text-primary)]'
-          }`}
-        >
-          <div className="min-w-0">
-            <span className="text-xs font-semibold block">
-              {isSettledForCurrentPeriod
-                ? 'Periodens utlägg är markerade som utjämnade!'
-                : !partnerMember
-                ? `Din andel av gemensamma utgifter är ${formatKr(myFairShare)}`
-                : Math.abs(netBalance) < 5
-                ? 'Ni ligger helt jämnt i denna period!'
-                : netBalance > 0
-                ? `${partnerMember.name} är skyldig dig ${formatKr(netBalance)}`
-                : `Du är skyldig ${partnerMember.name} ${formatKr(Math.abs(netBalance))}`}
-            </span>
-            <span className="text-[11px] opacity-80 block mt-0.5">
-              {isSettledForCurrentPeriod
-                ? 'Tryck på knappen om ni vill öppna avräkningen igen'
-                : partnerMember
-                ? 'Baserat på era delade fasta räkningar och gemensamma köp i perioden'
-                : 'Bjud in din partner med koden ovan för att jämföra bådas utlägg'}
-            </span>
-          </div>
-
-          {partnerMember && Math.abs(netBalance) >= 5 && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              {!isSettledForCurrentPeriod && (
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard?.writeText(String(Math.abs(netBalance)));
+                    navigator.clipboard?.writeText(String(Math.round(Math.abs(netBalance))));
                     setCopiedSwishAmt(true);
                     setTimeout(() => setCopiedSwishAmt(false), 2000);
                   }}
-                  className="px-2.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-primary)] flex items-center gap-1 cursor-pointer"
-                  title="Kopiera belopp för Swish"
+                  className="px-3 py-2 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer"
                 >
-                  {copiedSwishAmt ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-                  <span>Belopp</span>
+                  {copiedSwishAmt ? (
+                    <>
+                      <Check size={12} weight="bold" className="text-emerald-500" />
+                      <span>Kopierat</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} />
+                      <span>Belopp</span>
+                    </>
+                  )}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={handleToggleSettled}
-                className="px-3 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[11px] font-semibold cursor-pointer"
-              >
-                {isSettledForCurrentPeriod ? 'Ångra' : 'Utjämnat'}
-              </button>
-            </div>
+              </div>
+            </>
           )}
         </div>
-      </section>
 
-      {/* 3. Automatiskt delade utgiftskategorier */}
-      <section className="ui-card p-5 space-y-3.5">
-        <div>
-          <h3 className="font-display font-semibold text-sm text-[var(--text-primary)]">
-            Kategorier som delas automatiskt
-          </h3>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-            Rörliga köp i valda kategorier räknas automatiskt in i hushållets gemensamma utjämning. Du kan även markera enskilda köp direkt i transaktionsvyn.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {expenseCategories.map((cat) => {
-            const isSelected = (household.sharedCategories || []).some(
-              (c) => c.toLowerCase() === cat.name.toLowerCase()
-            );
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleToggleSharedCategory(cat.name)}
-                className={`px-3 py-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
-                    : 'bg-[var(--bg-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                <CategoryIcon category={cat.name} size={13} />
-                <span>{cat.name}</span>
-                {isSelected && <Check size={12} weight="bold" />}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 4. Gemensamma poster i perioden */}
-      {allSharedEntries.length > 0 && (
-        <section className="ui-section">
-          <div className="ui-section-header">
-            <h3 className="ui-section-title">
-              Gemensamma utgifter i perioden ({allSharedEntries.length})
-            </h3>
+        {/* Hairline-divided 2-Column Paid Summary (No nested boxes) */}
+        <div className="pt-4 border-t border-[var(--border-subtle)] grid grid-cols-2 divide-x divide-[var(--border-subtle)] text-xs tabular-nums">
+          <div className="pr-3">
+            <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              Du har betalat
+            </span>
+            <span className="font-display font-semibold text-sm text-[var(--text-primary)] block mt-0.5">
+              {formatKr(myTotalPaid)}
+            </span>
           </div>
+
+          <div className="pl-3 text-right">
+            <span className="text-[11px] text-[var(--text-secondary)] block truncate">
+              {partnerMember ? `${partnerMember.name} har betalat` : 'Partner har betalat'}
+            </span>
+            <span className="font-display font-semibold text-sm text-[var(--text-primary)] block mt-0.5">
+              {formatKr(partnerTotalPaid)}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Clean Shared Expenses List */}
+      <section className="ui-section">
+        <div className="ui-section-header">
+          <h3 className="ui-section-title">
+            Gemensamma utgifter ({allSharedEntries.length})
+          </h3>
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            Kategorier ({(household.sharedCategories || []).length})
+          </button>
+        </div>
+
+        {allSharedEntries.length === 0 ? (
+          <div className="ui-card-p py-8 text-center space-y-1.5">
+            <p className="font-medium text-xs text-[var(--text-primary)]">
+              Inga gemensamma utgifter i perioden än
+            </p>
+            <p className="text-[11.5px] text-[var(--text-secondary)] max-w-[240px] mx-auto">
+              Delade fasta räkningar och köp i dina valda kategorier dyker upp här automatiskt.
+            </p>
+          </div>
+        ) : (
           <div className="ui-list-card">
-            {allSharedEntries.slice(0, 20).map((entry) => (
+            {allSharedEntries.slice(0, 25).map((entry) => (
               <div
                 key={`${entry.paidByEmail}-${entry.id}`}
                 className="py-3 flex items-center justify-between gap-3 text-xs"
@@ -938,7 +834,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                   <div className="min-w-0 flex-1">
                     <span className="ui-row-title truncate block">{entry.title}</span>
                     <span className="ui-row-subtitle block truncate">
-                      Betald av {entry.paidByName} · {entry.kind === 'fixed' ? 'Fast utgift' : 'Rörligt köp'}
+                      {entry.paidByName} · {entry.kind === 'fixed' ? 'Fast' : entry.category}
                     </span>
                   </div>
                 </div>
@@ -947,31 +843,123 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                     {formatKr(entry.fullAmount)}
                   </span>
                   <span className="text-[10.5px] text-[var(--text-secondary)] block">
-                    Din del: {formatKr(Math.round(entry.fullAmount * myShareRatio))}
+                    Din del {formatKr(Math.round(entry.fullAmount * myShareRatio))}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
-      {/* 5. Lämna hushåll */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={() => setShowLeaveConfirm(true)}
-          className="w-full py-3 rounded-2xl bg-[var(--surface-color)] hover:bg-rose-500/8 border border-[var(--border-subtle)] text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-        >
-          <SignOut size={15} weight="bold" />
-          <span>Koppla från delad budget</span>
-        </button>
-      </div>
+      {/* 3. Progressive Disclosure BottomSheet: Inställningar för delad budget */}
+      <BottomSheet
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        title="Inställningar för delad ekonomi"
+      >
+        <div className="space-y-5">
+          {/* A. Partner */}
+          {partnerMember && (
+            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-4 py-3 flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] text-[var(--text-secondary)] block">
+                  Ansluten partner
+                </span>
+                <span className="font-display font-semibold text-sm text-[var(--text-primary)]">
+                  {partnerMember.name}
+                </span>
+              </div>
+              {onOpenFriendsChat && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSettingsOpen(false);
+                    onOpenFriendsChat(partnerMember.email || null);
+                  }}
+                  className="px-3 py-1.5 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ChatCircleDots size={13} />
+                  <span>Öppna chatt</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* B. Fördelningsmodell */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-medium text-[var(--text-secondary)] px-1 block">
+              Hur vill ni dela på utgifterna?
+            </span>
+            <div className="ui-segmented grid-cols-2">
+              <button
+                type="button"
+                onClick={() => handleChangeSplitMode('equal')}
+                className={`ui-segmented-tab ${
+                  household.splitMode === 'equal' ? 'ui-segmented-tab-active' : ''
+                }`}
+              >
+                Lika (50 / 50)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleChangeSplitMode('income')}
+                className={`ui-segmented-tab ${
+                  household.splitMode === 'income' ? 'ui-segmented-tab-active' : ''
+                }`}
+              >
+                Efter inkomst ({Math.round(myShareRatio * 100)}/{Math.round(partnerShareRatio * 100)} %)
+              </button>
+            </div>
+          </div>
+
+          {/* C. Kategorier som delas automatiskt */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-medium text-[var(--text-secondary)] px-1 block">
+              Kategorier som delas automatiskt
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {expenseCategories.map((cat) => {
+                const isSelected = (household.sharedCategories || []).some(
+                  (c) => c.toLowerCase() === cat.name.toLowerCase()
+                );
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => handleToggleSharedCategory(cat.name)}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+                        : 'bg-[var(--bg-color)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <CategoryIcon category={cat.name} size={12} />
+                    <span>{cat.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* D. Lämna delad budget */}
+          <div className="pt-2 border-t border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => setShowLeaveConfirm(true)}
+              className="w-full py-2.5 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-500/8 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <SignOut size={14} />
+              <span>Koppla från delad budget</span>
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
 
       <ConfirmDialog
         isOpen={showLeaveConfirm}
         title="Koppla från delad budget?"
-        description="Dina egna bankkonton, fasta utgifter och transaktioner finns kvar precis som vanligt, men synkningen med hushållet avslutas."
+        description="Dina egna konton och transaktioner påverkas inte, men synkningen med hushållet avslutas."
         confirmLabel="Koppla från"
         cancelLabel="Avbryt"
         variant="danger"

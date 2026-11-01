@@ -28,6 +28,11 @@ import { SavingsGoalsView } from './components/SavingsGoalsView';
 import { FriendsChatView } from './components/FriendsChatView';
 import { LandingPage } from './components/LandingPage';
 import { OnboardingFlow } from './components/OnboardingFlow';
+import {
+  PartnerSimulatorColumn,
+  getSplitSimulatorActive,
+  setSplitSimulatorActive,
+} from './components/AdminSimulator';
 import { ItemLogo } from './components/ItemLogo';
 import { CategoryIcon } from './components/CategoryIcon';
 import { Heart, Package, Paperclip, FileText, Eye } from '@phosphor-icons/react';
@@ -48,6 +53,7 @@ import {
 } from './utils/householdSync';
 import {
   connectFriendsChatWebSocket,
+  getStoredFriends,
   getTotalUnreadChatCount,
   normalizeSocialUserKey,
 } from './utils/friendsChatSync';
@@ -1397,6 +1403,24 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [selectedHistoryAccountId, setSelectedHistoryAccountId] = useState<string | null>(null);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('main');
+  const [autoOpenGoalWizard, setAutoOpenGoalWizard] = useState(false);
+  const [splitSimulatorActive, setSplitSimulatorActiveState] = useState<boolean>(() =>
+    getSplitSimulatorActive()
+  );
+
+  useEffect(() => {
+    const onSimChanged = () => {
+      setSplitSimulatorActiveState(getSplitSimulatorActive());
+    };
+    window.addEventListener('dejz:split-simulator-changed', onSimChanged);
+    return () => window.removeEventListener('dejz:split-simulator-changed', onSimChanged);
+  }, []);
+
+  const handleToggleSplitSimulator = useCallback((active: boolean) => {
+    setSplitSimulatorActive(active);
+    setSplitSimulatorActiveState(active);
+  }, []);
+
   const [undoToast, setUndoToast] = useState<{
     id: string;
     excluded: boolean;
@@ -4324,15 +4348,18 @@ export const App: React.FC = () => {
   return (
     <div
       style={{ backgroundImage: 'var(--bg-gradient)' }}
-      className="min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]"
+      className={`min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)] ${
+        splitSimulatorActive ? 'md:pr-[410px]' : ''
+      }`}
     >
       <div className="app-spatial-shell flex-1 flex flex-col min-h-screen">
       <Navbar
         userEmail={userEmail}
         userName={userName}
         userAvatar={userAvatar}
-        navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}:${selectedGoalIdInView || ''}`}
+        navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}:${selectedGoalIdInView || ''}:${selectedChatFriendKey || ''}`}
         hasUnreadNotifications={false}
+        friendsUnreadCount={friendsUnreadCount}
         hideActions={activeTab === 'settings'}
         hideSearch={activeTab === 'transactions'}
         pageTitle={
@@ -4349,15 +4376,32 @@ export const App: React.FC = () => {
             : activeTab === 'receipts'
             ? 'Kvitton'
             : activeTab === 'friends'
-            ? 'Vänner & chatt'
+            ? selectedChatFriendKey
+              ? getStoredFriends().find((f) => f.key === selectedChatFriendKey)?.name ||
+                'Chatt'
+              : 'Vänner & chatt'
             : null
         }
         onBack={() => {
+          if (activeTab === 'friends' && selectedChatFriendKey) {
+            setSelectedChatFriendKey(null);
+            return;
+          }
           if (
             selectedGoalIdInView &&
             (activeTab === 'goals' || (activeTab === 'settings' && settingsSubView === 'goals'))
           ) {
             setSelectedGoalIdInView(null);
+            return;
+          }
+          if (
+            activeTab === 'settings' &&
+            (settingsSubView === 'privacy' ||
+              settingsSubView === 'terms' ||
+              settingsSubView === 'psd2' ||
+              settingsSubView === 'cookies')
+          ) {
+            setSettingsSubView('legal');
             return;
           }
           if (activeTab === 'settings' && settingsSubView !== 'main') {
@@ -4383,6 +4427,12 @@ export const App: React.FC = () => {
         onSearchClick={() => {
           setIsNotificationsModalOpen(false);
           setIsSearchModalOpen(true);
+        }}
+        onFriendsClick={() => {
+          setIsSearchModalOpen(false);
+          setIsNotificationsModalOpen(false);
+          setSelectedChatFriendKey(null);
+          setActiveTab('friends');
         }}
         onNotificationsClick={() => {
           setIsSearchModalOpen(false);
@@ -4602,6 +4652,8 @@ export const App: React.FC = () => {
                   totalBalance={totalBalance}
                   selectedGoalId={selectedGoalIdInView}
                   onSelectGoalId={setSelectedGoalIdInView}
+                  autoOpenCreate={autoOpenGoalWizard}
+                  onAutoOpenConsumed={() => setAutoOpenGoalWizard(false)}
                 />
               )}
 
@@ -4615,6 +4667,7 @@ export const App: React.FC = () => {
                   fixedExpenses={fixedExpenses}
                   incomes={incomes}
                   initialSelectedFriendKey={selectedChatFriendKey}
+                  onSelectFriendKey={setSelectedChatFriendKey}
                   onOpenHousehold={() => {
                     setSettingsSubView('household');
                     setActiveTab('settings');
@@ -5176,6 +5229,36 @@ export const App: React.FC = () => {
                     setSelectedChatFriendKey(friendKey || null);
                     setActiveTab('friends');
                   }}
+                  splitSimulatorActive={splitSimulatorActive}
+                  onToggleSplitSimulator={handleToggleSplitSimulator}
+                  onStartCreateGoalWizard={() => {
+                    setSelectedGoalIdInView(null);
+                    setAutoOpenGoalWizard(true);
+                    setActiveTab('goals');
+                  }}
+                  onOpenAddFixedModal={() => {
+                    setSelectedFixedExpense(null);
+                    setIsFixedModalOpen(true);
+                  }}
+                  onOpenPreviewFixedModal={(exp) => {
+                    setSelectedFixedExpense(exp);
+                    setIsFixedModalOpen(true);
+                  }}
+                  onOpenAddIncomeModal={() => {
+                    setSelectedIncome(null);
+                    setIsIncomeModalOpen(true);
+                  }}
+                  onOpenAddTransactionModal={() => {
+                    setSelectedTransaction(null);
+                    setIsTxModalOpen(true);
+                  }}
+                  onOpenPreviewTransactionModal={(tx) => {
+                    setSelectedTransaction(tx);
+                    setIsTxModalOpen(true);
+                  }}
+                  onApplyFixedExpenses={(items) => {
+                    setFixedExpenses(items);
+                  }}
                 />
               )}
           </>
@@ -5359,6 +5442,17 @@ export const App: React.FC = () => {
           </div>
         )}
       </BottomSheet>
+
+      {/* Live Split-Screen Simulator (Du + Motpart sida vid sida på datorn) */}
+      {splitSimulatorActive && (
+        <div className="fixed right-3 top-3 bottom-3 z-[120] hidden md:flex items-stretch">
+          <PartnerSimulatorColumn
+            myUserEmail={userEmail}
+            myUserName={userName}
+            onCloseSimulator={() => handleToggleSplitSimulator(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

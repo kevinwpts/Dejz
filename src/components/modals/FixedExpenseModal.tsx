@@ -46,6 +46,7 @@ import {
   isMerchantCategoryIconPreferred,
   setMerchantCategoryIconPreferred,
 } from '../../utils/logo';
+import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -113,6 +114,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [category, setCategory] = useState('Räkningar');
   const [paymentMethod, setPaymentMethod] = useState('Autogiro');
   const [linkedGoalId, setLinkedGoalId] = useState<string>('');
+  const [isShared, setIsShared] = useState<boolean>(false);
   const [draftReceipts, setDraftReceipts] = useState<ReceiptAttachment[]>([]);
   const [previewReceipt, setPreviewReceipt] = useState<ReceiptAttachment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -162,6 +164,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setCategory(normalizeCategoryToValid(initialExpense.category || 'Räkningar', 'expense'));
       setPaymentMethod(initialExpense.paymentMethod || 'Autogiro');
       setLinkedGoalId(initialExpense.linkedGoalId || '');
+      setIsShared(Boolean(initialExpense.isShared));
       setDraftReceipts(getItemReceipts(initialExpense));
       setSubView('details');
       setPickerReturnView('details');
@@ -172,6 +175,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setCategory('Räkningar');
       setPaymentMethod('Autogiro');
       setLinkedGoalId('');
+      setIsShared(false);
       setDraftReceipts([]);
       setSubView('edit');
       setPickerReturnView('edit');
@@ -316,12 +320,15 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       overrides?.paymentMethod !== undefined ? overrides.paymentMethod : paymentMethod;
     const nextLinkedGoalId =
       overrides?.linkedGoalId !== undefined ? overrides.linkedGoalId : linkedGoalId;
+    const nextIsShared =
+      overrides?.isShared !== undefined ? overrides.isShared : isShared;
     const nextReceipts = overrides?.receipts !== undefined ? overrides.receipts : draftReceipts;
 
     onUpdate({
       ...activeExpense,
       name: nextName,
       amount: nextAmt,
+      isShared: nextIsShared,
       dueDay: nextDueDay,
       category: nextCategory,
       paymentMethod: nextPaymentMethod,
@@ -340,6 +347,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       onSave({
         name: cleanName,
         amount: cleanAmt,
+        isShared: hasConnectedHouseholdPartner() ? isShared : false,
         dueDay: Number(dueDay) || 27,
         category: category || 'Räkningar',
         paymentMethod: paymentMethod || 'Autogiro',
@@ -913,10 +921,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             </button>
           </div>
 
-          <p className="text-xs text-[var(--text-secondary)] px-1 leading-relaxed">
-            När denna fasta post (t.ex. månadssparande till Avanza eller sparkonto) dras på kontot läggs beloppet automatiskt till på det valda sparmålet.
-          </p>
-
           <div className="ui-sheet-group">
             <button
               type="button"
@@ -1200,6 +1204,25 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </button>
             )}
 
+            {hasConnectedHouseholdPartner() && (
+              <div className="ui-row">
+                <span className="ui-info-label">Delad i hushåll</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isShared}
+                  onClick={() => setIsShared((prev) => !prev)}
+                  className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
+                >
+                  <span
+                    className={`ui-switch-thumb ${
+                      isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+
             <div className="ui-row">
               <span className="ui-info-label">
                 {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
@@ -1366,27 +1389,42 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
           <div className="space-y-3">
             <div className="ui-sheet-group">
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('category-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Kategori</span>
                 <span className="ui-info-value flex items-center gap-1.5">
                   <CategoryIcon category={category} size={13} />
                   <span>{category}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('payment-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Betalsätt</span>
-                <span className="ui-info-value">
-                  {paymentMethod}
+                <span className="ui-info-value flex items-center gap-1.5">
+                  <span>{paymentMethod}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('day-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Dragningsdag</span>
-                <span className="ui-info-value tabular-nums">
-                  Den {dueDay}:e
+                <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
+                  <span>Den {dueDay}:e</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
               <div className="ui-row">
                 <span className="ui-info-label">Årskostnad</span>
@@ -1411,6 +1449,95 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 </button>
               )}
 
+              {hasConnectedHouseholdPartner() && (
+                <>
+                  <div className="ui-row">
+                    <span className="ui-info-label">Delad i hushåll</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={isShared}
+                      onClick={() => {
+                        const next = !isShared;
+                        setIsShared(next);
+                        commitInlineChanges({ isShared: next });
+                      }}
+                      className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
+                    >
+                      <span
+                        className={`ui-switch-thumb ${
+                          isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {isShared && activeExpense && (
+                    <div className="ui-row">
+                      <span className="ui-info-label">I min egen budget</span>
+                      <div className="flex items-center gap-1 bg-[var(--bg-color)] p-0.5 rounded-lg border border-[var(--border-subtle)]">
+                        {(() => {
+                          const totalBill =
+                            activeExpense.fullAmount && activeExpense.fullAmount > activeExpense.amount
+                              ? activeExpense.fullAmount
+                              : Number(amount) || activeExpense.amount;
+                          const isHalfInPersonal =
+                            Boolean(activeExpense.fullAmount) &&
+                            activeExpense.fullAmount > activeExpense.amount;
+                          return (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const halfAmt = Math.max(1, Math.round(totalBill / 2));
+                                  setAmount(halfAmt);
+                                  if (onUpdate) {
+                                    onUpdate({
+                                      ...activeExpense,
+                                      isShared: true,
+                                      fullAmount: totalBill,
+                                      amount: halfAmt,
+                                    });
+                                  }
+                                }}
+                                className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
+                                  isHalfInPersonal
+                                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                                }`}
+                              >
+                                Min halva ({formatKr(Math.round(totalBill / 2))})
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAmount(totalBill);
+                                  if (onUpdate) {
+                                    onUpdate({
+                                      ...activeExpense,
+                                      isShared: true,
+                                      fullAmount: totalBill,
+                                      amount: totalBill,
+                                    });
+                                  }
+                                }}
+                                className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
+                                  !isHalfInPersonal
+                                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                                }`}
+                              >
+                                Hela ({formatKr(totalBill)})
+                              </button>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
               {resolvedAccountInfo && (
                 <div className="ui-row">
                   <span className="ui-info-label">Konto</span>
@@ -1433,7 +1560,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               )}
             </div>
 
-            {/* Bifogade kvitton (visas endast i förhandsgranskning om det faktiskt finns kvitton) */}
+            {/* Bifogade kvitton */}
             {draftReceipts.length > 0 && (
               <div className="space-y-2">
                 {draftReceipts.map((rcpt, idx) => (
@@ -1477,7 +1604,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </div>
             )}
 
-            {/* Navigationsrader: Liknande transaktioner & Säg upp abonnemang */}
+            {/* Navigationsrader: Liknande transaktioner, Kvitto & Säg upp abonnemang */}
             <div className="ui-sheet-group">
               <button
                 type="button"
@@ -1500,6 +1627,18 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   </span>
                   <CaretRight size={13} className="text-[var(--text-muted)]" />
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="ui-row-btn"
+              >
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-2">
+                  <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
+                  <span>{draftReceipts.length > 0 ? 'Bifoga fler kvitton/avtal' : 'Bifoga kvitto eller avtal'}</span>
+                </span>
+                <CaretRight size={13} className="text-[var(--text-muted)] shrink-0" />
               </button>
 
               <button

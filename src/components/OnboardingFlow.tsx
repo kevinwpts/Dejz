@@ -27,6 +27,7 @@ import {
   inferCategoryAndMethodFromName,
 } from '../utils/bankHistoryAnalyzer';
 import { getLogoUrl } from '../utils/logo';
+import { hasConnectedHouseholdPartner } from '../utils/householdSync';
 import {
   getStoredExpenseCategories,
   getStoredIncomeCategories,
@@ -1742,7 +1743,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         -{formatKr(item.amount)}
                       </span>
                       <span className="ui-row-meta">
-                        {item.isShared ? `Delad · Den ${item.dueDay}:e` : `Den ${item.dueDay}:e`}
+                        {item.isShared && hasConnectedHouseholdPartner()
+                          ? `Delad · Den ${item.dueDay}:e`
+                          : `Den ${item.dueDay}:e`}
                       </span>
                     </div>
                   </button>
@@ -2427,7 +2430,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     </span>
                   </button>
 
-                  {sheetEditor.type === 'fixed' && (
+                  {sheetEditor.type === 'fixed' && hasConnectedHouseholdPartner() && (
                     <div className="ui-row">
                       <div className="min-w-0">
                         <span className="text-[var(--text-muted)] block">Dela utgift (50 %)</span>

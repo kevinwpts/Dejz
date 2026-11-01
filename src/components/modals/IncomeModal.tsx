@@ -641,20 +641,30 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
 
           <div className="space-y-3">
             <div className="ui-sheet-group">
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('category-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Kategori</span>
                 <span className="ui-info-value flex items-center gap-1.5">
                   <CategoryIcon category={category} size={13} />
                   <span>{category}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
-              <div className="ui-row">
+              <button
+                type="button"
+                onClick={() => navigateSubView('day-picker', 'forward')}
+                className="ui-row-btn"
+              >
                 <span className="ui-info-label">Utbetalningsdag</span>
-                <span className="ui-info-value tabular-nums">
-                  Den {payday}:e
+                <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
+                  <span>Den {payday}:e</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
-              </div>
+              </button>
 
               {resolvedAccountInfo && (
                 <div className="ui-row">

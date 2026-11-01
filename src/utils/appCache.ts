@@ -1141,6 +1141,7 @@ export interface SavingsGoalItem {
   name: string;
   targetAmount: number;
   currentAmount: number;
+  isShared?: boolean;
   linkedAccountId?: string;
   linkedAccountName?: string;
   monthlyContribution?: number;
@@ -1166,6 +1167,7 @@ export function saveSavingsGoals(goals: SavingsGoalItem[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(SAVINGS_GOALS_KEY, JSON.stringify(goals));
+    window.dispatchEvent(new CustomEvent('dejz:goals-updated'));
     syncAllUserPreferencesToSupabase();
   } catch {
     // ignore

@@ -28,6 +28,7 @@ import {
   isDateInPeriod,
   isDueDayPaidInPeriod,
 } from '../../utils/periodEngine';
+import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -457,7 +458,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           incomes
                         );
                         const isSplit =
-                          tx.originalAmount !== undefined && tx.originalAmount > tx.amount;
+                          hasConnectedHouseholdPartner() &&
+                          tx.originalAmount !== undefined &&
+                          tx.originalAmount > tx.amount;
                         const statusSub =
                           tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
                             ? 'Reserverat'

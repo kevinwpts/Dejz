@@ -28,7 +28,11 @@ import {
   EmptyClusterArtwork,
 } from './ui/VisualArtwork';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
-import { getHouseholdState, pushHouseholdSyncToServer } from '../utils/householdSync';
+import {
+  getHouseholdState,
+  hasConnectedHouseholdPartner,
+  pushHouseholdSyncToServer,
+} from '../utils/householdSync';
 import { TransactionItem, AccountItem } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
 
@@ -40,6 +44,8 @@ interface SavingsGoalsViewProps {
   totalBalance?: number;
   selectedGoalId?: string | null;
   onSelectGoalId?: (goalId: string | null) => void;
+  autoOpenCreate?: boolean;
+  onAutoOpenConsumed?: () => void;
 }
 
 type CreateWizardStep = 1 | 2 | 3 | 4 | 5;
@@ -117,6 +123,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   totalBalance,
   selectedGoalId: controlledSelectedGoalId,
   onSelectGoalId,
+  autoOpenCreate,
+  onAutoOpenConsumed,
 }) => {
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoalItem[]>(() => getSavingsGoals());
   const [internalSelectedGoalId, setInternalSelectedGoalId] = useState<string | null>(null);
@@ -142,6 +150,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [goalNameInput, setGoalNameInput] = useState('');
   const [goalTargetInput, setGoalTargetInput] = useState('');
   const [goalCurrentInput, setGoalCurrentInput] = useState('');
+  const [goalIsShared, setGoalIsShared] = useState(false);
   const [goalLinkedAccountId, setGoalLinkedAccountId] = useState<string | undefined>(undefined);
   const [goalArtworkId, setGoalArtworkId] = useState<string>('piggy');
   const [goalCustomImage, setGoalCustomImage] = useState<string | undefined>(undefined);
@@ -154,6 +163,23 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [transferAmountInput, setTransferAmountInput] = useState('');
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    const onSync = () => setSavingsGoals(getSavingsGoals());
+    window.addEventListener('dejz:goals-updated', onSync);
+    window.addEventListener('dejz:household-updated', onSync);
+    return () => {
+      window.removeEventListener('dejz:goals-updated', onSync);
+      window.removeEventListener('dejz:household-updated', onSync);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (autoOpenCreate) {
+      openCreateGoal();
+      onAutoOpenConsumed?.();
+    }
+  }, [autoOpenCreate]);
 
   const formatKr = (amount: number) =>
     `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
@@ -175,7 +201,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     if (hh) {
       void pushHouseholdSyncToServer({
         ...hh,
-        sharedSavingsGoals: next,
+        sharedSavingsGoals: next.filter((g) => g.isShared),
         updatedAt: new Date().toISOString(),
       });
     }
@@ -233,6 +259,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalNameInput('');
     setGoalTargetInput('');
     setGoalCurrentInput('');
+    setGoalIsShared(false);
     setGoalLinkedAccountId(undefined);
     setGoalArtworkId('piggy');
     setGoalCustomImage(undefined);
@@ -249,6 +276,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalNameInput(goal.name);
     setGoalTargetInput(String(goal.targetAmount));
     setGoalCurrentInput(String(resolveGoalAmount(goal)));
+    setGoalIsShared(Boolean(goal.isShared));
     setGoalLinkedAccountId(goal.linkedAccountId);
     setGoalArtworkId(goal.artworkId || 'piggy');
     setGoalCustomImage(goal.customImageUrl);
@@ -304,6 +332,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               name: cleanName,
               targetAmount: cleanTarget,
               currentAmount: cleanCurr,
+              isShared: hasConnectedHouseholdPartner() ? goalIsShared : false,
               linkedAccountId: goalLinkedAccountId,
               linkedAccountName: linkedName,
               artworkId: goalArtworkId,
@@ -321,6 +350,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         name: cleanName,
         targetAmount: cleanTarget,
         currentAmount: cleanCurr,
+        isShared: hasConnectedHouseholdPartner() ? goalIsShared : false,
         linkedAccountId: goalLinkedAccountId,
         linkedAccountName: linkedName,
         artworkId: goalArtworkId,
@@ -517,6 +547,27 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                     </span>
                   </div>
                 </label>
+              )}
+
+              {hasConnectedHouseholdPartner() && (
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-[var(--text-primary)]">
+                    Delat sparmål i hushåll
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={goalIsShared}
+                    onClick={() => setGoalIsShared((p) => !p)}
+                    className={`ui-switch ${goalIsShared ? 'ui-switch-on' : 'ui-switch-off'}`}
+                  >
+                    <span
+                      className={`ui-switch-thumb ${
+                        goalIsShared ? 'ui-switch-thumb-on' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -1539,6 +1590,27 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                     </button>
                   );
                 })}
+
+                {hasConnectedHouseholdPartner() && (
+                  <div className="w-full p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-color)]/60 flex items-center justify-between gap-3">
+                    <span className="font-display font-semibold text-sm text-[var(--text-primary)]">
+                      Delat sparmål i hushåll
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={goalIsShared}
+                      onClick={() => setGoalIsShared((p) => !p)}
+                      className={`ui-switch ${goalIsShared ? 'ui-switch-on' : 'ui-switch-off'}`}
+                    >
+                      <span
+                        className={`ui-switch-thumb ${
+                          goalIsShared ? 'ui-switch-thumb-on' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="shrink-0 pt-3">
@@ -1691,7 +1763,14 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="ui-row-title truncate">{goal.name}</span>
+                      <span className="ui-row-title truncate">
+                        {goal.name}
+                        {hasConnectedHouseholdPartner() && goal.isShared ? (
+                          <span className="text-[11px] font-normal text-[var(--text-secondary)]">
+                            {' '}· Delat
+                          </span>
+                        ) : null}
+                      </span>
                       <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums shrink-0">
                         {formatKr(effectiveAmt)}
                       </span>

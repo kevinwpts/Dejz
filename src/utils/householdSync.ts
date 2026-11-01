@@ -63,6 +63,13 @@ export function getHouseholdState(): HouseholdState | null {
   }
 }
 
+export function hasConnectedHouseholdPartner(state?: HouseholdState | null): boolean {
+  const hh = state !== undefined ? state : getHouseholdState();
+  if (!hh || typeof hh !== 'object') return false;
+  const memberKeys = Object.keys(hh.members || {});
+  return memberKeys.length >= 2;
+}
+
 export function saveHouseholdStateLocal(state: HouseholdState | null): void {
   if (typeof window === 'undefined') return;
   try {
@@ -76,6 +83,10 @@ export function saveHouseholdStateLocal(state: HouseholdState | null): void {
   } catch {
     // ignore
   }
+}
+
+export function clearHouseholdStateLocal(): void {
+  saveHouseholdStateLocal(null);
 }
 
 export function generateInviteCode(): string {
