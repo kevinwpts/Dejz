@@ -48,7 +48,11 @@ import {
   hasInitializedReviewedTransactions,
   markTransactionsReviewed,
 } from '../utils/appCache';
-import { hasConnectedHouseholdPartner } from '../utils/householdSync';
+import {
+  getHouseholdState,
+  hasConnectedHouseholdPartner,
+  computeMyHouseholdSummary,
+} from '../utils/householdSync';
 
 export interface AccountItem {
   id: string;
@@ -246,6 +250,9 @@ interface HomeTabProps {
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   onExcludeTransaction?: (id: string, exclude: boolean) => void;
   onUpdateTransaction?: (tx: TransactionItem) => void;
+  userEmail?: string | null;
+  userName?: string | null;
+  onNavigateToHousehold?: () => void;
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -273,6 +280,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onTogglePackage,
   onExcludeTransaction,
   onUpdateTransaction,
+  userEmail,
+  userName,
+  onNavigateToHousehold,
 }) => {
   const [showBudgetBreakdown, setShowBudgetBreakdown] = useState<boolean>(() =>
     getShowBudgetBreakdownOnHome()
@@ -290,6 +300,62 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
+  const [heroBudgetMode, setHeroBudgetMode] = useState<'personal' | 'joint'>('personal');
+  const [householdTick, setHouseholdTick] = useState(0);
+
+  useEffect(() => {
+    const onHhUpdate = () => setHouseholdTick((t) => t + 1);
+    window.addEventListener('dejz:household-updated', onHhUpdate);
+    return () => window.removeEventListener('dejz:household-updated', onHhUpdate);
+  }, []);
+
+  const householdBudgetStats = useMemo(() => {
+    void householdTick;
+    const hh = getHouseholdState();
+    if (!hasConnectedHouseholdPartner(hh) || !hh) return null;
+
+    const mySummary = computeMyHouseholdSummary({
+      userEmail,
+      userName,
+      period,
+      incomes,
+      fixedExpenses,
+      transactions,
+      sharedCategories: hh.sharedCategories || ['Mat & dryck', 'Boende', 'Räkningar'],
+    });
+
+    const otherMembers = Object.values(hh.members || {}).filter(
+      (m) => m.email.toLowerCase() !== mySummary.email.toLowerCase()
+    );
+
+    const jointIncome =
+      (Number(totalIncome) || 0) +
+      otherMembers.reduce((sum, m) => sum + (Number(m.totalIncome) || 0), 0);
+    const jointFixed =
+      (Number(mySummary.sharedFixedPaid) || 0) +
+      otherMembers.reduce((sum, m) => sum + (Number(m.sharedFixedPaid) || 0), 0);
+    const jointVariable =
+      (Number(mySummary.sharedVariableSpent) || 0) +
+      otherMembers.reduce((sum, m) => sum + (Number(m.sharedVariableSpent) || 0), 0);
+    const jointKvar = jointIncome - jointFixed - jointVariable;
+
+    return {
+      householdName: hh.name || 'Gemensamt hushåll',
+      jointIncome,
+      jointFixed,
+      jointVariable,
+      jointKvar,
+    };
+  }, [
+    householdTick,
+    userEmail,
+    userName,
+    period,
+    incomes,
+    fixedExpenses,
+    transactions,
+    totalIncome,
+  ]);
   const savingsGoals = useMemo(
     () => getSavingsGoals(),
     [transactions, fixedExpenses, incomes, accounts, totalBalance]
@@ -899,118 +965,211 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* MODUL 1: KVAR ATT SPENDERA (Hero Bento Card)                   */}
       {/* ============================================================== */}
-      <section className="ui-card-p">
-        <button
-          type="button"
-          onClick={() => {
-            const next = !showBudgetBreakdown;
-            setShowBudgetBreakdown(next);
-            setShowBudgetBreakdownOnHome(next);
-          }}
-          className="w-full text-left cursor-pointer group focus:outline-none"
-          aria-expanded={showBudgetBreakdown}
-          title={showBudgetBreakdown ? 'Dölj budgetdetaljer' : 'Visa budgetdetaljer'}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[12px] text-[var(--text-secondary)] font-normal">
-              Kvar att spendera
-            </span>
-            <span className="text-[12px] text-[var(--text-secondary)] font-normal tabular-nums text-right">
-              {period.startLabel} – {period.endLabel}
-            </span>
-          </div>
+      {(() => {
+        const isJointMode = Boolean(householdBudgetStats && heroBudgetMode === 'joint');
+        const activeKvar = isJointMode ? householdBudgetStats!.jointKvar : kvarAttSpendera;
+        const activeIncome = isJointMode ? householdBudgetStats!.jointIncome : totalIncome;
+        const activeFixed = isJointMode ? householdBudgetStats!.jointFixed : totalFixedExpenses;
+        const activeVariable = isJointMode
+          ? householdBudgetStats!.jointVariable
+          : totalVariableSpent;
+        const isOverBudget = activeKvar < 0;
 
-          <div className="flex items-center justify-between gap-3 mt-0.5">
-            {isInitialLoading && accounts.length === 0 ? (
-              <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
-            ) : (
-              <div
-                className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums ${
-                  kvarAttSpendera >= 0
-                    ? 'text-[var(--text-primary)]'
-                    : 'text-rose-600 dark:text-rose-400'
-                }`}
-              >
-                {formatKr(kvarAttSpendera)}
+        return (
+          <section className="ui-card-p">
+            {householdBudgetStats && (
+              <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-[var(--border-subtle)]">
+                <div className="inline-flex items-center p-0.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+                  <button
+                    type="button"
+                    onClick={() => setHeroBudgetMode('personal')}
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
+                      heroBudgetMode === 'personal'
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-2xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    Mitt eget
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHeroBudgetMode('joint')}
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer flex items-center gap-1 ${
+                      heroBudgetMode === 'joint'
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-2xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <Users size={11} weight="bold" />
+                    <span>Gemensamt</span>
+                  </button>
+                </div>
+
+                {onNavigateToHousehold && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToHousehold}
+                    className="text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-0.5 transition-colors cursor-pointer"
+                  >
+                    <span>Delad ekonomi</span>
+                    <CaretRight size={10} weight="bold" />
+                  </button>
+                )}
               </div>
             )}
 
-            <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
-              <CaretDown
-                size={14}
-                weight="regular"
-                className={`transition-transform duration-200 ${
-                  showBudgetBreakdown ? 'rotate-180' : ''
-                }`}
-              />
-            </span>
-          </div>
-        </button>
-
-        {/* Mjukt utfällbar 3-kolumns översikt (Inkomst · Fasta · Rörligt) */}
-        <div
-          className={`grid transition-all duration-200 ease-out ${
-            showBudgetBreakdown
-              ? 'grid-rows-[1fr] opacity-100 mt-3.5'
-              : 'grid-rows-[0fr] opacity-0 mt-0'
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="ui-stat-grid pt-3.5 border-t border-[var(--border-subtle)]">
-              <button
-                type="button"
-                onClick={() => setActiveHeroPopup('income')}
-                className="pr-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
-              >
-                <span className="ui-stat-label">
-                  Inkomst
+            <button
+              type="button"
+              onClick={() => {
+                const next = !showBudgetBreakdown;
+                setShowBudgetBreakdown(next);
+                setShowBudgetBreakdownOnHome(next);
+              }}
+              className="w-full text-left cursor-pointer group focus:outline-none"
+              aria-expanded={showBudgetBreakdown}
+              title={showBudgetBreakdown ? 'Dölj budgetdetaljer' : 'Visa budgetdetaljer'}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={`text-[12px] font-normal ${
+                    isOverBudget
+                      ? 'text-rose-600 dark:text-rose-400 font-medium'
+                      : 'text-[var(--text-secondary)]'
+                  }`}
+                >
+                  {isOverBudget
+                    ? isJointMode
+                      ? 'Gemensamt över budget'
+                      : 'Över budget'
+                    : isJointMode
+                    ? 'Gemensamt kvar att spendera'
+                    : 'Kvar att spendera'}
                 </span>
-                {isInitialLoading && accounts.length === 0 ? (
-                  <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-                ) : (
-                  <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
-                    +{formatKr(totalIncome)}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveHeroPopup('fixed')}
-                className="px-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
-              >
-                <span className="ui-stat-label">
-                  Fasta
+                <span className="text-[12px] text-[var(--text-secondary)] font-normal tabular-nums text-right">
+                  {period.startLabel} – {period.endLabel}
                 </span>
-                {isInitialLoading && accounts.length === 0 ? (
-                  <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
-                ) : (
-                  <span className="ui-stat-value text-[var(--text-primary)]">
-                    -{formatKr(totalFixedExpenses)}
-                  </span>
-                )}
-              </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveHeroPopup('variable')}
-                className="pl-3 text-left min-w-0 cursor-pointer hover:opacity-80 active:opacity-60 transition-opacity focus:outline-none"
-              >
-                <span className="ui-stat-label">
-                  Rörligt
-                </span>
+              <div className="flex items-center justify-between gap-3 mt-0.5">
                 {isInitialLoading && accounts.length === 0 ? (
-                  <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                  <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
                 ) : (
-                  <span className="ui-stat-value text-[var(--text-primary)]">
-                    -{formatKr(totalVariableSpent)}
-                  </span>
+                  <div
+                    className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums ${
+                      activeKvar >= 0
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-rose-600 dark:text-rose-400'
+                    }`}
+                  >
+                    {formatKr(activeKvar)}
+                  </div>
                 )}
-              </button>
+
+                <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
+                  <CaretDown
+                    size={14}
+                    weight="regular"
+                    className={`transition-transform duration-200 ${
+                      showBudgetBreakdown ? 'rotate-180' : ''
+                    }`}
+                  />
+                </span>
+              </div>
+            </button>
+
+            {/* Mjukt utfällbar 3-kolumns översikt (Inkomst · Fasta · Rörligt) */}
+            <div
+              className={`grid transition-all duration-200 ease-out ${
+                showBudgetBreakdown
+                  ? 'grid-rows-[1fr] opacity-100 mt-3.5'
+                  : 'grid-rows-[0fr] opacity-0 mt-0'
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="ui-stat-grid pt-3.5 border-t border-[var(--border-subtle)]">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      isJointMode && onNavigateToHousehold
+                        ? onNavigateToHousehold()
+                        : setActiveHeroPopup('income')
+                    }
+                    className="pr-3 text-left min-w-0 cursor-pointer group/stat hover:opacity-85 active:scale-[0.98] transition-all focus:outline-none"
+                  >
+                    <span className="ui-stat-label inline-flex items-center gap-1">
+                      <span>Inkomst</span>
+                      <CaretRight
+                        size={10}
+                        weight="bold"
+                        className="text-[var(--text-muted)] group-hover/stat:text-[var(--text-primary)] group-hover/stat:translate-x-0.5 transition-all shrink-0"
+                      />
+                    </span>
+                    {isInitialLoading && accounts.length === 0 ? (
+                      <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                    ) : (
+                      <span className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+                        +{formatKr(activeIncome)}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      isJointMode && onNavigateToHousehold
+                        ? onNavigateToHousehold()
+                        : setActiveHeroPopup('fixed')
+                    }
+                    className="px-3 text-left min-w-0 cursor-pointer group/stat hover:opacity-85 active:scale-[0.98] transition-all focus:outline-none"
+                  >
+                    <span className="ui-stat-label inline-flex items-center gap-1">
+                      <span>Fasta</span>
+                      <CaretRight
+                        size={10}
+                        weight="bold"
+                        className="text-[var(--text-muted)] group-hover/stat:text-[var(--text-primary)] group-hover/stat:translate-x-0.5 transition-all shrink-0"
+                      />
+                    </span>
+                    {isInitialLoading && accounts.length === 0 ? (
+                      <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                    ) : (
+                      <span className="ui-stat-value text-[var(--text-primary)]">
+                        -{formatKr(activeFixed)}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      isJointMode && onNavigateToHousehold
+                        ? onNavigateToHousehold()
+                        : setActiveHeroPopup('variable')
+                    }
+                    className="pl-3 text-left min-w-0 cursor-pointer group/stat hover:opacity-85 active:scale-[0.98] transition-all focus:outline-none"
+                  >
+                    <span className="ui-stat-label inline-flex items-center gap-1">
+                      <span>Rörligt</span>
+                      <CaretRight
+                        size={10}
+                        weight="bold"
+                        className="text-[var(--text-muted)] group-hover/stat:text-[var(--text-primary)] group-hover/stat:translate-x-0.5 transition-all shrink-0"
+                      />
+                    </span>
+                    {isInitialLoading && accounts.length === 0 ? (
+                      <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                    ) : (
+                      <span className="ui-stat-value text-[var(--text-primary)]">
+                        -{formatKr(activeVariable)}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        );
+      })()}
 
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO · BANKKONTON                             */}
@@ -1400,7 +1559,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         {/* Vald dags händelser samlade i ett enhetligt listkort med generöst mellanrum till tidslinjen */}
         <div className="mt-3.5 sm:mt-4">
         {selectedDayItems.length > 0 ? (
-          <div className="ui-list-card">
+          <div className="space-y-1.5">
+            <div className="ui-date-header px-1">
+              <span>{formatSwedishDateHeading(selectedDateKey)}</span>
+              <span className="tabular-nums font-medium text-[var(--text-secondary)]">
+                {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '-' : ''}
+                {formatKr(Math.abs(selectedDayNet))}
+              </span>
+            </div>
+            <div className="ui-list-card">
             {selectedDayItems.map((tx) => {
               const isIncome = tx.type === 'income';
               const isPlanned = tx.id.startsWith('planned-');
@@ -1521,6 +1688,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 </SwipeableTxRow>
               );
             })}
+            </div>
           </div>
         ) : isInitialLoading ? (
           <div className="ui-list-card animate-pulse">
@@ -1987,26 +2155,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </button>
                 </div>
               )}
-
-              {/* Periodens flöde på kontot */}
-              <div className="py-2.5 grid grid-cols-2 gap-3">
-                <div>
-                  <span className="text-[11.5px] text-[var(--text-secondary)] block">
-                    Inkomster i perioden
-                  </span>
-                  <span className="font-display text-[13.5px] font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                    +{formatKr(activeAccountPeriodStats.incomeSum)}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[11.5px] text-[var(--text-secondary)] block">
-                    Utgifter i perioden
-                  </span>
-                  <span className="font-display text-[13.5px] font-semibold text-[var(--text-primary)] tabular-nums">
-                    -{formatKr(activeAccountPeriodStats.expenseSum)}
-                  </span>
-                </div>
-              </div>
 
               {/* Räkna med i Totalt saldo */}
               <div className="py-2.5 flex items-center justify-between gap-3">

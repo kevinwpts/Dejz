@@ -892,6 +892,16 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                           <span className="ui-row-title">
                             {item.category}
                           </span>
+                          <span className="ui-row-subtitle tabular-nums">
+                            {item.items.length}{' '}
+                            {item.isIncomeCategory
+                              ? item.items.length === 1
+                                ? 'inbetalning'
+                                : 'inbetalningar'
+                              : item.items.length === 1
+                              ? 'post'
+                              : 'poster'}
+                          </span>
                         </div>
                       </div>
 
@@ -933,20 +943,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <div className="overflow-hidden">
                       {isExpanded && (
                         <div className="divide-y divide-[var(--border-subtle)]">
-                          {item.items.length > 0 && (
-                            <div className="pl-7 sm:pl-9 pr-4 sm:pr-5 py-2 flex items-center justify-between text-[11px] text-[var(--text-secondary)] tabular-nums bg-[var(--surface-color)]/50">
-                              <span>
-                                {item.items.length}{' '}
-                                {item.isIncomeCategory
-                                  ? item.items.length === 1
-                                    ? 'inbetalning'
-                                    : 'inbetalningar'
-                                  : item.items.length === 1
-                                  ? 'post'
-                                  : 'poster'}
-                              </span>
-                            </div>
-                          )}
                           {item.items.map((subItem: any, idx: number) => {
                             const isIncome = subItem.type === 'income';
                             const itemName = subItem.title || subItem.name;

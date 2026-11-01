@@ -2167,7 +2167,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           onOpenAddIncome={() => onOpenAddIncomeModal?.()}
           onOpenAddTransaction={() => onOpenAddTransactionModal?.()}
           onOpenPreviewTransaction={() => onOpenPreviewTransactionModal?.()}
-          onOpenFriendsChat={() => onOpenFriendsChat?.()}
+          onOpenFriendsChat={(fk) => onOpenFriendsChat?.(fk)}
           onOpenHouseholdBudget={() => setSubView('household')}
           onApplyFixedExpenses={onApplyFixedExpenses}
         />

@@ -1306,26 +1306,24 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
 
       {/* Conversations List or Minimal Empty State */}
       {filteredFriends.length === 0 ? (
-        <section className="ui-card-p py-12 text-center space-y-3">
-          <div className="w-11 h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto text-[var(--text-secondary)]">
+        <section className="ui-empty-state-page animate-fade-in">
+          <div className="w-11 h-11 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto text-[var(--text-secondary)] mb-3">
             <ChatCircleDots size={22} weight="duotone" />
           </div>
-          <div className="space-y-1">
-            <p className="font-display font-semibold text-sm text-[var(--text-primary)]">
-              Inga konversationer än
-            </p>
-            <p className="text-xs text-[var(--text-secondary)] max-w-[230px] mx-auto leading-relaxed">
-              Lägg till din partner eller vänner för att chatta och dela på utgifter.
-            </p>
-          </div>
-          <div className="pt-1 flex justify-center">
+          <p className="ui-empty-title">
+            Inga konversationer än
+          </p>
+          <p className="ui-empty-sub max-w-[230px] mx-auto mb-5">
+            Lägg till din partner eller vänner för att chatta och dela på utgifter.
+          </p>
+          <div className="flex justify-center">
             <button
               type="button"
               onClick={() => {
                 setAddError(null);
                 setIsAddFriendOpen(true);
               }}
-              className="px-4 py-2 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
             >
               <UserPlus size={14} weight="bold" />
               <span>Lägg till vän</span>

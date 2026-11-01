@@ -144,6 +144,8 @@ import {
   getStoredIncomeCategories,
   getSavingsGoals,
   saveSavingsGoals,
+  resolveSwishPhoneToName,
+  saveSwishPhoneDirectoryEntry,
 } from './utils/appCache';
 import {
   findInternalTransferIds,
@@ -285,14 +287,24 @@ function sanitizeTransactionItem(
 
     const swishTitle = formatSwishTitle(
       updated.rawDescription || updated.note || updated.title || 'Swish',
-      updated.counterpartyName
+      updated.counterpartyName,
+      updated.type === 'income',
+      updated.rawJson
     );
 
     if (swishTitle && swishTitle !== 'Swish') {
       updated.title = swishTitle;
     } else if (swishPhone) {
-      const formattedPhone = formatSwishPhone(swishPhone);
-      updated.title = `Swish (${formattedPhone})`;
+      const resolvedName = resolveSwishPhoneToName(swishPhone);
+      if (resolvedName) {
+        updated.title =
+          updated.type === 'income'
+            ? `Swish från ${resolvedName}`
+            : `Swish till ${resolvedName}`;
+      } else {
+        const formattedPhone = formatSwishPhone(swishPhone);
+        updated.title = `Swish (${formattedPhone})`;
+      }
     } else {
       updated.title = 'Swish';
     }
@@ -1407,18 +1419,26 @@ export const App: React.FC = () => {
   const [splitSimulatorActive, setSplitSimulatorActiveState] = useState<boolean>(() =>
     getSplitSimulatorActive()
   );
+  const [mobileSimPane, setMobileSimPane] = useState<'mine' | 'partner'>('mine');
 
   useEffect(() => {
     const onSimChanged = () => {
       setSplitSimulatorActiveState(getSplitSimulatorActive());
     };
     window.addEventListener('dejz:split-simulator-changed', onSimChanged);
-    return () => window.removeEventListener('dejz:split-simulator-changed', onSimChanged);
+    window.addEventListener('dejz:simulator-toggled', onSimChanged);
+    return () => {
+      window.removeEventListener('dejz:split-simulator-changed', onSimChanged);
+      window.removeEventListener('dejz:simulator-toggled', onSimChanged);
+    };
   }, []);
 
   const handleToggleSplitSimulator = useCallback((active: boolean) => {
     setSplitSimulatorActive(active);
     setSplitSimulatorActiveState(active);
+    if (!active) {
+      setMobileSimPane('mine');
+    }
   }, []);
 
   const [undoToast, setUndoToast] = useState<{
@@ -2418,6 +2438,46 @@ export const App: React.FC = () => {
       processPendingBankCallback();
     }
   }, [userId, processPendingBankCallback]);
+
+  // Lyssna på uppdateringar i Swish-nummerkatalogen och slå upp okända telefonnummer i bakgrunden
+  const lookedUpSwishPhonesRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const handleDirectoryUpdate = () => {
+      setTransactions((prev) => prev.map((tx) => sanitizeTransactionItem(tx)));
+    };
+    window.addEventListener('dejz:swish-directory-updated', handleDirectoryUpdate);
+    return () => window.removeEventListener('dejz:swish-directory-updated', handleDirectoryUpdate);
+  }, []);
+
+  useEffect(() => {
+    const unresolvedPhones = new Set<string>();
+    for (const tx of transactions) {
+      if (tx.category !== 'Swish' && !/swish/i.test(tx.title || '') && !/swish/i.test(tx.rawDescription || '')) {
+        continue;
+      }
+      const phone = extractSwishPhoneNumber(
+        `${tx.rawDescription || ''} ${tx.counterpartyName || ''} ${tx.title || ''}`
+      );
+      if (!phone) continue;
+      if (resolveSwishPhoneToName(phone)) continue;
+      if (lookedUpSwishPhonesRef.current.has(phone)) continue;
+      lookedUpSwishPhonesRef.current.add(phone);
+      unresolvedPhones.add(phone);
+    }
+
+    if (unresolvedPhones.size === 0) return;
+
+    unresolvedPhones.forEach((phone) => {
+      fetch(`/api/swish/lookup?phone=${encodeURIComponent(phone)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.name && typeof data.name === 'string') {
+            saveSwishPhoneDirectoryEntry(phone, data.name);
+          }
+        })
+        .catch(() => {});
+    });
+  }, [transactions]);
 
   // Initiera Supabase-session och trigga en enda koordinerad, atomär hydrering vid appstart
   useEffect(() => {
@@ -4349,10 +4409,52 @@ export const App: React.FC = () => {
     <div
       style={{ backgroundImage: 'var(--bg-gradient)' }}
       className={`min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)] ${
-        splitSimulatorActive ? 'md:pr-[410px]' : ''
+        splitSimulatorActive ? 'min-[820px]:pr-[410px]' : ''
       }`}
     >
-      <div className="app-spatial-shell flex-1 flex flex-col min-h-screen">
+      {/* Top Switcher Bar when simulator is active on narrower screens (<820px) */}
+      {splitSimulatorActive && (
+        <div className="min-[820px]:hidden sticky top-0 z-[160] bg-[var(--surface-color)]/95 backdrop-blur-xl border-b border-[var(--border-subtle)] px-3 py-2 flex items-center justify-between gap-2">
+          <div className="flex-1 grid grid-cols-2 gap-1 p-0.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => setMobileSimPane('mine')}
+              className={`py-1.5 rounded-lg text-xs font-display font-semibold transition-colors cursor-pointer ${
+                mobileSimPane === 'mine'
+                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                  : 'text-[var(--text-secondary)]'
+              }`}
+            >
+              Min app
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileSimPane('partner')}
+              className={`py-1.5 rounded-lg text-xs font-display font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                mobileSimPane === 'partner'
+                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                  : 'text-[var(--text-secondary)]'
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Motpartens telefon</span>
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleToggleSplitSimulator(false)}
+            className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer shrink-0"
+          >
+            Stäng
+          </button>
+        </div>
+      )}
+
+      <div
+        className={`app-spatial-shell flex-1 flex flex-col min-h-screen ${
+          splitSimulatorActive && mobileSimPane === 'partner' ? 'max-[819px]:hidden' : ''
+        }`}
+      >
       <Navbar
         userEmail={userEmail}
         userName={userName}
@@ -4530,6 +4632,12 @@ export const App: React.FC = () => {
                     setSelectedGoalIdInView(null);
                     setActiveTab('goals');
                   }}
+                  onNavigateToHousehold={() => {
+                    setSettingsSubView('household');
+                    setActiveTab('settings');
+                  }}
+                  userEmail={userEmail}
+                  userName={userName}
                   onSelectAccount={(accountId) => {
                     setSelectedHistoryAccountId(accountId);
                     setActiveTab('transactions');
@@ -5276,6 +5384,20 @@ export const App: React.FC = () => {
           }
           setActiveTab(tab);
         }}
+        onOpenHousehold={() => {
+          setIsSearchModalOpen(false);
+          setIsNotificationsModalOpen(false);
+          setSettingsSubView('household');
+          setActiveTab('settings');
+        }}
+        onOpenDiscover={() => {
+          setIsSearchModalOpen(false);
+          setIsNotificationsModalOpen(false);
+          setSettingsSubView('discover');
+          setActiveTab('settings');
+        }}
+        activeSettingsSubView={settingsSubView}
+        goalsCount={getSavingsGoals().length}
         friendsUnreadCount={friendsUnreadCount}
         savedCount={displayTransactions.filter((t) => t.isHearted).length}
         packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
@@ -5353,6 +5475,14 @@ export const App: React.FC = () => {
         accounts={accounts}
         fixedExpenses={fixedExpenses}
         incomes={incomes}
+        userEmail={userEmail}
+        userName={userName}
+        onOpenFriendsChat={(friendKey) => {
+          setIsTxModalOpen(false);
+          setSelectedTransaction(null);
+          setSelectedChatFriendKey(friendKey || null);
+          setActiveTab('friends');
+        }}
         onClose={() => {
           setIsTxModalOpen(false);
           setSelectedTransaction(null);
@@ -5443,12 +5573,24 @@ export const App: React.FC = () => {
         )}
       </BottomSheet>
 
-      {/* Live Split-Screen Simulator (Du + Motpart sida vid sida på datorn) */}
+      {/* Live Split-Screen Simulator (Du + Motpart sida vid sida på datorn, eller växlingsbar på mindre skärm) */}
       {splitSimulatorActive && (
-        <div className="fixed right-3 top-3 bottom-3 z-[120] hidden md:flex items-stretch">
+        <div
+          className={
+            mobileSimPane === 'partner'
+              ? 'flex-1 flex justify-center p-2 sm:p-4 min-[820px]:fixed min-[820px]:right-3 min-[820px]:top-3 min-[820px]:bottom-3 min-[820px]:p-0 z-[120] items-stretch'
+              : 'fixed right-3 top-3 bottom-3 z-[120] hidden min-[820px]:flex items-stretch'
+          }
+        >
           <PartnerSimulatorColumn
             myUserEmail={userEmail}
             myUserName={userName}
+            selectedFriendKeyInMyApp={selectedChatFriendKey}
+            onSelectFriendInMyApp={(fk) => {
+              setSelectedChatFriendKey(fk);
+              setActiveTab('friends');
+              setMobileSimPane('mine');
+            }}
             onCloseSimulator={() => handleToggleSplitSimulator(false)}
           />
         </div>

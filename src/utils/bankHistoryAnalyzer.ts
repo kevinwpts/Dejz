@@ -8,6 +8,7 @@ import {
   resolveMerchantAlias,
   normalizeCategoryToValid,
   getStoredPaymentMethods,
+  resolveSwishPhoneToName,
 } from './appCache';
 
 export type DetectedFixedExpenseWithEvidence = Omit<FixedExpense, 'id'> & {
@@ -1191,6 +1192,8 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['ica nära', 'ica nara'], cleanName: 'ICA Nära', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['ica '], cleanName: 'ICA', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['stora coop', 'coop '], cleanName: 'Coop', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['x-tra', 'x -tra', 'xtra '], cleanName: 'X-tra', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
+  { keywords: ['gekås', 'gekas', 'gek$s', 'ullared'], cleanName: 'Gekås Ullared', preferredCategories: ['Shopping', 'Hemmet'] },
   { keywords: ['willys'], cleanName: 'Willys', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['hemköp', 'hemkop'], cleanName: 'Hemköp', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
   { keywords: ['lidl'], cleanName: 'Lidl', preferredCategories: ['Mat & dryck', 'Mat', 'Livsmedel'] },
@@ -1201,7 +1204,7 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['systembolaget', 'systembolag', 'systembolage', 'sys.bolaget', 'sysbolaget'], cleanName: 'Systembolaget', preferredCategories: ['Mat & dryck', 'Nöjen', 'Uteliv'] },
   { keywords: ['öresundskraft', 'oresundskraft'], cleanName: 'Öresundskraft AB', preferredCategories: ['Boende', 'Räkningar'] },
   { keywords: ['holy greens', 'holygreens'], cleanName: 'Holy Greens', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
-  { keywords: ['mcdonalds', 'mcdonald'], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['mcdonalds', 'mcdonald', 'mcdfalkenberg', 'mcd '], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['max burgers', 'max hamburger'], cleanName: 'MAX Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['burger king'], cleanName: 'Burger King', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['bastard burgers'], cleanName: 'Bastard Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
@@ -1405,27 +1408,85 @@ export function formatSwishPhone(rawNumber: string): string {
 
 export function formatSwishTitle(
   description: string | null | undefined,
-  counterpartyName: string | null | undefined
+  counterpartyName: string | null | undefined,
+  isIncome?: boolean,
+  rawJson?: any
 ): string {
-  // 1. Om banken redan har ett separat motpartsnamn som inte bara är "Swish" eller ett telefonnummer
-  if (counterpartyName && counterpartyName.trim().length > 0) {
-    const cp = counterpartyName.trim();
-    const cpPhone = extractSwishPhoneNumber(cp, false);
-    if (!/^swish$/i.test(cp) && !cpPhone && !/^[\d\s()-]+$/.test(cp)) {
-      return cleanDisplayMerchantName(cp);
+  const raw = String(description || '').trim();
+  const cpRaw = String(counterpartyName || '').trim();
+  const combinedLower = `${raw} ${cpRaw}`.toLowerCase();
+
+  const inferredIncome =
+    isIncome !== undefined
+      ? isIncome
+      : combinedLower.includes('mottagen') ||
+        combinedLower.includes('inbetalning') ||
+        combinedLower.includes('från') ||
+        combinedLower.includes('fran')
+      ? true
+      : combinedLower.includes('skickad') ||
+        combinedLower.includes('betalning') ||
+        combinedLower.includes('till')
+      ? false
+      : undefined;
+
+  const formatWithDirection = (personOrMerchantName: string): string => {
+    const clean = personOrMerchantName
+      .replace(/^swish\s*(från|fran|till|mottagen|skickad|inbetalning|betalning|·|-)?\s*/i, '')
+      .trim();
+    if (!clean || /^swish$/i.test(clean)) return 'Swish';
+    if (inferredIncome === true) {
+      return `Swish från ${clean}`;
+    }
+    if (inferredIncome === false) {
+      return `Swish till ${clean}`;
+    }
+    return `Swish från ${clean}`;
+  };
+
+  // 1. Extrahera eventuellt giltigt Swish-telefonnummer (t.ex. 46739976655 -> 0739976655)
+  const phoneDigits =
+    extractSwishPhoneNumber(`swish ${raw}`, true) ||
+    extractSwishPhoneNumber(`swish ${cpRaw}`, true);
+  const formattedPhone = phoneDigits ? formatSwishPhone(phoneDigits) : '';
+
+  // 2. Kontrollera först om telefonnumret finns i vår Swish-nummeruppslagning / kontaktbok
+  if (phoneDigits) {
+    const lookedUpName = resolveSwishPhoneToName(phoneDigits);
+    if (lookedUpName) {
+      return formatWithDirection(cleanDisplayMerchantName(lookedUpName));
     }
   }
 
-  const raw = String(description || '').trim();
-  if (!raw) return 'Swish';
+  // 3. Om banken har ett separat motpartsnamn (eller debtor/creditor i rawJson) som inte bara är "Swish" eller ett telefonnummer
+  const jsonNameCandidates = [
+    cpRaw,
+    rawJson?.debtor?.name,
+    rawJson?.creditor?.name,
+    rawJson?.debtor_name,
+    rawJson?.creditor_name,
+    rawJson?.ultimate_debtor,
+    rawJson?.ultimate_creditor,
+  ];
+  for (const cand of jsonNameCandidates) {
+    if (typeof cand !== 'string' || !cand.trim()) continue;
+    const trimmedCand = cand.trim();
+    const candPhone = extractSwishPhoneNumber(trimmedCand, false);
+    if (
+      !/^swish$/i.test(trimmedCand) &&
+      !candPhone &&
+      !/^[\d\s()+-]+$/.test(trimmedCand) &&
+      /[a-zA-ZåäöÅÄÖ]{2,}/.test(trimmedCand)
+    ) {
+      return formatWithDirection(cleanDisplayMerchantName(trimmedCand));
+    }
+  }
 
-  // 2. Extrahera och formatera eventuellt giltigt Swish-telefonnummer (t.ex. 46722162125 -> 072-216 21 25)
-  const phoneDigits =
-    extractSwishPhoneNumber(`swish ${raw}`, true) ||
-    extractSwishPhoneNumber(`swish ${counterpartyName || ''}`, true);
-  const formattedPhone = phoneDigits ? formatSwishPhone(phoneDigits) : '';
+  if (!raw) {
+    return formattedPhone ? `Swish (${formattedPhone})` : 'Swish';
+  }
 
-  // 3. Extrahera personens/företagets namn från typiska svenska Swish-beskrivningar:
+  // 4. Extrahera personens/företagets namn från typiska svenska Swish-beskrivningar:
   let cleaned = raw
     .replace(/^swish\s*(mottagen|inbetalning|inb\.?|skickad|betalning|från|fran|till)?\s*/i, '')
     .trim();
@@ -1440,7 +1501,7 @@ export function formatSwishTitle(
   const remainingLetters = cleaned.replace(/[^a-zA-ZåäöÅÄÖ]/g, '').trim();
 
   if (remainingLetters.length >= 2 && !/^swish$/i.test(remainingLetters)) {
-    return cleanDisplayMerchantName(cleaned);
+    return formatWithDirection(cleanDisplayMerchantName(cleaned));
   }
 
   if (formattedPhone) {
@@ -1775,6 +1836,15 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
     cleaned = withoutCorpSuffix;
   }
 
+  // 4.5. Hantera ISO-646-SE teckenersättningar i kortterminaler (t.ex. "GEK$S ULLARED # ULLARED" -> "Gekås Ullared", "X -TRA" -> "X-tra", "MCDFALKENBERG" -> "McDonald's Falkenberg")
+  cleaned = cleaned
+    .replace(/\bGEK\$S\b/gi, 'Gekås')
+    .replace(/\bX\s+-\s*TRA\b/gi, 'X-tra')
+    .replace(/\bMCD([A-ZÅÄÖ]{3,})\b/gi, (_, city) => `McDonald's ${city}`)
+    .replace(/\s+#\s+/g, ' ')
+    .replace(/\s+#$/g, '')
+    .trim();
+
   if (!cleaned || /^[\d\s*-]+$/.test(cleaned)) {
     return isExplicitTransferText ? 'Överföring' : 'Banktransaktion';
   }
@@ -1786,22 +1856,28 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
     return KNOWN_MERCHANT_NAMES_MAP[lower];
   }
 
-  // 6. Ta bort avhuggna enbokstavsrester mitt i banksträngar när nästa ord börjar på samma bokstav
-  // (t.ex. "HEMKOP HELSINGBORG R RYDEBACK" -> där "R" är slutet på det 20-teckenstrunkerade fältet före ortfältet "RYDEBACK")
+  // 6. Ta bort avhuggna ord eller dubbletter mitt i/slutet av banksträngar när nästa ord är samma ord eller börjar på samma avhuggna stam
+  // (t.ex. "COOP GAMLETULL HALMSTA HALMSTAD" -> "Coop Gamletull Halmstad", "GEKÅS ULLARED ULLARED" -> "Gekås Ullared")
   const rawWords = cleaned.split(/\s+/);
   const dedupedWords: string[] = [];
   for (let i = 0; i < rawWords.length; i++) {
     const curr = rawWords[i];
     const next = rawWords[i + 1];
-    if (
-      i > 0 &&
-      curr.length === 1 &&
-      /^[a-zA-ZåäöÅÄÖ]$/.test(curr) &&
-      next &&
-      next.length >= 2 &&
-      next.charAt(0).toLowerCase() === curr.toLowerCase()
-    ) {
-      continue;
+    if (curr === '#') continue;
+    if (next && next.length >= 2) {
+      const currL = curr.toLowerCase();
+      const nextL = next.toLowerCase();
+      if (currL === nextL) {
+        continue;
+      }
+      if (
+        i > 0 &&
+        /^[a-zA-ZåäöÅÄÖ]+$/.test(curr) &&
+        nextL.startsWith(currL) &&
+        (curr.length === 1 || curr.length >= 4)
+      ) {
+        continue;
+      }
     }
     dedupedWords.push(curr);
   }

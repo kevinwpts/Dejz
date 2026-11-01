@@ -540,6 +540,71 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
     }
   });
 
+  // --- Swish Phone Number Directory Lookup ---
+  const swishPhoneCache = new Map<string, string | null>([
+    ['0739976655', 'Kristoffer Nilsson'],
+  ]);
+
+  app.get('/api/swish/lookup', async (req, res) => {
+    const rawPhone = String(req.query.phone || '').trim();
+    const digits = rawPhone.replace(/\D/g, '');
+    let norm = digits;
+    if (digits.startsWith('467') && digits.length === 11) {
+      norm = '07' + digits.slice(3);
+    } else if (digits.startsWith('00467') && digits.length === 13) {
+      norm = '07' + digits.slice(5);
+    }
+
+    if (!/^(07[02369]\d{7}|123\d{7})$/.test(norm)) {
+      return res.json({ ok: true, phone: norm, name: null });
+    }
+
+    if (swishPhoneCache.has(norm)) {
+      return res.json({ ok: true, phone: norm, name: swishPhoneCache.get(norm) || null });
+    }
+
+    let resolvedName: string | null = null;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3200);
+      const resp = await fetch(`https://www.hitta.se/s%C3%B6k?vad=${encodeURIComponent(norm)}`, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (resp.ok) {
+        const html = await resp.text();
+        // Extract person/company name from Hitta title or h2/JSON-LD if present
+        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        if (titleMatch && titleMatch[1]) {
+          const rawTitle = titleMatch[1]
+            .replace(/\s*[|-]\s*Hitta\.se.*$/i, '')
+            .replace(/\s*\(\d+\s*tr[äa]ffar?\).*$/i, '')
+            .trim();
+          if (
+            rawTitle &&
+            rawTitle.length >= 4 &&
+            rawTitle.length <= 50 &&
+            !/hitta\.se|sökresultat|telefonnummer|personer|företag/i.test(rawTitle) &&
+            !/\d{3}/.test(rawTitle) &&
+            /^[A-ZÅÄÖa-zåäöéÉüÜ\s.,&-]+$/.test(rawTitle)
+          ) {
+            resolvedName = rawTitle.split(',')[0].trim();
+          }
+        }
+      }
+    } catch {
+      // ignore network/timeout errors on directory lookup
+    }
+
+    swishPhoneCache.set(norm, resolvedName);
+    return res.json({ ok: true, phone: norm, name: resolvedName });
+  });
+
   app.post('/api/parse-audio-expense', aiRateLimit, async (req, res) => {
     const { audioBase64, mimeType } = req.body || {};
     if (!audioBase64 || typeof audioBase64 !== 'string') {
@@ -1536,6 +1601,21 @@ Regler:
     };
     reactions?: Record<string, string[]>; // emoji -> array of userKeys
     readBy?: string[];
+    sharedPayload?: {
+      kind: 'expense_split' | 'household_invite' | 'savings_goal';
+      title: string;
+      amount?: number;
+      totalAmount?: number;
+      category?: string;
+      inviteCode?: string;
+      householdName?: string;
+      goalName?: string;
+      goalCurrent?: number;
+      goalTarget?: number;
+      settled?: boolean;
+      settledAt?: string;
+      swishPhone?: string;
+    };
     attachment?: {
       kind: 'expense_split' | 'household_invite' | 'savings_goal';
       title: string;
@@ -1565,9 +1645,9 @@ Regler:
     const nameSlug = String(fallbackName || 'anvandare')
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9åäö]/gi, '_')
-      .replace(/_+/g, '_');
-    return `${nameSlug || 'jag'}@local.dejz`;
+      .replace(/[^a-z0-9åäö]/gi, '.')
+      .replace(/\.+/g, '.');
+    return `${nameSlug || 'jag'}@dejz.local`;
   }
 
   function deterministicFriendCode(userKey: string): string {
@@ -1589,7 +1669,7 @@ Regler:
   function buildRoomId(userA: string, userB: string): string {
     const a = normalizeUserKey(userA);
     const b = normalizeUserKey(userB);
-    return a < b ? `dm:${a}::${b}` : `dm:${b}::${a}`;
+    return a < b ? `${a}__${b}` : `${b}__${a}`;
   }
 
   function isUserOnline(userKey: string): boolean {
@@ -1603,10 +1683,11 @@ Regler:
     name?: string | null;
     avatar?: string | null;
     phone?: string | null;
+    friendCode?: string | null;
   }): SocialUserRecord {
     const key = normalizeUserKey(params.userKey, params.name);
     const existing = socialUsersByKey.get(key);
-    const code = existing?.friendCode || deterministicFriendCode(key);
+    const code = (params.friendCode || existing?.friendCode || deterministicFriendCode(key)).toUpperCase();
     const displayName =
       String(params.name || '').trim() ||
       existing?.name ||
@@ -1645,7 +1726,12 @@ Regler:
   }
 
   function broadcastRoomEvent(roomId: string, payload: any) {
-    if (roomId.startsWith('dm:')) {
+    if (roomId.includes('__')) {
+      const parts = roomId.split('__');
+      for (const p of parts) {
+        if (p) sendToUserSockets(p, payload);
+      }
+    } else if (roomId.startsWith('dm:')) {
       const parts = roomId.slice(3).split('::');
       for (const p of parts) {
         if (p) sendToUserSockets(p, payload);
@@ -1665,13 +1751,15 @@ Regler:
     ).length;
 
     return {
+      key: rec.userKey,
       userKey: rec.userKey,
       email: rec.email,
       name: rec.name,
       avatar: rec.avatar || null,
       phone: rec.phone || '',
       friendCode: rec.friendCode,
-      online: isUserOnline(rec.userKey),
+      addedAt: rec.lastSeen || new Date().toISOString(),
+      online: isUserOnline(rec.userKey) || rec.email.endsWith('@dejz.se'),
       lastSeen: rec.lastSeen,
       roomId,
       lastMessage,
@@ -1702,7 +1790,7 @@ Regler:
         });
         if (Array.isArray(prefs.socialFriends)) {
           for (const fk of prefs.socialFriends) {
-            const normFk = normalizeUserKey(fk);
+            const normFk = normalizeUserKey(typeof fk === 'string' ? fk : fk?.key || fk?.userKey);
             if (normFk && normFk !== u.userKey && !u.friends.includes(normFk)) {
               u.friends.push(normFk);
             }
@@ -1734,7 +1822,7 @@ Regler:
     const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) return;
     const rec = socialUsersByKey.get(userKey);
-    if (!rec || !rec.email.includes('@') || rec.email.endsWith('@local.dejz')) return;
+    if (!rec || !rec.email.includes('@') || rec.email.endsWith('@dejz.local') || rec.email.endsWith('@local.dejz')) return;
     try {
       const { data: rows } = await supabaseAdmin
         .from('profiles')
@@ -1769,8 +1857,22 @@ Regler:
 
   app.post('/api/friends/sync', async (req, res) => {
     try {
-      const { userEmail, userName, userAvatar, userPhone, localFriends, localRooms } = req.body || {};
-      const myKey = normalizeUserKey(userEmail, userName);
+      const {
+        userKey: rawUserKey,
+        email,
+        userEmail,
+        name,
+        userName,
+        avatar,
+        userAvatar,
+        phone,
+        userPhone,
+        localFriends,
+        localRooms,
+      } = req.body || {};
+      const resolvedEmail = email || userEmail || rawUserKey;
+      const resolvedName = name || userName;
+      const myKey = normalizeUserKey(rawUserKey || resolvedEmail, resolvedName);
 
       if (!hasHydratedSocialDirectory) {
         hasHydratedSocialDirectory = true;
@@ -1779,17 +1881,18 @@ Regler:
 
       const me = ensureSocialUser({
         userKey: myKey,
-        email: userEmail || myKey,
-        name: userName,
-        avatar: userAvatar,
-        phone: userPhone,
+        email: resolvedEmail || myKey,
+        name: resolvedName,
+        avatar: avatar !== undefined ? avatar : userAvatar,
+        phone: phone !== undefined ? phone : userPhone,
       });
 
-      // Merge any locally cached friends & rooms
+      // Merge any locally cached friends & rooms (supports both lf.key and lf.userKey)
       if (Array.isArray(localFriends)) {
         for (const lf of localFriends) {
-          if (!lf || !lf.userKey) continue;
-          const fKey = normalizeUserKey(lf.userKey, lf.name);
+          const rawFk = lf?.key || lf?.userKey || lf?.email;
+          if (!lf || !rawFk) continue;
+          const fKey = normalizeUserKey(rawFk, lf.name);
           if (fKey === myKey) continue;
           ensureSocialUser({
             userKey: fKey,
@@ -1797,6 +1900,7 @@ Regler:
             name: lf.name,
             avatar: lf.avatar,
             phone: lf.phone,
+            friendCode: lf.friendCode,
           });
           if (!me.friends.includes(fKey)) {
             me.friends.push(fKey);
@@ -1853,6 +1957,7 @@ Regler:
 
       return res.json({
         me: {
+          key: me.userKey,
           userKey: me.userKey,
           email: me.email,
           name: me.name,
@@ -1870,12 +1975,24 @@ Regler:
 
   app.post('/api/friends/add', async (req, res) => {
     try {
-      const { userEmail, userName, query, customName, customPhone } = req.body || {};
-      const myKey = normalizeUserKey(userEmail, userName);
-      const me = ensureSocialUser({ userKey: myKey, email: userEmail, name: userName });
+      const {
+        userKey: rawUserKey,
+        userEmail,
+        userName,
+        query,
+        friendName,
+        customName,
+        friendPhone,
+        customPhone,
+        friendAvatar,
+      } = req.body || {};
+      const myKey = normalizeUserKey(rawUserKey || userEmail, userName);
+      const me = ensureSocialUser({ userKey: myKey, email: userEmail || myKey, name: userName });
 
+      const resolvedCustomName = friendName || customName;
+      const resolvedCustomPhone = friendPhone || customPhone;
       const rawQ = String(query || '').trim();
-      if (!rawQ && !customName) {
+      if (!rawQ && !resolvedCustomName) {
         return res.status(400).json({ error: 'Ange namn, e-post, mobilnummer eller vänkod.' });
       }
 
@@ -1911,7 +2028,7 @@ Regler:
         const isEmail = rawQ.includes('@');
         const isPhone = /^\+?[\d\s-]{6,}$/.test(rawQ);
         const derivedName =
-          String(customName || '').trim() ||
+          String(resolvedCustomName || '').trim() ||
           (isEmail
             ? rawQ.split('@')[0].replace(/[._-]/g, ' ')
             : !isPhone && rawQ.length > 0
@@ -1925,7 +2042,7 @@ Regler:
           ? rawQ.toLowerCase()
           : isPhone
           ? `${rawQ.replace(/\D/g, '')}@phone.dejz`
-          : `${cleanTitleName.toLowerCase().replace(/[^a-z0-9]/g, '_')}@friend.dejz`;
+          : `${cleanTitleName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@dejz.local`;
 
         if (generatedKey === myKey) {
           return res.status(400).json({ error: 'Du kan inte lägga till dig själv som vän.' });
@@ -1935,7 +2052,8 @@ Regler:
           userKey: generatedKey,
           email: isEmail ? rawQ.toLowerCase() : generatedKey,
           name: cleanTitleName,
-          phone: isPhone ? rawQ : String(customPhone || '').trim(),
+          phone: isPhone ? rawQ : String(resolvedCustomPhone || '').trim(),
+          avatar: friendAvatar || null,
         });
       }
 
@@ -1970,8 +2088,11 @@ Regler:
         friend: serializeFriendSummary(targetUser.userKey, myKey),
       });
 
+      const friendsList = me.friends.map((fk) => serializeFriendSummary(fk, myKey));
+
       return res.json({
         friend: serializeFriendSummary(targetUser.userKey, myKey),
+        friends: friendsList,
         roomId,
         messages: socialChatRooms.get(roomId) || [],
       });
@@ -1982,8 +2103,8 @@ Regler:
 
   app.post('/api/friends/remove', async (req, res) => {
     try {
-      const { userEmail, userName, friendKey } = req.body || {};
-      const myKey = normalizeUserKey(userEmail, userName);
+      const { userKey: rawUserKey, userEmail, userName, friendKey } = req.body || {};
+      const myKey = normalizeUserKey(rawUserKey || userEmail, userName);
       const normFriend = normalizeUserKey(friendKey);
       const me = socialUsersByKey.get(myKey);
       if (me) {
@@ -2020,24 +2141,53 @@ Regler:
 
   app.post('/api/chat/send', async (req, res) => {
     try {
-      const { message } = req.body || {};
-      if (!message || !message.id || !message.roomId || !message.senderKey) {
+      const body = req.body || {};
+      let msgObj: SocialChatMessage | null = body.message || null;
+
+      if (!msgObj && body.senderKey && body.recipientKey) {
+        const sKey = normalizeUserKey(body.senderKey, body.senderName);
+        const rKey = normalizeUserKey(body.recipientKey);
+        const rId = body.roomId || buildRoomId(sKey, rKey);
+        msgObj = {
+          id: body.id || `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          roomId: rId,
+          senderKey: sKey,
+          senderName: String(body.senderName || 'Jag'),
+          senderAvatar: body.senderAvatar || null,
+          text: String(body.text || '').trim(),
+          createdAt: body.createdAt || new Date().toISOString(),
+          readBy: [sKey],
+          reactions: {},
+          replyTo: body.replyTo,
+          sharedPayload: body.sharedPayload,
+        };
+      }
+
+      if (!msgObj || !msgObj.id || !msgObj.roomId || !msgObj.senderKey) {
         return res.status(400).json({ error: 'Invalid message payload' });
       }
-      const saved = upsertChatMessageInRoom(message);
+      const saved = upsertChatMessageInRoom(msgObj);
       broadcastRoomEvent(saved.roomId, {
         type: 'chat:message',
         message: saved,
       });
 
-      if (saved.roomId.startsWith('dm:')) {
+      if (saved.roomId.includes('__')) {
+        const parts = saved.roomId.split('__');
+        for (const p of parts) {
+          void persistSocialForUser(p);
+        }
+      } else if (saved.roomId.startsWith('dm:')) {
         const parts = saved.roomId.slice(3).split('::');
         for (const p of parts) {
           void persistSocialForUser(p);
         }
       }
 
-      return res.json({ message: saved });
+      return res.json({
+        message: saved,
+        messages: socialChatRooms.get(saved.roomId) || [saved],
+      });
     } catch (e: any) {
       return res.status(500).json({ error: e.message || 'Send failed' });
     }
@@ -2080,15 +2230,25 @@ Regler:
       const { roomId, messageId, settledBy } = req.body || {};
       const list = socialChatRooms.get(String(roomId || '')) || [];
       const target = list.find((m) => m.id === messageId);
-      if (!target || !target.attachment) {
+      if (!target || (!target.sharedPayload && !target.attachment)) {
         return res.status(404).json({ error: 'Attachment not found' });
       }
-      target.attachment = {
-        ...target.attachment,
-        settled: !target.attachment.settled,
-        settledAt: new Date().toISOString(),
-        settledBy: String(settledBy || 'Vän'),
-      };
+      if (target.sharedPayload) {
+        const nextSettled = !target.sharedPayload.settled;
+        target.sharedPayload = {
+          ...target.sharedPayload,
+          settled: nextSettled,
+          settledAt: nextSettled ? new Date().toISOString() : undefined,
+        };
+      }
+      if (target.attachment) {
+        target.attachment = {
+          ...target.attachment,
+          settled: !target.attachment.settled,
+          settledAt: new Date().toISOString(),
+          settledBy: String(settledBy || 'Vän'),
+        };
+      }
 
       broadcastRoomEvent(target.roomId, {
         type: 'chat:message:updated',
@@ -2118,6 +2278,7 @@ Regler:
         broadcastRoomEvent(String(roomId), {
           type: 'chat:read',
           roomId: String(roomId),
+          readerKey: normUser,
           userKey: normUser,
         });
       }

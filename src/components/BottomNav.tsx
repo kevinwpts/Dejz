@@ -9,7 +9,9 @@ import {
   Package,
   Paperclip,
   PiggyBank,
-  ChatCircleDots,
+  Users,
+  Sparkle,
+  GearSix,
   CaretRight,
 } from '@phosphor-icons/react';
 
@@ -29,6 +31,9 @@ export type AppTab =
 interface BottomNavProps {
   activeTab: AppTab;
   onChangeTab: (tab: AppTab) => void;
+  onOpenHousehold?: () => void;
+  onOpenDiscover?: () => void;
+  activeSettingsSubView?: string;
   goalsCount?: number;
   savedCount?: number;
   packagesCount?: number;
@@ -39,11 +44,13 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onChangeTab,
+  onOpenHousehold,
+  onOpenDiscover,
+  activeSettingsSubView = 'main',
   goalsCount = 0,
   savedCount = 0,
   packagesCount = 0,
   receiptsCount = 0,
-  friendsUnreadCount = 0,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -55,34 +62,85 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     { id: 'fixed' as AppTab, label: 'Ekonomi', icon: Receipt },
   ];
 
-  const menuItems = [
+  const menuItems: {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+    badge?: number | string;
+    isSelected: boolean;
+    onSelect: () => void;
+  }[] = [
     {
-      id: 'friends' as AppTab,
-      label: 'Vänner & chatt',
-      icon: ChatCircleDots,
-      badge: friendsUnreadCount > 0 ? friendsUnreadCount : undefined,
+      id: 'goals',
+      label: 'Sparmål',
+      icon: PiggyBank,
+      badge: goalsCount > 0 ? goalsCount : undefined,
+      isSelected: activeTab === 'goals',
+      onSelect: () => onChangeTab('goals'),
     },
     {
-      id: 'saved' as AppTab,
+      id: 'household',
+      label: 'Delad ekonomi',
+      icon: Users,
+      isSelected: activeTab === 'settings' && activeSettingsSubView === 'household',
+      onSelect: () => {
+        if (onOpenHousehold) {
+          onOpenHousehold();
+        } else {
+          onChangeTab('settings');
+        }
+      },
+    },
+    {
+      id: 'discover',
+      label: 'Prenumerationsscanner',
+      icon: Sparkle,
+      isSelected: activeTab === 'settings' && activeSettingsSubView === 'discover',
+      onSelect: () => {
+        if (onOpenDiscover) {
+          onOpenDiscover();
+        } else {
+          onChangeTab('settings');
+        }
+      },
+    },
+    {
+      id: 'saved',
       label: 'Sparade köp',
       icon: Heart,
       badge: savedCount > 0 ? savedCount : undefined,
+      isSelected: activeTab === 'saved',
+      onSelect: () => onChangeTab('saved'),
     },
     {
-      id: 'packages' as AppTab,
+      id: 'packages',
       label: 'Paket',
       icon: Package,
       badge: packagesCount > 0 ? packagesCount : undefined,
+      isSelected: activeTab === 'packages',
+      onSelect: () => onChangeTab('packages'),
     },
     {
-      id: 'receipts' as AppTab,
+      id: 'receipts',
       label: 'Kvitton',
       icon: Paperclip,
       badge: receiptsCount > 0 ? receiptsCount : undefined,
+      isSelected: activeTab === 'receipts',
+      onSelect: () => onChangeTab('receipts'),
+    },
+    {
+      id: 'settings',
+      label: 'Inställningar',
+      icon: GearSix,
+      isSelected:
+        activeTab === 'settings' &&
+        activeSettingsSubView !== 'household' &&
+        activeSettingsSubView !== 'discover',
+      onSelect: () => onChangeTab('settings'),
     },
   ];
 
-  const isMoreActive = isMenuOpen || menuItems.some((item) => item.id === activeTab);
+  const isMoreActive = isMenuOpen || menuItems.some((item) => item.isSelected);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -110,17 +168,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       >
         {/* Popover Menu for More Options */}
         {isMenuOpen && (
-          <div className="mb-2.5 ml-auto w-56 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-2xl shadow-nav p-1.5 animate-scale-in origin-bottom-right space-y-0.5">
+          <div className="mb-2.5 ml-auto w-60 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-2xl shadow-nav p-1.5 animate-scale-in origin-bottom-right space-y-0.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isSelected = activeTab === item.id;
+              const isSelected = item.isSelected;
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onChangeTab(item.id);
+                    item.onSelect();
                   }}
                   className={`w-full px-3 py-2.5 rounded-xl flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
                     isSelected
@@ -166,9 +224,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive =
-              (activeTab === tab.id || (tab.id === 'home' && activeTab === 'goals')) &&
-              !isMenuOpen;
+            const isActive = activeTab === tab.id && !isMenuOpen;
             return (
               <button
                 key={tab.id}
@@ -204,9 +260,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           >
             <span className="relative inline-flex">
               <SquaresFour size={20} weight={isMoreActive ? 'fill' : 'regular'} />
-              {friendsUnreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--surface-color)]" />
-              )}
             </span>
             <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
               Mer
@@ -217,3 +270,4 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     </>
   );
 };
+

@@ -24,6 +24,10 @@ import {
   normalizeCategoryToValid,
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import {
+  isMerchantCategoryIconPreferred,
+  setMerchantCategoryIconPreferred,
+} from '../../utils/logo';
 
 interface IncomeModalProps {
   isOpen: boolean;
@@ -68,6 +72,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
   const [category, setCategory] = useState('Lön');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showFullAccount, setShowFullAccount] = useState(false);
+  const [logoPrefTick, setLogoPrefTick] = useState(0);
 
   const navigateSubView = (next: ModalSubView, dir: 'forward' | 'back' = 'forward') => {
     if (next === 'category-picker' || next === 'day-picker') {
@@ -505,33 +510,34 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             </div>
           </div>
 
-          <div className="ui-sheet-group">
+          {isCreateMode && (
+            <div className="ui-sheet-group">
+              <button
+                type="button"
+                onClick={() => navigateSubView('category-picker', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="ui-info-label shrink-0">Kategori</span>
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                  <CategoryIcon category={category} size={13} />
+                  <span>{category}</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
+                </span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => navigateSubView('category-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label shrink-0">Kategori</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
-                <CategoryIcon category={category} size={13} />
-                <span>{category}</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigateSubView('day-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label shrink-0">Utbetalningsdag</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
-                <span>Den {payday}:e</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => navigateSubView('day-picker', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="ui-info-label shrink-0">Utbetalningsdag</span>
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+                  <span>Den {payday}:e</span>
+                  <CaretRight size={12} className="text-[var(--text-muted)]" />
+                </span>
+              </button>
+            </div>
+          )}
 
           <div className="space-y-2.5">
             {isCreateMode ? (
@@ -612,13 +618,34 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
             <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full bg-emerald-500 blur-2xl opacity-15 dark:opacity-20" />
             <div className="relative flex justify-center mb-3.5">
-              <ItemLogo
-                name={displayName}
-                category={category}
-                logoUrl={activeIncome?.logo}
-                size="xl"
-                isRecurring={true}
-              />
+              {(() => {
+                void logoPrefTick;
+                const prefersCatIcon = isMerchantCategoryIconPreferred(displayName);
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMerchantCategoryIconPreferred(displayName, !prefersCatIcon);
+                      setLogoPrefTick((t) => t + 1);
+                    }}
+                    title={
+                      prefersCatIcon
+                        ? 'Tryck för att visa företagslogga'
+                        : 'Tryck för att visa kategori-ikon'
+                    }
+                    className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
+                  >
+                    <ItemLogo
+                      key={`income-logo-${logoPrefTick}`}
+                      name={displayName}
+                      category={category}
+                      logoUrl={activeIncome?.logo}
+                      size="xl"
+                      isRecurring={true}
+                    />
+                  </button>
+                );
+              })()}
             </div>
 
             <h2 className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center truncate px-2">

@@ -1797,12 +1797,12 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           </div>
         </section>
       ) : (
-        <section className="ui-card-p py-10 px-6 text-center">
+        <section className="ui-empty-state-page animate-fade-in">
           <EmptyClusterArtwork variant="savings" />
-          <p className="font-display font-semibold text-base text-[var(--text-primary)] mt-1">
+          <p className="ui-empty-title">
             Spara till dina drömmar
           </p>
-          <p className="text-xs text-[var(--text-secondary)] max-w-[260px] mx-auto mt-1.5 mb-5 leading-relaxed">
+          <p className="ui-empty-sub max-w-[260px] mx-auto mb-5">
             Skapa ditt första sparmål för att börja följa dina framsteg
           </p>
           <button

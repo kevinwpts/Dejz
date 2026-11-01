@@ -268,10 +268,42 @@ export async function syncFriendsAndChatFromServer(params: {
       saveStoredMyFriendCode(data.me.friendCode);
     }
     if (Array.isArray(data?.friends)) {
-      saveStoredFriends(data.friends);
+      const latestLocalFriends = getStoredFriends();
+      const byKey = new Map<string, SocialFriend>();
+      for (const f of latestLocalFriends) {
+        const k = (f?.key || (f as any)?.userKey || '').trim().toLowerCase();
+        if (k) byKey.set(k, { ...f, key: k });
+      }
+      for (const f of data.friends) {
+        const k = (f?.key || f?.userKey || '').trim().toLowerCase();
+        if (!k) continue;
+        const prev = byKey.get(k);
+        byKey.set(k, {
+          ...(prev || {}),
+          ...f,
+          key: k,
+          addedAt: f.addedAt || prev?.addedAt || new Date().toISOString(),
+        });
+      }
+      saveStoredFriends(Array.from(byKey.values()));
     }
     if (data?.rooms && typeof data.rooms === 'object') {
-      const mergedRooms = { ...localRooms, ...data.rooms };
+      const latestLocalRooms = getStoredChatRooms();
+      const mergedRooms: Record<string, SocialChatMessage[]> = { ...latestLocalRooms };
+      for (const [rId, serverMsgs] of Object.entries(data.rooms)) {
+        if (!Array.isArray(serverMsgs)) continue;
+        const existing = mergedRooms[rId] || [];
+        const byId = new Map<string, SocialChatMessage>();
+        for (const m of existing) {
+          if (m && m.id) byId.set(m.id, m);
+        }
+        for (const m of serverMsgs as SocialChatMessage[]) {
+          if (m && m.id) byId.set(m.id, m);
+        }
+        mergedRooms[rId] = Array.from(byId.values()).sort((a, b) =>
+          String(a.createdAt || '').localeCompare(String(b.createdAt || ''))
+        );
+      }
       saveStoredChatRooms(mergedRooms);
     }
   } catch {
@@ -558,8 +590,19 @@ export function sendLiveTypingSignal(params: {
   friendKey: string;
   isTyping: boolean;
 }): void {
-  if (!activeSocket || activeSocket.readyState !== WebSocket.OPEN) return;
   const roomId = getRoomIdForKeys(params.myKey, params.friendKey);
+  if (params.isTyping) {
+    typingStateByRoom[roomId] = {
+      senderKey: params.myKey,
+      senderName: params.myName || 'Vän',
+      expiresAt: Date.now() + 4000,
+    };
+  } else if (typingStateByRoom[roomId]?.senderKey === params.myKey) {
+    delete typingStateByRoom[roomId];
+  }
+  notifySocialUpdated();
+
+  if (!activeSocket || activeSocket.readyState !== WebSocket.OPEN) return;
   try {
     activeSocket.send(
       JSON.stringify({
