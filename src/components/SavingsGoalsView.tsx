@@ -271,14 +271,16 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     e.target.value = '';
   };
 
-  const handleSaveGoal = () => {
+  const handleSaveGoal = (overrideCurrentAmount?: number) => {
     const cleanName = goalNameInput.trim();
     const cleanTarget = Math.max(1, Math.round(Number(goalTargetInput) || 0));
     const matchedAcc = goalLinkedAccountId
       ? accounts.find((a) => a.id === goalLinkedAccountId)
       : undefined;
     const cleanCurr =
-      goalLinkedAccountId === '__TOTAL__'
+      typeof overrideCurrentAmount === 'number'
+        ? Math.max(0, Math.round(overrideCurrentAmount))
+        : goalLinkedAccountId === '__TOTAL__'
         ? effectiveTotalBalance
         : matchedAcc
         ? Math.max(0, Math.round(Number(matchedAcc.balance) || 0))
@@ -339,6 +341,41 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       setSelectedGoalId(newId);
     }
   };
+
+  // Physical keyboard support for Numpad steps (Step 3 & Step 5)
+  React.useEffect(() => {
+    if (!isCreateWizardOpen || (wizardStep !== 3 && wizardStep !== 5)) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const isStep3 = wizardStep === 3;
+      const currentVal = isStep3 ? goalTargetInput : goalCurrentInput;
+      const setVal = isStep3 ? setGoalTargetInput : setGoalCurrentInput;
+
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        const nextDigits = (currentVal + e.key).replace(/^0+/, '');
+        if (nextDigits.length <= 9) {
+          setVal(nextDigits);
+        }
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        setVal(currentVal.slice(0, -1));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (isStep3) {
+          if (Number(goalTargetInput) > 0) {
+            navigateWizardStep(4, 'forward');
+          }
+        } else {
+          handleSaveGoal();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCreateWizardOpen, wizardStep, goalTargetInput, goalCurrentInput, goalNameInput, goalLinkedAccountId]);
 
   const selectedGoal = useMemo(
     () => savingsGoals.find((g) => g.id === selectedGoalId) || null,
@@ -980,7 +1017,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   }
 
   // ============================================================================
-  // ONBOARDING-STYLE STEP-BY-STEP WIZARD (Exclusively for creating new goals)
+  // STEP-BY-STEP GOAL CREATION SHEET (Lunar-style non-fullscreen modal sheet)
   // ============================================================================
   function renderCreateWizardModal() {
     if (!isCreateWizardOpen || typeof document === 'undefined') return null;
@@ -988,22 +1025,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     const activeTheme = getGoalArtworkTheme(goalArtworkId);
     const pageAnimClass =
       slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
-
-    const previewTargetAmount = Math.max(0, Math.round(Number(goalTargetInput) || 0));
-
-    const totalStepsForCreate = !goalLinkedAccountId ? 5 : 4;
-    const progressWidthClass =
-      wizardStep === 1
-        ? 'w-1/4'
-        : wizardStep === 2
-        ? 'w-2/4'
-        : wizardStep === 3
-        ? 'w-3/4'
-        : wizardStep === 4
-        ? totalStepsForCreate === 5
-          ? 'w-4/5'
-          : 'w-full'
-        : 'w-full';
 
     const handleBackNavigation = () => {
       if (wizardStep === 5) {
@@ -1015,71 +1036,135 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       }
     };
 
-    const renderGoalContextPill = (showTarget = false) => (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] max-w-full">
-        <div
-          className="w-5 h-5 rounded-full overflow-hidden relative shrink-0"
-          style={{
-            backgroundColor: goalCustomImage ? undefined : activeTheme.tileBg,
-          }}
-        >
-          {goalCustomImage ? (
-            <img
-              src={goalCustomImage}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-5 h-5">
-              <GoalArtworkIllustration artworkId={goalArtworkId} />
-            </div>
-          )}
+    const appendDigit = (digit: string, isTarget: boolean) => {
+      const current = isTarget ? goalTargetInput : goalCurrentInput;
+      const setFn = isTarget ? setGoalTargetInput : setGoalCurrentInput;
+      const next = (current + digit).replace(/^0+/, '');
+      if (next.length <= 9) {
+        setFn(next);
+      }
+    };
+
+    const removeLastDigit = (isTarget: boolean) => {
+      const current = isTarget ? goalTargetInput : goalCurrentInput;
+      const setFn = isTarget ? setGoalTargetInput : setGoalCurrentInput;
+      setFn(current.slice(0, -1));
+    };
+
+    const renderNumpad = (isTarget: boolean) => {
+      const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+      return (
+        <div className="grid grid-cols-3 gap-y-1 gap-x-4 pb-3 select-none">
+          {digits.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => appendDigit(d, isTarget)}
+              className="h-14 rounded-2xl font-display font-semibold text-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer"
+            >
+              {d}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => appendDigit('00', isTarget)}
+            className="h-14 rounded-2xl font-display font-semibold text-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer"
+          >
+            ,
+          </button>
+
+          <button
+            type="button"
+            onClick={() => appendDigit('0', isTarget)}
+            className="h-14 rounded-2xl font-display font-semibold text-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer"
+          >
+            0
+          </button>
+
+          <button
+            type="button"
+            onClick={() => removeLastDigit(isTarget)}
+            aria-label="Sudda"
+            className="h-14 rounded-2xl text-[var(--text-primary)] flex items-center justify-center hover:bg-[var(--surface-color)]/60 active:bg-[var(--surface-color)] active:scale-95 transition-all cursor-pointer"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+              <line x1="18" y1="9" x2="12" y2="15" />
+              <line x1="12" y1="9" x2="18" y2="15" />
+            </svg>
+          </button>
         </div>
-        <span className="text-xs font-medium text-[var(--text-primary)] truncate">
-          {goalNameInput.trim() || 'Nytt sparmål'}
-        </span>
-        {showTarget && previewTargetAmount > 0 && (
-          <span className="text-xs text-[var(--text-muted)] tabular-nums shrink-0">
-            · {formatKr(previewTargetAmount)}
-          </span>
-        )}
-      </div>
-    );
+      );
+    };
+
+    const stepHeading =
+      wizardStep === 1
+        ? 'Vad sparar du till?'
+        : wizardStep === 2
+        ? 'Välj bild till ditt mål'
+        : wizardStep === 3
+        ? 'Hur mycket behöver du spara?'
+        : wizardStep === 4
+        ? 'Hur vill du följa sparandet?'
+        : 'Hur mycket har du sparat hittills?';
 
     return createPortal(
-      <div className="fixed inset-0 z-[200] bg-[var(--bg-color)] text-[var(--text-primary)]">
-        <div className="h-dvh max-h-dvh flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none">
-          {/* 1. TOP HEADER (Pinned / Non-scrolling, exact match to OnboardingFlow) */}
-          <header className="shrink-0 space-y-3 pb-1">
-            <div className="flex items-center justify-between h-9">
+      <div
+        className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px] flex flex-col justify-end animate-fade-in"
+        onClick={() => setIsCreateWizardOpen(false)}
+      >
+        {/* Subtle stacked card edge behind the sheet (matches Lunar modal stack) */}
+        <div
+          className="w-[92%] max-w-[416px] mx-auto h-3 rounded-t-[28px] bg-[var(--surface-color)]/60 border-t border-x border-[var(--border-subtle)]/60 -mb-1 pointer-events-none"
+          aria-hidden="true"
+        />
+
+        {/* Sheet Container (Does NOT cover the whole screen) */}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-md mx-auto h-[89dvh] max-h-[89dvh] rounded-t-[34px] bg-[var(--bg-color)] text-[var(--text-primary)] border-t border-[var(--border-subtle)] shadow-[0_-16px_48px_rgba(0,0,0,0.45)] flex flex-col justify-between px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none animate-slide-up"
+        >
+          {/* 1. TOP HEADER (Circular Back button + optional Hoppa över pill + Centered Question) */}
+          <header className="shrink-0 space-y-4">
+            <div className="flex items-center justify-between">
               <button
                 type="button"
                 onClick={handleBackNavigation}
-                className="p-1.5 -ml-1.5 text-[var(--text-primary)] flex items-center justify-center hover:opacity-70 active:scale-95 transition-all cursor-pointer"
+                className="w-11 h-11 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center hover:opacity-80 active:scale-95 transition-all cursor-pointer"
                 aria-label="Tillbaka"
               >
                 <CaretLeft size={18} weight="bold" />
               </button>
 
-              {wizardStep > 1 ? (
+              {wizardStep === 5 ? (
                 <button
                   type="button"
-                  onClick={() => setIsCreateWizardOpen(false)}
-                  className="p-1.5 -mr-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center active:scale-95 transition-all cursor-pointer"
-                  aria-label="Avbryt"
+                  onClick={() => {
+                    setGoalCurrentInput('0');
+                    handleSaveGoal(0);
+                  }}
+                  className="px-4 py-2 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:opacity-80 active:scale-95 transition-all cursor-pointer"
                 >
-                  <X size={18} weight="bold" />
+                  Hoppa över
                 </button>
               ) : (
-                <div className="w-7" />
+                <div className="w-11" />
               )}
             </div>
 
-            <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
-              <div
-                className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${progressWidthClass}`}
-              />
-            </div>
+            <h2 className="text-[15px] sm:text-base font-medium text-center text-[var(--text-primary)] tracking-[-0.01em]">
+              {stepHeading}
+            </h2>
           </header>
 
           {/* ============================================================== */}
@@ -1098,34 +1183,29 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-4">
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Vad sparar du till?
-                </h1>
-              </div>
-
-              <div className="my-auto py-4">
-                <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
-                  <input
-                    type="text"
-                    autoFocus
-                    required
-                    placeholder="t.ex. Resa, Buffert eller Ny bil..."
-                    value={goalNameInput}
-                    onChange={(e) => setGoalNameInput(e.target.value)}
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
-                  />
-                </div>
+              <div className="my-auto py-6 flex flex-col items-center justify-center">
+                <input
+                  type="text"
+                  autoFocus
+                  required
+                  placeholder="t.ex. Buffert eller Resa"
+                  value={goalNameInput}
+                  onChange={(e) => setGoalNameInput(e.target.value)}
+                  className="w-full bg-transparent border-0 p-0 text-center font-display font-bold text-3xl sm:text-4xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/35 tracking-tight focus:outline-none"
+                />
               </div>
 
               <div className="shrink-0 pt-3">
                 <button
                   type="submit"
                   disabled={!goalNameInput.trim()}
-                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+                  className={`w-full py-4 rounded-full font-display font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+                    goalNameInput.trim()
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] hover:opacity-90 active:scale-[0.99] cursor-pointer'
+                      : 'bg-[var(--surface-color)] text-[var(--text-muted)] cursor-not-allowed'
+                  }`}
                 >
                   <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
                 </button>
               </div>
             </form>
@@ -1137,16 +1217,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           {wizardStep === 2 && (
             <div
               key="goal-step-2"
-              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden pt-3 ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-5 pb-2">
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Välj bild till ditt mål
-                </h1>
-              </div>
-
               <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 py-1 pr-0.5">
-                {/* Live förhandsvisning av målkortet utan onödig etikett */}
                 <div
                   className="relative rounded-2xl overflow-hidden px-4 py-4 min-h-[76px] flex items-center justify-between text-white shadow-sm transition-colors duration-200"
                   style={{
@@ -1178,7 +1251,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   </div>
                 </div>
 
-                {/* Sökfält */}
                 <div className="relative shrink-0">
                   <MagnifyingGlass
                     size={15}
@@ -1203,7 +1275,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   )}
                 </div>
 
-                {/* 3x3 Grid: Tile 1 = Egen bild, Tiles 2..9 = Illustrationer */}
                 <div className="grid grid-cols-3 gap-2.5 content-start">
                   <button
                     type="button"
@@ -1277,74 +1348,56 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 <button
                   type="button"
                   onClick={() => navigateWizardStep(3, 'forward')}
-                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                  className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
                 </button>
               </div>
             </div>
           )}
 
           {/* ============================================================== */}
-          {/* STEG 3: VAD ÄR DITT MÅLBELOPP? (Fintech-siffra utan ruta)      */}
+          {/* STEG 3: HUR MYCKET BEHÖVER DU SPARA? (Stora siffror + Numpad)  */}
           {/* ============================================================== */}
           {wizardStep === 3 && (
-            <form
+            <div
               key="goal-step-3"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!(Number(goalTargetInput) > 0)) return;
-                navigateWizardStep(4, 'forward');
-              }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-2 space-y-3">
-                {renderGoalContextPill(false)}
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Vad är ditt målbelopp?
-                </h1>
+              <div className="my-auto py-4 flex items-center justify-center">
+                <div className="flex items-baseline justify-center gap-2.5 font-display font-bold text-5xl sm:text-6xl tracking-tight tabular-nums">
+                  <span
+                    className={
+                      Number(goalTargetInput) > 0
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-[var(--text-muted)]/40'
+                    }
+                  >
+                    {Number(goalTargetInput) > 0
+                      ? formatInputThousands(goalTargetInput)
+                      : '0'}
+                  </span>
+                  <span className="text-[var(--text-primary)]">kr</span>
+                </div>
               </div>
 
-              <div className="my-auto py-6 flex flex-col items-center justify-center">
-                <label className="w-full flex flex-col items-center justify-center cursor-text">
-                  <div className="flex items-baseline justify-center gap-2 w-full">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoFocus
-                      required
-                      placeholder="10 000"
-                      value={formatInputThousands(goalTargetInput)}
-                      onChange={(e) =>
-                        setGoalTargetInput(e.target.value.replace(/[^\d]/g, ''))
-                      }
-                      style={{
-                        width: `${Math.max(
-                          5,
-                          (formatInputThousands(goalTargetInput) || '10 000').length
-                        )}ch`,
-                      }}
-                      className="max-w-[80%] bg-transparent border-0 p-0 text-center font-display font-bold text-4xl sm:text-5xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/35 tabular-nums tracking-tight focus:outline-none"
-                    />
-                    <span className="font-display font-semibold text-xl sm:text-2xl text-[var(--text-muted)] shrink-0">
-                      kr
-                    </span>
-                  </div>
-                </label>
-              </div>
+              <div className="shrink-0">
+                {renderNumpad(true)}
 
-              <div className="shrink-0 pt-3">
                 <button
-                  type="submit"
+                  type="button"
                   disabled={!(Number(goalTargetInput) > 0)}
-                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+                  onClick={() => navigateWizardStep(4, 'forward')}
+                  className={`w-full py-4 rounded-full font-display font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+                    Number(goalTargetInput) > 0
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] hover:opacity-90 active:scale-[0.99] cursor-pointer'
+                      : 'bg-[var(--surface-color)] text-[var(--text-muted)] cursor-not-allowed'
+                  }`}
                 >
                   <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
                 </button>
               </div>
-            </form>
+            </div>
           )}
 
           {/* ============================================================== */}
@@ -1353,17 +1406,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           {wizardStep === 4 && (
             <div
               key="goal-step-4"
-              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden pt-4 ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-4 space-y-3">
-                {renderGoalContextPill(true)}
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Hur vill du följa sparandet?
-                </h1>
-              </div>
-
               <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
-                {/* Alternativ 1: Eget valt belopp */}
                 <button
                   type="button"
                   onClick={() => setGoalLinkedAccountId(undefined)}
@@ -1392,7 +1437,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   </div>
                 </button>
 
-                {/* Alternativ 2: Totalsaldo */}
                 {(accounts.length > 0 || effectiveTotalBalance > 0) && (
                   <button
                     type="button"
@@ -1434,7 +1478,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   </button>
                 )}
 
-                {/* Alternativ 3..N: Specifikt bankkonto */}
                 {accounts.map((acc) => {
                   const isSelected = goalLinkedAccountId === acc.id;
                   const accBal = Math.max(0, Math.round(Number(acc.balance) || 0));
@@ -1503,19 +1546,17 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   <button
                     type="button"
                     onClick={() => navigateWizardStep(5, 'forward')}
-                    className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                    className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                   >
                     <span>Fortsätt</span>
-                    <ArrowRight size={16} weight="bold" />
                   </button>
                 ) : (
                   <button
                     type="button"
                     disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
-                    onClick={handleSaveGoal}
-                    className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                    onClick={() => handleSaveGoal()}
+                    className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                   >
-                    <Check size={16} weight="bold" />
                     <span>Skapa sparmål</span>
                   </button>
                 )}
@@ -1524,65 +1565,43 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           )}
 
           {/* ============================================================== */}
-          {/* STEG 5: HUR MYCKET HAR DU SPARAT HITTILLS? (Vid eget belopp)   */}
+          {/* STEG 5: HUR MYCKET HAR DU SPARAT HITTILLS? (Stora siffror)     */}
           {/* ============================================================== */}
           {wizardStep === 5 && (
-            <form
+            <div
               key="goal-step-5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSaveGoal();
-              }}
               className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
             >
-              <div className="shrink-0 pt-6 pb-2 space-y-3">
-                {renderGoalContextPill(true)}
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Hur mycket har du sparat hittills?
-                </h1>
-              </div>
-
-              <div className="my-auto py-6 flex flex-col items-center justify-center">
-                <label className="w-full flex flex-col items-center justify-center cursor-text">
-                  <div className="flex items-baseline justify-center gap-2 w-full">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoFocus
-                      placeholder="0"
-                      value={formatInputThousands(goalCurrentInput)}
-                      onChange={(e) =>
-                        setGoalCurrentInput(e.target.value.replace(/[^\d]/g, ''))
-                      }
-                      style={{
-                        width: `${Math.max(
-                          2,
-                          (formatInputThousands(goalCurrentInput) || '0').length
-                        )}ch`,
-                      }}
-                      className="max-w-[80%] bg-transparent border-0 p-0 text-center font-display font-bold text-4xl sm:text-5xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/35 tabular-nums tracking-tight focus:outline-none"
-                    />
-                    <span className="font-display font-semibold text-xl sm:text-2xl text-[var(--text-muted)] shrink-0">
-                      kr
-                    </span>
-                  </div>
-                  <span className="text-xs text-[var(--text-muted)] mt-3">
-                    Lämna på 0 kr om du börjar från noll
+              <div className="my-auto py-4 flex items-center justify-center">
+                <div className="flex items-baseline justify-center gap-2.5 font-display font-bold text-5xl sm:text-6xl tracking-tight tabular-nums">
+                  <span
+                    className={
+                      Number(goalCurrentInput) > 0
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-[var(--text-muted)]/40'
+                    }
+                  >
+                    {Number(goalCurrentInput) > 0
+                      ? formatInputThousands(goalCurrentInput)
+                      : '0'}
                   </span>
-                </label>
+                  <span className="text-[var(--text-primary)]">kr</span>
+                </div>
               </div>
 
-              <div className="shrink-0 pt-3">
+              <div className="shrink-0">
+                {renderNumpad(false)}
+
                 <button
-                  type="submit"
+                  type="button"
                   disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
-                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                  onClick={() => handleSaveGoal()}
+                  className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                 >
-                  <Check size={16} weight="bold" />
                   <span>Skapa sparmål</span>
                 </button>
               </div>
-            </form>
+            </div>
           )}
         </div>
       </div>,
