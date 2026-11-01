@@ -144,20 +144,60 @@ export function extractMerchantKeyVariants(name: string): string[] {
   const norm = normalizeMerchantKey(raw);
   const variants = new Set<string>([raw, norm]);
 
+  // If this string contains a Swedish mobile / Swish number, add the exact normalized phone keys
+  // (never the generic word "swish")
+  const digitsOnly = raw.replace(/\D/g, '');
+  if (/^(?:467\d{8}|00467\d{8}|07\d{8}|123\d{7})$/.test(digitsOnly)) {
+    const normPhone = digitsOnly.startsWith('00467')
+      ? '07' + digitsOnly.slice(5)
+      : digitsOnly.startsWith('467')
+      ? '07' + digitsOnly.slice(3)
+      : digitsOnly;
+    variants.add(normPhone);
+    if (normPhone.startsWith('07')) {
+      variants.add('46' + normPhone.slice(1));
+    }
+  }
+
   // Also extract content inside or outside parentheses, e.g. "Hyra (Sveafastigheter)" or "Sveafastigheter (Hyra)"
   const parenMatch = norm.match(/^(.+?)\s*\((.+?)\)$/);
   if (parenMatch) {
     const outer = parenMatch[1].trim();
     const inner = parenMatch[2].trim();
-    if (outer.length >= 3 && outer !== 'hyra' && outer !== 'lön' && outer !== 'boende') {
+    const isOuterSwishOrGeneric =
+      outer === 'hyra' ||
+      outer === 'lön' ||
+      outer === 'boende' ||
+      outer === 'klarna' ||
+      outer === 'autogiro' ||
+      outer.startsWith('swish');
+    if (outer.length >= 3 && !isOuterSwishOrGeneric) {
       variants.add(outer);
     }
-    if (inner.length >= 3 && inner !== 'hyra' && inner !== 'lön' && inner !== 'boende') {
+    if (
+      inner.length >= 3 &&
+      inner !== 'hyra' &&
+      inner !== 'lön' &&
+      inner !== 'boende' &&
+      !inner.startsWith('swish')
+    ) {
       variants.add(inner);
+      const innerDigits = inner.replace(/\D/g, '');
+      if (/^(?:467\d{8}|00467\d{8}|07\d{8}|123\d{7})$/.test(innerDigits)) {
+        const normInnerPhone = innerDigits.startsWith('00467')
+          ? '07' + innerDigits.slice(5)
+          : innerDigits.startsWith('467')
+          ? '07' + innerDigits.slice(3)
+          : innerDigits;
+        variants.add(normInnerPhone);
+        if (normInnerPhone.startsWith('07')) {
+          variants.add('46' + normInnerPhone.slice(1));
+        }
+      }
     }
   }
 
-  return Array.from(variants).filter(Boolean);
+  return Array.from(variants).filter((v) => Boolean(v) && !GENERIC_PLACEHOLDER_MERCHANTS.has(v));
 }
 
 // --- Permanent Ignored / Blacklisted Merchants for Fixed Items ---
@@ -197,7 +237,67 @@ const GENERIC_PLACEHOLDER_MERCHANTS = new Set([
   'okand butik',
   'övrigt',
   'ovrigt',
+  'swish',
+  'swish betalning',
+  'swish inbetalning',
+  'swish mottagen',
+  'swish skickad',
+  'swish från',
+  'swish fran',
+  'swish till',
+  'swish handel',
 ]);
+
+let hasRunSwishBulkCleanup = false;
+function runSwishBulkRenameCleanupOnce(): void {
+  if (hasRunSwishBulkCleanup || typeof window === 'undefined') return;
+  hasRunSwishBulkCleanup = true;
+  try {
+    if (localStorage.getItem('dejz_swish_zlatan_cleanup_v1') === 'true') return;
+    localStorage.setItem('dejz_swish_zlatan_cleanup_v1', 'true');
+
+    const rawAliases = localStorage.getItem(MERCHANT_ALIASES_KEY);
+    if (rawAliases) {
+      const parsedAliases = JSON.parse(rawAliases);
+      if (parsedAliases && typeof parsedAliases === 'object') {
+        let changed = false;
+        for (const [k, v] of Object.entries(parsedAliases)) {
+          const val = v as { name?: string } | null;
+          if (k === 'swish' || (val?.name && /zlatan\s*kadic/i.test(val.name))) {
+            delete parsedAliases[k];
+            changed = true;
+          }
+        }
+        if (changed) {
+          localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(parsedAliases));
+        }
+      }
+    }
+
+    const rawMeta = localStorage.getItem(TRANSACTION_META_KEY);
+    if (rawMeta) {
+      const parsedMeta = JSON.parse(rawMeta);
+      if (parsedMeta && typeof parsedMeta === 'object') {
+        let metaChanged = false;
+        for (const [txId, meta] of Object.entries(parsedMeta)) {
+          const entry = meta as { customTitle?: string } | null;
+          if (entry?.customTitle && /zlatan\s*kadic/i.test(entry.customTitle)) {
+            delete entry.customTitle;
+            metaChanged = true;
+            if (Object.keys(entry).length === 0) {
+              delete parsedMeta[txId];
+            }
+          }
+        }
+        if (metaChanged) {
+          localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(parsedMeta));
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+}
 
 export function isGenericPlaceholderMerchant(name: string | null | undefined): boolean {
   if (!name) return true;
@@ -211,6 +311,7 @@ export function isGenericPlaceholderMerchant(name: string | null | undefined): b
 
 export function getMerchantAliases(): Record<string, { name: string; category: string }> {
   if (typeof window === 'undefined') return {};
+  runSwishBulkRenameCleanupOnce();
   try {
     const raw = localStorage.getItem(MERCHANT_ALIASES_KEY);
     if (!raw) return {};
@@ -1215,6 +1316,7 @@ function getReceiptsVaultMap(): Record<string, ReceiptVaultEntry> {
 
 export function getTransactionMetaMap(): Record<string, TransactionMetaPatch> {
   if (typeof window === 'undefined') return {};
+  runSwishBulkRenameCleanupOnce();
   try {
     const raw = localStorage.getItem(TRANSACTION_META_KEY);
     const baseMap: Record<string, TransactionMetaPatch> = raw ? JSON.parse(raw) : {};
@@ -1421,10 +1523,6 @@ export function setPrivacyBlurMode(enabled: boolean): void {
 // --- Swish Phone-to-Name Directory & Lookup Cache ---
 const SWISH_PHONE_LOOKUP_KEY = 'dejz_swish_phone_lookup_v1';
 
-const BUILTIN_SWISH_PHONE_NAMES: Record<string, string> = {
-  '0739976655': 'Kristoffer Nilsson',
-};
-
 export function normalizeSwishPhoneKey(rawPhone: string | null | undefined): string {
   if (!rawPhone) return '';
   const digits = String(rawPhone).replace(/\D/g, '');
@@ -1441,7 +1539,7 @@ export function normalizeSwishPhoneKey(rawPhone: string | null | undefined): str
 }
 
 export function getSwishPhoneDirectoryMap(): Record<string, string> {
-  const map: Record<string, string> = { ...BUILTIN_SWISH_PHONE_NAMES };
+  const map: Record<string, string> = {};
   if (typeof window === 'undefined') return map;
   try {
     const rawContacts = localStorage.getItem('dejz_swish_contacts');
@@ -1451,6 +1549,7 @@ export function getSwishPhoneDirectoryMap(): Record<string, string> {
         for (const item of parsed) {
           const norm = normalizeSwishPhoneKey(item?.phone);
           const name = String(item?.name || '').trim();
+          if (norm === '0739976655' && /^kristoffer nilsson$/i.test(name)) continue;
           if (norm && name) {
             map[norm] = name;
           }
@@ -1464,6 +1563,7 @@ export function getSwishPhoneDirectoryMap(): Record<string, string> {
         for (const [k, v] of Object.entries(parsedLookup)) {
           const norm = normalizeSwishPhoneKey(k);
           const name = String(v || '').trim();
+          if (norm === '0739976655' && /^kristoffer nilsson$/i.test(name)) continue;
           if (norm && name) {
             map[norm] = name;
           }

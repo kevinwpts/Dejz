@@ -285,8 +285,18 @@ function sanitizeTransactionItem(
     updated.category = 'Swish';
     updated.logo = SWISH_SVG_DATA_URI;
 
+    if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+      updated.title = savedMeta.customTitle;
+      return updated;
+    }
+
+    const cleanExistingTitle =
+      /kristoffer nilsson|zlatan\s*kadic/i.test(updated.title || '') && !savedMeta?.customTitle
+        ? ''
+        : updated.title;
+
     const swishTitle = formatSwishTitle(
-      updated.rawDescription || updated.note || updated.title || 'Swish',
+      updated.rawDescription || updated.note || cleanExistingTitle || 'Swish',
       updated.counterpartyName,
       updated.type === 'income',
       updated.rawJson

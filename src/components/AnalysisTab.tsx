@@ -753,10 +753,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <span className="font-display font-semibold text-xl sm:text-[23px] tracking-[-0.02em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                       {formatKr(totalSpent)}
                     </span>
-                    <span className="text-[11px] font-normal text-[var(--text-muted)] tabular-nums mt-1">
-                      {expenseChartSlices.length}{' '}
-                      {expenseChartSlices.length === 1 ? 'kategori' : 'kategorier'}
-                    </span>
                   </>
                 )}
               </button>

@@ -79,6 +79,8 @@ const GENERIC_WRAPPER_WORDS = new Set([
   'standard',
   'familj',
   'individual',
+  'swish',
+  'klarna',
 ]);
 
 function extractSpecificBrandTokens(name: string): string[] {
@@ -717,6 +719,21 @@ export interface SimilarTransactionsSummary {
  * Also separates `sameMerchantTransactions` (exact same store/location name, e.g. "Circle K Varberg")
  * from `transactions` (all stores in the same chain, e.g. "Circle K Helsingborg", "Circle K Stockholm").
  */
+function extractNormalizedSwishPhoneFromTx(tx: Partial<TransactionItem> | null | undefined): string {
+  if (!tx) return '';
+  for (const field of [tx.rawDescription, tx.counterpartyName, tx.title]) {
+    if (!field) continue;
+    const m = String(field).match(/(?:\+?46\s*7[02369]|0046\s*7[02369]|07[02369]|123)(?:[\s-]?\d){7}/);
+    if (m) {
+      const digits = m[0].replace(/\D/g, '');
+      if (digits.startsWith('00467') && digits.length === 13) return '07' + digits.slice(5);
+      if (digits.startsWith('467') && digits.length === 11) return '07' + digits.slice(3);
+      if ((digits.startsWith('07') || digits.startsWith('123')) && digits.length === 10) return digits;
+    }
+  }
+  return '';
+}
+
 export function findSimilarTransactionsForTransaction(
   targetTx: TransactionItem | null | undefined,
   allTransactions: TransactionItem[] = [],
@@ -734,6 +751,12 @@ export function findSimilarTransactionsForTransaction(
   }
 
   const targetType = targetTx.type === 'income' ? 'income' : 'expense';
+  const targetSwishPhone = extractNormalizedSwishPhoneFromTx(targetTx);
+  const isTargetSwish =
+    Boolean(targetSwishPhone) ||
+    targetTx.category === 'Swish' ||
+    /\bswish\b/i.test(`${targetTx.title || ''} ${targetTx.rawDescription || ''} ${targetTx.counterpartyName || ''}`);
+
   const matchedFixed =
     targetType === 'expense' ? findMatchingFixedExpense(targetTx, fixedExpenses) : null;
   const matchedIncome =
@@ -762,6 +785,35 @@ export function findSimilarTransactionsForTransaction(
     const isStoreRefundForExpense =
       targetType === 'expense' && txType === 'income' && tx.category === 'Återbetalning';
     if (txType !== targetType && !isStoreRefundForExpense) continue;
+
+    const otherSwishPhone = extractNormalizedSwishPhoneFromTx(tx);
+    const isOtherSwish =
+      Boolean(otherSwishPhone) ||
+      tx.category === 'Swish' ||
+      /\bswish\b/i.test(`${tx.title || ''} ${tx.rawDescription || ''} ${tx.counterpartyName || ''}`);
+
+    // Swish-transaktioner får ENDAST grupperas med andra Swish-transaktioner som har EXAKT samma telefonnummer
+    // (eller exakt samma namngivna person om inget telefonnummer finns). Olika telefonnummer får ALDRIG slås ihop!
+    if (isTargetSwish || isOtherSwish) {
+      if (!isTargetSwish || !isOtherSwish) continue;
+      if (targetSwishPhone || otherSwishPhone) {
+        if (targetSwishPhone && otherSwishPhone && targetSwishPhone === otherSwishPhone) {
+          matched.push(tx);
+          sameMerchant.push(tx);
+        }
+        continue;
+      }
+      const otherTitleNormSwish = normalizeMerchantKey(tx.title || '');
+      if (
+        !isTargetGeneric &&
+        targetTitleNorm &&
+        targetTitleNorm === otherTitleNormSwish
+      ) {
+        matched.push(tx);
+        sameMerchant.push(tx);
+      }
+      continue;
+    }
 
     const otherTitleNorm = normalizeMerchantKey(tx.title || '');
     const otherRawNorm = normalizeMerchantKey(
@@ -812,7 +864,7 @@ export function findSimilarTransactionsForTransaction(
         matched.push(tx);
         continue;
       }
-      // For generic titles (e.g. "Swish"), require same rawDescription/counterpartyName or amount
+      // For generic titles, require same rawDescription/counterpartyName
       const rawA = normalizeMerchantKey(targetTx.rawDescription || targetTx.counterpartyName || '');
       const rawB = normalizeMerchantKey(tx.rawDescription || tx.counterpartyName || '');
       if (rawA && rawA === rawB) {

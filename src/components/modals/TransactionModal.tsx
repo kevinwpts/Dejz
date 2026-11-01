@@ -505,16 +505,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const isTitleChanged = nextTitle !== activeTx.title;
     const isCategoryChanged = nextCategory !== activeTx.category;
 
-    // Om detta är en Swish-transaktion med telefonnummer och användaren döper om den till ett personnamn, spara i Swish-katalogen!
-    if (isTitleChanged) {
+    // Om detta är en Swish-transaktion med telefonnummer och användaren väljer att spara för alla med detta nummer (ej 'single'), spara i Swish-katalogen!
+    if (isTitleChanged && applyScope !== 'single') {
       const swishPhone = extractSwishPhoneNumber(
         `${activeTx.rawDescription || ''} ${activeTx.counterpartyName || ''} ${activeTx.title || ''}`
       );
       if (swishPhone) {
-        const cleanedPerson = nextTitle
-          .replace(/^swish\s+(?:från|till|köp)?\s*/i, '')
-          .replace(/\([^)]*\)/g, '')
-          .trim();
+        const parenPersonMatch = nextTitle.match(/^swish\s*\(([^)]+)\)$/i);
+        const cleanedPerson = (
+          parenPersonMatch?.[1] ||
+          nextTitle
+            .replace(/^swish\s+(?:från|fran|till|köp)?\s*/i, '')
+            .replace(/\(\s*[\d\s+-]+\s*\)/g, '')
+        ).trim();
         if (cleanedPerson.length >= 2 && !/\d{5,}/.test(cleanedPerson)) {
           saveSwishPhoneDirectoryEntry(swishPhone, cleanedPerson);
         }
@@ -2447,7 +2450,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             activeTx.counterpartyName ||
             activeTx.rawDescription ||
             activeTx.title;
+          const activeSwishPhone = extractSwishPhoneNumber(
+            `${activeTx.rawDescription || ''} ${activeTx.counterpartyName || ''} ${activeTx.title || ''}`
+          );
           const hasDistinctChainVsStore =
+            !activeSwishPhone &&
             similarInfo.transactions.length > similarInfo.sameMerchantTransactions.length &&
             similarInfo.sameMerchantTransactions.length >= 1;
 
@@ -2463,13 +2470,30 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 <div className="text-center space-y-1.5">
                   <h3 className="font-display font-semibold text-base text-[var(--text-primary)]">
                     {isTitleChanged
-                      ? isAggregatorTx
+                      ? activeSwishPhone
+                        ? 'Byt namn på Swish?'
+                        : isAggregatorTx
                         ? 'Ändra namn på köpet?'
                         : 'Byt namn bakåt och framåt i tiden?'
                       : 'Byt kategori bakåt och framåt i tiden?'}
                   </h3>
                   <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                    {isTitleChanged && isAggregatorTx ? (
+                    {isTitleChanged && activeSwishPhone ? (
+                      <>
+                        Vill du ändra till{' '}
+                        <span className="font-medium text-[var(--text-primary)]">
+                          {nextTitleTrimmed}
+                        </span>{' '}
+                        endast för denna enskilda Swish-händelse, eller för alla Swish med numret{' '}
+                        <span className="font-medium text-[var(--text-secondary)] tabular-nums">
+                          {activeSwishPhone}
+                        </span>
+                        {similarInfo.transactions.length > 1
+                          ? ` (${similarInfo.transactions.length} st)`
+                          : ''}
+                        ?
+                      </>
+                    ) : isTitleChanged && isAggregatorTx ? (
                       <>
                         Köp via{' '}
                         <span className="font-medium text-[var(--text-secondary)]">
@@ -2501,7 +2525,25 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  {isTitleChanged && isAggregatorTx ? (
+                  {isTitleChanged && activeSwishPhone ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('single')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        Endast denna Swish-händelse
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => commitEditChanges('same-merchant')}
+                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] transition-all cursor-pointer tabular-nums"
+                      >
+                        Alla med nummer {activeSwishPhone} ({similarInfo.transactions.length} st)
+                      </button>
+                    </>
+                  ) : isTitleChanged && isAggregatorTx ? (
                     <>
                       <button
                         type="button"

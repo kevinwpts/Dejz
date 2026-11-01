@@ -541,9 +541,7 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
   });
 
   // --- Swish Phone Number Directory Lookup ---
-  const swishPhoneCache = new Map<string, string | null>([
-    ['0739976655', 'Kristoffer Nilsson'],
-  ]);
+  const swishPhoneCache = new Map<string, string | null>();
 
   app.get('/api/swish/lookup', async (req, res) => {
     const rawPhone = String(req.query.phone || '').trim();
@@ -576,20 +574,54 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
         signal: controller.signal,
       });
       clearTimeout(timeout);
-      if (resp.ok) {
+      if (resp.ok && !resp.url.includes('/vem-ringde/')) {
         const html = await resp.text();
-        // Extract person/company name from Hitta title or h2/JSON-LD if present
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-        if (titleMatch && titleMatch[1]) {
-          const rawTitle = titleMatch[1]
+        const titleText = titleMatch?.[1]?.trim() || '';
+
+        // 1. Direct redirect to a single person or company page: <h1> holds the exact name
+        const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        const h1Clean = h1Match?.[1]
+          ? h1Match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+          : '';
+        if (
+          h1Clean &&
+          h1Clean.length >= 3 &&
+          h1Clean.length <= 50 &&
+          !/hitta\.se|sökresultat|vem ringde/i.test(h1Clean) &&
+          !/\d{3}/.test(h1Clean)
+        ) {
+          resolvedName = h1Clean;
+        }
+
+        // 2. Search result list with 1 hit (e.g. "0736385803 (1 Sökträff) - Personer | hitta.se")
+        if (!resolvedName && /\(\s*1\s*s[öo]ktr[äa]ff/i.test(titleText)) {
+          const h2Match = html.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
+          const h2Clean = h2Match?.[1]
+            ? h2Match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+            : '';
+          if (
+            h2Clean &&
+            h2Clean.length >= 3 &&
+            h2Clean.length <= 50 &&
+            !/sökningar efter|tipsa oss|hitta\.se/i.test(h2Clean) &&
+            !/\d{4}/.test(h2Clean)
+          ) {
+            resolvedName = h2Clean;
+          }
+        }
+
+        // 3. Fallback to <title> before comma/pipe
+        if (!resolvedName && titleText) {
+          const rawTitle = titleText
             .replace(/\s*[|-]\s*Hitta\.se.*$/i, '')
-            .replace(/\s*\(\d+\s*tr[äa]ffar?\).*$/i, '')
+            .replace(/\s*\(\d+\s*s[öo]ktr[äa]ffar?\).*$/i, '')
             .trim();
           if (
             rawTitle &&
             rawTitle.length >= 4 &&
             rawTitle.length <= 50 &&
-            !/hitta\.se|sökresultat|telefonnummer|personer|företag/i.test(rawTitle) &&
+            !/hitta\.se|sökresultat|telefonnummer|personer|företag|vem ringde/i.test(rawTitle) &&
             !/\d{3}/.test(rawTitle) &&
             /^[A-ZÅÄÖa-zåäöéÉüÜ\s.,&-]+$/.test(rawTitle)
           ) {
