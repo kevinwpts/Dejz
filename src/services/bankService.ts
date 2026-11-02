@@ -16,6 +16,7 @@ export type BankReconciliationStatus =
   | 'refund_linked'
   | 'needs_review'
   | 'excluded'
+  | 'reserved'
   | 'reserved_pending'
   | 'reserved_replaced';
 
@@ -517,10 +518,15 @@ export const bankService = {
     }
     if (unselectedIds.length > 0) {
       try {
-        await supabase
-          .from('bank_transactions')
-          .delete()
-          .in('bank_account_id', unselectedIds);
+        const { data: sessionData } = await supabase.auth.getSession();
+        const uid = sessionData?.session?.user?.id;
+        if (uid) {
+          await supabase
+            .from('bank_transactions')
+            .delete()
+            .eq('user_id', uid)
+            .in('bank_account_id', unselectedIds);
+        }
       } catch {
         // ignore
       }
@@ -565,6 +571,10 @@ export const bankService = {
     } catch {
       // Fallback to direct Supabase table update if the Edge Function hasn't been redeployed yet
       try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const uid = sessionData?.session?.user?.id;
+        if (!uid) return null;
+
         const dbPatch: Record<string, unknown> = {
           updated_at: new Date().toISOString(),
         };
@@ -583,6 +593,7 @@ export const bankService = {
           .from('bank_accounts')
           .update(dbPatch)
           .eq('id', params.bankAccountId)
+          .eq('user_id', uid)
           .select('*')
           .maybeSingle();
         if (data) return mergeAccountWithOverlay(data as BankAccount);
@@ -622,13 +633,17 @@ export const bankService = {
     saveTxReconciliationOverlay(bankTxId, withTimestamp);
 
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData?.session?.user?.id;
+      if (!uid) return;
       await supabase
         .from('bank_transactions')
         .update({
           ...withTimestamp,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', bankTxId);
+        .eq('id', bankTxId)
+        .eq('user_id', uid);
     } catch {
       // If migration 20261025_bank_budget_integration.sql has not been applied yet, local overlay still persists it
     }

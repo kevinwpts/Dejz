@@ -36,7 +36,8 @@ function getGenAI(): GoogleGenAI | null {
 // Lazy initialization helpers
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+  // Admin service role key must strictly come from server-only environment variable (never VITE_*)
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
   try {
     return createClient(url, key);
@@ -100,7 +101,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Missing or invalid text' });
     }
 
-    console.log(`[Gemini] Parsing transaction: "${text}"`);
+    // Do not log raw user transaction text to server stdout
 
     // Helper for local regex parsing as fallback
     const localParse = (rawText: string) => {
@@ -156,7 +157,6 @@ async function startServer() {
       });
 
       const responseText = result.text?.trim() || '';
-      console.log(`[Gemini] Result: "${responseText}"`);
       
       const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
       const data = JSON.parse(cleanJson);
@@ -726,7 +726,6 @@ ${JSON.stringify({ expenseCandidates: expList, incomeCandidates: incList })}`;
           });
 
           const responseText = result.text?.trim() || '';
-          console.log(`[Gemini Audio] Raw AI response: "${responseText}"`);
           
           const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
           const data = JSON.parse(cleanJson);
@@ -999,7 +998,7 @@ Regler:
     const cleanEmail = typeof userEmail === 'string' ? userEmail.slice(0, 200) : 'anonym';
     const cleanName = typeof userName === 'string' ? userName.slice(0, 120) : null;
 
-    console.log(`[Feedback] (${cleanType}) from ${cleanEmail}: ${cleanMessage}`);
+    console.log(`[Feedback] Received (${cleanType})`);
 
     const supabaseAdmin = getSupabaseAdmin();
     if (supabaseAdmin) {
@@ -1068,6 +1067,32 @@ Regler:
     }
   });
 
+  // ==============================================================
+  // SHARED HOUSEHOLD BUDGET API (Multi-user sync via Invite Code)
+  // ==============================================================
+  const householdMemoryStore = new Map<string, any>(); // keyed by inviteCode
+
+  function purgeUserFromHouseholdStore(emailOrKey?: string | null) {
+    if (!emailOrKey) return;
+    const norm = String(emailOrKey).toLowerCase().trim();
+    if (!norm) return;
+    for (const [code, hh] of householdMemoryStore.entries()) {
+      if (hh?.members && norm in hh.members) {
+        const nextMembers = { ...hh.members };
+        delete nextMembers[norm];
+        if (Object.keys(nextMembers).length === 0) {
+          householdMemoryStore.delete(code);
+        } else {
+          householdMemoryStore.set(code, {
+            ...hh,
+            members: nextMembers,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+    }
+  }
+
   // Reset Account Data (Clear all data but keep auth user)
   app.post('/api/auth/reset-account', async (req, res) => {
     const { userId } = req.body || {};
@@ -1077,6 +1102,11 @@ Regler:
       return res.status(400).json({ error: 'Missing userId' });
     }
 
+    // Local preview/demo mode only clears client state
+    if (userId === 'preview-user' || userId === 'demo-user') {
+      return res.json({ success: true, localOnly: true });
+    }
+
     // If Supabase Admin isn't configured, return success so local reset proceeds
     if (!supabaseAdmin) {
       return res.json({ success: true, localOnly: true });
@@ -1084,25 +1114,22 @@ Regler:
 
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    if (!token) {
+      return res.status(401).json({ error: 'Autentisering krävs för att nollställa kontodata.' });
+    }
 
     try {
-      let targetUid = userId;
-      if (token) {
-        const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
-        if (!authErr && authData?.user) {
-          if (
-            userId &&
-            userId !== 'preview-user' &&
-            userId !== 'demo-user' &&
-            authData.user.id !== userId
-          ) {
-            return res.status(403).json({ error: 'Du har endast behörighet att nollställa ditt eget konto' });
-          }
-          targetUid = authData.user.id;
-        }
+      const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
+      if (authErr || !authData?.user) {
+        return res.status(401).json({ error: 'Ogiltig eller utgången session.' });
       }
 
-      console.log(`Starting account reset for user: ${targetUid}`);
+      if (userId && authData.user.id !== userId) {
+        return res.status(403).json({ error: 'Du har endast behörighet att nollställa ditt eget konto.' });
+      }
+
+      const targetUid = authData.user.id;
+      purgeUserFromHouseholdStore(authData.user.email);
 
       // Wave 1: Clear nullable foreign-key references in parallel
       await Promise.allSettled([
@@ -1163,31 +1190,32 @@ Regler:
 
       await supabaseAdmin.from('bank_connections').delete().eq('user_id', targetUid);
 
-      console.log(`Successfully reset account data for user: ${targetUid}`);
       return res.json({ success: true });
     } catch (error: any) {
-      console.error('Reset account error:', error);
+      console.error('Reset account error:', error?.message || 'Unknown error');
       return res.json({ success: true, warning: error.message });
     }
   });
 
-  // ==============================================================
-  // SHARED HOUSEHOLD BUDGET API (Multi-user sync via Invite Code)
-  // ==============================================================
-  const householdMemoryStore = new Map<string, any>(); // keyed by inviteCode
-
-  async function persistHouseholdToProfiles(household: any) {
+  async function persistHouseholdToProfiles(household: any, removedMemberEmails: string[] = []) {
     if (!household || !household.inviteCode) return;
-    householdMemoryStore.set(String(household.inviteCode).toUpperCase().trim(), household);
+    const code = String(household.inviteCode).toUpperCase().trim();
+    const memberKeys = Object.keys(household.members || {});
+    if (memberKeys.length === 0) {
+      householdMemoryStore.delete(code);
+    } else {
+      householdMemoryStore.set(code, household);
+    }
+
     const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) return;
 
-    const memberEmails = Object.keys(household.members || {})
+    const memberEmails = memberKeys
       .map((e) => e.toLowerCase().trim())
       .filter((e) => e.includes('@') && !e.endsWith('@demo.dejz'));
 
-    await Promise.allSettled(
-      memberEmails.map(async (em) => {
+    await Promise.allSettled([
+      ...memberEmails.map(async (em) => {
         const { data: rows } = await supabaseAdmin
           .from('profiles')
           .select('id, user_preferences')
@@ -1197,14 +1225,34 @@ Regler:
             row.user_preferences && typeof row.user_preferences === 'object'
               ? { ...row.user_preferences }
               : {};
-          prefs.household = household;
+          prefs.household = memberKeys.length > 0 ? household : null;
           await supabaseAdmin
             .from('profiles')
             .update({ user_preferences: prefs })
             .eq('id', row.id);
         }
-      })
-    );
+      }),
+      ...removedMemberEmails
+        .map((e) => e.toLowerCase().trim())
+        .filter((e) => e.includes('@') && !e.endsWith('@demo.dejz'))
+        .map(async (em) => {
+          const { data: rows } = await supabaseAdmin
+            .from('profiles')
+            .select('id, user_preferences')
+            .ilike('email', em);
+          for (const row of rows || []) {
+            const prefs =
+              row.user_preferences && typeof row.user_preferences === 'object'
+                ? { ...row.user_preferences }
+                : {};
+            prefs.household = null;
+            await supabaseAdmin
+              .from('profiles')
+              .update({ user_preferences: prefs })
+              .eq('id', row.id);
+          }
+        }),
+    ]);
   }
 
   async function findHouseholdByInviteCode(rawCode: string) {
@@ -1236,29 +1284,53 @@ Regler:
 
   app.post('/api/household/sync', async (req, res) => {
     try {
-      const { household } = req.body || {};
+      const { household, removedMemberEmail } = req.body || {};
       if (!household || !household.inviteCode) {
         return res.status(400).json({ error: 'Missing household payload' });
       }
       const code = String(household.inviteCode).replace(/\s+/g, '').toUpperCase();
       const existing = await findHouseholdByInviteCode(code);
+
+      const removedList: string[] = [];
+      if (typeof removedMemberEmail === 'string' && removedMemberEmail.trim()) {
+        removedList.push(removedMemberEmail.toLowerCase().trim());
+      }
+
+      // If caller explicitly passed members, respect member removals so leaving a household immediately revokes access
+      const nextMembers = {
+        ...(existing?.members || {}),
+        ...(household.members || {}),
+      };
+      for (const rem of removedList) {
+        delete nextMembers[rem];
+      }
+      if (existing?.members && household.members) {
+        for (const oldKey of Object.keys(existing.members)) {
+          if (!(oldKey in household.members)) {
+            delete nextMembers[oldKey];
+            if (!removedList.includes(oldKey)) {
+              removedList.push(oldKey);
+            }
+          }
+        }
+      }
+
       const merged = existing
         ? {
             ...existing,
             ...household,
-            members: {
-              ...(existing.members || {}),
-              ...(household.members || {}),
-            },
+            inviteCode: code,
+            members: nextMembers,
             updatedAt: new Date().toISOString(),
           }
         : {
             ...household,
             inviteCode: code,
+            members: nextMembers,
             updatedAt: new Date().toISOString(),
           };
 
-      await persistHouseholdToProfiles(merged);
+      await persistHouseholdToProfiles(merged, removedList);
       return res.json({ household: merged });
     } catch (e: any) {
       return res.status(500).json({ error: e.message || 'Sync failed' });
@@ -1359,39 +1431,45 @@ Regler:
       return res.status(400).json({ error: 'Missing user identifier' });
     }
 
+    if (userId === 'preview-user' || userId === 'demo-user') {
+      return res.json({ success: true, localOnly: true });
+    }
+
     if (!supabaseAdmin) {
       return res.json({ success: true, localOnly: true });
     }
 
     const authHeader = req.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    if (!token) {
+      return res.status(401).json({ error: 'Autentisering krävs för att radera kontot permanent.' });
+    }
+
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
     try {
-      const targetUserIds = new Set<string>();
+      const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
+      if (authErr || !authData?.user) {
+        return res.status(401).json({ error: 'Ogiltig eller utgången inloggningssession.' });
+      }
+
+      if (
+        typeof userId === 'string' &&
+        uuidRegex.test(userId.trim()) &&
+        userId.trim() !== authData.user.id
+      ) {
+        return res.status(403).json({ error: 'Du kan endast radera ditt eget inloggade konto.' });
+      }
+
+      // Strictly scope deletion to the authenticated user's own ID and email
+      const targetUserIds = new Set<string>([authData.user.id]);
       const targetEmails = new Set<string>();
-
-      if (typeof userId === 'string' && uuidRegex.test(userId.trim())) {
-        targetUserIds.add(userId.trim());
-      }
-      if (typeof secondaryUserId === 'string' && uuidRegex.test(secondaryUserId.trim())) {
-        targetUserIds.add(secondaryUserId.trim());
-      }
-      if (typeof email === 'string' && email.trim().includes('@')) {
-        targetEmails.add(email.trim().toLowerCase());
+      if (authData.user.email) {
+        targetEmails.add(authData.user.email.trim().toLowerCase());
+        purgeUserFromHouseholdStore(authData.user.email);
       }
 
-      if (token && targetUserIds.size === 0) {
-        const { data: authData, error: authErr } = await supabaseAdmin.auth.getUser(token);
-        if (!authErr && authData?.user) {
-          targetUserIds.add(authData.user.id);
-          if (authData.user.email) {
-            targetEmails.add(authData.user.email.trim().toLowerCase());
-          }
-        }
-      }
-
-      // Look up any profile rows matching targetEmails in parallel
+      // Look up any profile rows matching the authenticated user's email
       if (targetEmails.size > 0) {
         await Promise.allSettled(
           Array.from(targetEmails).map(async (em) => {
@@ -1407,27 +1485,6 @@ Regler:
           })
         );
       }
-
-      // Only call listUsers if we still don't have a UUID for the email
-      if (targetUserIds.size === 0 && targetEmails.size > 0) {
-        try {
-          const { data: listData } = await supabaseAdmin.auth.admin.listUsers({
-            page: 1,
-            perPage: 1000,
-          });
-          for (const u of listData?.users || []) {
-            if (u.email && targetEmails.has(u.email.trim().toLowerCase())) {
-              targetUserIds.add(u.id);
-            }
-          }
-        } catch {
-          // ignore
-        }
-      }
-
-      console.log(
-        `Starting full permanent account deletion for userIds=[${Array.from(targetUserIds).join(', ')}], emails=[${Array.from(targetEmails).join(', ')}]`
-      );
 
       const leafTables = [
         'transactions',
@@ -1513,7 +1570,7 @@ Regler:
         })
       );
 
-      // Clean up any rows matched by email in parallel
+      // Clean up any rows matched by the authenticated user's email in parallel
       if (targetEmails.size > 0) {
         await Promise.allSettled(
           Array.from(targetEmails).flatMap((em) => [
@@ -1523,15 +1580,12 @@ Regler:
         );
       }
 
-      console.log(
-        `Successfully completed permanent deletion for userIds=[${Array.from(targetUserIds).join(', ')}]`
-      );
       return res.json({
         success: true,
         deletedUserIds: Array.from(targetUserIds),
       });
     } catch (error: any) {
-      console.error('Delete account error:', error);
+      console.error('Delete account error:', error?.message || 'Unknown error');
       return res.status(500).json({ error: error.message || 'Delete account failed' });
     }
   });
@@ -1799,7 +1853,7 @@ Regler:
     };
   }
 
-  async function hydrateSocialFromSupabaseIfNeeded(userKey: string) {
+  async function hydrateSocialFromSupabaseIfNeeded(_userKey: string) {
     const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) return;
     try {

@@ -1204,7 +1204,7 @@ const EVERYDAY_MERCHANT_RULES: EverydayMerchantRule[] = [
   { keywords: ['systembolaget', 'systembolag', 'systembolage', 'sys.bolaget', 'sysbolaget'], cleanName: 'Systembolaget', preferredCategories: ['Mat & dryck', 'Nöjen', 'Uteliv'] },
   { keywords: ['öresundskraft', 'oresundskraft'], cleanName: 'Öresundskraft AB', preferredCategories: ['Boende', 'Räkningar'] },
   { keywords: ['holy greens', 'holygreens'], cleanName: 'Holy Greens', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
-  { keywords: ['mcdonalds', 'mcdonald', 'mcdfalkenberg', 'mcd '], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
+  { keywords: ['mcdonalds', 'mcdonald', 'mcdfalkenberg', 'mcdfalkenber', 'mcd '], cleanName: "McDonald's", preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['max burgers', 'max hamburger'], cleanName: 'MAX Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['burger king'], cleanName: 'Burger King', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
   { keywords: ['bastard burgers'], cleanName: 'Bastard Burgers', preferredCategories: ['Uteliv', 'Restaurang', 'Mat & dryck'] },
@@ -1410,7 +1410,8 @@ export function formatSwishTitle(
   description: string | null | undefined,
   counterpartyName: string | null | undefined,
   isIncome?: boolean,
-  rawJson?: any
+  rawJson?: any,
+  ignoreCustomDirectory?: boolean
 ): string {
   const raw = String(description || '').trim();
   const cpRaw = String(counterpartyName || '').trim();
@@ -1451,7 +1452,7 @@ export function formatSwishTitle(
   const formattedPhone = phoneDigits ? formatSwishPhone(phoneDigits) : '';
 
   // 2. Kontrollera först om telefonnumret finns i vår Swish-nummeruppslagning / kontaktbok
-  if (phoneDigits) {
+  if (phoneDigits && !ignoreCustomDirectory) {
     const lookedUpName = resolveSwishPhoneToName(phoneDigits);
     if (lookedUpName) {
       return formatWithDirection(cleanDisplayMerchantName(lookedUpName));
@@ -1946,7 +1947,8 @@ function extractRawJsonFallbackText(rawJson: any): string {
 export function categorizeBankTransactionForApp(
   tx: BankTransactionItem,
   availableCategories: Array<string | { name?: string }> = [],
-  _incomeCategories?: Array<string | { name?: string }>
+  _incomeCategories?: Array<string | { name?: string }>,
+  ignoreUserAliases?: boolean
 ): { merchant: string; category: string; logo?: string } {
   const rawFallback = extractRawJsonFallbackText(tx.raw_json);
   const effectiveDesc =
@@ -1993,7 +1995,13 @@ export function categorizeBankTransactionForApp(
     isLikelySwishTransactionText(tx.counterparty_name, tx.raw_json);
 
   if (isSwishTx) {
-    const swishTitle = formatSwishTitle(effectiveDesc, tx.counterparty_name);
+    const swishTitle = formatSwishTitle(
+      effectiveDesc,
+      tx.counterparty_name,
+      undefined,
+      tx.raw_json,
+      ignoreUserAliases
+    );
     return {
       merchant: swishTitle,
       category: 'Swish',
@@ -2017,18 +2025,20 @@ export function categorizeBankTransactionForApp(
     rawOrCleanBankName.toLowerCase() !== 'kortköp';
 
   // Kontrollera användarens sparade merchant-alias / regler först (Merchant Memory)
-  const userAlias =
-    resolveMerchantAlias(directBankName) ||
-    resolveMerchantAlias(cleanedBankName) ||
-    resolveMerchantAlias(tx.counterparty_name || '') ||
-    resolveMerchantAlias(effectiveDesc);
-  if (userAlias) {
-    const resolvedCat = resolveCategory([userAlias.category]);
-    return {
-      merchant: userAlias.name,
-      category: resolvedCat,
-      logo: getLogoUrl(userAlias.name, resolvedCat) || getLogoUrl(directBankName, resolvedCat),
-    };
+  if (!ignoreUserAliases) {
+    const userAlias =
+      resolveMerchantAlias(directBankName) ||
+      resolveMerchantAlias(cleanedBankName) ||
+      resolveMerchantAlias(tx.counterparty_name || '') ||
+      resolveMerchantAlias(effectiveDesc);
+    if (userAlias) {
+      const resolvedCat = resolveCategory([userAlias.category]);
+      return {
+        merchant: userAlias.name,
+        category: resolvedCat,
+        logo: getLogoUrl(userAlias.name, resolvedCat) || getLogoUrl(directBankName, resolvedCat),
+      };
+    }
   }
 
   for (const rule of EVERYDAY_MERCHANT_RULES) {

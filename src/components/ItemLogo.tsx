@@ -101,10 +101,10 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-8 rounded-[11px]',
-    md: 'w-10 h-10 rounded-[13px]',
-    lg: 'w-11 h-11 rounded-[14px]',
-    xl: 'w-14 h-14 rounded-[18px]',
+    sm: 'w-8 h-8 rounded-xl',
+    md: 'w-10 h-10 rounded-xl',
+    lg: 'w-11 h-11 rounded-2xl',
+    xl: 'w-14 h-14 rounded-2xl',
   }[size];
 
   const iconSize = {

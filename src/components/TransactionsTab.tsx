@@ -6,7 +6,6 @@ import {
   Package,
   Heart,
   Paperclip,
-  Users,
   Plus,
   SlidersHorizontal,
   Check,
@@ -944,7 +943,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     fixedExpenses,
                     incomes
                   );
-                  const isFixedExpenseTx = Boolean(!isIncome && recurringStatus.isRecurring);
                   const hasReceipts = getItemReceipts(tx).length > 0;
 
                   return (

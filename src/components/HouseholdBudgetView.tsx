@@ -8,7 +8,6 @@ import {
   UserPlus,
   ChatCircleDots,
   SlidersHorizontal,
-  CaretRight,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
 import { PeriodInfo } from '../utils/periodEngine';
@@ -23,8 +22,8 @@ import {
   HouseholdMemberSummary,
   getHouseholdState,
   saveHouseholdStateLocal,
+  clearHouseholdStateLocal,
   generateInviteCode,
-  formatInviteCodeDisplay,
   getMemberKey,
   computeMyHouseholdSummary,
   calculateHouseholdSettlement,
@@ -212,38 +211,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     myKey,
   ]);
 
-  const handleCreateHousehold = async () => {
-    const code = generateInviteCode();
-    const defaultCats = ['Mat & dryck', 'Boende', 'Räkningar'];
-    const mySummary = computeMyHouseholdSummary({
-      userEmail,
-      userName,
-      userAvatar,
-      period,
-      incomes,
-      fixedExpenses,
-      transactions,
-      sharedCategories: defaultCats,
-    });
-
-    const newHh: HouseholdState = {
-      householdId: `hh-${code}`,
-      inviteCode: code,
-      name: 'Delad budget',
-      splitMode: 'equal',
-      sharedCategories: defaultCats,
-      members: {
-        [myKey]: mySummary,
-      },
-      sharedFixedExpenses: fixedExpenses.filter((f) => f.isShared),
-      sharedSavingsGoals: getSavingsGoals(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setHousehold(newHh);
-    await pushHouseholdSyncToServer(newHh);
-  };
-
   const handleJoinHousehold = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCode = joinCodeInput.replace(/\s+/g, '').toUpperCase();
@@ -416,7 +383,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
   };
 
   const handleLeaveHousehold = () => {
-    saveHouseholdStateLocal(null);
+    clearHouseholdStateLocal(userEmail, userName);
     setHousehold(null);
     setShowLeaveConfirm(false);
     setIsSettingsOpen(false);

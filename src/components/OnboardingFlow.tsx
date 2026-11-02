@@ -6,7 +6,6 @@ import {
   Plus,
   Trash,
   Check,
-  PencilSimple,
   X,
   MagnifyingGlass,
   ShieldCheck,

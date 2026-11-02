@@ -2,20 +2,19 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X,
   Trash,
-  PencilSimple,
   Check,
   CaretRight,
   CaretLeft,
   Paperclip,
   FileText,
   ClockCounterClockwise,
-  Users,
   ArrowsClockwise,
   Plus,
   Scissors,
   ArrowSquareOut,
   Sparkle,
   Info,
+  CalendarBlank,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, AccountItem, TransactionItem, getTransactionTime } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
@@ -34,15 +33,16 @@ import {
   getStoredExpenseCategories,
   getStoredPaymentMethods,
   normalizeCategoryToValid,
-  syncAllUserPreferencesToSupabase,
   compressImageFileToDataUrl,
   getSavingsGoals,
 } from '../../utils/appCache';
-import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import {
+  inferCategoryAndMethodFromName,
+  cleanDisplayMerchantName,
+} from '../../utils/bankHistoryAnalyzer';
 import {
   fetchLogoForName,
   getLearnedBrandCategory,
-  getLogoUrl,
   isMerchantCategoryIconPreferred,
   setMerchantCategoryIconPreferred,
 } from '../../utils/logo';
@@ -1095,38 +1095,73 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
           {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
           <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
-            <label className="flex items-center gap-3.5 cursor-text">
-              <ItemLogo
-                name={name || activeExpense?.name || 'Fast utgift'}
-                category={category}
-                logoUrl={activeExpense?.logo}
-                size="lg"
-                isRecurring={true}
-              />
-              <div className="flex-1 min-w-0">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
-                  Namn
-                </span>
-                <input
-                  type="text"
-                  autoFocus={isCreateMode}
-                  placeholder="Butik eller tjänst"
-                  value={name}
-                  onChange={(e) => {
-                    const nextName = e.target.value;
-                    setName(nextName);
-                    const inferred = inferCategoryAndMethodFromName(nextName, 'fixed');
-                    if (inferred?.category) {
-                      setCategory(inferred.category);
-                    }
-                    if (inferred?.paymentMethod) {
-                      setPaymentMethod(inferred.paymentMethod);
-                    }
-                  }}
-                  className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
-                />
-              </div>
-            </label>
+            {(() => {
+              const rawOrig = (activeExpense?.originalName || '').trim();
+              const cleanedOrig = rawOrig ? cleanDisplayMerchantName(rawOrig) : '';
+              const originalDisplayName =
+                cleanedOrig && cleanedOrig !== 'Banktransaktion' ? cleanedOrig : rawOrig;
+              const canResetName =
+                !isCreateMode &&
+                Boolean(originalDisplayName) &&
+                name.trim().toLowerCase() !== originalDisplayName.toLowerCase();
+
+              return (
+                <div className="flex items-center gap-3.5">
+                  <label className="flex items-center gap-3.5 cursor-text flex-1 min-w-0">
+                    <ItemLogo
+                      name={name || activeExpense?.name || 'Fast utgift'}
+                      category={category}
+                      logoUrl={activeExpense?.logo}
+                      size="lg"
+                      isRecurring={true}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
+                        Namn
+                      </span>
+                      <input
+                        type="text"
+                        autoFocus={isCreateMode}
+                        placeholder="Butik eller tjänst"
+                        value={name}
+                        onChange={(e) => {
+                          const nextName = e.target.value;
+                          setName(nextName);
+                          const inferred = inferCategoryAndMethodFromName(nextName, 'fixed');
+                          if (inferred?.category) {
+                            setCategory(inferred.category);
+                          }
+                          if (inferred?.paymentMethod) {
+                            setPaymentMethod(inferred.paymentMethod);
+                          }
+                        }}
+                        className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                      />
+                    </div>
+                  </label>
+                  {canResetName && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setName(originalDisplayName);
+                        const inferred = inferCategoryAndMethodFromName(
+                          originalDisplayName,
+                          'fixed'
+                        );
+                        if (inferred?.category) {
+                          setCategory(inferred.category);
+                        }
+                      }}
+                      title={`Återställ ursprungsnamn (${originalDisplayName})`}
+                      aria-label={`Återställ ursprungsnamn (${originalDisplayName})`}
+                      className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
+                    >
+                      <ClockCounterClockwise size={15} weight="bold" />
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="border-t border-[var(--border-subtle)] pt-3.5">
               <label className="block cursor-text">
@@ -1150,129 +1185,125 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             </div>
           </div>
 
-          {isCreateMode && (
-            <>
-              <div className="ui-sheet-group">
+          <div className="ui-sheet-group">
+            <button
+              type="button"
+              onClick={() => navigateSubView('category-picker', 'forward')}
+              className="ui-row-btn"
+            >
+              <span className="ui-info-label shrink-0">Kategori</span>
+              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                <CategoryIcon category={category} size={13} />
+                <span>{category}</span>
+                <CaretRight size={12} className="text-[var(--text-muted)]" />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigateSubView('day-picker', 'forward')}
+              className="ui-row-btn"
+            >
+              <span className="ui-info-label shrink-0">Dragningsdag</span>
+              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+                <span>Den {dueDay}:e</span>
+                <CaretRight size={12} className="text-[var(--text-muted)]" />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigateSubView('payment-picker', 'forward')}
+              className="ui-row-btn"
+            >
+              <span className="ui-info-label shrink-0">Betalsätt</span>
+              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                <span>{paymentMethod}</span>
+                <CaretRight size={12} className="text-[var(--text-muted)]" />
+              </span>
+            </button>
+
+            {availableGoals.length > 0 && (
+              <button
+                type="button"
+                onClick={() => navigateSubView('goal-picker', 'forward')}
+                className="ui-row-btn"
+              >
+                <span className="ui-info-label shrink-0">Kopplat sparmål</span>
+                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
+                  <span className="truncate">
+                    {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget'}
+                  </span>
+                  <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
+                </span>
+              </button>
+            )}
+
+            {hasConnectedHouseholdPartner() && (
+              <div className="ui-row">
+                <span className="ui-info-label">Delad i hushåll</span>
                 <button
                   type="button"
-                  onClick={() => navigateSubView('category-picker', 'forward')}
-                  className="ui-row-btn"
+                  role="switch"
+                  aria-checked={isShared}
+                  onClick={() => setIsShared((prev) => !prev)}
+                  className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
                 >
-                  <span className="ui-info-label shrink-0">Kategori</span>
-                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
-                    <CategoryIcon category={category} size={13} />
-                    <span>{category}</span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
+                  <span
+                    className={`ui-switch-thumb ${
+                      isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
+                    }`}
+                  />
                 </button>
+              </div>
+            )}
 
-                <button
-                  type="button"
-                  onClick={() => navigateSubView('day-picker', 'forward')}
-                  className="ui-row-btn"
+            <div className="ui-row">
+              <span className="ui-info-label">
+                {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
+              </span>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
+              >
+                <Paperclip size={13} />
+                <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga'}</span>
+              </button>
+            </div>
+          </div>
+
+          {draftReceipts.length > 0 && (
+            <div className="space-y-2">
+              {draftReceipts.map((rcpt, idx) => (
+                <div
+                  key={`${rcpt.name}-${idx}`}
+                  className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2"
                 >
-                  <span className="ui-info-label shrink-0">Dragningsdag</span>
-                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
-                    <span>Den {dueDay}:e</span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => navigateSubView('payment-picker', 'forward')}
-                  className="ui-row-btn"
-                >
-                  <span className="ui-info-label shrink-0">Betalsätt</span>
-                  <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
-                    <span>{paymentMethod}</span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
-                </button>
-
-                {availableGoals.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => navigateSubView('goal-picker', 'forward')}
-                    className="ui-row-btn"
+                    onClick={() => {
+                      setPreviewReceipt(rcpt);
+                      navigateSubView('receipt-preview', 'forward');
+                    }}
+                    className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 cursor-pointer"
                   >
-                    <span className="ui-info-label shrink-0">Kopplat sparmål</span>
-                    <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
-                      <span className="truncate">
-                        {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget'}
-                      </span>
-                      <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
+                    <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
+                    <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                      {rcpt.name || `Kvitto ${idx + 1}`}
                     </span>
                   </button>
-                )}
-
-                {hasConnectedHouseholdPartner() && (
-                  <div className="ui-row">
-                    <span className="ui-info-label">Delad i hushåll</span>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={isShared}
-                      onClick={() => setIsShared((prev) => !prev)}
-                      className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
-                    >
-                      <span
-                        className={`ui-switch-thumb ${
-                          isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                )}
-
-                <div className="ui-row">
-                  <span className="ui-info-label">
-                    {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
-                  </span>
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => handleRemoveReceiptAt(idx)}
+                    className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer shrink-0"
+                    title="Ta bort kvitto"
                   >
-                    <Paperclip size={13} />
-                    <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga'}</span>
+                    <Trash size={13} />
                   </button>
                 </div>
-              </div>
-
-              {draftReceipts.length > 0 && (
-                <div className="space-y-2">
-                  {draftReceipts.map((rcpt, idx) => (
-                    <div
-                      key={`${rcpt.name}-${idx}`}
-                      className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewReceipt(rcpt);
-                          navigateSubView('receipt-preview', 'forward');
-                        }}
-                        className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 cursor-pointer"
-                      >
-                        <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-                        <span className="text-xs font-medium text-[var(--text-primary)] truncate">
-                          {rcpt.name || `Kvitto ${idx + 1}`}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveReceiptAt(idx)}
-                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer shrink-0"
-                        title="Ta bort kvitto"
-                      >
-                        <Trash size={13} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
+              ))}
+            </div>
           )}
 
           <div className="space-y-2.5">
@@ -1336,21 +1367,13 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
           <div className="ui-sheet-header !mb-0">
             <span className="ui-sheet-title">Fast utgift</span>
             <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => navigateSubView('edit', 'forward')}
-                className="px-3.5 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <PencilSimple size={13} weight="regular" />
-                <span>Redigera</span>
-              </button>
               <button type="button" onClick={onClose} className="ui-icon-btn">
                 <X size={16} />
               </button>
             </div>
           </div>
 
-          {/* Hero Receipt Header (Ren förhandsgranskning utan inline-inputs) */}
+          {/* Hero Receipt Header (Direkt redigerbar) */}
           <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
             {(() => {
               void logoPrefTick;
@@ -1390,25 +1413,145 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               );
             })()}
 
-            <h2 className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center truncate px-2">
-              {displayName}
-            </h2>
+            <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => {
+                  const nextName = e.target.value;
+                  setName(nextName);
+                  commitInlineChanges({ name: nextName });
+                }}
+                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none transition-colors w-full"
+                placeholder="Tjänst eller butik"
+              />
+              {(() => {
+                const rawOrig = (activeExpense?.originalName || '').trim();
+                const cleanedOrig = rawOrig ? cleanDisplayMerchantName(rawOrig) : '';
+                const originalDisplayName =
+                  cleanedOrig && cleanedOrig !== 'Banktransaktion' ? cleanedOrig : rawOrig;
+                const canResetName =
+                  Boolean(originalDisplayName) &&
+                  name.trim().toLowerCase() !== originalDisplayName.toLowerCase();
+                if (!canResetName) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setName(originalDisplayName);
+                      commitInlineChanges({ name: originalDisplayName });
+                    }}
+                    title={`Återställ till ursprungsnamn (${originalDisplayName})`}
+                    aria-label={`Återställ till ursprungsnamn (${originalDisplayName})`}
+                    className="w-7 h-7 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
+                  >
+                    <ClockCounterClockwise size={13} weight="bold" />
+                  </button>
+                );
+              })()}
+            </div>
 
             <div className="mt-1 flex items-baseline justify-center gap-1">
-              <span className="font-display font-semibold text-3xl text-[var(--text-primary)] tabular-nums">
-                -{new Intl.NumberFormat('sv-SE').format(Math.round(Number(amount) || 0))}
+              <span className="font-display font-semibold text-2xl sm:text-3xl text-[var(--text-primary)]">
+                -
               </span>
-              <span className="font-display font-medium text-lg text-[var(--text-secondary)]">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={amount}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^\d]/g, '');
+                  setAmount(cleaned);
+                  const num = Number(cleaned);
+                  if (num > 0) {
+                    commitInlineChanges({ amount: num });
+                  }
+                }}
+                className="bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl max-w-[170px] p-0 text-[var(--text-primary)]"
+                placeholder="0"
+              />
+              <span className="font-display font-medium text-base text-[var(--text-secondary)]">
                 kr/mån
               </span>
             </div>
 
-            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
-              Dras den {dueDay}:e varje månad
-            </p>
+            <button
+              type="button"
+              onClick={() => navigateSubView('day-picker', 'forward')}
+              className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] tabular-nums mt-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
+            >
+              <span>Dras den {dueDay}:e varje månad</span>
+              <CaretRight size={11} className="text-[var(--text-muted)]" />
+            </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
+            {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={handleOpenCancelGuide}
+                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
+              >
+                <div className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Scissors size={16} />
+                </div>
+                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+                  Säg upp
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (draftReceipts.length > 0) {
+                    setPreviewReceipt(draftReceipts[0]);
+                    navigateSubView('receipt-preview', 'forward');
+                  } else {
+                    fileInputRef.current?.click();
+                  }
+                }}
+                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group relative"
+              >
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform relative">
+                  <Paperclip size={16} weight="regular" />
+                  {draftReceipts.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-color)]" />
+                  )}
+                </div>
+                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+                  {draftReceipts.length > 0 ? `${draftReceipts.length} avtal` : 'Kvitto'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigateSubView('day-picker', 'forward')}
+                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
+              >
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
+                  <CalendarBlank size={16} />
+                </div>
+                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+                  Den {dueDay}:e
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigateSubView('similar', 'forward')}
+                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
+              >
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
+                  <ClockCounterClockwise size={16} />
+                </div>
+                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
+                  {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} dragn.` : 'Historik'}
+                </span>
+              </button>
+            </div>
+
+            {/* 2. Ett enda sammanhållet detaljkort */}
             <div className="ui-sheet-group">
               <button
                 type="button"
@@ -1442,17 +1585,10 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               >
                 <span className="ui-info-label">Dragningsdag</span>
                 <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
-                  <span>Den {dueDay}:e</span>
+                  <span>Den {dueDay}:e varje månad</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
               </button>
-
-              <div className="ui-row">
-                <span className="ui-info-label">Årskostnad</span>
-                <span className="ui-info-value tabular-nums">
-                  -{formatKr((Number(amount) || 0) * 12)}/år
-                </span>
-              </div>
 
               {availableGoals.length > 0 && (
                 <button
@@ -1470,6 +1606,83 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                 </button>
               )}
 
+              {resolvedAccountInfo && (
+                <div className="ui-row">
+                  <span className="ui-info-label">Konto</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="ui-info-value truncate max-w-[190px] sm:max-w-[230px]">
+                      {resolvedAccountInfo.label} ·{' '}
+                      {showFullAccount
+                        ? resolvedAccountInfo.fullNumber
+                        : resolvedAccountInfo.maskedNumber}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowFullAccount((prev) => !prev)}
+                      className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+                    >
+                      {showFullAccount ? 'Dölj' : 'Visa'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Bifogade kvitton & avtal (visas endast i listan om kvitto finns; snabbvalsknappen ovan hanterar bifogning) */}
+              {draftReceipts.length > 0 && (
+                <>
+                  {draftReceipts.map((rcpt, idx) => (
+                    <div key={`${rcpt.name}-${idx}`} className="ui-row">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPreviewReceipt(rcpt);
+                          navigateSubView('receipt-preview', 'forward');
+                        }}
+                        className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer flex-1 group"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
+                          {rcpt.url.startsWith('data:image/') ||
+                          /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
+                            <img src={rcpt.url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <Paperclip size={13} />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-medium text-[var(--text-primary)] block truncate group-hover:opacity-80">
+                            {rcpt.name || `Kvitto ${idx + 1}`}
+                          </span>
+                          <span className="text-[11px] text-[var(--text-muted)] block">
+                            Klicka för att granska
+                          </span>
+                        </div>
+                      </button>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPreviewReceipt(rcpt);
+                            navigateSubView('receipt-preview', 'forward');
+                          }}
+                          className="px-2 py-1 rounded-md text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                        >
+                          Öppna
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveReceiptAt(idx)}
+                          className="p-1 rounded-md text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                          title="Ta bort kvitto"
+                        >
+                          <Trash size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Hushållsdelning */}
               {hasConnectedHouseholdPartner() && (
                 <>
                   <div className="ui-row">
@@ -1496,7 +1709,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   {isShared && activeExpense && (
                     <div className="ui-row">
                       <span className="ui-info-label">I min egen budget</span>
-                      <div className="flex items-center gap-1 bg-[var(--bg-color)] p-0.5 rounded-lg border border-[var(--border-subtle)]">
+                      <div className="flex items-center gap-1 bg-[var(--surface-color)] p-0.5 rounded-lg border border-[var(--border-subtle)]">
                         {(() => {
                           const totalBill =
                             activeExpense.fullAmount && activeExpense.fullAmount > activeExpense.amount
@@ -1558,154 +1771,30 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   )}
                 </>
               )}
-
-              {resolvedAccountInfo && (
-                <div className="ui-row">
-                  <span className="ui-info-label">Konto</span>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="ui-info-value truncate max-w-[190px] sm:max-w-[230px]">
-                      {resolvedAccountInfo.label} ·{' '}
-                      {showFullAccount
-                        ? resolvedAccountInfo.fullNumber
-                        : resolvedAccountInfo.maskedNumber}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowFullAccount((prev) => !prev)}
-                      className="px-2 py-0.5 rounded-md bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
-                    >
-                      {showFullAccount ? 'Dölj' : 'Visa'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Bifogade kvitton */}
-            {draftReceipts.length > 0 && (
-              <div className="space-y-2">
-                {draftReceipts.map((rcpt, idx) => (
-                  <div
-                    key={`${rcpt.name}-${idx}`}
-                    className="w-full rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-3.5 space-y-2.5 text-left"
-                  >
-                    <div className="flex items-center justify-between gap-2 px-0.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewReceipt(rcpt);
-                          navigateSubView('receipt-preview', 'forward');
-                        }}
-                        className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate hover:opacity-80 cursor-pointer flex-1 text-left"
-                      >
-                        <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-                        <span className="truncate">{rcpt.name || `Kvitto ${idx + 1}`}</span>
-                      </button>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPreviewReceipt(rcpt);
-                            navigateSubView('receipt-preview', 'forward');
-                          }}
-                          className="text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>Öppna</span>
-                          <CaretRight size={11} className="text-[var(--text-muted)]" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveReceiptAt(idx)}
-                          className="p-1 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                          title="Ta bort kvitto"
-                        >
-                          <Trash size={13} />
-                        </button>
-                      </div>
-                    </div>
+            {/* Ta bort fast utgift */}
+            {onDelete && activeExpense && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="ui-btn-danger"
+                >
+                  <Trash size={14} />
+                  <span>Ta bort fast utgift</span>
+                </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewReceipt(rcpt);
-                        navigateSubView('receipt-preview', 'forward');
-                      }}
-                      className="w-full rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-56 cursor-pointer hover:opacity-95 transition-opacity"
-                    >
-                      {rcpt.url.startsWith('data:image/') ||
-                      /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
-                        <img
-                          src={rcpt.url}
-                          alt={rcpt.name || 'Kvitto'}
-                          className="max-h-48 w-auto object-contain rounded-lg"
-                        />
-                      ) : (
-                        <div className="py-5 flex flex-col items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-                          <FileText size={26} weight="duotone" />
-                          <span className="font-medium">{rcpt.name || 'Öppna dokument'}</span>
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                ))}
+                <ConfirmDialog
+                  isOpen={showDeleteConfirm}
+                  title="Ta bort fast utgift?"
+                  description={`${displayName} tas bort från dina fasta utgifter.`}
+                  confirmLabel="Ta bort"
+                  onConfirm={handleDelete}
+                  onCancel={() => setShowDeleteConfirm(false)}
+                />
               </div>
             )}
-
-            {/* Navigationsrader: Liknande transaktioner, Kvitto & Säg upp abonnemang */}
-            <div className="ui-sheet-group">
-              <button
-                type="button"
-                onClick={() => navigateSubView('similar', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="font-normal text-[var(--text-primary)] flex items-center gap-2">
-                  <ClockCounterClockwise
-                    size={15}
-                    className="text-[var(--text-secondary)] shrink-0"
-                  />
-                  <span>Liknande transaktioner</span>
-                </span>
-                <span className="flex items-center gap-1.5 text-[var(--text-secondary)] font-normal tabular-nums shrink-0">
-                  <span>
-                    {similarInfo.transactions.length} st
-                    {similarInfo.transactions.length > 0
-                      ? ` · ${formatKr(similarInfo.totalAmount)}`
-                      : ''}
-                  </span>
-                  <CaretRight size={13} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="ui-row-btn"
-              >
-                <span className="font-normal text-[var(--text-primary)] flex items-center gap-2">
-                  <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
-                  <span>{draftReceipts.length > 0 ? 'Bifoga fler kvitton/avtal' : 'Bifoga kvitto eller avtal'}</span>
-                </span>
-                <CaretRight size={13} className="text-[var(--text-muted)] shrink-0" />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleOpenCancelGuide}
-                className="ui-row-btn"
-              >
-                <span className="font-normal text-[var(--text-primary)] flex items-center gap-2">
-                  <Scissors
-                    size={15}
-                    className="text-rose-500 shrink-0"
-                  />
-                  <span>Säg upp abonnemang</span>
-                </span>
-                <span className="flex items-center gap-1.5 text-[var(--text-secondary)] font-normal shrink-0">
-                  <span>Guide & länk</span>
-                  <CaretRight size={13} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-            </div>
           </div>
         </div>
       )}

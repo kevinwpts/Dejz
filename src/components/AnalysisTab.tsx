@@ -338,109 +338,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
   const totalSpent = periodFixedTotal + periodVariableTotal;
   const netSavings = periodIncomeTotal - totalSpent;
-  const spentPercentage =
-    periodIncomeTotal > 0 ? Math.min(100, Math.round((totalSpent / periodIncomeTotal) * 100)) : 0;
-
-  // Previous period for Spend Pace & month-over-month comparison
-  const prevComputedPeriod = useMemo(() => {
-    const refDate = new Date();
-    refDate.setMonth(refDate.getMonth() + periodOffset - 1);
-    return calculateCurrentPeriod(refDate, targetPayday, weekendHandling);
-  }, [periodOffset, targetPayday, weekendHandling]);
-
-  const prevPeriodVariableTransactions = useMemo(() => {
-    const deduped = deduplicateTransactions(transactions);
-    const prevTxs = deduped.filter((t) => {
-      if (t.isExcluded) return false;
-      if (isTransactionManuallyExcluded(t.id)) return false;
-      if (
-        excludeInternalTransfers &&
-        (internalTransferIds.has(t.id) ||
-          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-      ) {
-        return false;
-      }
-      return isDateInPeriod(t.date, prevComputedPeriod);
-    });
-    const prevRec = reconcilePeriodRecurringMatches(prevTxs, fixedExpenses, incomes);
-    return prevTxs.filter((t) => {
-      if (t.type === 'income') return false;
-      if (prevRec.claimedFixedTxIds.has(t.id)) return false;
-      return true;
-    });
-  }, [
-    transactions,
-    prevComputedPeriod,
-    excludeInternalTransfers,
-    internalTransferIds,
-    bankAccounts,
-    userEmail,
-    userName,
-    fixedExpenses,
-    incomes,
-  ]);
-
-  const spendPaceComparison = useMemo(() => {
-    if (prevPeriodVariableTransactions.length === 0 && variableTransactions.length === 0) {
-      return null;
-    }
-
-    if (periodOffset === 0) {
-      // Compare up to the same number of elapsed days in the period
-      const elapsedDays = Math.max(1, computedPeriod.daysElapsed || computedPeriod.daysPassed || 1);
-      const prevCutoff = new Date(prevComputedPeriod.startDate);
-      prevCutoff.setDate(prevCutoff.getDate() + elapsedDays);
-      const prevCutoffStr = `${prevCutoff.getFullYear()}-${String(
-        prevCutoff.getMonth() + 1
-      ).padStart(2, '0')}-${String(prevCutoff.getDate()).padStart(2, '0')}`;
-
-      const prevSameDaySum = prevPeriodVariableTransactions
-        .filter((t) => (t.date || '') <= prevCutoffStr)
-        .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-      if (prevSameDaySum <= 0) return null;
-      const diff = periodVariableTotal - prevSameDaySum;
-      return {
-        diff,
-        prevSum: prevSameDaySum,
-        isCurrentPeriod: true,
-        elapsedDays,
-      };
-    } else {
-      const prevFullSum = prevPeriodVariableTransactions.reduce(
-        (sum, t) => sum + (Number(t.amount) || 0),
-        0
-      );
-      if (prevFullSum <= 0) return null;
-      const diff = periodVariableTotal - prevFullSum;
-      return {
-        diff,
-        prevSum: prevFullSum,
-        isCurrentPeriod: false,
-        elapsedDays: computedPeriod.daysTotal || computedPeriod.totalDays || 30,
-      };
-    }
-  }, [
-    prevPeriodVariableTransactions,
-    variableTransactions,
-    periodOffset,
-    computedPeriod,
-    prevComputedPeriod,
-    periodVariableTotal,
-  ]);
-
-  const prevCategoryTotals = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const tx of prevPeriodVariableTransactions) {
-      const cat = tx.category || 'Övrigt';
-      map.set(cat, (map.get(cat) || 0) + (Number(tx.amount) || 0));
-    }
-    for (const exp of periodFixedList) {
-      const cat = exp.category || 'Räkningar';
-      map.set(cat, (map.get(cat) || 0) + (Number(exp.amount) || 0));
-    }
-    return map;
-  }, [prevPeriodVariableTransactions, periodFixedList]);
 
   // Category breakdown (med avräkning av butiksreturer/återköp per handlarkategori så cirkeldiagrammet matchar Rörligt netto)
   const categoryBreakdown = useMemo(() => {
@@ -949,7 +846,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                   checkIsRecurringTransaction(subItem, fixedExpenses, incomes)
                                     .isRecurring)
                             );
-                            const isFixedExpItem = Boolean(!isIncome && isSubRecurring);
                             const hasSubReceipts = Boolean(
                               (Array.isArray(subItem.receipts) && subItem.receipts.length > 0) ||
                                 subItem.receiptUrl

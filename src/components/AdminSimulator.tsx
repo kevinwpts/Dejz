@@ -16,7 +16,6 @@ import {
   Checks,
   Wallet,
   ArrowBendUpLeft,
-  HandCoins,
   Robot,
   ArrowSquareOut,
   UserPlus,
@@ -1164,7 +1163,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
   };
 
   return (
-    <aside className="w-full max-w-[410px] min-[820px]:w-[395px] xl:w-[415px] shrink-0 h-full rounded-[30px] bg-[var(--surface-color)] border-2 border-[var(--border-subtle)] shadow-2xl flex flex-col overflow-hidden select-none">
+    <aside className="w-full max-w-[410px] min-[820px]:w-[395px] xl:w-[415px] shrink-0 h-full rounded-3xl bg-[var(--surface-color)] border-2 border-[var(--border-subtle)] shadow-2xl flex flex-col overflow-hidden select-none">
       {/* ============================================================== */}
       {/* TOP SIMULATOR CONTROL BAR                                      */}
       {/* ============================================================== */}
@@ -1371,7 +1370,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
               }}
               className="px-2.5 py-1 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] whitespace-nowrap cursor-pointer shrink-0"
             >
-              Simulera "Skriver..."
+              Simulera &quot;Skriver...&quot;
             </button>
           </div>
 

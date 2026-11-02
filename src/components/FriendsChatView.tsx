@@ -18,6 +18,7 @@ import {
   MagnifyingGlass,
   ChatCircleDots,
   DotsThree,
+  ThumbsUp,
 } from '@phosphor-icons/react';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from './HomeTab';
 import { PeriodInfo } from '../utils/periodEngine';
@@ -451,23 +452,39 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
     }
 
     return (
-      <div className="flex flex-col min-h-[calc(100dvh-10.5rem)] pb-36 animate-slide-in-right">
-        {/* Compact Status & Actions Bar (No duplicate Back button since Navbar handles < Friend) */}
-        <div className="flex items-center justify-between gap-2 pb-3 mb-2 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2 min-w-0">
-            <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
-                selectedFriend.online !== false ? 'bg-emerald-500' : 'bg-zinc-400'
-              }`}
-            />
-            <span className="text-xs text-[var(--text-secondary)] truncate">
-              {typingInfo.isTyping
-                ? 'Skriver...'
-                : selectedFriend.online !== false
-                ? 'Aktiv nu'
-                : 'Frånkopplad'}
-              {isSelectedFriendInHousehold ? ' · Delad budget' : ''}
-            </span>
+      <div className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+var(--safe-top,env(safe-area-inset-top,0px))+8px)] z-40 bg-[var(--bg-color)] flex flex-col max-w-md mx-auto overflow-hidden animate-slide-in-right">
+        {/* Compact Status & Quick Action Bar */}
+        <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface-color)] shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => updateSelectedFriendKey(null)}
+              className="w-8 h-8 -ml-1 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
+              title="Tillbaka till vänner"
+            >
+              <CaretLeft size={18} weight="bold" />
+            </button>
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center font-display font-semibold text-xs text-[var(--text-primary)] uppercase shrink-0 relative">
+              {selectedFriend.name.slice(0, 2)}
+              <span
+                className={`w-2.5 h-2.5 rounded-full absolute -bottom-0.5 -right-0.5 border-2 border-[var(--surface-color)] ${
+                  selectedFriend.online !== false ? 'bg-emerald-500' : 'bg-zinc-400'
+                }`}
+              />
+            </div>
+            <div className="min-w-0">
+              <span className="font-display font-semibold text-xs text-[var(--text-primary)] truncate block leading-tight">
+                {selectedFriend.name}
+              </span>
+              <span className="text-[11px] text-[var(--text-secondary)] truncate block leading-tight">
+                {typingInfo.isTyping
+                  ? 'Skriver...'
+                  : selectedFriend.online !== false
+                  ? 'Aktiv nu'
+                  : 'Frånkopplad'}
+                {isSelectedFriendInHousehold ? ' · Delad budget' : ''}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
@@ -480,7 +497,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                   void handleInviteFriendToHousehold(selectedFriend);
                 }
               }}
-              className="px-2.5 py-1 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
             >
               <Users size={12} />
               <span>{isSelectedFriendInHousehold ? 'Delad budget' : 'Dela budget'}</span>
@@ -489,7 +506,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
             <button
               type="button"
               onClick={() => setIsFriendOptionsOpen(true)}
-              className="w-7 h-7 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-7 h-7 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
               title="Alternativ"
             >
               <DotsThree size={16} weight="bold" />
@@ -498,14 +515,14 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
         </div>
 
         {statusBanner && (
-          <div className="mb-3 py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-medium text-center animate-fade-in">
+          <div className="m-2.5 py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-medium text-center shrink-0 animate-fade-in">
             {statusBanner}
           </div>
         )}
 
-        {/* Messages Stream */}
+        {/* Scrollable Messages Stream */}
         <div
-          className="flex-1 space-y-4 py-2"
+          className="flex-1 overflow-y-auto px-4 py-3 space-y-3.5 overscroll-contain"
           onClick={() => {
             if (activeActionMsgId) setActiveActionMsgId(null);
           }}
@@ -689,24 +706,53 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                           </div>
                         )}
 
-                        {/* Clean Text Bubble (Tap to react or reply) */}
-                        {msg.text && (
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveActionMsgId((prev) =>
-                                prev === msg.id ? null : msg.id
-                              );
-                            }}
-                            className={`px-3.5 py-2.5 rounded-2xl text-[13.5px] leading-relaxed break-words cursor-pointer transition-opacity active:opacity-80 ${
-                              isMine
-                                ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                                : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)]'
-                            }`}
-                          >
-                            <span>{msg.text}</span>
-                          </div>
-                        )}
+                        {/* Clean Text Bubble (Omits duplicate fallback summary if rich card is present) */}
+                        {(() => {
+                          const isRedundantCardText = Boolean(
+                            msg.sharedPayload &&
+                              msg.text &&
+                              (msg.text.startsWith('Delar utlägg för') ||
+                                msg.text.startsWith('Jag har bjudit in dig') ||
+                                msg.text.startsWith('Delar sparmål:') ||
+                                msg.text === msg.sharedPayload.title)
+                          );
+                          if (!msg.text || isRedundantCardText) return null;
+
+                          if (msg.text === '👍') {
+                            return (
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveActionMsgId((prev) =>
+                                    prev === msg.id ? null : msg.id
+                                  );
+                                }}
+                                className="text-3xl py-1 cursor-pointer select-none hover:scale-110 active:scale-95 transition-transform"
+                                title="Tumme upp"
+                              >
+                                👍
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveActionMsgId((prev) =>
+                                  prev === msg.id ? null : msg.id
+                                );
+                              }}
+                              className={`px-3.5 py-2.5 rounded-2xl text-[13.5px] leading-relaxed break-words cursor-pointer transition-opacity active:opacity-85 ${
+                                isMine
+                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] rounded-br-sm'
+                                  : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-bl-sm'
+                              }`}
+                            >
+                              <span>{msg.text}</span>
+                            </div>
+                          );
+                        })()}
 
                         {/* Tap-triggered Reaction & Reply Popover */}
                         {isActionOpen && (
@@ -816,9 +862,9 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Sticky Composer Bar */}
-        <div className="sticky bottom-24 z-20 pt-2">
-          <div className="rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-subtle)] p-2 shadow-subtle space-y-2">
+        {/* Docked Messenger-Style Bottom Composer Bar */}
+        <div className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface-color)]/95 backdrop-blur-xl px-3 py-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-20">
+          <div className="space-y-2 max-w-md mx-auto">
             {replyToMsg && (
               <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs">
                 <div className="min-w-0">
@@ -846,47 +892,67 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                   setAttachMode('menu');
                   setIsAttachSheetOpen(true);
                 }}
-                className="w-9 h-9 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
-                title="Dela köp eller sparmål"
+                className="w-9 h-9 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shrink-0"
+                title="Dela köp, utlägg eller sparmål"
               >
                 <Plus size={16} weight="bold" />
               </button>
 
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => {
-                  setMessageText(e.target.value);
-                  sendLiveTypingSignal({
-                    myKey,
-                    myName: myDisplayName,
-                    friendKey: selectedFriend.key,
-                    isTyping: e.target.value.trim().length > 0,
-                  });
-                  if (typingTimeoutRef.current) {
-                    window.clearTimeout(typingTimeoutRef.current);
-                  }
-                  typingTimeoutRef.current = window.setTimeout(() => {
+              <div className="flex-1 min-w-0 flex items-center bg-[var(--bg-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-full px-3.5 py-1.5 transition-colors">
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={(e) => {
+                    setMessageText(e.target.value);
                     sendLiveTypingSignal({
                       myKey,
                       myName: myDisplayName,
                       friendKey: selectedFriend.key,
-                      isTyping: false,
+                      isTyping: e.target.value.trim().length > 0,
                     });
-                  }, 2500);
-                }}
-                placeholder={`Meddelande till ${selectedFriend.name}...`}
-                className="flex-1 min-w-0 bg-transparent border-0 px-2 py-1.5 text-[13.5px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
-              />
+                    if (typingTimeoutRef.current) {
+                      window.clearTimeout(typingTimeoutRef.current);
+                    }
+                    typingTimeoutRef.current = window.setTimeout(() => {
+                      sendLiveTypingSignal({
+                        myKey,
+                        myName: myDisplayName,
+                        friendKey: selectedFriend.key,
+                        isTyping: false,
+                      });
+                    }, 2500);
+                  }}
+                  placeholder={`Meddelande till ${selectedFriend.name}...`}
+                  className="w-full bg-transparent border-0 text-[14px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
+                />
+              </div>
 
-              <button
-                type="submit"
-                disabled={!messageText.trim()}
-                className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] disabled:opacity-30 flex items-center justify-center transition-all active:scale-95 cursor-pointer shrink-0"
-                title="Skicka"
-              >
-                <PaperPlaneTilt size={15} weight="fill" />
-              </button>
+              {messageText.trim() ? (
+                <button
+                  type="submit"
+                  className="w-9 h-9 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center transition-all active:scale-90 hover:opacity-90 cursor-pointer shrink-0 shadow-sm animate-scale-in"
+                  title="Skicka"
+                >
+                  <PaperPlaneTilt size={16} weight="fill" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void sendChatMessage({
+                      myKey,
+                      myName: myDisplayName,
+                      myAvatar: userAvatar,
+                      friendKey: selectedFriend.key,
+                      text: '👍',
+                    });
+                  }}
+                  className="w-9 h-9 rounded-full text-[var(--text-muted)] hover:text-amber-500 hover:bg-[var(--bg-color)] flex items-center justify-center transition-all active:scale-90 cursor-pointer shrink-0"
+                  title="Skicka tumme upp"
+                >
+                  <ThumbsUp size={18} weight="fill" />
+                </button>
+              )}
             </form>
           </div>
         </div>

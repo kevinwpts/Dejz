@@ -4,15 +4,21 @@ import { ArrowClockwise } from '@phosphor-icons/react';
 interface PullToRefreshProps {
   onRefresh: () => Promise<void> | void;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
-export const PullToRefresh: React.FC<PullToRefreshProps> = ({ onRefresh, children }) => {
+export const PullToRefresh: React.FC<PullToRefreshProps> = ({
+  onRefresh,
+  children,
+  disabled = false,
+}) => {
   const [pullDistance, setPullDistance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const startYRef = useRef(0);
   const pullingRef = useRef(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (disabled) return;
     if (window.scrollY <= 5 && !refreshing) {
       startYRef.current = e.touches[0].clientY;
       pullingRef.current = true;

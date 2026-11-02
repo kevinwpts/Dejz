@@ -679,9 +679,21 @@ serve(async (req: Request) => {
       const requestedRedirectUrl = typeof body?.redirectUrl === "string"
         ? body.redirectUrl.trim()
         : "";
-      const isValidRequestedRedirect =
-        requestedRedirectUrl.startsWith("https://") &&
-        requestedRedirectUrl.endsWith("/bank/callback");
+      let isValidRequestedRedirect = false;
+      if (requestedRedirectUrl.startsWith("https://") && requestedRedirectUrl.endsWith("/bank/callback")) {
+        try {
+          const parsedUrl = new URL(requestedRedirectUrl);
+          const host = parsedUrl.hostname.toLowerCase();
+          isValidRequestedRedirect =
+            parsedUrl.pathname === "/bank/callback" &&
+            (host === "dejz.se" ||
+              host === "www.dejz.se" ||
+              host.endsWith(".dejz.se") ||
+              host.endsWith(".run.app"));
+        } catch {
+          isValidRequestedRedirect = false;
+        }
+      }
 
       let redirectUrlUsed = isValidRequestedRedirect
         ? requestedRedirectUrl
@@ -1264,7 +1276,6 @@ serve(async (req: Request) => {
               await adminClient
                 .from("bank_transactions")
                 .update({
-                  reconciliation_status: "reserved_replaced",
                   reservation_disappeared_at: new Date().toISOString(),
                 })
                 .eq("id", pRow.id);
@@ -2001,7 +2012,7 @@ serve(async (req: Request) => {
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error: any) {
-    console.error("enable-banking edge function error:", error);
+    console.error("enable-banking edge function error:", error?.message || "Unknown error");
     return new Response(
       JSON.stringify({
         error: error?.message || "Ett oväntat fel uppstod vid kommunikation med banktjänsten.",

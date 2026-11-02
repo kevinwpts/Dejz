@@ -1,7 +1,6 @@
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../components/HomeTab';
 import {
   SavingsGoalItem,
-  getSavingsGoals,
   saveSavingsGoals,
   syncAllUserPreferencesToSupabase,
 } from './appCache';
@@ -63,11 +62,8 @@ export function getHouseholdState(): HouseholdState | null {
   }
 }
 
-export function hasConnectedHouseholdPartner(state?: HouseholdState | null): boolean {
-  const hh = state !== undefined ? state : getHouseholdState();
-  if (!hh || typeof hh !== 'object') return false;
-  const memberKeys = Object.keys(hh.members || {});
-  return memberKeys.length >= 2;
+export function hasConnectedHouseholdPartner(_state?: HouseholdState | null): boolean {
+  return false;
 }
 
 export function saveHouseholdStateLocal(state: HouseholdState | null): void {
@@ -85,8 +81,33 @@ export function saveHouseholdStateLocal(state: HouseholdState | null): void {
   }
 }
 
-export function clearHouseholdStateLocal(): void {
+export function clearHouseholdStateLocal(
+  userEmail?: string | null,
+  userName?: string | null
+): void {
+  const existing = getHouseholdState();
   saveHouseholdStateLocal(null);
+  if (existing && existing.inviteCode) {
+    const myKey = getMemberKey(userEmail, userName);
+    const nextMembers = { ...(existing.members || {}) };
+    if (myKey in nextMembers) {
+      delete nextMembers[myKey];
+    }
+    const updated: HouseholdState = {
+      ...existing,
+      members: nextMembers,
+      updatedAt: new Date().toISOString(),
+    };
+    broadcastHouseholdUpdate(updated);
+    fetch('/api/household/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        household: updated,
+        removedMemberEmail: myKey,
+      }),
+    }).catch(() => {});
+  }
 }
 
 export function generateInviteCode(): string {

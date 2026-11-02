@@ -27,8 +27,6 @@ import {
   LockKey,
   Cookie,
   DownloadSimple,
-  PiggyBank,
-  Sparkle,
   Users,
   Eye,
   EyeSlash,
@@ -45,16 +43,19 @@ import { SavingsGoalsView } from './SavingsGoalsView';
 import { RecurringDiscoveryView } from './RecurringDiscoveryView';
 import { HouseholdBudgetView } from './HouseholdBudgetView';
 import { AdminPanelView } from './AdminSimulator';
-import { hasConnectedHouseholdPartner } from '../utils/householdSync';
 import { getMyFriendInviteCode } from '../utils/friendsChatSync';
 import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
   saveStoredPaymentMethods,
   compressImageFileToDataUrl,
-  getSavingsGoals,
   getPrivacyBlurMode,
   setPrivacyBlurMode,
+  getSavingsGoals,
+  getStoredExpenseCategories,
+  getStoredIncomeCategories,
+  getTransactionMetaMap,
+  getAccountMetaMap,
 } from '../utils/appCache';
 import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../constants';
 import { BottomSheet } from './ui/BottomSheet';
@@ -363,16 +364,27 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const handleExportGdprData = () => {
     const exportPayload = {
       exportedAt: new Date().toISOString(),
+      dataController: 'Dejz',
       profile: {
         name: userName || null,
         email: userEmail || null,
+        phone: editPhone || null,
         targetPayday,
         weekendHandling,
+        excludeInternalTransfers,
       },
+      bankConnections: connections,
+      bankAccounts,
+      accounts,
       incomes,
       fixedExpenses,
       transactions,
+      savingsGoals: getSavingsGoals(),
+      expenseCategories: getStoredExpenseCategories(),
+      incomeCategories: getStoredIncomeCategories(),
       paymentMethods,
+      transactionCustomMetadata: getTransactionMetaMap(),
+      accountCustomMetadata: getAccountMetaMap(),
     };
     const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
       type: 'application/json',
@@ -1854,47 +1866,194 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'privacy') {
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              1. Personuppgiftsansvar
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              1. Personuppgiftsansvar & rollfördelning
             </h3>
             <p>
-              Dejz behandlar dina personuppgifter i enlighet med EU:s dataskyddsförordning
-              (GDPR, 2016/679) samt svensk dataskyddslagstiftning (Lag 2018:218).
+              Dejz är personuppgiftsansvarig (Data Controller) enligt EU:s
+              dataskyddsförordning (GDPR, 2016/679) och svensk dataskyddslagstiftning
+              (Lag 2018:218) för samtliga person- och bankuppgifter som Dejz tar emot,
+              bearbetar och lagrar i tjänsten.
+            </p>
+            <p>
+              När du ansluter din bank sker inhämtningen via vår Open Banking-partner{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                Enable Banking Oy
+              </span>{' '}
+              (The Connectivity Engine), som är ett auktoriserat kontoinformationsinstitut
+              (AISP) under PSD2-direktivet under tillsyn av finska Finansinspektionen
+              (FIN-FSA). Enable Banking ansvarar självständigt för själva
+              bankanslutningen och autentiseringen mot din bank, men detta ersätter inte
+              Dejz eget personuppgiftsansvar för den bankdata som Dejz tar emot och
+              behandlar i appen.
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              2. Uppgifter som behandlas
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              2. Vilka bankuppgifter vi hämtar, varför och hur länge de sparas
             </h3>
             <p>
-              Vi behandlar endast de uppgifter som krävs för din ekonomiöversikt:
-              kontouppgifter, lönedagsinställningar, manuella poster samt de bankkonton och
-              transaktioner du samtycker till att hämta via Open Banking.
+              <span className="font-semibold text-[var(--text-primary)]">
+                Uppgifter som hämtas:
+              </span>{' '}
+              Efter ditt uttryckliga samtycke hämtar Dejz kontonamn, kontonummer
+              (IBAN/BBAN), valuta, aktuellt och bokfört saldo, transaktionsbelopp,
+              transaktions- och bokföringsdatum, bokningsstatus (reserverat{' '}
+              <span className="font-mono">PDNG</span> respektive bokfört{' '}
+              <span className="font-mono">BOOK</span>), betalningsmottagare/motpartsnamn,
+              transaktionsbeskrivning samt bankens unika transaktionsreferens. Dejz har
+              aldrig tillgång till dina inloggningsuppgifter eller säkerhetskoder i
+              banken.
+            </p>
+            <p>
+              <span className="font-semibold text-[var(--text-primary)]">
+                Varför uppgifterna hämtas (ändamål):
+              </span>{' '}
+              Uppgifterna används uteslutande för att visa dina valda konton och saldon,
+              beräkna ”Kvar att spendera” under din aktuella löneperiod, identifiera och
+              stämma av fasta inkomster och räkningar, filtrera bort interna överföringar
+              mellan egna konton samt kategorisera dina köp.
+            </p>
+            <p>
+              <span className="font-semibold text-[var(--text-primary)]">
+                Lagringstid:
+              </span>{' '}
+              Bankuppgifter och transaktionshistorik sparas så länge ditt konto och din
+              bankkoppling är aktiva i Dejz för att ge dig historik och
+              löneperiodsjämförelser. Om du kopplar från en bank, nollställer din data
+              eller raderar ditt konto raderas uppgifterna omedelbart från vår aktiva
+              databas. Ett banksamtycke är enligt PSD2-regelverket giltigt i högst
+              90–180 dagar åt gången beroende på bank och upphör automatiskt om det inte
+              förnyas.
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              3. Ändamål & rättslig grund
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              3. Leverantörer, personuppgiftsbiträden & AI
             </h3>
             <p>
-              Behandlingen sker med stöd av avtal (Artikel 6.1 b GDPR) samt uttryckligt
-              samtycke (Artikel 6.1 a GDPR) vid bankanslutning. Vi säljer aldrig dina
-              uppgifter vidare.
+              Vi säljer eller hyr aldrig ut dina uppgifter. För att driva tjänsten
+              anlitar Dejz följande kontrollerade leverantörer med upprättade
+              personuppgiftsbiträdesavtal (DPA):
+            </p>
+            <ul className="list-disc pl-4 space-y-1.5">
+              <li>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Enable Banking Oy (EU/EES):
+                </span>{' '}
+                Reglerad Open Banking-leverantör (PSD2 AISP) som förmedlar krypterad
+                konto- och transaktionsdata från din bank efter BankID-signering.
+              </li>
+              <li>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Supabase (EU-region):
+                </span>{' '}
+                Tillhandahåller autentisering och krypterad databaslagring inom EU med
+                strikt radnivåsäkerhet (Row Level Security, RLS), så att varje användare
+                endast kan läsa och ändra sin egen data.
+              </li>
+              <li>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Google Cloud / Gemini API (AI-bearbetning):
+                </span>{' '}
+                Används för att tolka och tvätta svårlästa kort- och banktexter till
+                tydliga butiksnamn och kategorier samt när du själv aktivt använder
+                röst- eller textinmatning för att lägga till en post. Inga personnummer,
+                kontonummer, kontosaldon eller inloggningsuppgifter skickas till AI-modellen
+                vid texttvätt. Data som skickas via vårt företags-API loggas inte för
+                mänsklig granskning och används aldrig för att träna publika AI-modeller.
+              </li>
+            </ul>
+            <p>
+              All primär datalagring sker inom EU/EES. Om en underleverantör i
+              undantagsfall behandlar teknisk metadata utanför EU/EES säkerställs
+              skyddsnivån genom EU-kommissionens standardavtalsklausuler (SCC) och EU–US
+              Data Privacy Framework (DPF).
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              4. Dina rättigheter
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              4. Delad ekonomi (kommande funktion)
             </h3>
             <p>
-              Under{' '}
-              <span className="font-semibold text-[var(--text-primary)]">Data & säkerhet</span>{' '}
-              kan du när som helst exportera all din data eller radera ditt konto permanent.
+              När du väljer att aktivera Delad ekonomi med en partner i ett gemensamt
+              hushåll delas <span className="font-semibold text-[var(--text-primary)]">endast</span>{' '}
+              ditt visningsnamn, sammanställda månadsbelopp (total inkomst och totala
+              fasta utgifter för fördelningsberäkning) samt de specifika fasta utgifter,
+              gemensamma utlägg och sparmål som du själv aktivt väljer att markera som
+              delade.
+            </p>
+            <p>
+              Din partner får <span className="font-semibold text-[var(--text-primary)]">aldrig</span>{' '}
+              åtkomst till dina privata bankkonton, kontosaldon, kontonummer eller din
+              privata transaktionslista. Du kan när som helst avsluta delningen genom att
+              lämna hushållet under{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                Inställningar → Delad ekonomi
+              </span>
+              , varpå partnerns åtkomst till dina delade poster upphör omedelbart.
+            </p>
+          </div>
+
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              5. Avsluta bankkoppling, exportera uppgifter & radera konto
+            </h3>
+            <ul className="list-disc pl-4 space-y-1.5">
+              <li>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Avsluta bankkoppling:
+                </span>{' '}
+                Gå till{' '}
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Inställningar → Bankkonton
+                </span>{' '}
+                och välj <span className="font-semibold text-[var(--text-primary)]">Koppla från</span>.
+                Samtycket hos Enable Banking återkallas direkt och alla synkade bankkonton
+                och banktransaktioner tas bort. Du kan även återkalla samtycket direkt i
+                din internetbank.
+              </li>
+              <li>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Begära ut dina uppgifter (Dataportabilitet, Art. 15 & 20 GDPR):
+                </span>{' '}
+                Under{' '}
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Inställningar → Data & säkerhet → Exportera data
+                </span>{' '}
+                laddar du omedelbart ner en fullständig maskinläsbar kopia (JSON) av all
+                data som finns lagrad om dig.
+              </li>
+              <li>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Nollställa eller radera konto permanent (Art. 17 GDPR):
+                </span>{' '}
+                Under{' '}
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Inställningar → Data & säkerhet
+                </span>{' '}
+                kan du välja{' '}
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Nollställ all data
+                </span>{' '}
+                (tömmer all ekonomidata men behåller din inloggning) eller{' '}
+                <span className="font-semibold text-[var(--text-primary)]">
+                  Radera konto
+                </span>{' '}
+                (raderar omedelbart och permanent ditt användarkonto, din profil, alla
+                bankkopplingar, konton, transaktioner, fasta poster och delningar både i
+                databasen och lokalt på enheten).
+              </li>
+            </ul>
+            <p className="pt-1">
+              Du har även rätt att inge klagomål till Integritetsskyddsmyndigheten (IMY,{' '}
+              <span className="font-mono">imy.se</span>) om du anser att vår behandling
+              strider mot GDPR.
             </p>
           </div>
         </div>
@@ -1908,34 +2067,70 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'terms') {
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              1. Om tjänsten
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              1. Om tjänsten & avtalets omfattning
             </h3>
             <p>
-              Dejz är ett digitalt verktyg för personlig ekonomiöversikt och
-              löneperiodsbudgetering för privat bruk.
+              Dejz är en digital tjänst för personlig ekonomiöversikt,
+              löneperiodsbudgetering och utgiftsuppföljning för privat bruk. Genom att
+              skapa ett konto eller använda Dejz godkänner du dessa användarvillkor.
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              2. Ingen finansiell rådgivning
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              2. Bankkoppling & tredjepartsleverantörer
             </h3>
             <p>
-              Sammanställningar och prognoser i Dejz utgör inte finansiell, juridisk eller
-              skattemässig rådgivning enligt lagen (2003:862).
+              Inhämtning av kontoinformation via Open Banking tillhandahålls i samarbete
+              med Enable Banking Oy (auktoriserat kontoinformationsinstitut under PSD2).
+              Dejz har endast läsrättigheter till de bankkonton du själv väljer att
+              ansluta och kan aldrig initiera betalningar eller överföringar.
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              3. Avslutande & tillämplig lag
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              3. Ingen finansiell rådgivning & beräkningsansvar
             </h3>
             <p>
-              Du kan när som helst avsluta ditt konto utan uppsägningstid. Svensk lag
-              tillämpas på dessa villkor.
+              Beräkningar i Dejz – inklusive ”Kvar att spendera”, identifiering av fasta
+              kostnader, reserverade belopp, interna överföringar och AI-baserad
+              kategorisering – är automatiserade sammanställningar avsedda som beslutsstöd
+              i vardagen. De utgör inte finansiell, juridisk eller skattemässig rådgivning
+              enligt lagen (2003:862) om finansiell rådgivning till konsumenter. Du
+              ansvarar själv för att kontrollera att räkningar och betalningar utförs i
+              tid hos din bank.
+            </p>
+          </div>
+
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              4. Delad ekonomi & användaransvar
+            </h3>
+            <p>
+              Du ansvarar för att hålla din inloggning säker. Om du använder Delad
+              ekonomi (kommande funktion) ansvarar du själv för vilka fasta kostnader,
+              utlägg och sparmål du väljer att dela med medlemmar i ditt hushåll. Delning
+              kan när som helst avslutas med omedelbar verkan.
+            </p>
+          </div>
+
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              5. Uppsägning, radering & tillämplig lag
+            </h3>
+            <p>
+              Du kan när som helst avsluta ditt konto utan uppsägningstid genom att
+              radera kontot under{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                Inställningar → Data & säkerhet → Radera konto
+              </span>
+              . Vid radering tas all din sparade kontodata bort permanent. Svensk lag
+              tillämpas på dessa villkor och eventuell tvist prövas av svensk allmän
+              domstol.
             </p>
           </div>
         </div>
@@ -1949,36 +2144,67 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'psd2') {
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              Säker bankanslutning (PSD2)
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              1. Reglerad Open Banking via Enable Banking (PSD2)
             </h3>
             <p>
-              Bankkopplingar sker via Enable Banking i enlighet med EU:s andra
-              betaltjänstdirektiv (PSD2). Autentisering sker direkt mot din bank med Mobilt
-              BankID.
+              Dejz använder{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                Enable Banking Oy
+              </span>{' '}
+              (The Connectivity Engine) för säker bankanslutning enligt EU:s andra
+              betaltjänstdirektiv (PSD2, Direktiv 2015/2366). Enable Banking är ett
+              auktoriserat kontoinformationsinstitut (AISP) under tillsyn av finska
+              Finansinspektionen (FIN-FSA) med gränsöverskridande tillstånd i Sverige och
+              EU/EES.
+            </p>
+            <p>
+              Autentisering sker alltid direkt mot din egen bank med Mobilt BankID eller
+              bankens säkerhetsdosa. Dejz ser eller lagrar aldrig dina bankkoder.
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              Endast läsrättigheter
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              2. Personuppgiftsansvar & biträdesavtal
             </h3>
             <p>
-              Dejz har uteslutande läsrättigheter till dina valda konton och transaktioner.
-              Appen kan aldrig flytta pengar eller genomföra betalningar.
+              När dina bankuppgifter har hämtats och överförts till Dejz är{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                Dejz personuppgiftsansvarig
+              </span>{' '}
+              för lagring, bearbetning och visning av uppgifterna i appen. Enable
+              Bankings regulatoriska ansvar för bankkopplingen ersätter inte Dejz eget
+              personuppgiftsansvar enligt GDPR.
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              Samtycke & återkallelse
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              3. Endast läsrättigheter (Read-Only)
             </h3>
             <p>
-              Ett banksamtycke gäller i högst 90 dagar åt gången och kan när som helst
-              återkallas direkt under{' '}
-              <span className="font-semibold text-[var(--text-primary)]">Bankkonton</span>.
+              Anslutningen ger uteslutande läsrättigheter till de konton du själv väljer
+              att aktivera (kontonamn, IBAN/BBAN, saldo samt bokförda och reserverade
+              transaktioner). Det är tekniskt omöjligt för Dejz att flytta pengar, ändra
+              uppdrag eller genomföra betalningar på dina konton.
+            </p>
+          </div>
+
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              4. Giltighetstid & hur du avslutar bankkopplingen
+            </h3>
+            <p>
+              Ett banksamtycke gäller i högst 90–180 dagar beroende på bankens
+              PSD2-regler. Du kan när som helst bryta kopplingen med omedelbar verkan
+              under{' '}
+              <span className="font-semibold text-[var(--text-primary)]">
+                Inställningar → Bankkonton → Koppla från
+              </span>{' '}
+              eller via din internetbanks inställningar för tredjepartsbehörigheter.
             </p>
           </div>
         </div>
@@ -1992,25 +2218,38 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'cookies') {
     return (
       <div className="ui-page animate-slide-in-right">
-        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed">
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              Tekniskt nödvändig lagring
+        <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              1. Tekniskt nödvändig lokal lagring
             </h3>
             <p>
-              Dejz använder lokal lagring (localStorage och sessionscookies) uteslutande för
-              att hålla dig inloggad och spara dina inställningar såsom lönedag, utseende,
-              kategorier och betalsätt.
+              Dejz använder webbläsarens lokala lagring (<span className="font-mono">localStorage</span>)
+              och autentiseringstoken från Supabase uteslutande för att hålla dig
+              inloggad, cacha din krypterade vy lokalt på din enhet för snabb laddning
+              samt spara dina inställningar (lönedag, tema, egna kategorier och
+              betalsätt).
             </p>
           </div>
 
-          <div className="p-5">
-            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)] mb-1">
-              Inga spårningscookies
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              2. Isolering mellan konton & rensning vid utloggning
             </h3>
             <p>
-              Dejz använder inga tredjepartscookies för annonsering, profilering eller
-              kommersiell spårning.
+              Vid utloggning, kontobyte eller radering av konto töms all lokal cache på
+              enheten automatiskt så att ingen efterföljande användare på samma enhet kan
+              se eller ärva tidigare kontouppgifter.
+            </p>
+          </div>
+
+          <div className="p-5 space-y-2">
+            <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
+              3. Inga annons- eller spårningscookies
+            </h3>
+            <p>
+              Dejz använder inga tredjepartscookies för annonsering, beteendeprofilering
+              eller kommersiell spårning över andra webbplatser.
             </p>
           </div>
         </div>
@@ -2052,21 +2291,21 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                         : 'border-[var(--border-subtle)] opacity-80 group-hover:opacity-100'
                     } ${
                       opt.id === 'light'
-                        ? 'bg-[#F6F6F4]'
+                        ? 'bg-stone-100'
                         : opt.id === 'dark'
-                        ? 'bg-[#0A0A0C]'
-                        : 'bg-gradient-to-br from-[#F6F6F4] from-50% to-[#0A0A0C] to-50%'
+                        ? 'bg-zinc-950'
+                        : 'bg-gradient-to-br from-stone-100 from-50% to-zinc-950 to-50%'
                     }`}
                   >
                     {opt.id === 'system' ? (
                       <>
                         <div className="w-full h-5 rounded-lg bg-white/95 border border-black/5 px-1.5 flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-full bg-[#111113]" />
+                          <div className="w-2 h-2 rounded-full bg-zinc-900" />
                           <div className="h-1.5 w-8 rounded-full bg-black/15" />
                         </div>
                         <div className="space-y-1.5">
-                          <div className="w-full h-3.5 rounded-md bg-[#141417] border border-white/10" />
-                          <div className="w-3/4 h-3.5 rounded-md bg-[#141417] border border-white/10" />
+                          <div className="w-full h-3.5 rounded-md bg-zinc-900 border border-white/10" />
+                          <div className="w-3/4 h-3.5 rounded-md bg-zinc-900 border border-white/10" />
                         </div>
                       </>
                     ) : (
@@ -2075,12 +2314,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                           className={`w-full h-5 rounded-lg px-1.5 flex items-center gap-1 ${
                             opt.id === 'light'
                               ? 'bg-white border border-black/5'
-                              : 'bg-[#141417] border border-white/10'
+                              : 'bg-zinc-900 border border-white/10'
                           }`}
                         >
                           <div
                             className={`w-2 h-2 rounded-full ${
-                              opt.id === 'light' ? 'bg-[#111113]' : 'bg-[#F5F5F7]'
+                              opt.id === 'light' ? 'bg-zinc-900' : 'bg-zinc-100'
                             }`}
                           />
                           <div
@@ -2094,14 +2333,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                             className={`w-full h-3.5 rounded-md ${
                               opt.id === 'light'
                                 ? 'bg-white border border-black/5'
-                                : 'bg-[#141417] border border-white/10'
+                                : 'bg-zinc-900 border border-white/10'
                             }`}
                           />
                           <div
                             className={`w-3/4 h-3.5 rounded-md ${
                               opt.id === 'light'
                                 ? 'bg-white border border-black/5'
-                                : 'bg-[#141417] border border-white/10'
+                                : 'bg-zinc-900 border border-white/10'
                             }`}
                           />
                         </div>
@@ -2277,11 +2516,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </button>
 
           {/* Delad ekonomi (Hushåll) */}
-          <button
-            type="button"
-            onClick={() => setSubView('household')}
-            className="ui-admin-row"
-          >
+          <div className="ui-admin-row-static">
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <span className="ui-admin-icon-slot">
                 <Users size={18} weight="regular" />
@@ -2289,20 +2524,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className={rowTitleClass}>Delad ekonomi</span>
             </div>
             <div className="ui-admin-right">
-              <span
-                className={`ui-admin-value ${
-                  hasConnectedHouseholdPartner()
-                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                    : ''
-                }`}
-              >
-                {hasConnectedHouseholdPartner() ? 'Aktiv' : 'Bjud in'}
-              </span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
+              <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-muted)]">
+                Kommer snart
               </span>
             </div>
-          </button>
+          </div>
 
           {/* Kategorier */}
           <button
@@ -2344,11 +2570,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
           {/* Dölj egna överföringar */}
           <div className="ui-admin-row-static">
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-3">
               <span className="ui-admin-icon-slot">
                 <ArrowsLeftRight size={18} weight="regular" />
               </span>
-              <span className={rowTitleClass}>Dölj egna överföringar</span>
+              <div className="min-w-0 flex-1">
+                <span className={rowTitleClass}>Dölj egna överföringar</span>
+                <span className={rowSubClass}>
+                  Räknar inte flytt mellan egna konton som inkomst eller utgift
+                </span>
+              </div>
             </div>
             {onToggleExcludeInternalTransfers && (
               <button
@@ -2462,33 +2693,35 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
-          {/* Admin & Testsimulator */}
-          <button
-            type="button"
-            onClick={() => setSubView('admin')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <SlidersHorizontal size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Admin & Testsimulator</span>
-            </div>
-            <div className="ui-admin-right">
-              <span
-                className={`ui-admin-value ${
-                  splitSimulatorActive
-                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                    : ''
-                }`}
-              >
-                {splitSimulatorActive ? 'Split-Screen På' : 'Scenarion & flöden'}
-              </span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
+          {/* Admin & Testsimulator (Endast synlig för admin) */}
+          {(userEmail || '').trim().toLowerCase() === 'kevinwpts@gmail.com' && (
+            <button
+              type="button"
+              onClick={() => setSubView('admin')}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <SlidersHorizontal size={18} weight="regular" />
+                </span>
+                <span className={rowTitleClass}>Admin & Testsimulator</span>
+              </div>
+              <div className="ui-admin-right">
+                <span
+                  className={`ui-admin-value ${
+                    splitSimulatorActive
+                      ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                      : ''
+                  }`}
+                >
+                  {splitSimulatorActive ? 'Split-Screen På' : 'Scenarion & flöden'}
+                </span>
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
+              </div>
+            </button>
+          )}
         </div>
       </section>
 

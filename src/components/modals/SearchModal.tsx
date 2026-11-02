@@ -43,8 +43,6 @@ interface SearchModalProps {
   onSelectIncome: (inc: IncomeItem) => void;
 }
 
-type QuickFilter = 'all' | 'period' | 'large' | 'saved' | 'fixed';
-
 export const SearchModal: React.FC<SearchModalProps> = ({
   isOpen,
   onClose,
@@ -57,7 +55,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   onSelectIncome,
 }) => {
   const [query, setQuery] = useState('');
-  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -87,9 +84,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const results = useMemo(() => {
     const q = query.toLowerCase().trim();
     const qDigits = q.replace(/\s+/g, '');
-    const isFilterActive = quickFilter !== 'all';
 
-    if (!q && !isFilterActive) {
+    if (!q) {
       return { transactions: [], fixed: [], incomes: [] };
     }
 
@@ -102,17 +98,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
     const dedupedTx = deduplicateTransactions(transactions)
       .filter((tx) => {
-        if (quickFilter === 'fixed') return false;
-        if (quickFilter === 'period' && period && !isDateInPeriod(tx.date, period)) {
-          return false;
-        }
-        if (quickFilter === 'large' && (tx.type === 'income' || tx.amount < 500)) {
-          return false;
-        }
-        if (quickFilter === 'saved' && !tx.isHearted) {
-          return false;
-        }
-        if (!q) return true;
         return (
           (tx.title || '').toLowerCase().includes(q) ||
           (tx.category || '').toLowerCase().includes(q) ||
@@ -123,8 +108,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       .sort(compareTransactionsChronologically);
 
     const filteredFixed = fixedExpenses.filter((f) => {
-      if (quickFilter === 'large' || quickFilter === 'saved') return false;
-      if (!q) return quickFilter === 'fixed';
       return (
         (f.name || '').toLowerCase().includes(q) ||
         (f.category || '').toLowerCase().includes(q) ||
@@ -133,8 +116,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     });
 
     const filteredIncomes = incomes.filter((i) => {
-      if (quickFilter !== 'all' && quickFilter !== 'period') return false;
-      if (!q) return false;
       return (
         (i.name || '').toLowerCase().includes(q) ||
         (i.category || '').toLowerCase().includes(q) ||
@@ -147,7 +128,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       fixed: filteredFixed.slice(0, 20),
       incomes: filteredIncomes.slice(0, 15),
     };
-  }, [query, quickFilter, transactions, fixedExpenses, incomes, period]);
+  }, [query, transactions, fixedExpenses, incomes]);
 
   const groupedTransactionsByDate = useMemo(() => {
     const groups: {
@@ -232,7 +213,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     });
   }, [results.fixed, transactions, period, hasBankConnected]);
 
-  const isSearchingOrFiltered = Boolean(query.trim()) || quickFilter !== 'all';
+  const isSearchingOrFiltered = Boolean(query.trim());
   const hasResults =
     results.transactions.length > 0 ||
     results.fixed.length > 0 ||
@@ -240,14 +221,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
   const totalMatchedIncomes = enrichedIncomes.reduce((s, i) => s + i.amount, 0);
   const totalMatchedFixed = enrichedFixed.reduce((s, e) => s + e.amount, 0);
-
-  const filterButtons: { id: QuickFilter; label: string }[] = [
-    { id: 'all', label: 'Alla' },
-    { id: 'period', label: 'Denna period' },
-    { id: 'large', label: 'Stora köp (>500 kr)' },
-    { id: 'saved', label: 'Sparade' },
-    { id: 'fixed', label: 'Fasta & abonnemang' },
-  ];
 
   if (!isOpen) return null;
 

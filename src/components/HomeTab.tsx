@@ -11,15 +11,12 @@ import {
   Package,
   Paperclip,
   PencilSimple,
-  PiggyBank,
-  Plus,
   Users,
   X,
 } from '@phosphor-icons/react';
-import { PeriodInfo, getDueDateInPeriod, isDueDayPaidInPeriod, isDateInPeriod } from '../utils/periodEngine';
+import { PeriodInfo, isDateInPeriod } from '../utils/periodEngine';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
-import { SwishLogo } from './SwishLogo';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { BottomSheet } from './ui/BottomSheet';
 import {
@@ -36,7 +33,6 @@ import {
 } from '../utils/swedishDate';
 import {
   checkIsRecurringTransaction,
-  findMatchingFixedExpense,
   reconcilePeriodRecurringMatches,
 } from '../utils/recurring';
 import {
@@ -53,6 +49,7 @@ import {
   getHouseholdState,
   hasConnectedHouseholdPartner,
   computeMyHouseholdSummary,
+  calculateHouseholdSettlement,
 } from '../utils/householdSync';
 
 export interface AccountItem {
@@ -101,6 +98,7 @@ export interface FixedExpenseItem {
 export interface TransactionItem {
   id: string;
   title: string;
+  originalTitle?: string;
   amount: number;
   originalAmount?: number;
   linkedSwishTxId?: string;
@@ -294,7 +292,7 @@ interface HomeTabProps {
 
 export const HomeTab: React.FC<HomeTabProps> = ({
   period,
-  connectedBank,
+  connectedBank: _connectedBank,
   accounts,
   incomes = [],
   fixedExpenses = [],
@@ -304,7 +302,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   totalFixedExpenses,
   totalVariableSpent,
   kvarAttSpendera,
-  dagsbudget,
+  dagsbudget: _dagsbudget,
   isInitialLoading = false,
   onOpenBank,
   onSelectTransaction,
@@ -316,7 +314,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onToggleHeart,
   onTogglePackage,
   onExcludeTransaction,
-  onUpdateTransaction,
+  onUpdateTransaction: _onUpdateTransaction,
   userEmail,
   userName,
   onNavigateToHousehold,
@@ -333,11 +331,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       return true;
     }
   });
-  const [showCashflowForecast, setShowCashflowForecast] = useState<boolean>(false);
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
-  const [heroBudgetMode, setHeroBudgetMode] = useState<'personal' | 'joint'>('personal');
+  const [heroBudgetMode, setHeroBudgetMode] = useState<'personal' | 'joint'>(() => {
+    if (typeof window === 'undefined') return 'personal';
+    try {
+      return localStorage.getItem('dejz_hero_budget_mode') === 'joint' ? 'joint' : 'personal';
+    } catch {
+      return 'personal';
+    }
+  });
+
+  const handleSetHeroBudgetMode = (mode: 'personal' | 'joint') => {
+    setHeroBudgetMode(mode);
+    try {
+      localStorage.setItem('dejz_hero_budget_mode', mode);
+    } catch {
+      // ignore
+    }
+  };
+
   const [householdTick, setHouseholdTick] = useState(0);
 
   useEffect(() => {
@@ -365,6 +379,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       (m) => m.email.toLowerCase() !== mySummary.email.toLowerCase()
     );
 
+    const partnerMember = otherMembers[0] || null;
+
     const jointIncome =
       (Number(totalIncome) || 0) +
       otherMembers.reduce((sum, m) => sum + (Number(m.totalIncome) || 0), 0);
@@ -376,12 +392,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       otherMembers.reduce((sum, m) => sum + (Number(m.sharedVariableSpent) || 0), 0);
     const jointKvar = jointIncome - jointFixed - jointVariable;
 
+    const settlement = calculateHouseholdSettlement(hh, mySummary.email, period.startDate);
+
     return {
       householdName: hh.name || 'Gemensamt hushåll',
+      myName: mySummary.name || 'Jag',
+      partnerName: partnerMember?.name || 'Partner',
       jointIncome,
       jointFixed,
       jointVariable,
       jointKvar,
+      settlement,
     };
   }, [
     householdTick,
@@ -463,8 +484,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const yesterdayStr = useMemo(() => getYesterdaySwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
   const [isTodayScrolledOut, setIsTodayScrolledOut] = useState<boolean>(false);
-  const [reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
-  const [isInboxOpen, setIsInboxOpen] = useState(false);
+  const [_reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
 
   const activeModalAccount = useMemo(
     () =>
@@ -481,21 +501,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       .filter((tx) => !tx.isExcluded && doesTransactionMatchAccount(tx, activeModalAccount))
       .sort(compareTransactionsChronologically);
   }, [transactions, activeModalAccount]);
-
-  const activeAccountPeriodStats = useMemo(() => {
-    let incomeSum = 0;
-    let expenseSum = 0;
-    for (const tx of activeAccountTransactions) {
-      if (!isDateInPeriod(tx.date, period)) continue;
-      const amt = Math.abs(Number(tx.amount) || 0);
-      if (tx.type === 'income') {
-        incomeSum += amt;
-      } else {
-        expenseSum += amt;
-      }
-    }
-    return { incomeSum, expenseSum };
-  }, [activeAccountTransactions, period]);
 
   // Initialize reviewed IDs on first run so only transactions from the last 3 days appear as new
   useEffect(() => {
@@ -514,122 +519,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }
   }, [transactions, todayStr]);
 
-  const unreviewedTransactions = useMemo(() => {
-    const deduped = deduplicateTransactions(transactions || []);
-    return deduped
-      .filter((tx) => !tx.isExcluded && !reviewedIds.has(tx.id))
-      .sort(compareTransactionsChronologically)
-      .slice(0, 20);
-  }, [transactions, reviewedIds]);
-
   const handleMarkReviewed = (ids: string[]) => {
     markTransactionsReviewed(ids);
     setReviewedIds(getReviewedTransactionIds());
   };
-
-  // Spenderingstakt (Burn-rate) & Kassaprognos fram till nästa lön
-  const cashflowInsight = useMemo(() => {
-    const disposableBudget = Math.max(0, totalIncome - totalFixedExpenses);
-    const totalDays = Math.max(1, period.daysTotal || period.totalDays || 30);
-    const daysRemaining = Math.max(0, period.daysRemaining);
-    const daysPassed = Math.max(
-      1,
-      Math.min(totalDays, period.daysElapsed || totalDays - daysRemaining)
-    );
-
-    const idealDailySpend = disposableBudget > 0 ? disposableBudget / totalDays : 0;
-    const expectedVariableByToday = idealDailySpend * daysPassed;
-    const paceDelta = Math.round(expectedVariableByToday - totalVariableSpent);
-    const actualDailyBurn = daysPassed > 0 ? totalVariableSpent / daysPassed : 0;
-    const projectedEndSurplus = Math.round(
-      kvarAttSpendera - actualDailyBurn * daysRemaining
-    );
-
-    const periodProgressPct = Math.min(100, Math.round((daysPassed / totalDays) * 100));
-    const budgetUsedPct =
-      disposableBudget > 0
-        ? Math.min(100, Math.round((totalVariableSpent / disposableBudget) * 100))
-        : 0;
-
-    // Kommande obetalda fasta utgifter i perioden
-    const periodExpenseTxs = (transactions || []).filter(
-      (tx) => tx.type !== 'income' && !tx.isExcluded && isDateInPeriod(tx.date, period)
-    );
-    const upcomingFixed = fixedExpenses
-      .filter((exp) => {
-        const matched = periodExpenseTxs.some((tx) =>
-          Boolean(findMatchingFixedExpense(tx, [exp]))
-        );
-        const passed = isDueDayPaidInPeriod(exp.dueDay, period);
-        return !matched && !passed;
-      })
-      .map((exp) => ({
-        ...exp,
-        dueDate: getDueDateInPeriod(exp.dueDay, period),
-      }))
-      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
-
-    const upcomingFixedTotal = upcomingFixed.reduce(
-      (sum, e) => sum + (Number(e.amount) || 0),
-      0
-    );
-
-    return {
-      disposableBudget,
-      idealDailySpend: Math.round(idealDailySpend),
-      actualDailyBurn: Math.round(actualDailyBurn),
-      paceDelta,
-      projectedEndSurplus,
-      periodProgressPct,
-      budgetUsedPct,
-      upcomingFixed,
-      upcomingFixedTotal,
-    };
-  }, [
-    totalIncome,
-    totalFixedExpenses,
-    totalVariableSpent,
-    kvarAttSpendera,
-    period,
-    transactions,
-    fixedExpenses,
-  ]);
-
-  // ”Väntar på Swish”-lista + automatisk matchning mot inkomna Swish-insättningar
-  const pendingSwishItems = useMemo(() => {
-    const deduped = deduplicateTransactions(transactions || []);
-    const waiting = deduped.filter((t) => Boolean(t.isWaitingForSwish));
-    if (waiting.length === 0) return [];
-
-    const incomingSwishTxs = deduped.filter((t) => {
-      if (t.type !== 'income' || t.isExcluded) return false;
-      return (
-        t.category === 'Swish' ||
-        /swish/i.test(t.title || '') ||
-        /swish/i.test(t.rawDescription || '')
-      );
-    });
-
-    return waiting.map((tx) => {
-      const expectedAmt =
-        tx.pendingSwishAmount ||
-        (tx.originalAmount && tx.originalAmount > tx.amount
-          ? tx.originalAmount - tx.amount
-          : Math.round(tx.amount / 2));
-
-      // Sök efter en inkommen Swish på eller efter utgiftens datum med matchande belopp
-      const suggestedSwish = incomingSwishTxs.find((sw) => {
-        if ((sw.date || '') < (tx.date || '')) return false;
-        return Math.abs(Math.round(sw.amount) - Math.round(expectedAmt)) <= 5;
-      });
-
-      return {
-        tx,
-        expectedAmt,
-        suggestedSwish,
-      };
-    });
-  }, [transactions]);
 
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -949,7 +842,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 <div className="inline-flex items-center p-0.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)]">
                   <button
                     type="button"
-                    onClick={() => setHeroBudgetMode('personal')}
+                    onClick={() => handleSetHeroBudgetMode('personal')}
                     className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
                       heroBudgetMode === 'personal'
                         ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-2xs'
@@ -960,14 +853,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setHeroBudgetMode('joint')}
-                    className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer flex items-center gap-1 ${
+                    onClick={() => handleSetHeroBudgetMode('joint')}
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                       heroBudgetMode === 'joint'
                         ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-2xs'
                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <Users size={11} weight="bold" />
+                    <Users size={12} weight="bold" />
                     <span>Gemensamt</span>
                   </button>
                 </div>
@@ -976,10 +869,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   <button
                     type="button"
                     onClick={onNavigateToHousehold}
-                    className="text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-0.5 transition-colors cursor-pointer"
+                    className="text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer hover:opacity-80"
                   >
-                    <span>Delad ekonomi</span>
-                    <CaretRight size={10} weight="bold" />
+                    {householdBudgetStats.settlement.isSettledForCurrentPeriod ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <Check size={11} weight="bold" />
+                        <span>Utjämnat</span>
+                      </span>
+                    ) : householdBudgetStats.settlement.netBalance > 5 ? (
+                      <span className="text-emerald-600 dark:text-emerald-400">
+                        {householdBudgetStats.partnerName} är skyldig {formatKr(householdBudgetStats.settlement.netBalance)}
+                      </span>
+                    ) : householdBudgetStats.settlement.netBalance < -5 ? (
+                      <span className="text-amber-600 dark:text-amber-400">
+                        Du ska swisha {formatKr(Math.abs(householdBudgetStats.settlement.netBalance))}
+                      </span>
+                    ) : (
+                      <span className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                        Delad ekonomi
+                      </span>
+                    )}
+                    <CaretRight size={10} weight="bold" className="text-[var(--text-muted)]" />
                   </button>
                 )}
               </div>
@@ -997,21 +907,31 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               title={showBudgetBreakdown ? 'Dölj budgetdetaljer' : 'Visa budgetdetaljer'}
             >
               <div className="flex items-center justify-between gap-2">
-                <span
-                  className={`text-[12px] font-normal ${
-                    isOverBudget
-                      ? 'text-rose-600 dark:text-rose-400 font-medium'
-                      : 'text-[var(--text-secondary)]'
-                  }`}
-                >
-                  {isOverBudget
-                    ? isJointMode
-                      ? 'Gemensamt över budget'
-                      : 'Över budget'
-                    : isJointMode
-                    ? 'Gemensamt kvar att spendera'
-                    : 'Kvar att spendera'}
-                </span>
+                {isJointMode ? (
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="flex -space-x-1 shrink-0">
+                      <span className="w-4 h-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center font-display font-semibold text-[8px] uppercase">
+                        {householdBudgetStats!.myName.slice(0, 1)}
+                      </span>
+                      <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-[var(--surface-color)] flex items-center justify-center font-display font-semibold text-[8px] uppercase">
+                        {householdBudgetStats!.partnerName.slice(0, 1)}
+                      </span>
+                    </span>
+                    <span className="text-[12px] font-medium text-[var(--text-primary)] truncate">
+                      Hushållet · {householdBudgetStats!.myName} & {householdBudgetStats!.partnerName}
+                    </span>
+                  </div>
+                ) : (
+                  <span
+                    className={`text-[12px] font-normal ${
+                      isOverBudget
+                        ? 'text-rose-600 dark:text-rose-400 font-medium'
+                        : 'text-[var(--text-secondary)]'
+                    }`}
+                  >
+                    {isOverBudget ? 'Över budget' : 'Kvar att spendera'}
+                  </span>
+                )}
                 <span className="text-[12px] text-[var(--text-secondary)] font-normal tabular-nums text-right">
                   {period.startLabel} – {period.endLabel}
                 </span>
@@ -1021,14 +941,26 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {isInitialLoading && accounts.length === 0 ? (
                   <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
                 ) : (
-                  <div
-                    className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums ${
-                      activeKvar >= 0
-                        ? 'text-[var(--text-primary)]'
-                        : 'text-rose-600 dark:text-rose-400'
-                    }`}
-                  >
-                    {formatKr(activeKvar)}
+                  <div className="min-w-0">
+                    <div
+                      className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums ${
+                        activeKvar >= 0
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-rose-600 dark:text-rose-400'
+                      }`}
+                    >
+                      {formatKr(activeKvar)}
+                    </div>
+                    {isJointMode && (
+                      <div className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
+                        <span>
+                          Din andel ({Math.round(householdBudgetStats!.settlement.myShareRatio * 100)} %):
+                        </span>
+                        <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+                          {formatKr(Math.round(activeKvar * householdBudgetStats!.settlement.myShareRatio))}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1064,7 +996,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     className="pr-3 text-left min-w-0 cursor-pointer group/stat hover:opacity-85 active:scale-[0.98] transition-all focus:outline-none"
                   >
                     <span className="ui-stat-label inline-flex items-center gap-1">
-                      <span>Inkomst</span>
+                      <span>{isJointMode ? 'Gemensam inkomst' : 'Inkomst'}</span>
                       <CaretRight
                         size={10}
                         weight="bold"
@@ -1090,7 +1022,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     className="px-3 text-left min-w-0 cursor-pointer group/stat hover:opacity-85 active:scale-[0.98] transition-all focus:outline-none"
                   >
                     <span className="ui-stat-label inline-flex items-center gap-1">
-                      <span>Fasta</span>
+                      <span>{isJointMode ? 'Gemensamma fasta' : 'Fasta'}</span>
                       <CaretRight
                         size={10}
                         weight="bold"
@@ -1116,7 +1048,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     className="pl-3 text-left min-w-0 cursor-pointer group/stat hover:opacity-85 active:scale-[0.98] transition-all focus:outline-none"
                   >
                     <span className="ui-stat-label inline-flex items-center gap-1">
-                      <span>Rörligt</span>
+                      <span>{isJointMode ? 'Gemensamt rörligt' : 'Rörligt'}</span>
                       <CaretRight
                         size={10}
                         weight="bold"
@@ -1141,7 +1073,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO · BANKKONTON                             */}
       {/* ============================================================== */}
-      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
+      <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4">
         <button
           type="button"
           onClick={() => {
@@ -1288,7 +1220,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* MODUL 2.5: SPARMÅL · BUFFERT & DRÖMMAR                         */}
       {/* ============================================================== */}
       {onNavigateToGoals && (
-        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[22px] px-4 py-3.5 sm:px-5 sm:py-4">
+        <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={() => {
@@ -1559,9 +1491,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 fixedExpenses,
                 incomes
               );
-              const isFixedExpenseTx = Boolean(
-                !isIncome && (recurringStatus.isRecurring || tx.id.startsWith('planned-exp-'))
-              );
               const hasReceipts = Boolean(
                 (Array.isArray(tx.receipts) && tx.receipts.length > 0) || tx.receiptUrl
               );
@@ -1708,6 +1637,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       <BottomSheet
         isOpen={Boolean(activeHeroPopup)}
         onClose={() => setActiveHeroPopup(null)}
+        surfaceClass="bg-[var(--bg-color)]"
         title={
           activeHeroPopup === 'income'
             ? 'Inkomst'
@@ -1716,7 +1646,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             : 'Rörliga utgifter'
         }
       >
-        <div className="divide-y divide-[var(--border-subtle)] -mt-2">
+        <div>
           {activeHeroPopup === 'income' &&
             (() => {
               const extraIncomeTxs = deduplicateTransactions(transactions || []).filter(
@@ -1733,16 +1663,25 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
               if (incomes.length === 0 && extraIncomeTxs.length === 0) {
                 return (
-                  <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                  <div className="ui-list-card py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
                     Inga inkomster
                   </div>
                 );
               }
 
               return (
-                <>
+                <div className="ui-list-card">
                   {incomes.map((inc) => {
                     const catLabel = inc.category || 'Lön';
+                    const matchedTx =
+                      periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
+                    const effectiveAmt = matchedTx
+                      ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
+                      : Math.round(Number(inc.amount) || 0);
+                    const hasVariableDiff =
+                      Boolean(matchedTx) &&
+                      effectiveAmt !== Math.round(Number(inc.amount) || 0);
+
                     return (
                       <button
                         key={inc.id}
@@ -1755,7 +1694,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         }}
                         className="ui-tx-row"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
                           <ItemLogo
                             name={inc.name}
                             category={catLabel}
@@ -1765,36 +1704,32 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           />
                           <div className="min-w-0 flex-1">
                             <span className="ui-row-title">{inc.name}</span>
-                            <span className="ui-row-subtitle">
+                            <span className="ui-row-subtitle flex items-center gap-1">
                               <CategoryIcon
                                 category={catLabel}
                                 size={11}
-                                className="shrink-0"
+                                className="shrink-0 text-[var(--text-secondary)]"
                               />
                               <span className="truncate">{catLabel}</span>
                             </span>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          {(() => {
-                            const matchedTx =
-                              periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
-                            const effectiveAmt = matchedTx
-                              ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
-                              : inc.amount;
-                            return (
-                              <>
-                                <span className="ui-row-amount-income">
-                                  +{formatKr(effectiveAmt)}
-                                </span>
-                                <span className="ui-row-meta">
-                                  {matchedTx
-                                    ? `Inkommen · ${formatSwedishDateHeading(matchedTx.date)}`
-                                    : `Den ${inc.payday || 25}:e`}
-                                </span>
-                              </>
-                            );
-                          })()}
+                          <span className="ui-row-amount-income">
+                            +{formatKr(effectiveAmt)}
+                          </span>
+                          <span className="ui-row-meta flex items-center justify-end gap-1">
+                            <span>
+                              {hasVariableDiff
+                                ? `Riktvärde ${formatKr(inc.amount)}`
+                                : `Den ${inc.payday || 25}:e`}
+                            </span>
+                            {matchedTx && (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                · Utbetald
+                              </span>
+                            )}
+                          </span>
                         </div>
                       </button>
                     );
@@ -1802,6 +1737,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
                   {extraIncomeTxs.map((tx) => {
                     const catLabel = tx.category || 'Övrig inkomst';
+                    const isPending =
+                      tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
                     return (
                       <button
                         key={tx.id}
@@ -1812,7 +1749,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         }}
                         className="ui-tx-row"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
                           <ItemLogo
                             name={tx.title}
                             category={catLabel}
@@ -1822,11 +1759,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           />
                           <div className="min-w-0 flex-1">
                             <span className="ui-row-title">{tx.title}</span>
-                            <span className="ui-row-subtitle">
+                            <span className="ui-row-subtitle flex items-center gap-1">
                               <CategoryIcon
                                 category={catLabel}
                                 size={11}
-                                className="shrink-0"
+                                className="shrink-0 text-[var(--text-secondary)]"
                               />
                               <span className="truncate">{catLabel}</span>
                             </span>
@@ -1837,178 +1774,271 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                             +{formatKr(tx.amount)}
                           </span>
                           <span className="ui-row-meta">
-                            Inkommen · {formatSwedishDateHeading(tx.date)}
+                            {isPending
+                              ? 'Reserverat'
+                              : formatSwedishDateHeading(tx.date)}
                           </span>
                         </div>
                       </button>
                     );
                   })}
-                </>
+                </div>
               );
             })()}
 
           {activeHeroPopup === 'fixed' &&
             (fixedExpenses.length > 0 ? (
-              fixedExpenses.map((exp) => {
-                const catLabel = exp.category || 'Räkningar';
-                const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
-                const isPartnerConnected = hasConnectedHouseholdPartner();
-                const shareRatio =
-                  isPartnerConnected && exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
-                    ? exp.amount / exp.fullAmount
-                    : 1;
-                const effectiveAmt = matchedTx
-                  ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
-                  : exp.amount;
-                return (
-                  <button
-                    key={exp.id}
-                    type="button"
-                    onClick={() => {
-                      if (onSelectFixed) {
-                        setActiveHeroPopup(null);
-                        onSelectFixed(exp);
-                      }
-                    }}
-                    className="ui-tx-row"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <ItemLogo
-                        name={exp.name}
-                        category={catLabel}
-                        logoUrl={exp.logo}
-                        size="md"
-                        isRecurring={false}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title">{exp.name}</span>
-                        <span className="ui-row-subtitle">
-                          <CategoryIcon
-                            category={catLabel}
-                            size={11}
-                            className="shrink-0"
-                          />
-                          <span className="truncate">
-                            {catLabel}
-                            {isPartnerConnected &&
-                            exp.isShared &&
-                            exp.fullAmount &&
-                            exp.fullAmount > exp.amount
-                              ? ` · Delad (av ${formatKr(exp.fullAmount)})`
-                              : ''}
+              <div className="ui-list-card">
+                {fixedExpenses.map((exp) => {
+                  const catLabel = exp.category || 'Räkningar';
+                  const matchedTx =
+                    periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+                  const isPartnerConnected = hasConnectedHouseholdPartner();
+                  const shareRatio =
+                    isPartnerConnected &&
+                    exp.isShared &&
+                    exp.fullAmount &&
+                    exp.fullAmount > 0 &&
+                    exp.amount > 0
+                      ? exp.amount / exp.fullAmount
+                      : 1;
+                  const effectiveAmt = matchedTx
+                    ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
+                    : Math.round(Number(exp.amount) || 0);
+                  const hasVariableDiff =
+                    Boolean(matchedTx) &&
+                    effectiveAmt !== Math.round(Number(exp.amount) || 0);
+
+                  return (
+                    <button
+                      key={exp.id}
+                      type="button"
+                      onClick={() => {
+                        if (onSelectFixed) {
+                          setActiveHeroPopup(null);
+                          onSelectFixed(exp);
+                        }
+                      }}
+                      className="ui-tx-row"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <ItemLogo
+                          name={exp.name}
+                          category={catLabel}
+                          logoUrl={exp.logo}
+                          size="md"
+                          isRecurring={true}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <span className="ui-row-title truncate block">
+                            {exp.name}
                           </span>
+                          <span className="ui-row-subtitle flex items-center gap-1">
+                            <CategoryIcon
+                              category={catLabel}
+                              size={11}
+                              className="shrink-0 text-[var(--text-secondary)]"
+                            />
+                            <span className="truncate">
+                              {catLabel}
+                              {isPartnerConnected && exp.isShared
+                                ? exp.fullAmount && exp.fullAmount > exp.amount
+                                  ? ` · Delad (Totalt ${formatKr(exp.fullAmount)})`
+                                  : ' · Delad'
+                                : ''}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="ui-row-amount">
+                          -{formatKr(effectiveAmt)}
+                        </span>
+                        <span className="ui-row-meta flex items-center justify-end gap-1">
+                          <span>
+                            {hasVariableDiff
+                              ? `Riktvärde ${formatKr(exp.amount)}`
+                              : `Den ${exp.dueDay || 28}:e`}
+                          </span>
+                          {matchedTx && (
+                            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                              · Betald
+                            </span>
+                          )}
                         </span>
                       </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="ui-row-amount">
-                        -{formatKr(effectiveAmt)}
-                      </span>
-                      <span className="ui-row-meta">
-                        {matchedTx
-                          ? `Betald · ${formatSwedishDateHeading(matchedTx.date)}`
-                          : `Den ${exp.dueDay || 28}:e`}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })
+                    </button>
+                  );
+                })}
+              </div>
             ) : (
-              <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+              <div className="ui-list-card py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
                 Inga fasta utgifter
               </div>
             ))}
 
           {activeHeroPopup === 'variable' &&
-            (variablePeriodTransactions.length > 0 ? (
-              variablePeriodTransactions.map((tx) => {
-                const isRefund = tx.type === 'income';
-                const isPending =
-                  tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD';
-                const isSplit =
-                  hasConnectedHouseholdPartner() &&
-                  tx.originalAmount !== undefined &&
-                  tx.originalAmount > tx.amount;
+            (() => {
+              if (variablePeriodTransactions.length === 0) {
                 return (
-                  <button
-                    key={tx.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveHeroPopup(null);
-                      onSelectTransaction(tx);
-                    }}
-                    className="ui-tx-row"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <ItemLogo
-                        name={tx.title}
-                        category={tx.category}
-                        logoUrl={tx.logo}
-                        size="md"
-                        isRecurring={false}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title">{tx.title}</span>
-                        <span className="ui-row-subtitle">
-                          <CategoryIcon
-                            category={tx.category}
-                            size={11}
-                            className="shrink-0"
-                          />
-                          <span className="truncate">{tx.category}</span>
-                          {isSplit && tx.originalAmount && (
-                            <span className="text-[11px] opacity-80 shrink-0">
-                              · av {formatKr(tx.originalAmount)}
-                            </span>
-                          )}
-                          {tx.isHearted && (
-                            <Heart
-                              size={11}
-                              weight="fill"
-                              className="text-rose-500 shrink-0 ml-0.5"
-                            />
-                          )}
-                          {tx.isWaitingForPackage && (
-                            <Package
-                              size={11}
-                              weight="fill"
-                              className="text-amber-500 shrink-0 ml-0.5"
-                            />
-                          )}
-                          {tx.receiptUrl && (
-                            <Paperclip
-                              size={11}
-                              weight="bold"
-                              className="text-[var(--text-secondary)] shrink-0 ml-0.5"
-                            />
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span
-                        className={
-                          isRefund ? 'ui-row-amount-income' : 'ui-row-amount'
-                        }
-                      >
-                        {isRefund
-                          ? `+${formatKr(tx.amount)}`
-                          : `-${formatKr(tx.amount)}`}
-                      </span>
-                      <span className="ui-row-meta">
-                        {isPending
-                          ? 'Reserverat'
-                          : formatSwedishDateHeading(tx.date)}
-                      </span>
-                    </div>
-                  </button>
+                  <div className="ui-list-card py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                    Inga rörliga utgifter i perioden
+                  </div>
                 );
-              })
-            ) : (
-              <div className="py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
-                Inga rörliga utgifter i perioden
-              </div>
-            ))}
+              }
+
+              const groupsMap = new Map<string, TransactionItem[]>();
+              for (const tx of variablePeriodTransactions) {
+                const key = tx.date || todayStr;
+                const list = groupsMap.get(key);
+                if (list) {
+                  list.push(tx);
+                } else {
+                  groupsMap.set(key, [tx]);
+                }
+              }
+
+              const sortedDateKeys = Array.from(groupsMap.keys()).sort((a, b) =>
+                b.localeCompare(a)
+              );
+
+              return (
+                <div className="space-y-4">
+                  {sortedDateKeys.map((dateKey) => {
+                    const items = groupsMap.get(dateKey) || [];
+                    const dayNet = items.reduce((acc, item) => {
+                      const amt = Number(item.amount) || 0;
+                      return item.type === 'income' ? acc + amt : acc - amt;
+                    }, 0);
+
+                    return (
+                      <div key={dateKey}>
+                        <div className="ui-date-header">
+                          <span className="font-medium text-[var(--text-secondary)]">
+                            {formatSwedishDateHeading(dateKey)}
+                          </span>
+                          <span
+                            className={`font-display font-medium tabular-nums ${
+                              dayNet > 0
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-[var(--text-secondary)]'
+                            }`}
+                          >
+                            {dayNet > 0
+                              ? `+${formatKr(dayNet)}`
+                              : dayNet < 0
+                              ? `-${formatKr(Math.abs(dayNet))}`
+                              : formatKr(0)}
+                          </span>
+                        </div>
+
+                        <section className="ui-list-card">
+                          {items.map((tx) => {
+                            const isRefund = tx.type === 'income';
+                            const isPending =
+                              tx.bookingStatus === 'PDNG' ||
+                              tx.bookingStatus === 'HOLD';
+                            const isSplit =
+                              hasConnectedHouseholdPartner() &&
+                              tx.originalAmount !== undefined &&
+                              tx.originalAmount > tx.amount;
+                            const hasReceipts = Boolean(
+                              (Array.isArray(tx.receipts) &&
+                                tx.receipts.length > 0) ||
+                                tx.receiptUrl
+                            );
+                            const statusSub = isPending
+                              ? 'Reserverat'
+                              : getTransactionTime(tx);
+
+                            return (
+                              <button
+                                key={tx.id}
+                                type="button"
+                                onClick={() => {
+                                  setActiveHeroPopup(null);
+                                  onSelectTransaction(tx);
+                                }}
+                                className="ui-tx-row"
+                              >
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                  <ItemLogo
+                                    name={tx.title}
+                                    category={tx.category}
+                                    logoUrl={tx.logo}
+                                    size="md"
+                                    isRecurring={false}
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <span className="ui-row-title">
+                                      {tx.title}
+                                    </span>
+                                    <span className="ui-row-subtitle">
+                                      <CategoryIcon
+                                        category={tx.category}
+                                        size={11}
+                                        className="shrink-0"
+                                      />
+                                      <span className="truncate">
+                                        {tx.category}
+                                      </span>
+                                      {isSplit && tx.originalAmount && (
+                                        <span className="text-[11px] opacity-80 shrink-0">
+                                          · av {formatKr(tx.originalAmount)}
+                                        </span>
+                                      )}
+                                      {tx.isHearted && (
+                                        <Heart
+                                          size={11}
+                                          weight="fill"
+                                          className="text-rose-500 shrink-0 ml-0.5"
+                                        />
+                                      )}
+                                      {tx.isWaitingForPackage && (
+                                        <Package
+                                          size={11}
+                                          weight="fill"
+                                          className="text-amber-500 shrink-0 ml-0.5"
+                                        />
+                                      )}
+                                      {hasReceipts && (
+                                        <Paperclip
+                                          size={11}
+                                          weight="bold"
+                                          className="text-[var(--text-secondary)] shrink-0 ml-0.5"
+                                        />
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <span
+                                    className={
+                                      isRefund
+                                        ? 'ui-row-amount-income'
+                                        : 'ui-row-amount'
+                                    }
+                                  >
+                                    {isRefund
+                                      ? `+${formatKr(tx.amount)}`
+                                      : `-${formatKr(tx.amount)}`}
+                                  </span>
+                                  {statusSub ? (
+                                    <span className="ui-row-meta">
+                                      {statusSub}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </section>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
         </div>
       </BottomSheet>
 
@@ -2094,9 +2124,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <div className="font-display text-[28px] sm:text-[32px] font-semibold tracking-[-0.025em] text-[var(--text-primary)] tabular-nums mt-1 leading-tight">
                 {formatKr(activeModalAccount.balance)}
               </div>
-              <span className="text-[12px] text-[var(--text-secondary)] mt-0.5">
-                Aktuellt saldo
-              </span>
             </div>
 
             {/* Kontouppgifter & Inställningar */}

@@ -51,8 +51,10 @@ export function normalizeMerchantForDedup(rawName: unknown): string {
   }
 
   return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\b(ab|aktiebolag|sverige|sweden|se|inc|ltd|gmbh|as|oy|aps)\b/gi, ' ')
-    .replace(/\b(kortköp|kortkop|betalning|köp|kop|autogiro|bg|pg|bankgiro|plusgiro)\b/gi, ' ')
+    .replace(/\b(kortkop|betalning|kop|autogiro|bg|pg|bankgiro|plusgiro)\b/gi, ' ')
     .replace(/[0-9*#/_.,:-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -134,15 +136,60 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
           return true;
         }
 
-        // B. Aktiva reservationer (PDNG/HOLD) får ALDRIG slås ihop heuristiskt med bokförda (BOOK)
-        // transaktioner baserat på bara belopp/butiksnamn, eftersom användaren annars tappar
-        // synliga reservationer från banken. Endast om de delar exakt samma icke-volatila referens slås de ihop.
+        // B. Reservation (PDNG/HOLD) som övergått till bokförd (BOOK):
+        // Om de delar samma icke-volatila referens ELLER har samma konto, samma belopp, kompatibelt butiksnamn
+        // och bokföringsdatumet är >= reservationsdatumet (inom 0–7 dagar) slås reservationen ihop med den bokförda posten.
+        // En NY reservation (pendingDate > bookedDate) slås däremot ALDRIG ihop med ett äldre bokfört köp.
         if (isItemPending !== isExistPending) {
           if (
             (item.transactionId && existing.transactionId && item.transactionId === existing.transactionId) ||
             (item.entryReference && existing.entryReference && item.entryReference === existing.entryReference)
           ) {
             return true;
+          }
+
+          if (
+            item.bankAccountId &&
+            existing.bankAccountId &&
+            item.bankAccountId !== existing.bankAccountId
+          ) {
+            return false;
+          }
+
+          const pendingTx = isItemPending ? item : existing;
+          const bookedTx = isItemPending ? existing : item;
+          const pendingDateStr = pendingTx.valueDate || pendingTx.date || '';
+          const bookedDateStr = bookedTx.bookingDate || bookedTx.date || '';
+          if (pendingDateStr && bookedDateStr) {
+            const pMs = new Date(`${pendingDateStr.slice(0, 10)}T12:00:00Z`).getTime();
+            const bMs = new Date(`${bookedDateStr.slice(0, 10)}T12:00:00Z`).getTime();
+            const signedDays = (bMs - pMs) / (1000 * 60 * 60 * 24);
+            // Bokförd post måste ligga på samma dag eller upp till 7 dagar efter reservationen (aldrig före)
+            if (signedDays >= -0.05 && signedDays <= 7.5) {
+              const itemIsGen = isGenericDedupTitle(itemTitleNorm) || isGenericDedupTitle(item.title);
+              const existIsGen = isGenericDedupTitle(existTitleNorm) || isGenericDedupTitle(existing.title);
+              if (itemIsGen || existIsGen) {
+                return true;
+              }
+              if (itemTitleNorm && existTitleNorm) {
+                if (
+                  itemTitleNorm === existTitleNorm ||
+                  itemTitleNorm.includes(existTitleNorm) ||
+                  existTitleNorm.includes(itemTitleNorm)
+                ) {
+                  return true;
+                }
+                const tokens1 = itemTitleNorm.split(' ').filter((t) => t.length >= 3);
+                const tokens2 = existTitleNorm.split(' ').filter((t) => t.length >= 3);
+                if (
+                  tokens1.some((t1) =>
+                    tokens2.some((t2) => t1 === t2 || t1.includes(t2) || t2.includes(t1))
+                  )
+                ) {
+                  return true;
+                }
+              }
+            }
           }
           return false;
         }
@@ -157,6 +204,19 @@ export function deduplicateTransactions(items: TransactionItem[]): TransactionIt
           if (itemDate === existDate) {
             return true;
           }
+        }
+
+        // D. Samma konto, samma bokningsstatus, samma datum, samma belopp och samma handlare (när saldo saknas)
+        if (
+          (!item.bankAccountId || !existing.bankAccountId || item.bankAccountId === existing.bankAccountId) &&
+          itemBal === null &&
+          existBal === null &&
+          itemDate === existDate &&
+          itemTitleNorm &&
+          existTitleNorm &&
+          itemTitleNorm === existTitleNorm
+        ) {
+          return true;
         }
 
         return false;

@@ -9,9 +9,6 @@ import {
   Package,
   Paperclip,
   PiggyBank,
-  Users,
-  Sparkle,
-  GearSix,
   CaretRight,
 } from '@phosphor-icons/react';
 
@@ -44,9 +41,6 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onChangeTab,
-  onOpenHousehold,
-  onOpenDiscover,
-  activeSettingsSubView = 'main',
   goalsCount = 0,
   savedCount = 0,
   packagesCount = 0,
@@ -79,32 +73,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       onSelect: () => onChangeTab('goals'),
     },
     {
-      id: 'household',
-      label: 'Delad ekonomi',
-      icon: Users,
-      isSelected: activeTab === 'settings' && activeSettingsSubView === 'household',
-      onSelect: () => {
-        if (onOpenHousehold) {
-          onOpenHousehold();
-        } else {
-          onChangeTab('settings');
-        }
-      },
-    },
-    {
-      id: 'discover',
-      label: 'Prenumerationsscanner',
-      icon: Sparkle,
-      isSelected: activeTab === 'settings' && activeSettingsSubView === 'discover',
-      onSelect: () => {
-        if (onOpenDiscover) {
-          onOpenDiscover();
-        } else {
-          onChangeTab('settings');
-        }
-      },
-    },
-    {
       id: 'saved',
       label: 'Sparade köp',
       icon: Heart,
@@ -127,16 +95,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       badge: receiptsCount > 0 ? receiptsCount : undefined,
       isSelected: activeTab === 'receipts',
       onSelect: () => onChangeTab('receipts'),
-    },
-    {
-      id: 'settings',
-      label: 'Inställningar',
-      icon: GearSix,
-      isSelected:
-        activeTab === 'settings' &&
-        activeSettingsSubView !== 'household' &&
-        activeSettingsSubView !== 'discover',
-      onSelect: () => onChangeTab('settings'),
     },
   ];
 
@@ -220,42 +178,45 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           </div>
         )}
 
-        {/* Unified Floating Glass Capsule Dock (All 5 items in one cohesive pill) */}
-        <div className="bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id && !isMenuOpen;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onChangeTab(tab.id);
-                }}
-                className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
-                  isActive
-                    ? 'text-[var(--text-primary)] font-semibold'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
-                }`}
-              >
-                <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
+        {/* Split Floating Glass Dock: Main 4-tab pill + Separated "Mer" button */}
+        <div className="flex items-stretch gap-2.5">
+          <div className="flex-1 bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id && !isMenuOpen;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onChangeTab(tab.id);
+                  }}
+                  className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+                    isActive
+                      ? 'text-[var(--text-primary)] font-semibold'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
+                  }`}
+                >
+                  <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
+                  <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-          {/* Integrated "Mer" Tab inside the same unified capsule dock */}
+          {/* Separated "Mer" Capsule Button */}
           <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
             aria-label="Mer"
-            className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+            aria-expanded={isMenuOpen}
+            className={`bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border rounded-full shadow-nav px-4 py-1.5 flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 shrink-0 min-w-[60px] ${
               isMoreActive
-                ? 'text-[var(--text-primary)] font-semibold'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
+                ? 'border-[var(--border-control)] text-[var(--text-primary)] font-semibold'
+                : 'border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
             <span className="relative inline-flex">

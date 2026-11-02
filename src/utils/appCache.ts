@@ -396,6 +396,47 @@ export function resolveMerchantAlias(
   return null;
 }
 
+export function removeMerchantAliasForSources(
+  sources: Array<string | null | undefined>
+): void {
+  if (typeof window === 'undefined' || !sources || sources.length === 0) return;
+  try {
+    const map = getMerchantAliases();
+    const keysToRemove = new Set<string>();
+    const lowerSources = new Set<string>();
+    for (const s of sources) {
+      if (!s || typeof s !== 'string') continue;
+      const trimmed = s.trim();
+      if (!trimmed) continue;
+      lowerSources.add(trimmed.toLowerCase());
+      for (const v of extractMerchantKeyVariants(trimmed)) {
+        if (v) keysToRemove.add(v);
+      }
+    }
+    if (keysToRemove.size === 0 && lowerSources.size === 0) return;
+
+    let changed = false;
+    for (const [k, v] of Object.entries(map)) {
+      const targetNorm = normalizeMerchantKey(v.name);
+      const targetLower = v.name.toLowerCase().trim();
+      if (
+        keysToRemove.has(k) ||
+        (targetNorm && keysToRemove.has(targetNorm)) ||
+        lowerSources.has(targetLower)
+      ) {
+        delete map[k];
+        changed = true;
+      }
+    }
+    if (changed) {
+      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(map));
+      syncAllUserPreferencesToSupabase();
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export function getDismissedFixedMerchants(): Set<string> {
   if (typeof window === 'undefined') return new Set();
   try {
@@ -1277,6 +1318,7 @@ export function saveSavingsGoals(goals: SavingsGoalItem[]): void {
 
 export interface TransactionMetaPatch {
   customTitle?: string;
+  originalTitle?: string;
   customCategory?: string;
   isHearted?: boolean;
   isWaitingForPackage?: boolean;
@@ -1620,6 +1662,38 @@ export function saveSwishPhoneDirectoryEntry(rawPhone: string, rawName: string):
 
     window.dispatchEvent(
       new CustomEvent('dejz:swish-directory-updated', { detail: { phone: norm, name: cleanName } })
+    );
+    syncAllUserPreferencesToSupabase();
+  } catch {
+    // ignore
+  }
+}
+
+export function removeSwishPhoneDirectoryEntry(rawPhone: string): void {
+  if (typeof window === 'undefined') return;
+  const norm = normalizeSwishPhoneKey(rawPhone);
+  if (!norm) return;
+  try {
+    const rawLookup = localStorage.getItem(SWISH_PHONE_LOOKUP_KEY);
+    if (rawLookup) {
+      const lookupMap: Record<string, string> = JSON.parse(rawLookup);
+      if (lookupMap && typeof lookupMap === 'object' && norm in lookupMap) {
+        delete lookupMap[norm];
+        localStorage.setItem(SWISH_PHONE_LOOKUP_KEY, JSON.stringify(lookupMap));
+      }
+    }
+
+    const rawContacts = localStorage.getItem('dejz_swish_contacts');
+    if (rawContacts) {
+      const contactsList: { name: string; phone: string }[] = JSON.parse(rawContacts);
+      if (Array.isArray(contactsList)) {
+        const filtered = contactsList.filter((c) => normalizeSwishPhoneKey(c?.phone) !== norm);
+        localStorage.setItem('dejz_swish_contacts', JSON.stringify(filtered));
+      }
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('dejz:swish-directory-updated', { detail: { phone: norm, name: '' } })
     );
     syncAllUserPreferencesToSupabase();
   } catch {

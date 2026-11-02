@@ -36,7 +36,7 @@ import {
 } from './components/AdminSimulator';
 import { ItemLogo } from './components/ItemLogo';
 import { CategoryIcon } from './components/CategoryIcon';
-import { Heart, Package, Paperclip, FileText, Eye } from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, FileText, Eye, CheckCircle, ArrowRight, X } from '@phosphor-icons/react';
 import { BankModal } from './components/modals/BankModal';
 import { IncomeModal } from './components/modals/IncomeModal';
 import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
@@ -124,6 +124,7 @@ import {
   getMerchantAliases,
   saveMerchantAlias,
   resolveMerchantAlias,
+  removeMerchantAliasForSources,
   isGenericPlaceholderMerchant,
   normalizeMerchantKey,
   ensureValidUuid,
@@ -164,6 +165,31 @@ import {
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
 
+const RESERVATION_PURCHASE_DATES_KEY = 'dejz_reservation_purchase_dates_v1';
+
+function getSavedReservationPurchaseDates(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(RESERVATION_PURCHASE_DATES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveReservationPurchaseDate(txId: string, purchaseDate: string): void {
+  if (typeof window === 'undefined' || !txId || !/^\d{4}-\d{2}-\d{2}$/.test(purchaseDate)) return;
+  try {
+    const map = getSavedReservationPurchaseDates();
+    const cleanId = txId.startsWith('bank-') ? txId : `bank-${txId}`;
+    if (map[cleanId] === purchaseDate) return;
+    map[cleanId] = purchaseDate;
+    localStorage.setItem(RESERVATION_PURCHASE_DATES_KEY, JSON.stringify(map));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 function getActualTransactionDate(bt: BankTransactionItem): string {
   return getActualBankPaymentDateAndMeta(bt).paymentDate;
 }
@@ -195,8 +221,15 @@ function sanitizeTransactionItem(
       ? savedMeta.customAmount
       : item.amount;
 
+  const hasExplicitCustomTitle = Boolean(
+    savedMeta?.customTitle &&
+      savedMeta.customTitle.trim() &&
+      savedMeta.customTitle.trim().toLowerCase() !== 'banktransaktion'
+  );
+
   const updated: TransactionItem = {
     ...item,
+    originalTitle: item.originalTitle ?? savedMeta?.originalTitle,
     amount: effectiveAmount,
     originalAmount: effectiveOriginalAmount,
     linkedSwishTxId:
@@ -266,9 +299,12 @@ function sanitizeTransactionItem(
     }
   }
 
-  // 1. Fastställ det faktiska köpdatumet (utan att flytta söndagsköp till lördag eller skriva över bevarat reservationsdatum)
+  // 1. Fastställ det faktiska köpdatumet (lås alltid ursprungligt köpdatum från reservation om sådant finns)
+  const lockedResDate = updated.id ? getSavedReservationPurchaseDates()[updated.id] : undefined;
   const embeddedDate = parseDateFromSwedishText(combinedText, todayStr);
-  if (embeddedDate && embeddedDate <= todayStr) {
+  if (lockedResDate && /^\d{4}-\d{2}-\d{2}$/.test(lockedResDate) && lockedResDate <= todayStr) {
+    updated.date = lockedResDate;
+  } else if (embeddedDate && embeddedDate <= todayStr) {
     updated.date = embeddedDate;
   } else if (
     updated.valueDate &&
@@ -303,7 +339,7 @@ function sanitizeTransactionItem(
     updated.category = 'Swish';
     updated.logo = SWISH_SVG_DATA_URI;
 
-    if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+    if (hasExplicitCustomTitle && savedMeta?.customTitle) {
       updated.title = savedMeta.customTitle;
       return updated;
     }
@@ -371,7 +407,7 @@ function sanitizeTransactionItem(
 
   if (aliasMatch && !isGenericPlaceholderMerchant(aliasMatch.name)) {
     updated.title =
-      savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)
+      hasExplicitCustomTitle && savedMeta?.customTitle
         ? savedMeta.customTitle
         : aliasMatch.name;
     updated.category = normalizeCategoryToValid(
@@ -395,7 +431,7 @@ function sanitizeTransactionItem(
     const matchedFixed = findMatchingFixedExpense(updated, fixedList);
     if (matchedFixed) {
       const amountMatches = isFixedExpenseAmountMatch(matchedFixed, updated.amount);
-      if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+      if (hasExplicitCustomTitle && savedMeta?.customTitle) {
         updated.title = savedMeta.customTitle;
       } else if (!hasDirectBankName && amountMatches) {
         updated.title = matchedFixed.name;
@@ -415,7 +451,7 @@ function sanitizeTransactionItem(
   if (updated.type === 'income' && incomeList && incomeList.length > 0) {
     const matchedInc = findMatchingIncome(updated, incomeList);
     if (matchedInc) {
-      if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+      if (hasExplicitCustomTitle && savedMeta?.customTitle) {
         updated.title = savedMeta.customTitle;
       } else if (!hasDirectBankName) {
         updated.title = matchedInc.name;
@@ -432,7 +468,7 @@ function sanitizeTransactionItem(
     }
   }
 
-  if (savedMeta?.customTitle && !isGenericPlaceholderMerchant(savedMeta.customTitle)) {
+  if (hasExplicitCustomTitle && savedMeta?.customTitle) {
     updated.title = savedMeta.customTitle;
   }
   if (savedMeta?.customCategory) {
@@ -981,9 +1017,77 @@ function mapBankTransactionsToAppItems(
   const consumedBookedIdsForPending = new Set<string>();
   const settledPendingIds = new Set<string>();
 
-  // Samla alla reservationer (inklusive de som servern redan markerat som 'reserved_replaced'
-  // när reservationen övergick till bokförd transaktion) så att köpdatum, klockslag,
-  // butiksnamn och användarens markeringar (hjärta, paket, kvitto, delad utgift m.m.) alltid ärvs.
+  // Beräkna senaste synkningstidpunkt per konto så att vi direkt ser vilka PDNG/HOLD-rader
+  // som banken inte längre returnerar (eftersom de har övergått till bokförda BOOK-rader).
+  const maxUpdatedAtByAccount = new Map<string, number>();
+  for (const bt of bankTxs) {
+    const accKey = bt.bank_account_id || '__default__';
+    const ts = Date.parse(bt.updated_at || bt.created_at || '');
+    if (Number.isFinite(ts)) {
+      const prevMax = maxUpdatedAtByAccount.get(accKey) || 0;
+      if (ts > prevMax) maxUpdatedAtByAccount.set(accKey, ts);
+    }
+  }
+
+  const isPendingDisappearedFromLatestSync = (bt: BankTransactionItem): boolean => {
+    if (
+      bt.reconciliation_status === 'reserved_replaced' ||
+      bt.reconciliation_status === 'reserved' ||
+      Boolean(bt.replaced_by_bank_tx_id) ||
+      Boolean(bt.reservation_disappeared_at)
+    ) {
+      return true;
+    }
+    const accKey = bt.bank_account_id || '__default__';
+    const maxAccMs = maxUpdatedAtByAccount.get(accKey) || 0;
+    const btMs = Date.parse(bt.updated_at || bt.created_at || '');
+    if (maxAccMs > 0 && Number.isFinite(btMs) && maxAccMs - btMs > 45_000) {
+      return true;
+    }
+    return false;
+  };
+
+  const normalizeBankDescForMatch = (s?: string | null): string =>
+    String(s || '')
+      .toLowerCase()
+      .replace(/[$åä]/g, 'a')
+      .replace(/ö/g, 'o')
+      .replace(/[^a-z0-9]/g, '');
+
+  const areMerchantsCompatibleForReservation = (
+    bt: BankTransactionItem,
+    b: BankTransactionItem,
+    pendingMerchant: string,
+    bMerchant: string,
+    pendingIsGeneric: boolean,
+    bookedIsGeneric: boolean
+  ): boolean => {
+    if (
+      bMerchant === pendingMerchant ||
+      pendingIsGeneric ||
+      bookedIsGeneric ||
+      (bt.description && bt.description.toLowerCase().includes(bMerchant)) ||
+      (b.description && b.description.toLowerCase().includes(pendingMerchant))
+    ) {
+      return true;
+    }
+    const normPendingDesc = normalizeBankDescForMatch(bt.description || pendingMerchant);
+    const normBookedDesc = normalizeBankDescForMatch(b.description || bMerchant);
+    if (normPendingDesc.length >= 6 && normBookedDesc.length >= 6) {
+      const prefixLen = Math.min(8, normPendingDesc.length, normBookedDesc.length);
+      if (
+        normPendingDesc.slice(0, prefixLen) === normBookedDesc.slice(0, prefixLen) ||
+        normPendingDesc.includes(normBookedDesc) ||
+        normBookedDesc.includes(normPendingDesc)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Samla alla reservationer (inklusive de som övergått till bokförd transaktion)
+  // så att köpdatum, klockslag, butiksnamn och användarens markeringar alltid ärvs.
   const pendingCandidates = bankTxs.filter((bt) => {
     if (bt.booking_status === 'CNCL' || bt.booking_status === 'RJCT') return false;
     if (bt.reconciliation_status === 'excluded') return false;
@@ -991,7 +1095,9 @@ function mapBankTransactionsToAppItems(
       bt.booking_status === 'PDNG' ||
       bt.booking_status === 'HOLD' ||
       bt.reconciliation_status === 'reserved_replaced' ||
-      Boolean(bt.replaced_by_bank_tx_id);
+      bt.reconciliation_status === 'reserved' ||
+      Boolean(bt.replaced_by_bank_tx_id) ||
+      Boolean(bt.reservation_disappeared_at);
     if (!isPendingOrReplaced) return false;
     return getNormalizedBankTxAmount(bt) < 0;
   });
@@ -1010,6 +1116,15 @@ function mapBankTransactionsToAppItems(
       pendingMerchant,
       pendingMerchant
     );
+    if (purchaseDate) {
+      saveReservationPurchaseDate(b.id, purchaseDate);
+    }
+    if (bt.replaced_by_bank_tx_id !== b.id) {
+      void bankService.updateTransactionReconciliation(bt.id, {
+        replaced_by_bank_tx_id: b.id,
+        reservation_disappeared_at: bt.reservation_disappeared_at || new Date().toISOString(),
+      });
+    }
     bookedToReservationMeta.set(b.id, {
       purchaseDate,
       purchaseTime,
@@ -1025,10 +1140,9 @@ function mapBankTransactionsToAppItems(
     });
   };
 
-  // Pass 1: Koppla ENDAST ersatta reservationer ('reserved_replaced' / replaced_by_bank_tx_id)
-  // eller reservationer som delar exakt samma transaction_id/entry_reference med en bokförd post.
-  // Aktiva reservationer (PDNG/HOLD som fortfarande är reserverade hos banken) ska ALDRIG döljas
-  // via lös belopps-/butiksmatchning!
+  // Pass 1: Koppla ersatta reservationer eller reservationer som har en motsvarande bokförd (BOOK) post.
+  // Aktiva reservationer (PDNG/HOLD som fortfarande returneras av banken i senaste synken)
+  // matchas ENDAST om det finns en nyare BOOK-rad med exakt samma belopp och samma handlare.
   for (const bt of pendingCandidates) {
     if (bt.replaced_by_bank_tx_id) {
       const explicitBooked = bookedNegativeTxs.find(
@@ -1040,33 +1154,28 @@ function mapBankTransactionsToAppItems(
       }
     }
 
-    // Om reservationen fortfarande är aktiv (inte markerad reserved_replaced av banken),
-    // matcha enbart om banken skickat exakt samma icke-tomma transaction_id eller entry_reference på en BOOK-rad.
-    const isAlreadyMarkedReplaced =
-      bt.reconciliation_status === 'reserved_replaced' || Boolean(bt.replaced_by_bank_tx_id);
-
-    if (!isAlreadyMarkedReplaced) {
-      if (bt.transaction_id || bt.entry_reference) {
-        const exactRefBooked = bookedNegativeTxs.find(
-          (b) =>
-            !consumedBookedIdsForPending.has(b.id) &&
-            ((bt.transaction_id && b.transaction_id === bt.transaction_id) ||
-              (bt.entry_reference && b.entry_reference === bt.entry_reference))
-        );
-        if (exactRefBooked) {
-          recordReservationMatch(bt, exactRefBooked);
-        }
+    if (bt.transaction_id || bt.entry_reference) {
+      const exactRefBooked = bookedNegativeTxs.find(
+        (b) =>
+          !consumedBookedIdsForPending.has(b.id) &&
+          ((bt.transaction_id && b.transaction_id === bt.transaction_id) ||
+            (bt.entry_reference && b.entry_reference === bt.entry_reference))
+      );
+      if (exactRefBooked) {
+        recordReservationMatch(bt, exactRefBooked);
+        continue;
       }
-      continue;
     }
 
-    const pendingAmt = Math.round(Math.abs(getNormalizedBankTxAmount(bt)));
+    const isDisappeared = isPendingDisappearedFromLatestSync(bt);
+    const pendingExactAmt = Math.abs(getNormalizedBankTxAmount(bt));
+    const pendingAmt = Math.round(pendingExactAmt);
     const pendingCatInfo = categorizeBankTransactionForApp(bt);
     const pendingMerchant = pendingCatInfo.merchant.toLowerCase().trim();
     const pendingIsGeneric = isGenericPlaceholderMerchant(pendingMerchant);
     const pendingDate = getActualTransactionDate(bt);
 
-    const matchedBooked = bookedNegativeTxs.find((b) => {
+    const candidateMatches = bookedNegativeTxs.filter((b) => {
       if (consumedBookedIdsForPending.has(b.id)) return false;
       if (
         bt.bank_account_id &&
@@ -1075,45 +1184,65 @@ function mapBankTransactionsToAppItems(
       ) {
         return false;
       }
-      const bAmt = Math.round(Math.abs(getNormalizedBankTxAmount(b)));
-      if (bAmt !== pendingAmt) return false;
+      const bExactAmt = Math.abs(getNormalizedBankTxAmount(b));
+      const bAmt = Math.round(bExactAmt);
+      const isExactDecimalMatch = Math.abs(bExactAmt - pendingExactAmt) < 0.015;
+      if (!isExactDecimalMatch && (!isDisappeared || bAmt !== pendingAmt)) {
+        return false;
+      }
 
       const bCatInfo = categorizeBankTransactionForApp(b);
       const bMerchant = bCatInfo.merchant.toLowerCase().trim();
       const bookedIsGeneric = isGenericPlaceholderMerchant(bMerchant);
 
-      const merchantsMatch =
-        bMerchant === pendingMerchant ||
-        pendingIsGeneric ||
-        bookedIsGeneric ||
-        (bt.description && bt.description.toLowerCase().includes(bMerchant)) ||
-        (b.description && b.description.toLowerCase().includes(pendingMerchant));
+      const merchantsMatch = areMerchantsCompatibleForReservation(
+        bt,
+        b,
+        pendingMerchant,
+        bMerchant,
+        pendingIsGeneric,
+        bookedIsGeneric
+      );
       if (!merchantsMatch) return false;
 
       const bDate = getActualTransactionDate(b);
+      const bBookingDate = b.booking_date || b.value_date || bDate;
       if (pendingDate && bDate) {
         const diffMs = new Date(bDate).getTime() - new Date(pendingDate).getTime();
         const dayDiff = Math.abs(diffMs) / (1000 * 60 * 60 * 24);
         if (dayDiff <= 10 && diffMs >= -86_400_000) {
-          return true;
+          if (isDisappeared) return true;
+          // Om BOOK-raden har samma eller senare bokföringsdatum än reservationens köpdatum
+          if (
+            (bBookingDate && bBookingDate >= pendingDate) ||
+            (b.created_at && bt.created_at && b.created_at >= bt.created_at)
+          ) {
+            return true;
+          }
         }
       }
       return false;
     });
 
-    if (matchedBooked) {
-      recordReservationMatch(bt, matchedBooked);
+    if (candidateMatches.length > 0) {
+      // Föredra exakt decimalmatchning (t.ex. 775.10 === 775.10) och närmast datum
+      candidateMatches.sort((a, b) => {
+        const aExact = Math.abs(Math.abs(getNormalizedBankTxAmount(a)) - pendingExactAmt) < 0.015 ? 0 : 1;
+        const bExact = Math.abs(Math.abs(getNormalizedBankTxAmount(b)) - pendingExactAmt) < 0.015 ? 0 : 1;
+        if (aExact !== bExact) return aExact - bExact;
+        const aDate = getActualTransactionDate(a);
+        const bDate = getActualTransactionDate(b);
+        return aDate.localeCompare(bDate);
+      });
+      recordReservationMatch(bt, candidateMatches[0]);
     }
   }
 
-  // Pass 2: Ändrat slutbelopp för ersatta reservationer ('reserved_replaced'),
+  // Pass 2: Ändrat slutbelopp för ersatta/försvunna reservationer,
   // t.ex. bensinstation (1 500 kr -> 642 kr), hotell eller matbutik online (ICA/Mathem).
   for (const bt of pendingCandidates) {
     if (settledPendingIds.has(bt.id)) continue;
-    if (
-      bt.reconciliation_status !== 'reserved_replaced' &&
-      !bt.replaced_by_bank_tx_id
-    ) {
+    if (!isPendingDisappearedFromLatestSync(bt)) {
       continue;
     }
 
@@ -1141,10 +1270,14 @@ function mapBankTransactionsToAppItems(
         return false;
       }
 
-      const sameMerchant =
-        bMerchant === pendingMerchant ||
-        (pendingMerchant.length >= 4 && bMerchant.includes(pendingMerchant)) ||
-        (bMerchant.length >= 4 && pendingMerchant.includes(bMerchant));
+      const sameMerchant = areMerchantsCompatibleForReservation(
+        bt,
+        b,
+        pendingMerchant,
+        bMerchant,
+        false,
+        false
+      );
       if (!sameMerchant) return false;
 
       const bDate = getActualTransactionDate(b);
@@ -1168,11 +1301,9 @@ function mapBankTransactionsToAppItems(
       if (bt.replaced_by_bank_tx_id || settledPendingIds.has(bt.id)) {
         return false;
       }
-      // Om en reservation har status 'reserved_replaced' utan att någon bokförd transaktion
+      // Om en reservation har försvunnit eller ersatts utan att någon bokförd transaktion
       // matchat den (och utan replaced_by_bank_tx_id), dölj den ENDAST om den är äldre än 7 dagar.
-      // Detta garanterar att färska reserverade köp hos banken aldrig försvinner om bankens API
-      // tillfälligt utelämnat dem eller ändrat datumstämpel under pågående reservation.
-      if (bt.reconciliation_status === 'reserved_replaced') {
+      if (isPendingDisappearedFromLatestSync(bt)) {
         const pDate = getActualTransactionDate(bt);
         const pMs = pDate ? Date.parse(`${pDate}T12:00:00`) : NaN;
         const ageDays =
@@ -1380,7 +1511,7 @@ function mapBankTransactionsToAppItems(
             bt.credit_debit_indicator || (isIncome ? 'CRDT' : 'DBIT'),
           transactionId: bt.transaction_id || undefined,
           entryReference: bt.entry_reference || undefined,
-          valueDate: bt.value_date || undefined,
+          valueDate: reservationMeta?.purchaseDate || bt.value_date || undefined,
           bankAccountId: bt.bank_account_id || undefined,
           bankAccountName,
           createdAt: bt.created_at || undefined,
@@ -1614,6 +1745,29 @@ export const App: React.FC = () => {
     title: string;
   } | null>(null);
   const undoTimerRef = useRef<number | null>(null);
+
+  interface FeedbackToastState {
+    id: string;
+    title: string;
+    subtitle?: string;
+    actionLabel?: string;
+    onAction?: () => void;
+    undoLabel?: string;
+    onUndo?: () => void;
+  }
+  const [feedbackToast, setFeedbackToast] = useState<FeedbackToastState | null>(null);
+  const feedbackTimerRef = useRef<number | null>(null);
+
+  const showFeedbackToast = useCallback((toast: FeedbackToastState, durationMs = 5500) => {
+    if (feedbackTimerRef.current) {
+      window.clearTimeout(feedbackTimerRef.current);
+    }
+    setFeedbackToast(toast);
+    feedbackTimerRef.current = window.setTimeout(() => {
+      setFeedbackToast((current) => (current?.id === toast.id ? null : current));
+    }, durationMs);
+  }, []);
+
   const [previewReceipt, setPreviewReceipt] = useState<{
     url: string;
     name: string;
@@ -2238,6 +2392,7 @@ export const App: React.FC = () => {
         fixedExpensesRef.current = [];
         transactionsRef.current = [];
         clearCachedAppState();
+        clearAllLocalAppData(true);
       }
       lastHydratedUserIdRef.current = uid;
 
@@ -3352,7 +3507,9 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleAddIncome = async (data: Omit<IncomeItem, 'id'>) => {
+  const handleAddIncome = async (
+    data: Omit<IncomeItem, 'id'>
+  ): Promise<IncomeItem> => {
     unDismissIncomeMerchant(data.name, data.originalName);
     const logo = data.logo || getLogoUrl(data.name, data.category);
     const validId = ensureValidUuid(
@@ -3399,6 +3556,7 @@ export const App: React.FC = () => {
         })
         .catch(() => {});
     }
+    return newItem;
   };
 
   const handleUpdateIncome = async (updated: IncomeItem) => {
@@ -3580,7 +3738,6 @@ export const App: React.FC = () => {
 
     setIsTxModalOpen(false);
     setSelectedTransaction(null);
-    setActiveTab('fixed');
 
     if (kind === 'expense') {
       const created = await handleAddFixed({
@@ -3592,16 +3749,80 @@ export const App: React.FC = () => {
         paymentMethod: tx.paymentMethod || 'Autogiro',
         logo: tx.logo,
       });
-      setSelectedFixedExpense(created);
-      setIsFixedModalOpen(true);
+
+      // Link transaction metadata to this newly created fixed expense
+      saveTransactionMeta(tx.id, { linkedFixedExpenseId: created.id });
+      setTransactions((prev) => {
+        const next = prev.map((item) =>
+          item.id === tx.id ? { ...item, linkedFixedExpenseId: created.id } : item
+        );
+        transactionsRef.current = next;
+        saveCachedAppState({ userId: userIdRef.current, transactions: next });
+        return next;
+      });
+
+      showFeedbackToast({
+        id: `created-fixed-${created.id}`,
+        title: 'Skapad som fast utgift',
+        subtitle: `${created.name} · ${Math.round(created.amount).toLocaleString('sv-SE')} kr den ${created.dueDay}:e varje månad`,
+        actionLabel: 'Visa i Fasta',
+        onAction: () => {
+          setActiveTab('fixed');
+        },
+        undoLabel: 'Ångra',
+        onUndo: () => {
+          handleDeleteFixed(created.id);
+          saveTransactionMeta(tx.id, { linkedFixedExpenseId: '' });
+          setTransactions((prev) => {
+            const next = prev.map((item) =>
+              item.id === tx.id ? { ...item, linkedFixedExpenseId: undefined } : item
+            );
+            transactionsRef.current = next;
+            return next;
+          });
+        },
+      });
     } else {
-      await handleAddIncome({
+      const created = await handleAddIncome({
         name: tx.title,
         originalName: tx.counterpartyName || tx.rawDescription || tx.title,
         amount: tx.amount,
         payday: day,
         category: tx.category || 'Lön',
         logo: tx.logo,
+      });
+
+      // Link transaction metadata to this newly created income
+      saveTransactionMeta(tx.id, { linkedIncomeId: created.id });
+      setTransactions((prev) => {
+        const next = prev.map((item) =>
+          item.id === tx.id ? { ...item, linkedIncomeId: created.id } : item
+        );
+        transactionsRef.current = next;
+        saveCachedAppState({ userId: userIdRef.current, transactions: next });
+        return next;
+      });
+
+      showFeedbackToast({
+        id: `created-income-${created.id}`,
+        title: 'Skapad som inkomst',
+        subtitle: `${created.name} · ${Math.round(created.amount).toLocaleString('sv-SE')} kr den ${created.payday}:e varje månad`,
+        actionLabel: 'Visa i Inkomster',
+        onAction: () => {
+          setActiveTab('fixed');
+        },
+        undoLabel: 'Ångra',
+        onUndo: () => {
+          handleDeleteIncome(created.id);
+          saveTransactionMeta(tx.id, { linkedIncomeId: '' });
+          setTransactions((prev) => {
+            const next = prev.map((item) =>
+              item.id === tx.id ? { ...item, linkedIncomeId: undefined } : item
+            );
+            transactionsRef.current = next;
+            return next;
+          });
+        },
       });
     }
   };
@@ -3641,6 +3862,26 @@ export const App: React.FC = () => {
       setSelectedTransaction((prev) =>
         prev && prev.id === tx.id ? { ...prev, linkedFixedExpenseId: nextLinkedId } : prev
       );
+
+      if (targetItem) {
+        showFeedbackToast({
+          id: `link-fixed-${tx.id}-${targetItem.id}`,
+          title: `Kopplad till ${targetItem.name}`,
+          subtitle: `${tx.title} matchas nu som fast utgift`,
+          actionLabel: 'Visa i Fasta',
+          onAction: () => setActiveTab('fixed'),
+          undoLabel: 'Ångra',
+          onUndo: () => {
+            handleLinkTransactionToFixed(tx, null, 'expense');
+          },
+        });
+      } else {
+        showFeedbackToast({
+          id: `unlink-fixed-${tx.id}`,
+          title: 'Koppling borttagen',
+          subtitle: `${tx.title} är inte längre kopplad till fast utgift`,
+        });
+      }
     } else {
       const nextLinkedId = targetItem ? targetItem.id : '';
       saveTransactionMeta(tx.id, { linkedIncomeId: nextLinkedId });
@@ -3669,6 +3910,26 @@ export const App: React.FC = () => {
       setSelectedTransaction((prev) =>
         prev && prev.id === tx.id ? { ...prev, linkedIncomeId: nextLinkedId } : prev
       );
+
+      if (targetItem) {
+        showFeedbackToast({
+          id: `link-inc-${tx.id}-${targetItem.id}`,
+          title: `Kopplad till ${targetItem.name}`,
+          subtitle: `${tx.title} matchas nu som fast inkomst`,
+          actionLabel: 'Visa i Inkomster',
+          onAction: () => setActiveTab('fixed'),
+          undoLabel: 'Ångra',
+          onUndo: () => {
+            handleLinkTransactionToFixed(tx, null, 'income');
+          },
+        });
+      } else {
+        showFeedbackToast({
+          id: `unlink-inc-${tx.id}`,
+          title: 'Koppling borttagen',
+          subtitle: `${tx.title} är inte längre kopplad till fast inkomst`,
+        });
+      }
     }
   };
 
@@ -3862,15 +4123,18 @@ export const App: React.FC = () => {
     const logo = data.logo || getLogoUrl(data.title, data.category);
     const aliases = getMerchantAliases();
     const newId = 'tx-' + Date.now();
-    if (data.receiptUrl || (data.receipts && data.receipts.length > 0)) {
-      saveTransactionMeta(newId, {
-        receiptUrl: data.receiptUrl,
-        receiptName: data.receiptName,
-        receipts: data.receipts,
-      });
-    }
+    saveTransactionMeta(newId, {
+      originalTitle: data.originalTitle || data.title,
+      ...(data.receiptUrl || (data.receipts && data.receipts.length > 0)
+        ? {
+            receiptUrl: data.receiptUrl,
+            receiptName: data.receiptName,
+            receipts: data.receipts,
+          }
+        : {}),
+    });
     const newItem: TransactionItem = sanitizeTransactionItem(
-      { ...data, logo, id: newId },
+      { ...data, originalTitle: data.originalTitle || data.title, logo, id: newId },
       fixedExpensesRef.current,
       incomesRef.current,
       aliases
@@ -3906,6 +4170,13 @@ export const App: React.FC = () => {
     }
   ) => {
     const existing = transactionsRef.current.find((t) => t.id === updated.id);
+    const existingMeta = getTransactionMetaMap()[updated.id];
+    const rootOriginalTitle =
+      existing?.originalTitle ||
+      existingMeta?.originalTitle ||
+      existing?.title ||
+      updated.originalTitle ||
+      updated.title;
     const titleChanged = Boolean(
       existing && existing.title.toLowerCase().trim() !== updated.title.toLowerCase().trim()
     );
@@ -3921,6 +4192,12 @@ export const App: React.FC = () => {
 
     // 1. Om användaren valt att byta namn bakåt i tiden och framåt i tiden ('same-merchant' eller 'chain')
     if (titleChanged && (renameScope === 'same-merchant' || renameScope === 'chain') && existing) {
+      removeMerchantAliasForSources([
+        existing.title,
+        existing.originalTitle,
+        existing.counterpartyName,
+        existing.rawDescription,
+      ]);
       saveMerchantAlias(existing.title, updated.title, updated.category);
       if (existing.counterpartyName) {
         saveMerchantAlias(existing.counterpartyName, updated.title, updated.category);
@@ -3930,6 +4207,15 @@ export const App: React.FC = () => {
       }
       for (const tx of transactionsRef.current) {
         if (renameSet.has(tx.id) || tx.id === updated.id) {
+          const txMeta = getTransactionMetaMap()[tx.id];
+          const txOriginalTitle =
+            tx.originalTitle || txMeta?.originalTitle || tx.title;
+          removeMerchantAliasForSources([
+            tx.title,
+            tx.originalTitle,
+            tx.counterpartyName,
+            tx.rawDescription,
+          ]);
           saveMerchantAlias(tx.title, updated.title, updated.category);
           if (tx.counterpartyName) {
             saveMerchantAlias(tx.counterpartyName, updated.title, updated.category);
@@ -3938,6 +4224,7 @@ export const App: React.FC = () => {
             saveMerchantAlias(tx.rawDescription, updated.title, updated.category);
           }
           saveTransactionMeta(tx.id, {
+            originalTitle: txOriginalTitle,
             customTitle: updated.title,
             ...(categoryChanged ? { customCategory: updated.category } : {}),
           });
@@ -3972,7 +4259,6 @@ export const App: React.FC = () => {
     }
 
     // 3. Spara per-transaktions-metadata för den redigerade transaktionen först så sanitizeTransactionItem respekterar customTitle/customCategory
-    const existingMeta = getTransactionMetaMap()[updated.id];
     const nextCustomTitle = titleChanged
       ? updated.title
       : existingMeta?.customTitle;
@@ -3981,6 +4267,7 @@ export const App: React.FC = () => {
       : existingMeta?.customCategory;
 
     saveTransactionMeta(updated.id, {
+      originalTitle: rootOriginalTitle,
       ...(nextCustomTitle ? { customTitle: nextCustomTitle } : {}),
       ...(nextCustomCategory ? { customCategory: nextCustomCategory } : {}),
       isHearted: updated.isHearted,
@@ -4005,7 +4292,7 @@ export const App: React.FC = () => {
     const logo = updated.logo || getLogoUrl(updated.title, updated.category);
     const aliases = getMerchantAliases();
     const itemWithLogo: TransactionItem = sanitizeTransactionItem(
-      { ...updated, logo },
+      { ...updated, originalTitle: rootOriginalTitle, logo },
       fixedExpensesRef.current,
       incomesRef.current,
       aliases
@@ -4037,6 +4324,21 @@ export const App: React.FC = () => {
     });
     setSelectedTransaction(itemWithLogo);
     syncAllUserPreferencesToSupabase();
+
+    if (renameScope !== 'single' && renameSet.size > 1) {
+      showFeedbackToast({
+        id: `bulk-rename-${updated.id}`,
+        title: 'Uppdaterat bakåt & framåt i tiden',
+        subtitle: `Sparades för ${renameSet.size} transaktioner med "${updated.title}"`,
+      });
+    } else if (categorySet.size > 1) {
+      showFeedbackToast({
+        id: `bulk-cat-${updated.id}`,
+        title: 'Kategori uppdaterad',
+        subtitle: `Ändrades till ${updated.category} för ${categorySet.size} transaktioner`,
+      });
+    }
+
     if (userId && !itemWithLogo.id.startsWith('bank-') && !itemWithLogo.id.startsWith('inc-')) {
       await dataService
         .updateTransaction(itemWithLogo.id, {
@@ -4676,12 +4978,6 @@ export const App: React.FC = () => {
           setIsNotificationsModalOpen(false);
           setIsSearchModalOpen(true);
         }}
-        onFriendsClick={() => {
-          setIsSearchModalOpen(false);
-          setIsNotificationsModalOpen(false);
-          setSelectedChatFriendKey(null);
-          setActiveTab('friends');
-        }}
         onNotificationsClick={() => {
           setIsSearchModalOpen(false);
           setIsNotificationsModalOpen(true);
@@ -4738,6 +5034,7 @@ export const App: React.FC = () => {
 
       <main className="flex-1 w-full max-w-md mx-auto px-4 pt-4">
         <PullToRefresh
+          disabled={activeTab === 'friends' && Boolean(selectedChatFriendKey)}
           onRefresh={async () => {
             await performSilentBankSync(true);
             await refreshBankStatus();
@@ -5076,7 +5373,7 @@ export const App: React.FC = () => {
                             Inga paket på väg
                           </p>
                           <p className="ui-empty-sub">
-                            Markera ett onlineköp som "Väntar på paket" för att hålla koll tills det har levererats.
+                            Markera ett onlineköp som &quot;Väntar på paket&quot; för att hålla koll tills det har levererats.
                           </p>
                         </section>
                       );
@@ -5519,39 +5816,41 @@ export const App: React.FC = () => {
         </PullToRefresh>
       </main>
 
-      <BottomNav
-        activeTab={activeTab}
-        onChangeTab={(tab) => {
-          setIsSearchModalOpen(false);
-          setIsNotificationsModalOpen(false);
-          setSettingsSubView('main');
-          if (tab !== 'friends') {
-            setSelectedChatFriendKey(null);
+      {!(activeTab === 'friends' && Boolean(selectedChatFriendKey)) && (
+        <BottomNav
+          activeTab={activeTab}
+          onChangeTab={(tab) => {
+            setIsSearchModalOpen(false);
+            setIsNotificationsModalOpen(false);
+            setSettingsSubView('main');
+            if (tab !== 'friends') {
+              setSelectedChatFriendKey(null);
+            }
+            setActiveTab(tab);
+          }}
+          onOpenHousehold={() => {
+            setIsSearchModalOpen(false);
+            setIsNotificationsModalOpen(false);
+            setSettingsSubView('household');
+            setActiveTab('settings');
+          }}
+          onOpenDiscover={() => {
+            setIsSearchModalOpen(false);
+            setIsNotificationsModalOpen(false);
+            setSettingsSubView('discover');
+            setActiveTab('settings');
+          }}
+          activeSettingsSubView={settingsSubView}
+          goalsCount={getSavingsGoals().length}
+          friendsUnreadCount={friendsUnreadCount}
+          savedCount={displayTransactions.filter((t) => t.isHearted).length}
+          packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
+          receiptsCount={
+            displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
+            fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0)
           }
-          setActiveTab(tab);
-        }}
-        onOpenHousehold={() => {
-          setIsSearchModalOpen(false);
-          setIsNotificationsModalOpen(false);
-          setSettingsSubView('household');
-          setActiveTab('settings');
-        }}
-        onOpenDiscover={() => {
-          setIsSearchModalOpen(false);
-          setIsNotificationsModalOpen(false);
-          setSettingsSubView('discover');
-          setActiveTab('settings');
-        }}
-        activeSettingsSubView={settingsSubView}
-        goalsCount={getSavingsGoals().length}
-        friendsUnreadCount={friendsUnreadCount}
-        savedCount={displayTransactions.filter((t) => t.isHearted).length}
-        packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
-        receiptsCount={
-          displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
-          fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0)
-        }
-      />
+        />
+      )}
       </div>
 
       <BankModal
@@ -5678,6 +5977,74 @@ export const App: React.FC = () => {
             >
               Ångra
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Modern Confirmation Feedback Toast */}
+      {feedbackToast && (
+        <div className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-1.5rem)] max-w-md animate-fade-in pointer-events-auto">
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-subtle)] shadow-2xl flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
+                <CheckCircle size={16} weight="fill" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-display font-semibold text-[var(--text-primary)] text-xs truncate">
+                  {feedbackToast.title}
+                </p>
+                {feedbackToast.subtitle && (
+                  <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">
+                    {feedbackToast.subtitle}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              {feedbackToast.actionLabel && feedbackToast.onAction && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const action = feedbackToast.onAction;
+                    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+                    setFeedbackToast(null);
+                    action?.();
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-[11px] hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{feedbackToast.actionLabel}</span>
+                  <ArrowRight size={11} weight="bold" />
+                </button>
+              )}
+
+              {feedbackToast.undoLabel && feedbackToast.onUndo && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const undo = feedbackToast.onUndo;
+                    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+                    setFeedbackToast(null);
+                    undo?.();
+                  }}
+                  className="px-2 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium text-[11px] transition-colors cursor-pointer"
+                >
+                  {feedbackToast.undoLabel}
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+                  setFeedbackToast(null);
+                }}
+                className="w-6 h-6 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Stäng"
+              >
+                <X size={12} weight="bold" />
+              </button>
+            </div>
           </div>
         </div>
       )}

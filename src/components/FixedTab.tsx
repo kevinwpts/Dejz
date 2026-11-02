@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
 import {
   Plus,
-  Sparkle,
-  Check,
   CaretRight,
   Users,
 } from '@phosphor-icons/react';
@@ -59,10 +57,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   onSelectFixed,
   onAddIncome,
   onAddFixed,
-  onOpenDiscover,
+  onOpenDiscover: _onOpenDiscover,
   onOpenHousehold,
 }) => {
-  const [fixedFilter, setFixedFilter] = React.useState<'all' | 'unpaid' | 'paid' | 'shared'>('all');
 
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
@@ -107,23 +104,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     );
   };
 
-  const paidStats = useMemo(() => {
-    let paidCount = 0;
-    let remainingSum = 0;
-    for (const exp of fixedExpenses) {
-      if (isExpensePaid(exp)) {
-        paidCount += 1;
-      } else {
-        remainingSum += Number(exp.amount) || 0;
-      }
-    }
-    return {
-      paidCount,
-      totalCount: fixedExpenses.length,
-      remainingSum,
-    };
-  }, [fixedExpenses, periodMatches, period]);
-
   const netAfterFixed = totalIncome - totalFixedExpenses;
 
   return (
@@ -166,26 +146,10 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             </span>
           </div>
         </div>
-
-        {paidStats.totalCount > 0 && (
-          <div className="mt-3.5 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between gap-2 text-xs text-[var(--text-secondary)] tabular-nums">
-            <span className="flex items-center gap-1.5">
-              <Check size={13} weight="bold" className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>
-                {paidStats.paidCount} av {paidStats.totalCount} fasta utgifter betalda i perioden
-              </span>
-            </span>
-            <span className="font-medium text-[var(--text-primary)] shrink-0">
-              {paidStats.remainingSum > 0
-                ? `${formatKr(paidStats.remainingSum)} kvar`
-                : 'Alla dragna'}
-            </span>
-          </div>
-        )}
       </section>
 
       {/* ============================================================== */}
-      {/* GENVÄG: UPPTÄCK FASTA KOSTNADER & DELAD BUDGET                 */}
+      {/* GENVÄG: DELAD BUDGET                                           */}
       {/* ============================================================== */}
       {(() => {
         const hh = getHouseholdState();
@@ -231,28 +195,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           </button>
         );
       })()}
-
-      {onOpenDiscover && transactions.length > 0 && (
-        <button
-          type="button"
-          onClick={onOpenDiscover}
-          className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-              <Sparkle size={16} weight="regular" />
-            </div>
-            <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate">
-              Hitta abonnemang från bankköp
-            </span>
-          </div>
-          <CaretRight
-            size={14}
-            weight="bold"
-            className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
-          />
-        </button>
-      )}
 
       {/* ============================================================== */}
       {/* SEKTION 1: INKOMSTER                                           */}
@@ -378,56 +320,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           )}
         </div>
 
-        {sortedExpenses.length > 1 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {[
-              { id: 'all' as const, label: `Alla (${sortedExpenses.length})` },
-              {
-                id: 'unpaid' as const,
-                label: `Kvar att dras (${sortedExpenses.filter((e) => !isExpensePaid(e)).length})`,
-              },
-              {
-                id: 'paid' as const,
-                label: `Betalda (${sortedExpenses.filter((e) => isExpensePaid(e)).length})`,
-              },
-              ...(hasConnectedHouseholdPartner() && sortedExpenses.some((e) => e.isShared)
-                ? [
-                    {
-                      id: 'shared' as const,
-                      label: `Delade (${sortedExpenses.filter((e) => e.isShared).length})`,
-                    },
-                  ]
-                : []),
-            ].map((tab) => {
-              const active = fixedFilter === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setFixedFilter(tab.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                      : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         <div className="ui-list-card">
           {sortedExpenses.length > 0 ? (
-            sortedExpenses
-              .filter((exp) => {
-                if (fixedFilter === 'unpaid') return !isExpensePaid(exp);
-                if (fixedFilter === 'paid') return isExpensePaid(exp);
-                if (fixedFilter === 'shared') return Boolean(exp.isShared);
-                return true;
-              })
-              .map((exp) => {
+            sortedExpenses.map((exp) => {
                 const paid = isExpensePaid(exp);
                 const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
                 const isPartnerConnected = hasConnectedHouseholdPartner();

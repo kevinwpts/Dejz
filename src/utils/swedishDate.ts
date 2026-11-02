@@ -250,6 +250,7 @@ export interface BankTxDateSource {
   description?: string | null;
   counterparty_name?: string | null;
   booking_status?: string | null;
+  reconciliation_status?: string | null;
   booking_date?: string | null;
   value_date?: string | null;
   transaction_date?: string | null;
@@ -324,6 +325,12 @@ export function getActualBankPaymentDateAndMeta(
   }
 
   // 4. Faktiska köp-/transaktionsdatumfält i API:et (kortauktorisering)
+  // Obs: Ignorera bt.transaction_date om raw.transaction_date saknas och bt.transaction_date är identiskt med bookingDate
+  const distinctBtTxDate =
+    bt.transaction_date && (!bookingDate || bt.transaction_date < bookingDate)
+      ? bt.transaction_date
+      : null;
+
   const txCandidates = [
     raw.card_transaction?.authorized_date,
     raw.card_transaction?.transaction_date_time,
@@ -334,7 +341,7 @@ export function getActualBankPaymentDateAndMeta(
     raw.origination_date_time,
     raw.origination_date,
     raw.transaction_date,
-    bt.transaction_date,
+    distinctBtTxDate,
   ];
 
   let rawPurchaseDate: string | null = null;
@@ -381,7 +388,11 @@ export function getActualBankPaymentDateAndMeta(
     }
   }
 
-  const isPending = status === 'PDNG' || status === 'HOLD';
+  const isPending =
+    status === 'PDNG' ||
+    status === 'HOLD' ||
+    bt.reconciliation_status === 'reserved_replaced' ||
+    bt.reconciliation_status === 'reserved';
 
   // 6. Fastställ det faktiska köpdatumet
   let paymentDate: string;
@@ -396,10 +407,12 @@ export function getActualBankPaymentDateAndMeta(
     }
   } else if (textDate) {
     paymentDate = textDate;
-  } else if (rawPurchaseDate) {
+  } else if (rawPurchaseDate && (!valueDate || rawPurchaseDate <= valueDate)) {
     paymentDate = rawPurchaseDate;
   } else if (valueDate && valueDate <= todayStr) {
     paymentDate = valueDate;
+  } else if (rawPurchaseDate) {
+    paymentDate = rawPurchaseDate;
   } else if (bookingDate && bookingDate <= todayStr) {
     paymentDate = bookingDate;
   } else {

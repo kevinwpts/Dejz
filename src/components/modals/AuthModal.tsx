@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   X,
-  Lock,
-  Envelope,
   SpinnerGap,
   Eye,
   EyeSlash,
