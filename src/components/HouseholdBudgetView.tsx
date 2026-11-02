@@ -795,8 +795,8 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                 className="py-3 flex items-center justify-between gap-3 text-xs"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-8 h-8 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0">
-                    <CategoryIcon category={entry.category} size={14} />
+                  <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                    <CategoryIcon category={entry.category} size={22} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="ui-row-title truncate block">{entry.title}</span>

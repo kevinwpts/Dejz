@@ -7,7 +7,7 @@ import {
   fetchLogoForName,
   isMerchantCategoryIconPreferred,
 } from '../utils/logo';
-import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
+import { CategoryIcon } from './CategoryIcon';
 import { SwishLogo } from './SwishLogo';
 
 interface ItemLogoProps {
@@ -108,10 +108,10 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
   }[size];
 
   const iconSize = {
-    sm: 16,
-    md: 19,
-    lg: 22,
-    xl: 26,
+    sm: 24,
+    md: 30,
+    lg: 34,
+    xl: 44,
   }[size];
 
   const badgeSizeClasses = {
@@ -127,8 +127,6 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     lg: 10,
     xl: 11,
   }[size];
-
-  const tintColor = resolveCategoryColor(category || name);
 
   const renderInnerContent = () => {
     if (isSwish) {
@@ -169,14 +167,8 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     }
 
     return (
-      <div
-        className={`${sizeClasses} border border-transparent flex items-center justify-center shrink-0`}
-        style={{
-          backgroundColor: `${tintColor}18`,
-          color: tintColor,
-        }}
-      >
-        <CategoryIcon category={category || name} size={iconSize} color={tintColor} />
+      <div className={`${sizeClasses} flex items-center justify-center shrink-0`}>
+        <CategoryIcon category={category || name} size={iconSize} />
       </div>
     );
   };

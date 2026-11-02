@@ -27,7 +27,7 @@ import {
   AccountItem,
 } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon, resolveCategoryColor } from '../CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon, resolveCategoryColor } from '../CategoryIcon';
 import {
   formatSwedishFullDate,
   formatSwedishDateHeading,
@@ -850,15 +850,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   }}
                   className="ui-row-btn"
                 >
-                  <span
-                    className={`truncate ${
-                      isSel
-                        ? 'font-medium text-[var(--text-primary)]'
-                        : 'font-normal text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {m}
-                  </span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <PaymentMethodIcon method={m} size={17} />
+                    <span
+                      className={`truncate ${
+                        isSel
+                          ? 'font-medium text-[var(--text-primary)]'
+                          : 'font-normal text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {m}
+                    </span>
+                  </div>
                   {isSel && (
                     <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
                   )}
@@ -1772,6 +1775,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               >
                 <span className="ui-info-label">Betalsätt</span>
                 <span className="ui-info-value flex items-center gap-1.5">
+                  <PaymentMethodIcon method={paymentMethod || getDefaultPaymentMethodForTx(activeTx)} size={15} />
                   <span>{paymentMethod || getDefaultPaymentMethodForTx(activeTx)}</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
@@ -2286,6 +2290,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               >
                 <span className="ui-info-label shrink-0">Betalsätt</span>
                 <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                  <PaymentMethodIcon method={paymentMethod} size={15} />
                   <span>{paymentMethod}</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>

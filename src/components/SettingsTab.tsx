@@ -62,6 +62,7 @@ import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
 import { ItemLogo } from './ItemLogo';
+import { PaymentMethodIcon, AVAILABLE_PAYMENT_METHOD_ICONS } from './CategoryIcon';
 
 interface SettingsTabProps {
   period: PeriodInfo;
@@ -274,6 +275,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [pmSheetMode, setPmSheetMode] = useState<'new' | 'edit' | null>(null);
   const [selectedPm, setSelectedPm] = useState<PaymentMethodOption | null>(null);
   const [pmFormName, setPmFormName] = useState('');
+  const [pmFormIcon, setPmFormIcon] = useState('credit-card');
   const [pmDeleteConfirm, setPmDeleteConfirm] = useState(false);
   const [pmResetConfirm, setPmResetConfirm] = useState(false);
 
@@ -947,7 +949,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
       if (pmSheetMode === 'edit' && selectedPm) {
         const next = paymentMethods.map((m) =>
-          m.id === selectedPm.id ? { ...m, name: trimmed } : m
+          m.id === selectedPm.id ? { ...m, name: trimmed, icon: pmFormIcon } : m
         );
         setPaymentMethods(next);
         saveStoredPaymentMethods(next);
@@ -962,7 +964,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         }
         const next: PaymentMethodOption[] = [
           ...paymentMethods,
-          { id: `pm-${Date.now()}`, name: trimmed, isCustom: true },
+          { id: `pm-${Date.now()}`, name: trimmed, icon: pmFormIcon, isCustom: true },
         ];
         setPaymentMethods(next);
         saveStoredPaymentMethods(next);
@@ -1005,6 +1007,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 onClick={() => {
                   setSelectedPm(method);
                   setPmFormName(method.name);
+                  setPmFormIcon(method.icon || method.id || 'credit-card');
                   setPmDeleteConfirm(false);
                   setPmSheetMode('edit');
                 }}
@@ -1012,7 +1015,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               >
                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
                   <span className="ui-admin-icon-slot">
-                    <Wallet size={17} weight="regular" />
+                    <PaymentMethodIcon method={method.name} iconId={method.icon || method.id} size={20} />
                   </span>
                   <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
                     {method.name}
@@ -1034,6 +1037,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             onClick={() => {
               setSelectedPm(null);
               setPmFormName('');
+              setPmFormIcon('credit-card');
               setPmDeleteConfirm(false);
               setPmSheetMode('new');
             }}
@@ -1086,8 +1090,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <form onSubmit={handleSavePmSheet} className="space-y-4">
             <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
               <label className="flex items-center gap-3.5 cursor-text">
-                <div className="w-11 h-11 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
-                  <Wallet size={22} weight="duotone" />
+                <div className="w-11 h-11 flex items-center justify-center shrink-0">
+                  <PaymentMethodIcon
+                    method={pmFormName || 'Betalsätt'}
+                    iconId={pmFormIcon}
+                    size={30}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
@@ -1104,6 +1112,32 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   />
                 </div>
               </label>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+                Välj ikon
+              </span>
+              <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+                {AVAILABLE_PAYMENT_METHOD_ICONS.map((item) => {
+                  const isSelected = pmFormIcon === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      title={item.label}
+                      onClick={() => setPmFormIcon(item.id)}
+                      className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                        isSelected
+                          ? 'bg-[var(--surface-color)] ring-2 ring-[var(--text-primary)] scale-[1.04]'
+                          : 'bg-transparent hover:bg-[var(--surface-color)]'
+                      }`}
+                    >
+                      <PaymentMethodIcon iconId={item.id} size={22} />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="space-y-2.5">

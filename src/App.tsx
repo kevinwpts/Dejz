@@ -16,6 +16,7 @@ import {
   TransactionItem,
   getTransactionTime,
   compareTransactionsChronologically,
+  isFixedExpenseActiveInPeriod,
 } from './components/HomeTab';
 import { FixedTab } from './components/FixedTab';
 import { AnalysisTab } from './components/AnalysisTab';
@@ -617,7 +618,7 @@ function reconcileFixedExpensesList(params: {
   // 1. Load items from Supabase fixed_expenses table
   if (Array.isArray(dbList)) {
     for (const f of dbList) {
-      if (!f || f.isCancelled) continue;
+      if (!f) continue;
       if (f.id && deletedIds.has(String(f.id))) continue;
 
       const rawDbAmt = Math.round(Number(f.amount) || 0);
@@ -641,6 +642,16 @@ function reconcileFixedExpensesList(params: {
         idOverride?.fullAmount !== undefined ? idOverride.fullAmount : f.fullAmount;
       const finalDue = idOverride?.dueDay || f.deductionDay || f.dueDay || 27;
       const finalMethod = idOverride?.paymentMethod || f.paymentMethod || 'Autogiro';
+      const finalIsCancelled =
+        idOverride?.isCancelled !== undefined ? idOverride.isCancelled : f.isCancelled;
+      const finalHasNoMorePayments =
+        idOverride?.hasNoMorePayments !== undefined
+          ? idOverride.hasNoMorePayments
+          : f.hasNoMorePayments;
+      const finalLastPaymentDate =
+        idOverride && 'lastPaymentDate' in idOverride
+          ? idOverride.lastPaymentDate
+          : f.lastPaymentDate;
 
       if (isValidUuid(f.id)) {
         dbIds.add(f.id);
@@ -662,6 +673,9 @@ function reconcileFixedExpensesList(params: {
         receipts: idOverride?.receipts || f.receipts,
         linkedAliases: idOverride?.linkedAliases || f.linkedAliases,
         linkedGoalId: idOverride?.linkedGoalId ?? f.linkedGoalId,
+        isCancelled: finalIsCancelled,
+        hasNoMorePayments: finalHasNoMorePayments,
+        lastPaymentDate: finalLastPaymentDate,
       };
 
       const existingIdx = findExactSavedMatchIndex(item);
@@ -697,6 +711,16 @@ function reconcileFixedExpensesList(params: {
       curr.fullAmount !== undefined ? curr.fullAmount : idOverride?.fullAmount;
     const finalDue = curr.dueDay || idOverride?.dueDay || 27;
     const finalMethod = curr.paymentMethod || idOverride?.paymentMethod || 'Autogiro';
+    const finalIsCancelled =
+      curr.isCancelled !== undefined ? curr.isCancelled : idOverride?.isCancelled;
+    const finalHasNoMorePayments =
+      curr.hasNoMorePayments !== undefined
+        ? curr.hasNoMorePayments
+        : idOverride?.hasNoMorePayments;
+    const finalLastPaymentDate =
+      curr.lastPaymentDate !== undefined
+        ? curr.lastPaymentDate
+        : idOverride?.lastPaymentDate;
 
     const candidate: FixedExpenseItem = {
       id: validId,
@@ -714,6 +738,9 @@ function reconcileFixedExpensesList(params: {
       receipts: curr.receipts || idOverride?.receipts,
       linkedAliases: curr.linkedAliases || idOverride?.linkedAliases,
       linkedGoalId: curr.linkedGoalId ?? idOverride?.linkedGoalId,
+      isCancelled: finalIsCancelled,
+      hasNoMorePayments: finalHasNoMorePayments,
+      lastPaymentDate: finalLastPaymentDate,
     };
 
     const existingIdx = findExactSavedMatchIndex(candidate);
@@ -734,6 +761,12 @@ function reconcileFixedExpensesList(params: {
         receipts: candidate.receipts || existing.receipts,
         linkedAliases: candidate.linkedAliases || existing.linkedAliases,
         linkedGoalId: candidate.linkedGoalId ?? existing.linkedGoalId,
+        isCancelled: candidate.isCancelled ?? existing.isCancelled,
+        hasNoMorePayments: candidate.hasNoMorePayments ?? existing.hasNoMorePayments,
+        lastPaymentDate:
+          candidate.isCancelled === false
+            ? undefined
+            : candidate.lastPaymentDate ?? existing.lastPaymentDate,
       };
       unified[existingIdx] = merged;
       if (
@@ -742,7 +775,10 @@ function reconcileFixedExpensesList(params: {
           existing.name !== merged.name ||
           existing.amount !== merged.amount ||
           existing.dueDay !== merged.dueDay ||
-          existing.category !== merged.category)
+          existing.category !== merged.category ||
+          existing.isCancelled !== merged.isCancelled ||
+          existing.lastPaymentDate !== merged.lastPaymentDate ||
+          existing.hasNoMorePayments !== merged.hasNoMorePayments)
       ) {
         if (!toPersist.some((p) => p.id === merged.id)) {
           toPersist.push(merged);
@@ -2574,11 +2610,12 @@ export const App: React.FC = () => {
           localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
           localStorage.getItem('dejz_onboarding_completed') === 'true';
         const explicitlyIncomplete =
-          profilePrefs.onboardingCompleted === false ||
-          profilePrefs.onboardingInProgress === true ||
-          localStorage.getItem('dejz_onboarding_in_progress') === 'true';
+          !explicitlyCompleted &&
+          (profilePrefs.onboardingCompleted === false ||
+            profilePrefs.onboardingInProgress === true ||
+            localStorage.getItem('dejz_onboarding_in_progress') === 'true');
 
-        if (explicitlyIncomplete || (!explicitlyCompleted && !hasAnyExistingUserData)) {
+        if (!explicitlyCompleted && (explicitlyIncomplete || !hasAnyExistingUserData)) {
           try {
             localStorage.setItem('dejz_onboarding_in_progress', 'true');
             if (!localStorage.getItem('dejz_onboarding_step')) {
@@ -2587,8 +2624,6 @@ export const App: React.FC = () => {
                 String(profilePrefs.onboardingStep || '1')
               );
             }
-            localStorage.removeItem('dejz_onboarding_v2_done');
-            localStorage.removeItem('dejz_onboarding_completed');
           } catch {
             // ignore
           }
@@ -3355,9 +3390,12 @@ export const App: React.FC = () => {
             : 1;
         return sum + Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio);
       }
+      if (!isFixedExpenseActiveInPeriod(exp, period)) {
+        return sum;
+      }
       return sum + (Number(exp.amount) || 0);
     }, 0);
-  }, [fixedExpenses, periodRecurringMatches]);
+  }, [fixedExpenses, periodRecurringMatches, period]);
 
   // Enhetlig transaktionslista för både Hem ("Senaste transaktioner"), Historik och Sök:
   // Garanterar att antalet reserverade transaktioner och historikrader alltid är 100% identiskt oavsett flik.
@@ -4075,6 +4113,9 @@ export const App: React.FC = () => {
         receipts: updated.receipts,
         linkedAliases: updated.linkedAliases,
         linkedGoalId: updated.linkedGoalId,
+        isCancelled: updated.isCancelled,
+        hasNoMorePayments: updated.hasNoMorePayments,
+        lastPaymentDate: updated.lastPaymentDate,
       },
       rootOriginalName,
       validId,
@@ -4128,6 +4169,9 @@ export const App: React.FC = () => {
           paymentMethod: itemWithLogo.paymentMethod || 'Autogiro',
           frequency: Frequency.MONTHLY,
           logo,
+          isCancelled: itemWithLogo.isCancelled,
+          hasNoMorePayments: itemWithLogo.hasNoMorePayments,
+          lastPaymentDate: itemWithLogo.lastPaymentDate,
         })
         .catch(() => {});
     }

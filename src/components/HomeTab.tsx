@@ -93,6 +93,60 @@ export interface FixedExpenseItem {
   receiptUrl?: string;
   receiptName?: string;
   receipts?: { url: string; name: string }[];
+  isCancelled?: boolean;
+  lastPaymentDate?: string;
+  hasNoMorePayments?: boolean;
+}
+
+const SHORT_SWEDISH_MONTHS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'maj',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'okt',
+  'nov',
+  'dec',
+];
+
+export function isFixedExpenseActiveInPeriod(
+  exp: FixedExpenseItem,
+  period: PeriodInfo
+): boolean {
+  if (!exp.isCancelled) return true;
+  if (exp.hasNoMorePayments) return false;
+  if (exp.lastPaymentDate && /^\d{4}-\d{2}$/.test(exp.lastPaymentDate)) {
+    const periodEndYm = (period.endDate || '').slice(0, 7);
+    if (periodEndYm && periodEndYm > exp.lastPaymentDate) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function formatFixedCancellationBadge(exp: FixedExpenseItem): string | null {
+  if (!exp.isCancelled) return null;
+  if (exp.hasNoMorePayments) return 'Uppsagd · Slut';
+  if (exp.lastPaymentDate && /^\d{4}-\d{2}$/.test(exp.lastPaymentDate)) {
+    const [yStr, mStr] = exp.lastPaymentDate.split('-');
+    const targetYear = parseInt(yStr, 10);
+    const targetMonth = parseInt(mStr, 10) - 1;
+    const nowStr = getSwedishDateStr();
+    const nowYear = parseInt(nowStr.slice(0, 4), 10);
+    const nowMonth = parseInt(nowStr.slice(5, 7), 10) - 1;
+    const diffMonths = (targetYear - nowYear) * 12 + (targetMonth - nowMonth);
+    const monthLabel = SHORT_SWEDISH_MONTHS[targetMonth] || exp.lastPaymentDate;
+
+    if (diffMonths < 0) return 'Uppsagd · Slut';
+    if (diffMonths === 0) return `Uppsagd · Sista ${monthLabel}`;
+    if (diffMonths <= 6) return `Uppsagd · ${diffMonths} mån kvar`;
+    return `Uppsagd · Sista ${monthLabel}`;
+  }
+  return 'Uppsagd';
 }
 
 export interface TransactionItem {
@@ -523,6 +577,109 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     markTransactionsReviewed(ids);
     setReviewedIds(getReviewedTransactionIds());
   };
+
+  // "Sedan sist"-överblick för nya köp sedan förra besöket i appen
+  const [sinceLastVisitTxs, setSinceLastVisitTxs] = useState<TransactionItem[]>([]);
+  const [isSinceLastOpen, setIsSinceLastOpen] = useState(false);
+
+  useEffect(() => {
+    if (isInitialLoading || !transactions || transactions.length === 0) return;
+    const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';
+    try {
+      const deduped = deduplicateTransactions(transactions);
+      const recentCutoff = (() => {
+        const parts = todayStr.split('-');
+        const d = new Date(
+          Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10) - 3, 12, 0, 0)
+        );
+        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(
+          d.getUTCDate()
+        ).padStart(2, '0')}`;
+      })();
+
+      const rawSeen = localStorage.getItem(SEEN_STORAGE_KEY);
+      if (!rawSeen) {
+        // Första gången: visa senaste inköpsdagens rörliga köp (om det finns köp senaste 3 dagarna)
+        const recentExpenses = deduped.filter(
+          (tx) =>
+            !tx.isExcluded &&
+            tx.type === 'expense' &&
+            (tx.date || '') >= recentCutoff &&
+            (tx.date || '') <= todayStr &&
+            !checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
+        );
+
+        if (recentExpenses.length > 0) {
+          const latestDate = recentExpenses.reduce(
+            (maxD, tx) => ((tx.date || '') > maxD ? tx.date : maxD),
+            ''
+          );
+          const batch = recentExpenses
+            .filter((tx) => tx.date === latestDate)
+            .slice(0, 6);
+          const batchIdSet = new Set(batch.map((b) => b.id));
+          const initialSeen = deduped
+            .filter((tx) => !batchIdSet.has(tx.id))
+            .map((tx) => tx.id);
+          localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(initialSeen));
+          if (batch.length > 0) {
+            setSinceLastVisitTxs(batch);
+            setIsSinceLastOpen(true);
+          }
+        } else {
+          localStorage.setItem(
+            SEEN_STORAGE_KEY,
+            JSON.stringify(deduped.map((tx) => tx.id))
+          );
+        }
+        return;
+      }
+
+      const seenSet = new Set<string>(JSON.parse(rawSeen) || []);
+      const newlyArrived = deduped
+        .filter(
+          (tx) =>
+            !seenSet.has(tx.id) &&
+            !tx.isExcluded &&
+            tx.type === 'expense' &&
+            (tx.date || '') >= recentCutoff &&
+            (tx.date || '') <= todayStr &&
+            !checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
+        )
+        .slice(0, 8);
+
+      if (newlyArrived.length > 0) {
+        setSinceLastVisitTxs(newlyArrived);
+        setIsSinceLastOpen(true);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [transactions, isInitialLoading, todayStr, fixedExpenses, incomes]);
+
+  const dismissSinceLastVisit = useCallback(() => {
+    setIsSinceLastOpen(false);
+    try {
+      const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';
+      const rawSeen = localStorage.getItem(SEEN_STORAGE_KEY);
+      const seenSet = new Set<string>(rawSeen ? JSON.parse(rawSeen) : []);
+      for (const tx of transactions || []) {
+        if (tx.id) seenSet.add(tx.id);
+      }
+      for (const tx of sinceLastVisitTxs) {
+        if (tx.id) seenSet.add(tx.id);
+      }
+      localStorage.setItem(
+        SEEN_STORAGE_KEY,
+        JSON.stringify(Array.from(seenSet).slice(-2500))
+      );
+      if (sinceLastVisitTxs.length > 0) {
+        handleMarkReviewed(sinceLastVisitTxs.map((t) => t.id));
+      }
+    } catch {
+      // ignore
+    }
+  }, [transactions, sinceLastVisitTxs]);
 
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
   const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -2306,6 +2463,69 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             )}
           </div>
         )}
+      </BottomSheet>
+
+      {/* ============================================================== */}
+      {/* SEDAN SIST-ÖVERBLICK (NYA KÖP SEDAN FÖRRA BESÖKET)             */}
+      {/* ============================================================== */}
+      <BottomSheet
+        isOpen={isSinceLastOpen && sinceLastVisitTxs.length > 0}
+        onClose={dismissSinceLastVisit}
+        title="Sedan sist"
+      >
+        <div className="space-y-4">
+          <div className="flex items-baseline justify-between px-1">
+            <span className="text-xs font-medium text-[var(--text-secondary)]">
+              {sinceLastVisitTxs.length} {sinceLastVisitTxs.length === 1 ? 'köp' : 'köp'}
+            </span>
+            <span className="font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] text-[var(--text-primary)] tabular-nums">
+              -{formatKr(sinceLastVisitTxs.reduce((s, t) => s + (Number(t.amount) || 0), 0))}
+            </span>
+          </div>
+
+          <div className="ui-sheet-group">
+            {sinceLastVisitTxs.map((tx) => (
+              <button
+                key={`since-last-${tx.id}`}
+                type="button"
+                onClick={() => {
+                  dismissSinceLastVisit();
+                  onSelectTransaction(tx);
+                }}
+                className="ui-tx-row px-4"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <ItemLogo
+                    name={tx.title}
+                    category={tx.category}
+                    logoUrl={tx.logo}
+                    size="md"
+                    isRecurring={false}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="ui-row-title truncate block">{tx.title}</span>
+                    <span className="ui-row-subtitle flex items-center gap-1">
+                      <CategoryIcon category={tx.category} size={11} className="shrink-0" />
+                      <span className="truncate">{tx.category}</span>
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="ui-row-amount">-{formatKr(tx.amount)}</span>
+                  <span className="ui-row-meta">{formatSwedishDateHeading(tx.date)}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={dismissSinceLastVisit}
+            className="w-full ui-btn-primary"
+          >
+            <span>OK</span>
+          </button>
+        </div>
       </BottomSheet>
     </div>
   );

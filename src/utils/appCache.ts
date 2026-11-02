@@ -663,6 +663,9 @@ export interface ManualFixedOverride {
   linkedAliases?: string[];
   linkedGoalId?: string;
   receipts?: { url: string; name: string }[];
+  isCancelled?: boolean;
+  lastPaymentDate?: string;
+  hasNoMorePayments?: boolean;
 }
 
 /**
@@ -1745,7 +1748,10 @@ export function collectAllUserPreferences(): Record<string, any> {
     onboardingCompleted:
       localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
       localStorage.getItem('dejz_onboarding_completed') === 'true',
-    onboardingInProgress: localStorage.getItem('dejz_onboarding_in_progress') === 'true',
+    onboardingInProgress:
+      localStorage.getItem('dejz_onboarding_v2_done') !== 'true' &&
+      localStorage.getItem('dejz_onboarding_completed') !== 'true' &&
+      localStorage.getItem('dejz_onboarding_in_progress') === 'true',
     onboardingStep: localStorage.getItem('dejz_onboarding_step') || '1',
     updatedAt: new Date().toISOString(),
   };
@@ -2006,14 +2012,15 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
         JSON.stringify(prefs.customPaymentMethods)
       );
     }
-    if (prefs.onboardingCompleted === true) {
+    const isAlreadyDoneLocally =
+      localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
+      localStorage.getItem('dejz_onboarding_completed') === 'true';
+    if (prefs.onboardingCompleted === true || isAlreadyDoneLocally) {
       localStorage.setItem('dejz_onboarding_v2_done', 'true');
       localStorage.setItem('dejz_onboarding_completed', 'true');
       localStorage.removeItem('dejz_onboarding_in_progress');
-    } else if (prefs.onboardingCompleted === false || prefs.onboardingInProgress === true) {
+    } else if (prefs.onboardingInProgress === true) {
       localStorage.setItem('dejz_onboarding_in_progress', 'true');
-      localStorage.removeItem('dejz_onboarding_v2_done');
-      localStorage.removeItem('dejz_onboarding_completed');
       if (prefs.onboardingStep && !localStorage.getItem('dejz_onboarding_step')) {
         localStorage.setItem('dejz_onboarding_step', String(prefs.onboardingStep));
       }

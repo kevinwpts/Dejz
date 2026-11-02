@@ -12,7 +12,6 @@ import {
   ArrowsClockwise,
   Bank,
   CalendarBlank,
-  Wallet,
   Sparkle,
 } from '@phosphor-icons/react';
 import {
@@ -25,7 +24,7 @@ import {
   doesTransactionMatchAccount,
 } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon, resolveCategoryColor } from './CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon, resolveCategoryColor } from './CategoryIcon';
 import { SwipeableTxRow } from './ui/SwipeableTxRow';
 import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
@@ -871,7 +870,6 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
           {/* 5. BETALSÄTT */}
           <div className="space-y-2">
             <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-              <Wallet size={13} />
               <span>Betalsätt</span>
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -893,13 +891,14 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     key={pm}
                     type="button"
                     onClick={() => setSelectedPaymentMethod(isSel ? null : pm)}
-                    className={`px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                       isSel
                         ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
                         : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] font-normal'
                     }`}
                   >
-                    {pm}
+                    <PaymentMethodIcon method={pm} size={14} />
+                    <span>{pm}</span>
                   </button>
                 );
               })}

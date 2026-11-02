@@ -4,7 +4,14 @@ import {
   CaretRight,
   Users,
 } from '@phosphor-icons/react';
-import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem } from './HomeTab';
+import {
+  FixedExpenseItem,
+  IncomeItem,
+  TransactionItem,
+  AccountItem,
+  formatFixedCancellationBadge,
+  isFixedExpenseActiveInPeriod,
+} from './HomeTab';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
 import {
@@ -338,13 +345,17 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 const linkedGoalName = exp.linkedGoalId
                   ? savingsGoalsMap.get(exp.linkedGoalId)
                   : undefined;
+                const cancelBadge = formatFixedCancellationBadge(exp);
+                const isActiveInPeriod = isFixedExpenseActiveInPeriod(exp, period);
+                const displayAmt =
+                  !isActiveInPeriod && !matchedTx ? 0 : actualPaidAmt;
 
                 return (
                   <button
                     key={exp.id}
                     type="button"
                     onClick={() => onSelectFixed(exp)}
-                    className="ui-tx-row"
+                    className={`ui-tx-row ${!isActiveInPeriod && !matchedTx ? 'opacity-60' : ''}`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <ItemLogo
@@ -379,18 +390,26 @@ export const FixedTab: React.FC<FixedTabProps> = ({
 
                     <div className="text-right shrink-0">
                       <span className="ui-row-amount">
-                        -{formatKr(actualPaidAmt)}
+                        {displayAmt > 0 ? `-${formatKr(displayAmt)}` : '0 kr'}
                       </span>
                       <span className="ui-row-meta flex items-center justify-end gap-1">
-                        <span>
-                          {hasVariableDiff
-                            ? `Riktvärde ${formatKr(exp.amount)}`
-                            : `Den ${exp.dueDay}:e`}
-                        </span>
-                        {paid && (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                            · Betald
+                        {cancelBadge ? (
+                          <span className="text-amber-600 dark:text-amber-400 font-medium">
+                            {cancelBadge}
                           </span>
+                        ) : (
+                          <>
+                            <span>
+                              {hasVariableDiff
+                                ? `Riktvärde ${formatKr(exp.amount)}`
+                                : `Den ${exp.dueDay}:e`}
+                            </span>
+                            {paid && (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                · Betald
+                              </span>
+                            )}
+                          </>
                         )}
                       </span>
                     </div>

@@ -622,17 +622,10 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               >
                 {activeSlice ? (
                   <>
-                    <div
-                      className="w-7 h-7 rounded-xl flex items-center justify-center mb-1 transition-transform"
-                      style={{
-                        backgroundColor: `${activeSlice.color}1F`,
-                        color: activeSlice.color,
-                      }}
-                    >
+                    <div className="w-7 h-7 flex items-center justify-center mb-1 transition-transform">
                       <CategoryIcon
                         category={activeSlice.category}
-                        size={14}
-                        color={activeSlice.color}
+                        size={22}
                       />
                     </div>
                     <span className="text-[11.5px] font-medium text-[var(--text-secondary)] truncate max-w-[120px]">
@@ -751,7 +744,6 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         {categoryBreakdown.length > 0 ? (
           <div className="divide-y divide-[var(--border-subtle)]">
             {categoryBreakdown.map((item) => {
-              const catColor = resolveCategoryColor(item.category);
               const isExpanded = inspectedCategory === item.category;
 
               return (
@@ -772,14 +764,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   >
                     <div className="w-full flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div
-                          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
-                          style={{
-                            backgroundColor: `${catColor}18`,
-                            color: catColor,
-                          }}
-                        >
-                          <CategoryIcon category={item.category} size={18} color={catColor} />
+                        <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                          <CategoryIcon category={item.category} size={28} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <span className="ui-row-title">

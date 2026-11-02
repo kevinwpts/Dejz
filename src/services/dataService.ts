@@ -1,6 +1,6 @@
 import { supabase } from '../supabaseClient';
 import { Config, Income, FixedExpense, Transaction } from '../types';
-import { ICON_MAP, isEmojiString } from '../utils/icons';
+import { isKnownIconId, isEmojiString } from '../components/CategoryIcon';
 import { seedDemoData } from '../utils/demoData';
 import { getTransactionReceipts, serializeTransactionReceipts } from '../utils/format';
 
@@ -401,7 +401,7 @@ export const dataService = {
         logo: t.logo,
         icon:
           t.icon ||
-          (t.logo && (isEmojiString(t.logo) || ICON_MAP[t.logo]) ? t.logo : undefined),
+          (t.logo && (isEmojiString(t.logo) || isKnownIconId(t.logo)) ? t.logo : undefined),
         paymentMethod: t.payment_method,
         receiptUrl: receiptUrls[0],
         receiptUrls,
@@ -584,7 +584,7 @@ export const dataService = {
       logo: row.logo,
       icon:
         row.icon ||
-        (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
+        (row.logo && (isEmojiString(row.logo) || isKnownIconId(row.logo)) ? row.logo : undefined),
       paymentMethod: row.payment_method,
       receiptUrl: rowReceipts[0],
       receiptUrls: rowReceipts,
@@ -738,7 +738,7 @@ export const dataService = {
       logo: row.logo,
       icon:
         row.icon ||
-        (row.logo && (isEmojiString(row.logo) || ICON_MAP[row.logo]) ? row.logo : undefined),
+        (row.logo && (isEmojiString(row.logo) || isKnownIconId(row.logo)) ? row.logo : undefined),
       paymentMethod: row.payment_method,
       receiptUrl: rowReceipts[0],
       receiptUrls: rowReceipts,

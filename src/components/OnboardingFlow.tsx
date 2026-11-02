@@ -35,7 +35,7 @@ import {
   syncAllUserPreferencesToSupabase,
 } from '../utils/appCache';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon } from './CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
 import { BottomSheet } from './ui/BottomSheet';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
 
@@ -2230,15 +2230,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         }}
                         className="ui-row-btn"
                       >
-                        <span
-                          className={`truncate ${
-                            isSel
-                              ? 'font-medium text-[var(--text-primary)]'
-                              : 'font-normal text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {m}
-                        </span>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <PaymentMethodIcon method={m} size={17} />
+                          <span
+                            className={`truncate ${
+                              isSel
+                                ? 'font-medium text-[var(--text-primary)]'
+                                : 'font-normal text-[var(--text-primary)]'
+                            }`}
+                          >
+                            {m}
+                          </span>
+                        </div>
                         {isSel && (
                           <Check
                             size={14}
@@ -2408,6 +2411,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                     >
                       <span className="text-[var(--text-muted)] shrink-0">Betalsätt</span>
                       <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                        <PaymentMethodIcon method={sheetEditor.paymentMethod || 'Autogiro'} size={15} />
                         <span>{sheetEditor.paymentMethod || 'Autogiro'}</span>
                         <CaretRight size={12} className="text-[var(--text-muted)]" />
                       </span>

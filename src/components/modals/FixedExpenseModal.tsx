@@ -16,13 +16,24 @@ import {
   Info,
   CalendarBlank,
 } from '@phosphor-icons/react';
-import { FixedExpenseItem, AccountItem, TransactionItem, getTransactionTime } from '../HomeTab';
+import {
+  FixedExpenseItem,
+  AccountItem,
+  TransactionItem,
+  getTransactionTime,
+  formatFixedCancellationBadge,
+} from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon, resolveCategoryColor } from '../CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon, resolveCategoryColor } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
-import { formatSwedishDateHeading, getItemReceipts, ReceiptAttachment } from '../../utils/swedishDate';
+import {
+  formatSwedishDateHeading,
+  getItemReceipts,
+  getSwedishDateStr,
+  ReceiptAttachment,
+} from '../../utils/swedishDate';
 import {
   findMatchingFixedExpense,
   findTransactionsForFixedExpense,
@@ -72,6 +83,7 @@ type ModalSubView =
   | 'share-picker'
   | 'receipt-preview'
   | 'similar'
+  | 'cancel-picker'
   | 'cancel-guide';
 
 interface CancelGuideData {
@@ -120,6 +132,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showFullAccount, setShowFullAccount] = useState(false);
   const [logoPrefTick, setLogoPrefTick] = useState(0);
+  const [showCustomMonthPicker, setShowCustomMonthPicker] = useState(false);
   const [cancelGuide, setCancelGuide] = useState<CancelGuideData | null>(null);
   const [isLoadingCancelGuide, setIsLoadingCancelGuide] = useState(false);
   const cancelGuideCacheRef = useRef<Record<string, CancelGuideData>>({});
@@ -184,6 +197,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     setNavDirection('forward');
     setShowDeleteConfirm(false);
     setShowFullAccount(false);
+    setShowCustomMonthPicker(false);
     setCancelGuide(null);
     setIsLoadingCancelGuide(false);
   }, [initialExpense, isOpen]);
@@ -324,6 +338,17 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       overrides?.isShared !== undefined ? overrides.isShared : isShared;
     const nextReceipts = overrides?.receipts !== undefined ? overrides.receipts : draftReceipts;
 
+    const nextIsCancelled =
+      overrides?.isCancelled !== undefined ? overrides.isCancelled : activeExpense.isCancelled;
+    const nextHasNoMorePayments =
+      overrides?.hasNoMorePayments !== undefined
+        ? overrides.hasNoMorePayments
+        : activeExpense.hasNoMorePayments;
+    const nextLastPaymentDate =
+      'lastPaymentDate' in (overrides || {})
+        ? overrides?.lastPaymentDate
+        : activeExpense.lastPaymentDate;
+
     onUpdate({
       ...activeExpense,
       name: nextName,
@@ -336,6 +361,9 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       receipts: nextReceipts && nextReceipts.length > 0 ? nextReceipts : undefined,
       receiptUrl: nextReceipts && nextReceipts.length > 0 ? nextReceipts[0].url : undefined,
       receiptName: nextReceipts && nextReceipts.length > 0 ? nextReceipts[0].name : undefined,
+      isCancelled: nextIsCancelled,
+      hasNoMorePayments: nextHasNoMorePayments,
+      lastPaymentDate: nextLastPaymentDate,
     });
   };
 
@@ -550,6 +578,216 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               Inga registrerade banktransaktioner matchar {displayName} ännu.
             </div>
           )}
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* SUB-VIEW 1A: UPPSAGD — ENKLA SCENARION (1 TRYCK)               */}
+      {/* ============================================================== */}
+      {subView === 'cancel-picker' && (
+        <div className={`${slideAnimClass} space-y-4`}>
+          <div className="ui-sheet-sub-header">
+            <button
+              type="button"
+              onClick={() => navigateSubView('details', 'back')}
+              title="Tillbaka"
+              aria-label="Tillbaka"
+              className="ui-icon-btn"
+            >
+              <CaretLeft size={15} weight="bold" />
+            </button>
+            <span className="ui-sheet-title truncate max-w-[220px]">
+              Uppsagd · {displayName}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-icon-btn"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {(() => {
+            const SHORT_MONTHS = [
+              'jan',
+              'feb',
+              'mar',
+              'apr',
+              'maj',
+              'jun',
+              'jul',
+              'aug',
+              'sep',
+              'okt',
+              'nov',
+              'dec',
+            ];
+            const nowStr = getSwedishDateStr();
+            const baseYear = parseInt(nowStr.slice(0, 4), 10);
+            const baseMonth = parseInt(nowStr.slice(5, 7), 10) - 1;
+
+            const getMonthOption = (monthsAhead: number) => {
+              const d = new Date(Date.UTC(baseYear, baseMonth + monthsAhead, 1, 12, 0, 0));
+              const y = d.getUTCFullYear();
+              const m = d.getUTCMonth();
+              const ym = `${y}-${String(m + 1).padStart(2, '0')}`;
+              const label =
+                y !== baseYear ? `${SHORT_MONTHS[m]} ${String(y).slice(-2)}` : SHORT_MONTHS[m];
+              return { ym, label };
+            };
+
+            const quickScenarios = [
+              {
+                key: 'none',
+                title: 'Inga fler dragningar',
+                rightLabel: 'Slutar direkt',
+                isSelected: Boolean(activeExpense?.isCancelled && activeExpense?.hasNoMorePayments),
+                onPick: () => {
+                  commitInlineChanges({
+                    isCancelled: true,
+                    hasNoMorePayments: true,
+                    lastPaymentDate: undefined,
+                  });
+                  navigateSubView('details', 'back');
+                },
+              },
+              ...[1, 2, 3, 6].map((mCount) => {
+                const target = getMonthOption(mCount - 1);
+                const isSelected = Boolean(
+                  activeExpense?.isCancelled &&
+                    !activeExpense?.hasNoMorePayments &&
+                    activeExpense?.lastPaymentDate === target.ym
+                );
+                return {
+                  key: `m-${mCount}`,
+                  title: mCount === 1 ? '1 månad kvar' : `${mCount} månader kvar`,
+                  rightLabel: `Sista: ${target.label}`,
+                  isSelected,
+                  onPick: () => {
+                    commitInlineChanges({
+                      isCancelled: true,
+                      hasNoMorePayments: false,
+                      lastPaymentDate: target.ym,
+                    });
+                    navigateSubView('details', 'back');
+                  },
+                };
+              }),
+            ];
+
+            const customMonths = Array.from({ length: 12 }, (_, idx) => getMonthOption(idx));
+
+            return (
+              <div className="space-y-3.5">
+                {activeExpense?.isCancelled && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      commitInlineChanges({
+                        isCancelled: false,
+                        hasNoMorePayments: false,
+                        lastPaymentDate: undefined,
+                      });
+                      navigateSubView('details', 'back');
+                    }}
+                    className="w-full py-3 px-4 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <span>Ångra uppsägning</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                      Gör aktiv igen
+                    </span>
+                  </button>
+                )}
+
+                <div className="ui-sheet-group">
+                  {quickScenarios.map((sc) => (
+                    <button
+                      key={sc.key}
+                      type="button"
+                      onClick={sc.onPick}
+                      className="ui-row-btn"
+                    >
+                      <span
+                        className={
+                          sc.isSelected
+                            ? 'font-semibold text-[var(--text-primary)]'
+                            : 'font-normal text-[var(--text-primary)]'
+                        }
+                      >
+                        {sc.title}
+                      </span>
+                      <span className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                        <span>{sc.rightLabel}</span>
+                        {sc.isSelected && (
+                          <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                        )}
+                      </span>
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomMonthPicker((prev) => !prev)}
+                    className="ui-row-btn"
+                  >
+                    <span className="font-normal text-[var(--text-primary)]">
+                      Välj sista månad
+                    </span>
+                    <CaretRight
+                      size={12}
+                      className={`text-[var(--text-muted)] transition-transform ${
+                        showCustomMonthPicker ? 'rotate-90' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {showCustomMonthPicker && (
+                  <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+                    {customMonths.map((cm) => {
+                      const isSel = Boolean(
+                        activeExpense?.isCancelled &&
+                          !activeExpense?.hasNoMorePayments &&
+                          activeExpense?.lastPaymentDate === cm.ym
+                      );
+                      return (
+                        <button
+                          key={cm.ym}
+                          type="button"
+                          onClick={() => {
+                            commitInlineChanges({
+                              isCancelled: true,
+                              hasNoMorePayments: false,
+                              lastPaymentDate: cm.ym,
+                            });
+                            navigateSubView('details', 'back');
+                          }}
+                          className={`py-2 px-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                            isSel
+                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                          }`}
+                        >
+                          {cm.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="pt-1 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={handleOpenCancelGuide}
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1.5 px-3 transition-colors cursor-pointer"
+                  >
+                    Hur säger jag upp hos {displayName}?
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -875,15 +1113,18 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                   }}
                   className="ui-row-btn"
                 >
-                  <span
-                    className={`truncate ${
-                      isSel
-                        ? 'font-medium text-[var(--text-primary)]'
-                        : 'font-normal text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {m}
-                  </span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <PaymentMethodIcon method={m} size={17} />
+                    <span
+                      className={`truncate ${
+                        isSel
+                          ? 'font-medium text-[var(--text-primary)]'
+                          : 'font-normal text-[var(--text-primary)]'
+                      }`}
+                    >
+                      {m}
+                    </span>
+                  </div>
                   {isSel && (
                     <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
                   )}
@@ -1218,6 +1459,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             >
               <span className="ui-info-label shrink-0">Betalsätt</span>
               <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+                <PaymentMethodIcon method={paymentMethod} size={15} />
                 <span>{paymentMethod}</span>
                 <CaretRight size={12} className="text-[var(--text-muted)]" />
               </span>
@@ -1477,14 +1719,25 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => navigateSubView('day-picker', 'forward')}
-              className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] tabular-nums mt-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
-            >
-              <span>Dras den {dueDay}:e varje månad</span>
-              <CaretRight size={11} className="text-[var(--text-muted)]" />
-            </button>
+            {activeExpense?.isCancelled ? (
+              <button
+                type="button"
+                onClick={() => navigateSubView('cancel-picker', 'forward')}
+                className="text-xs font-medium text-amber-600 dark:text-amber-400 hover:opacity-80 mt-1.5 transition-opacity cursor-pointer inline-flex items-center gap-1"
+              >
+                <span>{formatFixedCancellationBadge(activeExpense)}</span>
+                <CaretRight size={11} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigateSubView('day-picker', 'forward')}
+                className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] tabular-nums mt-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
+              >
+                <span>Dras den {dueDay}:e varje månad</span>
+                <CaretRight size={11} className="text-[var(--text-muted)]" />
+              </button>
+            )}
           </div>
 
           <div className="space-y-3.5">
@@ -1492,14 +1745,20 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             <div className="grid grid-cols-4 gap-2">
               <button
                 type="button"
-                onClick={handleOpenCancelGuide}
+                onClick={() => navigateSubView('cancel-picker', 'forward')}
                 className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
               >
-                <div className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${
+                    activeExpense?.isCancelled
+                      ? 'bg-amber-500/15 text-amber-500'
+                      : 'bg-rose-500/10 text-rose-500'
+                  }`}
+                >
                   <Scissors size={16} />
                 </div>
                 <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                  Säg upp
+                  {activeExpense?.isCancelled ? 'Uppsagd' : 'Säg upp'}
                 </span>
               </button>
 
@@ -1575,10 +1834,25 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               >
                 <span className="ui-info-label">Betalsätt</span>
                 <span className="ui-info-value flex items-center gap-1.5">
+                  <PaymentMethodIcon method={paymentMethod} size={15} />
                   <span>{paymentMethod}</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
               </button>
+
+              {activeExpense?.isCancelled && (
+                <button
+                  type="button"
+                  onClick={() => navigateSubView('cancel-picker', 'forward')}
+                  className="ui-row-btn"
+                >
+                  <span className="ui-info-label">Status</span>
+                  <span className="ui-info-value flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                    <span>{formatFixedCancellationBadge(activeExpense)}</span>
+                    <CaretRight size={12} className="text-[var(--text-muted)]" />
+                  </span>
+                </button>
+              )}
 
               <button
                 type="button"
