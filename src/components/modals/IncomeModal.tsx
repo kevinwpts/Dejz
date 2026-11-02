@@ -446,6 +446,8 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                   </span>
                   <input
                     type="text"
+                    spellCheck={false}
+                    autoCorrect="off"
                     autoFocus
                     placeholder="Inkomstkälla"
                     value={name}
@@ -457,7 +459,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                         setCategory(inferred.category);
                       }
                     }}
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none focus:ring-0"
                   />
                 </div>
               </label>
@@ -577,13 +579,15 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
               <input
                 type="text"
+                spellCheck={false}
+                autoCorrect="off"
                 value={name}
                 onChange={(e) => {
                   const nextName = e.target.value;
                   setName(nextName);
                   commitInlineChanges({ name: nextName });
                 }}
-                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none transition-colors w-full"
+                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors w-full p-0"
                 placeholder="Inkomstkälla"
               />
               {(() => {
@@ -619,6 +623,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                spellCheck={false}
                 size={Math.max(1, (amount || '0').length)}
                 style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                 value={amount}
@@ -630,7 +635,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                     commitInlineChanges({ amount: num });
                   }
                 }}
-                className="bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-emerald-600 dark:text-emerald-400"
+                className="bg-transparent border-0 focus:outline-none focus:ring-0 text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-emerald-600 dark:text-emerald-400"
                 placeholder="0"
               />
               <span className="ml-1.5 font-display font-medium text-base text-emerald-600/70 dark:text-emerald-400/70">

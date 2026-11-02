@@ -1362,6 +1362,8 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                       </span>
                       <input
                         type="text"
+                        spellCheck={false}
+                        autoCorrect="off"
                         autoFocus={isCreateMode}
                         placeholder="Butik eller tjänst"
                         value={name}
@@ -1376,7 +1378,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                             setPaymentMethod(inferred.paymentMethod);
                           }
                         }}
-                        className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+                        className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none focus:ring-0"
                       />
                     </div>
                   </label>
@@ -1658,13 +1660,15 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
               <input
                 type="text"
+                spellCheck={false}
+                autoCorrect="off"
                 value={name}
                 onChange={(e) => {
                   const nextName = e.target.value;
                   setName(nextName);
                   commitInlineChanges({ name: nextName });
                 }}
-                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none transition-colors w-full"
+                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors w-full p-0"
                 placeholder="Tjänst eller butik"
               />
               {(() => {
@@ -1700,6 +1704,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                spellCheck={false}
                 size={Math.max(1, (amount || '0').length)}
                 style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                 value={amount}
@@ -1711,7 +1716,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                     commitInlineChanges({ amount: num });
                   }
                 }}
-                className="bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-[var(--text-primary)]"
+                className="bg-transparent border-0 focus:outline-none focus:ring-0 text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-[var(--text-primary)]"
                 placeholder="0"
               />
               <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">

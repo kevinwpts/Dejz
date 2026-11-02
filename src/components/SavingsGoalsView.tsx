@@ -555,12 +555,14 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             <div className="max-w-[68%]">
               <input
                 type="text"
+                spellCheck={false}
+                autoCorrect="off"
                 value={selectedGoal.name}
                 onChange={(e) => {
                   updateSelectedGoal({ name: e.target.value });
                 }}
                 placeholder="Sparmålets namn"
-                className="w-full bg-transparent border-b border-transparent hover:border-white/30 focus:border-white text-sm font-medium text-white/95 placeholder-white/50 focus:outline-none transition-colors p-0"
+                className="w-full bg-transparent border-0 text-sm font-medium text-white/95 placeholder-white/50 focus:outline-none focus:ring-0 transition-colors p-0"
               />
               <span className="font-display font-bold text-3xl sm:text-4xl text-white tabular-nums tracking-tight block mt-0.5">
                 {formatKr(effectiveSelectedAmount)}
@@ -621,6 +623,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                spellCheck={false}
                 value={formatInputThousands(String(selectedGoal.targetAmount || ''))}
                 onChange={(e) => {
                   const cleaned = e.target.value.replace(/[^\d]/g, '');
@@ -630,7 +633,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   }
                 }}
                 placeholder="10 000"
-                className="bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-right font-display font-semibold tabular-nums text-xs sm:text-[13px] text-[var(--text-primary)] max-w-[130px] p-0"
+                className="bg-transparent border-0 focus:outline-none focus:ring-0 text-right font-display font-semibold tabular-nums text-xs sm:text-[13px] text-[var(--text-primary)] max-w-[130px] p-0"
               />
               <span className="text-xs text-[var(--text-secondary)]">kr</span>
             </div>

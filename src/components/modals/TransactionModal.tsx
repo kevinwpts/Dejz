@@ -1547,6 +1547,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
               <input
                 type="text"
+                spellCheck={false}
+                autoCorrect="off"
                 value={title}
                 onChange={(e) => {
                   const nextTitle = e.target.value;
@@ -1555,7 +1557,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     onUpdate({ ...activeTx, title: nextTitle.trim() || activeTx.title });
                   }
                 }}
-                className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] text-center bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none transition-colors w-full"
+                className="font-display font-semibold text-base sm:text-lg text-[var(--text-primary)] text-center bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors w-full p-0"
                 placeholder="Transaktionens namn"
               />
               {(() => {
@@ -1603,6 +1605,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 <input
                   type="text"
                   inputMode="numeric"
+                  spellCheck={false}
                   size={Math.max(1, (amount || '0').length)}
                   style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                   value={amount}
@@ -1614,7 +1617,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       onUpdate({ ...activeTx, amount: num });
                     }
                   }}
-                  className={`bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 ${
+                  className={`bg-transparent border-0 focus:outline-none focus:ring-0 text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 ${
                     isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
                   }`}
                   placeholder="0"
