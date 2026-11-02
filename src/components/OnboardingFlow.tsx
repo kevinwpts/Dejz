@@ -32,6 +32,7 @@ import {
   getStoredIncomeCategories,
   getStoredPaymentMethods,
   normalizeCategoryToValid,
+  syncAllUserPreferencesToSupabase,
 } from '../utils/appCache';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
@@ -190,6 +191,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     try {
       localStorage.setItem('dejz_onboarding_in_progress', 'true');
       localStorage.setItem('dejz_onboarding_step', String(step));
+      syncAllUserPreferencesToSupabase();
     } catch {
       // ignore
     }

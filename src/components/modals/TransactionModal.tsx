@@ -1590,14 +1590,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
             ) : (
               <div
-                className={`mt-1 flex items-baseline justify-center gap-1 ${
+                className={`mt-1 flex items-baseline justify-center ${
                   isIncome ? 'ui-hero-amount-income' : 'ui-hero-amount'
                 }`}
               >
-                <span>{isIncome ? '+' : '-'}</span>
+                <span className="font-display font-bold text-2xl sm:text-3xl">
+                  {isIncome ? '+' : '-'}
+                </span>
                 <input
                   type="text"
                   inputMode="numeric"
+                  size={Math.max(1, (amount || '0').length)}
+                  style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                   value={amount}
                   onChange={(e) => {
                     const cleaned = e.target.value.replace(/[^\d]/g, '');
@@ -1607,12 +1611,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       onUpdate({ ...activeTx, amount: num });
                     }
                   }}
-                  className={`bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl max-w-[190px] p-0 ${
+                  className={`bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 ${
                     isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
                   }`}
                   placeholder="0"
                 />
-                <span className="font-display font-medium text-base text-[var(--text-secondary)]">kr</span>
+                <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">
+                  kr
+                </span>
               </div>
             )}
 

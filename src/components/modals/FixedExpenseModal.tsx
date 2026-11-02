@@ -1451,13 +1451,15 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               })()}
             </div>
 
-            <div className="mt-1 flex items-baseline justify-center gap-1">
-              <span className="font-display font-semibold text-2xl sm:text-3xl text-[var(--text-primary)]">
+            <div className="mt-1 flex items-baseline justify-center">
+              <span className="font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)]">
                 -
               </span>
               <input
                 type="text"
                 inputMode="numeric"
+                size={Math.max(1, (amount || '0').length)}
+                style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                 value={amount}
                 onChange={(e) => {
                   const cleaned = e.target.value.replace(/[^\d]/g, '');
@@ -1467,10 +1469,10 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                     commitInlineChanges({ amount: num });
                   }
                 }}
-                className="bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl max-w-[170px] p-0 text-[var(--text-primary)]"
+                className="bg-transparent border-b border-transparent hover:border-[var(--border-subtle)] focus:border-emerald-500 focus:outline-none text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-[var(--text-primary)]"
                 placeholder="0"
               />
-              <span className="font-display font-medium text-base text-[var(--text-secondary)]">
+              <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">
                 kr/mån
               </span>
             </div>

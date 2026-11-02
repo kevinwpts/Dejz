@@ -249,7 +249,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       return '';
     }
   });
-  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [copiedPersonalCode, setCopiedPersonalCode] = useState(false);
 
   // Password change & reset state in Profile
   const [isPasswordSheetOpen, setIsPasswordSheetOpen] = useState(false);
@@ -432,8 +433,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       } catch {
         // ignore
       }
-      setSavedMsg('Dina profiluppgifter har sparats');
-      setTimeout(() => setSavedMsg(null), 2800);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 1800);
     };
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
@@ -579,13 +580,22 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 type="button"
                 onClick={() => {
                   navigator.clipboard?.writeText(getMyFriendInviteCode(userEmail));
-                  setSavedMsg('Personlig kod kopierad');
-                  setTimeout(() => setSavedMsg(null), 2000);
+                  setCopiedPersonalCode(true);
+                  setTimeout(() => setCopiedPersonalCode(false), 1800);
                 }}
                 className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
               >
-                <Copy size={13} />
-                <span>Kopiera</span>
+                {copiedPersonalCode ? (
+                  <>
+                    <Check size={13} weight="bold" />
+                    <span>Kopierad</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} />
+                    <span>Kopiera</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -639,15 +649,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </label>
             </div>
 
-            {savedMsg && (
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium text-center animate-fade-in">
-                {savedMsg}
-              </div>
-            )}
-
             <button type="submit" className="w-full ui-btn-primary">
-              <Check size={14} weight="bold" />
-              <span>Spara uppgifter</span>
+              {profileSaved ? (
+                <>
+                  <Check size={14} weight="bold" />
+                  <span>Sparat</span>
+                </>
+              ) : (
+                <span>Spara uppgifter</span>
+              )}
             </button>
           </form>
         </section>

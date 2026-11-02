@@ -2559,6 +2559,51 @@ export const App: React.FC = () => {
           return { connections: [], accounts: [] };
         }
 
+        // Kontrollera om användaren har slutfört onboardingen eller ska fortsätta där de slutade
+        const profilePrefs =
+          dbProfile?.user_preferences && typeof dbProfile.user_preferences === 'object'
+            ? dbProfile.user_preferences
+            : {};
+        const hasAnyExistingUserData =
+          conns.length > 0 ||
+          reconciledInc.items.length > 0 ||
+          reconciledFix.items.length > 0 ||
+          combinedTxs.length > 0;
+        const explicitlyCompleted =
+          profilePrefs.onboardingCompleted === true ||
+          localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
+          localStorage.getItem('dejz_onboarding_completed') === 'true';
+        const explicitlyIncomplete =
+          profilePrefs.onboardingCompleted === false ||
+          profilePrefs.onboardingInProgress === true ||
+          localStorage.getItem('dejz_onboarding_in_progress') === 'true';
+
+        if (explicitlyIncomplete || (!explicitlyCompleted && !hasAnyExistingUserData)) {
+          try {
+            localStorage.setItem('dejz_onboarding_in_progress', 'true');
+            if (!localStorage.getItem('dejz_onboarding_step')) {
+              localStorage.setItem(
+                'dejz_onboarding_step',
+                String(profilePrefs.onboardingStep || '1')
+              );
+            }
+            localStorage.removeItem('dejz_onboarding_v2_done');
+            localStorage.removeItem('dejz_onboarding_completed');
+          } catch {
+            // ignore
+          }
+          setIsOnboardingActive(true);
+        } else {
+          try {
+            localStorage.setItem('dejz_onboarding_v2_done', 'true');
+            localStorage.setItem('dejz_onboarding_completed', 'true');
+            localStorage.removeItem('dejz_onboarding_in_progress');
+          } catch {
+            // ignore
+          }
+          setIsOnboardingActive(false);
+        }
+
         // Tillämpa alla beräknade listor i ett enda atomärt steg
         incomesRef.current = reconciledInc.items;
         fixedExpensesRef.current = reconciledFix.items;
@@ -4737,16 +4782,9 @@ export const App: React.FC = () => {
           if (mode === 'register') {
             setIsOnboardingActive(true);
             setShowLanding(false);
+            syncAllUserPreferencesToSupabase(true);
           } else {
-            try {
-              localStorage.setItem('dejz_onboarding_v2_done', 'true');
-              localStorage.setItem('dejz_onboarding_completed', 'true');
-              localStorage.removeItem('dejz_onboarding_in_progress');
-              localStorage.removeItem('dejz_onboarding_step');
-            } catch {
-              // ignore
-            }
-            setIsOnboardingActive(false);
+            setIsInitialLoading(true);
             setShowLanding(false);
           }
           setUserEmail(email);
@@ -4827,6 +4865,7 @@ export const App: React.FC = () => {
             } catch {
               // ignore
             }
+            syncAllUserPreferencesToSupabase(true);
             setIsOnboardingActive(false);
             setShowLanding(false);
             setActiveTab('home');

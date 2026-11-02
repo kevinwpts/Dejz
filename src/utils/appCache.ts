@@ -1742,6 +1742,11 @@ export function collectAllUserPreferences(): Record<string, any> {
     household: safeParse('dejz_household_state_v1', null),
     weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
     darkMode: localStorage.getItem('dejz_dark_mode') || 'light',
+    onboardingCompleted:
+      localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
+      localStorage.getItem('dejz_onboarding_completed') === 'true',
+    onboardingInProgress: localStorage.getItem('dejz_onboarding_in_progress') === 'true',
+    onboardingStep: localStorage.getItem('dejz_onboarding_step') || '1',
     updatedAt: new Date().toISOString(),
   };
 }
@@ -2000,6 +2005,18 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
         CUSTOM_PAYMENT_METHODS_KEY,
         JSON.stringify(prefs.customPaymentMethods)
       );
+    }
+    if (prefs.onboardingCompleted === true) {
+      localStorage.setItem('dejz_onboarding_v2_done', 'true');
+      localStorage.setItem('dejz_onboarding_completed', 'true');
+      localStorage.removeItem('dejz_onboarding_in_progress');
+    } else if (prefs.onboardingCompleted === false || prefs.onboardingInProgress === true) {
+      localStorage.setItem('dejz_onboarding_in_progress', 'true');
+      localStorage.removeItem('dejz_onboarding_v2_done');
+      localStorage.removeItem('dejz_onboarding_completed');
+      if (prefs.onboardingStep && !localStorage.getItem('dejz_onboarding_step')) {
+        localStorage.setItem('dejz_onboarding_step', String(prefs.onboardingStep));
+      }
     }
   } catch {
     // ignore
