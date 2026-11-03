@@ -56,6 +56,7 @@ import {
   getStoredIncomeCategories,
   getTransactionMetaMap,
   getAccountMetaMap,
+  saveAccountMeta,
 } from '../utils/appCache';
 import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../constants';
 import { BottomSheet } from './ui/BottomSheet';
@@ -284,6 +285,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [accountNameInput, setAccountNameInput] = useState('');
   const [accountIncludedInput, setAccountIncludedInput] = useState(true);
   const [savingAccountEdit, setSavingAccountEdit] = useState(false);
+  const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
   const [disconnectConfirmConnId, setDisconnectConfirmConnId] = useState<string | null>(null);
 
   // Security confirmation dialog & loading state
@@ -1229,12 +1231,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     const formatKr = (amount: number) =>
       `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
 
+    const accountMetaMap = getAccountMetaMap();
+
     const displayAccountItems: AccountItem[] =
       bankAccounts.length > 0
         ? bankAccounts.map((ba, idx) => {
             const conn = connections.find((c) => c.id === ba.connection_id);
             const bName = conn?.aspsp_name || connectedBank || 'Bank';
+            const meta = accountMetaMap[ba.id];
             const cleanName =
+              meta?.customName?.trim() ||
               ba.custom_name?.trim() ||
               stripRawAccountDigits(ba.product || ba.name || '') ||
               (idx === 0 ? 'Lönekonto' : 'Sparkonto');
@@ -1252,9 +1258,78 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
     const handleOpenAccountDetail = (acc: AccountItem) => {
       const rawBa = bankAccounts.find((b) => b.id === acc.id);
+      const meta = accountMetaMap[acc.id];
       setEditingAccount(acc);
-      setAccountNameInput(rawBa?.custom_name || stripRawAccountDigits(acc.name) || 'Bankkonto');
+      setAccountNameInput(
+        meta?.customName?.trim() ||
+          rawBa?.custom_name?.trim() ||
+          stripRawAccountDigits(acc.name) ||
+          'Bankkonto'
+      );
       setAccountIncludedInput(rawBa ? rawBa.is_selected !== false : true);
+    };
+
+    const handleActivateAndSyncAccount = async (accId: string, customNameOverride?: string) => {
+      const rawBa = bankAccounts.find((b) => b.id === accId);
+      const cleanName = customNameOverride?.trim();
+
+      bankService.saveAccountOverlay(accId, {
+        ...(cleanName ? { custom_name: cleanName } : {}),
+        is_selected: true,
+        include_in_budget: true,
+      });
+      saveAccountMeta(accId, {
+        ...(cleanName ? { customName: cleanName } : {}),
+        excludeFromTotalBalance: false,
+      });
+
+      await bankService
+        .updateAccountSettings({
+          bankAccountId: accId,
+          ...(cleanName ? { customName: cleanName } : {}),
+          isSelected: true,
+          includeInBudget: true,
+        })
+        .catch(() => {});
+
+      if (rawBa?.connection_id) {
+        const connAccs = bankAccounts.filter((b) => b.connection_id === rawBa.connection_id);
+        const nextSelectedIds = Array.from(
+          new Set([
+            ...connAccs.filter((b) => b.is_selected !== false).map((b) => b.id),
+            accId,
+          ])
+        );
+        await bankService
+          .selectAccounts({
+            connectionId: rawBa.connection_id,
+            selectedAccountIds: nextSelectedIds,
+          })
+          .catch(() => {});
+
+        await bankService
+          .sync({
+            connectionId: rawBa.connection_id,
+            bankAccountId: accId,
+            fullSync: true,
+          })
+          .catch(() => {});
+      }
+
+      if (onRefreshBankStatus) {
+        await Promise.resolve(onRefreshBankStatus());
+      }
+    };
+
+    const handleQuickSyncAccount = async (e: React.MouseEvent, acc: AccountItem) => {
+      e.stopPropagation();
+      if (syncingAccountId) return;
+      setSyncingAccountId(acc.id);
+      try {
+        await handleActivateAndSyncAccount(acc.id);
+      } finally {
+        setSyncingAccountId(null);
+      }
     };
 
     const handleSaveAccountDetail = async (e: React.FormEvent) => {
@@ -1263,21 +1338,58 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       setSavingAccountEdit(true);
       try {
         const cleanName = accountNameInput.trim() || 'Bankkonto';
-        bankService.saveAccountOverlay(editingAccount.id, {
-          custom_name: cleanName,
-          is_selected: accountIncludedInput,
-          include_in_budget: accountIncludedInput,
-        });
-
         const rawBa = bankAccounts.find((b) => b.id === editingAccount.id);
-        if (rawBa?.connection_id) {
-          const connAccs = bankAccounts.filter((b) => b.connection_id === rawBa.connection_id);
-          const nextSelectedIds = connAccs
-            .filter((b) =>
-              b.id === editingAccount.id ? accountIncludedInput : b.is_selected !== false
-            )
-            .map((b) => b.id);
-          if (nextSelectedIds.length > 0) {
+        const wasUnselected = rawBa ? rawBa.is_selected === false : false;
+
+        if (accountIncludedInput) {
+          if (wasUnselected || !rawBa?.last_synced_at) {
+            await handleActivateAndSyncAccount(editingAccount.id, cleanName);
+          } else {
+            bankService.saveAccountOverlay(editingAccount.id, {
+              custom_name: cleanName,
+              is_selected: true,
+              include_in_budget: true,
+            });
+            saveAccountMeta(editingAccount.id, {
+              customName: cleanName,
+              excludeFromTotalBalance: false,
+            });
+            await bankService
+              .updateAccountSettings({
+                bankAccountId: editingAccount.id,
+                customName: cleanName,
+                isSelected: true,
+                includeInBudget: true,
+              })
+              .catch(() => {});
+            if (onRefreshBankStatus) {
+              await Promise.resolve(onRefreshBankStatus());
+            }
+          }
+        } else {
+          bankService.saveAccountOverlay(editingAccount.id, {
+            custom_name: cleanName,
+            is_selected: false,
+            include_in_budget: false,
+          });
+          saveAccountMeta(editingAccount.id, {
+            customName: cleanName,
+            excludeFromTotalBalance: true,
+          });
+          await bankService
+            .updateAccountSettings({
+              bankAccountId: editingAccount.id,
+              customName: cleanName,
+              isSelected: false,
+              includeInBudget: false,
+            })
+            .catch(() => {});
+
+          if (rawBa?.connection_id) {
+            const connAccs = bankAccounts.filter((b) => b.connection_id === rawBa.connection_id);
+            const nextSelectedIds = connAccs
+              .filter((b) => (b.id === editingAccount.id ? false : b.is_selected !== false))
+              .map((b) => b.id);
             await bankService
               .selectAccounts({
                 connectionId: rawBa.connection_id,
@@ -1285,9 +1397,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               })
               .catch(() => {});
           }
-        }
-        if (onRefreshBankStatus) {
-          onRefreshBankStatus();
+          if (onRefreshBankStatus) {
+            await Promise.resolve(onRefreshBankStatus());
+          }
         }
       } finally {
         setSavingAccountEdit(false);
@@ -1405,30 +1517,54 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                       acc.bankName || acc.bank || connectedBank || 'Bank'
                     );
                     const rawBa = bankAccounts.find((b) => b.id === acc.id);
-                    const isHidden = rawBa && rawBa.is_selected === false;
+                    const isHidden = Boolean(rawBa && rawBa.is_selected === false);
+                    const isSyncingThis = syncingAccountId === acc.id;
 
                     return (
-                      <button
-                        key={acc.id}
-                        type="button"
-                        onClick={() => handleOpenAccountDetail(acc)}
-                        className={`ui-row-btn ${isHidden ? 'opacity-55' : ''}`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div key={acc.id} className="ui-row">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAccountDetail(acc)}
+                          className={`flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer ${
+                            isHidden ? 'opacity-65' : ''
+                          }`}
+                        >
                           <ItemLogo name={cleanBank} logoUrl={acc.logo} size="md" />
                           <div className="min-w-0 flex-1">
                             <span className="ui-row-title">{cleanName}</span>
                             <span className="ui-row-subtitle">
                               {cleanBank}
-                              {isHidden ? ' · Dold i översikt' : ''}
+                              {isHidden ? ' · Ej synkat' : ''}
                             </span>
                           </div>
-                        </div>
+                        </button>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="ui-row-amount">{formatKr(acc.balance)}</span>
-                          <CaretRight size={14} className="text-[var(--text-muted)]" />
+                          {isHidden ? (
+                            <button
+                              type="button"
+                              onClick={(e) => handleQuickSyncAccount(e, acc)}
+                              disabled={isSyncingThis}
+                              className="px-3 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer flex items-center gap-1.5"
+                            >
+                              <ArrowClockwise
+                                size={13}
+                                weight="bold"
+                                className={isSyncingThis ? 'animate-spin' : ''}
+                              />
+                              <span>{isSyncingThis ? 'Synkar...' : 'Synka'}</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAccountDetail(acc)}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <span className="ui-row-amount">{formatKr(acc.balance)}</span>
+                              <CaretRight size={14} className="text-[var(--text-muted)]" />
+                            </button>
+                          )}
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

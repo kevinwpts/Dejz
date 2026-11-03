@@ -253,6 +253,10 @@ export const BankModal: React.FC<BankModalProps> = ({
     setSavingAccounts(true);
     setErrorMsg(null);
     try {
+      const newlySelectedAccountIds = fetchedAccounts
+        .filter((acc) => selectedAccountIds.includes(acc.id) && (acc.is_selected === false || !acc.last_synced_at))
+        .map((acc) => acc.id);
+
       for (const acc of fetchedAccounts) {
         const customName = accountCustomNames[acc.id]?.trim();
         if (customName !== undefined) {
@@ -264,6 +268,19 @@ export const BankModal: React.FC<BankModalProps> = ({
         connectionId: activeConnection.id,
         selectedAccountIds,
       });
+
+      if (newlySelectedAccountIds.length > 0) {
+        for (const accId of newlySelectedAccountIds) {
+          await bankService
+            .sync({
+              connectionId: activeConnection.id,
+              bankAccountId: accId,
+              fullSync: true,
+            })
+            .catch(() => {});
+        }
+      }
+
       const synced = await bankService.sync({ connectionId: activeConnection.id });
       onBankStateUpdated(synced.connections, synced.accounts);
       setStep('list');
@@ -279,7 +296,7 @@ export const BankModal: React.FC<BankModalProps> = ({
     const connAccs = bankAccounts.filter((a) => a.connection_id === conn.id);
     setActiveConnection(conn);
     setFetchedAccounts(connAccs);
-    setSelectedAccountIds(connAccs.filter((a) => a.is_selected).map((a) => a.id));
+    setSelectedAccountIds(connAccs.filter((a) => a.is_selected !== false).map((a) => a.id));
     const nameMap: Record<string, string> = {};
     connAccs.forEach((a, idx) => {
       nameMap[a.id] = a.custom_name || getCleanAccountTypeLabel(a, idx);

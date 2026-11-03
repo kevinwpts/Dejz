@@ -1323,12 +1323,18 @@ serve(async (req: Request) => {
         .eq("connection_id", connectionId)
         .eq("user_id", user.id);
 
+      const newlyOrUnsyncedIds = new Set<string>();
       for (const acc of allAccounts || []) {
         const isSelected = selectedAccountIds.includes(acc.id);
+        const wasUnselectedOrUnsynced = acc.is_selected === false || !acc.last_synced_at;
+        if (isSelected && wasUnselectedOrUnsynced) {
+          newlyOrUnsyncedIds.add(acc.id);
+        }
         await adminClient
           .from("bank_accounts")
           .update({
             is_selected: isSelected,
+            ...(isSelected && wasUnselectedOrUnsynced ? { last_synced_at: null } : {}),
             updated_at: new Date().toISOString(),
           })
           .eq("id", acc.id)
@@ -1338,12 +1344,14 @@ serve(async (req: Request) => {
       const envToUse: "production" | "sandbox" =
         conn.environment === "sandbox" ? "sandbox" : "production";
 
-      const selectedAccounts = (allAccounts || []).filter((a) => selectedAccountIds.includes(a.id));
+      const accountsToSync = (allAccounts || []).filter(
+        (a) => selectedAccountIds.includes(a.id) && (newlyOrUnsyncedIds.has(a.id) || (allAccounts || []).every((x) => !x.last_synced_at)),
+      );
 
-      for (const acc of selectedAccounts) {
+      for (const acc of accountsToSync) {
         try {
           await syncAccountTransactionsMultiPage({
-            acc,
+            acc: { ...acc, last_synced_at: null },
             conn,
             envToUse,
             loadMoreOnly: false,
