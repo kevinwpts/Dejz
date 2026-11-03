@@ -286,6 +286,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [accountIncludedInput, setAccountIncludedInput] = useState(true);
   const [savingAccountEdit, setSavingAccountEdit] = useState(false);
   const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
+  const [selectingAccountsConn, setSelectingAccountsConn] = useState<BankConnection | null>(null);
+  const [selectedConnAccountIds, setSelectedConnAccountIds] = useState<string[]>([]);
+  const [savingConnAccounts, setSavingConnAccounts] = useState(false);
+  const [reconnectingBankId, setReconnectingBankId] = useState<string | null>(null);
   const [disconnectConfirmConnId, setDisconnectConfirmConnId] = useState<string | null>(null);
 
   // Security confirmation dialog & loading state
@@ -1332,6 +1336,99 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       }
     };
 
+    const handleOpenSelectConnAccounts = (conn?: BankConnection) => {
+      const targetConn = conn || connections[0] || null;
+      if (!targetConn) {
+        onOpenBank();
+        return;
+      }
+      const connAccs = bankAccounts.filter((b) => b.connection_id === targetConn.id);
+      const listToUse = connAccs.length > 0 ? connAccs : bankAccounts;
+      setSelectingAccountsConn(targetConn);
+      setSelectedConnAccountIds(
+        listToUse.filter((b) => b.is_selected !== false).map((b) => b.id)
+      );
+    };
+
+    const handleToggleConnAccountSelection = (accId: string) => {
+      setSelectedConnAccountIds((prev) =>
+        prev.includes(accId) ? prev.filter((id) => id !== accId) : [...prev, accId]
+      );
+    };
+
+    const handleSaveConnAccountSelection = async () => {
+      if (!selectingAccountsConn) return;
+      setSavingConnAccounts(true);
+      try {
+        const connAccs = bankAccounts.filter((b) => b.connection_id === selectingAccountsConn.id);
+        const listToUse = connAccs.length > 0 ? connAccs : bankAccounts;
+        const selectedSet = new Set(selectedConnAccountIds);
+        const newlySelectedIds = listToUse
+          .filter((b) => selectedSet.has(b.id) && (b.is_selected === false || !b.last_synced_at))
+          .map((b) => b.id);
+
+        for (const ba of listToUse) {
+          const isSel = selectedSet.has(ba.id);
+          bankService.saveAccountOverlay(ba.id, {
+            is_selected: isSel,
+            include_in_budget: isSel,
+          });
+          saveAccountMeta(ba.id, {
+            excludeFromTotalBalance: !isSel,
+          });
+        }
+
+        await bankService
+          .selectAccounts({
+            connectionId: selectingAccountsConn.id,
+            selectedAccountIds: selectedConnAccountIds,
+          })
+          .catch(() => {});
+
+        for (const accId of newlySelectedIds) {
+          await bankService
+            .sync({
+              connectionId: selectingAccountsConn.id,
+              bankAccountId: accId,
+              fullSync: true,
+            })
+            .catch(() => {});
+        }
+
+        if (onRefreshBankStatus) {
+          await Promise.resolve(onRefreshBankStatus());
+        }
+        setSelectingAccountsConn(null);
+      } finally {
+        setSavingConnAccounts(false);
+      }
+    };
+
+    const handleReconnectBankForMoreAccounts = async (conn: BankConnection) => {
+      if (reconnectingBankId) return;
+      setReconnectingBankId(conn.id);
+      try {
+        const redirectUrl = `${window.location.origin}/bank/callback`;
+        const res = await bankService.startAuth({
+          aspspName: conn.aspsp_name,
+          aspspCountry: conn.aspsp_country || 'SE',
+          aspspLogo: conn.aspsp_logo || null,
+          originContext: 'settings',
+          environment: 'production',
+          reconnectConnectionId: conn.id,
+          redirectUrl,
+        });
+        if (res?.url) {
+          window.location.assign(res.url);
+        }
+      } catch {
+        setSelectingAccountsConn(null);
+        onOpenBank();
+      } finally {
+        setReconnectingBankId(null);
+      }
+    };
+
     const handleSaveAccountDetail = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!editingAccount) return;
@@ -1461,13 +1558,21 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          {(isExpired || isExpiringSoon) && (
+                          {(isExpired || isExpiringSoon) ? (
                             <button
                               type="button"
-                              onClick={onOpenBank}
+                              onClick={() => handleReconnectBankForMoreAccounts(conn)}
                               className="px-2.5 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                             >
                               Förnya
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenSelectConnAccounts(conn)}
+                              className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
+                            >
+                              Välj konton
                             </button>
                           )}
                           <button
@@ -1507,9 +1612,20 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Kontolista där varje konto öppnar kontoinställningar/detaljer */}
             {displayAccountItems.length > 0 && (
               <div className="space-y-1.5">
-                <span className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-                  Konton
-                </span>
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Konton
+                  </span>
+                  {connections.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenSelectConnAccounts(connections[0])}
+                      className="text-xs font-semibold text-[var(--accent-primary)] hover:opacity-80 transition-opacity cursor-pointer"
+                    >
+                      Välj konton att synka
+                    </button>
+                  )}
+                </div>
                 <div className="ui-group-card">
                   {displayAccountItems.map((acc) => {
                     const cleanName = stripRawAccountDigits(acc.name) || 'Bankkonto';
@@ -1654,7 +1770,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     <div className="ui-row">
                       <div className="min-w-0 pr-3">
                         <span className="text-[var(--text-primary)] font-medium block">
-                          Visa i appens översikt
+                          Synka och visa i översikten
                         </span>
                         <span className="text-xs text-[var(--text-muted)] block mt-0.5">
                           Räkna med saldo och händelser från detta konto
@@ -1678,15 +1794,128 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={savingAccountEdit || !accountNameInput.trim()}
-                    className="ui-btn-primary"
-                  >
-                    <Check size={14} weight="bold" />
-                    <span>{savingAccountEdit ? 'Sparar...' : 'Spara'}</span>
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      disabled={savingAccountEdit}
+                      onClick={async () => {
+                        if (!editingAccount) return;
+                        setSavingAccountEdit(true);
+                        try {
+                          const cleanName = accountNameInput.trim() || 'Bankkonto';
+                          setAccountIncludedInput(true);
+                          await handleActivateAndSyncAccount(editingAccount.id, cleanName);
+                        } finally {
+                          setSavingAccountEdit(false);
+                          setEditingAccount(null);
+                        }
+                      }}
+                      className="w-full py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
+                    >
+                      <ArrowClockwise size={14} className={savingAccountEdit ? 'animate-spin' : ''} />
+                      <span>{savingAccountEdit ? 'Synkar konto...' : 'Synka detta konto nu'}</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={savingAccountEdit || !accountNameInput.trim()}
+                      className="ui-btn-primary"
+                    >
+                      <Check size={14} weight="bold" />
+                      <span>{savingAccountEdit ? 'Sparar...' : 'Spara'}</span>
+                    </button>
+                  </div>
                 </form>
+              )}
+            </BottomSheet>
+
+            {/* Välj vilka konton som ska synkas */}
+            <BottomSheet
+              isOpen={selectingAccountsConn !== null}
+              onClose={() => setSelectingAccountsConn(null)}
+              title="Välj konton att synka"
+            >
+              {selectingAccountsConn && (
+                <div className="space-y-4">
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-0.5">
+                    {(bankAccounts.filter((b) => b.connection_id === selectingAccountsConn.id).length > 0
+                      ? bankAccounts.filter((b) => b.connection_id === selectingAccountsConn.id)
+                      : bankAccounts
+                    ).map((ba, idx) => {
+                      const isChecked = selectedConnAccountIds.includes(ba.id);
+                      const meta = accountMetaMap[ba.id];
+                      const accTitle =
+                        meta?.customName?.trim() ||
+                        ba.custom_name?.trim() ||
+                        stripRawAccountDigits(ba.product || ba.name || '') ||
+                        (idx === 0 ? 'Lönekonto' : 'Sparkonto');
+                      const rawNum = (ba.bban || ba.iban || '').trim();
+                      const formattedNum =
+                        rawNum.length === 11 && /^\d+$/.test(rawNum)
+                          ? `${rawNum.slice(0, 4)}-${rawNum.slice(4)}`
+                          : rawNum || selectingAccountsConn.aspsp_name;
+
+                      return (
+                        <button
+                          key={ba.id}
+                          type="button"
+                          onClick={() => handleToggleConnAccountSelection(ba.id)}
+                          className={`w-full p-3.5 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
+                            isChecked
+                              ? 'bg-[var(--bg-color)] border-[var(--border-subtle)]'
+                              : 'bg-[var(--bg-color)]/50 border-[var(--border-subtle)] opacity-60'
+                          }`}
+                        >
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
+                              isChecked
+                                ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
+                                : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
+                            }`}
+                          >
+                            {isChecked && <Check size={12} weight="bold" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
+                              {accTitle}
+                            </span>
+                            <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">
+                              {formattedNum}
+                            </span>
+                          </div>
+                          {ba.balance_amount !== null && ba.balance_amount !== undefined && (
+                            <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+                              {formatKr(Number(ba.balance_amount) || 0)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={savingConnAccounts || selectedConnAccountIds.length === 0}
+                      onClick={handleSaveConnAccountSelection}
+                      className="ui-btn-primary"
+                    >
+                      <Check size={14} weight="bold" />
+                      <span>{savingConnAccounts ? 'Synkar valda konton...' : 'Spara och synka'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={reconnectingBankId === selectingAccountsConn.id}
+                      onClick={() => handleReconnectBankForMoreAccounts(selectingAccountsConn)}
+                      className="w-full py-2.5 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+                    >
+                      {reconnectingBankId === selectingAccountsConn.id
+                        ? `Öppnar ${selectingAccountsConn.aspsp_name}...`
+                        : `Saknas ett konto? Välj fler hos ${selectingAccountsConn.aspsp_name}`}
+                    </button>
+                  </div>
+                </div>
               )}
             </BottomSheet>
 

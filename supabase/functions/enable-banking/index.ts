@@ -1065,7 +1065,7 @@ serve(async (req: Request) => {
             balance_type: balanceInfo.balanceType ?? matchedExisting.balance_type,
             balance_label: balanceInfo.balanceLabel ?? matchedExisting.balance_label,
             balances_json: rawBalances.length > 0 ? rawBalances : matchedExisting.balances_json,
-            last_synced_at: new Date().toISOString(),
+            last_synced_at: matchedExisting.last_synced_at || null,
             updated_at: new Date().toISOString(),
           };
           const { data: updatedRow, error: updErr } = await adminClient
