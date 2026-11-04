@@ -695,6 +695,8 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   // Optically balance colorful Fluent Emoji Flat icons across inline subtitles, pickers, and headers
   const opticalSize = badge
     ? Math.max(size + 5, 19)
+    : size <= 10
+    ? 12
     : size <= 11
     ? 14
     : size <= 13
@@ -744,6 +746,8 @@ export const PaymentMethodIcon: React.FC<PaymentMethodIconProps> = ({
 
   const opticalSize = badge
     ? Math.max(size + 5, 19)
+    : size <= 10
+    ? 12
     : size <= 12
     ? 14
     : size <= 14

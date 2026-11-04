@@ -13,11 +13,10 @@ import {
   isFixedExpenseActiveInPeriod,
 } from './HomeTab';
 import { ItemLogo } from './ItemLogo';
-import { CategoryIcon } from './CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
 import {
   PeriodInfo,
   isDateInPeriod,
-  isDueDayPaidInPeriod,
 } from '../utils/periodEngine';
 import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import {
@@ -92,24 +91,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     const periodTxs = transactions.filter((t) => isDateInPeriod(t.date, period));
     return reconcilePeriodRecurringMatches(periodTxs, fixedExpenses, incomes);
   }, [transactions, period, fixedExpenses, incomes]);
-
-  const isExpensePaid = (exp: FixedExpenseItem) => {
-    return (
-      Boolean(
-        periodMatches?.matchedFixedTxByExpId?.has(exp.id) ||
-          periodMatches?.matchedFixedIds?.has(exp.id)
-      ) || isDueDayPaidInPeriod(exp.dueDay || 27, period)
-    );
-  };
-
-  const isIncomeReceived = (inc: IncomeItem) => {
-    return (
-      Boolean(
-        periodMatches?.matchedIncomeTxByIncId?.has(inc.id) ||
-          periodMatches?.matchedIncomeIds?.has(inc.id)
-      ) || isDueDayPaidInPeriod(inc.payday || 25, period)
-    );
-  };
 
   const netAfterFixed = totalIncome - totalFixedExpenses;
 
@@ -227,13 +208,10 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           {sortedIncomes.length > 0 ? (
             sortedIncomes.map((inc) => {
               const catLabel = inc.category || 'Lön';
-              const received = isIncomeReceived(inc);
               const matchedTx = periodMatches?.matchedIncomeTxByIncId?.get(inc.id);
               const actualReceivedAmt = matchedTx
                 ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
                 : Math.round(Number(inc.amount) || 0);
-              const hasVariableDiff =
-                Boolean(matchedTx) && actualReceivedAmt !== Math.round(Number(inc.amount) || 0);
 
               return (
                 <button
@@ -254,10 +232,10 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       <span className="ui-row-title">
                         {inc.name}
                       </span>
-                      <span className="ui-row-subtitle flex items-center gap-1">
+                      <span className="mt-0.5 flex items-center gap-1 text-[10.5px] sm:text-[11px] font-normal text-[var(--text-muted)] min-w-0">
                         <CategoryIcon
                           category={catLabel}
-                          size={11}
+                          size={10}
                           className="shrink-0 text-[var(--text-secondary)]"
                         />
                         <span className="truncate">{catLabel}</span>
@@ -269,16 +247,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       +{formatKr(actualReceivedAmt)}
                     </span>
                     <span className="ui-row-meta flex items-center justify-end gap-1">
-                      <span>
-                        {hasVariableDiff
-                          ? `Riktvärde ${formatKr(inc.amount)}`
-                          : `Den ${inc.payday}:e`}
-                      </span>
-                      {received && (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                          · Utbetald
-                        </span>
-                      )}
+                      <span>Den {inc.payday || 25}:e</span>
                     </span>
                   </div>
                 </button>
@@ -330,7 +299,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
         <div className="ui-list-card">
           {sortedExpenses.length > 0 ? (
             sortedExpenses.map((exp) => {
-                const paid = isExpensePaid(exp);
                 const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
                 const isPartnerConnected = hasConnectedHouseholdPartner();
                 const shareRatio =
@@ -340,8 +308,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 const actualPaidAmt = matchedTx
                   ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
                   : Math.round(Number(exp.amount) || 0);
-                const hasVariableDiff =
-                  Boolean(matchedTx) && actualPaidAmt !== Math.round(Number(exp.amount) || 0);
                 const linkedGoalName = exp.linkedGoalId
                   ? savingsGoalsMap.get(exp.linkedGoalId)
                   : undefined;
@@ -349,6 +315,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 const isActiveInPeriod = isFixedExpenseActiveInPeriod(exp, period);
                 const displayAmt =
                   !isActiveInPeriod && !matchedTx ? 0 : actualPaidAmt;
+                const paymentMethodLabel = exp.paymentMethod || 'Autogiro';
 
                 return (
                   <button
@@ -369,21 +336,30 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         <span className="ui-row-title truncate block">
                           {exp.name}
                         </span>
-                        <span className="ui-row-subtitle flex items-center gap-1">
-                          <CategoryIcon
-                            category={exp.category || 'Räkningar'}
-                            size={11}
-                            className="shrink-0 text-[var(--text-secondary)]"
-                          />
-                          <span className="truncate">
-                            {exp.category || 'Räkningar'}
-                            {isPartnerConnected && exp.isShared
-                              ? exp.fullAmount && exp.fullAmount > exp.amount
-                                ? ` · Delad (Totalt ${formatKr(exp.fullAmount)})`
-                                : ' · Delad'
-                              : ''}
-                            {linkedGoalName ? ` · Sparmål: ${linkedGoalName}` : ''}
+                        <span className="mt-0.5 flex items-center gap-1 text-[10.5px] sm:text-[11px] font-normal text-[var(--text-muted)] min-w-0">
+                          <span className="inline-flex items-center gap-1 min-w-0 truncate">
+                            <CategoryIcon
+                              category={exp.category || 'Räkningar'}
+                              size={10}
+                              className="shrink-0 text-[var(--text-secondary)]"
+                            />
+                            <span className="truncate">{exp.category || 'Räkningar'}</span>
                           </span>
+                          <span className="text-[var(--text-muted)]/60 shrink-0">·</span>
+                          <span className="inline-flex items-center gap-1 shrink-0">
+                            <PaymentMethodIcon
+                              method={paymentMethodLabel}
+                              size={10}
+                              className="shrink-0"
+                            />
+                            <span>{paymentMethodLabel}</span>
+                          </span>
+                          {isPartnerConnected && exp.isShared && (
+                            <span className="shrink-0">· Delad</span>
+                          )}
+                          {linkedGoalName && (
+                            <span className="truncate">· {linkedGoalName}</span>
+                          )}
                         </span>
                       </div>
                     </div>
@@ -398,18 +374,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                             {cancelBadge}
                           </span>
                         ) : (
-                          <>
-                            <span>
-                              {hasVariableDiff
-                                ? `Riktvärde ${formatKr(exp.amount)}`
-                                : `Den ${exp.dueDay}:e`}
-                            </span>
-                            {paid && (
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                                · Betald
-                              </span>
-                            )}
-                          </>
+                          <span>Den {exp.dueDay || 27}:e</span>
                         )}
                       </span>
                     </div>
