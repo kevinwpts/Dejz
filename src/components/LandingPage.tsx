@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ArrowRight,
   CaretLeft,
   Eye,
   EyeSlash,
@@ -10,6 +9,7 @@ import {
   PaperPlaneTilt,
 } from '@phosphor-icons/react';
 import { supabase } from '../supabaseClient';
+import { WaitlistLanding } from './WaitlistLanding';
 
 interface LandingPageProps {
   existingEmail?: string | null;
@@ -494,10 +494,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   Inget konto än?{' '}
                   <button
                     type="button"
-                    onClick={() => switchView('register', 'forward')}
+                    onClick={backToLanding}
                     className="font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
                   >
-                    Skapa konto
+                    Ställ dig på väntelistan
                   </button>
                 </p>
               )}
@@ -529,66 +529,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
+  // Startsidan är just nu en väntelista. Registrering är stängd för nya besökare,
+  // men befintliga användare kan fortfarande logga in.
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none overflow-x-hidden">
-      {/* Top Bar */}
-      <header className="flex items-center justify-between h-12">
-        <img
-          src="/dejz_mork.png"
-          alt="Dejz"
-          className="dejz-logo h-6 w-auto object-contain dark:invert"
-        />
-      </header>
-
-      {/* Main Focal Content */}
-      <main
-        key="landing-main"
-        className={`my-auto py-8 space-y-6 ${
-          slideDir === 'back' ? 'animate-page-back' : 'animate-fade-in'
-        }`}
-      >
-        {/* Minimal Copy */}
-        <div className="space-y-2.5 text-center px-2">
-          <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)] leading-tight">
-            Koll på pengarna.
-            <br />
-            Från lön till lön.
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)]">
-            Se vad du har kvar att spendera varje dag.
-          </p>
-        </div>
-      </main>
-
-      {/* Bottom Actions */}
-      <footer className="space-y-2.5">
-        <button
-          type="button"
-          onClick={() => openAuthPage('register')}
-          className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-        >
-          <span>Kom igång</span>
-          <ArrowRight size={16} weight="bold" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => openAuthPage('login')}
-          className="w-full py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-display font-bold text-sm hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer"
-        >
-          Logga in
-        </button>
-
-        {existingEmail && onContinueExisting && (
-          <button
-            type="button"
-            onClick={onContinueExisting}
-            className="w-full pt-2 text-center text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer truncate"
-          >
-            Fortsätt som {existingEmail} →
-          </button>
-        )}
-      </footer>
-    </div>
+    <WaitlistLanding
+      onLogin={() => openAuthPage('login')}
+      existingEmail={existingEmail}
+      onContinueExisting={onContinueExisting}
+    />
   );
 };
