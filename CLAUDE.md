@@ -17,7 +17,7 @@
 - Jag är inte programmerare. Svara på **svenska**, förenklat och kort. Förklara vad du gör och varför.
 - **Jag vill lära mig.** Skriv gärna hur riktiga programmerare eller vana AI-användare skulle säga eller skriva samma sak, med det riktiga ordet och en kort förklaring. Exempel: *"Det här kallas att **deploya** – att publicera en ny version."* eller *"En van användare hade skrivit: 'Refaktorera hemkortet så att statistiken ligger i en egen komponent.'"*
 - **Ett steg i taget.** Om något har flera steg: dela upp det, ge bara steg 1 och skriv vilket steg vi är på (t.ex. "Steg 1 av 5"). Be mig skriva **"nästa"** när jag är klar, och ge sedan nästa steg.
-- När jag frågar något och skriver "svara bara": svara, ändra ingenting.
+- **Ändra bara när jag uttryckligen ber om det.** Om jag frågar något, ber om din åsikt eller beskriver ett problem utan att be dig fixa det: svara bara – ändra inga filer, kör inga kommandon som ändrar något. Föreslå gärna vad du skulle göra, men vänta tills jag säger t.ex. "fixa", "gör det" eller "kör".
 - Ge en tydlig rekommendation i stället för en lång lista med alternativ.
 
 ## Om Dejz
