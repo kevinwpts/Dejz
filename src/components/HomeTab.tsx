@@ -1000,7 +1000,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         );
         const spendable = Math.max(0, activeKvar + activeVariable);
         const spent = Math.max(0, activeVariable);
-        const moneyShare = spendable > 0 ? Math.min(1, spent / spendable) : isOverBudget ? 1 : 0;
+        // Batteri: andel av periodens pengar som finns kvar (full på lönedagen, tom vid nästa lön)
+        const remainingShare = spendable > 0 ? Math.max(0, Math.min(1, activeKvar / spendable)) : 0;
         const paceDiff = Math.round(spendable * timeShare - spent); // + = under planen
         const tolerance = Math.max(100, spendable * 0.03);
         const pace: 'over' | 'fast' | 'good' = isOverBudget
@@ -1104,7 +1105,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </div>
                 ) : (
                   <span
-                    className={`text-[12px] font-normal ${
+                    className={`text-[13px] font-normal ${
                       isOverBudget
                         ? 'text-rose-600 dark:text-rose-400 font-medium'
                         : 'text-[var(--text-secondary)]'
@@ -1113,6 +1114,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     {isOverBudget ? 'Över budget' : 'Kvar att spendera'}
                   </span>
                 )}
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] tabular-nums text-right shrink-0">
+                  {daysLabel}
+                </span>
               </div>
 
               <div className="mt-0.5">
@@ -1129,11 +1133,28 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     >
                       {formatKr(activeKvar)}
                     </div>
-                    {/* En stödrad: per dag + dagar till lön */}
-                    <div className="text-[13px] text-[var(--text-secondary)] mt-2 tabular-nums">
-                      {perDay > 0 && <>{formatKr(perDay)}/dag · </>}
-                      {daysLabel}
+                    {/* Beloppet i bildform: fylld del = det som är kvar. Färgen visar takten. */}
+                    <div
+                      className="mt-4 h-2 rounded-full bg-[var(--bg-color)] overflow-hidden"
+                      role="meter"
+                      aria-label="Kvar av löneperiodens pengar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(remainingShare * 100)}
+                    >
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          pace === "fast" ? "bg-amber-400" : "bg-[var(--text-primary)]"
+                        }`}
+                        style={{ width: `${remainingShare * 100}%` }}
+                      />
                     </div>
+                    {/* "Per dag" förklarar beloppet – vanlig text direkt under */}
+                    {perDay > 0 && (
+                      <div className="mt-2.5 text-[13px] text-[var(--text-secondary)] tabular-nums">
+                        {formatKr(perDay)} per dag
+                      </div>
+                    )}
                     {isJointMode && (
                       <div className="text-[12px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
                         <span>
@@ -1146,27 +1167,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     )}
                   </div>
                 )}
-              </div>
-
-              {/* Stapel: fyllning = använda pengar, streck = idag. Färgen visar takten. */}
-              <div className="mt-4 relative">
-                <div className="relative h-2 rounded-full bg-[var(--bg-color)] overflow-hidden">
-                  <div
-                    className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
-                      pace === 'over'
-                        ? 'bg-rose-500'
-                        : pace === 'fast'
-                        ? 'bg-amber-500'
-                        : 'bg-[var(--text-primary)]'
-                    }`}
-                    style={{ width: `${moneyShare * 100}%` }}
-                  />
-                </div>
-                <span
-                  aria-hidden="true"
-                  className="absolute -top-1 -bottom-1 w-[2px] -translate-x-1/2 rounded-full bg-[var(--text-primary)]/45"
-                  style={{ left: `${timeShare * 100}%` }}
-                />
               </div>
 
               {/* Text bara när något behöver uppmärksamhet */}
@@ -1197,24 +1197,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             <div
               className={`grid transition-all duration-200 ease-out ${
                 showBudgetBreakdown
-                  ? 'grid-rows-[1fr] opacity-100 mt-3.5'
+                  ? 'grid-rows-[1fr] opacity-100 mt-5'
                   : 'grid-rows-[0fr] opacity-0 mt-0'
               }`}
             >
               <div className="overflow-hidden">
-                {/* Detaljer: löneperioden och takten i ord */}
-                <div className="pt-3.5 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3 text-[12px] text-[var(--text-secondary)] tabular-nums">
-                  <span>
-                    Lön {period.startLabel} → {period.nextPayLabel}
-                  </span>
-                  {pace === 'good' && spendable > 0 && (
-                    <span className="inline-flex items-center gap-1.5 text-right">
-                      <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                      {paceDiff >= 50 ? `${formatKr(paceDiff)} under planen` : 'Bra takt'}
-                    </span>
-                  )}
-                </div>
-                <div className="ui-stat-grid pt-3.5 mt-3.5 border-t border-[var(--border-subtle)]">
+                <div className="ui-stat-grid pt-4 border-t border-[var(--border-subtle)]">
                   <button
                     type="button"
                     onClick={() =>
