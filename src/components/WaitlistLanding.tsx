@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  AppleLogo,
   ArrowRight,
   CaretDown,
   LockSimple,
@@ -430,19 +429,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.png?v=6',
+    src: '/screens/ekonomi.webp?v=6',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Koppla din bank',
     text: 'Dejz hittar din lön, hyra och prenumerationer och räknar av dem varje löneperiod.',
   },
   {
-    src: '/screens/historik.png?v=6',
+    src: '/screens/historik.webp?v=6',
     alt: 'Dejz – historik över köp',
     title: 'Köpen dyker upp av sig själva',
     text: 'Varje köp hamnar i Dejz med butik, logga och kategori. Du behöver inte göra något.',
   },
   {
-    src: '/screens/analys.png?v=6',
+    src: '/screens/analys.webp?v=6',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -521,6 +520,13 @@ const ComparisonVisual: React.FC = () => (
 
 /* ---------------------- Kommer snart i butikerna ---------------------- */
 
+/** Apples symbol (ikonbibliotekets version har en avskuren botten). */
+const AppleMark: React.FC<{ size?: number }> = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="shrink-0">
+    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+  </svg>
+);
+
 /** Google Play-symbolen i sina fyra färger (Apples symbol är alltid enfärgad). */
 const GooglePlayColor: React.FC<{ size?: number }> = ({ size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
@@ -548,7 +554,7 @@ const StoreBadge: React.FC<{ icon: React.ReactNode; store: string }> = ({ icon, 
 
 const StoreBadges: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
-    <StoreBadge icon={<AppleLogo size={24} weight="fill" />} store="App Store" />
+    <StoreBadge icon={<AppleMark size={22} />} store="App Store" />
     <StoreBadge icon={<GooglePlayColor size={22} />} store="Google Play" />
   </div>
 );
@@ -711,10 +717,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.png?v=6" alt="" />
+              <PhoneFrame src="/screens/analys.webp?v=6" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.png?v=6" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.webp?v=6" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
@@ -794,7 +800,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-white/85 text-sm">
             <span className="inline-flex items-center gap-2">
-              <AppleLogo size={18} weight="fill" /> Kommer snart på App Store
+              <AppleMark size={17} /> Kommer snart på App Store
             </span>
             <span className="inline-flex items-center gap-2">
               <GooglePlayColor size={17} /> Kommer snart på Google Play
