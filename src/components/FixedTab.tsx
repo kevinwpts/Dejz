@@ -232,12 +232,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       <span className="ui-row-title">
                         {inc.name}
                       </span>
-                      <span className="mt-0.5 flex items-center gap-1 text-[10.5px] sm:text-[11px] font-normal text-[var(--text-muted)] min-w-0">
-                        <CategoryIcon
-                          category={catLabel}
-                          size={10}
-                          className="shrink-0 text-[var(--text-secondary)]"
-                        />
+                      <span className="ui-row-subtitle min-w-0">
+                        <CategoryIcon category={catLabel} size={11} className="shrink-0" />
                         <span className="truncate">{catLabel}</span>
                       </span>
                     </div>
@@ -336,12 +332,12 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         <span className="ui-row-title truncate block">
                           {exp.name}
                         </span>
-                        <span className="mt-1 flex items-center gap-2 text-[10.5px] sm:text-[11px] font-normal text-[var(--text-muted)] min-w-0">
-                          <span className="inline-flex items-center gap-1 min-w-0 truncate">
+                        <span className="ui-row-subtitle min-w-0">
+                          <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
                             <CategoryIcon
                               category={exp.category || 'Räkningar'}
-                              size={10}
-                              className="shrink-0 text-[var(--text-secondary)]"
+                              size={11}
+                              className="shrink-0"
                             />
                             <span className="truncate">{exp.category || 'Räkningar'}</span>
                           </span>
