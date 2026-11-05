@@ -3,7 +3,6 @@ import {
   AppleLogo,
   ArrowRight,
   CaretDown,
-  GooglePlayLogo,
   LockSimple,
   Eye,
   ArrowsClockwise,
@@ -524,6 +523,18 @@ const PaydayTimeline: React.FC = () => (
 
 /* ---------------------- Kommer snart i butikerna ---------------------- */
 
+/** Google Play-symbolen i sina fyra färger (Apples symbol är alltid enfärgad). */
+const GooglePlayColor: React.FC<{ size?: number }> = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
+    <g strokeLinejoin="round" strokeWidth="1.2">
+      <path d="M4.2 2.4 L13.6 12 L4.2 21.6 Q3.4 21.2 3.4 20.2 V3.8 Q3.4 2.8 4.2 2.4 Z" fill="#4285F4" stroke="#4285F4" />
+      <path d="M4.2 2.4 L16.6 9.2 L13.6 12 Z" fill="#34A853" stroke="#34A853" />
+      <path d="M4.2 21.6 L13.6 12 L16.6 14.8 Z" fill="#EA4335" stroke="#EA4335" />
+      <path d="M16.6 9.2 L20.1 11.1 Q21.6 12 20.1 12.9 L16.6 14.8 L13.6 12 Z" fill="#FBBC04" stroke="#FBBC04" />
+    </g>
+  </svg>
+);
+
 const StoreBadge: React.FC<{ icon: React.ReactNode; store: string }> = ({ icon, store }) => (
   <div
     className="inline-flex items-center gap-2.5 h-12 pl-3.5 pr-4 rounded-btn bg-[var(--text-primary)] text-[var(--bg-color)] select-none"
@@ -540,7 +551,7 @@ const StoreBadge: React.FC<{ icon: React.ReactNode; store: string }> = ({ icon, 
 const StoreBadges: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
     <StoreBadge icon={<AppleLogo size={24} weight="fill" />} store="App Store" />
-    <StoreBadge icon={<GooglePlayLogo size={22} weight="fill" />} store="Google Play" />
+    <StoreBadge icon={<GooglePlayColor size={22} />} store="Google Play" />
   </div>
 );
 
@@ -788,7 +799,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
               <AppleLogo size={18} weight="fill" /> Kommer snart på App Store
             </span>
             <span className="inline-flex items-center gap-2">
-              <GooglePlayLogo size={17} weight="fill" /> Kommer snart på Google Play
+              <GooglePlayColor size={17} /> Kommer snart på Google Play
             </span>
           </div>
         </section>
