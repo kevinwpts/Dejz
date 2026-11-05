@@ -60,12 +60,17 @@ export const PrivacyPolicyContent: React.FC = () => (
         köp. Uppgifterna används bara för att Dejz ska fungera för dig. Du kan radera ditt konto och all data när som
         helst i appen under Profil → Radera konto.
       </p>
+      <p>
+        Om du kopplar din bank hämtar vi saldo och transaktioner från de konton du väljer, via Enable Banking. Vi kan
+        bara läsa uppgifterna – aldrig flytta pengar – och du kan koppla bort banken när du vill.
+      </p>
     </Section>
 
     <Section title="Vilka hjälper oss?">
       <p>Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:</p>
       <ul className="list-disc pl-5 space-y-1">
         <li>Supabase – databas och inloggning, lagrat inom EU/EES.</li>
+        <li>Enable Banking – licensierad tjänst för bankkoppling (endast om du kopplar din bank).</li>
         <li>Resend – skickar våra mejl.</li>
         <li>Vercel – driftar webbplatsen.</li>
       </ul>

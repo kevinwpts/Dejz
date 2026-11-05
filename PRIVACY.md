@@ -25,9 +25,12 @@ För att stoppa spam sparar vi en krypterad kod av din IP-adress i högst 24 tim
 ## 3. Appen
 När du använder appen sparar vi det du själv lägger in, till exempel inkomster, fasta räkningar, sparmål och köp. Uppgifterna används bara för att Dejz ska fungera för dig. Du kan radera ditt konto och all data när som helst i appen under Profil → Radera konto.
 
+Om du kopplar din bank hämtar vi saldo och transaktioner från de konton du väljer, via Enable Banking. Vi kan bara läsa uppgifterna – aldrig flytta pengar – och du kan koppla bort banken när du vill.
+
 ## 4. Vilka hjälper oss?
 Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:
 - Supabase – databas och inloggning, lagrat inom EU/EES.
+- Enable Banking – licensierad tjänst för bankkoppling (endast om du kopplar din bank).
 - Resend – skickar våra mejl.
 - Vercel – driftar webbplatsen.
 

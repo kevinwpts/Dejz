@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  AppleLogo,
   ArrowRight,
   CaretDown,
+  GooglePlayLogo,
+  LockSimple,
+  Eye,
+  ArrowsClockwise,
   Check,
   CheckCircle,
   ShareNetwork,
@@ -425,14 +430,14 @@ const STEPS = [
   {
     src: '/screens/ekonomi.png?v=4',
     alt: 'Dejz – inkomster och fasta utgifter',
-    title: 'Lägg in lön och räkningar en gång',
-    text: 'Hyra, försäkringar och prenumerationer räknas av automatiskt varje månad.',
+    title: 'Koppla din bank',
+    text: 'Dejz hittar din lön, hyra och prenumerationer och räknar av dem varje löneperiod.',
   },
   {
     src: '/screens/historik.png?v=4',
     alt: 'Dejz – historik över köp',
-    title: 'Logga köp på några sekunder',
-    text: 'Skriv eller säg vad du köpt. Dejz hittar butik, logga och kategori åt dig.',
+    title: 'Köpen dyker upp av sig själva',
+    text: 'Varje köp hamnar i Dejz med butik, logga och kategori. Du behöver inte göra något.',
   },
   {
     src: '/screens/analys.png?v=4',
@@ -448,8 +453,16 @@ const FAQ = [
     a: 'Dejz räknar från lön till lön i stället för per kalendermånad. Du ser ett enda belopp – vad du har kvar fram till nästa lön – där räkningar och sparande redan är avräknade.',
   },
   {
+    q: 'Är det säkert att koppla min bank?',
+    a: 'Ja. Kopplingen sker via Enable Banking, en licensierad tjänst för öppen bankdata enligt EU:s regler (PSD2). Du loggar in med BankID hos din egen bank. Dejz kan bara läsa saldo och transaktioner – aldrig flytta pengar – och du kan koppla bort banken när du vill.',
+  },
+  {
     q: 'Måste jag koppla min bank?',
-    a: 'Nej. Du lägger in din lön och dina fasta räkningar en gång, och loggar köp med text eller röst på några sekunder. Resten räknar Dejz ut åt dig.',
+    a: 'Nej, men det är så Dejz fungerar bäst – då uppdateras allt av sig självt. Vill du hellre sköta det själv lägger du in lön och räkningar en gång och loggar köp med text eller röst på några sekunder.',
+  },
+  {
+    q: 'När kommer appen?',
+    a: 'Dejz kommer snart till App Store och Google Play. Du som står på väntelistan får testa först – vi mejlar dig när det är dags.',
   },
   {
     q: 'Vad händer med min e-postadress?',
@@ -507,6 +520,101 @@ const PaydayTimeline: React.FC = () => (
       </div>
     </div>
   </div>
+);
+
+/* ---------------------- Kommer snart i butikerna ---------------------- */
+
+const StoreBadge: React.FC<{ icon: React.ReactNode; store: string }> = ({ icon, store }) => (
+  <div
+    className="inline-flex items-center gap-2.5 h-12 pl-3.5 pr-4 rounded-btn bg-[var(--text-primary)] text-[var(--bg-color)] select-none"
+    aria-label={`Kommer snart på ${store}`}
+  >
+    {icon}
+    <span className="text-left leading-none">
+      <span className="block text-[10px] opacity-75">Kommer snart på</span>
+      <span className="block mt-1 font-display font-semibold text-[15px] tracking-[-0.01em]">{store}</span>
+    </span>
+  </div>
+);
+
+const StoreBadges: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
+    <StoreBadge icon={<AppleLogo size={24} weight="fill" />} store="App Store" />
+    <StoreBadge icon={<GooglePlayLogo size={22} weight="fill" />} store="Google Play" />
+  </div>
+);
+
+/* --------------------------- Bankkoppling --------------------------- */
+
+const BANKS = [
+  { file: 'seb', name: 'SEB' },
+  { file: 'swedbank', name: 'Swedbank' },
+  { file: 'handelsbanken', name: 'Handelsbanken' },
+  { file: 'nordea', name: 'Nordea' },
+  { file: 'lansforsakringar', name: 'Länsförsäkringar' },
+  { file: 'danske', name: 'Danske Bank' },
+  { file: 'icabanken', name: 'ICA Banken' },
+  { file: 'skandia', name: 'Skandia' },
+  { file: 'sbab', name: 'SBAB' },
+  { file: 'revolut', name: 'Revolut' },
+  { file: 'klarna', name: 'Klarna' },
+];
+
+const BANK_POINTS = [
+  { icon: LockSimple, text: 'Du loggar in med BankID hos din egen bank' },
+  { icon: Eye, text: 'Dejz kan bara läsa – aldrig flytta pengar' },
+  { icon: ArrowsClockwise, text: 'Saldo och köp uppdateras av sig själva' },
+];
+
+const BankSection: React.FC = () => (
+  <section className="mt-24 sm:mt-32 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+    <div className="text-center lg:text-left">
+      <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+        Koppla din bank. Se alltid vad du har kvar.
+      </h2>
+      <p className="mt-4 text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto lg:mx-0 text-pretty">
+        När banken är kopplad räknar Dejz av varje köp direkt. Du behöver aldrig skriva in något – du öppnar
+        appen och ser hur mycket du har kvar till nästa lön, just nu.
+      </p>
+      <ul className="mt-6 space-y-3 max-w-md mx-auto lg:mx-0 text-left">
+        {BANK_POINTS.map(({ icon: Icon, text }) => (
+          <li key={text} className="flex items-center gap-3 text-sm text-[var(--text-primary)]">
+            <span className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <Icon size={16} weight="bold" />
+            </span>
+            {text}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div className="rounded-container bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 sm:p-7 shadow-sm">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+        {BANKS.map((bank) => (
+          <div
+            key={bank.file}
+            className="h-14 sm:h-16 rounded-card-nested bg-white border border-[var(--border-subtle)] flex items-center justify-center px-3"
+          >
+            <img
+              src={`/banks/${bank.file}.png`}
+              alt={bank.name}
+              loading="lazy"
+              decoding="async"
+              className="max-h-5 sm:max-h-6 max-w-full w-auto object-contain"
+            />
+          </div>
+        ))}
+        <div className="h-14 sm:h-16 rounded-card-nested bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-center px-2">
+          <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] leading-tight">
+            + över 100 banker till
+          </span>
+        </div>
+      </div>
+      <p className="mt-4 text-xs text-[var(--text-muted)] text-center">
+        Bankkopplingen sker säkert via Enable Banking.
+      </p>
+    </div>
+  </section>
 );
 
 interface WaitlistLandingProps {
@@ -569,13 +677,15 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             </h1>
 
             <p className="mt-5 text-base sm:text-lg text-[var(--text-secondary)] max-w-lg mx-auto lg:mx-0 leading-relaxed text-pretty">
-              Dejz visar exakt hur mycket du kan spendera – från lön till lön. Räkningar och sparande
-              räknas av automatiskt, så du ser vad som faktiskt är ditt.
+              Koppla din bank så visar Dejz exakt hur mycket du kan spendera – från lön till lön.
+              Räkningar, sparande och köp räknas av automatiskt, så du alltid ser vad som faktiskt är ditt.
             </p>
 
             <div className="mt-8 max-w-md mx-auto lg:mx-0">
               <WaitlistForm inputRef={heroInputRef} />
             </div>
+
+            <StoreBadges className="mt-6 justify-center lg:justify-start" />
 
             {existingEmail && onContinueExisting && (
               <button
@@ -590,7 +700,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
 
           {/* Telefoner */}
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
-            <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-2xl" />
+            <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
               <PhoneFrame src="/screens/analys.png?v=4" alt="" />
             </div>
@@ -603,8 +713,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         {/* Lön till lön – det som gör Dejz annorlunda */}
         <section className="mt-24 sm:mt-32 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="text-center lg:text-left">
-            <p className="text-sm font-medium text-emerald-600">Från lön till lön</p>
-            <h2 className="mt-2 font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+            <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
               Din budget börjar när lönen kommer – inte den 1:a
             </h2>
             <p className="mt-4 text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto lg:mx-0 text-pretty">
@@ -617,11 +726,12 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <PaydayTimeline />
         </section>
 
+        <BankSection />
+
         {/* Så funkar det */}
         <section className="mt-24 sm:mt-32">
           <div className="text-center max-w-2xl mx-auto">
-            <p className="text-sm font-medium text-emerald-600">Så funkar det</p>
-            <h2 className="mt-2 font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+            <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
               Budget utan kalkylark
             </h2>
           </div>
@@ -630,7 +740,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             {STEPS.map((s, i) => (
               <div key={s.src} className="flex flex-col items-center text-center">
                 <PhoneFrame src={s.src} alt={s.alt} className="w-[230px] sm:w-full sm:max-w-[250px]" />
-                <span className="mt-7 w-7 h-7 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center justify-center">
+                <span className="mt-7 w-7 h-7 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-semibold flex items-center justify-center">
                   {i + 1}
                 </span>
                 <h3 className="mt-3 font-display font-semibold text-lg tracking-[-0.01em]">{s.title}</h3>
@@ -672,6 +782,14 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           </p>
           <div className="mt-8 max-w-md mx-auto text-left">
             <WaitlistForm onDark />
+          </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-white/70 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <AppleLogo size={18} weight="fill" /> Kommer snart på App Store
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <GooglePlayLogo size={17} weight="fill" /> Kommer snart på Google Play
+            </span>
           </div>
         </section>
 
