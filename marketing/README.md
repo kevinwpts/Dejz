@@ -44,3 +44,39 @@ Lägg till ett **länkklistermärke** med `dejz.se/?utm_source=instagram` i Inst
 > Lön om 6 dagar. Kvar: 2 340 kr. Så enkelt borde det vara 💜 Väntelista på dejz.se
 >
 > #privatekonomi #budget #ekonomitips #sparatips #fyp
+
+## Testomgång: fyra bildtyper (`test/`, 1080 × 1350)
+
+Lägg upp en i taget, med några dagars mellanrum, och jämför vilken som ger flest klick och anmälningar. Använd en egen länk per bild så syns det i väntelistan: `dejz.se/?utm_source=instagram&utm_content=notis` och så vidare.
+
+| Fil | Typ | Varför den kan fungera |
+| :--- | :--- | :--- |
+| `1-notisen.png` | Låsskärm med en notis från Dejz | Ser ut som något på ens egen telefon och väcker frågan "vilken app är det?" |
+| `2-den-20e.png` | Vardagsfoto + text | Man känner igen sig i situationen, inte i reklam |
+| `3-saldot-ljuger.png` | Före och efter | Visar problemet med saldot i bankappen på en sekund |
+| `4-en-siffra.png` | Bara hemkortet, stort | Produkten i fokus, siffrorna går att läsa på mobilen |
+
+Bilderna skapas från `test.html`. Ändra texten där och rendera om för nya varianter.
+
+### Färdiga texter
+**1 – Notisen** (`utm_content=notis`)
+> Tänk om din telefon bara sa det här varje dag 👀
+> Dejz visar hur mycket du har kvar till lön – inte till månadsskiftet.
+> Gratis väntelista: länk i bion 💜
+
+**2 – Den 20:e** (`utm_content=den20e`)
+> Det är den 20:e. Vet du exakt vad du har kvar till lön?
+> Med Dejz gör du det. Räkningar och sparande är redan avdragna.
+> Skriv upp dig på väntelistan – länk i bion 🔗
+
+**3 – Saldot ljuger** (`utm_content=saldot`)
+> Saldot i bankappen: 8 450 kr. Ser bra ut?
+> Hyran, elen, gymmet och Netflix är inte dragna än. Det du faktiskt har kvar: 1 240 kr.
+> Dejz räknar ut det åt dig. Väntelista: länk i bion
+
+**4 – En siffra** (`utm_content=ensiffra`)
+> En siffra. Hela vägen till lön.
+> Inga kalkylark, ingen huvudräkning – bara vad du har kvar och hur mycket du kan lägga per dag.
+> Gå med i väntelistan: länk i bion 💜
+
+#privatekonomi #budget #ekonomitips #lönetilllön #sverige
