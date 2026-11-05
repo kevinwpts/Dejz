@@ -916,7 +916,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
             <div key={group.dateKey}>
               {/* Datumrubrik och dagssummering utanför listkortet */}
               <div className="ui-date-header">
-                <span className="font-medium text-[var(--text-secondary)]">
+                <span className="font-semibold text-[var(--text-primary)]">
                   {group.label}
                 </span>
                 <span

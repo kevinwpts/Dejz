@@ -1791,7 +1791,7 @@ b {
   }
 
   .ui-section-title {
-    @apply font-display font-semibold text-[14px] sm:text-[14.5px] tracking-[-0.01em] text-[var(--text-primary)] flex items-center gap-1.5;
+    @apply font-display font-semibold text-[16px] sm:text-[16.5px] tracking-[-0.015em] text-[var(--text-primary)] flex items-center gap-1.5;
   }
 
   .ui-section-meta {
@@ -1803,7 +1803,7 @@ b {
   }
 
   .ui-date-header {
-    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 text-xs;
+    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1 text-[12.5px];
   }
 
   /* 2. Cards & Grouped Containers */

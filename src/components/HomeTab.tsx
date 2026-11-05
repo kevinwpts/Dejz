@@ -1104,7 +1104,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 ) : (
                   <div className="min-w-0">
                     <div
-                      className={`font-display text-[28px] sm:text-[30px] font-semibold tracking-[-0.02em] leading-tight tabular-nums ${
+                      className={`font-display text-[38px] sm:text-[42px] font-[600] tracking-[-0.03em] leading-none tabular-nums mt-1.5 ${
                         activeKvar >= 0
                           ? 'text-[var(--text-primary)]'
                           : 'text-rose-600 dark:text-rose-400'
@@ -1291,7 +1291,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-7 w-32 rounded-lg bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <div className="font-display text-[22px] sm:text-[24px] font-semibold tracking-[-0.02em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+              <div className="font-display text-[19px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
                 {formatKr(totalBalance)}
               </div>
             )}
@@ -1440,7 +1440,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
                 Sparmål
               </span>
-              <div className="font-display text-[22px] sm:text-[24px] font-semibold tracking-[-0.02em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+              <div className="font-display text-[19px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
                 {formatKr(totalSavedInGoals)}
               </div>
             </div>
