@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; font-optical-sizing: auto; }
+  .ad { position: relative; overflow: hidden; color: #fff;
+    background:
+      radial-gradient(70% 45% at 85% 8%, rgba(255,255,255,.20), transparent 60%),
+      radial-gradient(60% 40% at 0% 100%, rgba(255,140,210,.35), transparent 60%),
+      linear-gradient(160deg, #7356FF 0%, #5B3DF5 45%, #3F22C9 100%); }
+  .logo { font-weight: 800; letter-spacing: -0.05em; }
+  .hook { font-weight: 700; letter-spacing: -0.045em; line-height: 1.0; }
+  .sub { font-weight: 450; letter-spacing: -0.015em; line-height: 1.35; color: rgba(255,255,255,.86); }
+  .phone { position: absolute; left: 50%; transform: translateX(-50%) rotate(-4deg);
+    background: #0E0C18; border-radius: 9.5%/4.4%; padding: 2.1%;
+    box-shadow: 0 60px 120px -30px rgba(20,8,80,.7), 0 0 0 2px rgba(255,255,255,.08) inset; }
+  .phone img { display: block; width: 100%; border-radius: 8%/3.7%; }
+  .island { position: absolute; top: 3.4%; left: 50%; transform: translateX(-50%); width: 30%; height: 2.6%; background: #0E0C18; border-radius: 99px; }
+  .cta { display: inline-flex; align-items: center; gap: .5em; background: #fff; color: #2B1A8F;
+    font-weight: 700; letter-spacing: -0.02em; border-radius: 999px; }
+  .small { color: rgba(255,255,255,.75); font-weight: 500; letter-spacing: -0.01em; }
+  .tag { display: inline-block; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 999px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
+  .fade { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, #3F22C9 35%, rgba(63,34,201,0)); }
+
+  /* 9:16 – TikTok, Reels, Stories */
+  #story { width: 1080px; height: 1920px; }
+  #story .logo { position: absolute; top: 120px; left: 0; right: 0; text-align: center; font-size: 56px; }
+  #story .hook { position: absolute; top: 230px; left: 80px; right: 80px; text-align: center; font-size: 118px; }
+  #story .sub { position: absolute; top: 520px; left: 120px; right: 120px; text-align: center; font-size: 42px; }
+  #story .phone { top: 700px; width: 540px; }
+  #story .fade { height: 820px; background: linear-gradient(to top, #3F22C9 0%, #3F22C9 52%, rgba(63,34,201,0.85) 66%, rgba(63,34,201,0) 100%); }
+  #story .bottom { position: absolute; left: 0; right: 0; bottom: 330px; text-align: center; }
+  #story .cta { font-size: 46px; padding: 30px 56px; }
+  #story .small { margin-top: 26px; font-size: 30px; }
+
+  /* 4:5 – Instagram & Facebook-flöde */
+  #feed { width: 1080px; height: 1350px; }
+  #feed .left { position: absolute; top: 96px; left: 84px; width: 520px; }
+  #feed .logo { font-size: 46px; }
+  #feed .hook { margin-top: 64px; font-size: 92px; }
+  #feed .sub { margin-top: 32px; font-size: 34px; }
+  #feed .tag { margin-top: 40px; font-size: 26px; padding: 12px 22px; }
+  #feed .phone { left: auto; right: -40px; transform: rotate(6deg); top: 150px; width: 470px; }
+  #feed .bottom { position: absolute; left: 84px; bottom: 96px; }
+  #feed .cta { font-size: 38px; padding: 26px 46px; }
+  #feed .small { margin-top: 20px; font-size: 25px; }
+</style></head>
+<body>
+  <div class="ad" id="story">
+    <div class="logo">dejz</div>
+    <div class="hook">Pengarna slut innan lön?</div>
+    <div class="sub">Dejz visar exakt hur mycket du har kvar – varje dag fram till nästa lön.</div>
+    <div class="phone"><img src="../public/screens/home.png"><span class="island"></span></div>
+    <div class="fade"></div>
+    <div class="bottom">
+      <div class="cta">Skriv upp dig gratis → dejz.se</div>
+      <div class="small">Kommer snart på App Store & Google Play</div>
+    </div>
+  </div>
+
+  <div class="ad" id="feed" style="margin-top:40px">
+    <div class="phone"><img src="../public/screens/home.png"><span class="island"></span></div>
+    <div class="left">
+      <div class="logo">dejz</div>
+      <div class="hook">Pengarna slut innan lön?</div>
+      <div class="sub">Se exakt vad du har kvar – varje dag fram till nästa lön.</div>
+      <div class="tag">Räkningar dras av automatiskt</div>
+    </div>
+    <div class="bottom">
+      <div class="cta">Gå med i väntelistan → dejz.se</div>
+      <div class="small">Gratis · Kommer snart på App Store & Google Play</div>
+    </div>
+  </div>
+</body></html>
