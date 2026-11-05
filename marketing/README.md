@@ -76,7 +76,7 @@ Bilderna skapas från `test.html`. Ändra texten där och rendera om för nya va
 
 **4 – En siffra** (`utm_content=ensiffra`)
 > En siffra. Hela vägen till lön.
-> Inga kalkylark, ingen huvudräkning – bara vad du har kvar och hur mycket du kan lägga per dag.
+> Inga kalkylark, ingen huvudräkning – bara exakt hur mycket du har kvar till nästa lön.
 > Gå med i väntelistan: länk i bion 💜
 
 #privatekonomi #budget #ekonomitips #lönetilllön #sverige

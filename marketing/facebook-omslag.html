@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#222;font-family:Inter,sans-serif}
+#c{position:relative;width:1640px;height:624px;overflow:hidden;color:#fff;background:#3F22C9}
+.photo{position:absolute;left:-40px;top:-96px;width:1680px;height:auto}
+/* Lila toning från vänster så att texten syns och färgerna knyts ihop */
+.fade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(74,46,224,.97) 0%,rgba(85,54,238,.94) 30%,rgba(85,54,238,.78) 40%,rgba(85,54,238,.35) 50%,rgba(85,54,238,0) 60%)}
+.logo{display:block;height:42px;width:auto;filter:brightness(0) invert(1)}
+.txt{position:absolute;left:280px;top:70px;width:600px}
+.h{margin-top:26px;font-size:60px;font-weight:700;letter-spacing:-0.045em;line-height:1.03}
+.s{margin-top:18px;font-size:24px;font-weight:500;opacity:.9;letter-spacing:-0.01em;line-height:1.35}
+/* Dejz-kortet som "svävar" ut ur mobilen */
+/* Widget i samma rutnät som texten: rak, vit, skarp */
+.card{position:absolute;left:280px;top:404px;width:380px;padding:22px 24px 20px;border-radius:22px;color:#16141F;background:#fff;
+  box-shadow:0 24px 48px -20px rgba(20,8,80,.55),0 2px 6px rgba(20,8,80,.12)}
+.card .r{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;font-weight:500;color:#6B6880}
+.card .v{margin-top:8px;font-size:42px;font-weight:700;letter-spacing:-0.035em;line-height:1;font-variant-numeric:tabular-nums}
+.card .b{margin-top:16px;height:8px;border-radius:99px;background:#ECE9F8;overflow:hidden}
+.card .b i{display:block;height:100%;width:81%;border-radius:99px;background:linear-gradient(90deg,#7356FF,#5B3DF5)}
+.card .p{margin-top:10px;font-size:14px;font-weight:500;color:#6B6880;font-variant-numeric:tabular-nums}
+</style></head>
+<body>
+<div id="c">
+  <img class="photo" src="file:///C:/Users/kevin/Desktop/Dejz/marketing/foto-soffa.webp" alt="">
+  <div class="fade"></div>
+  <div class="txt">
+    <img class="logo" src="file:///C:/Users/kevin/Desktop/Dejz/public/dejz_mork.png" alt="Dejz">
+    <div class="h">Stenkoll på pengarna<br>ända till nästa lön.</div>
+    <div class="s">Appen som visar exakt hur mycket du<br>kan spendera fram till nästa lön.</div>
+  </div>
+  <div class="card">
+    <div class="r"><span>Kvar att spendera</span><span>20 dagar till lön</span></div>
+    <div class="v">17 371 kr</div>
+    <div class="b"><i></i></div>
+  </div>
+</div>
+</body></html>

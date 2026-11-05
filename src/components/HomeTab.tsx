@@ -1015,7 +1015,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             : period.daysRemaining === 1
             ? '1 dag till lön'
             : `${period.daysRemaining} dagar till lön`;
-        const perDay = activeKvar > 0 ? Math.floor(activeKvar / Math.max(1, period.daysRemaining)) : 0;
 
         return (
           <section className={`ui-card-p dejz-hero ${isOverBudget ? 'dejz-hero--over' : ''}`}>
@@ -1149,12 +1148,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         style={{ width: `${remainingShare * 100}%` }}
                       />
                     </div>
-                    {/* "Per dag" förklarar beloppet – vanlig text direkt under */}
-                    {perDay > 0 && (
-                      <div className="mt-2.5 text-[13px] text-[var(--text-secondary)] tabular-nums">
-                        {formatKr(perDay)} per dag
-                      </div>
-                    )}
                     {isJointMode && (
                       <div className="text-[12px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
                         <span>
