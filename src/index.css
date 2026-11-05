@@ -699,89 +699,89 @@ h6 {
   --brand-gradient: none;
 
   /* Dejz Official Brand Logo Color */
-  --logo-color: #111113;
+  --logo-color: #5B3DF5;
 
   /* Universal Card Gap / Spacing */
   --card-gap: 0.65rem;
   --menu-content-gap: 1.5rem;
 
   /* Seamless Light Theme Background & Surfaces (Warm Stone / Alabaster #F6F6F4) */
-  --bg-top-color: #F6F6F4;
-  --bg-color: #F6F6F4;
-  --bg-secondary: #EFEFED;
+  --bg-top-color: #F5F4FA;
+  --bg-color: #F5F4FA;
+  --bg-secondary: #EDEBF5;
   --bg-gradient: none;
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
-  --surface-raised: #EFEFED;
-  --surface-high: #EFEFED;
+  --surface-raised: #EEECF6;
+  --surface-high: #EEECF6;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #EFEFED;
-  --surface-input: #EFEFED;
-  --surface-hover: #F2F2F0;
-  --surface-tint: rgba(17, 17, 19, 0.02);
+  --surface-muted: #EEECF6;
+  --surface-input: #EEECF6;
+  --surface-hover: #F1EFF8;
+  --surface-tint: rgba(91, 61, 245, 0.025);
 
-  --text-primary: #111113;
-  --text-metric-label: #111113;
-  --text-secondary: #52525B;
-  --text-tertiary: #71717A;
-  --text-muted: #8E8E93;
-  --text-disabled: #A1A1AA;
-  --text-inactive: #8E8E93;
+  --text-primary: #16141F;
+  --text-metric-label: #16141F;
+  --text-secondary: #56546B;
+  --text-tertiary: #75738A;
+  --text-muted: #8F8DA3;
+  --text-disabled: #AEACBF;
+  --text-inactive: #8F8DA3;
 
-  --border-subtle: rgba(17, 17, 19, 0.06);
-  --border-color: rgba(17, 17, 19, 0.06);
-  --border-control: rgba(17, 17, 19, 0.11);
-  --border-strong: rgba(17, 17, 19, 0.16);
-  --border-divider: rgba(17, 17, 19, 0.055);
-  --border-menu-divider: rgba(17, 17, 19, 0.055);
+  --border-subtle: rgba(22, 20, 31, 0.06);
+  --border-color: rgba(22, 20, 31, 0.06);
+  --border-control: rgba(22, 20, 31, 0.11);
+  --border-strong: rgba(22, 20, 31, 0.16);
+  --border-divider: rgba(22, 20, 31, 0.055);
+  --border-menu-divider: rgba(22, 20, 31, 0.055);
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #FFFFFF;
   --chip-text: #52525B;
-  --chip-active-bg: #111113;
+  --chip-active-bg: #5B3DF5;
   --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F6F6F4;
-  --surface-nested: #F6F6F4;
+  --card-nested-bg: #F5F4FA;
+  --surface-nested: #F5F4FA;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Minimal Card Shadows, Discreet Nav & Menu Shadows */
-  --shadow-level-1: 0 2px 10px -4px rgba(17, 17, 19, 0.03);
-  --shadow-level-2: 0 8px 24px -6px rgba(17, 17, 19, 0.06);
-  --shadow-level-3: 0 14px 32px -8px rgba(17, 17, 19, 0.08);
+  --shadow-level-1: 0 2px 10px -4px rgba(36, 24, 99, 0.04);
+  --shadow-level-2: 0 8px 24px -6px rgba(36, 24, 99, 0.07);
+  --shadow-level-3: 0 14px 32px -8px rgba(36, 24, 99, 0.10);
 
   /* Brand Accents & Colors - Carbon Black Primary & Emerald Inflows */
-  --accent-color: #111113;
-  --accent-hover: #27272A;
-  --accent-pressed: #09090B;
+  --accent-color: #5B3DF5;
+  --accent-hover: #4E30E6;
+  --accent-pressed: #4224CC;
   --accent-gradient: none;
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(17, 17, 19, 0.06);
-  --accent-container: rgba(17, 17, 19, 0.06);
-  --on-accent-container: #111113;
+  --accent-soft: rgba(91, 61, 245, 0.10);
+  --accent-container: rgba(91, 61, 245, 0.10);
+  --on-accent-container: #4224CC;
   --accent-on-solid: #FFFFFF;
   --dejz-accent: var(--accent-color);
-  --accent-glow: none;
+  --accent-glow: 0 18px 40px -18px rgba(91, 61, 245, 0.55);
   --accent-secondary-color: var(--accent-container);
 
   /* Primary & Secondary button states (Light mode) */
-  --btn-primary-bg: #111113;
+  --btn-primary-bg: #5B3DF5;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #27272A;
-  --btn-primary-pressed: #09090B;
+  --btn-primary-hover: #4E30E6;
+  --btn-primary-pressed: #4224CC;
   --btn-secondary-bg: #FFFFFF;
 
   --modal-bg: var(--bg-color);
-  --shadow-modal: 0 20px 44px -12px rgba(17, 17, 19, 0.12), 0 4px 12px -4px rgba(17, 17, 19, 0.04);
-  --shadow-nav: 0 10px 30px -6px rgba(17, 17, 19, 0.08), 0 2px 8px -2px rgba(17, 17, 19, 0.04);
-  --shadow-subtle: 0 1px 4px rgba(17, 17, 19, 0.025);
+  --shadow-modal: 0 20px 44px -12px rgba(36, 24, 99, 0.14), 0 4px 12px -4px rgba(36, 24, 99, 0.05);
+  --shadow-nav: 0 10px 30px -6px rgba(36, 24, 99, 0.10), 0 2px 8px -2px rgba(36, 24, 99, 0.05);
+  --shadow-subtle: 0 1px 4px rgba(36, 24, 99, 0.03);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #F2F2F0;
+  --bg-hover: #F1EFF8;
 
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
@@ -792,13 +792,13 @@ h6 {
   --danger-container: rgba(239, 68, 68, 0.10);
   --warning-color: #F59E0B;
   --warning-container: rgba(245, 158, 11, 0.12);
-  --info-color: #111113;
-  --info-container: rgba(17, 17, 19, 0.06);
-  --scrim-color: rgba(17, 17, 19, 0.45);
+  --info-color: #5B3DF5;
+  --info-container: rgba(91, 61, 245, 0.10);
+  --scrim-color: rgba(22, 20, 31, 0.45);
 
-  --nav-active-color: #111113;
+  --nav-active-color: #5B3DF5;
   --nav-inactive-color: #8E8E93;
-  --nav-plus-bg: #111113;
+  --nav-plus-bg: #5B3DF5;
   --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
 
@@ -809,12 +809,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #111113;
+  --date-active-bg: #5B3DF5;
   --date-active-color: #FFFFFF;
-  --date-active-shadow: none;
+  --date-active-shadow: 0 8px 18px -8px rgba(91, 61, 245, 0.6);
   --date-inactive-bg: transparent;
   --date-inactive-border: transparent;
-  --date-inactive-color: #636366;
+  --date-inactive-color: #66647A;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -945,36 +945,36 @@ h6 {
 
 .dark {
   /* Obsidian Carbon Dark Theme */
-  --bg-top-color: #0A0A0C;
-  --bg-color: #0A0A0C;
-  --bg-secondary: #0A0A0C;
+  --bg-top-color: #0C0B11;
+  --bg-color: #0C0B11;
+  --bg-secondary: #0C0B11;
   --bg-gradient: none;
 
   /* Layer 1: Surface */
-  --surface-color: #141417;
-  --surface-gradient: #141417;
-  --surface-solid: #141417;
+  --surface-color: #15141C;
+  --surface-gradient: #15141C;
+  --surface-solid: #15141C;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #1C1C21;
-  --surface-elevated: #1C1C21;
-  --surface-elevated-gradient: #1C1C21;
+  --surface-raised: #1D1B26;
+  --surface-elevated: #1D1B26;
+  --surface-elevated-gradient: #1D1B26;
   --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #1C1C21;
-  --surface-muted: #1C1C21;
-  --surface-input: #1C1C21;
-  --surface-hover: #24242B;
-  --bg-hover: #24242B;
+  --surface-high: #1D1B26;
+  --surface-muted: #1D1B26;
+  --surface-input: #1D1B26;
+  --surface-hover: #252331;
+  --bg-hover: #252331;
   --surface-tint: transparent;
 
   /* Typography */
-  --text-primary: #F5F5F7;
-  --text-metric-label: #F5F5F7;
-  --text-secondary: #98989F;
-  --text-tertiary: #8E8E93;
-  --text-muted: #6E6E73;
+  --text-primary: #F5F4FA;
+  --text-metric-label: #F5F4FA;
+  --text-secondary: #9D9BB0;
+  --text-tertiary: #8F8DA3;
+  --text-muted: #6F6D84;
   --text-disabled: #48484A;
   --text-inactive: #6E6E73;
 
@@ -987,26 +987,29 @@ h6 {
   --border-menu-divider: rgba(255, 255, 255, 0.065);
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.06);
-  --accent-color: #F5F5F7;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --accent-container: rgba(255, 255, 255, 0.08);
-  --on-accent-container: #F5F5F7;
+  --accent-color: #7A63FF;
+  --accent-hover: #8B77FF;
+  --accent-pressed: #6A52F0;
+  --on-accent: #FFFFFF;
+  --accent-soft: rgba(122, 99, 255, 0.16);
+  --accent-container: rgba(122, 99, 255, 0.16);
+  --on-accent-container: #B4A8FF;
   --accent-secondary-color: var(--accent-container);
-  --btn-primary-bg: #F5F5F7;
-  --btn-primary-text: #0A0A0C;
-  --btn-primary-hover: #E5E5EA;
-  --btn-primary-pressed: #D1D1D6;
-  --btn-secondary-bg: #1C1C21;
+  --btn-primary-bg: #7A63FF;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: #8B77FF;
+  --btn-primary-pressed: #6A52F0;
+  --btn-secondary-bg: #1D1B26;
 
   --chip-bg: rgba(255, 255, 255, 0.06);
   --chip-text: #98989F;
-  --chip-active-bg: #F5F5F7;
-  --chip-active-text: #0A0A0C;
+  --chip-active-bg: #7A63FF;
+  --chip-active-text: #FFFFFF;
 
-  --transaction-bg: #141417;
-  --card-nested-bg: #1C1C21;
-  --surface-nested: #1C1C21;
-  --remaining-today-gradient: #141417;
+  --transaction-bg: #15141C;
+  --card-nested-bg: #1D1B26;
+  --surface-nested: #1D1B26;
+  --remaining-today-gradient: #15141C;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 
@@ -1018,7 +1021,7 @@ h6 {
   --shadow-nav: 0 10px 28px -4px rgba(0, 0, 0, 0.55);
   --shadow-subtle: none;
 
-  --logo-color: #FFFFFF;
+  --logo-color: #B4A8FF;
 
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
@@ -1030,14 +1033,14 @@ h6 {
   --warning-container: rgba(251, 191, 36, 0.15);
   --danger-color: #F87171;
   --danger-container: rgba(248, 113, 113, 0.16);
-  --info-color: #F5F5F7;
+  --info-color: #B4A8FF;
   --info-container: var(--surface-muted);
   --scrim-color: rgba(0, 0, 0, 0.68);
 
-  --nav-active-color: #F5F5F7;
+  --nav-active-color: #A797FF;
   --nav-inactive-color: #6E6E73;
-  --nav-plus-bg: #F5F5F7;
-  --nav-plus-color: #0A0A0C;
+  --nav-plus-bg: #7A63FF;
+  --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -1047,8 +1050,8 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #F5F5F7;
-  --date-active-color: #0A0A0C;
+  --date-active-bg: #7A63FF;
+  --date-active-color: #FFFFFF;
   --date-active-shadow: none;
   --date-inactive-bg: transparent;
   --date-inactive-border: transparent;
@@ -2151,3 +2154,58 @@ b {
   }
 }
 
+
+/* ==========================================================================
+   DEJZ SIGNATURKORT – "Kvar att spendera"
+   Appens identitetsmoment: violett gradient med vit text. Variablerna
+   omdefinieras lokalt så att allt innehåll i kortet följer med automatiskt.
+   Blir rosa/röd när man är över budget.
+   ========================================================================== */
+.dejz-hero {
+  --hero-from: #7356FF;
+  --hero-mid: #5B3DF5;
+  --hero-to: #3F22C9;
+  --hero-glow: rgba(91, 61, 245, 0.55);
+  --text-primary: #FFFFFF;
+  --text-metric-label: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.78);
+  --text-tertiary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.64);
+  --bg-color: rgba(255, 255, 255, 0.2);
+  --surface-color: var(--hero-mid);
+  --surface-raised: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.18);
+  --border-divider: rgba(255, 255, 255, 0.18);
+  position: relative;
+  isolation: isolate;
+  color: #FFFFFF;
+  border-color: transparent !important;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(80% 70% at 0% 100%, rgba(255, 140, 210, 0.28) 0%, rgba(255, 140, 210, 0) 60%),
+    linear-gradient(150deg, var(--hero-from) 0%, var(--hero-mid) 48%, var(--hero-to) 100%) !important;
+  box-shadow: 0 18px 40px -18px var(--hero-glow) !important;
+}
+.dark .dejz-hero {
+  --hero-from: #6E55FF;
+  --hero-mid: #5438E8;
+  --hero-to: #321AA8;
+  --hero-glow: rgba(84, 56, 232, 0.45);
+}
+.dejz-hero.dejz-hero--over {
+  --hero-from: #FB5B78;
+  --hero-mid: #E11D48;
+  --hero-to: #9F1239;
+  --hero-glow: rgba(225, 29, 72, 0.5);
+}
+/* Statusfärger som behöver ljusare toner mot den mörka gradienten */
+.dejz-hero .text-emerald-600,
+.dejz-hero .dark\:text-emerald-400 { color: #B9F8D9 !important; }
+.dejz-hero .text-rose-600,
+.dejz-hero .dark\:text-rose-400 { color: #FFFFFF !important; }
+.dejz-hero .text-amber-600,
+.dejz-hero .dark\:text-amber-400 { color: #FFE7A3 !important; }
+.dejz-hero .bg-rose-500 { background-color: #FFFFFF !important; }
+.dejz-hero .border-rose-500 { border-color: #FFFFFF !important; }
+/* Text på vita markeringar (t.ex. hushållsväxlaren) */
+.dejz-hero .text-\[var\(--bg-color\)\] { color: var(--hero-to) !important; }

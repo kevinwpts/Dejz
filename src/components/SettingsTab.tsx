@@ -338,13 +338,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     if (effectiveMode === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
-      root.style.backgroundColor = '#0A0A0C';
-      if (metaTheme) metaTheme.setAttribute('content', '#0A0A0C');
+      root.style.backgroundColor = '#0C0B11';
+      if (metaTheme) metaTheme.setAttribute('content', '#0C0B11');
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
-      root.style.backgroundColor = '#F6F6F4';
-      if (metaTheme) metaTheme.setAttribute('content', '#F6F6F4');
+      root.style.backgroundColor = '#F5F4FA';
+      if (metaTheme) metaTheme.setAttribute('content', '#F5F4FA');
     }
     try {
       localStorage.setItem('dejz_theme_pref', mode);

@@ -993,7 +993,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         const isOverBudget = activeKvar < 0;
 
         return (
-          <section className="ui-card-p">
+          <section className={`ui-card-p dejz-hero ${isOverBudget ? 'dejz-hero--over' : ''}`}>
             {householdBudgetStats && (
               <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-[var(--border-subtle)]">
                 <div className="inline-flex items-center p-0.5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)]">
@@ -1615,14 +1615,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 }}
                 className={`relative shrink-0 w-[50px] sm:w-[54px] h-[60px] sm:h-[62px] rounded-2xl transition-all flex flex-col items-center justify-center cursor-pointer active:scale-95 ${
                   isSelected
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-subtle'
+                    ? 'bg-[var(--date-active-bg)] text-[var(--date-active-color)] shadow-[var(--date-active-shadow)]'
                     : 'bg-transparent hover:bg-[var(--surface-color)]/70 text-[var(--text-primary)]'
                 }`}
               >
                 <span
                   className={`text-[10.5px] leading-none ${
                     isSelected
-                      ? 'text-[var(--bg-color)]/80 font-normal'
+                      ? 'text-[var(--date-active-color)]/80 font-normal'
                       : isToday
                       ? 'text-[var(--text-primary)] font-semibold'
                       : 'text-[var(--text-muted)] font-normal'
@@ -1642,7 +1642,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     <span
                       className={`w-1.5 h-1.5 rounded-full transition-colors ${
                         isSelected
-                          ? 'bg-[var(--bg-color)]'
+                          ? 'bg-[var(--date-active-color)]'
                           : isToday
                           ? 'bg-[var(--text-primary)]'
                           : 'bg-[var(--text-muted)]/60'

@@ -189,7 +189,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   }}
                   className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
                     isActive
-                      ? 'text-[var(--text-primary)] font-semibold'
+                      ? 'text-[var(--nav-active-color)] font-semibold'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
                   }`}
                 >
@@ -210,7 +210,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             aria-expanded={isMenuOpen}
             className={`bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border rounded-full shadow-nav px-4 py-1.5 flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 shrink-0 min-w-[60px] ${
               isMoreActive
-                ? 'border-[var(--border-control)] text-[var(--text-primary)] font-semibold'
+                ? 'border-[var(--border-control)] text-[var(--nav-active-color)] font-semibold'
                 : 'border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >

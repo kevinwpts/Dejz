@@ -168,3 +168,24 @@ Vissa delar av källkoden är undantagna från de automatiska kontrollerna av te
 * **Varningar:** 0 (både i `scripts/lint-design-system.js` och `eslint --max-warnings 0`)
 * **Publika vyer (`LandingPage`, `Auth`, `PublicLegalPage`):** Konsekvent låsta till ljust tema (`.landing-light`) och använder samma `LanguagePicker` (`variant="compact"`).
 * **Central styrning:** Fullt implementerad för knappar, flikar, filter, modaler, listrader, skeletons och semantiska färger/radier i hela kodbasen.
+
+---
+
+## Identitet: Dejz Violett
+
+Dejz signaturfärg är **Dejz Violett**. Den används sparsamt, på de ställen där appen ska kännas igen:
+
+| Token | Ljust | Mörkt | Används till |
+| :--- | :--- | :--- | :--- |
+| `--accent-color` | `#5B3DF5` | `#7A63FF` | Primärknappar, switchar, valda pills |
+| `--nav-active-color` | `#5B3DF5` | `#A797FF` | Aktiv flik i menyraden |
+| `--date-active-bg` | `#5B3DF5` | `#7A63FF` | Vald dag i datumraden |
+| `--bg-color` | `#F5F4FA` | `#0C0B11` | Canvas med en svag violett ton |
+| `--text-primary` | `#16141F` | `#F5F4FA` | Bläckfärg för text |
+
+**Signaturkortet** (`.dejz-hero`) är kortet "Kvar att spendera" på Hem. Det har en violett gradient med vit text. Kortet omdefinierar text- och ytvariablerna lokalt, så innehållet behöver inga egna färger. Lägg till `.dejz-hero--over` så blir kortet rosa/rött när användaren är över budget.
+
+Regler:
+- Violett är för identitet och huvudhandlingar. Använd den inte på listor, rader eller stora ytor.
+- Grön och röd är bara för pengar in och ut, aldrig för dekoration.
+- Kategori-emojis är det enda färgglada i innehållet, och max en färgglad sak per rad.
