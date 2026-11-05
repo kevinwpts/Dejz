@@ -1189,14 +1189,15 @@ export function saveStoredPaymentMethods(methods: PaymentMethodItem[]): void {
 // --- Show Accounts & Budget Breakdown Toggle Persistence (Hemfliken) ---
 const SHOW_BUDGET_BREAKDOWN_ON_HOME_KEY = 'dejz_show_budget_breakdown_on_home';
 
+// Standard: hopfällt hemkort (bara belopp, stödrad och stapel). Detaljer visas vid tryck.
 export function getShowBudgetBreakdownOnHome(): boolean {
-  if (typeof window === 'undefined') return true;
+  if (typeof window === 'undefined') return false;
   try {
     const stored = localStorage.getItem(SHOW_BUDGET_BREAKDOWN_ON_HOME_KEY);
-    if (stored === null) return true;
+    if (stored === null) return false;
     return stored === 'true';
   } catch {
-    return true;
+    return false;
   }
 }
 

@@ -429,19 +429,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.webp?v=6',
+    src: '/screens/ekonomi.webp?v=8',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Koppla din bank',
     text: 'Dejz hittar din lön, hyra och prenumerationer och räknar av dem varje löneperiod.',
   },
   {
-    src: '/screens/historik.webp?v=6',
+    src: '/screens/historik.webp?v=8',
     alt: 'Dejz – historik över köp',
     title: 'Köpen dyker upp av sig själva',
     text: 'Varje köp hamnar i Dejz med butik, logga och kategori. Du behöver inte göra något.',
   },
   {
-    src: '/screens/analys.webp?v=6',
+    src: '/screens/analys.webp?v=8',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -506,13 +506,24 @@ const ComparisonVisual: React.FC = () => (
         2 340 kr
       </div>
       <div className="mt-1.5 text-sm text-white/80 tabular-nums">≈ 390 kr per dag</div>
-      <div className="mt-4 relative h-1.5 rounded-pill bg-white/20">
-        <div className="absolute inset-y-0 left-0 w-[80%] rounded-pill bg-white" />
-        <div className="absolute top-1/2 left-[80%] -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#5B3DF5] border-2 border-white" />
+      {/* Samma takt-visning som i appen: stapeln = använda pengar, strecket = idag */}
+      <div className="mt-6 relative">
+        <span className="absolute -top-4 left-[80%] -translate-x-1/2 text-[9.5px] font-medium uppercase tracking-[0.06em] text-white/70">
+          Idag
+        </span>
+        <div className="h-2 rounded-pill bg-white/20 overflow-hidden">
+          <div className="h-full w-[75%] rounded-pill bg-white" />
+        </div>
+        <span className="absolute -top-1 -bottom-1 left-[80%] w-[2px] -translate-x-1/2 rounded-pill bg-white/60" />
       </div>
       <div className="mt-2 flex justify-between text-xs text-white/70 tabular-nums">
         <span>Lön 25 okt</span>
         <span>Nästa lön 25 nov</span>
+      </div>
+      <div className="mt-3 flex items-center gap-1.5 text-xs tabular-nums">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        <span className="font-medium">Bra takt</span>
+        <span className="text-white/75">– 468 kr under planen</span>
       </div>
     </div>
   </div>
@@ -717,10 +728,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.webp?v=6" alt="" />
+              <PhoneFrame src="/screens/analys.webp?v=8" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.webp?v=6" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.webp?v=8" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>

@@ -992,6 +992,30 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           : totalVariableSpent;
         const isOverBudget = activeKvar < 0;
 
+        // Takt i löneperioden: stapeln = andel av pengarna som är använda,
+        // strecket = var idag ligger i perioden.
+        const timeShare = Math.min(
+          1,
+          Math.max(0, period.daysElapsed / Math.max(1, period.daysTotal))
+        );
+        const spendable = Math.max(0, activeKvar + activeVariable);
+        const spent = Math.max(0, activeVariable);
+        const moneyShare = spendable > 0 ? Math.min(1, spent / spendable) : isOverBudget ? 1 : 0;
+        const paceDiff = Math.round(spendable * timeShare - spent); // + = under planen
+        const tolerance = Math.max(100, spendable * 0.03);
+        const pace: 'over' | 'fast' | 'good' = isOverBudget
+          ? 'over'
+          : paceDiff < -tolerance
+          ? 'fast'
+          : 'good';
+        const daysLabel =
+          period.daysRemaining === 0
+            ? 'Lön idag'
+            : period.daysRemaining === 1
+            ? '1 dag till lön'
+            : `${period.daysRemaining} dagar till lön`;
+        const perDay = activeKvar > 0 ? Math.floor(activeKvar / Math.max(1, period.daysRemaining)) : 0;
+
         return (
           <section className={`ui-card-p dejz-hero ${isOverBudget ? 'dejz-hero--over' : ''}`}>
             {householdBudgetStats && (
@@ -1089,22 +1113,15 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     {isOverBudget ? 'Över budget' : 'Kvar att spendera'}
                   </span>
                 )}
-                <span className="text-[12px] text-[var(--text-secondary)] font-normal tabular-nums text-right">
-                  {period.daysRemaining === 0
-                    ? 'Lön idag'
-                    : period.daysRemaining === 1
-                    ? '1 dag till lön'
-                    : `${period.daysRemaining} dagar till lön`}
-                </span>
               </div>
 
-              <div className="flex items-center justify-between gap-3 mt-0.5">
+              <div className="mt-0.5">
                 {isInitialLoading && accounts.length === 0 ? (
-                  <div className="h-9 w-40 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1" />
+                  <div className="h-11 w-44 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1.5" />
                 ) : (
                   <div className="min-w-0">
                     <div
-                      className={`font-display text-[38px] sm:text-[42px] font-[600] tracking-[-0.03em] leading-none tabular-nums mt-1.5 ${
+                      className={`font-display text-[44px] sm:text-[48px] font-[600] tracking-[-0.035em] leading-none tabular-nums mt-1.5 ${
                         activeKvar >= 0
                           ? 'text-[var(--text-primary)]'
                           : 'text-rose-600 dark:text-rose-400'
@@ -1112,11 +1129,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     >
                       {formatKr(activeKvar)}
                     </div>
-                    {activeKvar > 0 && (
-                      <div className="text-[12px] text-[var(--text-secondary)] mt-0.5 tabular-nums">
-                        ≈ {formatKr(Math.floor(activeKvar / Math.max(1, period.daysRemaining)))} per dag
-                      </div>
-                    )}
+                    {/* En stödrad: per dag + dagar till lön */}
+                    <div className="text-[13px] text-[var(--text-secondary)] mt-2 tabular-nums">
+                      {perDay > 0 && <>{formatKr(perDay)}/dag · </>}
+                      {daysLabel}
+                    </div>
                     {isJointMode && (
                       <div className="text-[12px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
                         <span>
@@ -1129,47 +1146,51 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     )}
                   </div>
                 )}
-
-                <span className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:bg-[var(--bg-color)] transition-all shrink-0">
-                  <CaretDown
-                    size={14}
-                    weight="regular"
-                    className={`transition-transform duration-200 ${
-                      showBudgetBreakdown ? 'rotate-180' : ''
-                    }`}
-                  />
-                </span>
               </div>
 
-              {/* Löneperioden som tidslinje: Lön → Idag → Nästa lön */}
-              {(() => {
-                const pct = Math.min(
-                  100,
-                  Math.max(0, (period.daysElapsed / Math.max(1, period.daysTotal)) * 100)
-                );
-                return (
-                  <div className="mt-4">
-                    <div className="relative h-1.5 rounded-full bg-[var(--bg-color)]">
-                      <div
-                        className={`absolute inset-y-0 left-0 rounded-full ${
-                          isOverBudget ? 'bg-rose-500' : 'bg-[var(--text-primary)]'
-                        }`}
-                        style={{ width: `${pct}%` }}
-                      />
-                      <div
-                        className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--surface-color)] border-[2.5px] ${
-                          isOverBudget ? 'border-rose-500' : 'border-[var(--text-primary)]'
-                        }`}
-                        style={{ left: `${pct}%` }}
-                      />
-                    </div>
-                    <div className="mt-2 flex items-center justify-between text-[11px] text-[var(--text-muted)] tabular-nums">
-                      <span>Lön {period.startLabel}</span>
-                      <span>Nästa lön {period.nextPayLabel}</span>
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* Stapel: fyllning = använda pengar, streck = idag. Färgen visar takten. */}
+              <div className="mt-4 relative">
+                <div className="relative h-2 rounded-full bg-[var(--bg-color)] overflow-hidden">
+                  <div
+                    className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
+                      pace === 'over'
+                        ? 'bg-rose-500'
+                        : pace === 'fast'
+                        ? 'bg-amber-500'
+                        : 'bg-[var(--text-primary)]'
+                    }`}
+                    style={{ width: `${moneyShare * 100}%` }}
+                  />
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-1 -bottom-1 w-[2px] -translate-x-1/2 rounded-full bg-[var(--text-primary)]/45"
+                  style={{ left: `${timeShare * 100}%` }}
+                />
+              </div>
+
+              {/* Text bara när något behöver uppmärksamhet */}
+              {pace !== 'good' && (
+                <div className="mt-2.5 flex items-center gap-1.5 text-[12px] tabular-nums">
+                  <span
+                    aria-hidden="true"
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      pace === 'over' ? 'bg-rose-500' : 'bg-amber-500'
+                    }`}
+                  />
+                  <span className="text-[var(--text-secondary)]">
+                    {pace === 'over' ? (
+                      <>Pengarna är slut för den här perioden</>
+                    ) : (
+                      <>
+                        <span className="font-medium text-amber-700 dark:text-amber-400">Lite för snabbt</span>
+                        {' – '}
+                        {formatKr(Math.abs(paceDiff))} över planen
+                      </>
+                    )}
+                  </span>
+                </div>
+              )}
             </button>
 
             {/* Mjukt utfällbar 3-kolumns översikt (Inkomst · Fasta · Rörligt) */}
@@ -1181,7 +1202,19 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               }`}
             >
               <div className="overflow-hidden">
-                <div className="ui-stat-grid pt-3.5 border-t border-[var(--border-subtle)]">
+                {/* Detaljer: löneperioden och takten i ord */}
+                <div className="pt-3.5 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3 text-[12px] text-[var(--text-secondary)] tabular-nums">
+                  <span>
+                    Lön {period.startLabel} → {period.nextPayLabel}
+                  </span>
+                  {pace === 'good' && spendable > 0 && (
+                    <span className="inline-flex items-center gap-1.5 text-right">
+                      <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      {paceDiff >= 50 ? `${formatKr(paceDiff)} under planen` : 'Bra takt'}
+                    </span>
+                  )}
+                </div>
+                <div className="ui-stat-grid pt-3.5 mt-3.5 border-t border-[var(--border-subtle)]">
                   <button
                     type="button"
                     onClick={() =>
@@ -1193,11 +1226,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   >
                     <span className="ui-stat-label inline-flex items-center gap-1">
                       <span>{isJointMode ? 'Gemensam inkomst' : 'Inkomst'}</span>
-                      <CaretRight
-                        size={10}
-                        weight="bold"
-                        className="text-[var(--text-muted)] group-hover/stat:text-[var(--text-primary)] group-hover/stat:translate-x-0.5 transition-all shrink-0"
-                      />
                     </span>
                     {isInitialLoading && accounts.length === 0 ? (
                       <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
@@ -1219,11 +1247,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   >
                     <span className="ui-stat-label inline-flex items-center gap-1">
                       <span>{isJointMode ? 'Gemensamma fasta' : 'Fasta'}</span>
-                      <CaretRight
-                        size={10}
-                        weight="bold"
-                        className="text-[var(--text-muted)] group-hover/stat:text-[var(--text-primary)] group-hover/stat:translate-x-0.5 transition-all shrink-0"
-                      />
                     </span>
                     {isInitialLoading && accounts.length === 0 ? (
                       <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
@@ -1245,11 +1268,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   >
                     <span className="ui-stat-label inline-flex items-center gap-1">
                       <span>{isJointMode ? 'Gemensamt rörligt' : 'Rörligt'}</span>
-                      <CaretRight
-                        size={10}
-                        weight="bold"
-                        className="text-[var(--text-muted)] group-hover/stat:text-[var(--text-primary)] group-hover/stat:translate-x-0.5 transition-all shrink-0"
-                      />
                     </span>
                     {isInitialLoading && accounts.length === 0 ? (
                       <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
