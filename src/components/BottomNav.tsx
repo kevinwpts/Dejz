@@ -64,6 +64,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     isSelected: boolean;
     onSelect: () => void;
   }[] = [
+    ...(onAddTransaction
+      ? [
+          {
+            id: 'add-transaction',
+            label: 'Lägg till köp',
+            icon: Plus,
+            isSelected: false,
+            onSelect: onAddTransaction,
+          },
+        ]
+      : []),
     {
       id: 'goals',
       label: 'Sparmål',
@@ -190,22 +201,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               );
             })}
           </div>
-
-          {/* Lägg till köp – alltid ett tryck bort */}
-          {onAddTransaction && (
-            <button
-              type="button"
-              onClick={() => {
-                setIsMenuOpen(false);
-                onAddTransaction();
-              }}
-              aria-label="Lägg till köp"
-              title="Lägg till köp"
-              className="shrink-0 w-[52px] self-center aspect-square rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] shadow-nav flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 hover:opacity-90"
-            >
-              <Plus size={22} weight="bold" />
-            </button>
-          )}
 
           {/* Separated "Mer" Capsule Button */}
           <button
