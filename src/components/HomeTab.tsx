@@ -1090,7 +1090,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </span>
                 )}
                 <span className="text-[12px] text-[var(--text-secondary)] font-normal tabular-nums text-right">
-                  {period.startLabel} – {period.endLabel}
+                  {period.daysRemaining === 0
+                    ? 'Lön idag'
+                    : period.daysRemaining === 1
+                    ? '1 dag till lön'
+                    : `${period.daysRemaining} dagar till lön`}
                 </span>
               </div>
 
@@ -1108,6 +1112,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     >
                       {formatKr(activeKvar)}
                     </div>
+                    {activeKvar > 0 && (
+                      <div className="text-[12px] text-[var(--text-secondary)] mt-0.5 tabular-nums">
+                        ≈ {formatKr(Math.floor(activeKvar / Math.max(1, period.daysRemaining)))} per dag
+                      </div>
+                    )}
                     {isJointMode && (
                       <div className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
                         <span>
@@ -1131,6 +1140,36 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   />
                 </span>
               </div>
+
+              {/* Löneperioden som tidslinje: Lön → Idag → Nästa lön */}
+              {(() => {
+                const pct = Math.min(
+                  100,
+                  Math.max(0, (period.daysElapsed / Math.max(1, period.daysTotal)) * 100)
+                );
+                return (
+                  <div className="mt-4">
+                    <div className="relative h-1.5 rounded-full bg-[var(--bg-color)]">
+                      <div
+                        className={`absolute inset-y-0 left-0 rounded-full ${
+                          isOverBudget ? 'bg-rose-500' : 'bg-[var(--text-primary)]'
+                        }`}
+                        style={{ width: `${pct}%` }}
+                      />
+                      <div
+                        className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--surface-color)] border-[2.5px] ${
+                          isOverBudget ? 'border-rose-500' : 'border-[var(--text-primary)]'
+                        }`}
+                        style={{ left: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-[var(--text-muted)] tabular-nums">
+                      <span>Lön {period.startLabel}</span>
+                      <span>Nästa lön {period.nextPayLabel}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </button>
 
             {/* Mjukt utfällbar 3-kolumns översikt (Inkomst · Fasta · Rörligt) */}
@@ -1229,7 +1268,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO · BANKKONTON                             */}
+      {/* Visas bara när det finns kopplade/inlagda konton – annars blir */}
+      {/* det ett förvirrande "0 kr"-kort för användare utan bank.       */}
       {/* ============================================================== */}
+      {accounts.length > 0 && (
       <section className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4">
         <button
           type="button"
@@ -1372,6 +1414,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* ============================================================== */}
       {/* MODUL 2.5: SPARMÅL · BUFFERT & DRÖMMAR                         */}

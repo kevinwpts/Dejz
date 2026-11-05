@@ -1606,9 +1606,9 @@ Regler:
     };
 
     const manifest = {
-      "name": "Dejz – Full koll på pengarna från lön till lön",
+      "name": "Dejz – Se vad du har kvar från lön till lön",
       "short_name": "Dejz",
-      "description": "Samla lön, fasta räkningar och sparande på ett ställe. Se vad du har kvar att röra dig med fram till nästa lön.",
+      "description": "Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Lön, räkningar och sparande räknas av automatiskt – så att du vet vad som faktiskt är ditt, från lön till lön.",
       "start_url": "/",
       "display": "standalone",
       "background_color": "#F2F0F0",

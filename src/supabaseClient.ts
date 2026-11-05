@@ -26,8 +26,19 @@ export const isSupabaseUrlValid = isValidUrl(supabaseUrl);
 export const isSupabaseKeyValid = isValidKey(supabaseAnonKey);
 export const isSupabaseConfigured = isSupabaseUrlValid && isSupabaseKeyValid;
 
-export const supabase = isSupabaseConfigured 
-  ? createClient(supabaseUrl!, supabaseAnonKey!)
+// Lokalt demoläge (npm run dev + ?demo): använd en egen, tom inloggningslagring så att en
+// riktig inloggning i samma webbläsare aldrig syns för – eller skrivs över av – demodatan.
+export const isLocalDemoMode =
+  typeof window !== 'undefined' &&
+  Boolean(metaEnv.DEV) &&
+  new URLSearchParams(window.location.search).has('demo');
+
+export const supabase = isSupabaseConfigured
+  ? createClient(
+      supabaseUrl!,
+      supabaseAnonKey!,
+      isLocalDemoMode ? { auth: { storageKey: 'dejz-demo-isolated-auth', persistSession: false } } : undefined
+    )
   : {
       auth: {
         getSession: async () => ({ data: { session: null }, error: new Error('Supabase not configured') }),

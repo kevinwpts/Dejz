@@ -66,6 +66,7 @@ import {
   BankTransactionItem,
 } from './services/bankService';
 import { dataService } from './services/dataService';
+import { seedDemoData } from './utils/demoData';
 import { Frequency } from './types';
 import { getLogoUrl, saveLearnedBrandDomain } from './utils/logo';
 import {
@@ -2965,6 +2966,19 @@ export const App: React.FC = () => {
     supabase.auth
       .getSession()
       .then(async ({ data: { session } }: any) => {
+        // Endast lokalt (npm run dev): http://localhost:3000/?demo öppnar appen med påhittad
+        // demodata – används för skärmbilder till startsidan. Finns inte i produktionsbygget.
+        if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')) {
+          const demo = seedDemoData();
+          localStorage.setItem('dejz_onboarding_v2_done', 'true');
+          localStorage.setItem('dejz_onboarding_completed', 'true');
+          localStorage.removeItem('dejz_onboarding_in_progress');
+          localStorage.removeItem('dejz_onboarding_step');
+          localStorage.removeItem('dejz_logged_out');
+          setIsOnboardingActive(false);
+          await runCoordinateHydration({ ...demo.user, created_at: '2025-01-01T00:00:00.000Z' });
+          return;
+        }
         if (session?.user && localStorage.getItem('dejz_logged_out') !== 'true') {
           await runCoordinateHydration(session.user);
         } else {
@@ -2978,6 +2992,10 @@ export const App: React.FC = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+      // I lokalt demoläge (?demo) ska en riktig inloggning aldrig ta över demodatan
+      if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')) {
+        return;
+      }
       if (session?.user && localStorage.getItem('dejz_logged_out') !== 'true') {
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || session.user.id !== userIdRef.current) {
           void runCoordinateHydration(session.user);
@@ -4994,7 +5012,7 @@ export const App: React.FC = () => {
         hasUnreadNotifications={false}
         friendsUnreadCount={friendsUnreadCount}
         hideActions={activeTab === 'settings'}
-        hideSearch={activeTab === 'transactions'}
+        hideSearch
         pageTitle={
           activeTab === 'settings'
             ? settingsSubView === 'main'
@@ -5902,6 +5920,10 @@ export const App: React.FC = () => {
       {!(activeTab === 'friends' && Boolean(selectedChatFriendKey)) && (
         <BottomNav
           activeTab={activeTab}
+          onAddTransaction={() => {
+            setSelectedTransaction(null);
+            setIsTxModalOpen(true);
+          }}
           onChangeTab={(tab) => {
             setIsSearchModalOpen(false);
             setIsNotificationsModalOpen(false);

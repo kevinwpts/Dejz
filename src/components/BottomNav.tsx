@@ -5,11 +5,10 @@ import {
   ChartPieSlice,
   ArrowsDownUp,
   SquaresFour,
-  Heart,
-  Package,
   Paperclip,
   PiggyBank,
   CaretRight,
+  Plus,
 } from '@phosphor-icons/react';
 
 export type AppTab =
@@ -30,6 +29,8 @@ interface BottomNavProps {
   onChangeTab: (tab: AppTab) => void;
   onOpenHousehold?: () => void;
   onOpenDiscover?: () => void;
+  /** Öppnar "Lägg till köp" – appens vanligaste handling, nåbar från alla flikar */
+  onAddTransaction?: () => void;
   activeSettingsSubView?: string;
   goalsCount?: number;
   savedCount?: number;
@@ -41,9 +42,8 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onChangeTab,
+  onAddTransaction,
   goalsCount = 0,
-  savedCount = 0,
-  packagesCount = 0,
   receiptsCount = 0,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,7 +53,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     { id: 'home' as AppTab, label: 'Hem', icon: House },
     { id: 'transactions' as AppTab, label: 'Historik', icon: ArrowsDownUp },
     { id: 'analysis' as AppTab, label: 'Analys', icon: ChartPieSlice },
-    { id: 'fixed' as AppTab, label: 'Ekonomi', icon: Receipt },
+    { id: 'fixed' as AppTab, label: 'Fasta', icon: Receipt },
   ];
 
   const menuItems: {
@@ -71,22 +71,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       badge: goalsCount > 0 ? goalsCount : undefined,
       isSelected: activeTab === 'goals',
       onSelect: () => onChangeTab('goals'),
-    },
-    {
-      id: 'saved',
-      label: 'Sparade köp',
-      icon: Heart,
-      badge: savedCount > 0 ? savedCount : undefined,
-      isSelected: activeTab === 'saved',
-      onSelect: () => onChangeTab('saved'),
-    },
-    {
-      id: 'packages',
-      label: 'Paket',
-      icon: Package,
-      badge: packagesCount > 0 ? packagesCount : undefined,
-      isSelected: activeTab === 'packages',
-      onSelect: () => onChangeTab('packages'),
     },
     {
       id: 'receipts',
@@ -206,6 +190,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               );
             })}
           </div>
+
+          {/* Lägg till köp – alltid ett tryck bort */}
+          {onAddTransaction && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsMenuOpen(false);
+                onAddTransaction();
+              }}
+              aria-label="Lägg till köp"
+              title="Lägg till köp"
+              className="shrink-0 w-[52px] self-center aspect-square rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] shadow-nav flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 hover:opacity-90"
+            >
+              <Plus size={22} weight="bold" />
+            </button>
+          )}
 
           {/* Separated "Mer" Capsule Button */}
           <button

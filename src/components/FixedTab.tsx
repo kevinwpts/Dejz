@@ -336,7 +336,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         <span className="ui-row-title truncate block">
                           {exp.name}
                         </span>
-                        <span className="mt-0.5 flex items-center gap-1 text-[10.5px] sm:text-[11px] font-normal text-[var(--text-muted)] min-w-0">
+                        <span className="mt-1 flex items-center gap-2 text-[10.5px] sm:text-[11px] font-normal text-[var(--text-muted)] min-w-0">
                           <span className="inline-flex items-center gap-1 min-w-0 truncate">
                             <CategoryIcon
                               category={exp.category || 'Räkningar'}
@@ -345,8 +345,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                             />
                             <span className="truncate">{exp.category || 'Räkningar'}</span>
                           </span>
-                          <span className="text-[var(--text-muted)]/60 shrink-0">·</span>
-                          <span className="inline-flex items-center gap-1 shrink-0">
+                          <span className="inline-flex items-center gap-1 shrink-0 rounded-pill bg-[var(--bg-color)] px-1.5 py-px text-[var(--text-secondary)]">
                             <PaymentMethodIcon
                               method={paymentMethodLabel}
                               size={10}

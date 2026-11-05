@@ -53,6 +53,7 @@ import {
   removeSwishPhoneDirectoryEntry,
 } from '../../utils/appCache';
 import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
+import { formatIsoDateStockholm } from '../../utils/swedishDate';
 
 
 import { SwishLogo } from '../SwishLogo';
@@ -256,7 +257,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setShowSimilarPopup(false);
       setShowFullAccount(false);
     } else {
-      const todayIso = new Date().toISOString().slice(0, 10);
+      const todayIso = formatIsoDateStockholm(new Date());
       setTxType('expense');
       setTitle('');
       setAmount('');
@@ -560,7 +561,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       onSave({
         title: cleanTitle,
         amount: cleanAmt,
-        date: date || new Date().toISOString().slice(0, 10),
+        date: date || formatIsoDateStockholm(new Date()),
         time: currentTime,
         category: category || (txType === 'income' ? 'Lön' : 'Mat & dryck'),
         type: txType,
@@ -1662,7 +1663,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     setSwishCustomShare(
                       String(activeTx.pendingSwishAmount || Math.max(1, Math.round(baseFullAmt / 2)))
                     );
-                    setSwishSentFeedback(null);
                     navigateSubView('swish', 'forward');
                   }}
                   className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
@@ -2028,7 +2028,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                                       text: `${activeTx.title} (+${formatKr(amt)})`,
                                       date:
                                         activeTx.date ||
-                                        new Date().toISOString().slice(0, 10),
+                                        formatIsoDateStockholm(new Date()),
                                       amount: amt,
                                     },
                                     ...(item.activities || []),

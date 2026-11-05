@@ -3,7 +3,7 @@ import { IncomeItem, FixedExpenseItem, TransactionItem } from '../components/Hom
 import { WeekendHandlingMode } from './periodEngine';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { Category } from '../types';
-import { supabase } from '../supabaseClient';
+import { supabase, isLocalDemoMode } from '../supabaseClient';
 
 const APP_CACHE_KEY = 'dejz_app_state_cache_v2';
 const SHOW_ACCOUNTS_ON_HOME_KEY = 'dejz_show_accounts_on_home';
@@ -1800,6 +1800,8 @@ export function clearAllLocalAppData(preserveTheme = false): void {
 
 export function syncAllUserPreferencesToSupabase(immediate = false): void {
   if (typeof window === 'undefined') return;
+  // Demoläget får aldrig skriva inställningar till en riktig profil
+  if (isLocalDemoMode) return;
   try {
     if (localStorage.getItem('dejz_logged_out') === 'true') {
       cancelPendingPreferenceSync();

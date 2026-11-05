@@ -833,10 +833,47 @@ export function seedDemoData() {
     payment_methods: demoConfig.paymentMethods,
   };
 
+  // Äldre kategorinamn i demodatan → appens nuvarande standardkategorier
+  const LEGACY_CATEGORY_MAP: Record<string, string> = {
+    'Mat & Livsmedel': 'Mat & dryck',
+    'Restaurang & Fika': 'Mat & dryck',
+    'Nöje & Fritid': 'Nöje',
+    'Transport & Bensin': 'Transport',
+    'Hälsa & Skönhet': 'Hälsa',
+    'Shopping & Kläder': 'Shopping',
+    'Swish / Återbetalning': 'Swish',
+  };
+  const remapCategory = <T extends { category?: string }>(item: T): T =>
+    item.category && LEGACY_CATEGORY_MAP[item.category]
+      ? { ...item, category: LEGACY_CATEGORY_MAP[item.category] }
+      : item;
+
   localStorage.setItem('demo_settings', JSON.stringify(demoConfig));
   localStorage.setItem('demo_incomes', JSON.stringify(demoIncomes));
-  localStorage.setItem('demo_fixed', JSON.stringify(demoFixedExpenses));
-  localStorage.setItem('demo_transactions', JSON.stringify(demoTransactions));
+  localStorage.setItem('demo_fixed', JSON.stringify(demoFixedExpenses.map(remapCategory)));
+  // Några köp från idag, så att hemskärmens dagslista inte är tom
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const todayAt = (h: number, m: number) =>
+    Math.min(startOfToday.getTime() + (h * 60 + m) * 60000, now - 5 * 60000);
+  const todayTransactions: Transaction[] = [
+    { id: 'demo-tx-today-1', amount: 129, category: 'Mat & dryck', merchant: 'Max Hamburgare', note: 'Lunch', timestamp: todayAt(12, 4), type: 'expense', tags: [], paymentMethod: PaymentMethod.KORTBETALNING },
+    { id: 'demo-tx-today-2', amount: 42, category: 'Transport', merchant: 'SL', note: 'Enkelbiljett', timestamp: todayAt(8, 31), type: 'expense', tags: [], paymentMethod: PaymentMethod.KORTBETALNING },
+    { id: 'demo-tx-today-3', amount: 54, category: 'Mat & dryck', merchant: 'Pressbyrån', note: 'Kaffe', timestamp: todayAt(8, 12), type: 'expense', tags: [], paymentMethod: PaymentMethod.KORTBETALNING },
+  ];
+
+  localStorage.setItem(
+    'demo_transactions',
+    JSON.stringify([...todayTransactions, ...demoTransactions.map(remapCategory)])
+  );
+
+  // Sparmål (läses av hemskärmen och sparmålsvyn)
+  localStorage.setItem(
+    'dejz_savings_goals_v1',
+    JSON.stringify([
+      { id: 'demo-goal-1', name: 'Resa till Italien', targetAmount: 25000, currentAmount: 18500, artworkId: 'beach', monthlyContribution: 2000, createdAt: new Date(now - dayMs * 120).toISOString() },
+    ])
+  );
   localStorage.setItem('demo_accounts', JSON.stringify(demoAccounts));
   localStorage.setItem('demo_profile', JSON.stringify(demoProfile));
   localStorage.setItem('demo_data_version', 'v6_historical_rich');

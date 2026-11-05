@@ -12,10 +12,10 @@ export interface SeoMetadata {
 
 export const REGIONAL_SEO: Record<Language, SeoMetadata> = {
   sv: {
-    title: 'Dejz – Full koll på pengarna från lön till lön',
-    description: 'Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön.',
-    ogTitle: 'Dejz – Full koll på pengarna från lön till lön',
-    ogDescription: 'Samla lön, fasta räkningar och sparande på ett ställe. Logga dina köp på sekunder och se exakt vad du har kvar att röra dig med fram till nästa lön.',
+    title: 'Dejz – Se vad du har kvar från lön till lön',
+    description: 'Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Lön, räkningar och sparande räknas av automatiskt – så att du vet vad som faktiskt är ditt, från lön till lön.',
+    ogTitle: 'Dejz – Se vad du har kvar från lön till lön',
+    ogDescription: 'Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Lön, räkningar och sparande räknas av automatiskt – så att du vet vad som faktiskt är ditt, från lön till lön.',
     keywords: 'budgetapp, privatekonomi, lön till lön, fasta utgifter, sparande, utgiftskoll, budget, sverige, dejz',
     htmlLang: 'sv',
   },
