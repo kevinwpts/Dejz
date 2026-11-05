@@ -345,14 +345,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                             />
                             <span className="truncate">{exp.category || 'Räkningar'}</span>
                           </span>
-                          <span className="inline-flex items-center gap-1 shrink-0 rounded-pill bg-[var(--bg-color)] px-1.5 py-px text-[var(--text-secondary)]">
-                            <PaymentMethodIcon
-                              method={paymentMethodLabel}
-                              size={10}
-                              className="shrink-0"
-                            />
-                            <span>{paymentMethodLabel}</span>
-                          </span>
                           {isPartnerConnected && exp.isShared && (
                             <span className="shrink-0">· Delad</span>
                           )}
@@ -368,6 +360,13 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         {displayAmt > 0 ? `-${formatKr(displayAmt)}` : '0 kr'}
                       </span>
                       <span className="ui-row-meta flex items-center justify-end gap-1">
+                        <span
+                          className="inline-flex shrink-0"
+                          title={paymentMethodLabel}
+                          aria-label={paymentMethodLabel}
+                        >
+                          <PaymentMethodIcon method={paymentMethodLabel} size={11} />
+                        </span>
                         {cancelBadge ? (
                           <span className="text-amber-600 dark:text-amber-400 font-medium">
                             {cancelBadge}
