@@ -130,7 +130,7 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
   const [source, setSource] = useState<string | null>(null);
   const [pain, setPain] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [position, setPosition] = useState<number | null>(() => readStoredPosition());
+  const [, setPosition] = useState<number | null>(() => readStoredPosition());
   // Spamskydd: dolt fält som bara botar fyller i, och tiden formuläret varit öppet
   const [website, setWebsite] = useState('');
   const mountedAtRef = useRef(Date.now());
@@ -225,7 +225,7 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
           <CheckCircle size={26} weight="fill" className="text-emerald-500 shrink-0" />
           <div>
             <p className="font-display font-semibold text-[var(--text-primary)]">
-              {position ? `Du är med – nummer ${position} i kön!` : 'Du är med på listan!'}
+              Du är med på listan!
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
               Två snabba frågor hjälper mig bygga rätt saker. Helt frivilligt.
@@ -284,7 +284,7 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
           <CheckCircle size={26} weight="fill" className="text-emerald-500 shrink-0" />
           <div className="min-w-0">
             <p className="font-display font-semibold text-[var(--text-primary)]">
-              {position ? `Tack – du är nummer ${position} i kön` : 'Tack – du står på listan'}
+              Tack – du står på listan
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
               Vi mejlar{' '}
