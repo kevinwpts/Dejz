@@ -9,12 +9,26 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import { supabase } from '../supabaseClient';
+import { PrivacyPolicySheet } from './PrivacyPolicy';
 
 /* ------------------------------------------------------------------ */
 /*  Väntelista – startsida för besökare som inte är inloggade          */
 /* ------------------------------------------------------------------ */
 
 const STORAGE_KEY = 'dejz_waitlist_email';
+const POSITION_KEY = 'dejz_waitlist_position';
+const OPEN_PRIVACY_EVENT = 'dejz-open-privacy';
+
+function readStoredPosition(): number | null {
+  try {
+    const n = Number(localStorage.getItem(POSITION_KEY));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+const openPrivacy = () => window.dispatchEvent(new Event(OPEN_PRIVACY_EVENT));
 
 const SOURCES = [
   { id: 'tiktok', label: 'TikTok' },
@@ -50,22 +64,50 @@ function readUtmSource(): string | null {
   }
 }
 
+/** Returnerar platsen i kön (0 = okänd). */
 async function joinWaitlist(payload: {
   email: string;
   source?: string | null;
   pain?: string | null;
-}) {
+  website?: string;
+  elapsedMs?: number;
+}): Promise<number> {
   const client: any = supabase;
   if (typeof client.rpc !== 'function') {
     throw new Error('not_configured');
   }
-  const { error } = await client.rpc('join_waitlist', {
+  const base = {
     p_email: payload.email,
     p_source: payload.source ?? null,
     p_pain: payload.pain ?? null,
     p_utm_source: readUtmSource(),
+  };
+  const { data, error } = await client.rpc('join_waitlist', {
+    ...base,
+    p_website: payload.website ?? null,
+    p_elapsed_ms: payload.elapsedMs ?? null,
   });
-  if (error) throw error;
+  if (error) {
+    // Om spamskydds-migrationen inte är körd än: använd den gamla funktionen
+    const msg = `${error.code || ''} ${error.message || ''}`;
+    if (msg.includes('PGRST202') || msg.includes('Could not find the function')) {
+      const { error: legacyError } = await client.rpc('join_waitlist', base);
+      if (legacyError) throw legacyError;
+      return 0;
+    }
+    throw error;
+  }
+  return typeof data === 'number' ? data : 0;
+}
+
+/** Ber servern skicka tackmejlet. Misslyckas tyst – anmälan är redan sparad. */
+function requestWelcomeEmail(email: string) {
+  try {
+    const client: any = supabase;
+    client?.functions?.invoke?.('waitlist-welcome', { body: { email } })?.catch?.(() => {});
+  } catch {
+    // ignore
+  }
 }
 
 /* ---------------------------- Formulär ---------------------------- */
@@ -82,6 +124,10 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
   const [source, setSource] = useState<string | null>(null);
   const [pain, setPain] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [position, setPosition] = useState<number | null>(() => readStoredPosition());
+  // Spamskydd: dolt fält som bara botar fyller i, och tiden formuläret varit öppet
+  const [website, setWebsite] = useState('');
+  const mountedAtRef = useRef(Date.now());
 
   // Håll båda formulären på sidan i synk
   useEffect(() => {
@@ -90,6 +136,7 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
       if (stored) {
         setSavedEmail(stored);
         setStep((prev) => (prev === 'form' ? 'done' : prev));
+        setPosition(readStoredPosition());
       }
     };
     window.addEventListener('dejz-waitlist-joined', onJoined);
@@ -106,11 +153,20 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
     setError(null);
     setLoading(true);
     try {
-      await joinWaitlist({ email: clean });
+      const queuePosition = await joinWaitlist({
+        email: clean,
+        website,
+        elapsedMs: Date.now() - mountedAtRef.current,
+      });
       try {
         localStorage.setItem(STORAGE_KEY, clean);
+        if (queuePosition > 0) localStorage.setItem(POSITION_KEY, String(queuePosition));
       } catch {
         // ignore
+      }
+      if (queuePosition > 0) {
+        setPosition(queuePosition);
+        requestWelcomeEmail(clean);
       }
       setSavedEmail(clean);
       setStep('questions');
@@ -120,6 +176,8 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
       setError(
         msg.includes('invalid_email')
           ? 'Kontrollera e-postadressen.'
+          : msg.includes('rate_limited')
+          ? 'Många anmälningar härifrån just nu. Vänta en stund och försök igen.'
           : 'Något gick fel. Försök igen om en liten stund.'
       );
     } finally {
@@ -160,7 +218,9 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
         <div className="flex items-start gap-3">
           <CheckCircle size={26} weight="fill" className="text-emerald-500 shrink-0" />
           <div>
-            <p className="font-display font-semibold text-[var(--text-primary)]">Du är med på listan!</p>
+            <p className="font-display font-semibold text-[var(--text-primary)]">
+              {position ? `Du är med – nummer ${position} i kön!` : 'Du är med på listan!'}
+            </p>
             <p className="text-sm text-[var(--text-secondary)]">
               Två snabba frågor hjälper mig bygga rätt saker. Helt frivilligt.
             </p>
@@ -217,7 +277,9 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
         <div className="flex items-start gap-3">
           <CheckCircle size={26} weight="fill" className="text-emerald-500 shrink-0" />
           <div className="min-w-0">
-            <p className="font-display font-semibold text-[var(--text-primary)]">Tack – du står på listan</p>
+            <p className="font-display font-semibold text-[var(--text-primary)]">
+              {position ? `Tack – du är nummer ${position} i kön` : 'Tack – du står på listan'}
+            </p>
             <p className="text-sm text-[var(--text-secondary)]">
               Vi mejlar{' '}
               {savedEmail ? (
@@ -242,7 +304,21 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-2.5">
+    <form onSubmit={handleSubmit} noValidate className="relative space-y-2.5">
+      {/* Dolt fält mot botar – syns inte för människor och skärmläsare */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden">
+        <label>
+          Webbplats
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+        </label>
+      </div>
       <div className="flex flex-col sm:flex-row gap-2 sm:p-1.5 sm:rounded-card sm:bg-[var(--surface-color)] sm:border sm:border-[var(--border-subtle)] sm:shadow-sm">
         <input
           ref={inputRef}
@@ -279,8 +355,18 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
           {error}
         </p>
       ) : (
-        <p className={`text-xs ${onDark ? 'text-white/50' : 'text-[var(--text-muted)]'}`}>
-          Gratis. Vi mejlar bara när Dejz öppnar – inget spam.
+        <p className={`text-xs leading-relaxed ${onDark ? 'text-white/50' : 'text-[var(--text-muted)]'}`}>
+          Gratis och inget spam. Genom att skriva upp dig godkänner du att vi sparar din e-post enligt vår{' '}
+          <button
+            type="button"
+            onClick={openPrivacy}
+            className={`underline underline-offset-2 cursor-pointer ${
+              onDark ? 'hover:text-white' : 'hover:text-[var(--text-primary)]'
+            }`}
+          >
+            integritetspolicy
+          </button>
+          .
         </p>
       )}
     </form>
@@ -337,19 +423,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.png?v=3',
+    src: '/screens/ekonomi.png?v=4',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Lägg in lön och räkningar en gång',
     text: 'Hyra, försäkringar och prenumerationer räknas av automatiskt varje månad.',
   },
   {
-    src: '/screens/historik.png?v=3',
+    src: '/screens/historik.png?v=4',
     alt: 'Dejz – historik över köp',
     title: 'Logga köp på några sekunder',
     text: 'Skriv eller säg vad du köpt. Dejz hittar butik, logga och kategori åt dig.',
   },
   {
-    src: '/screens/analys.png?v=3',
+    src: '/screens/analys.png?v=4',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -435,6 +521,30 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
   onContinueExisting,
 }) => {
   const heroInputRef = useRef<HTMLInputElement>(null);
+  const [privacyOpen, setPrivacyOpen] = useState(() => {
+    try {
+      return window.location.pathname.replace(/\/$/, '') === '/integritet';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const onOpen = () => setPrivacyOpen(true);
+    window.addEventListener(OPEN_PRIVACY_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_PRIVACY_EVENT, onOpen);
+  }, []);
+
+  const closePrivacy = () => {
+    setPrivacyOpen(false);
+    try {
+      if (window.location.pathname.replace(/\/$/, '') === '/integritet') {
+        window.history.replaceState(null, '', '/');
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans overflow-x-hidden">
@@ -482,10 +592,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(16,185,129,0.18),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.png?v=3" alt="" />
+              <PhoneFrame src="/screens/analys.png?v=4" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.png?v=3" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.png?v=4" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
@@ -569,6 +679,13 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="flex items-center gap-3">
             <img src="/dejz_mork.png" alt="Dejz" className="h-4 w-auto opacity-70" />
             <span>© {new Date().getFullYear()} Dejz</span>
+            <button
+              type="button"
+              onClick={() => setPrivacyOpen(true)}
+              className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            >
+              Integritetspolicy
+            </button>
           </div>
           <button
             type="button"
@@ -579,6 +696,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           </button>
         </footer>
       </div>
+      <PrivacyPolicySheet open={privacyOpen} onClose={closePrivacy} />
     </div>
   );
 };

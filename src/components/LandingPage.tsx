@@ -39,6 +39,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
 
+  // Om någon utan konto försöker logga in med Google skickar Supabase tillbaka ett fel
+  // (när "Allow new users to sign up" är avstängt). Visa då en vänlig förklaring.
+  useEffect(() => {
+    try {
+      const raw = `${window.location.search}&${window.location.hash.replace(/^#/, '')}`;
+      const params = new URLSearchParams(raw);
+      const desc = (params.get('error_description') || '').toLowerCase();
+      if (params.get('error') || desc) {
+        setView('login');
+        setActivePage('auth');
+        setErrorMsg(
+          desc.includes('signup') || desc.includes('sign up') || desc.includes('not allowed')
+            ? 'Dejz är inte öppet för nya konton än. Ställ dig på väntelistan så hör vi av oss!'
+            : 'Inloggningen avbröts. Försök igen.'
+        );
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -195,8 +217,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         msg.includes('NetworkError') ||
         msg.includes('placeholder');
 
-      if (isNetworkError && cleanEmail) {
+      // Offline-genväg endast vid lokal utveckling – i produktion får ingen komma in utan riktig inloggning
+      if (isNetworkError && cleanEmail && import.meta.env.DEV) {
         onAuthenticated(cleanEmail, targetMode);
+        return;
+      }
+      if (isNetworkError) {
+        setErrorMsg('Ingen anslutning. Kontrollera internet och försök igen.');
+        setShakeTrigger((prev) => prev + 1);
         return;
       }
 

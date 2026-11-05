@@ -21,13 +21,21 @@ interface AuthModalProps {
 
 type AuthView = 'login' | 'register' | 'forgot_password';
 
+/**
+ * Registrering är stängd så länge Dejz bara har en väntelista.
+ * Sätt till true när appen öppnar för alla.
+ */
+const SIGNUPS_OPEN = false;
+
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   initialView = 'login',
   onClose,
   onSuccess,
 }) => {
-  const [view, setView] = useState<AuthView>(initialView);
+  const allowedInitialView: AuthView =
+    !SIGNUPS_OPEN && initialView === 'register' ? 'login' : initialView;
+  const [view, setView] = useState<AuthView>(allowedInitialView);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -42,12 +50,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setView(initialView);
+      setView(allowedInitialView);
       setErrorMsg(null);
       setHasPasswordError(false);
       setResetEmailSent(false);
     }
-  }, [isOpen, initialView]);
+  }, [isOpen, allowedInitialView]);
 
   // Resend cooldown timer
   useEffect(() => {
@@ -269,8 +277,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
       ) : (
         <>
-          {/* View Switcher (Login / Register) */}
-          {view !== 'forgot_password' && (
+          {/* View Switcher (Login / Register) – dold medan Dejz bara har väntelista */}
+          {SIGNUPS_OPEN && view !== 'forgot_password' && (
             <div className="ui-segmented grid-cols-2 mb-4">
               <button
                 type="button"

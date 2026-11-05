@@ -886,7 +886,7 @@ export function seedDemoData() {
     user: {
       id: 'demo-user',
       email: 'demo@dejz.se',
-      user_metadata: { full_name: 'Elin Lindqvist' },
+      user_metadata: { full_name: 'Elin Lindqvist', avatar_url: '/demo/avatar.jpg' },
       app_metadata: {},
       aud: 'authenticated',
       created_at: new Date().toISOString()

@@ -20,3 +20,14 @@ Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Många lev
 
 ## Licens
 Apache-2.0
+
+## Väntelistan – inställningar en gång
+1. **Databas:** Kör `supabase/migrations/20261105_waitlist.sql` och sedan `20261106_waitlist_protection.sql` i Supabase (SQL Editor → New query → klistra in → Run).
+2. **Stäng nya konton:** Supabase → Authentication → Sign In / Providers → stäng av *Allow new users to sign up*. Befintliga konton kan fortfarande logga in, även med Google.
+3. **Tackmejl:**
+   - Skapa ett konto på resend.com, lägg till och verifiera domänen `dejz.se` och skapa en API-nyckel.
+   - Supabase → Edge Functions → Secrets: lägg till `RESEND_API_KEY` och eventuellt `WAITLIST_FROM` (t.ex. `Dejz <hej@dejz.se>`).
+   - Publicera funktionen: `supabase functions deploy waitlist-welcome`.
+4. **Testa:** Skriv upp dig på dejz.se, kolla att raden finns i tabellen `waitlist` och att tackmejlet kommer fram.
+
+När appen ska öppna för alla: sätt `SIGNUPS_OPEN = true` i `src/components/modals/AuthModal.tsx` och slå på *Allow new users to sign up* igen.

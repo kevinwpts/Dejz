@@ -1,17 +1,35 @@
 # Integritetspolicy för Dejz
 
-Senast uppdaterad: 2026-10-20
+Senast uppdaterad: 2026-11-05
 
-Din integritet är viktig för oss. Denna policy beskriver hur vi hanterar din data.
+Här förklarar vi enkelt vilka uppgifter Dejz sparar, varför och hur länge. Vi säljer aldrig dina uppgifter.
 
-## 1. Insamlad information
-Vi samlar in information som du aktivt matar in i appen (inkomster, fasta räkningar, sparmål och utgifter). Vi använder Supabase för autentisering och krypterad datalagring inom EU/EES.
+> Samma text visas på webbplatsen (`src/components/PrivacyPolicy.tsx`). Ändrar du här, ändra där också.
 
-## 2. Användning av data
-Din data används uteslutande för att tillhandahålla tjänsten Dejz. Vi säljer aldrig din data till tredje part.
+## 1. Vem ansvarar för dina uppgifter?
+Dejz är personuppgiftsansvarig. Har du frågor eller vill använda dina rättigheter når du oss på hej@dejz.se.
 
-## 3. Säkerhet & Radering
-Du kan när som helst radera ditt konto och all tillhörande data permanent direkt i appen under Profil -> Radera konto.
+## 2. Väntelistan
+När du skriver upp dig sparar vi:
+- din e-postadress,
+- dina svar på de frivilliga frågorna (var du hittade Dejz och vad som är svårast med ekonomin),
+- vilken länk du kom från, till exempel en TikTok-länk,
+- när du skrev upp dig.
 
-## 4. Kontakt
-För frågor om din integritet, kontakta oss på hej@dejz.se.
+Vi använder uppgifterna för att skicka ett bekräftelsemejl, höra av oss när Dejz öppnar och förstå vad vi ska bygga. Grunden är ditt samtycke, som du ger när du skriver upp dig. Du kan ta tillbaka det när du vill.
+
+Vi sparar uppgifterna tills du har fått din inbjudan till Dejz, dock längst 24 månader, eller tills du ber oss ta bort dem. Svara bara på något av våra mejl eller skriv till hej@dejz.se.
+
+För att stoppa spam sparar vi en krypterad kod av din IP-adress i högst 24 timmar. Vi kan inte se din IP-adress utifrån koden.
+
+## 3. Appen
+När du använder appen sparar vi det du själv lägger in, till exempel inkomster, fasta räkningar, sparmål och köp. Uppgifterna används bara för att Dejz ska fungera för dig. Du kan radera ditt konto och all data när som helst i appen under Profil → Radera konto.
+
+## 4. Vilka hjälper oss?
+Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:
+- Supabase – databas och inloggning, lagrat inom EU/EES.
+- Resend – skickar våra mejl.
+- Vercel – driftar webbplatsen.
+
+## 5. Dina rättigheter
+Du har rätt att få veta vilka uppgifter vi har om dig, få dem rättade eller raderade och att ta tillbaka ditt samtycke. Tycker du att vi hanterar dina uppgifter fel kan du klaga hos Integritetsskyddsmyndigheten (IMY).
