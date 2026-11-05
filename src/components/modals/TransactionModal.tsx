@@ -974,7 +974,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           {p.label}
                         </span>
                         <span
-                          className={`text-[10.5px] block truncate mt-0.5 tabular-nums ${
+                          className={`text-[11px] block truncate mt-0.5 tabular-nums ${
                             isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
                           }`}
                         >
@@ -2053,8 +2053,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               {/* Rå banktext diskret längst ner i detaljkortet */}
               {rawBankText && (
                 <div className="ui-row items-start py-2.5 bg-[var(--surface-hover)]/25">
-                  <span className="text-[11.5px] text-[var(--text-muted)] shrink-0 pt-0.5">Banktext</span>
-                  <span className="text-[11.5px] text-right break-words max-w-[230px] sm:max-w-[265px] text-[var(--text-secondary)] font-normal leading-snug">
+                  <span className="text-[12px] text-[var(--text-muted)] shrink-0 pt-0.5">Banktext</span>
+                  <span className="text-[12px] text-right break-words max-w-[230px] sm:max-w-[265px] text-[var(--text-secondary)] font-normal leading-snug">
                     {rawBankText}
                   </span>
                 </div>

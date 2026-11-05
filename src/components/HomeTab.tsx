@@ -1118,7 +1118,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       </div>
                     )}
                     {isJointMode && (
-                      <div className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
+                      <div className="text-[12px] text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5">
                         <span>
                           Din andel ({Math.round(householdBudgetStats!.settlement.myShareRatio * 100)} %):
                         </span>
@@ -1291,7 +1291,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             {isInitialLoading && accounts.length === 0 ? (
               <div className="h-7 w-32 rounded-lg bg-[var(--surface-raised)] animate-pulse mt-1" />
             ) : (
-              <div className="font-display text-[19px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+              <div className="font-display text-[20px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
                 {formatKr(totalBalance)}
               </div>
             )}
@@ -1348,13 +1348,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                             size="sm"
                           />
                           <div className="min-w-0 flex-1">
-                            <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
+                            <span className="font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
                               {acc.name}
                             </span>
                             {(acc.bankName ||
                               (hasDuplicateName && last4) ||
                               acc.excludeFromTotalBalance) && (
-                              <span className="text-[11.5px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
+                              <span className="text-[12px] font-normal text-[var(--text-secondary)] block truncate mt-0.5">
                                 {acc.bankName}
                                 {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
                                 {acc.excludeFromTotalBalance ? ' · Ej i totalt' : ''}
@@ -1364,7 +1364,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span
-                            className={`font-display font-semibold text-[13.5px] tracking-[-0.01em] tabular-nums ${
+                            className={`font-display font-semibold text-[14px] tracking-[-0.01em] tabular-nums ${
                               acc.excludeFromTotalBalance
                                 ? 'text-[var(--text-secondary)]'
                                 : 'text-[var(--text-primary)]'
@@ -1440,7 +1440,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <span className="text-[12px] text-[var(--text-secondary)] font-normal block">
                 Sparmål
               </span>
-              <div className="font-display text-[19px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
+              <div className="font-display text-[20px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
                 {formatKr(totalSavedInGoals)}
               </div>
             </div>
@@ -1501,10 +1501,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
                           <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-baseline justify-between gap-2">
-                              <span className="font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
+                              <span className="font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
                                 {goal.name}
                               </span>
-                              <span className="font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
+                              <span className="font-display font-semibold text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
                                 {formatKr(effectiveGoalAmt)}
                               </span>
                             </div>
@@ -1535,7 +1535,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     className="w-full pt-1 flex items-center justify-between gap-3 text-left hover:opacity-90 transition-opacity cursor-pointer"
                   >
                     <div className="min-w-0 flex-1">
-                      <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] leading-snug block">
+                      <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] leading-snug block">
                         Spara till en resa, buffert eller dröm
                       </span>
                       <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-0.5">
@@ -1620,7 +1620,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 }`}
               >
                 <span
-                  className={`text-[10.5px] leading-none ${
+                  className={`text-[11px] leading-none ${
                     isSelected
                       ? 'text-[var(--date-active-color)]/80 font-normal'
                       : isToday
@@ -1631,7 +1631,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   {day.topLabel}
                 </span>
                 <span
-                  className={`font-display text-[13.5px] tabular-nums leading-none mt-1.5 no-privacy-blur ${
+                  className={`font-display text-[14px] tabular-nums leading-none mt-1.5 no-privacy-blur ${
                     isSelected || isToday ? 'font-semibold' : 'font-normal'
                   }`}
                 >
@@ -1863,7 +1863,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
               if (incomes.length === 0 && extraIncomeTxs.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                  <div className="ui-list-card py-10 text-center text-[13px] text-[var(--text-secondary)]">
                     Inga inkomster
                   </div>
                 );
@@ -2072,7 +2072,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 })}
               </div>
             ) : (
-              <div className="ui-list-card py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+              <div className="ui-list-card py-10 text-center text-[13px] text-[var(--text-secondary)]">
                 Inga fasta utgifter
               </div>
             ))}
@@ -2081,7 +2081,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             (() => {
               if (variablePeriodTransactions.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-[12.5px] text-[var(--text-secondary)]">
+                  <div className="ui-list-card py-10 text-center text-[13px] text-[var(--text-secondary)]">
                     Inga rörliga utgifter i perioden
                   </div>
                 );
@@ -2331,7 +2331,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {activeModalAccount.accountNumber && (
                 <div className="py-2.5 flex items-center justify-between gap-3">
                   <div>
-                    <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    <span className="text-[12px] text-[var(--text-secondary)] block">
                       Kontonummer
                     </span>
                     <span className="text-[13px] font-medium text-[var(--text-primary)] tabular-nums">
@@ -2349,7 +2349,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         setTimeout(() => setCopiedAccountNumber(false), 2000);
                       }
                     }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11.5px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
                   >
                     {copiedAccountNumber ? (
                       <>
@@ -2372,7 +2372,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   <span className="text-[13px] font-normal text-[var(--text-primary)] block">
                     Räkna med i Totalt saldo
                   </span>
-                  <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                  <span className="text-[12px] text-[var(--text-secondary)] block">
                     Inkludera kontots saldo på hemskärmen
                   </span>
                 </div>
@@ -2485,7 +2485,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   })}
                 </div>
               ) : (
-                <div className="rounded-2xl bg-[var(--surface-raised)]/40 border border-[var(--border-subtle)] py-6 text-center text-[12.5px] text-[var(--text-secondary)]">
+                <div className="rounded-2xl bg-[var(--surface-raised)]/40 border border-[var(--border-subtle)] py-6 text-center text-[13px] text-[var(--text-secondary)]">
                   Inga bokförda händelser på detta konto än
                 </div>
               )}
@@ -2499,7 +2499,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   setSelectedAccountModalId(null);
                   onSelectAccount?.(targetId);
                 }}
-                className="w-full py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[13.5px] font-semibold tracking-[-0.01em] hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[14px] font-semibold tracking-[-0.01em] hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
               >
                 Visa alla transaktioner ({activeAccountTransactions.length})
               </button>

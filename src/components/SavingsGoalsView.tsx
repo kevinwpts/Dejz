@@ -1318,7 +1318,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                         />
                         <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center p-2">
                           <ImageSquare size={22} weight="bold" className="text-white mb-1" />
-                          <span className="text-[10.5px] font-medium text-white leading-tight">
+                          <span className="text-[11px] font-medium text-white leading-tight">
                             Byt bild
                           </span>
                         </div>
@@ -1330,7 +1330,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                           weight="regular"
                           className="text-[var(--text-primary)] mb-1.5"
                         />
-                        <span className="text-[10.5px] font-medium text-[var(--text-primary)] leading-tight">
+                        <span className="text-[11px] font-medium text-[var(--text-primary)] leading-tight">
                           Egen bild
                         </span>
                       </>

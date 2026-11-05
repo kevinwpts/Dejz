@@ -194,7 +194,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onError={() => setImgError(true)}
                   />
                 ) : initialChar ? (
-                  <span className="font-display font-semibold text-[13.5px] uppercase text-[var(--text-primary)]">
+                  <span className="font-display font-semibold text-[14px] uppercase text-[var(--text-primary)]">
                     {initialChar}
                   </span>
                 ) : (

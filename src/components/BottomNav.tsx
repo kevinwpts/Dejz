@@ -194,7 +194,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   }`}
                 >
                   <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
+                  <span className="text-[11px] tracking-normal leading-none whitespace-nowrap">
                     {tab.label}
                   </span>
                 </button>
@@ -217,7 +217,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             <span className="relative inline-flex">
               <SquaresFour size={20} weight={isMoreActive ? 'fill' : 'regular'} />
             </span>
-            <span className="text-[10.5px] tracking-normal leading-none whitespace-nowrap">
+            <span className="text-[11px] tracking-normal leading-none whitespace-nowrap">
               Mer
             </span>
           </button>

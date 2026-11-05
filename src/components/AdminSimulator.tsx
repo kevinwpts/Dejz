@@ -659,7 +659,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Skapa sparmål
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Testa steg 1–5
               </span>
             </div>
@@ -675,7 +675,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Onboarding-guide
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Från första steget
               </span>
             </div>
@@ -691,7 +691,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Fast utgift (Vy)
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Testa förhandsgranskning
               </span>
             </div>
@@ -707,7 +707,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Transaktion (Vy)
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Testa förhandsgranskning
               </span>
             </div>
@@ -723,7 +723,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Hitta abonnemang
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Skanna bankköp
               </span>
             </div>
@@ -739,7 +739,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Ny fast utgift
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Öppna skapandevy
               </span>
             </div>
@@ -755,7 +755,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Ny fast inkomst
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Öppna skapandevy
               </span>
             </div>
@@ -771,7 +771,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Ny transaktion
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Öppna skapandevy
               </span>
             </div>
@@ -790,7 +790,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Vänner & Chatt
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Öppna meddelanden
               </span>
             </div>
@@ -806,7 +806,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
               <span className="font-display font-medium text-xs text-[var(--text-primary)] block truncate">
                 Delad ekonomi
               </span>
-              <span className="text-[10.5px] text-[var(--text-secondary)] block truncate">
+              <span className="text-[11px] text-[var(--text-secondary)] block truncate">
                 Öppna hushållsvyn
               </span>
             </div>
@@ -1182,7 +1182,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                 type="button"
                 onClick={() => onSelectFriendInMyApp(activePartner.key)}
                 title="Öppna denna chatt i min app till vänster"
-                className="px-2 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[10.5px] font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer transition-colors"
+                className="px-2 py-1 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <ArrowSquareOut size={12} />
                 <span>Öppna i min app</span>
@@ -1413,7 +1413,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                     <div className="max-w-[85%] space-y-1">
                       {/* Citerat svar om det finns */}
                       {m.replyTo && (
-                        <div className="px-2.5 py-1 rounded-xl text-[10.5px] border-l-2 bg-[var(--surface-color)] border-[var(--border-control)] text-[var(--text-secondary)]">
+                        <div className="px-2.5 py-1 rounded-xl text-[11px] border-l-2 bg-[var(--surface-color)] border-[var(--border-control)] text-[var(--text-secondary)]">
                           <span className="font-semibold text-[var(--text-primary)] block">
                             {m.replyTo.senderName}
                           </span>
@@ -1435,11 +1435,11 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                           {m.sharedPayload.kind === 'expense_split' && (
                             <>
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-[10.5px] font-medium text-[var(--text-secondary)]">
+                                <span className="text-[11px] font-medium text-[var(--text-secondary)]">
                                   Delat utlägg · 50/50
                                 </span>
                                 <span
-                                  className={`text-[10.5px] font-semibold ${
+                                  className={`text-[11px] font-semibold ${
                                     m.sharedPayload.settled
                                       ? 'text-emerald-600 dark:text-emerald-400'
                                       : 'text-amber-600 dark:text-amber-400'
@@ -1454,7 +1454,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                                     {m.sharedPayload.title}
                                   </span>
                                   {m.sharedPayload.totalAmount && (
-                                    <span className="text-[10.5px] text-[var(--text-secondary)] tabular-nums block">
+                                    <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block">
                                       Totalt {formatKr(m.sharedPayload.totalAmount)}
                                     </span>
                                   )}
@@ -1492,7 +1492,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
 
                           {m.sharedPayload.kind === 'household_invite' && (
                             <div className="space-y-1">
-                              <span className="text-[10.5px] text-[var(--text-secondary)] block">
+                              <span className="text-[11px] text-[var(--text-secondary)] block">
                                 Inbjudan till delad budget
                               </span>
                               <span className="font-display font-semibold text-xs text-[var(--text-primary)] block">
@@ -1504,7 +1504,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                           {m.sharedPayload.kind === 'savings_goal' && (
                             <div className="flex items-center justify-between gap-2">
                               <div>
-                                <span className="text-[10.5px] text-[var(--text-secondary)] block">
+                                <span className="text-[11px] text-[var(--text-secondary)] block">
                                   Sparmål
                                 </span>
                                 <span className="font-display font-semibold text-xs text-[var(--text-primary)] block">
@@ -1577,7 +1577,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                               });
                               setActiveActionMsgId(null);
                             }}
-                            className="px-2 h-6 rounded-full hover:bg-[var(--surface-hover)] text-[10.5px] font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer border-l border-[var(--border-subtle)]"
+                            className="px-2 h-6 rounded-full hover:bg-[var(--surface-hover)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 cursor-pointer border-l border-[var(--border-subtle)]"
                           >
                             <ArrowBendUpLeft size={11} />
                             <span>Svara</span>
@@ -1604,7 +1604,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                               });
                               refreshState();
                             }}
-                            className={`px-1.5 py-0.5 rounded-full border text-[10.5px] flex items-center gap-1 cursor-pointer ${
+                            className={`px-1.5 py-0.5 rounded-full border text-[11px] flex items-center gap-1 cursor-pointer ${
                               users.includes(activePartner.key)
                                 ? 'bg-[var(--surface-color)] border-[var(--text-primary)] text-[var(--text-primary)]'
                                 : 'bg-[var(--surface-color)] border-[var(--border-subtle)] text-[var(--text-secondary)]'

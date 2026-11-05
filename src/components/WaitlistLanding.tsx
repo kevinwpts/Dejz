@@ -427,19 +427,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.png?v=4',
+    src: '/screens/ekonomi.png?v=5',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Koppla din bank',
     text: 'Dejz hittar din lön, hyra och prenumerationer och räknar av dem varje löneperiod.',
   },
   {
-    src: '/screens/historik.png?v=4',
+    src: '/screens/historik.png?v=5',
     alt: 'Dejz – historik över köp',
     title: 'Köpen dyker upp av sig själva',
     text: 'Varje köp hamnar i Dejz med butik, logga och kategori. Du behöver inte göra något.',
   },
   {
-    src: '/screens/analys.png?v=4',
+    src: '/screens/analys.png?v=5',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -580,10 +580,10 @@ const BANK_POINTS = [
 const BankSection: React.FC = () => (
   <section className="mt-24 sm:mt-32 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
     <div className="text-center lg:text-left">
-      <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+      <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
         Koppla din bank. Se alltid vad du har kvar.
       </h2>
-      <p className="mt-4 text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto lg:mx-0 text-pretty">
+      <p className="mt-4 text-[var(--text-secondary)] leading-[1.5] tracking-[-0.005em] max-w-xl mx-auto lg:mx-0 text-pretty">
         När banken är kopplad räknar Dejz av varje köp direkt. Du behöver aldrig skriva in något – du öppnar
         appen och ser hur mycket du har kvar till nästa lön, just nu.
       </p>
@@ -683,13 +683,13 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         {/* Hjälte */}
         <section className="grid lg:grid-cols-[1.1fr_1fr] gap-14 lg:gap-10 items-center pt-10 sm:pt-16 lg:pt-20">
           <div className="text-center lg:text-left animate-fade-in">
-            <h1 className="font-display font-semibold text-[2.25rem] leading-[1.06] sm:text-5xl lg:text-[3.75rem] tracking-[-0.035em] text-[var(--text-primary)] text-balance">
+            <h1 className="font-display font-semibold text-[2.5rem] leading-[1.02] sm:text-[3.25rem] lg:text-[4rem] tracking-[-0.045em] text-[var(--text-primary)] text-balance">
               Vet du vad du har kvar till nästa lön?
             </h1>
 
-            <p className="mt-5 text-base sm:text-lg text-[var(--text-secondary)] max-w-lg mx-auto lg:mx-0 leading-relaxed text-pretty">
-              Koppla din bank så visar Dejz exakt hur mycket du kan spendera – från lön till lön.
-              Räkningar, sparande och köp räknas av automatiskt, så du alltid ser vad som faktiskt är ditt.
+            <p className="mt-4 text-[17px] sm:text-lg text-[var(--text-secondary)] max-w-[26rem] sm:max-w-lg mx-auto lg:mx-0 leading-[1.45] tracking-[-0.01em] text-pretty">
+              Koppla din bank och se direkt hur mycket du kan spendera fram till nästa lön. Räkningar och
+              sparande räknas av automatiskt.
             </p>
 
             <div className="mt-8 max-w-md mx-auto lg:mx-0">
@@ -713,10 +713,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.png?v=4" alt="" />
+              <PhoneFrame src="/screens/analys.png?v=5" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.png?v=4" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.png?v=5" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
@@ -724,10 +724,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         {/* Lön till lön – det som gör Dejz annorlunda */}
         <section className="mt-24 sm:mt-32 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="text-center lg:text-left">
-            <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+            <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
               Din budget börjar när lönen kommer – inte den 1:a
             </h2>
-            <p className="mt-4 text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto lg:mx-0 text-pretty">
+            <p className="mt-4 text-[var(--text-secondary)] leading-[1.5] tracking-[-0.005em] max-w-xl mx-auto lg:mx-0 text-pretty">
               De flesta budgetappar räknar per kalendermånad. Men för de flesta tar pengarna slut innan
               lönen – inte vid månadsskiftet. Dejz räknar i löneperioder, så du alltid ser vad du har kvar
               fram till nästa lönedag. Infaller lönen på en helg flyttas den automatiskt.
@@ -742,7 +742,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         {/* Så funkar det */}
         <section className="mt-24 sm:mt-32">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+            <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
               Budget utan kalkylark
             </h2>
           </div>
@@ -755,7 +755,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
                   {i + 1}
                 </span>
                 <h3 className="mt-3 font-display font-semibold text-lg tracking-[-0.01em]">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-[var(--text-secondary)] leading-relaxed max-w-xs">{s.text}</p>
+                <p className="mt-1.5 text-sm text-[var(--text-secondary)] leading-[1.5] max-w-xs">{s.text}</p>
               </div>
             ))}
           </div>
@@ -763,7 +763,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
 
         {/* Vanliga frågor */}
         <section className="mt-24 sm:mt-32 max-w-2xl mx-auto">
-          <h2 className="text-center font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em]">
+          <h2 className="text-center font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em]">
             Vanliga frågor
           </h2>
           <div className="mt-8 rounded-card bg-[var(--surface-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
@@ -777,7 +777,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
                     className="shrink-0 text-[var(--text-muted)] transition-transform group-open:rotate-180"
                   />
                 </summary>
-                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">{item.a}</p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-[1.55]">{item.a}</p>
               </details>
             ))}
           </div>
@@ -785,7 +785,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
 
         {/* Avslutande CTA */}
         <section className="mt-24 sm:mt-32 rounded-container bg-neutral-950 text-white px-6 py-12 sm:px-12 sm:py-16 text-center">
-          <h2 className="font-display font-semibold text-3xl sm:text-4xl tracking-[-0.03em] text-balance">
+          <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
             Bli bland de första att testa Dejz
           </h2>
           <p className="mt-3 text-white/60 max-w-md mx-auto">

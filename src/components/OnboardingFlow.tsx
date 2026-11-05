@@ -1560,7 +1560,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                                     <ItemLogo name={b.name} logoUrl={b.logo || undefined} size="lg" />
                                   )}
                                 </div>
-                                <span className="font-display font-semibold text-[11px] sm:text-[11.5px] text-center truncate max-w-full leading-tight">
+                                <span className="font-display font-semibold text-[11px] sm:text-[12px] text-center truncate max-w-full leading-tight">
                                   {isConnecting ? 'Ansluter...' : b.name}
                                 </span>
                               </button>
@@ -1602,7 +1602,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                                   <ItemLogo name={b.displayName} size="lg" />
                                 )}
                               </div>
-                              <span className="font-display font-semibold text-[11px] sm:text-[11.5px] text-center truncate max-w-full leading-tight">
+                              <span className="font-display font-semibold text-[11px] sm:text-[12px] text-center truncate max-w-full leading-tight">
                                 {isConnecting ? 'Ansluter...' : b.displayName}
                               </span>
                             </button>
@@ -2372,7 +2372,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 </div>
 
                 {/* Valbara rader för Kategori, Betalsätt och Dag */}
-                <div className="ui-sheet-group text-[13.5px] sm:text-sm">
+                <div className="ui-sheet-group text-[14px] sm:text-sm">
 
                   <button
                     type="button"

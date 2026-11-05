@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Poppins:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=JetBrains+Mono:wght@400;500&display=swap");
 
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -6,39 +6,39 @@
 @theme {
   --color-black: #141414;
   --font-sans:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-unbounded:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-editorial:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-ui:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-amount:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-shoulders:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-barlow:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-barlow-standard:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-exo:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-logo:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-serif:
-    "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono:
     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --font-weight-light: 300;
   --font-weight-normal: 400;
-  --font-weight-medium: 400;
-  --font-weight-semibold: 500;
-  --font-weight-bold: 500;
-  --font-weight-extrabold: 500;
-  --font-weight-black: 500;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 700;
+  --font-weight-black: 700;
 
   --color-canvas: var(--bg-color);
   --color-surface: var(--surface-color);
@@ -365,7 +365,7 @@ h6 {
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
   font-size: 28px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.02em;
   font-family: var(--font-amount);
@@ -375,7 +375,7 @@ h6 {
 
 @utility text-large-amount {
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.015em;
   font-family: var(--font-amount);
@@ -384,8 +384,8 @@ h6 {
 }
 
 @utility text-list-amount {
-  font-size: 13.5px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
   font-family: var(--font-amount);
@@ -395,7 +395,7 @@ h6 {
 
 @utility text-page-title {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.28;
   letter-spacing: -0.01em;
   font-family: var(--font-display);
@@ -403,8 +403,8 @@ h6 {
 }
 
 @utility text-section-title {
-  font-size: 14.5px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.32;
   letter-spacing: -0.01em;
   font-family: var(--font-display);
@@ -475,7 +475,7 @@ h6 {
 }
 
 @utility text-nav-label {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 400;
   line-height: 1.25;
   letter-spacing: 0em;
@@ -483,7 +483,7 @@ h6 {
 }
 
 @utility text-button {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.28;
   letter-spacing: -0.005em;
@@ -665,19 +665,20 @@ h6 {
 }
 
 :root {
-  /* Global Font System: Poppins across all UI, display & amounts */
-  --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-editorial: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-ui: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-amount: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-unbounded: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Global Font System: Inter (med optisk storlek – stora rubriker får automatiskt Display-snittet) */
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-editorial: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-amount: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-unbounded: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "tnum";
+  /* Lika breda siffror bara där klassen tabular-nums används – annars blir bindestreck för breda */
+  font-optical-sizing: auto;
 
   /* Primitive Brand Orange Scale (Brand Tokens) */
   --orange-50: #FFF7ED;
@@ -1748,27 +1749,34 @@ html.privacy-blur .privacy-blur-amount:not(.no-privacy-blur) {
 }
 
 /* ==========================================================================
-   GLOBAL TYPOGRAPHY REFINEMENT (Nordic / Bought-inspired Poppins 400 + 500)
-   Restrained two-weight hierarchy:
-   - 400 Regular for list titles, settings rows, labels, pills, inputs & body
-   - 500 Medium for section headers, hero balances, primary amounts & CTAs
+   GLOBAL TYPOGRAPHY (Inter)
+   Tydlig men återhållsam viktskala:
+   - 400 Regular för brödtext, listrader, etiketter och inmatning
+   - 500 Medium för små rubriker och knapptext
+   - 600 Semibold för sektionsrubriker, belopp och huvudsiffror
    ========================================================================== */
 .font-light {
   font-weight: 300 !important;
 }
 
-.font-normal,
-.font-medium {
+.font-normal {
   font-weight: 400 !important;
+}
+
+.font-medium {
+  font-weight: 500 !important;
 }
 
 .font-semibold,
 .font-bold,
-.font-extrabold,
-.font-black,
 strong,
 b {
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+}
+
+.font-extrabold,
+.font-black {
+  font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -1791,11 +1799,11 @@ b {
   }
 
   .ui-section-title {
-    @apply font-display font-semibold text-[16px] sm:text-[16.5px] tracking-[-0.015em] text-[var(--text-primary)] flex items-center gap-1.5;
+    @apply font-display font-semibold text-[16px] sm:text-[17px] tracking-[-0.015em] text-[var(--text-primary)] flex items-center gap-1.5;
   }
 
   .ui-section-meta {
-    @apply text-[11.5px] font-normal text-[var(--text-secondary)] tabular-nums;
+    @apply text-[12px] font-normal text-[var(--text-secondary)] tabular-nums;
   }
 
   .ui-section-action {
@@ -1803,7 +1811,7 @@ b {
   }
 
   .ui-date-header {
-    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1 text-[12.5px];
+    @apply flex items-center justify-between gap-2 px-1.5 pb-1.5 pt-1 text-[13px];
   }
 
   /* 2. Cards & Grouped Containers */
@@ -1829,11 +1837,11 @@ b {
   }
 
   .ui-admin-row {
-    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] font-normal text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-admin-row-static {
-    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] font-normal text-left;
+    @apply relative w-full px-4 py-3 sm:py-3.5 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] font-normal text-left;
   }
 
   .ui-admin-row:not(:last-child)::after,
@@ -1878,35 +1886,35 @@ b {
 
   /* 3. List Rows & Transaction Rows */
   .ui-tx-row {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left hover:opacity-85 active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-tx-row-static {
-    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left;
+    @apply w-full py-2.5 sm:py-3 flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left;
   }
 
   .ui-row {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left;
   }
 
   .ui-locked-row {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left bg-[var(--surface-hover)]/45 text-[var(--text-secondary)] select-none;
   }
 
   .ui-row-btn {
-    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
+    @apply w-full px-4 py-3 min-h-[46px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer;
   }
 
   .ui-input-row {
-    @apply w-full px-4 py-3 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[13.5px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
+    @apply w-full px-4 py-3 min-h-[48px] flex items-center justify-between gap-3 text-[13px] sm:text-[14px] cursor-text hover:bg-[var(--surface-color)]/60 focus-within:bg-[var(--surface-color)] transition-colors;
   }
 
   .ui-row-title {
-    @apply font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
+    @apply font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate;
   }
 
   .ui-row-subtitle {
-    @apply text-[11.5px] font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
+    @apply text-[12px] font-normal text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5 truncate;
   }
 
   .ui-info-label {
@@ -1918,11 +1926,11 @@ b {
   }
 
   .ui-row-amount {
-    @apply font-display font-semibold text-[13.5px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
+    @apply font-display font-semibold text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block;
   }
 
   .ui-row-amount-income {
-    @apply font-display font-semibold text-[13.5px] tracking-[-0.01em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
+    @apply font-display font-semibold text-[14px] tracking-[-0.01em] text-emerald-600 dark:text-emerald-400 tabular-nums block;
   }
 
   .ui-row-meta {
@@ -1935,11 +1943,11 @@ b {
   }
 
   .ui-stat-label {
-    @apply text-[11.5px] font-normal text-[var(--text-secondary)] block truncate;
+    @apply text-[12px] font-normal text-[var(--text-secondary)] block truncate;
   }
 
   .ui-stat-value {
-    @apply font-display font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
+    @apply font-display font-semibold text-[14px] sm:text-[14px] tracking-[-0.01em] text-[var(--text-primary)] tabular-nums block mt-0.5 truncate;
   }
 
   .ui-stat-sub {
@@ -1989,19 +1997,19 @@ b {
 
   /* 6. Buttons & Confirmation Bars (Compact 48px Capsule CTAs & Unified Pill Actions) */
   .ui-btn-primary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[13.5px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[13.5px] sm:text-[14px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[14px] sm:text-[14px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-danger {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[13.5px] sm:text-[14px] font-semibold text-rose-600 dark:text-rose-400 hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[14px] sm:text-[14px] font-semibold text-rose-600 dark:text-rose-400 hover:opacity-80 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2 transition-all cursor-pointer;
   }
 
   .ui-btn-sm {
@@ -2030,11 +2038,11 @@ b {
   }
 
   .ui-segmented-tab {
-    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[12.5px] font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
+    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[13px] font-normal transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)];
   }
 
   .ui-segmented-tab-active {
-    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[12.5px] font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
+    @apply py-1.5 px-3 rounded-lg text-[12px] sm:text-[13px] font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-[var(--text-primary)] text-[var(--bg-color)];
   }
 
   .ui-chip {
@@ -2050,7 +2058,7 @@ b {
   }
 
   .ui-search-input {
-    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-[13.5px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
+    @apply w-full bg-transparent border-0 p-0 pl-2 pr-6 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none;
   }
 
   .ui-box-input {
@@ -2058,7 +2066,7 @@ b {
   }
 
   .ui-inline-input {
-    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-[13.5px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
+    @apply flex-1 min-w-0 bg-transparent border-0 p-0 text-[14px] font-normal text-[var(--text-primary)] placeholder-[var(--text-muted)]/70 text-right focus:outline-none transition-colors;
   }
 
   .ui-inline-amount-input {
@@ -2125,11 +2133,11 @@ b {
   }
 
   .ui-day-btn {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-[12.5px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
+    @apply h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-color)] font-medium;
   }
 
   .ui-day-btn-active {
-    @apply h-10 sm:h-11 rounded-2xl font-display text-[12.5px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
+    @apply h-10 sm:h-11 rounded-2xl font-display text-[13px] sm:text-[13px] tabular-nums transition-all cursor-pointer flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold shadow-sm scale-[1.04];
   }
 
   /* 8. Empty States */
@@ -2150,7 +2158,7 @@ b {
   }
 
   .ui-empty-sub {
-    @apply text-[12.5px] font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
+    @apply text-[13px] font-normal text-[var(--text-secondary)] mt-1 max-w-[260px] mx-auto leading-relaxed;
   }
 }
 

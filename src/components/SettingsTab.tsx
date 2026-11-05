@@ -554,7 +554,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11.5px] font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Camera size={12} weight="regular" />
                 <span>{userAvatar ? 'Byt bild' : 'Välj bild'}</span>
@@ -563,7 +563,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <button
                   type="button"
                   onClick={() => onUpdateAvatar(null)}
-                  className="px-2.5 py-1 rounded-full text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                  className="px-2.5 py-1 rounded-full text-[12px] font-medium text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                 >
                   Ta bort
                 </button>
@@ -691,7 +691,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <span className="ui-admin-icon-slot">
                   <Key size={18} weight="regular" />
                 </span>
-                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                   Ändra lösenord
                 </span>
               </div>
@@ -709,7 +709,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <span className="ui-admin-icon-slot">
                   <EnvelopeSimple size={18} weight="regular" />
                 </span>
-                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                   Skicka återställningslänk
                 </span>
               </div>
@@ -727,7 +727,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     <Eye size={18} weight="regular" />
                   )}
                 </span>
-                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                   Sekretessläge (dölj belopp)
                 </span>
               </div>
@@ -1023,7 +1023,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   <span className="ui-admin-icon-slot">
                     <PaymentMethodIcon method={method.name} iconId={method.icon || method.id} size={20} />
                   </span>
-                  <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                  <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                     {method.name}
                   </span>
                 </div>
@@ -1198,7 +1198,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         <div className="ui-card-p">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <span className="ui-row-title text-[13.5px] sm:text-sm">
+              <span className="ui-row-title text-[14px] sm:text-sm">
                 Helghantering
               </span>
               <p className="ui-row-subtitle">
@@ -1973,7 +1973,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <DownloadSimple size={18} weight="regular" />
               </span>
-              <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+              <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                 Exportera data
               </span>
             </div>
@@ -1995,7 +1995,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <ArrowCounterClockwise size={18} weight="regular" />
               </span>
-              <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+              <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                 Nollställ data
               </span>
             </div>
@@ -2018,7 +2018,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="w-5 h-5 flex items-center justify-center shrink-0 text-rose-600 dark:text-rose-400">
                 <Trash size={18} weight="regular" />
               </span>
-              <span className="font-medium text-[13px] sm:text-[13.5px] text-rose-600 dark:text-rose-400 truncate">
+              <span className="font-medium text-[13px] sm:text-[14px] text-rose-600 dark:text-rose-400 truncate">
                 Radera konto
               </span>
             </div>
@@ -2172,7 +2172,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <span className="ui-admin-icon-slot">
                   <Compass size={18} weight="regular" />
                 </span>
-                <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                   Visa introduktionsguiden igen
                 </span>
               </div>
@@ -2202,7 +2202,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <LockKey size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                 Integritetspolicy
               </span>
             </div>
@@ -2220,7 +2220,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <FileText size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                 Användarvillkor
               </span>
             </div>
@@ -2238,7 +2238,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <Scales size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                 Open Banking (PSD2)
               </span>
             </div>
@@ -2256,7 +2256,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className="ui-admin-icon-slot">
                 <Cookie size={18} weight="regular" />
               </span>
-              <span className="font-normal text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+              <span className="font-normal text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                 Cookies & lagring
               </span>
             </div>
@@ -2828,11 +2828,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
   const rowTitleClass =
-    'font-normal text-[13px] sm:text-[13.5px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
+    'font-normal text-[13px] sm:text-[14px] tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
   const rowSubClass =
-    'font-normal text-[11.5px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
+    'font-normal text-[12px] leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
   const sectionLabelClass =
-    'px-1 pt-1.5 pb-0.5 text-[14px] sm:text-[14.5px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
+    'px-1 pt-1.5 pb-0.5 text-[14px] sm:text-[15px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
 
   return (
     <div className="space-y-5 pb-40 sm:pb-44 animate-slide-in-left">
@@ -3146,7 +3146,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <div className="w-5 h-5 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
                 <SignOut size={18} weight="regular" />
               </div>
-              <span className="text-[13px] sm:text-[13.5px] font-medium text-rose-600 dark:text-rose-400">
+              <span className="text-[13px] sm:text-[14px] font-medium text-rose-600 dark:text-rose-400">
                 Logga ut
               </span>
             </div>

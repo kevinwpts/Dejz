@@ -250,7 +250,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
               <span className="truncate max-w-[240px]">{email.trim()}</span>
             </div>
-            <p className="text-[11.5px] text-[var(--text-muted)] pt-1 leading-relaxed max-w-xs mx-auto">
+            <p className="text-[12px] text-[var(--text-muted)] pt-1 leading-relaxed max-w-xs mx-auto">
               Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.
             </p>
           </div>

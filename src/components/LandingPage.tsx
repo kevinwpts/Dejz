@@ -467,7 +467,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* Modern Inline Error Micro-banner (Replaces big clumsy red rectangle) */}
                 {hasPasswordError && (
-                  <div className="px-4 py-2.5 bg-rose-500/5 border-t border-rose-500/15 flex items-center justify-between text-[11.5px] text-rose-600 dark:text-rose-400 font-medium animate-scale-in">
+                  <div className="px-4 py-2.5 bg-rose-500/5 border-t border-rose-500/15 flex items-center justify-between text-[12px] text-rose-600 dark:text-rose-400 font-medium animate-scale-in">
                     <div className="flex items-center gap-1.5">
                       <WarningCircle size={14} weight="bold" className="shrink-0" />
                       <span>Fel lösenord. Kontrollera och försök igen.</span>

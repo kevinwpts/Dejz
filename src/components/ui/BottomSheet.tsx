@@ -50,11 +50,11 @@ export const BottomSheetOption: React.FC<BottomSheetOptionProps> = ({
     <div className="flex items-center gap-3 min-w-0 flex-1">
       {icon && <div className="shrink-0 text-[var(--text-secondary)]">{icon}</div>}
       <div className="min-w-0 flex-1">
-        <span className={`text-[14px] sm:text-[14.5px] block truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+        <span className={`text-[14px] sm:text-[15px] block truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
           {label}
         </span>
         {subtitle && (
-          <span className="text-[11.5px] text-[var(--text-muted)] block truncate mt-0.5">
+          <span className="text-[12px] text-[var(--text-muted)] block truncate mt-0.5">
             {subtitle}
           </span>
         )}

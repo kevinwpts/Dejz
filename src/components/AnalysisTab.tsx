@@ -628,7 +628,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                         size={22}
                       />
                     </div>
-                    <span className="text-[11.5px] font-medium text-[var(--text-secondary)] truncate max-w-[120px]">
+                    <span className="text-[12px] font-medium text-[var(--text-secondary)] truncate max-w-[120px]">
                       {activeSlice.category}
                     </span>
                     <span className="font-display font-semibold text-xl sm:text-[22px] tracking-[-0.02em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
@@ -637,7 +637,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   </>
                 ) : (
                   <>
-                    <span className="text-[11.5px] font-normal text-[var(--text-secondary)]">
+                    <span className="text-[12px] font-normal text-[var(--text-secondary)]">
                       Utgifter i perioden
                     </span>
                     <span className="font-display font-[600] text-[26px] sm:text-[28px] tracking-[-0.025em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
@@ -787,7 +787,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                       <div className="flex items-center gap-2.5 shrink-0">
                         <div className="text-right">
                           <span
-                            className={`font-display font-semibold text-[14.5px] sm:text-[15px] tabular-nums block ${
+                            className={`font-display font-semibold text-[15px] sm:text-[15px] tabular-nums block ${
                               item.isIncomeCategory
                                 ? 'text-emerald-600 dark:text-emerald-400'
                                 : 'text-[var(--text-primary)]'
@@ -861,7 +861,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                     isRecurring={isSubRecurring}
                                   />
                                   <div className="min-w-0 flex-1">
-                                    <span className="ui-row-title text-[13px] sm:text-[13.5px]">
+                                    <span className="ui-row-title text-[13px] sm:text-[14px]">
                                       {itemName}
                                     </span>
                                     <span className="ui-row-subtitle flex items-center gap-1.5">
@@ -904,8 +904,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                     <span
                                       className={
                                         isIncome
-                                          ? 'ui-row-amount-income text-[13.5px]'
-                                          : 'ui-row-amount text-[13.5px]'
+                                          ? 'ui-row-amount-income text-[14px]'
+                                          : 'ui-row-amount text-[14px]'
                                       }
                                     >
                                       {isIncome

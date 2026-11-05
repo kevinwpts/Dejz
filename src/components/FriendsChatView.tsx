@@ -743,7 +743,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                                   prev === msg.id ? null : msg.id
                                 );
                               }}
-                              className={`px-3.5 py-2.5 rounded-2xl text-[13.5px] leading-relaxed break-words cursor-pointer transition-opacity active:opacity-85 ${
+                              className={`px-3.5 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words cursor-pointer transition-opacity active:opacity-85 ${
                                 isMine
                                   ? 'bg-[var(--text-primary)] text-[var(--bg-color)] rounded-br-sm'
                                   : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-bl-sm'
@@ -800,7 +800,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
 
                         {/* Minimal Metadata Row: Reactions + Time */}
                         <div
-                          className={`flex items-center gap-1.5 px-1 text-[10.5px] text-[var(--text-muted)] ${
+                          className={`flex items-center gap-1.5 px-1 text-[11px] text-[var(--text-muted)] ${
                             isMine ? 'justify-end' : 'justify-start'
                           }`}
                         >
@@ -1034,7 +1034,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                     <span className="font-medium text-[var(--text-primary)] block">
                       Dela ett köp
                     </span>
-                    <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    <span className="text-[12px] text-[var(--text-secondary)] block">
                       Välj från dina transaktioner
                     </span>
                   </div>
@@ -1055,7 +1055,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                     <span className="font-medium text-[var(--text-primary)] block">
                       Valfritt belopp
                     </span>
-                    <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    <span className="text-[12px] text-[var(--text-secondary)] block">
                       Ange summa att dela 50/50
                     </span>
                   </div>
@@ -1079,7 +1079,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                     <span className="font-medium text-[var(--text-primary)] block">
                       Delad budget
                     </span>
-                    <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                    <span className="text-[12px] text-[var(--text-secondary)] block">
                       Synka era gemensamma utgifter
                     </span>
                   </div>
@@ -1101,7 +1101,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                       <span className="font-medium text-[var(--text-primary)] block">
                         Sparmål
                       </span>
-                      <span className="text-[11.5px] text-[var(--text-secondary)] block">
+                      <span className="text-[12px] text-[var(--text-secondary)] block">
                         Visa status för ett sparmål
                       </span>
                     </div>
@@ -1445,7 +1445,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <span
-                        className={`text-[13.5px] truncate ${
+                        className={`text-[14px] truncate ${
                           unreadCount > 0
                             ? 'font-semibold text-[var(--text-primary)]'
                             : 'font-medium text-[var(--text-primary)]'
@@ -1489,7 +1489,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                     </span>
                   )}
                   {unreadCount > 0 ? (
-                    <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-emerald-500 text-white text-[10.5px] font-semibold flex items-center justify-center tabular-nums">
+                    <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-emerald-500 text-white text-[11px] font-semibold flex items-center justify-center tabular-nums">
                       {unreadCount}
                     </span>
                   ) : (

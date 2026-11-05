@@ -281,7 +281,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                 <span className="ui-admin-icon-slot">
                   <CategoryIcon category={cat.name} iconId={cat.icon} size={20} badge={false} />
                 </span>
-                <span className="font-medium text-[13px] sm:text-[13.5px] text-[var(--text-primary)] truncate">
+                <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
                   {cat.name}
                 </span>
               </div>

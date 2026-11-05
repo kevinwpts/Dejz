@@ -189,3 +189,19 @@ Regler:
 - Violett är för identitet och huvudhandlingar. Använd den inte på listor, rader eller stora ytor.
 - Grön och röd är bara för pengar in och ut, aldrig för dekoration.
 - Kategori-emojis är det enda färgglada i innehållet, och max en färgglad sak per rad.
+
+---
+
+## Typografi: Inter
+
+Hela appen använder **Inter** med optisk storlek (`opsz`), så stora rubriker och belopp automatiskt får det tätare Display-snittet.
+
+| Vikt | Används till |
+| :--- | :--- |
+| 400 | Brödtext, listrader, etiketter, inmatning |
+| 500 (`font-medium`) | Små rubriker, knapptext |
+| 600 (`font-semibold`) | Sektionsrubriker, belopp, huvudsiffror |
+
+**Textstorlekar (px):** 11 · 12 · 13 · 14 · 15 · 16 · 17 · 20 · 28 och uppåt för hjältesiffror. Använd inga halva pixlar (till exempel 11.5 eller 13.5).
+
+**Siffror:** Använd `tabular-nums` på belopp och tider, så att siffrorna står rakt under varandra. Lägg det inte på vanlig text, eftersom bindestreck då blir för breda.

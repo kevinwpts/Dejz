@@ -839,7 +839,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               <span className="text-[11px] text-[var(--text-muted)] block">
                 Årlig besparing
               </span>
-              <span className="font-display font-semibold text-[13.5px] text-emerald-600 dark:text-emerald-400 tabular-nums">
+              <span className="font-display font-semibold text-[14px] text-emerald-600 dark:text-emerald-400 tabular-nums">
                 +{formatKr((Number(amount) || 0) * 12)}/år
               </span>
             </div>

@@ -769,7 +769,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                     <span>{catName}</span>
                     {count > 0 && (
                       <span
-                        className={`text-[10.5px] tabular-nums ${
+                        className={`text-[11px] tabular-nums ${
                           isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
                         }`}
                       >

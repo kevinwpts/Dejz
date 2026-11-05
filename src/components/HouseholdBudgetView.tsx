@@ -783,7 +783,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
             <p className="font-medium text-xs text-[var(--text-primary)]">
               Inga gemensamma utgifter i perioden än
             </p>
-            <p className="text-[11.5px] text-[var(--text-secondary)] max-w-[240px] mx-auto">
+            <p className="text-[12px] text-[var(--text-secondary)] max-w-[240px] mx-auto">
               Delade fasta räkningar och köp i dina valda kategorier dyker upp här automatiskt.
             </p>
           </div>
@@ -809,7 +809,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                   <span className="font-display font-semibold text-xs text-[var(--text-primary)] block">
                     {formatKr(entry.fullAmount)}
                   </span>
-                  <span className="text-[10.5px] text-[var(--text-secondary)] block">
+                  <span className="text-[11px] text-[var(--text-secondary)] block">
                     Din del {formatKr(Math.round(entry.fullAmount * myShareRatio))}
                   </span>
                 </div>
