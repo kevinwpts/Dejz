@@ -361,7 +361,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       </span>
                       <span className="ui-row-meta flex items-center justify-end gap-1">
                         <span
-                          className="inline-flex shrink-0"
+                          className="inline-flex shrink-0 text-[var(--text-muted)]"
                           title={paymentMethodLabel}
                           aria-label={paymentMethodLabel}
                         >

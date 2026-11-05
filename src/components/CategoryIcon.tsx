@@ -1,5 +1,23 @@
 import React, { useState } from 'react';
 import {
+  ArrowsClockwise,
+  ArrowsLeftRight,
+  Bank,
+  Coins,
+  CreditCard,
+  DeviceMobile,
+  DeviceMobileCamera,
+  Envelope,
+  FileText,
+  Lightning,
+  Money,
+  Receipt,
+  ShieldCheck,
+  ShoppingBag,
+  Tag,
+  Wallet,
+} from '@phosphor-icons/react';
+import {
   getStoredExpenseCategories,
   getStoredIncomeCategories,
   getStoredPaymentMethods,
@@ -680,7 +698,15 @@ interface CategoryIconProps {
   badge?: boolean;
   className?: string;
   weight?: 'regular' | 'bold' | 'fill' | 'duotone' | 'light';
+  /**
+   * Dämpad variant för små inline-ikoner under en butikslogga, så att loggan
+   * förblir radens enda färgstarka element. Standard: på för storlek ≤ 11.
+   */
+  muted?: boolean;
 }
+
+/** Dämpning för små kategori-emojis i rader som redan har en logga */
+const MUTED_EMOJI_STYLE: React.CSSProperties = { filter: 'saturate(0.55)', opacity: 0.8 };
 
 export const CategoryIcon: React.FC<CategoryIconProps> = ({
   category,
@@ -688,7 +714,9 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   size = 14,
   badge = false,
   className = '',
+  muted,
 }) => {
+  const isMuted = muted ?? (!badge && size <= 11);
   const resolvedId = resolveCategoryIconId(category, iconId);
   const fluentKey = resolveFluentEmojiKey(resolvedId);
 
@@ -696,9 +724,9 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   const opticalSize = badge
     ? Math.max(size + 5, 19)
     : size <= 10
-    ? 12
+    ? 11
     : size <= 11
-    ? 14
+    ? 12
     : size <= 13
     ? size + 3
     : size <= 16
@@ -717,10 +745,35 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   }
 
   return (
-    <span className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}>
+    <span
+      className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}
+      style={isMuted ? MUTED_EMOJI_STYLE : undefined}
+    >
       <FluentEmojiSvg fluentKey={fluentKey} size={opticalSize} />
     </span>
   );
+};
+
+/** Tunna streckikoner för betalsätt – de ska smälta in i texten, inte konkurrera */
+const PAYMENT_METHOD_LINE_ICONS: Record<string, React.ElementType> = {
+  refresh: ArrowsClockwise,
+  'credit-card': CreditCard,
+  'file-text': FileText,
+  receipt: Receipt,
+  smartphone: DeviceMobileCamera,
+  swish: DeviceMobileCamera,
+  'device-mobile': DeviceMobile,
+  'shopping-bag': ShoppingBag,
+  klarna: ShoppingBag,
+  envelope: Envelope,
+  bank: Bank,
+  'arrows-left-right': ArrowsLeftRight,
+  transfer: Lightning,
+  money: Money,
+  wallet: Wallet,
+  coins: Coins,
+  shield: ShieldCheck,
+  tag: Tag,
 };
 
 interface PaymentMethodIconProps {
@@ -729,6 +782,8 @@ interface PaymentMethodIconProps {
   size?: number;
   badge?: boolean;
   className?: string;
+  /** 'line' (standard): grå streckikon i textfärg. 'color': färgglad emoji/varumärkeslogga. */
+  variant?: 'line' | 'color';
 }
 
 export const PaymentMethodIcon: React.FC<PaymentMethodIconProps> = ({
@@ -737,8 +792,20 @@ export const PaymentMethodIcon: React.FC<PaymentMethodIconProps> = ({
   size = 15,
   badge = false,
   className = '',
+  variant = 'line',
 }) => {
   const [brandImgFailed, setBrandImgFailed] = useState(false);
+
+  if (variant === 'line') {
+    const lineId = resolvePaymentMethodIconId(method, iconId);
+    const LineIcon = PAYMENT_METHOD_LINE_ICONS[lineId] || CreditCard;
+    const lineSize = badge ? Math.max(size + 3, 17) : Math.max(size, 11);
+    return (
+      <span className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}>
+        <LineIcon size={lineSize} weight="regular" aria-hidden="true" />
+      </span>
+    );
+  }
 
   const rawMethod = (method || '').trim().toLowerCase();
   const resolvedId = resolvePaymentMethodIconId(method, iconId);
