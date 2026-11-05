@@ -14,6 +14,9 @@ import {
 } from '@phosphor-icons/react';
 import { supabase } from '../supabaseClient';
 import { PrivacyPolicySheet } from './PrivacyPolicy';
+import { DejzLogo } from './DejzLogo';
+
+export const DEJZ_SLOGAN = 'Äntligen vet du vad du har kvar.';
 
 /* ------------------------------------------------------------------ */
 /*  Väntelista – startsida för besökare som inte är inloggade          */
@@ -257,7 +260,7 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
           <button
             type="button"
             onClick={handleAnswers}
-            className="flex-1 h-12 rounded-btn bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            className="flex-1 h-12 rounded-btn bg-[var(--accent-color)] text-[var(--on-accent)] font-display font-semibold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
           >
             {source || pain ? 'Skicka' : 'Klar'}
           </button>
@@ -337,15 +340,15 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
           }}
           placeholder="Din e-postadress"
           aria-label="E-postadress"
-          className="w-full sm:flex-1 min-w-0 h-12 px-4 rounded-btn bg-[var(--surface-color)] sm:bg-transparent border border-[var(--border-subtle)] sm:border-0 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--text-primary)]/15 sm:focus:ring-0"
+          className="w-full sm:flex-1 min-w-0 h-12 px-4 rounded-btn bg-[var(--surface-color)] sm:bg-transparent border border-[var(--border-subtle)] sm:border-0 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/25 sm:focus:ring-0"
         />
         <button
           type="submit"
           disabled={loading}
           className={`h-12 px-5 rounded-btn ${
             onDark
-              ? 'bg-white text-neutral-950 sm:bg-[var(--text-primary)] sm:text-[var(--bg-color)]'
-              : 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+              ? 'bg-white text-[#3F22C9]'
+              : 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-[0_10px_24px_-10px_rgba(91,61,245,0.7)]'
           } font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 shrink-0`}
         >
           {loading ? <SpinnerGap size={16} className="animate-spin" /> : null}
@@ -354,12 +357,12 @@ const WaitlistForm: React.FC<{ inputRef?: React.Ref<HTMLInputElement>; onDark?: 
         </button>
       </div>
       {error ? (
-        <p className={`flex items-center gap-1.5 text-xs font-medium ${onDark ? 'text-rose-400' : 'text-rose-600'}`}>
+        <p className={`flex items-center gap-1.5 text-xs font-medium ${onDark ? 'text-rose-100' : 'text-rose-600'}`}>
           <WarningCircle size={14} weight="bold" />
           {error}
         </p>
       ) : (
-        <p className={`text-xs leading-relaxed ${onDark ? 'text-white/50' : 'text-[var(--text-muted)]'}`}>
+        <p className={`text-xs leading-relaxed ${onDark ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
           Gratis och inget spam. Genom att skriva upp dig godkänner du att vi sparar din e-post enligt vår{' '}
           <button
             type="button"
@@ -388,7 +391,7 @@ const Chip: React.FC<{ active: boolean; onClick: () => void; children: React.Rea
     aria-pressed={active}
     className={`px-3.5 py-2 rounded-pill text-xs font-medium border transition-all cursor-pointer active:scale-[0.97] ${
       active
-        ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)]'
+        ? 'bg-[var(--accent-color)] text-[var(--on-accent)] border-[var(--accent-color)]'
         : 'bg-[var(--bg-color)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-muted)]'
     }`}
   >
@@ -427,19 +430,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.png?v=5',
+    src: '/screens/ekonomi.png?v=6',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Koppla din bank',
     text: 'Dejz hittar din lön, hyra och prenumerationer och räknar av dem varje löneperiod.',
   },
   {
-    src: '/screens/historik.png?v=5',
+    src: '/screens/historik.png?v=6',
     alt: 'Dejz – historik över köp',
     title: 'Köpen dyker upp av sig själva',
     text: 'Varje köp hamnar i Dejz med butik, logga och kategori. Du behöver inte göra något.',
   },
   {
-    src: '/screens/analys.png?v=5',
+    src: '/screens/analys.png?v=6',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -469,53 +472,48 @@ const FAQ = [
   },
 ];
 
-/* ------------------------- Lön-till-lön-visual ------------------------- */
+/* ------------------- Jämförelse: månad mot lön ------------------- */
 
-const PaydayTimeline: React.FC = () => (
-  <div
-    className="rounded-container bg-[var(--surface-color)] border border-[var(--border-subtle)] p-6 sm:p-8 shadow-sm"
-    aria-hidden="true"
-  >
-    <div className="flex items-baseline justify-between text-sm text-[var(--text-secondary)]">
-      <span>Kvar att spendera</span>
-      <span className="tabular-nums">20 dagar till lön</span>
-    </div>
-    <div className="mt-1 font-display text-4xl sm:text-5xl font-semibold tracking-[-0.03em] tabular-nums">
-      17 371 kr
+const ComparisonVisual: React.FC = () => (
+  <div className="space-y-3" aria-hidden="true">
+    {/* Vanlig budgetapp */}
+    <div className="rounded-container bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 sm:p-6">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-[var(--text-muted)]">Vanlig budgetapp</span>
+        <span className="text-[var(--text-muted)] tabular-nums">1–30 nov</span>
+      </div>
+      <div className="mt-3 text-sm text-[var(--text-secondary)]">Kvar av novemberbudgeten</div>
+      <div className="mt-0.5 font-display text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[var(--text-muted)]">
+        4 120 kr
+      </div>
+      <div className="mt-4 h-1.5 rounded-pill bg-[var(--bg-color)] overflow-hidden">
+        <div className="h-full w-[63%] rounded-pill bg-[var(--text-disabled)]" />
+      </div>
+      <p className="mt-3 text-xs text-[var(--text-muted)] leading-[1.45]">
+        Men hyran dras den 27:e och lönen kommer den 25:e. Hur mycket har du egentligen?
+      </p>
     </div>
 
-    <div className="mt-8">
-      <div className="relative h-2 rounded-pill bg-[var(--bg-color)]">
-        <div className="absolute inset-y-0 left-0 w-[39%] rounded-pill bg-[var(--text-primary)]" />
-        <div className="absolute top-1/2 left-[39%] -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--surface-color)] border-[3px] border-[var(--text-primary)]" />
-        <span className="absolute -top-7 left-[39%] -translate-x-1/2 rounded-pill bg-[var(--text-primary)] text-[var(--bg-color)] px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap">
-          Idag
+    {/* Dejz */}
+    <div className="rounded-container p-5 sm:p-6 text-white bg-[linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_18px_40px_-18px_rgba(91,61,245,0.6)]">
+      <div className="flex items-center justify-between text-xs">
+        <span className="inline-flex items-center gap-1.5 font-medium">
+          <DejzLogo className="h-3.5 w-auto" />
         </span>
+        <span className="text-white/75 tabular-nums">6 dagar till lön</span>
       </div>
-      <div className="mt-3 flex justify-between text-xs">
-        <div>
-          <div className="font-semibold text-[var(--text-primary)]">Lön</div>
-          <div className="text-[var(--text-muted)] tabular-nums">23 okt</div>
-        </div>
-        <div className="text-right">
-          <div className="font-semibold text-[var(--text-primary)]">Nästa lön</div>
-          <div className="text-[var(--text-muted)] tabular-nums">25 nov</div>
-        </div>
+      <div className="mt-3 text-sm text-white/80">Kvar att spendera till lön</div>
+      <div className="mt-0.5 font-display text-[2.5rem] leading-none font-semibold tracking-[-0.035em] tabular-nums">
+        2 340 kr
       </div>
-    </div>
-
-    <div className="mt-7 pt-5 border-t border-[var(--border-subtle)] grid grid-cols-3 gap-3 text-xs">
-      <div>
-        <div className="text-[var(--text-secondary)]">Lön</div>
-        <div className="mt-0.5 font-display font-semibold text-sm text-emerald-600 tabular-nums">+34 700</div>
+      <div className="mt-1.5 text-sm text-white/80 tabular-nums">≈ 390 kr per dag</div>
+      <div className="mt-4 relative h-1.5 rounded-pill bg-white/20">
+        <div className="absolute inset-y-0 left-0 w-[80%] rounded-pill bg-white" />
+        <div className="absolute top-1/2 left-[80%] -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#5B3DF5] border-2 border-white" />
       </div>
-      <div>
-        <div className="text-[var(--text-secondary)]">Räkningar</div>
-        <div className="mt-0.5 font-display font-semibold text-sm tabular-nums">−11 414</div>
-      </div>
-      <div>
-        <div className="text-[var(--text-secondary)]">Köp hittills</div>
-        <div className="mt-0.5 font-display font-semibold text-sm tabular-nums">−5 915</div>
+      <div className="mt-2 flex justify-between text-xs text-white/70 tabular-nums">
+        <span>Lön 25 okt</span>
+        <span>Nästa lön 25 nov</span>
       </div>
     </div>
   </div>
@@ -670,7 +668,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
       <div className="mx-auto max-w-6xl px-5 sm:px-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         {/* Topp */}
         <header className="flex items-center justify-between h-12">
-          <img src="/dejz_mork.png" alt="Dejz" className="h-6 w-auto object-contain" />
+          <DejzLogo className="h-6 w-auto text-[var(--accent-color)]" />
           <button
             type="button"
             onClick={onLogin}
@@ -684,12 +682,12 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         <section className="grid lg:grid-cols-[1.1fr_1fr] gap-14 lg:gap-10 items-center pt-10 sm:pt-16 lg:pt-20">
           <div className="text-center lg:text-left animate-fade-in">
             <h1 className="font-display font-semibold text-[2.5rem] leading-[1.02] sm:text-[3.25rem] lg:text-[4rem] tracking-[-0.045em] text-[var(--text-primary)] text-balance">
-              Vet du vad du har kvar till nästa lön?
+              Äntligen vet du vad du har kvar.
             </h1>
 
             <p className="mt-4 text-[17px] sm:text-lg text-[var(--text-secondary)] max-w-[26rem] sm:max-w-lg mx-auto lg:mx-0 leading-[1.45] tracking-[-0.01em] text-pretty">
-              Koppla din bank och se direkt hur mycket du kan spendera fram till nästa lön. Räkningar och
-              sparande räknas av automatiskt.
+              Dejz visar hur mycket du kan spendera fram till nästa lön – inte till månadsskiftet. Koppla din
+              bank så räknas räkningar, sparande och köp av automatiskt.
             </p>
 
             <div className="mt-8 max-w-md mx-auto lg:mx-0">
@@ -713,10 +711,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.png?v=5" alt="" />
+              <PhoneFrame src="/screens/analys.png?v=6" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.png?v=5" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.png?v=6" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
@@ -725,16 +723,16 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         <section className="mt-24 sm:mt-32 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="text-center lg:text-left">
             <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
-              Din budget börjar när lönen kommer – inte den 1:a
+              Andra appar räknar till månadsskiftet. Dejz räknar till lön.
             </h2>
             <p className="mt-4 text-[var(--text-secondary)] leading-[1.5] tracking-[-0.005em] max-w-xl mx-auto lg:mx-0 text-pretty">
-              De flesta budgetappar räknar per kalendermånad. Men för de flesta tar pengarna slut innan
-              lönen – inte vid månadsskiftet. Dejz räknar i löneperioder, så du alltid ser vad du har kvar
-              fram till nästa lönedag. Infaller lönen på en helg flyttas den automatiskt.
+              Pengarna tar inte slut vid månadsskiftet – de tar slut innan lön. Därför räknar Dejz från
+              lönedag till lönedag och drar av räkningar och sparande direkt. Det du ser är det du faktiskt
+              har kvar. Infaller lönen på en helg flyttas den automatiskt.
             </p>
           </div>
 
-          <PaydayTimeline />
+          <ComparisonVisual />
         </section>
 
         <BankSection />
@@ -743,7 +741,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         <section className="mt-24 sm:mt-32">
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
-              Budget utan kalkylark
+              Tre steg. Sen vet du alltid.
             </h2>
           </div>
 
@@ -784,17 +782,17 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         </section>
 
         {/* Avslutande CTA */}
-        <section className="mt-24 sm:mt-32 rounded-container bg-neutral-950 text-white px-6 py-12 sm:px-12 sm:py-16 text-center">
+        <section className="relative overflow-hidden mt-24 sm:mt-32 rounded-container text-white px-6 py-12 sm:px-12 sm:py-16 text-center bg-[radial-gradient(120%_90%_at_100%_0%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_55%),radial-gradient(80%_70%_at_0%_100%,rgba(255,140,210,0.3)_0%,rgba(255,140,210,0)_60%),linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_24px_60px_-24px_rgba(91,61,245,0.7)]">
           <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
-            Bli bland de första att testa Dejz
+            Äntligen vet du vad du har kvar.
           </h2>
-          <p className="mt-3 text-white/60 max-w-md mx-auto">
-            Skriv upp dig så hör vi av oss när appen öppnar för fler.
+          <p className="mt-3 text-white/80 max-w-md mx-auto">
+            Skriv upp dig på väntelistan så får du testa Dejz först.
           </p>
           <div className="mt-8 max-w-md mx-auto text-left">
             <WaitlistForm onDark />
           </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-white/70 text-sm">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-white/85 text-sm">
             <span className="inline-flex items-center gap-2">
               <AppleLogo size={18} weight="fill" /> Kommer snart på App Store
             </span>
@@ -806,7 +804,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
 
         <footer className="mt-12 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-3">
-            <img src="/dejz_mork.png" alt="Dejz" className="h-4 w-auto opacity-70" />
+            <DejzLogo className="h-4 w-auto text-[var(--accent-color)]" />
             <span>© {new Date().getFullYear()} Dejz</span>
             <button
               type="button"

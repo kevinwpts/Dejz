@@ -12,10 +12,10 @@ export interface SeoMetadata {
 
 export const REGIONAL_SEO: Record<Language, SeoMetadata> = {
   sv: {
-    title: 'Dejz – Se vad du har kvar från lön till lön',
-    description: 'Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Lön, räkningar och sparande räknas av automatiskt – så att du vet vad som faktiskt är ditt, från lön till lön.',
-    ogTitle: 'Dejz – Se vad du har kvar från lön till lön',
-    ogDescription: 'Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Lön, räkningar och sparande räknas av automatiskt – så att du vet vad som faktiskt är ditt, från lön till lön.',
+    title: 'Dejz – Äntligen vet du vad du har kvar',
+    description: 'Äntligen vet du vad du har kvar. Dejz visar hur mycket du kan spendera fram till nästa lön – inte till månadsskiftet. Räkningar och sparande dras av automatiskt.',
+    ogTitle: 'Dejz – Äntligen vet du vad du har kvar',
+    ogDescription: 'Äntligen vet du vad du har kvar. Dejz visar hur mycket du kan spendera fram till nästa lön – inte till månadsskiftet. Räkningar och sparande dras av automatiskt.',
     keywords: 'budgetapp, privatekonomi, lön till lön, fasta utgifter, sparande, utgiftskoll, budget, sverige, dejz',
     htmlLang: 'sv',
   },
@@ -97,7 +97,7 @@ export function updateDocumentSeo(lang: Language, currentPath: string = '/'): vo
 
   // 3. OpenGraph Tags
   const origin = window.location.origin || 'https://dejz.se';
-  const ogImageUrl = `${origin}/dejz_02.png`;
+  const ogImageUrl = `${origin}/og.png`;
   const ogLocale =
     metadata.htmlLang === 'nb'
       ? 'nb_NO'

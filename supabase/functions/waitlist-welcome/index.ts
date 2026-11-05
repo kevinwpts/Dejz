@@ -38,6 +38,8 @@ function buildEmail(position: number) {
 
 Tack för att du skrev upp dig på Dejz väntelista. ${positionText}
 
+Äntligen vet du vad du har kvar.
+
 Dejz visar hur mycket du har kvar att spendera fram till nästa lön – räkningar och sparande dras av automatiskt, så att du ser vad som faktiskt är ditt.
 
 Vi hör av oss så fort du kan börja använda appen. Känner du någon som också lever från lön till lön? Tipsa gärna: ${shareUrl}
@@ -53,7 +55,7 @@ Vill du inte stå kvar på listan? Svara bara på det här mejlet så tar vi bor
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F5F4FA;padding:32px 16px;">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
-        <tr><td style="padding:0 4px 20px;font-size:22px;font-weight:700;letter-spacing:-0.02em;color:#5B3DF5;">dejz</td></tr>
+        <tr><td style="padding:0 4px 20px;"><span style="font-size:22px;font-weight:800;letter-spacing:-0.04em;color:#5B3DF5;">dejz</span><span style="font-size:13px;color:#8F8DA3;padding-left:10px;">Äntligen vet du vad du har kvar.</span></td></tr>
         <tr><td style="background:linear-gradient(150deg,#7356FF 0%,#5B3DF5 48%,#3F22C9 100%);background-color:#5B3DF5;border-radius:24px;padding:28px 24px;color:#FFFFFF;">
           <div style="font-size:14px;opacity:0.8;">Väntelistan</div>
           <div style="font-size:26px;font-weight:700;letter-spacing:-0.02em;margin-top:6px;line-height:1.2;">Du är med! 🎉</div>
@@ -61,7 +63,7 @@ Vill du inte stå kvar på listan? Svara bara på det här mejlet så tar vi bor
         </td></tr>
         <tr><td style="background:#FFFFFF;border-radius:24px;padding:24px;margin-top:12px;font-size:15px;line-height:1.6;color:#56546B;">
           <p style="margin:0 0 12px;color:#16141F;">Hej!</p>
-          <p style="margin:0 0 12px;">Tack för att du skrev upp dig. Dejz visar hur mycket du har kvar att spendera fram till nästa lön – räkningar och sparande dras av automatiskt, så att du ser vad som faktiskt är ditt.</p>
+          <p style="margin:0 0 12px;">Tack för att du skrev upp dig. Dejz visar hur mycket du kan spendera fram till nästa lön – inte till månadsskiftet. Räkningar och sparande dras av automatiskt, så att du ser vad som faktiskt är ditt.</p>
           <p style="margin:0 0 20px;">Vi hör av oss så fort du kan börja använda appen.</p>
           <a href="${shareUrl}" style="display:inline-block;background:#5B3DF5;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:14px;padding:12px 20px;border-radius:14px;">Tipsa en vän om Dejz</a>
         </td></tr>

@@ -1,11 +1,11 @@
 {
-  "name": "Dejz – Se vad du har kvar från lön till lön",
+  "name": "Dejz – Äntligen vet du vad du har kvar",
   "short_name": "Dejz",
-  "description": "Dejz visar hur mycket du har kvar att spendera fram till nästa lön. Lön, räkningar och sparande räknas av automatiskt – så att du vet vad som faktiskt är ditt, från lön till lön.",
+  "description": "Äntligen vet du vad du har kvar. Dejz visar hur mycket du kan spendera fram till nästa lön – inte till månadsskiftet. Räkningar och sparande dras av automatiskt.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F6F6F4",
-  "theme_color": "#F6F6F4",
+  "background_color": "#F5F4FA",
+  "theme_color": "#5B3DF5",
   "icons": [
     {
       "src": "/favicon.png",

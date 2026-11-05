@@ -640,7 +640,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <span className="text-[12px] font-normal text-[var(--text-secondary)]">
                       Utgifter i perioden
                     </span>
-                    <span className="font-display font-[600] text-[26px] sm:text-[28px] tracking-[-0.025em] text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
+                    <span className="font-display font-[600] text-[24px] sm:text-[26px] tracking-[-0.03em] whitespace-nowrap text-[var(--text-primary)] tabular-nums leading-tight mt-0.5">
                       {formatKr(totalSpent)}
                     </span>
                   </>
