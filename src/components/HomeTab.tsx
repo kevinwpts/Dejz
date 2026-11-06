@@ -342,6 +342,24 @@ interface HomeTabProps {
   userEmail?: string | null;
   userName?: string | null;
   onNavigateToHousehold?: () => void;
+  /** Saldo just nu (utan bank) – visas som en rad under hemkortet */
+  manualBalance?: { amount: number; at: string } | null;
+  onOpenBalance?: () => void;
+}
+
+/** "idag 14:02", "igår 09:10" eller "4 nov" */
+function formatBalanceUpdatedAt(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const day = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Stockholm' });
+  const time = d.toLocaleTimeString('sv-SE', {
+    timeZone: 'Europe/Stockholm',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  if (day === getSwedishDateStr()) return `idag ${time}`;
+  if (day === getYesterdaySwedishDateStr()) return `igår ${time}`;
+  return d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Stockholm', day: 'numeric', month: 'short' });
 }
 
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -372,6 +390,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   userEmail,
   userName,
   onNavigateToHousehold,
+  manualBalance = null,
+  onOpenBalance,
 }) => {
   const [showBudgetBreakdown, setShowBudgetBreakdown] = useState<boolean>(() =>
     getShowBudgetBreakdownOnHome()
@@ -1259,11 +1279,48 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     )}
                   </button>
                 </div>
+                {manualBalance && !isJointMode && (
+                  <p className="mt-3 text-[12px] text-[var(--text-secondary)]">
+                    Beloppet utgår från ditt saldo på {formatKr(manualBalance.amount)} minus räkningarna
+                    som är kvar före lön.
+                  </p>
+                )}
               </div>
             </div>
           </section>
         );
       })()}
+
+      {/* ============================================================== */}
+      {/* SALDO JUST NU (utan bank): gör "kvar" exakt utan att logga allt */}
+      {/* ============================================================== */}
+      {onOpenBalance && accounts.length === 0 && (
+        <button
+          type="button"
+          onClick={onOpenBalance}
+          className="w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-2xl px-4 py-3.5 sm:px-5 flex items-center gap-3 text-left cursor-pointer hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all"
+        >
+          <span className="w-9 h-9 rounded-full bg-[var(--bg-color)] flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+            <Bank size={18} weight="regular" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[14px] font-medium text-[var(--text-primary)] truncate">
+              {manualBalance ? 'Saldo på kontot' : 'Stämmer beloppet?'}
+            </span>
+            <span className="block text-[12px] text-[var(--text-secondary)] truncate mt-0.5">
+              {manualBalance
+                ? `Uppdaterat ${formatBalanceUpdatedAt(manualBalance.at)}`
+                : 'Skriv in ditt saldo så räknar Dejz exakt'}
+            </span>
+          </span>
+          {manualBalance && (
+            <span className="font-display font-semibold text-[15px] tabular-nums text-[var(--text-primary)] shrink-0">
+              {formatKr(manualBalance.amount)}
+            </span>
+          )}
+          <CaretRight size={14} className="text-[var(--text-muted)] shrink-0" />
+        </button>
+      )}
 
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO · BANKKONTON                             */}

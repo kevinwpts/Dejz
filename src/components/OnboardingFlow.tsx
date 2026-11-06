@@ -33,6 +33,7 @@ import {
   getStoredPaymentMethods,
   normalizeCategoryToValid,
   syncAllUserPreferencesToSupabase,
+  setManualBalance,
 } from '../utils/appCache';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
@@ -108,14 +109,15 @@ interface OnboardingFlowProps {
   bankEnabled?: boolean;
 }
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
+type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /**
  * Stegordning. Med bank: namn → bank → fasta (förslag från banken) → inkomster → lön → resultat.
  * Utan bank följer flödet hur man tänker lön till lön: namn → lönedag → inkomst → fasta → resultat.
  */
 const STEP_ORDER_WITH_BANK: OnboardingStep[] = [1, 2, 3, 4, 5, 6];
-const STEP_ORDER_MANUAL: OnboardingStep[] = [1, 5, 4, 3, 6];
+// Utan bank: sist frågar vi efter saldot på kontot (steg 7), så "kvar till lön" stämmer från dag ett
+const STEP_ORDER_MANUAL: OnboardingStep[] = [1, 5, 4, 3, 6, 7];
 
 interface SheetEditorState {
   mode: 'add' | 'edit';
@@ -168,6 +170,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     return 1;
   });
   const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
+  const [balanceInput, setBalanceInput] = useState('');
   const [name, setName] = useState<string>(() => {
     if (initialName) return initialName;
     try {
@@ -2103,16 +2106,88 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           </div>
 
           <div className="shrink-0 pt-3">
+            {stepOrder.includes(7) ? (
+              <button
+                type="button"
+                onClick={() => goNext(6)}
+                className="ui-btn-primary py-3.5 text-sm"
+              >
+                <span>Fortsätt</span>
+                <ArrowRight size={16} weight="bold" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onComplete}
+                className="ui-btn-primary py-3.5 text-sm"
+              >
+                <span>Öppna Dejz</span>
+                <Check size={16} weight="bold" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* STEG 7 (utan bank): SALDO JUST NU                              */}
+      {/* ============================================================== */}
+      {step === 7 && (
+        <form
+          key="step-7"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const amt = Math.round(Number(balanceInput.replace(/\s/g, '').replace(',', '.')));
+            if (balanceInput.trim() !== '' && Number.isFinite(amt)) {
+              setManualBalance({ amount: amt, at: new Date().toISOString() });
+            }
+            onComplete();
+          }}
+          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+        >
+          <div className="shrink-0 pt-6 pb-4">
+            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+              Hur mycket har du på kontot just nu?
+            </h1>
+            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+              Kolla i din bankapp. Dejz drar av räkningarna som är kvar före lön – då ser du exakt vad
+              du kan spendera.
+            </p>
+          </div>
+
+          <div className="my-auto py-4">
+            <label className="flex items-baseline gap-2 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-4 cursor-text">
+              <input
+                type="text"
+                inputMode="numeric"
+                autoFocus
+                placeholder="0"
+                value={balanceInput}
+                onChange={(e) => setBalanceInput(e.target.value.replace(/[^\d\s,.-]/g, ''))}
+                className="flex-1 min-w-0 bg-transparent border-0 p-0 font-display font-semibold text-[34px] leading-none tabular-nums text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
+              />
+              <span className="text-base font-medium text-[var(--text-secondary)]">kr</span>
+            </label>
+          </div>
+
+          <div className="shrink-0 pt-3 space-y-1">
             <button
-              type="button"
-              onClick={onComplete}
-              className="ui-btn-primary py-3.5 text-sm"
+              type="submit"
+              disabled={balanceInput.trim() === ''}
+              className="ui-btn-primary py-3.5 text-sm disabled:opacity-35"
             >
               <span>Öppna Dejz</span>
               <Check size={16} weight="bold" />
             </button>
+            <button
+              type="button"
+              onClick={onComplete}
+              className="w-full py-2.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            >
+              Hoppa över just nu
+            </button>
           </div>
-        </div>
+        </form>
       )}
 
       {/* ============================================================== */}

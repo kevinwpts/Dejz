@@ -1,19 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Microphone, ArrowRight } from '@phosphor-icons/react';
+import { Microphone, Keyboard } from '@phosphor-icons/react';
 import { BottomSheet } from './ui/BottomSheet';
 import { parseQuickEntry } from '../utils/quickEntry';
 
 /**
- * Röstinmatning av köp: tryck på mikrofonen, säg "Ica 143 kronor",
- * så öppnas "Nytt köp" med namn, belopp och kategori ifyllt. Inget sparas förrän man trycker Spara.
- * Saknar webbläsaren taligenkänning (t.ex. vissa iPhone-lägen) kan man skriva eller använda
- * tangentbordets mikrofon i samma ruta.
+ * "Lägg till köp" från menyns plusknapp: prata in ("Ica 143 kronor") eller fyll i manuellt.
+ * Rösten öppnar "Nytt köp" med namn, belopp och kategori ifyllt – inget sparas förrän man trycker Spara.
  */
 
-type Result = { title: string; amount?: number };
+export type VoiceResult = { title: string; amount?: number };
 
-interface VoiceEntryProps {
-  onResult: (result: Result) => void;
+interface AddEntrySheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onResult: (result: VoiceResult) => void;
+  onManual: () => void;
 }
 
 // Webbläsarens taligenkänning (Chrome/Android/Safari) – finns inte i alla typer
@@ -36,7 +37,12 @@ function getSpeechRecognition(): (new () => SpeechRec) | null {
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
-function toResult(text: string): Result | null {
+/** Finns taligenkänning i den här webbläsaren? Annars går plusknappen direkt till manuell inmatning. */
+export function isVoiceEntrySupported(): boolean {
+  return Boolean(getSpeechRecognition());
+}
+
+function toResult(text: string): VoiceResult | null {
   const clean = text.trim();
   if (!clean) return null;
   const parsed = parseQuickEntry(clean);
@@ -48,14 +54,17 @@ function toResult(text: string): Result | null {
   return { title: clean.charAt(0).toUpperCase() + clean.slice(1) };
 }
 
-export const VoiceEntry: React.FC<VoiceEntryProps> = ({ onResult }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [text, setText] = useState('');
+export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
+  isOpen,
+  onClose,
+  onResult,
+  onManual,
+}) => {
+  const [heard, setHeard] = useState('');
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const recRef = useRef<SpeechRec | null>(null);
   const finalRef = useRef('');
-  const supported = Boolean(getSpeechRecognition());
 
   const stopListening = () => {
     try {
@@ -67,19 +76,21 @@ export const VoiceEntry: React.FC<VoiceEntryProps> = ({ onResult }) => {
     setListening(false);
   };
 
-  const finish = (value: string) => {
-    const result = toResult(value);
-    if (!result) return;
-    stopListening();
-    setIsOpen(false);
-    setText('');
-    onResult(result);
-  };
+  useEffect(() => {
+    if (!isOpen) {
+      stopListening();
+      setHeard('');
+      setError(null);
+    }
+  }, [isOpen]);
+
+  useEffect(() => () => stopListening(), []);
 
   const startListening = () => {
     const Rec = getSpeechRecognition();
     if (!Rec) return;
     setError(null);
+    setHeard('');
     finalRef.current = '';
     try {
       const rec = new Rec();
@@ -96,128 +107,83 @@ export const VoiceEntry: React.FC<VoiceEntryProps> = ({ onResult }) => {
           else interim += chunk;
         }
         if (final) finalRef.current = final.trim();
-        setText((final || interim).trim());
+        setHeard((final || interim).trim());
       };
       rec.onerror = (e: any) => {
         const code = e?.error;
         if (code === 'not-allowed' || code === 'service-not-allowed') {
-          setError('Mikrofonen är blockerad. Skriv i stället, eller tillåt mikrofonen i webbläsaren.');
+          setError('Mikrofonen är blockerad. Tillåt den i webbläsaren, eller fyll i manuellt.');
         } else if (code === 'no-speech') {
-          setError('Jag hörde inget. Tryck på mikrofonen och försök igen.');
+          setError('Jag hörde inget. Tryck och försök igen.');
         } else if (code !== 'aborted') {
-          setError('Röstinmatning fungerar inte här just nu. Skriv i stället.');
+          setError('Rösten fungerar inte här just nu. Fyll i manuellt.');
         }
       };
       rec.onend = () => {
         setListening(false);
         recRef.current = null;
-        // Hörde vi både namn och belopp går vi direkt vidare
-        const heard = finalRef.current;
-        if (heard && parseQuickEntry(heard)) finish(heard);
+        const result = toResult(finalRef.current);
+        if (result) onResult(result);
       };
       recRef.current = rec;
       rec.start();
       setListening(true);
     } catch {
       setListening(false);
-      setError('Röstinmatning fungerar inte här just nu. Skriv i stället.');
+      setError('Rösten fungerar inte här just nu. Fyll i manuellt.');
     }
   };
 
-  const open = () => {
-    setText('');
-    setError(null);
-    setIsOpen(true);
-    if (supported) startListening();
-  };
-
-  const close = () => {
-    stopListening();
-    setIsOpen(false);
-  };
-
-  useEffect(() => () => stopListening(), []);
-
   return (
-    <>
-      <button
-        type="button"
-        onClick={open}
-        aria-label="Lägg till köp med rösten"
-        className="fixed z-30 w-14 h-14 rounded-full text-white flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
-        style={{
-          bottom: 'calc(1.5rem + 62px + 14px)',
-          right: 'max(1rem, calc((100vw - 24rem) / 2))',
-          background: 'linear-gradient(135deg, #7356FF 0%, #5B3DF5 50%, #3F22C9 100%)',
-          boxShadow: '0 10px 24px -8px rgba(63, 34, 201, 0.55)',
-        }}
-      >
-        <Microphone size={24} weight="fill" />
-      </button>
+    <BottomSheet isOpen={isOpen} onClose={onClose}>
+      <div className="space-y-6">
+        <div className="ui-sheet-sub-header">
+          <span className="ui-sheet-title">Lägg till köp</span>
+        </div>
 
-      <BottomSheet isOpen={isOpen} onClose={close}>
-        <div className="space-y-5">
-          <div className="ui-sheet-sub-header">
-            <span className="ui-sheet-title">Lägg till köp</span>
-          </div>
+        <div className="flex flex-col items-center text-center gap-4">
+          <button
+            type="button"
+            onClick={listening ? stopListening : startListening}
+            aria-label={listening ? 'Sluta lyssna' : 'Prata in köpet'}
+            className="relative w-24 h-24 rounded-full flex items-center justify-center text-white active:scale-95 transition-transform cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #7356FF 0%, #5B3DF5 50%, #3F22C9 100%)',
+              boxShadow: '0 14px 30px -10px rgba(63, 34, 201, 0.55)',
+            }}
+          >
+            {listening && (
+              <span className="absolute inset-0 rounded-full bg-[#5B3DF5]/40 animate-ping" />
+            )}
+            <Microphone size={38} weight="fill" className="relative" />
+          </button>
 
-          <div className="flex flex-col items-center text-center gap-4 pt-1">
-            <button
-              type="button"
-              onClick={listening ? stopListening : startListening}
-              disabled={!supported}
-              aria-label={listening ? 'Sluta lyssna' : 'Börja lyssna'}
-              className="relative w-20 h-20 rounded-full flex items-center justify-center text-white disabled:opacity-40 cursor-pointer"
-              style={{
-                background: 'linear-gradient(135deg, #7356FF 0%, #5B3DF5 50%, #3F22C9 100%)',
-              }}
-            >
-              {listening && (
-                <span className="absolute inset-0 rounded-full bg-[#5B3DF5]/40 animate-ping" />
-              )}
-              <Microphone size={32} weight="fill" className="relative" />
-            </button>
-            <p className="text-sm text-[var(--text-secondary)] min-h-[20px]">
-              {error
-                ? error
-                : listening
-                ? 'Lyssnar …'
-                : supported
-                ? 'Tryck och säg t.ex. ”Ica 143 kronor”'
-                : 'Skriv t.ex. ”Ica 143” – eller använd tangentbordets mikrofon'}
+          <div className="min-h-[52px] flex flex-col items-center justify-center gap-1">
+            {heard ? (
+              <p className="font-display font-semibold text-xl text-[var(--text-primary)]">{heard}</p>
+            ) : (
+              <p className="font-display font-semibold text-base text-[var(--text-primary)]">
+                {listening ? 'Lyssnar …' : 'Tryck och prata'}
+              </p>
+            )}
+            <p className="text-sm text-[var(--text-secondary)]">
+              {error || 'Säg t.ex. ”Ica 143 kronor”'}
             </p>
           </div>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              finish(text);
-            }}
-            className="space-y-3"
-          >
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => {
-                if (listening) stopListening();
-                setText(e.target.value);
-              }}
-              autoFocus={!supported}
-              enterKeyHint="done"
-              placeholder="T.ex. Ica 143"
-              className="w-full h-14 px-4 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] font-display font-semibold text-lg text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={!text.trim()}
-              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
-            >
-              <span>Fortsätt</span>
-              <ArrowRight size={16} weight="bold" />
-            </button>
-          </form>
         </div>
-      </BottomSheet>
-    </>
+
+        <button
+          type="button"
+          onClick={() => {
+            stopListening();
+            onManual();
+          }}
+          className="w-full py-3.5 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-sm font-semibold text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+        >
+          <Keyboard size={18} />
+          <span>Fyll i manuellt</span>
+        </button>
+      </div>
+    </BottomSheet>
   );
 };

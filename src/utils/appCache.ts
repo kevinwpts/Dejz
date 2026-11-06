@@ -1754,6 +1754,8 @@ export function collectAllUserPreferences(): Record<string, any> {
       localStorage.getItem('dejz_onboarding_completed') !== 'true' &&
       localStorage.getItem('dejz_onboarding_in_progress') === 'true',
     onboardingStep: localStorage.getItem('dejz_onboarding_step') || '1',
+    manualBalance: safeParse('dejz_manual_balance_v1', null),
+    incomeFirstSeen: safeParse('dejz_income_first_seen', {}),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -2028,9 +2030,66 @@ export function hydrateAllUserPreferencesFromProfile(profile: any): void {
         localStorage.setItem('dejz_onboarding_step', String(prefs.onboardingStep));
       }
     }
+
+    // Saldo just nu: den senast inmatade vinner (från vilken enhet som helst)
+    const remoteBalance = prefs.manualBalance;
+    if (remoteBalance && typeof remoteBalance.amount === 'number' && remoteBalance.at) {
+      const local = getManualBalance();
+      if (!local || String(remoteBalance.at) > local.at) {
+        localStorage.setItem(MANUAL_BALANCE_KEY, JSON.stringify(remoteBalance));
+      }
+    }
+    if (prefs.incomeFirstSeen && typeof prefs.incomeFirstSeen === 'object') {
+      const localSeen = safeJson<Record<string, string>>(INCOME_FIRST_SEEN_KEY, {});
+      const merged: Record<string, string> = { ...prefs.incomeFirstSeen };
+      for (const [id, date] of Object.entries(localSeen)) {
+        if (!merged[id] || date < merged[id]) merged[id] = date;
+      }
+      localStorage.setItem(INCOME_FIRST_SEEN_KEY, JSON.stringify(merged));
+    }
   } catch {
     // ignore
   }
+}
+
+// ==========================================
+// SALDO JUST NU (utan bankkoppling)
+// Användaren skriver in vad som finns på kontot. Dejz räknar: saldo − räkningar kvar före lön − köp sedan dess.
+// ==========================================
+export const MANUAL_BALANCE_KEY = 'dejz_manual_balance_v1';
+export const INCOME_FIRST_SEEN_KEY = 'dejz_income_first_seen';
+
+export interface ManualBalance {
+  amount: number;
+  /** ISO-tid när saldot skrevs in */
+  at: string;
+}
+
+function safeJson<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function getManualBalance(): ManualBalance | null {
+  if (typeof window === 'undefined') return null;
+  const v = safeJson<ManualBalance | null>(MANUAL_BALANCE_KEY, null);
+  return v && typeof v.amount === 'number' && typeof v.at === 'string' ? v : null;
+}
+
+export function setManualBalance(value: ManualBalance | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (value) localStorage.setItem(MANUAL_BALANCE_KEY, JSON.stringify(value));
+    else localStorage.removeItem(MANUAL_BALANCE_KEY);
+    window.dispatchEvent(new Event('dejz-manual-balance'));
+  } catch {
+    // ignore
+  }
+  syncAllUserPreferencesToSupabase();
 }
 
 

@@ -426,19 +426,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.webp?v=10',
+    src: '/screens/ekonomi.webp?v=11',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Lägg in lön och räkningar',
-    text: 'En gång, på under två minuter. Dejz drar av hyra och prenumerationer varje löneperiod.',
+    text: 'En gång, på under två minuter. Skriv in ditt saldo så drar Dejz av räkningarna som är kvar före lön.',
   },
   {
-    src: '/screens/historik.webp?v=10',
+    src: '/screens/historik.webp?v=11',
     alt: 'Dejz – historik över köp',
     title: 'Logga köp på sekunder',
-    text: 'Skriv eller säg "Ica 342" – Dejz fyller i belopp, kategori och logga åt dig.',
+    text: 'Tryck på + och säg "Ica 342" – Dejz fyller i belopp, kategori och logga åt dig.',
   },
   {
-    src: '/screens/analys.webp?v=10',
+    src: '/screens/analys.webp?v=11',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -460,7 +460,7 @@ const FAQ = [
   },
   {
     q: 'Kan jag koppla min bank?',
-    a: 'Inte än – bankkoppling kommer snart. Idag lägger du in lön och fasta räkningar en gång och loggar köp själv: skriv eller säg "Ica 342" så är det klart.',
+    a: 'Inte än – bankkoppling kommer snart. Tills dess skriver du in saldot från din bankapp när du vill, så räknar Dejz ut vad du har kvar till lön. Köp lägger du till på sekunder: tryck på + och säg "Ica 342".',
   },
   {
     q: 'Vad händer med mina uppgifter?',
@@ -562,7 +562,7 @@ const SignupCta: React.FC<{
     </button>
     {!hideNote && (
       <p className={`mt-3 text-sm ${onDark ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
-        Gratis betaversion · Bankkoppling kommer snart
+        Gratis · Ingen nedladdning · Funkar direkt i mobilen
       </p>
     )}
   </div>
@@ -643,10 +643,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.webp?v=10" alt="" />
+              <PhoneFrame src="/screens/analys.webp?v=11" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.webp?v=10" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.webp?v=11" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>

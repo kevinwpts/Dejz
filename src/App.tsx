@@ -5,10 +5,12 @@ import {
   PeriodInfo,
   WeekendHandlingMode,
   isDateInPeriod,
+  getDueDateInPeriod,
 } from './utils/periodEngine';
 import { Navbar } from './components/Navbar';
 import { BottomNav, AppTab } from './components/BottomNav';
-import { VoiceEntry } from './components/VoiceEntry';
+import { AddEntrySheet, isVoiceEntrySupported } from './components/VoiceEntry';
+import { BalanceSheet } from './components/BalanceSheet';
 import {
   HomeTab,
   AccountItem,
@@ -148,6 +150,9 @@ import {
   clearAllLocalAppData,
   getStoredExpenseCategories,
   getStoredIncomeCategories,
+  getManualBalance,
+  setManualBalance,
+  ManualBalance,
   getSavingsGoals,
   saveSavingsGoals,
   resolveSwishPhoneToName,
@@ -589,6 +594,7 @@ function getIncomeFirstSeen(incomeId: string, today: string): string {
     if (map[incomeId]) return map[incomeId];
     map[incomeId] = today;
     localStorage.setItem(KEY, JSON.stringify(map));
+    syncAllUserPreferencesToSupabase(); // samma historik på alla enheter
   } catch {
     // Ingen lagring (t.ex. privat läge) – visa bara innevarande period
   }
@@ -2230,6 +2236,9 @@ export const App: React.FC = () => {
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   // Förifyllt nytt köp från röstknappen ("Ica 143 kronor")
   const [txPrefill, setTxPrefill] = useState<{ title: string; amount?: number } | null>(null);
+  // Plusknappens ruta: prata in eller fyll i manuellt
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  const [isBalanceSheetOpen, setIsBalanceSheetOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionItem | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -3603,10 +3612,81 @@ export const App: React.FC = () => {
     userName,
   ]);
 
+  // "Saldo just nu" (utan bank): användaren skriver in vad som finns på kontot
+  const [manualBalance, setManualBalanceState] = useState<ManualBalance | null>(() =>
+    getManualBalance()
+  );
+  useEffect(() => {
+    const reload = () => setManualBalanceState(getManualBalance());
+    window.addEventListener('dejz-manual-balance', reload);
+    reload(); // profilen kan ha laddat ett saldo från en annan enhet
+    return () => window.removeEventListener('dejz-manual-balance', reload);
+  }, [isInitialLoading, userId]);
+
+  // Saldot gäller bara i den löneperiod det skrevs in
+  const activeManualBalance = useMemo(() => {
+    if (!manualBalance || hasActiveBankConnection) return null;
+    const at = new Date(manualBalance.at);
+    if (isNaN(at.getTime()) || at.getTime() < period.startDate.getTime()) return null;
+    return manualBalance;
+  }, [manualBalance, period, hasActiveBankConnection]);
+
+  // Kvar = saldo − räkningar som dras efter att saldot skrevs in − köp sedan dess + inkomster som kommer före lön
+  const kvarFromBalance = useMemo(() => {
+    if (!activeManualBalance) return null;
+    const atMs = new Date(activeManualBalance.at).getTime();
+    const atDay = formatIsoDateStockholm(new Date(atMs));
+    const dayOf = (d: Date) => formatIsoDateStockholm(d);
+
+    let upcomingFixed = 0;
+    for (const exp of fixedExpenses) {
+      if (!isFixedExpenseActiveInPeriod(exp, period)) continue;
+      const due = getDueDateInPeriod(exp.dueDay || 27, period);
+      if (dayOf(due) <= atDay) continue;
+      const paid = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
+      if (paid && (paid.date || '') <= atDay) continue;
+      upcomingFixed += Number(exp.amount) || 0;
+    }
+
+    let upcomingIncome = 0;
+    for (const inc of incomes) {
+      const payDate = getDueDateInPeriod(inc.payday || targetPayday || 25, period);
+      if (dayOf(payDate) <= atDay) continue;
+      upcomingIncome += Number(inc.amount) || 0;
+    }
+
+    // Köp som lagts in efter saldot (manuella köp har id "tx-<tidpunkt>")
+    let spentSince = 0;
+    for (const t of periodTransactions) {
+      if (t.isExcluded || isTransactionManuallyExcluded(t.id)) continue;
+      if (periodRecurringMatches.claimedFixedTxIds.has(t.id)) continue;
+      const idMs = /^tx-(\d{12,})$/.exec(String(t.id))?.[1];
+      const isAfter = idMs ? Number(idMs) > atMs : (t.date || '') > atDay;
+      if (!isAfter) continue;
+      if (t.type === 'income') {
+        if (typeof t.id === 'string' && t.id.startsWith('inc-')) continue;
+        spentSince -= Math.abs(Number(t.amount) || 0);
+      } else {
+        spentSince += Math.abs(Number(t.amount) || 0);
+      }
+    }
+
+    return Math.round(activeManualBalance.amount - upcomingFixed + upcomingIncome - spentSince);
+  }, [
+    activeManualBalance,
+    fixedExpenses,
+    incomes,
+    period,
+    targetPayday,
+    periodTransactions,
+    periodRecurringMatches,
+  ]);
+
   // Kvar att spendera under aktuell period (kan vara negativt om man gått över budget)
   const kvarAttSpendera = useMemo(() => {
+    if (kvarFromBalance !== null) return kvarFromBalance;
     return totalIncome - totalFixedExpenses - totalVariableSpent;
-  }, [totalIncome, totalFixedExpenses, totalVariableSpent]);
+  }, [kvarFromBalance, totalIncome, totalFixedExpenses, totalVariableSpent]);
 
   // Dagsbudget
   const dagsbudget = useMemo(() => {
@@ -5090,6 +5170,15 @@ export const App: React.FC = () => {
           }
           if (activeTab === 'settings' && settingsSubView !== 'main') {
             setSettingsSubView('main');
+          } else if (
+            activeTab === 'goals' ||
+            activeTab === 'receipts' ||
+            activeTab === 'packages' ||
+            activeTab === 'saved'
+          ) {
+            // Sparmål, kvitton och paket öppnas från profilen – tillbaka dit
+            setSettingsSubView('main');
+            setActiveTab('settings');
           } else {
             setActiveTab('home');
           }
@@ -5213,6 +5302,8 @@ export const App: React.FC = () => {
                     setSettingsSubView('household');
                     setActiveTab('settings');
                   }}
+                  manualBalance={activeManualBalance}
+                  onOpenBalance={hasActiveBankConnection ? undefined : () => setIsBalanceSheetOpen(true)}
                   userEmail={userEmail}
                   userName={userName}
                   onSelectAccount={(accountId) => {
@@ -5944,28 +6035,63 @@ export const App: React.FC = () => {
                   onApplyFixedExpenses={(items) => {
                     setFixedExpenses(items);
                   }}
+                  onOpenSection={(section) => {
+                    setSelectedGoalIdInView(null);
+                    setActiveTab(section);
+                  }}
+                  sectionCounts={{
+                    goals: getSavingsGoals().length,
+                    packages: displayTransactions.filter((t) => t.isWaitingForPackage).length,
+                    receipts:
+                      displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
+                      fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0),
+                  }}
                 />
               )}
           </>
         </PullToRefresh>
       </main>
 
-      {activeTab === 'home' && !isTxModalOpen && (
-        <VoiceEntry
-          onResult={(result) => {
-            setSelectedTransaction(null);
-            setTxPrefill(result);
-            setIsTxModalOpen(true);
-          }}
-        />
-      )}
+      <BalanceSheet
+        isOpen={isBalanceSheetOpen}
+        onClose={() => setIsBalanceSheetOpen(false)}
+        current={activeManualBalance}
+        onSave={(amount) => {
+          setManualBalance({ amount, at: new Date().toISOString() });
+          setIsBalanceSheetOpen(false);
+        }}
+        onClear={() => {
+          setManualBalance(null);
+          setIsBalanceSheetOpen(false);
+        }}
+      />
+
+      <AddEntrySheet
+        isOpen={isAddSheetOpen}
+        onClose={() => setIsAddSheetOpen(false)}
+        onResult={(result) => {
+          setIsAddSheetOpen(false);
+          setSelectedTransaction(null);
+          setTxPrefill(result);
+          setIsTxModalOpen(true);
+        }}
+        onManual={() => {
+          setIsAddSheetOpen(false);
+          setSelectedTransaction(null);
+          setTxPrefill(null);
+          setIsTxModalOpen(true);
+        }}
+      />
 
       {!(activeTab === 'friends' && Boolean(selectedChatFriendKey)) && (
         <BottomNav
           activeTab={activeTab}
           onAddTransaction={() => {
             setSelectedTransaction(null);
-            setIsTxModalOpen(true);
+            setTxPrefill(null);
+            // Utan taligenkänning i webbläsaren går vi direkt till manuell inmatning
+            if (isVoiceEntrySupported()) setIsAddSheetOpen(true);
+            else setIsTxModalOpen(true);
           }}
           onChangeTab={(tab) => {
             setIsSearchModalOpen(false);

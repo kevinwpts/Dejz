@@ -28,13 +28,15 @@ import {
   LockKey,
   Cookie,
   DownloadSimple,
-  Users,
   Eye,
   EyeSlash,
   Key,
   EnvelopeSimple,
   Copy,
   SlidersHorizontal,
+  PiggyBank,
+  Paperclip,
+  Package,
 } from '@phosphor-icons/react';
 import { supabase } from '../supabaseClient';
 import { bankService, BankConnection, BankAccount } from '../services/bankService';
@@ -121,6 +123,9 @@ interface SettingsTabProps {
   onOpenAddTransactionModal?: () => void;
   onOpenPreviewTransactionModal?: () => void;
   onApplyFixedExpenses?: (next: FixedExpenseItem[]) => void;
+  /** Öppnar Sparmål, Kvitton eller Paket (låg tidigare under "Mer" i menyn) */
+  onOpenSection?: (section: 'goals' | 'receipts' | 'packages') => void;
+  sectionCounts?: { goals?: number; receipts?: number; packages?: number };
 }
 
 export type SettingsSubView =
@@ -223,6 +228,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onOpenAddTransactionModal,
   onOpenPreviewTransactionModal,
   onApplyFixedExpenses,
+  onOpenSection,
+  sectionCounts = {},
 }) => {
   const [internalSubView, setInternalSubView] = useState<SettingsSubView>('main');
   const subView = controlledSubView ?? internalSubView;
@@ -2875,7 +2882,44 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         </button>
       </div>
 
-      {/* 2. Ekonomi */}
+      {/* 2. Mitt – sparmål, kvitton och paket */}
+      {onOpenSection && (
+        <div className="ui-admin-card">
+          {(
+            [
+              { id: 'goals', label: 'Sparmål', icon: PiggyBank },
+              { id: 'receipts', label: 'Kvitton', icon: Paperclip },
+              { id: 'packages', label: 'Väntar på paket', icon: Package },
+            ] as const
+          ).map((item) => {
+            const Icon = item.icon;
+            const count = sectionCounts[item.id] || 0;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onOpenSection(item.id)}
+                className="ui-admin-row"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <span className="ui-admin-icon-slot">
+                    <Icon size={18} weight="regular" />
+                  </span>
+                  <span className={rowTitleClass}>{item.label}</span>
+                </div>
+                <div className="ui-admin-right">
+                  {count > 0 && <span className="ui-admin-value tabular-nums">{count}</span>}
+                  <span className="ui-admin-chevron">
+                    <CaretRight size={13} />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 3. Ekonomi */}
       <section className="space-y-2">
         <span className={sectionLabelClass}>Ekonomi</span>
         <div className="ui-admin-card">
@@ -2942,21 +2986,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               </span>
             </div>
           </button>
-
-          {/* Delad ekonomi (Hushåll) */}
-          <div className="ui-admin-row-static">
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <Users size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Delad ekonomi</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-muted)]">
-                Kommer snart
-              </span>
-            </div>
-          </div>
 
           {/* Kategorier */}
           <button

@@ -1,15 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  House,
-  Receipt,
-  ChartPieSlice,
-  ArrowsDownUp,
-  SquaresFour,
-  Paperclip,
-  PiggyBank,
-  CaretRight,
-  Plus,
-} from '@phosphor-icons/react';
+import React from 'react';
+import { House, Receipt, ChartPieSlice, ArrowsDownUp, Plus } from '@phosphor-icons/react';
 
 export type AppTab =
   | 'home'
@@ -29,7 +19,7 @@ interface BottomNavProps {
   onChangeTab: (tab: AppTab) => void;
   onOpenHousehold?: () => void;
   onOpenDiscover?: () => void;
-  /** Öppnar "Lägg till köp" – appens vanligaste handling, nåbar från alla flikar */
+  /** Plusknappen: "Lägg till köp" (prata in eller fyll i manuellt) – nåbar från alla flikar */
   onAddTransaction?: () => void;
   activeSettingsSubView?: string;
   goalsCount?: number;
@@ -43,12 +33,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onChangeTab,
   onAddTransaction,
-  goalsCount = 0,
-  receiptsCount = 0,
 }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navRef = useRef<HTMLElement>(null);
-
   const tabs = [
     { id: 'home' as AppTab, label: 'Hem', icon: House },
     { id: 'transactions' as AppTab, label: 'Historik', icon: ArrowsDownUp },
@@ -56,174 +41,49 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     { id: 'fixed' as AppTab, label: 'Fasta', icon: Receipt },
   ];
 
-  const menuItems: {
-    id: string;
-    label: string;
-    icon: React.ElementType;
-    badge?: number | string;
-    isSelected: boolean;
-    onSelect: () => void;
-  }[] = [
-    ...(onAddTransaction
-      ? [
-          {
-            id: 'add-transaction',
-            label: 'Lägg till köp',
-            icon: Plus,
-            isSelected: false,
-            onSelect: onAddTransaction,
-          },
-        ]
-      : []),
-    {
-      id: 'goals',
-      label: 'Sparmål',
-      icon: PiggyBank,
-      badge: goalsCount > 0 ? goalsCount : undefined,
-      isSelected: activeTab === 'goals',
-      onSelect: () => onChangeTab('goals'),
-    },
-    {
-      id: 'receipts',
-      label: 'Kvitton',
-      icon: Paperclip,
-      badge: receiptsCount > 0 ? receiptsCount : undefined,
-      isSelected: activeTab === 'receipts',
-      onSelect: () => onChangeTab('receipts'),
-    },
-  ];
-
-  const isMoreActive = isMenuOpen || menuItems.some((item) => item.isSelected);
-
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMenuOpen]);
-
   return (
-    <>
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[1px] animate-fade-in"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
+    <nav className="fixed bottom-6 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm">
+      {/* Flytande docka: 4 flikar + separat plusknapp för nytt köp */}
+      <div className="flex items-stretch gap-2.5">
+        <div className="flex-1 bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onChangeTab(tab.id)}
+                className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
+                  isActive
+                    ? 'text-[var(--nav-active-color)] font-semibold'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
+                }`}
+              >
+                <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
+                <span className="text-[11px] tracking-normal leading-none whitespace-nowrap">
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-      <nav
-        ref={navRef}
-        className="fixed bottom-6 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm"
-      >
-        {/* Popover Menu for More Options */}
-        {isMenuOpen && (
-          <div className="mb-2.5 ml-auto w-60 bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-2xl shadow-nav p-1.5 animate-scale-in origin-bottom-right space-y-0.5">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isSelected = item.isSelected;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    item.onSelect();
-                  }}
-                  className={`w-full px-3 py-2.5 rounded-xl flex items-center justify-between transition-all duration-200 active:scale-[0.98] cursor-pointer ${
-                    isSelected
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-semibold'
-                      : 'text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon
-                      size={17}
-                      weight={isSelected ? 'fill' : 'regular'}
-                      className={
-                        isSelected
-                          ? 'text-[var(--bg-color)]'
-                          : 'text-[var(--text-secondary)]'
-                      }
-                    />
-                    <span className="text-[13px]">{item.label}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {item.badge !== undefined && (
-                      <span
-                        className={`text-xs tabular-nums ${
-                          isSelected ? 'opacity-80' : 'text-[var(--text-secondary)]'
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                    <CaretRight
-                      size={13}
-                      className={isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'}
-                    />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Split Floating Glass Dock: Main 4-tab pill + Separated "Mer" button */}
-        <div className="flex items-stretch gap-2.5">
-          <div className="flex-1 bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border border-[var(--border-subtle)] rounded-full shadow-nav px-2 py-1.5 flex items-center justify-around">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id && !isMenuOpen;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onChangeTab(tab.id);
-                  }}
-                  className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 ${
-                    isActive
-                      ? 'text-[var(--nav-active-color)] font-semibold'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
-                  }`}
-                >
-                  <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="text-[11px] tracking-normal leading-none whitespace-nowrap">
-                    {tab.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Separated "Mer" Capsule Button */}
+        {onAddTransaction && (
           <button
             type="button"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-label="Mer"
-            aria-expanded={isMenuOpen}
-            className={`bg-[var(--surface-color)]/92 dark:bg-[var(--surface-color)]/92 backdrop-blur-2xl border rounded-full shadow-nav px-4 py-1.5 flex flex-col items-center justify-center gap-1 transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer active:scale-95 shrink-0 min-w-[60px] ${
-              isMoreActive
-                ? 'border-[var(--border-control)] text-[var(--nav-active-color)] font-semibold'
-                : 'border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
-            }`}
+            onClick={onAddTransaction}
+            aria-label="Lägg till köp"
+            className="shrink-0 self-center w-[60px] h-[60px] rounded-full text-white flex items-center justify-center transition-transform duration-200 active:scale-95 cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #7356FF 0%, #5B3DF5 50%, #3F22C9 100%)',
+              boxShadow: '0 10px 24px -8px rgba(63, 34, 201, 0.55)',
+            }}
           >
-            <span className="relative inline-flex">
-              <SquaresFour size={20} weight={isMoreActive ? 'fill' : 'regular'} />
-            </span>
-            <span className="text-[11px] tracking-normal leading-none whitespace-nowrap">
-              Mer
-            </span>
+            <Plus size={26} weight="bold" />
           </button>
-        </div>
-      </nav>
-    </>
+        )}
+      </div>
+    </nav>
   );
 };
-

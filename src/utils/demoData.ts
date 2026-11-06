@@ -101,22 +101,13 @@ export function seedDemoData() {
   const demoIncomes: Income[] = [
     {
       id: 'demo-inc-1',
-      name: 'Spotify AB',
-      amount: 31200,
+      name: 'Lön',
+      amount: 24800,
       deductionDay: 25,
       icon: 'Briefcase',
       category: 'Lön',
       paymentMethod: PaymentMethod.AUTOGIRO,
     },
-    {
-      id: 'demo-inc-2',
-      name: 'Frilans & Konsulting',
-      amount: 3500,
-      deductionDay: 28,
-      icon: 'DollarSign',
-      category: 'Sidoinkomst',
-      paymentMethod: PaymentMethod.AUTOGIRO,
-    }
   ];
 
   const demoFixedExpenses: FixedExpense[] = [
@@ -415,9 +406,9 @@ export function seedDemoData() {
     // --- FÖRRA MÅNADEN / PERIODEN (15-44 dagar sedan) ---
     {
       id: 'demo-tx-income-1',
-      amount: 31200,
+      amount: 24800,
       category: 'Lön',
-      merchant: 'Spotify AB',
+      merchant: 'Lön',
       note: 'Månadslön Elin',
       timestamp: now - dayMs * 29.1,
       type: 'income',
@@ -604,9 +595,9 @@ export function seedDemoData() {
     // --- TVÅ MÅNADER SEDAN (45-74 dagar sedan) ---
     {
       id: 'demo-tx-income-2',
-      amount: 31200,
+      amount: 24800,
       category: 'Lön',
-      merchant: 'Spotify AB',
+      merchant: 'Lön',
       note: 'Månadslön Elin',
       timestamp: now - dayMs * 59.1,
       type: 'income',
@@ -738,9 +729,9 @@ export function seedDemoData() {
     // --- TRE MÅNADER SEDAN (75-95 dagar sedan) ---
     {
       id: 'demo-tx-income-3',
-      amount: 31200,
+      amount: 24800,
       category: 'Lön',
-      merchant: 'Spotify AB',
+      merchant: 'Lön',
       note: 'Månadslön Elin',
       timestamp: now - dayMs * 89.1,
       type: 'income',
