@@ -57,7 +57,6 @@ import { formatIsoDateStockholm } from '../../utils/swedishDate';
 
 
 import { SwishLogo } from '../SwishLogo';
-import { parseQuickEntry } from '../../utils/quickEntry';
 import {
   inferCategoryAndMethodFromName,
   categorizeBankTransactionForApp,
@@ -106,6 +105,8 @@ interface TransactionModalProps {
   userEmail?: string | null;
   userName?: string | null;
   onOpenFriendsChat?: (friendKey?: string | null) => void;
+  /** Förifyllt nytt köp (t.ex. från röstinmatning "Ica 143 kr") */
+  prefill?: { title: string; amount?: number } | null;
 }
 
 type ModalSubView =
@@ -162,6 +163,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   userEmail: _userEmail,
   userName: _userName,
   onOpenFriendsChat: _onOpenFriendsChat,
+  prefill = null,
 }) => {
   const isCreateMode = !initialTransaction;
 
@@ -214,18 +216,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const isIncome = isCreateMode ? txType === 'income' : activeTx?.type === 'income';
 
-  // Snabbinmatning: "Ica 342" i namnfältet → namn "Ica" och belopp 342 (bara när beloppet är tomt)
-  const applyQuickEntry = () => {
-    if (!isCreateMode || String(amount).trim() !== '') return;
-    const parsed = parseQuickEntry(title);
-    if (!parsed) return;
-    setTitle(parsed.name);
-    setAmount(String(parsed.amount));
-    const inferred = inferCategoryAndMethodFromName(parsed.name, isIncome ? 'income' : 'transaction');
-    if (inferred?.category) setCategory(inferred.category);
-    if (inferred?.paymentMethod) setPaymentMethod(inferred.paymentMethod);
-  };
-
   const availableCategories = useMemo(() => {
     const list = isIncome ? getStoredIncomeCategories() : getStoredExpenseCategories();
     return list.map((c) => c.name);
@@ -272,16 +262,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     } else {
       const todayIso = formatIsoDateStockholm(new Date());
       setTxType('expense');
-      setTitle('');
-      setAmount('');
+      setTitle(prefill?.title || '');
+      setAmount(prefill?.amount ? String(prefill.amount) : '');
       setDate(todayIso);
       setPickerYearMonth({
         year: parseInt(todayIso.slice(0, 4), 10),
         month: parseInt(todayIso.slice(5, 7), 10) - 1,
       });
-      setPaymentMethod('Kort');
+      const prefillInferred = prefill?.title
+        ? inferCategoryAndMethodFromName(prefill.title, 'transaction')
+        : null;
+      setPaymentMethod(prefillInferred?.paymentMethod || 'Kort');
       setNote('');
-      setCategory('Mat & dryck');
+      setCategory(prefillInferred?.category || 'Mat & dryck');
       setDraftReceipts([]);
       setPreviewReceipt(null);
       setSubView('edit');
@@ -290,7 +283,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setShowDeleteConfirm(false);
       setShowSimilarPopup(false);
     }
-  }, [initialTransaction, isOpen]);
+  }, [initialTransaction, isOpen, prefill]);
 
   // Live AI-kategorisering om ett företagsnamn saknas i den lokala ordlistan
   useEffect(() => {
@@ -2184,17 +2177,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       type="text"
                       autoFocus={isCreateMode}
                       enterKeyHint="next"
-                      placeholder={
-                        isIncome ? 'Inkomstkälla' : isCreateMode ? 'T.ex. Ica 342' : 'Butik eller köp'
-                      }
+                      placeholder={isIncome ? 'Inkomstkälla' : 'Butik eller köp'}
                       value={title}
-                      onBlur={applyQuickEntry}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && isCreateMode) {
-                          e.preventDefault();
-                          applyQuickEntry();
-                        }
-                      }}
                       onChange={(e) => {
                         const nextTitle = e.target.value;
                         setTitle(nextTitle);

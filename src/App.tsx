@@ -8,6 +8,7 @@ import {
 } from './utils/periodEngine';
 import { Navbar } from './components/Navbar';
 import { BottomNav, AppTab } from './components/BottomNav';
+import { VoiceEntry } from './components/VoiceEntry';
 import {
   HomeTab,
   AccountItem,
@@ -572,7 +573,26 @@ function getPayDatesForIncome(
       dates.push(dateStr);
     }
   }
-  return dates;
+
+  // Visa inte påhittad historik: börja från den löneperiod då inkomsten lades in i appen
+  // (senaste utbetalningen före eller samma dag, plus alla efter).
+  const firstSeen = getIncomeFirstSeen(inc.id, todayStockholm);
+  const startOfPeriod = dates.filter((d) => d <= firstSeen).sort().pop();
+  return dates.filter((d) => d >= firstSeen || d === startOfPeriod);
+}
+
+/** Datum (YYYY-MM-DD) då en inkomst först syntes på den här enheten. Sparas i localStorage. */
+function getIncomeFirstSeen(incomeId: string, today: string): string {
+  const KEY = 'dejz_income_first_seen';
+  try {
+    const map: Record<string, string> = JSON.parse(localStorage.getItem(KEY) || '{}');
+    if (map[incomeId]) return map[incomeId];
+    map[incomeId] = today;
+    localStorage.setItem(KEY, JSON.stringify(map));
+  } catch {
+    // Ingen lagring (t.ex. privat läge) – visa bara innevarande period
+  }
+  return today;
 }
 
 /**
@@ -2208,6 +2228,8 @@ export const App: React.FC = () => {
   const [isFixedModalOpen, setIsFixedModalOpen] = useState(false);
   const [selectedFixedExpense, setSelectedFixedExpense] = useState<FixedExpenseItem | null>(null);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
+  // Förifyllt nytt köp från röstknappen ("Ica 143 kronor")
+  const [txPrefill, setTxPrefill] = useState<{ title: string; amount?: number } | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionItem | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -5928,6 +5950,16 @@ export const App: React.FC = () => {
         </PullToRefresh>
       </main>
 
+      {activeTab === 'home' && !isTxModalOpen && (
+        <VoiceEntry
+          onResult={(result) => {
+            setSelectedTransaction(null);
+            setTxPrefill(result);
+            setIsTxModalOpen(true);
+          }}
+        />
+      )}
+
       {!(activeTab === 'friends' && Boolean(selectedChatFriendKey)) && (
         <BottomNav
           activeTab={activeTab}
@@ -6044,9 +6076,11 @@ export const App: React.FC = () => {
           setSelectedChatFriendKey(friendKey || null);
           setActiveTab('friends');
         }}
+        prefill={txPrefill}
         onClose={() => {
           setIsTxModalOpen(false);
           setSelectedTransaction(null);
+          setTxPrefill(null);
         }}
         onSelectTransaction={(tx) => {
           setSelectedTransaction(tx);

@@ -273,25 +273,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   useEffect(() => {
     if (step !== 3 && step !== 4) return;
 
-    // Utan bank: hämta inget från banken, visa bara vanliga förslag att bocka i (eller det som redan sparats)
-    if (!bankEnabled) {
-      if (suggestedFixedExpenses.length === 0 && fixedExpenses.length === 0) {
-        setSuggestedFixedExpenses([
-          { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Boende', checked: false },
-          { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Boende', checked: false },
-          { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Försäkringar', checked: false },
-          { id: '4', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Abonnemang', checked: false },
-        ]);
-      }
-      if (suggestedIncomes.length === 0 && incomes.length === 0) {
-        setSuggestedIncomes([
-          { id: 'inc-1', name: 'Lön', amount: 28500, payday, category: 'Lön', checked: false },
-          { id: 'inc-2', name: 'CSN', amount: 13156, payday: 25, category: 'CSN', checked: false },
-          { id: 'inc-3', name: 'Barnbidrag', amount: 1250, payday: 20, category: 'Bidrag', checked: false },
-        ]);
-      }
-      return;
-    }
+    // Utan bank: hämta inget från banken. Inga påhittade belopp – användaren trycker på
+    // snabbknapparna (Lön, Hyra …) och fyller i sina egna siffror.
+    if (!bankEnabled) return;
 
     if (hasAnalyzedBank && isBankDataDetected && !pendingSyncConnectionIdRef.current) return;
 
@@ -534,24 +518,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               // Ignorera nätverksfel – regelmotorn har redan satt alla poster
             }
           }
-        } else if (isMounted && connections.length === 0) {
-          // Endast om användaren hoppade över bankkoppling helt visas vanliga förslag
-          if (suggestedFixedExpenses.length === 0) {
-            setSuggestedFixedExpenses([
-              { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Boende', checked: false },
-              { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Boende', checked: false },
-              { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Försäkringar', checked: false },
-              { id: '4', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Abonnemang', checked: false },
-            ]);
-          }
-          if (suggestedIncomes.length === 0) {
-            setSuggestedIncomes([
-              { id: 'inc-1', name: 'Lön', amount: 28500, payday: 25, category: 'Lön', checked: false },
-              { id: 'inc-2', name: 'CSN', amount: 13156, payday: 25, category: 'CSN', checked: false },
-              { id: 'inc-3', name: 'Barnbidrag', amount: 1250, payday: 20, category: 'Bidrag', checked: false },
-            ]);
-          }
         }
+        // Hoppade användaren över bankkopplingen visas snabbknapparna i stället för påhittade belopp
       } catch (err) {
         console.warn('Could not analyze bank transactions:', err);
       } finally {
@@ -1043,19 +1011,42 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     goNext(5);
   };
 
-  const openAddSheet = (type: 'income' | 'fixed') => {
+  const openAddSheet = (
+    type: 'income' | 'fixed',
+    preset?: { name: string; category: string; day?: number }
+  ) => {
     setSheetSubView('main');
     setSheetNavDir('forward');
     setSheetEditor({
       mode: 'add',
       type,
-      name: '',
+      name: preset?.name ?? '',
       amount: '',
-      day: type === 'income' ? payday || 25 : 27,
-      category: type === 'income' ? 'Lön' : 'Räkningar',
+      day: preset?.day ?? (type === 'income' ? payday || 25 : 27),
+      category: preset?.category ?? (type === 'income' ? 'Lön' : 'Räkningar'),
       paymentMethod: type === 'fixed' ? 'Autogiro' : undefined,
+      logo: preset ? getLogoUrl(preset.name, preset.category) : undefined,
     });
   };
+
+  // Snabbknappar: namn och kategori är ifyllda, användaren skriver bara sitt belopp
+  const QUICK_INCOMES = [
+    { name: 'Lön', category: 'Lön' },
+    { name: 'CSN', category: 'Bidrag' },
+    { name: 'Bidrag', category: 'Bidrag' },
+    { name: 'Pension', category: 'Pension' },
+  ];
+  const QUICK_FIXED = [
+    { name: 'Hyra', category: 'Boende' },
+    { name: 'El', category: 'Boende' },
+    { name: 'Försäkring', category: 'Försäkring' },
+    { name: 'Mobil', category: 'Abonnemang' },
+    { name: 'Bredband', category: 'Abonnemang' },
+    { name: 'Streaming', category: 'Abonnemang' },
+    { name: 'Gym', category: 'Hälsa' },
+    { name: 'Lån', category: 'Räkningar' },
+    { name: 'Sparande', category: 'Sparande' },
+  ];
 
   const openEditSuggestedFixed = (item: {
     id: string;
@@ -1283,6 +1274,40 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       }
     }
     setSheetEditor(null);
+  };
+
+  const renderQuickChips = (type: 'income' | 'fixed') => {
+    const taken = new Set(
+      (type === 'income' ? suggestedIncomes : suggestedFixedExpenses).map((i) =>
+        i.name.toLowerCase()
+      )
+    );
+    const chips = (type === 'income' ? QUICK_INCOMES : QUICK_FIXED).filter(
+      (c) => !taken.has(c.name.toLowerCase())
+    );
+    return (
+      <div className="flex flex-wrap gap-2">
+        {chips.map((c) => (
+          <button
+            key={c.name}
+            type="button"
+            onClick={() => openAddSheet(type, c)}
+            className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <Plus size={14} weight="bold" className="text-[var(--text-secondary)]" />
+            <span>{c.name}</span>
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => openAddSheet(type)}
+          className="h-10 pl-3 pr-4 rounded-full border border-dashed border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-secondary)] flex items-center gap-1.5 transition-all cursor-pointer"
+        >
+          <Plus size={14} weight="bold" />
+          <span>Annat</span>
+        </button>
+      </div>
+    );
   };
 
   const totalInc = incomes.reduce((sum, i) => sum + i.amount, 0);
@@ -1695,6 +1720,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               Vilka fasta utgifter har du?
             </h1>
+            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+              Räkningar som dras varje månad. Tryck och skriv beloppet.
+            </p>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
@@ -1782,14 +1810,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => openAddSheet('fixed')}
-              className="w-full py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Plus size={14} weight="bold" />
-              <span>Lägg till egen fast utgift</span>
-            </button>
+            <div className={suggestedFixedExpenses.length > 0 ? 'pt-3' : ''}>
+              {renderQuickChips('fixed')}
+            </div>
           </div>
 
           <div className="shrink-0 pt-3 space-y-2">
@@ -1833,6 +1856,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
               Vilka fasta inkomster har du?
             </h1>
+            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+              Det du får in varje månad, efter skatt. Tryck och skriv beloppet.
+            </p>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
@@ -1918,14 +1944,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => openAddSheet('income')}
-              className="w-full py-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Plus size={14} weight="bold" />
-              <span>Lägg till egen fast inkomst</span>
-            </button>
+            <div className={suggestedIncomes.length > 0 ? 'pt-3' : ''}>
+              {renderQuickChips('income')}
+            </div>
           </div>
 
           <div className="shrink-0 pt-3 space-y-2">
@@ -2331,7 +2352,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                       <input
                         type="text"
                         required
-                        autoFocus={sheetEditor.mode === 'add'}
+                        autoFocus={sheetEditor.mode === 'add' && !sheetEditor.name}
                         placeholder={
                           sheetEditor.type === 'income'
                             ? 't.ex. Lön eller CSN'
@@ -2373,6 +2394,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                           type="text"
                           inputMode="numeric"
                           required
+                          autoFocus={sheetEditor.mode === 'add' && !!sheetEditor.name}
                           placeholder="0"
                           value={sheetEditor.amount}
                           onChange={(e) =>
