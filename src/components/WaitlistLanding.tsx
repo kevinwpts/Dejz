@@ -474,25 +474,7 @@ const FAQ = [
 /* ------------------- Jämförelse: månad mot lön ------------------- */
 
 const ComparisonVisual: React.FC = () => (
-  <div className="space-y-3" aria-hidden="true">
-    {/* Vanlig budgetapp */}
-    <div className="rounded-container bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 sm:p-6">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-[var(--text-muted)]">Vanlig budgetapp</span>
-        <span className="text-[var(--text-muted)] tabular-nums">1–30 nov</span>
-      </div>
-      <div className="mt-3 text-sm text-[var(--text-secondary)]">Kvar av novemberbudgeten</div>
-      <div className="mt-0.5 font-display text-3xl font-semibold tracking-[-0.03em] tabular-nums text-[var(--text-muted)]">
-        4 120 kr
-      </div>
-      <div className="mt-4 h-1.5 rounded-pill bg-[var(--bg-color)] overflow-hidden">
-        <div className="h-full w-[63%] rounded-pill bg-[var(--text-disabled)]" />
-      </div>
-      <p className="mt-3 text-xs text-[var(--text-muted)] leading-[1.45]">
-        Men hyran dras den 27:e och lönen kommer den 25:e. Hur mycket har du egentligen?
-      </p>
-    </div>
-
+  <div aria-hidden="true">
     {/* Dejz */}
     <div className="rounded-container p-5 sm:p-6 text-white bg-[linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_18px_40px_-18px_rgba(91,61,245,0.6)]">
       <div className="flex items-center justify-between text-xs">
