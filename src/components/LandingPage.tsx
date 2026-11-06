@@ -38,6 +38,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
+  // Vilket mejl som skickats: bekräftelse av nytt konto eller återställning av lösenord
+  const [sentKind, setSentKind] = useState<'signup' | 'reset'>('reset');
 
   // Om någon utan konto försöker logga in med Google skickar Supabase tillbaka ett fel
   // (när "Allow new users to sign up" är avstängt). Visa då en vänlig förklaring.
@@ -51,7 +53,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         setActivePage('auth');
         setErrorMsg(
           desc.includes('signup') || desc.includes('sign up') || desc.includes('not allowed')
-            ? 'Dejz är inte öppet för nya konton än. Ställ dig på väntelistan så hör vi av oss!'
+            ? 'Det gick inte att skapa kontot med Google. Försök igen eller använd e-post.'
             : 'Inloggningen avbröts. Försök igen.'
         );
         window.history.replaceState(null, '', window.location.pathname);
@@ -147,7 +149,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     if (resendCooldown > 0 || resending) return;
     setResending(true);
     try {
-      await handleSendResetEmail(email);
+      if (sentKind === 'signup') {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email: email.trim(),
+          options: { emailRedirectTo: window.location.origin },
+        });
+        if (error) throw error;
+      } else {
+        await handleSendResetEmail(email);
+      }
       setResendCooldown(45);
     } catch {
       // Still set cooldown to prevent spamming
@@ -195,18 +206,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
+          options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
         if (data.user) {
           if (data.session) {
             onAuthenticated(data.user.email || cleanEmail, 'register');
           } else {
-            // Modern email verification state
+            // Kontot måste bekräftas via mejl först
+            setSentKind('signup');
             setResetEmailSent(true);
+            setResendCooldown(45);
           }
         }
       } else if (view === 'forgot_password') {
         await handleSendResetEmail(cleanEmail);
+        setSentKind('reset');
         setResetEmailSent(true);
         setResendCooldown(45);
       }
@@ -310,7 +325,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <span className="truncate max-w-[260px]">{email.trim()}</span>
               </div>
               <p className="text-[12px] text-[var(--text-muted)] pt-2 leading-relaxed max-w-xs mx-auto">
-                Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.
+                {sentKind === 'signup'
+                  ? 'Klicka på länken i mejlet för att bekräfta ditt konto – sen är du igång. Hittar du det inte? Kika i skräpposten.'
+                  : 'Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.'}
               </p>
             </div>
 
@@ -522,10 +539,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   Inget konto än?{' '}
                   <button
                     type="button"
-                    onClick={backToLanding}
+                    onClick={() => switchView('register')}
                     className="font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
                   >
-                    Ställ dig på väntelistan
+                    Skapa konto
                   </button>
                 </p>
               )}
@@ -557,11 +574,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
-  // Startsidan är just nu en väntelista. Registrering är stängd för nya besökare,
-  // men befintliga användare kan fortfarande logga in.
   return (
     <WaitlistLanding
       onLogin={() => openAuthPage('login')}
+      onSignup={() => openAuthPage('register')}
       existingEmail={existingEmail}
       onContinueExisting={onContinueExisting}
     />

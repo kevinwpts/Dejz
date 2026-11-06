@@ -21,11 +21,8 @@ interface AuthModalProps {
 
 type AuthView = 'login' | 'register' | 'forgot_password';
 
-/**
- * Registrering är stängd så länge Dejz bara har en väntelista.
- * Sätt till true när appen öppnar för alla.
- */
-const SIGNUPS_OPEN = false;
+/** Registrering är öppen – Dejz är en gratis betaversion. */
+const SIGNUPS_OPEN = true;
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
@@ -277,7 +274,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
       ) : (
         <>
-          {/* View Switcher (Login / Register) – dold medan Dejz bara har väntelista */}
+          {/* View Switcher (Login / Register) */}
           {SIGNUPS_OPEN && view !== 'forgot_password' && (
             <div className="ui-segmented grid-cols-2 mb-4">
               <button

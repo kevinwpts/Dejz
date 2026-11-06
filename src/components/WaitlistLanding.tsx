@@ -2,9 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
   CaretDown,
-  LockSimple,
-  Eye,
-  ArrowsClockwise,
   Check,
   CheckCircle,
   ShareNetwork,
@@ -15,7 +12,7 @@ import { supabase } from '../supabaseClient';
 import { PrivacyPolicySheet } from './PrivacyPolicy';
 import { DejzLogo } from './DejzLogo';
 
-export const DEJZ_SLOGAN = 'Äntligen vet du vad du har kvar.';
+export const DEJZ_SLOGAN = 'Se vad du har kvar till nästa lön.';
 
 /* ------------------------------------------------------------------ */
 /*  Väntelista – startsida för besökare som inte är inloggade          */
@@ -431,14 +428,14 @@ const STEPS = [
   {
     src: '/screens/ekonomi.webp?v=10',
     alt: 'Dejz – inkomster och fasta utgifter',
-    title: 'Koppla din bank',
-    text: 'Dejz hittar din lön, hyra och prenumerationer och räknar av dem varje löneperiod.',
+    title: 'Lägg in lön och räkningar',
+    text: 'En gång, på under två minuter. Dejz drar av hyra och prenumerationer varje löneperiod.',
   },
   {
     src: '/screens/historik.webp?v=10',
     alt: 'Dejz – historik över köp',
-    title: 'Köpen dyker upp av sig själva',
-    text: 'Varje köp hamnar i Dejz med butik, logga och kategori. Du behöver inte göra något.',
+    title: 'Logga köp på sekunder',
+    text: 'Skriv butik och belopp – Dejz väljer kategori och logga åt dig.',
   },
   {
     src: '/screens/analys.webp?v=10',
@@ -454,20 +451,20 @@ const FAQ = [
     a: 'Dejz räknar från lön till lön i stället för per kalendermånad. Du ser ett enda belopp – vad du har kvar fram till nästa lön – där räkningar och sparande redan är avräknade.',
   },
   {
-    q: 'Är det säkert att koppla min bank?',
-    a: 'Ja. Kopplingen sker via Enable Banking, en licensierad tjänst för öppen bankdata enligt EU:s regler (PSD2). Du loggar in med BankID hos din egen bank. Dejz kan bara läsa saldo och transaktioner – aldrig flytta pengar – och du kan koppla bort banken när du vill.',
+    q: 'Vad kostar det?',
+    a: 'Ingenting. Dejz är en gratis betaversion just nu – du behöver inget kort för att komma igång.',
   },
   {
-    q: 'Måste jag koppla min bank?',
-    a: 'Nej, men det är så Dejz fungerar bäst – då uppdateras allt av sig självt. Vill du hellre sköta det själv lägger du in lön och räkningar en gång och loggar köp med text eller röst på några sekunder.',
+    q: 'Måste jag ladda ner något?',
+    a: 'Nej. Dejz fungerar direkt i mobilens webbläsare. Välj "Lägg till på hemskärmen" så ligger Dejz bland dina andra appar.',
   },
   {
-    q: 'När kommer appen?',
-    a: 'Dejz kommer snart till App Store och Google Play. Du som står på väntelistan får testa först – vi mejlar dig när det är dags.',
+    q: 'Kan jag koppla min bank?',
+    a: 'Inte än – bankkoppling kommer senare. Idag lägger du in lön och fasta räkningar en gång och loggar köp själv på några sekunder.',
   },
   {
-    q: 'Vad händer med min e-postadress?',
-    a: 'Den används bara för att höra av oss om Dejz – till exempel när du kan börja använda appen. Vill du bli borttagen räcker det att svara på mejlet.',
+    q: 'Vad händer med mina uppgifter?',
+    a: 'De används bara för att Dejz ska fungera och säljs aldrig vidare. Du kan radera ditt konto och all data när du vill i inställningarna.',
   },
 ];
 
@@ -536,91 +533,47 @@ const StoreBadges: React.FC<{ className?: string }> = ({ className = '' }) => (
   </div>
 );
 
-/* --------------------------- Bankkoppling --------------------------- */
-
-const BANKS = [
-  { file: 'seb', name: 'SEB' },
-  { file: 'swedbank', name: 'Swedbank' },
-  { file: 'handelsbanken', name: 'Handelsbanken' },
-  { file: 'nordea', name: 'Nordea' },
-  { file: 'lansforsakringar', name: 'Länsförsäkringar' },
-  { file: 'danske', name: 'Danske Bank' },
-  { file: 'icabanken', name: 'ICA Banken' },
-  { file: 'skandia', name: 'Skandia' },
-  { file: 'sbab', name: 'SBAB' },
-  { file: 'revolut', name: 'Revolut' },
-  { file: 'klarna', name: 'Klarna' },
-];
-
-const BANK_POINTS = [
-  { icon: LockSimple, text: 'Du loggar in med BankID hos din egen bank' },
-  { icon: Eye, text: 'Dejz kan bara läsa – aldrig flytta pengar' },
-  { icon: ArrowsClockwise, text: 'Saldo och köp uppdateras av sig själva' },
-];
-
-const BankSection: React.FC = () => (
-  <section className="mt-24 sm:mt-32 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-    <div className="text-center lg:text-left">
-      <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
-        Koppla din bank. Se alltid vad du har kvar.
-      </h2>
-      <p className="mt-4 text-[var(--text-secondary)] leading-[1.5] tracking-[-0.005em] max-w-xl mx-auto lg:mx-0 text-pretty">
-        När banken är kopplad räknar Dejz av varje köp direkt. Du behöver aldrig skriva in något – du öppnar
-        appen och ser hur mycket du har kvar till nästa lön, just nu.
-      </p>
-      <ul className="mt-6 space-y-3 max-w-md mx-auto lg:mx-0 text-left">
-        {BANK_POINTS.map(({ icon: Icon, text }) => (
-          <li key={text} className="flex items-center gap-3 text-sm text-[var(--text-primary)]">
-            <span className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)] flex items-center justify-center shrink-0">
-              <Icon size={16} weight="bold" />
-            </span>
-            {text}
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <div className="rounded-container bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 sm:p-7 shadow-sm">
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-        {BANKS.map((bank) => (
-          <div
-            key={bank.file}
-            className="h-14 sm:h-16 rounded-card-nested bg-white border border-[var(--border-subtle)] flex items-center justify-center px-3"
-          >
-            <img
-              src={`/banks/${bank.file}.png`}
-              alt={bank.name}
-              loading="lazy"
-              decoding="async"
-              className="max-h-5 sm:max-h-6 max-w-full w-auto object-contain"
-            />
-          </div>
-        ))}
-        <div className="h-14 sm:h-16 rounded-card-nested bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-center text-center px-2">
-          <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] leading-tight">
-            + över 100 banker till
-          </span>
-        </div>
-      </div>
-      <p className="mt-4 text-xs text-[var(--text-muted)] text-center">
-        Bankkopplingen sker säkert via Enable Banking.
-      </p>
-    </div>
-  </section>
-);
-
 interface WaitlistLandingProps {
   onLogin: () => void;
+  onSignup: () => void;
   existingEmail?: string | null;
   onContinueExisting?: () => void;
 }
 
+/** Huvudknappen: skapa ett gratis konto. */
+const SignupCta: React.FC<{
+  onSignup: () => void;
+  onDark?: boolean;
+  hideNote?: boolean;
+  className?: string;
+}> = ({ onSignup, onDark, hideNote, className = '' }) => (
+  <div className={className}>
+    <button
+      type="button"
+      onClick={onSignup}
+      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 h-14 px-8 rounded-pill font-display font-semibold text-base tracking-[-0.01em] active:scale-[0.98] transition-all cursor-pointer ${
+        onDark
+          ? 'bg-white text-[#3F22C9] hover:bg-white/90'
+          : 'bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 shadow-[0_12px_30px_-12px_rgba(91,61,245,0.6)]'
+      }`}
+    >
+      Skapa konto – gratis
+      <ArrowRight size={18} weight="bold" />
+    </button>
+    {!hideNote && (
+      <p className={`mt-3 text-sm ${onDark ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
+        Gratis betaversion · Fungerar direkt i mobilen
+      </p>
+    )}
+  </div>
+);
+
 export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
   onLogin,
+  onSignup,
   existingEmail,
   onContinueExisting,
 }) => {
-  const heroInputRef = useRef<HTMLInputElement>(null);
   const [privacyOpen, setPrivacyOpen] = useState(() => {
     try {
       return window.location.pathname.replace(/\/$/, '') === '/integritet';
@@ -665,19 +618,15 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         <section className="grid lg:grid-cols-[1.1fr_1fr] gap-14 lg:gap-10 items-center pt-10 sm:pt-16 lg:pt-20">
           <div className="text-center lg:text-left animate-fade-in">
             <h1 className="font-display font-semibold text-[2.5rem] leading-[1.02] sm:text-[3.25rem] lg:text-[4rem] tracking-[-0.045em] text-[var(--text-primary)] text-balance">
-              Äntligen vet du vad du har kvar.
+              Se vad du har kvar till nästa lön.
             </h1>
 
             <p className="mt-4 text-[17px] sm:text-lg text-[var(--text-secondary)] max-w-[26rem] sm:max-w-lg mx-auto lg:mx-0 leading-[1.45] tracking-[-0.01em] text-pretty">
-              Dejz visar hur mycket du kan spendera fram till nästa lön – inte till månadsskiftet. Koppla din
-              bank så räknas räkningar, sparande och köp av automatiskt.
+              Dejz räknar från lön till lön – inte till månadsskiftet. Lägg in lön och räkningar en gång, så
+              ser du alltid ett enda belopp: det du faktiskt kan spendera.
             </p>
 
-            <div className="mt-8 max-w-md mx-auto lg:mx-0">
-              <WaitlistForm inputRef={heroInputRef} />
-            </div>
-
-            <StoreBadges className="mt-6 justify-center lg:justify-start" />
+            <SignupCta onSignup={onSignup} className="mt-8" />
 
             {existingEmail && onContinueExisting && (
               <button
@@ -717,8 +666,6 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
 
           <ComparisonVisual />
         </section>
-
-        <BankSection />
 
         {/* Så funkar det */}
         <section className="mt-24 sm:mt-32">
@@ -767,22 +714,12 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         {/* Avslutande CTA */}
         <section className="relative overflow-hidden mt-24 sm:mt-32 rounded-container text-white px-6 py-12 sm:px-12 sm:py-16 text-center bg-[radial-gradient(120%_90%_at_100%_0%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_55%),radial-gradient(80%_70%_at_0%_100%,rgba(255,140,210,0.3)_0%,rgba(255,140,210,0)_60%),linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_24px_60px_-24px_rgba(91,61,245,0.7)]">
           <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
-            Äntligen vet du vad du har kvar.
+            Se vad du har kvar till nästa lön.
           </h2>
           <p className="mt-3 text-white/80 max-w-md mx-auto">
-            Skriv upp dig på väntelistan så får du testa Dejz först.
+            Kom igång på två minuter. Ingen bank, inget kort.
           </p>
-          <div className="mt-8 max-w-md mx-auto text-left">
-            <WaitlistForm onDark />
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-white/85 text-sm">
-            <span className="inline-flex items-center gap-2">
-              <AppleMark size={17} /> Kommer snart på App Store
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <GooglePlayColor size={17} /> Kommer snart på Google Play
-            </span>
-          </div>
+          <SignupCta onSignup={onSignup} onDark hideNote className="mt-8" />
         </section>
 
         <footer className="mt-12 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">

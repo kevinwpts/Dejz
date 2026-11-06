@@ -1,6 +1,6 @@
 # Integritetspolicy för Dejz
 
-Senast uppdaterad: 2026-11-05
+Senast uppdaterad: 2026-11-06
 
 Här förklarar vi enkelt vilka uppgifter Dejz sparar, varför och hur länge. Vi säljer aldrig dina uppgifter.
 
@@ -9,8 +9,15 @@ Här förklarar vi enkelt vilka uppgifter Dejz sparar, varför och hur länge. V
 ## 1. Vem ansvarar för dina uppgifter?
 Dejz är personuppgiftsansvarig. Har du frågor eller vill använda dina rättigheter når du oss på hej@dejz.se.
 
-## 2. Väntelistan
-När du skriver upp dig sparar vi:
+## 2. Ditt konto och appen
+När du skapar ett konto sparar vi din e-postadress och ditt namn. Lösenordet sparas krypterat – vi kan aldrig se det.
+
+I appen sparar vi det du själv lägger in, till exempel lön, fasta räkningar, sparmål och köp. Uppgifterna används bara för att Dejz ska fungera för dig. Grunden är vårt avtal med dig om att leverera appen.
+
+Vi sparar uppgifterna så länge du har ett konto. Du kan radera ditt konto och all data när som helst i appen under Inställningar → Data & säkerhet → Radera konto.
+
+## 3. Väntelistan
+Om du skrev upp dig på väntelistan sparade vi:
 - din e-postadress,
 - dina svar på de frivilliga frågorna (var du hittade Dejz och vad som är svårast med ekonomin),
 - vilken länk du kom från, till exempel en TikTok-länk,
@@ -22,17 +29,14 @@ Vi sparar uppgifterna tills du har fått din inbjudan till Dejz, dock längst 24
 
 För att stoppa spam sparar vi en krypterad kod av din IP-adress i högst 24 timmar. Vi kan inte se din IP-adress utifrån koden.
 
-## 3. Appen
-När du använder appen sparar vi det du själv lägger in, till exempel inkomster, fasta räkningar, sparmål och köp. Uppgifterna används bara för att Dejz ska fungera för dig. Du kan radera ditt konto och all data när som helst i appen under Profil → Radera konto.
-
-Om du kopplar din bank hämtar vi saldo och transaktioner från de konton du väljer, via Enable Banking. Vi kan bara läsa uppgifterna – aldrig flytta pengar – och du kan koppla bort banken när du vill.
-
 ## 4. Vilka hjälper oss?
 Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:
 - Supabase – databas och inloggning, lagrat inom EU/EES.
-- Enable Banking – licensierad tjänst för bankkoppling (endast om du kopplar din bank).
+- Google (Gemini) – AI som känner igen butiksnamn och väljer kategori och logga. Vi skickar bara namnet på butiken, aldrig vem du är.
 - Resend – skickar våra mejl.
 - Vercel – driftar webbplatsen.
+
+Bankkoppling via Enable Banking kommer senare. Policyn uppdateras innan den blir tillgänglig.
 
 ## 5. Dina rättigheter
 Du har rätt att få veta vilka uppgifter vi har om dig, få dem rättade eller raderade och att ta tillbaka ditt samtycke. Tycker du att vi hanterar dina uppgifter fel kan du klaga hos Integritetsskyddsmyndigheten (IMY).

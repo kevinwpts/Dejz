@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { X } from '@phosphor-icons/react';
 
 /* ------------------------------------------------------------------ */
-/*  Integritetspolicy – visas som ett blad över väntelistesidan.       */
+/*  Integritetspolicy – visas som ett blad över startsidan.           */
 /*  Håll innehållet i synk med PRIVACY.md i projektroten.              */
 /* ------------------------------------------------------------------ */
 
-export const PRIVACY_UPDATED = '2026-11-05';
+export const PRIVACY_UPDATED = '2026-11-06';
 export const PRIVACY_CONTACT = 'hej@dejz.se';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -32,8 +32,23 @@ export const PrivacyPolicyContent: React.FC = () => (
       </p>
     </Section>
 
+    <Section title="Ditt konto och appen">
+      <p>
+        När du skapar ett konto sparar vi din e-postadress och ditt namn. Lösenordet sparas krypterat – vi kan aldrig
+        se det.
+      </p>
+      <p>
+        I appen sparar vi det du själv lägger in, till exempel lön, fasta räkningar, sparmål och köp. Uppgifterna
+        används bara för att Dejz ska fungera för dig. Grunden är vårt avtal med dig om att leverera appen.
+      </p>
+      <p>
+        Vi sparar uppgifterna så länge du har ett konto. Du kan radera ditt konto och all data när som helst i appen
+        under Inställningar → Data & säkerhet → Radera konto.
+      </p>
+    </Section>
+
     <Section title="Väntelistan">
-      <p>När du skriver upp dig sparar vi:</p>
+      <p>Om du skrev upp dig på väntelistan sparade vi:</p>
       <ul className="list-disc pl-5 space-y-1">
         <li>din e-postadress,</li>
         <li>dina svar på de frivilliga frågorna (var du hittade Dejz och vad som är svårast med ekonomin),</li>
@@ -54,26 +69,18 @@ export const PrivacyPolicyContent: React.FC = () => (
       </p>
     </Section>
 
-    <Section title="Appen">
-      <p>
-        När du använder appen sparar vi det du själv lägger in, till exempel inkomster, fasta räkningar, sparmål och
-        köp. Uppgifterna används bara för att Dejz ska fungera för dig. Du kan radera ditt konto och all data när som
-        helst i appen under Profil → Radera konto.
-      </p>
-      <p>
-        Om du kopplar din bank hämtar vi saldo och transaktioner från de konton du väljer, via Enable Banking. Vi kan
-        bara läsa uppgifterna – aldrig flytta pengar – och du kan koppla bort banken när du vill.
-      </p>
-    </Section>
-
     <Section title="Vilka hjälper oss?">
       <p>Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:</p>
       <ul className="list-disc pl-5 space-y-1">
         <li>Supabase – databas och inloggning, lagrat inom EU/EES.</li>
-        <li>Enable Banking – licensierad tjänst för bankkoppling (endast om du kopplar din bank).</li>
+        <li>
+          Google (Gemini) – AI som känner igen butiksnamn och väljer kategori och logga. Vi skickar bara namnet på
+          butiken, aldrig vem du är.
+        </li>
         <li>Resend – skickar våra mejl.</li>
         <li>Vercel – driftar webbplatsen.</li>
       </ul>
+      <p>Bankkoppling via Enable Banking kommer senare. Policyn uppdateras innan den blir tillgänglig.</p>
     </Section>
 
     <Section title="Dina rättigheter">

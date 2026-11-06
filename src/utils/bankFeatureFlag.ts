@@ -7,25 +7,21 @@ const ADMIN_EMAILS = new Set([
 
 /**
  * Feature flag for Enable Banking in Onboarding and Settings.
- * Enabled for all authenticated accounts so new test accounts also see the bank step in Onboarding.
- * Can be restricted again by setting VITE_ENABLE_BANKING_PUBLIC="false".
+ * Bank connection needs a company (AB), so it is admin-only for now.
+ * Open it for everyone again by setting VITE_ENABLE_BANKING_PUBLIC="true".
  */
+export function isBankEnabledForEmail(email: string | null | undefined): boolean {
+  if (import.meta.env.VITE_ENABLE_BANKING_PUBLIC === 'true') return true;
+  return !!email && ADMIN_EMAILS.has(email.toLowerCase().trim());
+}
+
 export function isBankIntegrationEnabledForUser(
   user: User | null | undefined,
   userRole?: string | null
 ): boolean {
   if (!user) return false;
-
   if (userRole === 'admin') return true;
-  const email = (user.email || '').toLowerCase().trim();
-  if (ADMIN_EMAILS.has(email)) return true;
-
-  // Enabled by default for all logged-in accounts unless explicitly turned off
-  if (import.meta.env.VITE_ENABLE_BANKING_PUBLIC === 'false') {
-    return false;
-  }
-
-  return true;
+  return isBankEnabledForEmail(user.email);
 }
 
 export const BANK_ONBOARDING_DRAFT_KEY = 'dejz_onboarding_bank_draft_v1';

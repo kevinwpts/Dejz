@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
 import {
   Bank,
   ArrowClockwise,
@@ -356,6 +357,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   };
 
   const hasActiveBank = Boolean(connectedBank || connections.length > 0);
+  // Visa bankinställningarna för admin, eller för den som redan har en bank ansluten
+  const bankEnabled = isBankEnabledForEmail(userEmail) || hasActiveBank;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2876,33 +2879,49 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <section className="space-y-2">
         <span className={sectionLabelClass}>Ekonomi</span>
         <div className="ui-admin-card">
-          {/* Bankkonton */}
-          <button
-            type="button"
-            onClick={() => setSubView('bank')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <CreditCard size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Bankkonton</span>
+          {/* Bankkonton – bara för admin tills bankkopplingen finns för alla */}
+          {bankEnabled ? (
+            <button
+              type="button"
+              onClick={() => setSubView('bank')}
+              className="ui-admin-row"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <CreditCard size={18} weight="regular" />
+                </span>
+                <span className={rowTitleClass}>Bankkonton</span>
+              </div>
+              <div className="ui-admin-right">
+                <span
+                  className={`ui-admin-value ${
+                    hasActiveBank
+                      ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                      : ''
+                  }`}
+                >
+                  {hasActiveBank ? 'Ansluten' : 'Anslut'}
+                </span>
+                <span className="ui-admin-chevron">
+                  <CaretRight size={13} />
+                </span>
+              </div>
+            </button>
+          ) : (
+            <div className="ui-admin-row cursor-default">
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <span className="ui-admin-icon-slot">
+                  <CreditCard size={18} weight="regular" />
+                </span>
+                <span className={rowTitleClass}>Bankkoppling</span>
+              </div>
+              <div className="ui-admin-right">
+                <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-muted)]">
+                  Kommer snart
+                </span>
+              </div>
             </div>
-            <div className="ui-admin-right">
-              <span
-                className={`ui-admin-value ${
-                  hasActiveBank
-                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                    : ''
-                }`}
-              >
-                {hasActiveBank ? 'Ansluten' : 'Anslut'}
-              </span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
+          )}
 
           {/* Lönedag */}
           <button

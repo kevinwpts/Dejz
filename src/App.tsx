@@ -30,6 +30,7 @@ import { SavingsGoalsView } from './components/SavingsGoalsView';
 import { FriendsChatView } from './components/FriendsChatView';
 import { LandingPage } from './components/LandingPage';
 import { OnboardingFlow } from './components/OnboardingFlow';
+import { isBankEnabledForEmail } from './utils/bankFeatureFlag';
 import {
   PartnerSimulatorColumn,
   getSplitSimulatorActive,
@@ -2970,12 +2971,21 @@ export const App: React.FC = () => {
         // demodata – används för skärmbilder till startsidan. Finns inte i produktionsbygget.
         if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')) {
           const demo = seedDemoData();
-          localStorage.setItem('dejz_onboarding_v2_done', 'true');
-          localStorage.setItem('dejz_onboarding_completed', 'true');
-          localStorage.removeItem('dejz_onboarding_in_progress');
-          localStorage.removeItem('dejz_onboarding_step');
+          // ?demo&onboarding visar introduktionen från början (för att testa och ta skärmbilder)
+          const demoOnboarding = new URLSearchParams(window.location.search).has('onboarding');
+          if (demoOnboarding) {
+            localStorage.removeItem('dejz_onboarding_v2_done');
+            localStorage.removeItem('dejz_onboarding_completed');
+            localStorage.setItem('dejz_onboarding_in_progress', 'true');
+            localStorage.setItem('dejz_onboarding_step', '1');
+          } else {
+            localStorage.setItem('dejz_onboarding_v2_done', 'true');
+            localStorage.setItem('dejz_onboarding_completed', 'true');
+            localStorage.removeItem('dejz_onboarding_in_progress');
+            localStorage.removeItem('dejz_onboarding_step');
+          }
           localStorage.removeItem('dejz_logged_out');
-          setIsOnboardingActive(false);
+          setIsOnboardingActive(demoOnboarding);
           await runCoordinateHydration({ ...demo.user, created_at: '2025-01-01T00:00:00.000Z' });
           return;
         }
@@ -4882,6 +4892,7 @@ export const App: React.FC = () => {
     return (
       <>
         <OnboardingFlow
+          bankEnabled={isBankEnabledForEmail(userEmail)}
           initialName={userName || ''}
           targetPayday={targetPayday}
           initialWeekendHandling={weekendHandling}

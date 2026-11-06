@@ -104,9 +104,18 @@ interface OnboardingFlowProps {
   onDeleteFixed: (id: string) => void;
   onComplete: () => void;
   onBackToLanding?: () => void;
+  /** Bankkoppling (steg 2) visas bara när den är påslagen – idag bara för admin. */
+  bankEnabled?: boolean;
 }
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
+
+/**
+ * Stegordning. Med bank: namn → bank → fasta (förslag från banken) → inkomster → lön → resultat.
+ * Utan bank följer flödet hur man tänker lön till lön: namn → lönedag → inkomst → fasta → resultat.
+ */
+const STEP_ORDER_WITH_BANK: OnboardingStep[] = [1, 2, 3, 4, 5, 6];
+const STEP_ORDER_MANUAL: OnboardingStep[] = [1, 5, 4, 3, 6];
 
 interface SheetEditorState {
   mode: 'add' | 'edit';
@@ -144,11 +153,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   onDeleteFixed,
   onComplete,
   onBackToLanding,
+  bankEnabled = false,
 }) => {
+  const stepOrder = bankEnabled ? STEP_ORDER_WITH_BANK : STEP_ORDER_MANUAL;
   const [step, setStep] = useState<OnboardingStep>(() => {
     try {
       const savedStep = Number(localStorage.getItem('dejz_onboarding_step'));
-      if (savedStep >= 1 && savedStep <= 6) {
+      if (stepOrder.includes(savedStep as OnboardingStep)) {
         return savedStep as OnboardingStep;
       }
     } catch {
@@ -261,6 +272,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // Analysera RIKTIGA banktransaktioner från Enable Banking + Gemini AI först när användaren når steg 3 eller 4 (efter att konton valts i steg 2)
   useEffect(() => {
     if (step !== 3 && step !== 4) return;
+
+    // Utan bank: hämta inget från banken, visa bara vanliga förslag att bocka i (eller det som redan sparats)
+    if (!bankEnabled) {
+      if (suggestedFixedExpenses.length === 0 && fixedExpenses.length === 0) {
+        setSuggestedFixedExpenses([
+          { id: '1', name: 'Hyra / Bostad', amount: 7500, dueDay: 27, category: 'Boende', checked: false },
+          { id: '2', name: 'El & Nät', amount: 650, dueDay: 28, category: 'Boende', checked: false },
+          { id: '3', name: 'Hemförsäkring', amount: 195, dueDay: 28, category: 'Försäkringar', checked: false },
+          { id: '4', name: 'Mobil / Bredband', amount: 399, dueDay: 28, category: 'Abonnemang', checked: false },
+        ]);
+      }
+      if (suggestedIncomes.length === 0 && incomes.length === 0) {
+        setSuggestedIncomes([
+          { id: 'inc-1', name: 'Lön', amount: 28500, payday, category: 'Lön', checked: false },
+          { id: 'inc-2', name: 'CSN', amount: 13156, payday: 25, category: 'CSN', checked: false },
+          { id: 'inc-3', name: 'Barnbidrag', amount: 1250, payday: 20, category: 'Bidrag', checked: false },
+        ]);
+      }
+      return;
+    }
+
     if (hasAnalyzedBank && isBankDataDetected && !pendingSyncConnectionIdRef.current) return;
 
     let isMounted = true;
@@ -639,7 +671,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         onDeleteFixed(existing.id);
       }
     });
-    navigateStep(4, 'forward');
+    goNext(3);
   };
 
   const handleSaveSuggestedIncomes = () => {
@@ -677,9 +709,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       }
     });
 
-    // Utgå automatiskt från dagen på den valda/hittade lönen i nästa steg (När får du lön?)
+    // Utgå automatiskt från dagen på den valda/hittade lönen i nästa steg (När får du lön?).
+    // Utan bank har lönedagen redan valts innan inkomsterna, så då rör vi den inte.
     const checkedList = suggestedIncomes.filter((i) => i.checked);
-    if (checkedList.length > 0) {
+    if (bankEnabled && checkedList.length > 0) {
       const primaryInc =
         checkedList.find((i) => i.category === 'Lön' || i.category === 'Ersättning') ||
         [...checkedList].sort((a, b) => b.amount - a.amount)[0];
@@ -688,7 +721,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       }
     }
 
-    navigateStep(5, 'forward');
+    goNext(4);
   };
 
   // BottomSheet editor state (för att lägga till eller ändra post)
@@ -975,6 +1008,12 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     setStep(next);
   };
 
+  const stepIndex = Math.max(0, stepOrder.indexOf(step));
+  const goNext = (from: OnboardingStep) => {
+    const next = stepOrder[stepOrder.indexOf(from) + 1];
+    if (next) navigateStep(next, 'forward');
+  };
+
   const handleNextFromStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
@@ -985,7 +1024,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       // ignore
     }
     onSaveName(trimmed);
-    navigateStep(2, 'forward');
+    goNext(1);
   };
 
   const handleNextFromStep5Payday = () => {
@@ -1001,7 +1040,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     if (onUpdateWeekendHandling) {
       onUpdateWeekendHandling(weekendHandling);
     }
-    navigateStep(6, 'forward');
+    goNext(5);
   };
 
   const openAddSheet = (type: 'income' | 'fixed') => {
@@ -1272,8 +1311,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 setAuthError(null);
                 return;
               }
-              if (step > 1) {
-                navigateStep((step - 1) as OnboardingStep, 'back');
+              if (stepIndex > 0) {
+                navigateStep(stepOrder[stepIndex - 1], 'back');
               } else if (onBackToLanding) {
                 onBackToLanding();
               }
@@ -1288,19 +1327,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         {/* En enda lång sammanhängande progress-bar utan stegtext */}
         <div className="w-full h-1 rounded-full bg-[var(--border-subtle)] overflow-hidden">
           <div
-            className={`h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out ${
-              step === 1
-                ? 'w-1/6'
-                : step === 2
-                ? 'w-2/6'
-                : step === 3
-                ? 'w-3/6'
-                : step === 4
-                ? 'w-4/6'
-                : step === 5
-                ? 'w-5/6'
-                : 'w-full'
-            }`}
+            className="h-full rounded-full bg-[var(--text-primary)] transition-all duration-300 ease-out"
+            style={{ width: `${((stepIndex + 1) / stepOrder.length) * 100}%` }}
           />
         </div>
       </header>
