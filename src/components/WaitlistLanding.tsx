@@ -435,7 +435,7 @@ const STEPS = [
     src: '/screens/historik.webp?v=10',
     alt: 'Dejz – historik över köp',
     title: 'Logga köp på sekunder',
-    text: 'Skriv butik och belopp – Dejz väljer kategori och logga åt dig.',
+    text: 'Skriv eller säg "Ica 342" – Dejz fyller i belopp, kategori och logga åt dig.',
   },
   {
     src: '/screens/analys.webp?v=10',
@@ -460,7 +460,7 @@ const FAQ = [
   },
   {
     q: 'Kan jag koppla min bank?',
-    a: 'Inte än – bankkoppling kommer senare. Idag lägger du in lön och fasta räkningar en gång och loggar köp själv på några sekunder.',
+    a: 'Inte än – bankkoppling kommer snart. Idag lägger du in lön och fasta räkningar en gång och loggar köp själv: skriv eller säg "Ica 342" så är det klart.',
   },
   {
     q: 'Vad händer med mina uppgifter?',
@@ -562,7 +562,7 @@ const SignupCta: React.FC<{
     </button>
     {!hideNote && (
       <p className={`mt-3 text-sm ${onDark ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
-        Gratis betaversion · Fungerar direkt i mobilen
+        Gratis betaversion · Bankkoppling kommer snart
       </p>
     )}
   </div>

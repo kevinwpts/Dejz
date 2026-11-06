@@ -57,6 +57,7 @@ import { formatIsoDateStockholm } from '../../utils/swedishDate';
 
 
 import { SwishLogo } from '../SwishLogo';
+import { parseQuickEntry } from '../../utils/quickEntry';
 import {
   inferCategoryAndMethodFromName,
   categorizeBankTransactionForApp,
@@ -212,6 +213,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   };
 
   const isIncome = isCreateMode ? txType === 'income' : activeTx?.type === 'income';
+
+  // Snabbinmatning: "Ica 342" i namnfältet → namn "Ica" och belopp 342 (bara när beloppet är tomt)
+  const applyQuickEntry = () => {
+    if (!isCreateMode || String(amount).trim() !== '') return;
+    const parsed = parseQuickEntry(title);
+    if (!parsed) return;
+    setTitle(parsed.name);
+    setAmount(String(parsed.amount));
+    const inferred = inferCategoryAndMethodFromName(parsed.name, isIncome ? 'income' : 'transaction');
+    if (inferred?.category) setCategory(inferred.category);
+    if (inferred?.paymentMethod) setPaymentMethod(inferred.paymentMethod);
+  };
 
   const availableCategories = useMemo(() => {
     const list = isIncome ? getStoredIncomeCategories() : getStoredExpenseCategories();
@@ -2170,8 +2183,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     <input
                       type="text"
                       autoFocus={isCreateMode}
-                      placeholder={isIncome ? 'Inkomstkälla' : 'Butik eller köp'}
+                      enterKeyHint="next"
+                      placeholder={
+                        isIncome ? 'Inkomstkälla' : isCreateMode ? 'T.ex. Ica 342' : 'Butik eller köp'
+                      }
                       value={title}
+                      onBlur={applyQuickEntry}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && isCreateMode) {
+                          e.preventDefault();
+                          applyQuickEntry();
+                        }
+                      }}
                       onChange={(e) => {
                         const nextTitle = e.target.value;
                         setTitle(nextTitle);
