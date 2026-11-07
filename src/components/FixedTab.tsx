@@ -115,7 +115,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               Fasta utgifter
             </span>
             <span className="ui-stat-value text-[var(--text-primary)]">
-              -{formatKr(totalFixedExpenses)}
+              −{formatKr(totalFixedExpenses)}
             </span>
           </div>
 
@@ -353,7 +353,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
 
                     <div className="text-right shrink-0">
                       <span className="ui-row-amount">
-                        {displayAmt > 0 ? `-${formatKr(displayAmt)}` : '0 kr'}
+                        {displayAmt > 0 ? `−${formatKr(displayAmt)}` : '0 kr'}
                       </span>
                       <span className="ui-row-meta flex items-center justify-end gap-1">
                         <span

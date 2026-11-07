@@ -568,7 +568,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                       : 'text-[var(--text-primary)]'
                   }`}
                 >
-                  Totalt {netSum > 0 ? `+${absStr}` : netSum < 0 ? `-${absStr}` : '0 kr'}
+                  Totalt {netSum > 0 ? `+${absStr}` : netSum < 0 ? `−${absStr}` : '0 kr'}
                 </span>
               );
             })()}
@@ -929,7 +929,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                   {group.net > 0
                     ? `+${formatKr(group.net)}`
                     : group.net < 0
-                    ? `-${formatKr(Math.abs(group.net))}`
+                    ? `−${formatKr(Math.abs(group.net))}`
                     : formatKr(0)}
                 </span>
               </div>
@@ -1017,7 +1017,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
                           <span
                             className={isIncome ? 'ui-row-amount-income' : 'ui-row-amount'}
                           >
-                            {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                            {isIncome ? `+${formatKr(tx.amount)}` : `−${formatKr(tx.amount)}`}
                           </span>
                           {(() => {
                             const isPending =

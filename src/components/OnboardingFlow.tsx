@@ -1800,7 +1800,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
                     <div className="text-right shrink-0">
                       <span className="ui-row-amount">
-                        -{formatKr(item.amount)}
+                        −{formatKr(item.amount)}
                       </span>
                       <span className="ui-row-meta">
                         {item.isShared && hasConnectedHouseholdPartner()
@@ -2092,7 +2092,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                   Fasta utgifter
                 </span>
                 <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                  -{formatKr(totalFix)}
+                  −{formatKr(totalFix)}
                 </span>
               </div>
 

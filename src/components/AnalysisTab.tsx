@@ -718,7 +718,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               Utgifter
             </span>
             <span className="ui-stat-value text-[var(--text-primary)]">
-              -{formatKr(totalSpent)}
+              −{formatKr(totalSpent)}
             </span>
           </div>
 
@@ -796,7 +796,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                             {item.isIncomeCategory
                               ? `+${formatKr(item.amount)}`
                               : item.amount > 0
-                              ? `-${formatKr(item.amount)}`
+                              ? `−${formatKr(item.amount)}`
                               : formatKr(0)}
                           </span>
                         </div>
@@ -910,7 +910,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                     >
                                       {isIncome
                                         ? `+${formatKr(subItem.amount)}`
-                                        : `-${formatKr(subItem.amount)}`}
+                                        : `−${formatKr(subItem.amount)}`}
                                     </span>
                                     {subItem.date && (
                                       <span className="ui-row-meta">

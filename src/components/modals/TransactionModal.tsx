@@ -729,7 +729,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           txIsIncome ? 'ui-row-amount-income' : ''
                         }`}
                       >
-                        {txIsIncome ? '+' : '-'}
+                        {txIsIncome ? '+' : '−'}
                         {formatKr(tx.amount)}
                       </span>
                       <span className="ui-row-meta">
@@ -1597,7 +1597,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
                 }`}
               >
-                {isIncome ? '+' : '-'}
+                {isIncome ? '+' : '−'}
                 {formatKr(activeTx.amount)}
               </div>
             ) : (
@@ -1606,15 +1606,22 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   isIncome ? 'ui-hero-amount-income' : 'ui-hero-amount'
                 }`}
               >
-                <span className="font-display font-bold text-2xl sm:text-3xl">
-                  {isIncome ? '+' : '-'}
+                <span className="font-display font-bold text-2xl sm:text-3xl mr-0.5">
+                  {isIncome ? '+' : '−'}
                 </span>
+                {/* Rutan blir exakt lika bred som siffrorna (en osynlig kopia bestämmer bredden),
+                    så att tecknet sitter ihop med beloppet */}
+                <span className="relative inline-block">
+                  <span
+                    aria-hidden="true"
+                    className="invisible whitespace-pre font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em]"
+                  >
+                    {amount || '0'}
+                  </span>
                 <input
                   type="text"
                   inputMode="numeric"
                   spellCheck={false}
-                  size={Math.max(1, (amount || '0').length)}
-                  style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                   value={amount}
                   onChange={(e) => {
                     const cleaned = e.target.value.replace(/[^\d]/g, '');
@@ -1624,11 +1631,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       onUpdate({ ...activeTx, amount: num });
                     }
                   }}
-                  className={`bg-transparent border-0 focus:outline-none focus:ring-0 text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 ${
+                  className={`absolute inset-0 w-full min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-left font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] p-0 ${
                     isIncome ? 'text-emerald-500' : 'text-[var(--text-primary)]'
                   }`}
                   placeholder="0"
                 />
+                </span>
                 <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">
                   kr
                 </span>
@@ -1659,28 +1667,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <div className="space-y-3.5">
             {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
             <div className="grid grid-cols-4 gap-2">
-              {!isIncome ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const baseFullAmt = Math.round(
-                      Math.abs(Number(activeTx.originalAmount || activeTx.amount) || 0)
-                    );
-                    setSwishCustomShare(
-                      String(activeTx.pendingSwishAmount || Math.max(1, Math.round(baseFullAmt / 2)))
-                    );
-                    navigateSubView('swish', 'forward');
-                  }}
-                  className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
-                    <SwishLogo size={16} />
-                  </div>
-                  <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                    {activeTx.isWaitingForSwish ? 'Väntar' : 'Dela'}
-                  </span>
-                </button>
-              ) : (
+              {/* Kategori (Dela med Swish är borttaget för att hålla appen enkel) */}
                 <button
                   type="button"
                   onClick={() => navigateSubView('category-picker', 'forward')}
@@ -1693,7 +1680,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     Kategori
                   </span>
                 </button>
-              )}
 
               <button
                 type="button"
@@ -2268,7 +2254,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                           : 'text-[var(--text-primary)]'
                       }`}
                     >
-                      {isIncome ? '+' : '-'}
+                      {isIncome ? '+' : '−'}
                       {formatKr(activeTx!.amount)}
                     </span>
                   </div>

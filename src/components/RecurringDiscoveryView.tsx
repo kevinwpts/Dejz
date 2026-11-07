@@ -426,7 +426,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
                       >
                         {isIncome
                           ? `+${formatKr(cand.amount)}`
-                          : `-${formatKr(cand.amount)}`}
+                          : `−${formatKr(cand.amount)}`}
                       </span>
                       <span className="ui-row-meta">
                         {isIncome ? 'Inkomst' : 'Fast utgift'}

@@ -120,7 +120,14 @@ export function isFixedExpenseActiveInPeriod(
   if (!exp.isCancelled) return true;
   if (exp.hasNoMorePayments) return false;
   if (exp.lastPaymentDate && /^\d{4}-\d{2}$/.test(exp.lastPaymentDate)) {
-    const periodEndYm = (period.endDate || '').slice(0, 7);
+    // endDate är ett Date-objekt (inte text) – gör om till "ÅÅÅÅ-MM" innan jämförelsen
+    const end = period.endDate as unknown as Date | string | undefined;
+    const periodEndYm =
+      end instanceof Date && !isNaN(end.getTime())
+        ? `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`
+        : typeof end === 'string'
+        ? end.slice(0, 7)
+        : '';
     if (periodEndYm && periodEndYm > exp.lastPaymentDate) {
       return false;
     }
@@ -313,6 +320,8 @@ interface HomeTabProps {
   period: PeriodInfo;
   connectedBank: string | null;
   accounts: AccountItem[];
+  /** Är ett bankkonto kopplat? "Sedan sist" visas bara då – utan bank har man själv lagt in köpen. */
+  hasBankConnection?: boolean;
   incomes: IncomeItem[];
   fixedExpenses: FixedExpenseItem[];
   transactions: TransactionItem[];
@@ -366,6 +375,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   period,
   connectedBank: _connectedBank,
   accounts,
+  hasBankConnection = false,
   incomes = [],
   fixedExpenses = [],
   transactions,
@@ -603,6 +613,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [isSinceLastOpen, setIsSinceLastOpen] = useState(false);
 
   useEffect(() => {
+    if (!hasBankConnection) return;
     if (isInitialLoading || !transactions || transactions.length === 0) return;
     const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';
     try {
@@ -675,7 +686,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     } catch {
       // ignore storage errors
     }
-  }, [transactions, isInitialLoading, todayStr, fixedExpenses, incomes]);
+  }, [transactions, isInitialLoading, todayStr, fixedExpenses, incomes, hasBankConnection]);
 
   const dismissSinceLastVisit = useCallback(() => {
     setIsSinceLastOpen(false);
@@ -1253,7 +1264,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
                     ) : (
                       <span className="ui-stat-value text-[var(--text-primary)]">
-                        -{formatKr(activeFixed)}
+                        −{formatKr(activeFixed)}
                       </span>
                     )}
                   </button>
@@ -1274,7 +1285,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
                     ) : (
                       <span className="ui-stat-value text-[var(--text-primary)]">
-                        -{formatKr(activeVariable)}
+                        −{formatKr(activeVariable)}
                       </span>
                     )}
                   </button>
@@ -1730,7 +1741,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               </div>
               {selectedDayItems.length > 0 && (
                 <span className="tabular-nums font-medium text-[var(--text-secondary)]">
-                  {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '-' : ''}
+                  {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '−' : ''}
                   {formatKr(Math.abs(selectedDayNet))}
                 </span>
               )}
@@ -1808,7 +1819,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     <span
                       className={isIncome ? 'ui-row-amount-income' : 'ui-row-amount'}
                     >
-                      {isIncome ? `+${formatKr(tx.amount)}` : `-${formatKr(tx.amount)}`}
+                      {isIncome ? `+${formatKr(tx.amount)}` : `−${formatKr(tx.amount)}`}
                     </span>
                     {(() => {
                       const isPending =
@@ -2108,7 +2119,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       </div>
                       <div className="text-right shrink-0">
                         <span className="ui-row-amount">
-                          -{formatKr(effectiveAmt)}
+                          −{formatKr(effectiveAmt)}
                         </span>
                         <span className="ui-row-meta flex items-center justify-end gap-1">
                           <span>
@@ -2183,7 +2194,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                             {dayNet > 0
                               ? `+${formatKr(dayNet)}`
                               : dayNet < 0
-                              ? `-${formatKr(Math.abs(dayNet))}`
+                              ? `−${formatKr(Math.abs(dayNet))}`
                               : formatKr(0)}
                           </span>
                         </div>
@@ -2277,7 +2288,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                                   >
                                     {isRefund
                                       ? `+${formatKr(tx.amount)}`
-                                      : `-${formatKr(tx.amount)}`}
+                                      : `−${formatKr(tx.amount)}`}
                                   </span>
                                   {statusSub ? (
                                     <span className="ui-row-meta">
@@ -2528,7 +2539,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           >
                             {isIncome
                               ? `+${formatKr(tx.amount)}`
-                              : `-${formatKr(tx.amount)}`}
+                              : `−${formatKr(tx.amount)}`}
                           </span>
                           <span className="ui-row-meta">
                             {isPending
@@ -2578,7 +2589,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {sinceLastVisitTxs.length} {sinceLastVisitTxs.length === 1 ? 'köp' : 'köp'}
             </span>
             <span className="font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] text-[var(--text-primary)] tabular-nums">
-              -{formatKr(sinceLastVisitTxs.reduce((s, t) => s + (Number(t.amount) || 0), 0))}
+              −{formatKr(sinceLastVisitTxs.reduce((s, t) => s + (Number(t.amount) || 0), 0))}
             </span>
           </div>
 
@@ -2610,7 +2621,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="ui-row-amount">-{formatKr(tx.amount)}</span>
+                  <span className="ui-row-amount">−{formatKr(tx.amount)}</span>
                   <span className="ui-row-meta">{formatSwedishDateHeading(tx.date)}</span>
                 </div>
               </button>

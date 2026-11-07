@@ -41,7 +41,7 @@ import {
 } from './components/AdminSimulator';
 import { ItemLogo } from './components/ItemLogo';
 import { CategoryIcon } from './components/CategoryIcon';
-import { Heart, Package, Paperclip, FileText, Eye, CheckCircle, ArrowRight, X } from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, FileText, Eye, CheckCircle, X } from '@phosphor-icons/react';
 import { BankModal } from './components/modals/BankModal';
 import { IncomeModal } from './components/modals/IncomeModal';
 import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
@@ -3976,12 +3976,7 @@ export const App: React.FC = () => {
 
       showFeedbackToast({
         id: `created-fixed-${created.id}`,
-        title: 'Skapad som fast utgift',
-        subtitle: `${created.name} · ${Math.round(created.amount).toLocaleString('sv-SE')} kr den ${created.dueDay}:e varje månad`,
-        actionLabel: 'Visa i Fasta',
-        onAction: () => {
-          setActiveTab('fixed');
-        },
+        title: 'Sparad som fast utgift',
         undoLabel: 'Ångra',
         onUndo: () => {
           handleDeleteFixed(created.id);
@@ -4018,12 +4013,7 @@ export const App: React.FC = () => {
 
       showFeedbackToast({
         id: `created-income-${created.id}`,
-        title: 'Skapad som inkomst',
-        subtitle: `${created.name} · ${Math.round(created.amount).toLocaleString('sv-SE')} kr den ${created.payday}:e varje månad`,
-        actionLabel: 'Visa i Inkomster',
-        onAction: () => {
-          setActiveTab('fixed');
-        },
+        title: 'Sparad som inkomst',
         undoLabel: 'Ångra',
         onUndo: () => {
           handleDeleteIncome(created.id);
@@ -5266,6 +5256,7 @@ export const App: React.FC = () => {
           <>
             {activeTab === 'home' && (
                 <HomeTab
+                  hasBankConnection={hasActiveBankConnection}
                   period={period}
                   connectedBank={connectedBank}
                   accounts={accounts}
@@ -5499,7 +5490,7 @@ export const App: React.FC = () => {
                                 net > 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
                               }`}
                             >
-                              {net > 0 ? `+${netStr}` : `-${netStr}`}
+                              {net > 0 ? `+${netStr}` : `−${netStr}`}
                             </span>
                           </div>
 
@@ -5567,7 +5558,7 @@ export const App: React.FC = () => {
                                         isIncome ? 'ui-row-amount-income' : ''
                                       }`}
                                     >
-                                      {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
+                                      {isIncome ? `+${formattedAmt}` : `−${formattedAmt}`}
                                     </span>
                                     <span className="ui-row-meta">
                                       {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
@@ -5633,7 +5624,7 @@ export const App: React.FC = () => {
                                 net > 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
                               }`}
                             >
-                              {net > 0 ? `+${netStr}` : `-${netStr}`}
+                              {net > 0 ? `+${netStr}` : `−${netStr}`}
                             </span>
                           </div>
 
@@ -5704,7 +5695,7 @@ export const App: React.FC = () => {
                                           isIncome ? 'ui-row-amount-income' : ''
                                         }`}
                                       >
-                                        {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
+                                        {isIncome ? `+${formattedAmt}` : `−${formattedAmt}`}
                                       </span>
                                       <span className="ui-row-meta">
                                         {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
@@ -5793,7 +5784,7 @@ export const App: React.FC = () => {
                                 <div className="flex items-center gap-2.5 shrink-0">
                                   <div className="text-right">
                                     <span className="ui-row-amount">
-                                      -{formattedAmt}
+                                      −{formattedAmt}
                                     </span>
                                     <span className="ui-row-meta truncate max-w-[110px]">
                                       {expReceipts.length > 1
@@ -5905,7 +5896,7 @@ export const App: React.FC = () => {
                                         isIncome ? 'ui-row-amount-income' : ''
                                       }`}
                                     >
-                                      {isIncome ? `+${formattedAmt}` : `-${formattedAmt}`}
+                                      {isIncome ? `+${formattedAmt}` : `−${formattedAmt}`}
                                     </span>
                                     <span className="ui-row-meta">
                                       {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
@@ -6259,25 +6250,20 @@ export const App: React.FC = () => {
 
       {/* Floating Modern Confirmation Feedback Toast */}
       {feedbackToast && (
-        <div className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-1.5rem)] max-w-md animate-fade-in pointer-events-auto">
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-subtle)] shadow-2xl flex items-center justify-between gap-3 text-xs">
+        <div className="fixed bottom-[calc(5.6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-2rem)] max-w-sm animate-fade-in pointer-events-auto">
+          {/* Mörk notis i iOS-/Revolut-stil: en rad text + Ångra */}
+          <div className="pl-3.5 pr-2 py-2 min-h-[48px] rounded-2xl bg-[#16141F] text-white shadow-[0_16px_40px_-12px_rgba(22,20,31,0.45)] flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
-                <CheckCircle size={16} weight="fill" />
-              </div>
+              <CheckCircle size={20} weight="fill" className="text-emerald-400 shrink-0" />
               <div className="min-w-0">
-                <p className="font-display font-semibold text-[var(--text-primary)] text-xs truncate">
-                  {feedbackToast.title}
-                </p>
+                <p className="text-[14px] font-medium truncate">{feedbackToast.title}</p>
                 {feedbackToast.subtitle && (
-                  <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">
-                    {feedbackToast.subtitle}
-                  </p>
+                  <p className="text-[12px] text-white/60 truncate">{feedbackToast.subtitle}</p>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center shrink-0">
               {feedbackToast.actionLabel && feedbackToast.onAction && (
                 <button
                   type="button"
@@ -6287,14 +6273,13 @@ export const App: React.FC = () => {
                     setFeedbackToast(null);
                     action?.();
                   }}
-                  className="px-2.5 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-[11px] hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-2 rounded-xl text-[14px] font-semibold text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
                 >
-                  <span>{feedbackToast.actionLabel}</span>
-                  <ArrowRight size={11} weight="bold" />
+                  {feedbackToast.actionLabel}
                 </button>
               )}
 
-              {feedbackToast.undoLabel && feedbackToast.onUndo && (
+              {feedbackToast.undoLabel && feedbackToast.onUndo ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -6303,23 +6288,23 @@ export const App: React.FC = () => {
                     setFeedbackToast(null);
                     undo?.();
                   }}
-                  className="px-2 py-1.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium text-[11px] transition-colors cursor-pointer"
+                  className="px-3 py-2 rounded-xl text-[14px] font-semibold text-[#B4A8FF] hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
                 >
                   {feedbackToast.undoLabel}
                 </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+                    setFeedbackToast(null);
+                  }}
+                  className="w-9 h-9 rounded-xl text-white/60 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Stäng"
+                >
+                  <X size={14} weight="bold" />
+                </button>
               )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
-                  setFeedbackToast(null);
-                }}
-                className="w-6 h-6 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] flex items-center justify-center transition-colors cursor-pointer"
-                aria-label="Stäng"
-              >
-                <X size={12} weight="bold" />
-              </button>
             </div>
           </div>
         </div>

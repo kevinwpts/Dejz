@@ -558,7 +558,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                       >
                         <div className="text-right">
                           <span className="ui-row-amount">
-                            -{formatKr(tx.amount)}
+                            −{formatKr(tx.amount)}
                           </span>
                           <span className="ui-row-meta">
                             {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
@@ -831,7 +831,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
               <div className="min-w-0">
                 <span className="ui-row-title">{displayName}</span>
                 <span className="ui-row-subtitle">
-                  -{formatKr(Number(amount) || 0)}/mån · {paymentMethod}
+                  −{formatKr(Number(amount) || 0)}/mån · {paymentMethod}
                 </span>
               </div>
             </div>
@@ -1698,15 +1698,20 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
             </div>
 
             <div className="mt-1 flex items-baseline justify-center">
-              <span className="font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)]">
-                -
+              <span className="font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] mr-0.5">
+                −
               </span>
+              <span className="relative inline-block">
+                <span
+                  aria-hidden="true"
+                  className="invisible whitespace-pre font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em]"
+                >
+                  {amount || '0'}
+                </span>
               <input
                 type="text"
                 inputMode="numeric"
                 spellCheck={false}
-                size={Math.max(1, (amount || '0').length)}
-                style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                 value={amount}
                 onChange={(e) => {
                   const cleaned = e.target.value.replace(/[^\d]/g, '');
@@ -1716,9 +1721,10 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
                     commitInlineChanges({ amount: num });
                   }
                 }}
-                className="bg-transparent border-0 focus:outline-none focus:ring-0 text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-[var(--text-primary)]"
+                className="absolute inset-0 w-full min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-left font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] p-0 text-[var(--text-primary)]"
                 placeholder="0"
               />
+              </span>
               <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">
                 kr/mån
               </span>

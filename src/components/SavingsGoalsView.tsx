@@ -700,7 +700,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                       >
                         {act.amount > 0
                           ? `+${formatKr(act.amount)}`
-                          : `-${formatKr(Math.abs(act.amount))}`}
+                          : `−${formatKr(Math.abs(act.amount))}`}
                       </span>
                     )}
                     {canRemove && (

@@ -617,15 +617,20 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             </div>
 
             <div className="mt-1 flex items-baseline justify-center">
-              <span className="font-display font-bold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400">
+              <span className="font-display font-bold text-2xl sm:text-3xl text-emerald-600 dark:text-emerald-400 mr-0.5">
                 +
               </span>
+              <span className="relative inline-block">
+                <span
+                  aria-hidden="true"
+                  className="invisible whitespace-pre font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em]"
+                >
+                  {amount || '0'}
+                </span>
               <input
                 type="text"
                 inputMode="numeric"
                 spellCheck={false}
-                size={Math.max(1, (amount || '0').length)}
-                style={{ width: `${Math.max(1, (amount || '0').length)}ch` }}
                 value={amount}
                 onChange={(e) => {
                   const cleaned = e.target.value.replace(/[^\d]/g, '');
@@ -635,9 +640,10 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
                     commitInlineChanges({ amount: num });
                   }
                 }}
-                className="bg-transparent border-0 focus:outline-none focus:ring-0 text-center font-display font-bold tabular-nums text-2xl sm:text-3xl p-0 text-emerald-600 dark:text-emerald-400"
+                className="absolute inset-0 w-full min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-left font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] p-0 text-emerald-600 dark:text-emerald-400"
                 placeholder="0"
               />
+              </span>
               <span className="ml-1.5 font-display font-medium text-base text-emerald-600/70 dark:text-emerald-400/70">
                 kr/mån
               </span>

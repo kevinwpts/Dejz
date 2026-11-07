@@ -65,14 +65,33 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
   const [error, setError] = useState<string | null>(null);
   const recRef = useRef<SpeechRec | null>(null);
   const finalRef = useRef('');
+  // Senaste text som syntes på skärmen – iPhone markerar ofta aldrig resultatet som "klart"
+  const lastHeardRef = useRef('');
+  // true när lyssnandet avbryts (t.ex. bladet stängs) – då ska inget köp skapas
+  const cancelledRef = useRef(false);
 
+  /** Avbryt utan att skapa något (används när bladet stängs eller man väljer manuellt). */
   const stopListening = () => {
+    cancelledRef.current = true;
     try {
       recRef.current?.abort();
     } catch {
       // redan stoppad
     }
     recRef.current = null;
+    setListening(false);
+  };
+
+  /** Användaren trycker för att bli klar: avsluta mjukt så att det som sagts tas med. */
+  const finishListening = () => {
+    try {
+      if (recRef.current) {
+        recRef.current.stop();
+        return; // onend skapar köpet
+      }
+    } catch {
+      // ignore
+    }
     setListening(false);
   };
 
@@ -92,6 +111,8 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
     setError(null);
     setHeard('');
     finalRef.current = '';
+    lastHeardRef.current = '';
+    cancelledRef.current = false;
     try {
       const rec = new Rec();
       rec.lang = 'sv-SE';
@@ -107,7 +128,9 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
           else interim += chunk;
         }
         if (final) finalRef.current = final.trim();
-        setHeard((final || interim).trim());
+        const shown = (final || interim).trim();
+        if (shown) lastHeardRef.current = shown;
+        setHeard(shown);
       };
       rec.onerror = (e: any) => {
         const code = e?.error;
@@ -122,7 +145,8 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
       rec.onend = () => {
         setListening(false);
         recRef.current = null;
-        const result = toResult(finalRef.current);
+        if (cancelledRef.current) return;
+        const result = toResult(finalRef.current || lastHeardRef.current);
         if (result) onResult(result);
       };
       recRef.current = rec;
@@ -144,7 +168,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
         <div className="flex flex-col items-center text-center gap-4">
           <button
             type="button"
-            onClick={listening ? stopListening : startListening}
+            onClick={listening ? finishListening : startListening}
             aria-label={listening ? 'Sluta lyssna' : 'Prata in köpet'}
             className="relative w-24 h-24 rounded-full flex items-center justify-center text-white active:scale-95 transition-transform cursor-pointer"
             style={{
