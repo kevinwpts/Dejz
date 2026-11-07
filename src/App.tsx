@@ -47,6 +47,7 @@ import { IncomeModal } from './components/modals/IncomeModal';
 import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
 import { TransactionModal } from './components/modals/TransactionModal';
 import { AuthModal } from './components/modals/AuthModal';
+import { SetNewPasswordSheet } from './components/SetNewPasswordSheet';
 import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
@@ -1820,6 +1821,28 @@ export const App: React.FC = () => {
     onUndo?: () => void;
   }
   const [feedbackToast, setFeedbackToast] = useState<FeedbackToastState | null>(null);
+
+  // "Glömt lösenord": personen kom in via länken i mejlet och ska välja ett nytt lösenord
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('dejz_password_recovery') === '1';
+    } catch {
+      return false;
+    }
+  });
+  useEffect(() => {
+    const onRecovery = () => setIsPasswordRecovery(true);
+    window.addEventListener('dejz-password-recovery', onRecovery);
+    return () => window.removeEventListener('dejz-password-recovery', onRecovery);
+  }, []);
+  const endPasswordRecovery = () => {
+    try {
+      sessionStorage.removeItem('dejz_password_recovery');
+    } catch {
+      // ignore
+    }
+    setIsPasswordRecovery(false);
+  };
   const feedbackTimerRef = useRef<number | null>(null);
 
   const showFeedbackToast = useCallback((toast: FeedbackToastState, durationMs = 5500) => {
@@ -3024,8 +3047,14 @@ export const App: React.FC = () => {
           }
           try {
             localStorage.removeItem('dejz_logged_out');
+            if (type === 'recovery') {
+              sessionStorage.setItem('dejz_password_recovery', '1');
+            }
           } catch {
             // ignore
+          }
+          if (type === 'recovery') {
+            window.dispatchEvent(new Event('dejz-password-recovery'));
           }
         })();
         return w.__dejzEmailLinkCheck;
@@ -3072,6 +3101,15 @@ export const App: React.FC = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+      // Gammal återställningslänk (via supabase.co) – be om nytt lösenord även då
+      if (event === 'PASSWORD_RECOVERY') {
+        try {
+          sessionStorage.setItem('dejz_password_recovery', '1');
+        } catch {
+          // ignore
+        }
+        window.dispatchEvent(new Event('dejz-password-recovery'));
+      }
       // I lokalt demoläge (?demo) ska en riktig inloggning aldrig ta över demodatan
       if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')) {
         return;
@@ -5092,6 +5130,14 @@ export const App: React.FC = () => {
             refreshBankStatus();
           }}
         />
+        <SetNewPasswordSheet
+          open={isPasswordRecovery && Boolean(userId)}
+          onDone={() => {
+            endPasswordRecovery();
+            showFeedbackToast({ id: 'password-updated', title: 'Lösenordet är bytt' });
+          }}
+          onSkip={endPasswordRecovery}
+        />
       </>
     );
   }
@@ -6288,6 +6334,15 @@ export const App: React.FC = () => {
       )}
 
       {/* Floating Modern Confirmation Feedback Toast */}
+      <SetNewPasswordSheet
+        open={isPasswordRecovery && Boolean(userId)}
+        onDone={() => {
+          endPasswordRecovery();
+          showFeedbackToast({ id: 'password-updated', title: 'Lösenordet är bytt' });
+        }}
+        onSkip={endPasswordRecovery}
+      />
+
       {feedbackToast && (
         <div className="fixed bottom-[calc(5.6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-2rem)] max-w-sm animate-fade-in pointer-events-auto">
           {/* Mörk notis i iOS-/Revolut-stil: en rad text + Ångra */}

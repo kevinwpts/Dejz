@@ -40,6 +40,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [resending, setResending] = useState(false);
   // Vilket mejl som skickats: bekräftelse av nytt konto eller återställning av lösenord
   const [sentKind, setSentKind] = useState<'signup' | 'reset'>('reset');
+  // Inloggning misslyckades för att e-posten inte är bekräftad – visa "Skicka nytt mejl"
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendingConfirm, setResendingConfirm] = useState(false);
 
   // Om någon utan konto försöker logga in med Google skickar Supabase tillbaka ett fel
   // (när "Allow new users to sign up" är avstängt). Visa då en vänlig förklaring.
@@ -98,6 +101,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const clearErrors = () => {
     setErrorMsg(null);
     setHasPasswordError(false);
+    setNeedsConfirmation(false);
   };
 
   const openAuthPage = (mode: 'login' | 'register') => {
@@ -232,6 +236,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        // Finns kontot redan svarar Supabase "ok" utan att skicka något mejl (identities är tom).
+        // Skicka då personen till inloggningen istället för att låta hen vänta på ett mejl som aldrig kommer.
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          try {
+            localStorage.removeItem('dejz_onboarding_in_progress');
+            localStorage.removeItem('dejz_onboarding_step');
+          } catch {
+            // ignore
+          }
+          setSlideDir('back');
+          setView('login');
+          setPassword('');
+          setErrorMsg('Du har redan ett konto med den här e-posten. Logga in nedan.');
+          return;
+        }
         if (data.user) {
           if (data.session) {
             onAuthenticated(data.user.email || cleanEmail, 'register');
@@ -275,7 +294,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         }
       }
 
-      if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+      const errCode = String(err?.code || err?.error_code || '');
+      if (errCode === 'email_not_confirmed' || /email not confirmed/i.test(msg)) {
+        setErrorMsg('Du har inte bekräftat din e-post än. Hittar du inte mejlet? Vi skickar ett nytt.');
+        setNeedsConfirmation(true);
+      } else if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
         setHasPasswordError(true);
         setShakeTrigger((prev) => prev + 1);
       } else if (msg.includes('User already registered')) {
@@ -433,7 +456,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {errorMsg && !hasPasswordError && (
               <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-start gap-2.5 text-rose-600 dark:text-rose-400 text-xs font-medium animate-scale-in">
                 <WarningCircle size={16} weight="bold" className="shrink-0 mt-0.5" />
-                <span>{errorMsg}</span>
+                <div className="min-w-0 flex-1">
+                  <span>{errorMsg}</span>
+                  {needsConfirmation && (
+                    <button
+                      type="button"
+                      disabled={resendingConfirm}
+                      onClick={async () => {
+                        setResendingConfirm(true);
+                        try {
+                          await supabase.auth.resend({
+                            type: 'signup',
+                            email: email.trim(),
+                            options: { emailRedirectTo: window.location.origin },
+                          });
+                        } catch {
+                          // visa skärmen ändå – "Skicka igen" finns där
+                        } finally {
+                          setResendingConfirm(false);
+                        }
+                        clearErrors();
+                        setSentKind('signup');
+                        setResetEmailSent(true);
+                        setResendCooldown(45);
+                      }}
+                      className="mt-2.5 w-full py-2.5 rounded-xl bg-[var(--accent-color)] text-white text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
+                    >
+                      {resendingConfirm && <SpinnerGap size={14} className="animate-spin" />}
+                      Skicka nytt mejl
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
