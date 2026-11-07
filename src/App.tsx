@@ -2995,8 +2995,47 @@ export const App: React.FC = () => {
       }
     };
 
-    supabase.auth
-      .getSession()
+    // Bekräftelselänk från mejlet: dejz.se/bekrafta?token_hash=…&type=signup
+    // Länken går via dejz.se (inte supabase.co) så att mejlet inte ser ut som nätfiske.
+    const verifyEmailLinkIfPresent = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tokenHash = params.get('token_hash');
+        const type = params.get('type');
+        if (!tokenHash || !type) return;
+        // En länk får bara användas en gång – kör aldrig kontrollen två gånger
+        const w = window as any;
+        if (w.__dejzEmailLinkCheck) return w.__dejzEmailLinkCheck;
+        w.__dejzEmailLinkCheck = (async () => {
+          window.history.replaceState(null, '', '/');
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: type as any,
+          });
+          if (error) {
+            // Visa förklaringen på inloggningssidan (läses av LandingPage)
+            try {
+              sessionStorage.setItem('dejz_auth_link_error', 'expired');
+            } catch {
+              // ignore
+            }
+            window.dispatchEvent(new Event('dejz-auth-link-error'));
+            return;
+          }
+          try {
+            localStorage.removeItem('dejz_logged_out');
+          } catch {
+            // ignore
+          }
+        })();
+        return w.__dejzEmailLinkCheck;
+      } catch {
+        // ignore – vanlig uppstart fortsätter
+      }
+    };
+
+    verifyEmailLinkIfPresent()
+      .then(() => supabase.auth.getSession())
       .then(async ({ data: { session } }: any) => {
         // Endast lokalt (npm run dev): http://localhost:3000/?demo öppnar appen med påhittad
         // demodata – används för skärmbilder till startsidan. Finns inte i produktionsbygget.

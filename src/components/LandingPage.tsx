@@ -52,7 +52,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         setView('login');
         setActivePage('auth');
         setErrorMsg(
-          desc.includes('signup') || desc.includes('sign up') || desc.includes('not allowed')
+          desc.includes('expired') || desc.includes('invalid')
+            ? 'Länken har gått ut eller redan använts. Logga in – är kontot inte bekräftat kan du få en ny länk.'
+            : desc.includes('signup') || desc.includes('sign up') || desc.includes('not allowed')
             ? 'Det gick inte att skapa kontot med Google. Försök igen eller använd e-post.'
             : 'Inloggningen avbröts. Försök igen.'
         );
@@ -61,6 +63,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     } catch {
       // ignore
     }
+  }, []);
+
+  // Bekräftelselänken från mejlet hade gått ut eller redan använts (kontrolleras i App)
+  useEffect(() => {
+    const show = () => {
+      try {
+        if (sessionStorage.getItem('dejz_auth_link_error')) {
+          sessionStorage.removeItem('dejz_auth_link_error');
+          setView('login');
+          setActivePage('auth');
+          setErrorMsg(
+            'Länken har gått ut eller redan använts. Logga in – är kontot inte bekräftat kan du få en ny länk.'
+          );
+        }
+      } catch {
+        // ignore
+      }
+    };
+    show();
+    window.addEventListener('dejz-auth-link-error', show);
+    return () => window.removeEventListener('dejz-auth-link-error', show);
   }, []);
 
   // Resend cooldown timer
