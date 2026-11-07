@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="sv" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Be mejlappar att inte göra om färgerna i mörkt läge -->
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>Bekräfta ditt konto på Dejz</title>
+  <style>
+    :root { color-scheme: light only; supported-color-schemes: light only; }
+    /* Knapptexten ska alltid vara vit, även när mejlappen försöker byta färg */
+    .btn-link, .btn-link span { color: #ffffff !important; }
+    [data-ogsc] .btn-link, [data-ogsc] .btn-link span { color: #ffffff !important; }
+    @media (prefers-color-scheme: dark) {
+      .btn-link, .btn-link span { color: #ffffff !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#F5F4FA;-webkit-text-size-adjust:100%;">
+  <!-- Förhandstext som syns i inkorgen bredvid ämnesraden -->
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Ett tryck till, sen är du igång med Dejz.</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F5F4FA" style="background-color:#F5F4FA;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:440px;">
+
+          <!-- Logga -->
+          <tr>
+            <td align="left" style="padding:0 0 24px 4px;">
+              <img src="https://dejz.se/email/dejz-logo.png" width="48" height="48" alt="Dejz" style="display:block;width:48px;height:48px;border:0;border-radius:12px;">
+            </td>
+          </tr>
+
+          <!-- Kort -->
+          <tr>
+            <td bgcolor="#FFFFFF" style="background-color:#FFFFFF;border-radius:24px;padding:32px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <h1 style="margin:0 0 12px;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:-0.02em;color:#16141F;">
+                Välkommen till Dejz!
+              </h1>
+              <p style="margin:0 0 28px;font-size:16px;line-height:1.5;color:#56546B;">
+                Tryck på knappen för att bekräfta din e-post. Sen lägger du in lön och räkningar – det tar två minuter.
+              </p>
+
+              <!-- Knapp (byggd som tabell så att den fungerar i alla mejlappar) -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" bgcolor="#5B3DF5" style="background-color:#5B3DF5;border-radius:14px;">
+                    <a class="btn-link" href="{{ .ConfirmationURL }}" target="_blank"
+                       style="display:block;padding:16px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;line-height:1.2;color:#ffffff !important;text-decoration:none;border-radius:14px;">
+                      <span style="color:#ffffff !important;">Bekräfta mitt konto</span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+
+            </td>
+          </tr>
+
+          <!-- Sidfot -->
+          <tr>
+            <td style="padding:20px 4px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#8F8DA3;">
+              Har du inte skapat ett konto på Dejz? Då kan du strunta i det här mejlet.<br>
+              Dejz · <a href="https://dejz.se" style="color:#8F8DA3;">dejz.se</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
