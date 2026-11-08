@@ -426,19 +426,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.webp?v=11',
+    src: '/screens/ekonomi.webp?v=12',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Lägg in lön och räkningar',
     text: 'En gång, på under två minuter. Skriv in ditt saldo så drar Dejz av räkningarna som är kvar före lön.',
   },
   {
-    src: '/screens/historik.webp?v=11',
+    src: '/screens/historik.webp?v=12',
     alt: 'Dejz – historik över köp',
     title: 'Logga köp på sekunder',
-    text: 'Tryck på + och säg "Ica 342" – Dejz fyller i belopp, kategori och logga åt dig.',
+    text: 'Tryck på + och säg "Ica 342" – Dejz fyller i resten. När du lägger in köpen själv märker du direkt vart pengarna tar vägen.',
   },
   {
-    src: '/screens/analys.webp?v=11',
+    src: '/screens/analys.webp?v=12',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -460,7 +460,7 @@ const FAQ = [
   },
   {
     q: 'Kan jag koppla min bank?',
-    a: 'Inte än – bankkoppling kommer snart. Tills dess skriver du in saldot från din bankapp när du vill, så räknar Dejz ut vad du har kvar till lön. Köp lägger du till på sekunder: tryck på + och säg "Ica 342".',
+    a: 'Bankkoppling kommer snart. Just nu lägger du in köpen själv – det tar några sekunder (tryck på + och säg "Ica 342") och ger dig extra koll, eftersom du märker varje krona du spenderar. När bankkopplingen är klar kan du välja att koppla din bank, så sköts resten automatiskt.',
   },
   {
     q: 'Vad händer med mina uppgifter?',
@@ -643,10 +643,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.webp?v=11" alt="" />
+              <PhoneFrame src="/screens/analys.webp?v=12" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.webp?v=11" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.webp?v=12" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
@@ -717,7 +717,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             Se vad du har kvar till nästa lön.
           </h2>
           <p className="mt-3 text-white/80 max-w-md mx-auto">
-            Kom igång på två minuter. Ingen bank, inget kort.
+            Kom igång på två minuter, utan kort. Bankkoppling kommer snart.
           </p>
           <SignupCta onSignup={onSignup} onDark hideNote className="mt-8" />
         </section>

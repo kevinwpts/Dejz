@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SWEDISH_EXPENSE_PRESETS } from '../data/swedishExpensePresets';
 import {
   ArrowRight,
   CaretLeft,
@@ -1016,7 +1017,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
   const openAddSheet = (
     type: 'income' | 'fixed',
-    preset?: { name: string; category: string; day?: number }
+    preset?: { name: string; category: string; day?: number; amount?: number; paymentMethod?: string }
   ) => {
     setSheetSubView('main');
     setSheetNavDir('forward');
@@ -1024,10 +1025,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       mode: 'add',
       type,
       name: preset?.name ?? '',
-      amount: '',
+      amount: preset?.amount ? String(preset.amount) : '',
       day: preset?.day ?? (type === 'income' ? payday || 25 : 27),
       category: preset?.category ?? (type === 'income' ? 'Lön' : 'Räkningar'),
-      paymentMethod: type === 'fixed' ? 'Autogiro' : undefined,
+      paymentMethod: type === 'fixed' ? preset?.paymentMethod ?? 'Autogiro' : undefined,
       logo: preset ? getLogoUrl(preset.name, preset.category) : undefined,
     });
   };
@@ -1039,13 +1040,28 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     { name: 'Bidrag', category: 'Bidrag' },
     { name: 'Pension', category: 'Pension' },
   ];
-  const QUICK_FIXED = [
+  // Vanliga abonnemang: pris hämtas från prislistan (swedishExpensePresets) och kan ändras
+  const subscriptionChip = (presetId: string, name: string) => {
+    const preset = SWEDISH_EXPENSE_PRESETS.find((x) => x.id === presetId);
+    return {
+      name,
+      category: 'Nöje',
+      amount: preset?.defaultAmount,
+      paymentMethod: 'Kort',
+    };
+  };
+  const QUICK_FIXED: { name: string; category: string; amount?: number; paymentMethod?: string }[] = [
     { name: 'Hyra', category: 'Boende' },
     { name: 'El', category: 'Boende' },
     { name: 'Försäkring', category: 'Försäkring' },
     { name: 'Mobil', category: 'Abonnemang' },
     { name: 'Bredband', category: 'Abonnemang' },
-    { name: 'Streaming', category: 'Abonnemang' },
+    subscriptionChip('netflix-standard', 'Netflix'),
+    subscriptionChip('spotify-individual', 'Spotify'),
+    subscriptionChip('youtube-premium', 'YouTube Premium'),
+    subscriptionChip('disney-plus', 'Disney+'),
+    subscriptionChip('max-hbo', 'Max'),
+    subscriptionChip('viaplay-film-serier', 'Viaplay'),
     { name: 'Gym', category: 'Hälsa' },
     { name: 'Lån', category: 'Räkningar' },
     { name: 'Sparande', category: 'Sparande' },
@@ -2152,6 +2168,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
               Kolla i din bankapp. Dejz drar av räkningarna som är kvar före lön – då ser du exakt vad
               du kan spendera.
+            </p>
+            <p className="mt-2 text-xs text-[var(--text-muted)]">
+              Bankkoppling kommer snart. Tills dess skriver du in saldot själv – det ger dig full koll.
             </p>
           </div>
 
