@@ -8,6 +8,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
+import { buildFeedbackEmail } from './email.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,16 +20,6 @@ const json = (body: unknown, status = 200) =>
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
-
-const TYPE_LABELS: Record<string, string> = {
-  idea: '💡 Idé',
-  bug: '🐛 Något är fel',
-  praise: '💜 Beröm',
-  crash: '🚨 Krasch',
-};
-
-const escapeHtml = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -56,12 +47,17 @@ serve(async (req: Request) => {
     // Vem skickade? (om inloggad – annars anonymt)
     let userId: string | null = null;
     let userEmail: string | null = null;
+    let userName: string | null = null;
+    let userCreatedAt: string | null = null;
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     if (token) {
       const { data } = await admin.auth.getUser(token).catch(() => ({ data: null as any }));
       if (data?.user) {
         userId = data.user.id;
         userEmail = data.user.email ?? null;
+        const meta = data.user.user_metadata || {};
+        userName = (meta.full_name || meta.name || meta.first_name || null) as string | null;
+        userCreatedAt = data.user.created_at ?? null;
       }
     }
 
@@ -84,16 +80,7 @@ serve(async (req: Request) => {
 
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey && !tooMany) {
-      const label = TYPE_LABELS[type] || type;
-      const lines = Object.entries(context as Record<string, unknown>)
-        .map(([k, v]) => `<tr><td style="padding:2px 12px 2px 0;color:#8F8DA3;vertical-align:top">${escapeHtml(k)}</td><td style="padding:2px 0;color:#16141F;word-break:break-all">${escapeHtml(String(typeof v === 'string' ? v : JSON.stringify(v)).slice(0, 1500))}</td></tr>`)
-        .join('');
-      const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:15px;line-height:1.5;color:#16141F">
-        <p style="margin:0 0 4px;font-size:13px;color:#5B3DF5;font-weight:700">${label}</p>
-        <p style="margin:0 0 16px;white-space:pre-wrap">${escapeHtml(message)}</p>
-        <p style="margin:0 0 8px;font-size:13px;color:#56546B">Från: ${escapeHtml(userEmail || 'ej inloggad')}</p>
-        <table style="font-size:12px;border-collapse:collapse">${lines}</table>
-      </div>`;
+      const { subject, html } = buildFeedbackEmail({ type, message, context, userEmail, userName, userCreatedAt });
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
@@ -101,7 +88,7 @@ serve(async (req: Request) => {
           from: Deno.env.get('WAITLIST_FROM') || 'Dejz <hej@dejz.se>',
           to: [Deno.env.get('FEEDBACK_TO') || 'hej@dejz.se'],
           reply_to: userEmail || undefined,
-          subject: `${label}: ${message.slice(0, 60)}${message.length > 60 ? '…' : ''}`,
+          subject,
           html,
         }),
       });
