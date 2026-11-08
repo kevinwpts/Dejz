@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
+import { EmailVerifiedNotice } from './components/EmailVerification';
 import './index.css';
 
 const renderApp = () => {
@@ -16,6 +17,7 @@ const renderApp = () => {
     <StrictMode>
       <ErrorBoundary>
         <App />
+        <EmailVerifiedNotice />
       </ErrorBoundary>
     </StrictMode>,
   );

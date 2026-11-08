@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { isDemoMode } from '../utils/demoUtils';
+import { EmailVerificationStatus } from './EmailVerification';
 import { sendFeedback } from '../utils/sendFeedback';
 import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
 import {
@@ -561,6 +563,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             <span className="text-xs text-[var(--text-secondary)] block truncate mt-0.5">
               {editEmail || userEmail || 'Ingen e-post angiven'}
             </span>
+            {userEmail && !isDemoMode() && <EmailVerificationStatus />}
             <div className="flex flex-wrap items-center gap-2 mt-2.5">
               <button
                 type="button"
@@ -2866,6 +2869,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <span className={rowSubClass}>
                 {userEmail || 'Profil, namn och e-post'}
               </span>
+              {userEmail && !isDemoMode() && <EmailVerificationStatus compact />}
             </div>
           </div>
 
