@@ -48,6 +48,7 @@ import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
 import { TransactionModal } from './components/modals/TransactionModal';
 import { AuthModal } from './components/modals/AuthModal';
 import { SetNewPasswordSheet } from './components/SetNewPasswordSheet';
+import { FeedbackSheet } from './components/FeedbackSheet';
 import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
@@ -6411,6 +6412,8 @@ export const App: React.FC = () => {
       )}
 
       {/* Floating Modern Confirmation Feedback Toast */}
+      <FeedbackSheet />
+
       <SetNewPasswordSheet
         open={isPasswordRecovery && Boolean(userId)}
         onDone={() => {

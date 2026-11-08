@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { UserCircle, MagnifyingGlass, Bell, CaretLeft, Eye, EyeSlash, ChatCircleDots } from '@phosphor-icons/react';
+import { UserCircle, MagnifyingGlass, Bell, CaretLeft, Eye, EyeSlash, ChatCircleDots, ChatTeardropText } from '@phosphor-icons/react';
+import { openFeedback } from '../utils/sendFeedback';
 import { getPrivacyBlurMode, setPrivacyBlurMode } from '../utils/appCache';
 
 interface NavbarProps {
@@ -250,6 +251,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   )}
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={() => openFeedback()}
+                title="Skicka feedback"
+                aria-label="Skicka feedback"
+                className="w-9 h-9 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+              >
+                <ChatTeardropText size={20} weight="regular" />
+              </button>
 
               <button
                 type="button"

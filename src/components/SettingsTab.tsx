@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { sendFeedback } from '../utils/sendFeedback';
 import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
 import {
   Bank,
@@ -2102,16 +2103,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       }
 
       try {
-        await fetch('/api/feedback', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: feedbackType,
-            message: cleanMessage,
-            userEmail: userEmail || 'anonym',
-            userName: userName || null,
-          }),
-        });
+        // Sparas i Supabase och mejlas till hej@dejz.se (funktionen send-feedback)
+        await sendFeedback(feedbackType, cleanMessage);
       } catch {
         // fallback already stored locally
       } finally {

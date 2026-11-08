@@ -1594,7 +1594,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
           onWheel={handleWheel}
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2.5 select-none cursor-grab active:cursor-grabbing"
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 pb-6 -mb-3.5 select-none cursor-grab active:cursor-grabbing"
         >
           {timelineDays.map((day) => {
             const isSelected = day.dateKey === selectedDateKey;

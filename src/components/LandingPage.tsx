@@ -480,7 +480,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         setResetEmailSent(true);
                         setResendCooldown(45);
                       }}
-                      className="mt-2.5 w-full py-2.5 rounded-xl bg-[var(--accent-color)] text-white text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
+                      className="mt-2.5 w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
                     >
                       {resendingConfirm && <SpinnerGap size={14} className="animate-spin" />}
                       Skicka nytt mejl

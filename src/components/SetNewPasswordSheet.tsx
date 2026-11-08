@@ -104,7 +104,7 @@ export const SetNewPasswordSheet: React.FC<{
           <button
             type="submit"
             disabled={saving}
-            className="w-full h-12 rounded-2xl bg-[var(--accent-color)] text-white font-display font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+            className="w-full h-12 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
           >
             {saving && <SpinnerGap size={16} className="animate-spin" />}
             Spara nytt lösenord
