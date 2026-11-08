@@ -69,6 +69,14 @@ export const PrivacyPolicyContent: React.FC = () => (
       </p>
     </Section>
 
+    <Section title="Hur appen används">
+      <p>
+        För att förstå om Dejz är till nytta sparar vi när du senast använde appen, hur många gånger du öppnat den
+        och vilken typ av enhet du använder (till exempel iPhone). Vi sparar inte vad du gör i appen eller var du
+        befinner dig.
+      </p>
+    </Section>
+
     <Section title="Mejl från oss">
       <p>
         Vi kan mejla dig om ditt konto och om tjänsten, till exempel om du fastnat, om ett fel som påverkat dig

@@ -50,6 +50,7 @@ import { AuthModal } from './components/modals/AuthModal';
 import { SetNewPasswordSheet } from './components/SetNewPasswordSheet';
 import { FeedbackSheet } from './components/FeedbackSheet';
 import { flushPendingMarketingConsent } from './utils/marketingConsent';
+import { startActivityTracking } from './utils/activity';
 import { isDemoMode } from './utils/demoUtils';
 import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
@@ -2936,7 +2937,11 @@ export const App: React.FC = () => {
       userIdRef.current = uid;
       setUserEmail(sessionUser.email || null);
       // Svar på nyhetsbrevsfrågan från registreringen sparas nu när kontot finns
-      if (!isDemoMode()) void flushPendingMarketingConsent();
+      if (!isDemoMode()) {
+        void flushPendingMarketingConsent();
+        // "Senast aktiv" / "Aktiv nu" i Supabase (tabellen user_activity)
+        startActivityTracking();
+      }
 
       try {
         const isOnboardingPending =

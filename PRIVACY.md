@@ -29,6 +29,9 @@ Vi sparar uppgifterna tills du har fått din inbjudan till Dejz, dock längst 24
 
 För att stoppa spam sparar vi en krypterad kod av din IP-adress i högst 24 timmar. Vi kan inte se din IP-adress utifrån koden.
 
+## Hur appen används
+För att förstå om Dejz är till nytta sparar vi när du senast använde appen, hur många gånger du öppnat den och vilken typ av enhet du använder (till exempel iPhone). Vi sparar inte vad du gör i appen eller var du befinner dig.
+
 ## Mejl från oss
 Vi kan mejla dig om ditt konto och om tjänsten, till exempel om du fastnat, om ett fel som påverkat dig eller om viktiga ändringar.
 
