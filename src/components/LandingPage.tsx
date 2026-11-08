@@ -10,6 +10,7 @@ import {
 } from '@phosphor-icons/react';
 import { supabase } from '../supabaseClient';
 import { WaitlistLanding } from './WaitlistLanding';
+import { rememberConsentFromSignup } from '../utils/marketingConsent';
 
 interface LandingPageProps {
   existingEmail?: string | null;
@@ -30,6 +31,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  // Nyhetsbrev: alltid ej ikryssat från början (opt-in)
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -230,6 +233,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         } catch {
           // ignore
         }
+        // Svaret på nyhetsbrevsfrågan sparas så fort kontot finns och användaren är inloggad
+        rememberConsentFromSignup(marketingOptIn);
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
@@ -575,6 +580,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 )}
               </div>
+
+              {/* Frivilligt samtycke till nyhetsbrev – får aldrig vara förkryssat eller ett krav */}
+              {view === 'register' && (
+                <label className="flex items-start gap-3 px-1 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={marketingOptIn}
+                    onChange={(e) => setMarketingOptIn(e.target.checked)}
+                    className="mt-0.5 w-5 h-5 shrink-0 rounded-md accent-[var(--accent-color)] cursor-pointer"
+                  />
+                  <span className="text-[13px] leading-[1.45] text-[var(--text-secondary)]">
+                    Ja, skicka mig tips och nyheter från Dejz. Du kan avsluta när du vill.
+                  </span>
+                </label>
+              )}
 
               <button
                 type="submit"

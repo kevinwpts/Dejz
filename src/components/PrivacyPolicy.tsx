@@ -69,6 +69,17 @@ export const PrivacyPolicyContent: React.FC = () => (
       </p>
     </Section>
 
+    <Section title="Mejl från oss">
+      <p>
+        Vi kan mejla dig om ditt konto och om tjänsten, till exempel om du fastnat, om ett fel som påverkat dig
+        eller om viktiga ändringar.
+      </p>
+      <p>
+        Tips och nyheter skickar vi bara om du själv har kryssat i rutan för det. Du kan ändra dig när som helst
+        under Profil → Nyheter på mejl, eller genom att svara på mejlet. Vi sparar ditt svar och när du gav det.
+      </p>
+    </Section>
+
     <Section title="Vilka hjälper oss?">
       <p>Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:</p>
       <ul className="list-disc pl-5 space-y-1">

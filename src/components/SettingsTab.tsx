@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { isDemoMode } from '../utils/demoUtils';
 import { EmailVerificationStatus } from './EmailVerification';
+import { NewsletterToggle } from './NewsletterToggle';
 import { sendFeedback } from '../utils/sendFeedback';
 import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
 import {
@@ -585,6 +586,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </div>
         </section>
+
+        {/* Samtycke till nyhetsbrev (opt-in) – kan ändras när som helst */}
+        {userEmail && !isDemoMode() && <NewsletterToggle />}
 
         {/* Personlig kod för vänner & delad ekonomi */}
         <section className="ui-section">

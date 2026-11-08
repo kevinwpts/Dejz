@@ -49,6 +49,8 @@ import { TransactionModal } from './components/modals/TransactionModal';
 import { AuthModal } from './components/modals/AuthModal';
 import { SetNewPasswordSheet } from './components/SetNewPasswordSheet';
 import { FeedbackSheet } from './components/FeedbackSheet';
+import { flushPendingMarketingConsent } from './utils/marketingConsent';
+import { isDemoMode } from './utils/demoUtils';
 import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
@@ -2933,6 +2935,8 @@ export const App: React.FC = () => {
       setUserId(uid);
       userIdRef.current = uid;
       setUserEmail(sessionUser.email || null);
+      // Svar på nyhetsbrevsfrågan från registreringen sparas nu när kontot finns
+      if (!isDemoMode()) void flushPendingMarketingConsent();
 
       try {
         const isOnboardingPending =

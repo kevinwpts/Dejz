@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { SWEDISH_EXPENSE_PRESETS } from '../data/swedishExpensePresets';
 import {
+  getMarketingConsent,
+  hasPendingSignupConsent,
+  setMarketingConsent,
+} from '../utils/marketingConsent';
+import { isDemoMode } from '../utils/demoUtils';
+import {
   ArrowRight,
   CaretLeft,
   CaretRight,
@@ -172,6 +178,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   });
   const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
   const [balanceInput, setBalanceInput] = useState('');
+
+  // Nyhetsbrev: fråga bara den som aldrig svarat (t.ex. Google-inloggning – de såg ingen ruta)
+  const [showConsentQuestion, setShowConsentQuestion] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  useEffect(() => {
+    if (isDemoMode() || hasPendingSignupConsent()) return;
+    let cancelled = false;
+    void getMarketingConsent().then((answer) => {
+      if (!cancelled && answer === null) setShowConsentQuestion(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [name, setName] = useState<string>(() => {
     if (initialName) return initialName;
     try {
@@ -2247,6 +2267,23 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
           </div>
 
           <div className="shrink-0 pt-3 space-y-1">
+            {/* Nyhetsbrev: bara för den som inte redan svarat (t.ex. Google-inloggning). Aldrig förkryssat. */}
+            {showConsentQuestion && (
+              <label className="flex items-start gap-3 px-1 pb-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={consentChecked}
+                  onChange={(e) => {
+                    setConsentChecked(e.target.checked);
+                    void setMarketingConsent(e.target.checked, 'introduktion');
+                  }}
+                  className="mt-0.5 w-5 h-5 shrink-0 rounded-md accent-[var(--accent-color)] cursor-pointer"
+                />
+                <span className="text-[13px] leading-[1.45] text-[var(--text-secondary)]">
+                  Ja, skicka mig tips och nyheter från Dejz. Du kan avsluta när du vill.
+                </span>
+              </label>
+            )}
             <button
               type="submit"
               disabled={balanceInput.trim() === ''}

@@ -29,6 +29,11 @@ Vi sparar uppgifterna tills du har fått din inbjudan till Dejz, dock längst 24
 
 För att stoppa spam sparar vi en krypterad kod av din IP-adress i högst 24 timmar. Vi kan inte se din IP-adress utifrån koden.
 
+## Mejl från oss
+Vi kan mejla dig om ditt konto och om tjänsten, till exempel om du fastnat, om ett fel som påverkat dig eller om viktiga ändringar.
+
+Tips och nyheter skickar vi bara om du själv har kryssat i rutan för det. Du kan ändra dig när som helst under Profil → Nyheter på mejl, eller genom att svara på mejlet. Vi sparar ditt svar och när du gav det.
+
 ## 4. Vilka hjälper oss?
 Vi använder några leverantörer som bara får behandla uppgifterna för vår räkning:
 - Supabase – databas och inloggning, lagrat inom EU/EES.
