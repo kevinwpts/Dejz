@@ -448,7 +448,11 @@ const STEPS = [
 const FAQ = [
   {
     q: 'Vad skiljer Dejz från andra budgetappar?',
-    a: 'Dejz räknar från lön till lön i stället för per kalendermånad. Du ser ett enda belopp – vad du har kvar fram till nästa lön – där räkningar och sparande redan är avräknade.',
+    a: 'De flesta budgetappar delar upp pengarna per kalendermånad och kategori. Dejz svarar på en enda fråga: hur mycket kan jag spendera fram till nästa lön utan att gå minus? Räkningar och sparande är redan avräknade, så beloppet du ser är ditt att använda.',
+  },
+  {
+    q: 'Hur funkar sparande?',
+    a: 'Skapa ett sparmål och välj hur mycket du vill spara varje månad. Beloppet dras av från det du har kvar att spendera på lönedagen och läggs till i målet automatiskt – betala dig själv först.',
   },
   {
     q: 'Vad kostar det?',
@@ -622,8 +626,8 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             </h1>
 
             <p className="mt-4 text-[17px] sm:text-lg text-[var(--text-secondary)] max-w-[26rem] sm:max-w-lg mx-auto lg:mx-0 leading-[1.45] tracking-[-0.01em] text-pretty">
-              Dejz räknar från lön till lön – inte till månadsskiftet. Lägg in lön och räkningar en gång, så
-              ser du alltid ett enda belopp: det du faktiskt kan spendera.
+              Dejz räknar från lön till lön. Räkningar och sparande dras av direkt – så ser du alltid hur
+              mycket du kan spendera fram till nästa lön, utan att gå minus.
             </p>
 
             <SignupCta onSignup={onSignup} className="mt-8" />
@@ -659,8 +663,9 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             </h2>
             <p className="mt-4 text-[var(--text-secondary)] leading-[1.5] tracking-[-0.005em] max-w-xl mx-auto lg:mx-0 text-pretty">
               Pengarna tar inte slut vid månadsskiftet – de tar slut innan lön. Därför räknar Dejz från
-              lönedag till lönedag och drar av räkningar och sparande direkt. Det du ser är det du faktiskt
-              har kvar. Infaller lönen på en helg flyttas den automatiskt.
+              lönedag till lönedag och drar av hyra, räkningar och sparande direkt. Det du ser är det du
+              faktiskt kan spendera – utan att hamna på minus innan lönen kommer. Infaller lönen på en helg
+              flyttas den automatiskt.
             </p>
           </div>
 

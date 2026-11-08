@@ -37,6 +37,8 @@ import { ItemLogo } from './ItemLogo';
 
 interface SavingsGoalsViewProps {
   onGoalsChanged?: (goals: SavingsGoalItem[]) => void;
+  /** Skapar ett månadssparande (fast utgift kopplad till målet) som dras av från "kvar att spendera" */
+  onCreateMonthlySaving?: (data: { goalId: string; goalName: string; amount: number }) => void;
   userName?: string | null;
   transactions?: TransactionItem[];
   accounts?: AccountItem[];
@@ -47,7 +49,7 @@ interface SavingsGoalsViewProps {
   onAutoOpenConsumed?: () => void;
 }
 
-type CreateWizardStep = 1 | 2 | 3 | 4 | 5;
+type CreateWizardStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 function inferArtworkFromGoalName(rawName: string): string {
   const q = rawName.trim().toLowerCase();
@@ -116,6 +118,7 @@ function cleanActivityLabel(text: string, hasAmount: boolean): string {
 
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   onGoalsChanged,
+  onCreateMonthlySaving,
   userName,
   transactions = [],
   accounts = [],
@@ -149,6 +152,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [goalNameInput, setGoalNameInput] = useState('');
   const [goalTargetInput, setGoalTargetInput] = useState('');
   const [goalCurrentInput, setGoalCurrentInput] = useState('');
+  const [goalMonthlyInput, setGoalMonthlyInput] = useState('');
   const [goalIsShared, setGoalIsShared] = useState(false);
   const [goalLinkedAccountId, setGoalLinkedAccountId] = useState<string | undefined>(undefined);
   const [goalArtworkId, setGoalArtworkId] = useState<string>('piggy');
@@ -257,6 +261,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalNameInput('');
     setGoalTargetInput('');
     setGoalCurrentInput('');
+    setGoalMonthlyInput('');
     setGoalIsShared(false);
     setGoalLinkedAccountId(undefined);
     setGoalArtworkId('piggy');
@@ -289,7 +294,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     e.target.value = '';
   };
 
-  const handleSaveGoal = (overrideCurrentAmount?: number) => {
+  const handleSaveGoal = (overrideCurrentAmount?: number, overrideMonthly?: number) => {
     const cleanName = goalNameInput.trim();
     const cleanTarget = Math.max(1, Math.round(Number(goalTargetInput) || 0));
     const matchedAcc = goalLinkedAccountId
@@ -336,19 +341,26 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       ],
     };
     updateGoals([...savingsGoals, newGoal]);
+    const monthly =
+      typeof overrideMonthly === 'number'
+        ? overrideMonthly
+        : Math.max(0, Math.round(Number(goalMonthlyInput) || 0));
+    if (monthly > 0 && onCreateMonthlySaving) {
+      onCreateMonthlySaving({ goalId: newId, goalName: cleanName, amount: monthly });
+    }
     setIsCreateWizardOpen(false);
     setSelectedGoalId(newId);
   };
 
   // Physical keyboard support for Numpad steps (Step 3 & Step 5)
   React.useEffect(() => {
-    if (!isCreateWizardOpen || (wizardStep !== 3 && wizardStep !== 5)) return;
+    if (!isCreateWizardOpen || (wizardStep !== 3 && wizardStep !== 5 && wizardStep !== 6)) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const isStep3 = wizardStep === 3;
-      const currentVal = isStep3 ? goalTargetInput : goalCurrentInput;
-      const setVal = isStep3 ? setGoalTargetInput : setGoalCurrentInput;
+      const currentVal = isStep3 ? goalTargetInput : wizardStep === 6 ? goalMonthlyInput : goalCurrentInput;
+      const setVal = isStep3 ? setGoalTargetInput : wizardStep === 6 ? setGoalMonthlyInput : setGoalCurrentInput;
 
       if (/^[0-9]$/.test(e.key)) {
         e.preventDefault();
@@ -365,6 +377,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           if (Number(goalTargetInput) > 0) {
             navigateWizardStep(4, 'forward');
           }
+        } else if (wizardStep === 5) {
+          navigateWizardStep(6, 'forward');
         } else {
           handleSaveGoal();
         }
@@ -373,7 +387,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCreateWizardOpen, wizardStep, goalTargetInput, goalCurrentInput, goalNameInput, goalLinkedAccountId]);
+  }, [isCreateWizardOpen, wizardStep, goalTargetInput, goalCurrentInput, goalMonthlyInput, goalNameInput, goalLinkedAccountId]);
 
   const selectedGoal = useMemo(
     () => savingsGoals.find((g) => g.id === selectedGoalId) || null,
@@ -1051,7 +1065,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       slideDir === 'forward' ? 'animate-page-forward' : 'animate-page-back';
 
     const handleBackNavigation = () => {
-      if (wizardStep === 5) {
+      if (wizardStep === 6) {
+        navigateWizardStep(5, 'back');
+      } else if (wizardStep === 5) {
         navigateWizardStep(4, 'back');
       } else if (wizardStep > 1) {
         navigateWizardStep((wizardStep - 1) as CreateWizardStep, 'back');
@@ -1061,8 +1077,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     };
 
     const appendDigit = (digit: string, isTarget: boolean) => {
-      const current = isTarget ? goalTargetInput : goalCurrentInput;
-      const setFn = isTarget ? setGoalTargetInput : setGoalCurrentInput;
+      const isMonthly = wizardStep === 6;
+      const current = isTarget ? goalTargetInput : isMonthly ? goalMonthlyInput : goalCurrentInput;
+      const setFn = isTarget ? setGoalTargetInput : isMonthly ? setGoalMonthlyInput : setGoalCurrentInput;
       const next = (current + digit).replace(/^0+/, '');
       if (next.length <= 9) {
         setFn(next);
@@ -1070,8 +1087,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     };
 
     const removeLastDigit = (isTarget: boolean) => {
-      const current = isTarget ? goalTargetInput : goalCurrentInput;
-      const setFn = isTarget ? setGoalTargetInput : setGoalCurrentInput;
+      const isMonthly = wizardStep === 6;
+      const current = isTarget ? goalTargetInput : isMonthly ? goalMonthlyInput : goalCurrentInput;
+      const setFn = isTarget ? setGoalTargetInput : isMonthly ? setGoalMonthlyInput : setGoalCurrentInput;
       setFn(current.slice(0, -1));
     };
 
@@ -1140,7 +1158,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         ? 'Hur mycket behöver du spara?'
         : wizardStep === 4
         ? 'Hur vill du följa sparandet?'
-        : 'Hur mycket har du sparat hittills?';
+        : wizardStep === 5
+        ? 'Hur mycket har du sparat hittills?'
+        : 'Hur mycket sparar du varje månad?';
 
     return createPortal(
       <div
@@ -1170,12 +1190,17 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 <CaretLeft size={18} weight="bold" />
               </button>
 
-              {wizardStep === 5 ? (
+              {wizardStep === 5 || wizardStep === 6 ? (
                 <button
                   type="button"
                   onClick={() => {
-                    setGoalCurrentInput('0');
-                    handleSaveGoal(0);
+                    if (wizardStep === 5) {
+                      setGoalCurrentInput('0');
+                      navigateWizardStep(6, 'forward');
+                    } else {
+                      setGoalMonthlyInput('');
+                      handleSaveGoal(undefined, 0);
+                    }
                   }}
                   className="px-4 py-2 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] hover:opacity-80 active:scale-95 transition-all cursor-pointer"
                 >
@@ -1632,6 +1657,64 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   </span>
                   <span className="text-[var(--text-primary)]">kr</span>
                 </div>
+              </div>
+
+              <div className="shrink-0">
+                {renderNumpad(false)}
+
+                <button
+                  type="button"
+                  disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
+                  onClick={() => navigateWizardStep(6, 'forward')}
+                  className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                >
+                  <span>Fortsätt</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* STEG 6: MÅNADSSPARANDE – dras av från "kvar att spendera"       */}
+          {/* ============================================================== */}
+          {wizardStep === 6 && (
+            <div
+              key="goal-step-6"
+              className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+            >
+              <p className="pt-1 text-sm text-[var(--text-secondary)] leading-[1.45] text-center max-w-xs mx-auto">
+                Dras av från det du har kvar att spendera varje lönedag och läggs till i målet automatiskt.
+                Du kan hoppa över och sätta in pengar själv när du vill.
+              </p>
+              <div className="my-auto py-4 flex flex-col items-center justify-center gap-2">
+                <div className="flex items-baseline justify-center gap-2.5 font-display font-bold text-5xl sm:text-6xl tracking-tight tabular-nums">
+                  <span
+                    className={
+                      Number(goalMonthlyInput) > 0
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-[var(--text-muted)]/40'
+                    }
+                  >
+                    {Number(goalMonthlyInput) > 0 ? formatInputThousands(goalMonthlyInput) : '0'}
+                  </span>
+                  <span className="text-[var(--text-primary)]">kr</span>
+                </div>
+                {Number(goalMonthlyInput) > 0 && Number(goalTargetInput) > 0 && (
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {(() => {
+                      const left = Math.max(
+                        0,
+                        Number(goalTargetInput) - (Number(goalCurrentInput) || 0)
+                      );
+                      const months = Math.ceil(left / Number(goalMonthlyInput));
+                      return left === 0
+                        ? 'Du har redan nått målet 🎉'
+                        : months === 1
+                        ? 'Du når målet om 1 månad'
+                        : `Du når målet om ${months} månader`;
+                    })()}
+                  </span>
+                )}
               </div>
 
               <div className="shrink-0">

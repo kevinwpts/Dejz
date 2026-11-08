@@ -1040,32 +1040,54 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     { name: 'Bidrag', category: 'Bidrag' },
     { name: 'Pension', category: 'Pension' },
   ];
-  // Vanliga abonnemang: pris hämtas från prislistan (swedishExpensePresets) och kan ändras
-  const subscriptionChip = (presetId: string, name: string) => {
+  // Vanligaste fasta kostnaderna för unga vuxna i Sverige, i grupper.
+  // Abonnemang med fast pris får priset ifyllt från prislistan (swedishExpensePresets) – det går att ändra.
+  type QuickChip = { name: string; category: string; amount?: number; paymentMethod?: string };
+  const fromPreset = (presetId: string, name: string, category: string): QuickChip => {
     const preset = SWEDISH_EXPENSE_PRESETS.find((x) => x.id === presetId);
-    return {
-      name,
-      category: 'Nöje',
-      amount: preset?.defaultAmount,
-      paymentMethod: 'Kort',
-    };
+    return { name, category, amount: preset?.defaultAmount, paymentMethod: preset?.paymentMethod };
   };
-  const QUICK_FIXED: { name: string; category: string; amount?: number; paymentMethod?: string }[] = [
-    { name: 'Hyra', category: 'Boende' },
-    { name: 'El', category: 'Boende' },
-    { name: 'Försäkring', category: 'Försäkring' },
-    { name: 'Mobil', category: 'Abonnemang' },
-    { name: 'Bredband', category: 'Abonnemang' },
-    subscriptionChip('netflix-standard', 'Netflix'),
-    subscriptionChip('spotify-individual', 'Spotify'),
-    subscriptionChip('youtube-premium', 'YouTube Premium'),
-    subscriptionChip('disney-plus', 'Disney+'),
-    subscriptionChip('max-hbo', 'Max'),
-    subscriptionChip('viaplay-film-serier', 'Viaplay'),
-    { name: 'Gym', category: 'Hälsa' },
-    { name: 'Lån', category: 'Räkningar' },
-    { name: 'Sparande', category: 'Sparande' },
+  const QUICK_FIXED_GROUPS: { title: string; items: QuickChip[] }[] = [
+    {
+      title: 'Boende och räkningar',
+      items: [
+        { name: 'Hyra', category: 'Boende' },
+        { name: 'El', category: 'Boende' },
+        { name: 'Hemförsäkring', category: 'Försäkring' },
+        { name: 'Mobil', category: 'Abonnemang' },
+        { name: 'Bredband', category: 'Abonnemang' },
+        { name: 'CSN', category: 'Räkningar' },
+        { name: 'A-kassa & fack', category: 'Räkningar' },
+        { name: 'Lån', category: 'Räkningar' },
+      ],
+    },
+    {
+      title: 'Resor',
+      items: [
+        { name: 'Månadskort', category: 'Transport', paymentMethod: 'Kort' },
+        { name: 'Bilförsäkring', category: 'Försäkring' },
+        { name: 'Billån/leasing', category: 'Transport' },
+      ],
+    },
+    {
+      title: 'Abonnemang',
+      items: [
+        fromPreset('netflix-standard', 'Netflix', 'Nöje'),
+        fromPreset('spotify-individual', 'Spotify', 'Nöje'),
+        fromPreset('youtube-premium', 'YouTube Premium', 'Nöje'),
+        fromPreset('disney-plus', 'Disney+', 'Nöje'),
+        fromPreset('max-hbo', 'Max', 'Nöje'),
+        fromPreset('viaplay-film-serier', 'Viaplay', 'Nöje'),
+        fromPreset('storytel-ljudbok', 'Storytel', 'Nöje'),
+        { name: 'Gym', category: 'Hälsa' },
+      ],
+    },
+    {
+      title: 'Sparande',
+      items: [{ name: 'Sparande', category: 'Sparande', paymentMethod: 'Överföring' }],
+    },
   ];
+  const QUICK_FIXED: QuickChip[] = QUICK_FIXED_GROUPS.flatMap((g) => g.items);
 
   const openEditSuggestedFixed = (item: {
     id: string;
@@ -1304,6 +1326,41 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     const chips = (type === 'income' ? QUICK_INCOMES : QUICK_FIXED).filter(
       (c) => !taken.has(c.name.toLowerCase())
     );
+    const renderChip = (c: { name: string; category: string; amount?: number; paymentMethod?: string }) => (
+      <button
+        key={c.name}
+        type="button"
+        onClick={() => openAddSheet(type, c)}
+        className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
+      >
+        <Plus size={14} weight="bold" className="text-[var(--text-secondary)]" />
+        <span>{c.name}</span>
+      </button>
+    );
+    if (type === 'fixed') {
+      return (
+        <div className="space-y-4">
+          {QUICK_FIXED_GROUPS.map((group) => {
+            const groupChips = group.items.filter((c) => !taken.has(c.name.toLowerCase()));
+            if (groupChips.length === 0) return null;
+            return (
+              <div key={group.title} className="space-y-2">
+                <p className="text-xs font-medium text-[var(--text-muted)]">{group.title}</p>
+                <div className="flex flex-wrap gap-2">{groupChips.map(renderChip)}</div>
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => openAddSheet(type)}
+            className="h-10 pl-3 pr-4 rounded-full border border-dashed border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-secondary)] flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <Plus size={14} weight="bold" />
+            <span>Annat</span>
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-wrap gap-2">
         {chips.map((c) => (

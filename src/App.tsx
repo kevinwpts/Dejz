@@ -3475,6 +3475,72 @@ export const App: React.FC = () => {
     }
   }, [fixedExpenses, periodRecurringMatches]);
 
+  // Utan bank: ett månadssparande (fast utgift kopplad till ett sparmål) läggs till i målet
+  // en gång per löneperiod när dragningsdagen har passerat – samma period som det dras av från "kvar".
+  useEffect(() => {
+    if (hasActiveBankConnection) return; // med bank sköts det av matchningen ovan
+    const linkedExps = fixedExpenses.filter(
+      (e) => e.linkedGoalId && !e.isCancelled && Number(e.amount) > 0
+    );
+    if (linkedExps.length === 0 || !period?.startDate) return;
+    const goals = getSavingsGoals();
+    if (!goals || goals.length === 0) return;
+
+    const start = new Date(period.startDate);
+    start.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const periodKey = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(
+      start.getDate()
+    ).padStart(2, '0')}`;
+
+    // Har dragningsdagen (t.ex. den 25:e) inträffat mellan periodens start och idag?
+    const dueDatePassed = (dueDay: number): string | null => {
+      for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        if (d.getDate() === Math.min(Math.max(1, dueDay), lastDay)) {
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+            d.getDate()
+          ).padStart(2, '0')}`;
+        }
+      }
+      return null;
+    };
+
+    let mutated = false;
+    const nextGoals = goals.map((goal) => {
+      let updatedGoal = goal;
+      for (const exp of linkedExps) {
+        if (exp.linkedGoalId !== goal.id) continue;
+        const dueIso = dueDatePassed(Number(exp.dueDay) || 25);
+        if (!dueIso) continue;
+        const activityId = `fixed-goal-${exp.id}-${periodKey}`;
+        if ((updatedGoal.activities || []).some((a) => a.id === activityId)) continue;
+        const creditAmt = Math.round(Number(exp.amount) || 0);
+        if (creditAmt <= 0) continue;
+        mutated = true;
+        updatedGoal = {
+          ...updatedGoal,
+          currentAmount: (Number(updatedGoal.currentAmount) || 0) + creditAmt,
+          activities: [
+            {
+              id: activityId,
+              text: `Månadssparande (+${creditAmt.toLocaleString('sv-SE')} kr)`,
+              date: dueIso,
+              amount: creditAmt,
+            },
+            ...(updatedGoal.activities || []),
+          ],
+        };
+      }
+      return updatedGoal;
+    });
+
+    if (mutated) {
+      saveSavingsGoals(nextGoals); // skickar själv 'dejz:goals-updated' så vyerna uppdateras
+    }
+  }, [fixedExpenses, period, hasActiveBankConnection]);
+
   // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp + eventuella extra engångsinkomster i perioden)
   const totalIncome = useMemo(() => {
     const fixedIncomesSum = incomes.reduce((sum, inc) => {
@@ -5498,6 +5564,17 @@ export const App: React.FC = () => {
 
               {activeTab === 'goals' && (
                 <SavingsGoalsView
+                  onCreateMonthlySaving={({ goalId, goalName, amount }) => {
+                    void handleAddFixed({
+                      name: `Sparande: ${goalName}`,
+                      amount,
+                      dueDay: targetPayday || 25,
+                      category: 'Sparande',
+                      paymentMethod: 'Överföring',
+                      linkedGoalId: goalId,
+                    });
+                    showFeedbackToast({ id: `monthly-saving-${goalId}`, title: 'Månadssparande tillagt' });
+                  }}
                   userName={userName}
                   transactions={displayTransactions}
                   accounts={accounts}
