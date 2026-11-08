@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { WelcomeBetaCard } from './WelcomeBetaCard';
 import {
   ArrowCounterClockwise,
   Bank,
@@ -1294,6 +1295,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </section>
         );
       })()}
+
+      {/* Välkomstkort för nya användare (första veckan, kan stängas) */}
+      <WelcomeBetaCard />
 
       {/* ============================================================== */}
       {/* MODUL 2: TOTALT SALDO · BANKKONTON                             */}
