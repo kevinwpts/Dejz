@@ -80,3 +80,21 @@ Bilderna skapas från `test.html`. Ändra texten där och rendera om för nya va
 > Gå med i väntelistan: länk i bion 💜
 
 #privatekonomi #budget #ekonomitips #lönetilllön #sverige
+
+## Facebook-annons: hela appen (`feed/facebook-hela-appen.png`, 1080 × 1350)
+
+**Primär text (det som står ovanför bilden):**
+> Lönen kom för en vecka sen – men vet du hur mycket du faktiskt kan spendera fram till nästa? 🤔
+>
+> Dejz räknar från lön till lön, inte till månadsskiftet. Hyra, räkningar och sparande dras av direkt, så du ser ett enda belopp: det du kan spendera utan att gå minus innan lönen kommer. 💜
+>
+> ✅ Gratis
+> ✅ Klart på två minuter
+> ✅ Funkar direkt i mobilen – ingen nedladdning
+>
+> Skapa ditt konto på dejz.se 👇
+
+**Rubrik (under bilden):** Se vad du har kvar till nästa lön
+**Beskrivning:** Gratis · Klart på två minuter
+**Knapp:** Registrera dig
+**Länk:** `https://dejz.se/?utm_source=facebook`
