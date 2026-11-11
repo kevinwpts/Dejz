@@ -39,8 +39,19 @@ jobs:
       - name: Bygg appen
         run: npx vite build
 
+      # Webbläsaren sparas mellan körningar. Om Ubuntus paketserver krånglar
+      # (hänt en gång) försöker vi igen utan systempaket – de finns redan på GitHubs maskiner.
+      - name: Hämta sparad webbläsare
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Installera webbläsare för klicktester
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 6
+        run: |
+          timeout 240 npx playwright install --with-deps chromium \
+            || npx playwright install chromium
 
       - name: Klicktester (demoläget)
         run: npm run e2e
