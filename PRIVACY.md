@@ -46,6 +46,7 @@ Vi använder några leverantörer som bara får behandla uppgifterna för vår r
 - Resend – skickar våra mejl.
 - Google och Apple – om du väljer att logga in med dem får vi ditt namn och din e-postadress.
 - Vercel – driftar webbplatsen.
+- Sentry – tar emot tekniska felrapporter när appen kraschar (felmeddelande, telefon/webbläsare). Aldrig ditt namn, din e-post eller dina belopp.
 
 Bankkoppling via Enable Banking kommer senare. Policyn uppdateras innan den blir tillgänglig.
 

@@ -5,10 +5,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { EmailVerifiedNotice } from './components/EmailVerification';
 import './index.css';
 import { captureFirstTouch } from './utils/attribution';
+import { initMonitoring } from './utils/monitoring';
 import { getPublicPageKind, PublicInfoPage } from './components/PublicInfoPage';
 
 // Spara utm-länken (t.ex. ?utm_source=tiktok) innan något annat hinner ändra adressen
 captureFirstTouch();
+// Felövervakning (bara om VITE_SENTRY_DSN finns)
+initMonitoring();
 
 const renderApp = () => {
   let container = document.getElementById('root');

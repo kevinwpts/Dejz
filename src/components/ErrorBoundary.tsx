@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { sendFeedback } from '../utils/sendFeedback';
+import { reportError } from '../utils/monitoring';
 
 interface Props {
   children: ReactNode;
@@ -37,6 +38,7 @@ class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
     this.componentStack = (errorInfo?.componentStack || '').slice(0, 1500);
+    reportError(error, { komponenter: this.componentStack });
     void sendFeedback('crash', `${error?.name || 'Error'}: ${error?.message || String(error)}`, {
       stack: String(error?.stack || '').slice(0, 1500),
       komponenter: this.componentStack,

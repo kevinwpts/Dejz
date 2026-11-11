@@ -89,7 +89,12 @@ Krävs för 6,9-tumsskärm (1320 × 2868). Säg till så tar jag dem från demol
 3. *Settings → Auth → URL Configuration*: lägg till `https://dejz.se/**` och `se.dejz.app://**` som tillåtna adresser.
 
 ### Steg 11 – Felövervakning (rekommenderas starkt)
-Skapa ett gratis konto på https://sentry.io (projekt: React). Lägg in DSN-nyckeln i Vercel som `VITE_SENTRY_DSN` och säg till – då kopplar jag in den. Då får du veta direkt när något går fel hos en användare.
+Redan inkopplat i koden – bara nyckeln saknas.
+1. Skapa ett gratis konto på https://sentry.io (projekt: *React*, välj EU-region).
+2. Kopiera *DSN* (Settings → Client Keys).
+3. I Vercel: *Settings → Environment Variables* → `VITE_SENTRY_DSN` = din DSN → publicera om.
+
+Då får du ett mejl direkt när något kraschar hos en användare. Inga namn, e-post eller belopp skickas.
 
 ---
 

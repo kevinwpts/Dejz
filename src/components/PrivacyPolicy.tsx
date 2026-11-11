@@ -104,6 +104,10 @@ export const PrivacyPolicyContent: React.FC = () => (
         <li>Resend – skickar våra mejl.</li>
         <li>Google och Apple – om du väljer att logga in med dem får vi ditt namn och din e-postadress.</li>
         <li>Vercel – driftar webbplatsen.</li>
+        <li>
+          Sentry – tar emot tekniska felrapporter när appen kraschar (felmeddelande, telefon/webbläsare). Aldrig ditt
+          namn, din e-post eller dina belopp.
+        </li>
       </ul>
       <p>Bankkoppling via Enable Banking kommer senare. Policyn uppdateras innan den blir tillgänglig.</p>
     </Section>
