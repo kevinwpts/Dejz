@@ -38,7 +38,8 @@
 - Testa ändringar lokalt (`npm run dev`, http://localhost:3000) och visa resultatet innan något publiceras.
 - **Pusha bara när jag säger "pusha".** Fråga inte om vi ska pusha – jag säger till själv. Vercel publicerar automatiskt från `main`; kontrollera efteråt att ändringen syns på dejz.se.
 - Uppdatera skärmbilderna på startsidan (`public/screens/*.png` + `.webp`) när hemskärmen ändras, och höj `?v=N` i `src/components/WaitlistLanding.tsx`.
-- Projektet har gamla TypeScript-fel (t.ex. i `HomeTab.tsx`, `App.tsx`, `demoData.ts`). Rör dem inte i förbifarten – se bara till att du inte lägger till nya.
+- Koden har **0 TypeScript-fel och 0 lint-varningar** – håll det så. Innan push: `npm run typecheck`, `npm run lint`, `npm test` och `npm run e2e` (klicktester i demoläget). Samma kontroller körs automatiskt på GitHub vid varje push.
+- Räknereglerna för "kvar till lön" finns på ett ställe: `src/utils/budgetEngine.ts` (med tester). Appens datatyper finns i `src/app/models.ts`.
 
 ## Supabase och data – var försiktig
 - Projekt-id: `smddiufwpdpmzhvideto`. Supabase är kopplat till Claude.

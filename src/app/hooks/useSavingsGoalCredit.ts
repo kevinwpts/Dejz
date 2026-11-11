@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { FixedExpenseItem } from '../../components/HomeTab';
+import type { FixedExpenseItem } from '../models';
 import type { PeriodInfo } from '../../utils/periodEngine';
 import type { PeriodMatches } from '../../utils/budgetEngine';
 import { getSavingsGoals, saveSavingsGoals } from '../../utils/appCache';

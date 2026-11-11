@@ -11,7 +11,7 @@
  * - En dragning som kopplats till en fast utgift räknas aldrig som ett vanligt köp.
  * - Delade räkningar: bara din andel räknas.
  */
-import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../components/HomeTab';
+import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
 import type { PeriodInfo } from './periodEngine';
 import { getDueDateInPeriod } from './periodEngine';
 import { formatIsoDateStockholm } from './swedishDate';

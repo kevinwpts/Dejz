@@ -1,4 +1,4 @@
-import type { FixedExpenseItem, TransactionItem } from '../components/HomeTab';
+import type { FixedExpenseItem, TransactionItem } from '../app/models';
 import { findAllMatchingFixedExpensesByMerchant } from './recurring';
 
 /**

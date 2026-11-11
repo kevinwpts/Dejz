@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../components/HomeTab';
+import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../models';
 import type { BankAccount } from '../../services/bankService';
 import type { PeriodInfo } from '../../utils/periodEngine';
 import {
