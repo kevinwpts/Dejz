@@ -1,9 +1,16 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 import { Config, Income, FixedExpense, Transaction } from '../types';
-import { isKnownIconId, isEmojiString } from '../components/CategoryIcon';
 import { seedDemoData } from '../utils/demoData';
-import { getTransactionReceipts, serializeTransactionReceipts } from '../utils/format';
+import { getTransactionReceipts } from '../utils/format';
+import { transactionFromRow, transactionToRow } from './transactionRows';
+import {
+  FixedExpenseInput,
+  fixedExpenseFromRow,
+  fixedExpenseToRow,
+  incomeFromRow,
+  incomeToRow,
+} from './budgetRows';
 
 /**
  * dataService pratar med tabeller vars kolumner kan saknas i äldre databaser (se stripKnownMissingColumns
@@ -389,64 +396,7 @@ export const dataService = {
       .order('timestamp', { ascending: false });
 
     if (error) throw error;
-    return (data || []).map((t) => {
-      const receiptUrls = getTransactionReceipts({
-        receipt_url: t.receipt_url,
-        receiptUrls: t.receipt_urls,
-      });
-      const tags: string[] = Array.isArray(t.tags) ? t.tags : [];
-      const bankTxTag = tags.find((tag) => typeof tag === 'string' && tag.startsWith('bank_tx:'));
-      const bankAccTag = tags.find((tag) => typeof tag === 'string' && tag.startsWith('bank_acc:'));
-      const refundTag = tags.find((tag) => typeof tag === 'string' && tag.startsWith('refund_of:'));
-
-      return {
-        id: t.id,
-        amount: Number(t.amount),
-        category: t.category,
-        note: t.note,
-        merchant: t.merchant,
-        timestamp: Number(t.timestamp),
-        type: t.type,
-        isBackdated: t.is_backdated,
-        logo: t.logo,
-        icon:
-          t.icon ||
-          (t.logo && (isEmojiString(t.logo) || isKnownIconId(t.logo)) ? t.logo : undefined),
-        paymentMethod: t.payment_method,
-        receiptUrl: receiptUrls[0],
-        receiptUrls,
-        tags,
-        splits:
-          typeof t.splits === 'string'
-            ? (() => {
-                try {
-                  const p = JSON.parse(t.splits);
-                  return Array.isArray(p) ? p : [];
-                } catch {
-                  return [];
-                }
-              })()
-            : Array.isArray(t.splits)
-            ? t.splits
-            : [],
-        isStarred: Boolean(
-          t.is_starred || (tags && Array.isArray(tags) && tags.includes('starred'))
-        ),
-        bankTransactionId:
-          t.bank_transaction_id || (bankTxTag ? bankTxTag.slice('bank_tx:'.length) : undefined),
-        bankAccountId:
-          t.bank_account_id || (bankAccTag ? bankAccTag.slice('bank_acc:'.length) : undefined),
-        originalBankDescription: t.original_bank_description || undefined,
-        originalBankAmount:
-          t.original_bank_amount !== undefined && t.original_bank_amount !== null
-            ? Number(t.original_bank_amount)
-            : undefined,
-        originalBankCurrency: t.original_bank_currency || undefined,
-        refundOfTransactionId:
-          t.refund_of_transaction_id ||
-          (refundTag ? refundTag.slice('refund_of:'.length) : undefined),
-      };
-    });
+    return (data || []).map((t) => transactionFromRow(t));
   },
 
   async addTransaction(
@@ -481,58 +431,7 @@ export const dataService = {
         .upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
     }
 
-    const baseTags = (transaction.tags || []).filter(
-      (t) =>
-        t !== 'starred' &&
-        !t.startsWith('bank_tx:') &&
-        !t.startsWith('bank_acc:') &&
-        !t.startsWith('refund_of:')
-    );
-    if (transaction.isStarred) baseTags.push('starred');
-    if (transaction.bankTransactionId) baseTags.push(`bank_tx:${transaction.bankTransactionId}`);
-    if (transaction.bankAccountId) baseTags.push(`bank_acc:${transaction.bankAccountId}`);
-    if (transaction.refundOfTransactionId) {
-      baseTags.push(`refund_of:${transaction.refundOfTransactionId}`);
-    }
-    const tagsWithStar = Array.from(new Set(baseTags));
-
-    const serializedReceipt = serializeTransactionReceipts(
-      transaction.receiptUrls,
-      transaction.receiptUrl
-    );
-
-    const payload: Record<string, any> = {
-      user_id: userId,
-      amount: transaction.amount,
-      category: transaction.category,
-      note: transaction.note,
-      merchant: transaction.merchant,
-      timestamp: transaction.timestamp,
-      type: transaction.type,
-      is_backdated: transaction.isBackdated,
-      logo: transaction.logo,
-      icon: transaction.icon,
-      payment_method: transaction.paymentMethod,
-      receipt_url: serializedReceipt,
-      tags: tagsWithStar,
-      splits: transaction.splits,
-      ...(transaction.bankTransactionId
-        ? { bank_transaction_id: transaction.bankTransactionId }
-        : {}),
-      ...(transaction.bankAccountId ? { bank_account_id: transaction.bankAccountId } : {}),
-      ...(transaction.originalBankDescription
-        ? { original_bank_description: transaction.originalBankDescription }
-        : {}),
-      ...(transaction.originalBankAmount !== undefined
-        ? { original_bank_amount: transaction.originalBankAmount }
-        : {}),
-      ...(transaction.originalBankCurrency
-        ? { original_bank_currency: transaction.originalBankCurrency }
-        : {}),
-      ...(transaction.refundOfTransactionId
-        ? { refund_of_transaction_id: transaction.refundOfTransactionId }
-        : {}),
-    };
+    const payload: Record<string, any> = { user_id: userId, ...transactionToRow(transaction, 'insert') };
 
     stripKnownMissingColumns('transactions', payload);
 
@@ -579,55 +478,7 @@ export const dataService = {
     }
     if (!data || data.length === 0) throw new Error('Ingen data returnerades från databasen');
 
-    const row = data[0];
-    const rowReceipts = getTransactionReceipts({ receipt_url: row.receipt_url });
-    const rowTags: string[] = Array.isArray(row.tags) ? row.tags : tagsWithStar;
-    return {
-      id: row.id,
-      amount: Number(row.amount),
-      category: row.category,
-      note: row.note,
-      merchant: row.merchant,
-      timestamp: Number(row.timestamp),
-      type: row.type,
-      isBackdated: row.is_backdated,
-      logo: row.logo,
-      icon:
-        row.icon ||
-        (row.logo && (isEmojiString(row.logo) || isKnownIconId(row.logo)) ? row.logo : undefined),
-      paymentMethod: row.payment_method,
-      receiptUrl: rowReceipts[0],
-      receiptUrls: rowReceipts,
-      tags: rowTags,
-      splits:
-        typeof row.splits === 'string'
-          ? (() => {
-              try {
-                const p = JSON.parse(row.splits);
-                return Array.isArray(p) ? p : [];
-              } catch {
-                return [];
-              }
-            })()
-          : Array.isArray(row.splits)
-          ? row.splits
-          : [],
-      isStarred: Boolean(
-        row.is_starred ||
-          (rowTags && Array.isArray(rowTags) && rowTags.includes('starred')) ||
-          transaction.isStarred
-      ),
-      bankTransactionId: row.bank_transaction_id || transaction.bankTransactionId,
-      bankAccountId: row.bank_account_id || transaction.bankAccountId,
-      originalBankDescription:
-        row.original_bank_description || transaction.originalBankDescription,
-      originalBankAmount:
-        row.original_bank_amount !== undefined && row.original_bank_amount !== null
-          ? Number(row.original_bank_amount)
-          : transaction.originalBankAmount,
-      originalBankCurrency: row.original_bank_currency || transaction.originalBankCurrency,
-      refundOfTransactionId: row.refund_of_transaction_id || transaction.refundOfTransactionId,
-    };
+    return transactionFromRow(data[0], transaction);
   },
 
   async updateTransaction(
@@ -654,59 +505,7 @@ export const dataService = {
       return updatedTx;
     }
 
-    const baseTags = (transaction.tags || []).filter(
-      (t) =>
-        t !== 'starred' &&
-        !t.startsWith('bank_tx:') &&
-        !t.startsWith('bank_acc:') &&
-        !t.startsWith('refund_of:')
-    );
-    if (transaction.isStarred) baseTags.push('starred');
-    if (transaction.bankTransactionId) baseTags.push(`bank_tx:${transaction.bankTransactionId}`);
-    if (transaction.bankAccountId) baseTags.push(`bank_acc:${transaction.bankAccountId}`);
-    if (transaction.refundOfTransactionId) {
-      baseTags.push(`refund_of:${transaction.refundOfTransactionId}`);
-    }
-    const tagsWithStar = Array.from(new Set(baseTags));
-
-    const serializedReceipt = serializeTransactionReceipts(
-      transaction.receiptUrls,
-      transaction.receiptUrl
-    );
-
-    const payload: Record<string, any> = {
-      amount: transaction.amount,
-      category: transaction.category,
-      note: transaction.note,
-      merchant: transaction.merchant,
-      timestamp: transaction.timestamp,
-      type: transaction.type,
-      is_backdated: transaction.isBackdated,
-      logo: transaction.logo,
-      icon: transaction.icon,
-      payment_method: transaction.paymentMethod,
-      receipt_url: serializedReceipt,
-      tags: tagsWithStar,
-      splits: transaction.splits,
-      ...(transaction.bankTransactionId !== undefined
-        ? { bank_transaction_id: transaction.bankTransactionId || null }
-        : {}),
-      ...(transaction.bankAccountId !== undefined
-        ? { bank_account_id: transaction.bankAccountId || null }
-        : {}),
-      ...(transaction.originalBankDescription !== undefined
-        ? { original_bank_description: transaction.originalBankDescription || null }
-        : {}),
-      ...(transaction.originalBankAmount !== undefined
-        ? { original_bank_amount: transaction.originalBankAmount ?? null }
-        : {}),
-      ...(transaction.originalBankCurrency !== undefined
-        ? { original_bank_currency: transaction.originalBankCurrency || null }
-        : {}),
-      ...(transaction.refundOfTransactionId !== undefined
-        ? { refund_of_transaction_id: transaction.refundOfTransactionId || null }
-        : {}),
-    };
+    const payload: Record<string, any> = transactionToRow(transaction, 'update');
 
     stripKnownMissingColumns('transactions', payload);
 
@@ -733,55 +532,7 @@ export const dataService = {
     if (error) throw error;
     if (!data || data.length === 0) throw new Error('Kunde inte uppdatera transaktionen');
 
-    const row = data[0];
-    const rowReceipts = getTransactionReceipts({ receipt_url: row.receipt_url });
-    const rowTags: string[] = Array.isArray(row.tags) ? row.tags : tagsWithStar;
-    return {
-      id: row.id,
-      amount: Number(row.amount),
-      category: row.category,
-      note: row.note,
-      merchant: row.merchant,
-      timestamp: Number(row.timestamp),
-      type: row.type,
-      isBackdated: row.is_backdated,
-      logo: row.logo,
-      icon:
-        row.icon ||
-        (row.logo && (isEmojiString(row.logo) || isKnownIconId(row.logo)) ? row.logo : undefined),
-      paymentMethod: row.payment_method,
-      receiptUrl: rowReceipts[0],
-      receiptUrls: rowReceipts,
-      tags: rowTags,
-      splits:
-        typeof row.splits === 'string'
-          ? (() => {
-              try {
-                const p = JSON.parse(row.splits);
-                return Array.isArray(p) ? p : [];
-              } catch {
-                return [];
-              }
-            })()
-          : Array.isArray(row.splits)
-          ? row.splits
-          : [],
-      isStarred: Boolean(
-        row.is_starred ||
-          (rowTags && Array.isArray(rowTags) && rowTags.includes('starred')) ||
-          transaction.isStarred
-      ),
-      bankTransactionId: row.bank_transaction_id || transaction.bankTransactionId,
-      bankAccountId: row.bank_account_id || transaction.bankAccountId,
-      originalBankDescription:
-        row.original_bank_description || transaction.originalBankDescription,
-      originalBankAmount:
-        row.original_bank_amount !== undefined && row.original_bank_amount !== null
-          ? Number(row.original_bank_amount)
-          : transaction.originalBankAmount,
-      originalBankCurrency: row.original_bank_currency || transaction.originalBankCurrency,
-      refundOfTransactionId: row.refund_of_transaction_id || transaction.refundOfTransactionId,
-    };
+    return transactionFromRow(data[0], transaction);
   },
 
   async deleteTransaction(id: string) {    if (id.startsWith('demo-')) {
@@ -810,19 +561,7 @@ export const dataService = {
       .eq('user_id', userId);
     
     if (error) throw error;
-    return (data || []).map(i => ({
-      id: i.id,
-      name: i.name,
-      originalName: i.period_overrides?._original_name || undefined,
-      amount: Number(i.amount),
-      category: i.category,
-      icon: i.icon,
-      logo: i.logo,
-      deductionDay: i.deduction_day,
-      isVariable: i.is_variable,
-      periodOverrides: i.period_overrides || {},
-      note: i.note || undefined
-    }));
+    return (data || []).map((i) => incomeFromRow(i));
   },
 
   async saveIncomeSource(userId: string, income: Income & { originalName?: string }) {    if (userId === 'demo-user') {
@@ -839,23 +578,7 @@ export const dataService = {
       localStorage.setItem('demo_incomes', JSON.stringify(list));
       return;
     }
-    const periodOverrides = {
-      ...(income.periodOverrides || {}),
-      ...(income.originalName ? { _original_name: income.originalName } : {}),
-    };
-    const payload: any = {
-      id: isUuid(income.id) ? income.id : undefined,
-      user_id: userId,
-      name: income.name,
-      amount: income.amount,
-      category: income.category,
-      icon: income.icon,
-      logo: income.logo,
-      deduction_day: income.deductionDay,
-      is_variable: income.isVariable,
-      period_overrides: periodOverrides,
-      note: income.note && income.note.trim() ? income.note.trim() : null
-    };
+    const payload: any = incomeToRow(userId, income);
 
     const currentPayload = { ...payload };
     let attempts = 0;
@@ -913,52 +636,12 @@ export const dataService = {
       .eq('user_id', userId);
     
     if (error) throw error;
-    return (data || []).map(e => ({
-      id: e.id,
-      name: e.name,
-      originalName: e.period_overrides?._original_name || undefined,
-      amount: Number(e.amount),
-      isShared: Boolean(e.period_overrides?._is_shared),
-      fullAmount:
-        e.period_overrides?._full_amount !== undefined && e.period_overrides?._full_amount !== null
-          ? Number(e.period_overrides._full_amount)
-          : undefined,
-      receiptUrl: e.period_overrides?._receipt_url || undefined,
-      receiptName: e.period_overrides?._receipt_name || undefined,
-      paymentMethod: e.payment_method,
-      frequency: e.frequency,
-      icon: e.icon,
-      category: e.category,
-      logo: e.logo,
-      deductionDay: e.deduction_day,
-      startMonth: e.start_month !== undefined && e.start_month !== null 
-        ? e.start_month 
-        : (e.period_overrides?._start_month !== undefined && e.period_overrides?._start_month !== null ? Number(e.period_overrides._start_month) : undefined),
-      isVariable: e.is_variable,
-      periodOverrides: e.period_overrides || {},
-      note: e.note || undefined,
-      isCancelled: Boolean(e.is_cancelled || e.period_overrides?._is_cancelled),
-      cancellationDate: e.cancellation_date || e.period_overrides?._cancellation_date || undefined,
-      cancelledAt: e.cancelled_at || e.period_overrides?._cancelled_at || undefined,
-      lastPaymentDate: e.last_payment_date || e.period_overrides?._last_payment_date || undefined,
-      hasNoMorePayments: Boolean(
-        e.has_no_more_payments !== undefined && e.has_no_more_payments !== null
-          ? (e.has_no_more_payments || e.period_overrides?._has_no_more_payments)
-          : (e.period_overrides?._has_no_more_payments ?? false)
-      ),
-      cancellationScenario: e.cancellation_scenario || e.period_overrides?._cancellation_scenario || undefined,
-    }));
+    return (data || []).map((e) => fixedExpenseFromRow(e));
   },
 
   async saveFixedExpense(
     userId: string,
-    expense: FixedExpense & {
-      originalName?: string;
-      isShared?: boolean;
-      fullAmount?: number;
-      receiptUrl?: string;
-      receiptName?: string;
-    }
+    expense: FixedExpenseInput
   ) {
     if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_fixed');
@@ -975,66 +658,7 @@ export const dataService = {
       return;
     }
 
-    const baseOverrides = { ...(expense.periodOverrides || {}) };
-    delete (baseOverrides as any)._is_cancelled;
-    delete (baseOverrides as any)._cancellation_date;
-    delete (baseOverrides as any)._cancelled_at;
-    delete (baseOverrides as any)._last_payment_date;
-    delete (baseOverrides as any)._has_no_more_payments;
-    delete (baseOverrides as any)._cancellation_scenario;
-    delete (baseOverrides as any)._is_shared;
-    delete (baseOverrides as any)._full_amount;
-    delete (baseOverrides as any)._receipt_url;
-    delete (baseOverrides as any)._receipt_name;
-
-    const periodOverrides = {
-      ...baseOverrides,
-      ...(expense.originalName ? { _original_name: expense.originalName } : {}),
-      ...(expense.isShared ? { _is_shared: true } : {}),
-      ...(expense.fullAmount !== undefined && expense.fullAmount !== null
-        ? { _full_amount: expense.fullAmount }
-        : {}),
-      ...(expense.receiptUrl ? { _receipt_url: expense.receiptUrl } : {}),
-      ...(expense.receiptName ? { _receipt_name: expense.receiptName } : {}),
-      ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {}),
-      ...(expense.isCancelled
-        ? {
-            _is_cancelled: true,
-            ...(expense.cancellationDate ? { _cancellation_date: expense.cancellationDate } : {}),
-            ...(expense.cancelledAt ? { _cancelled_at: expense.cancelledAt } : {}),
-            ...(expense.lastPaymentDate ? { _last_payment_date: expense.lastPaymentDate } : {}),
-            _has_no_more_payments: Boolean(expense.hasNoMorePayments),
-            ...(expense.cancellationScenario ? { _cancellation_scenario: expense.cancellationScenario } : {}),
-          }
-        : {}),
-    };
-
-    const payload: any = {
-      id: isUuid(expense.id) ? expense.id : undefined,
-      user_id: userId,
-      name: expense.name,
-      amount: expense.amount,
-      payment_method: expense.paymentMethod,
-      frequency: expense.frequency,
-      ...(expense.icon ? { icon: expense.icon } : {}),
-      category: expense.category,
-      logo: expense.logo,
-      deduction_day: expense.deductionDay,
-      ...(expense.startMonth !== undefined ? { start_month: expense.startMonth } : {}),
-      ...(expense.isVariable !== undefined ? { is_variable: expense.isVariable } : {}),
-      period_overrides: periodOverrides,
-      ...(expense.note && expense.note.trim() ? { note: expense.note.trim() } : {}),
-      ...(expense.isCancelled
-        ? {
-            is_cancelled: true,
-            ...(expense.cancellationDate ? { cancellation_date: expense.cancellationDate } : {}),
-            ...(expense.cancelledAt ? { cancelled_at: expense.cancelledAt } : {}),
-            ...(expense.lastPaymentDate ? { last_payment_date: expense.lastPaymentDate } : {}),
-            has_no_more_payments: Boolean(expense.hasNoMorePayments),
-            ...(expense.cancellationScenario ? { cancellation_scenario: expense.cancellationScenario } : {}),
-          }
-        : {}),
-    };
+    const payload: any = fixedExpenseToRow(userId, expense);
 
     const currentPayload = { ...payload };
     stripKnownMissingColumns('fixed_expenses', currentPayload);
