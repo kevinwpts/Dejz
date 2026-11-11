@@ -4,10 +4,10 @@ import { expect, Page, test } from '@playwright/test';
 
 /** "−11 414 kr" → -11414, "+24 800 kr" → 24800 */
 const kr = (text: string) => {
-  const m = text.replace(/ | /g, ' ').match(/([−+-]?)\s?(\d{1,3}(?: \d{3})*)\s?kr/);
+  const m = text.replace(/\u00a0|\u202f/g, ' ').match(/([\u2212+-]?)\s?(\d{1,3}(?: \d{3})*)\s?kr/);
   if (!m) throw new Error(`Hittade inget belopp i "${text}"`);
   const value = Number(m[2].replace(/ /g, ''));
-  return m[1] === '−' || m[1] === '-' ? -value : value;
+  return m[1] === '\u2212' || m[1] === '-' ? -value : value;
 };
 
 /** Läser hemkortet: kvar, inkomst, fasta och rörligt */

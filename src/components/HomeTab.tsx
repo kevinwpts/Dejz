@@ -370,7 +370,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   userEmail,
   userName,
   onNavigateToHousehold,
-  manualBalance = null,
+  manualBalance: _manualBalance = null,
   onOpenBalance,
 }) => {
   const [showBudgetBreakdown, setShowBudgetBreakdown] = useState<boolean>(() =>

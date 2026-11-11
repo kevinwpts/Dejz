@@ -473,7 +473,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
 
     void runBankAnalysis();
     // Avsiktligt bara step/bankEnabled: analysen ska inte startas om av att data uppdateras under tiden.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, bankEnabled]);
 
   // Synka om App.tsx redan hunnit populera fixedExpenses eller incomes via bakgrundssynk (utan att låsa runBankAnalysis)

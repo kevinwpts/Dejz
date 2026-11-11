@@ -1725,7 +1725,6 @@ export const App: React.FC = () => {
     totalIncome,
     totalFixedExpenses,
     totalVariableSpent,
-    manualBalance,
     activeManualBalance,
     kvarAttSpendera,
     dagsbudget,

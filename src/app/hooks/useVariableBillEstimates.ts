@@ -41,6 +41,5 @@ export function useVariableBillEstimates({
       }
       void onUpdateFixed({ ...exp, amount: est.estimate });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasActiveBankConnection, period?.startDate, fixedExpenses, transactions, periodRecurringMatches]);
 }

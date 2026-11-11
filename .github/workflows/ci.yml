@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check:
-    name: Typer, tester, bygge och klicktester
+    name: Typer, lint, tester, bygge och klicktester
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,6 +29,9 @@ jobs:
 
       - name: TypeScript (0 fel)
         run: npm run typecheck
+
+      - name: Kodgranskning (lint)
+        run: npm run lint
 
       - name: Tester för räknemotorn
         run: npm test
