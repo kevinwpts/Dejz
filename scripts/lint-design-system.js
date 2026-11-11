@@ -36,6 +36,7 @@ const EXEMPT_FILES = [
   'src/constants.ts', // Database categories definition with static colors
   'src/utils/demoData.ts', // Large seed database with mock transaction objects and category colors
   'src/utils/appCache.ts', // Local storage cache, default categories and payment methods
+  'src/utils/cache/categories.ts', // Default payment method colors (moved from appCache.ts)
   'src/utils/logoVisuals.ts', // Data lookup maps and logo constants
   'src/App.tsx', // Contains basic mock categories definition mapping
   'src/components/AnalysisView.tsx', // Legitimate database/fallback colors for Recharts slices
