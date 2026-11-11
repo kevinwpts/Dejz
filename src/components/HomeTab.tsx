@@ -55,6 +55,8 @@ import {
 
 export interface AccountItem {
   id: string;
+  /** Bankens namn, om kontot kommer från en bankkoppling */
+  bank?: string;
   name: string;
   originalName?: string;
   accountNumber: string;
@@ -157,6 +159,7 @@ export interface TransactionItem {
   bookingStatus?: string;
   reconciliationStatus?: string;
   isExcluded?: boolean;
+  excludeFromBudget?: boolean;
   isHearted?: boolean;
   isWaitingForPackage?: boolean;
   isWaitingForSwish?: boolean;

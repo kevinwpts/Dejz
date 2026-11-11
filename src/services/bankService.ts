@@ -47,6 +47,7 @@ export interface BankConnection {
 
 export interface BankAccount {
   id: string;
+  bankName?: string;
   connection_id: string;
   user_id: string;
   provider_account_uid: string;
@@ -407,6 +408,8 @@ export function deduplicateBankSyncRows(rows: BankTransactionItem[]): BankTransa
 }
 
 export const bankService = {
+  /** Sparar egna inställningar för ett konto (namn, med i budget …) */
+  saveAccountOverlay,
   async listBanks(country = 'SE', environment: BankEnvironment = 'production'): Promise<BankAspsp[]> {
     if (country === 'SE' && SWEDISH_BANKS_CATALOG.length > 0) {
       // Return full catalog of Swedish banks immediately so UI never spins or waits

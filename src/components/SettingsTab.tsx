@@ -122,10 +122,10 @@ interface SettingsTabProps {
   onToggleSplitSimulator?: (active: boolean) => void;
   onStartCreateGoalWizard?: () => void;
   onOpenAddFixedModal?: () => void;
-  onOpenPreviewFixedModal?: () => void;
+  onOpenPreviewFixedModal?: (exp?: any) => void;
   onOpenAddIncomeModal?: () => void;
   onOpenAddTransactionModal?: () => void;
-  onOpenPreviewTransactionModal?: () => void;
+  onOpenPreviewTransactionModal?: (tx?: any) => void;
   onApplyFixedExpenses?: (next: FixedExpenseItem[]) => void;
   /** Öppnar Sparmål, Kvitton eller Paket (låg tidigare under "Mer" i menyn) */
   onOpenSection?: (section: 'goals' | 'receipts' | 'packages') => void;

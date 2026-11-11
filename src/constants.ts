@@ -1,3 +1,4 @@
+export type { PaymentMethodItem as PaymentMethodOption } from './utils/appCache';
 export const SUPPORT_EMAIL = '';
 export const LOGO_URL = '/favicon.svg';
 

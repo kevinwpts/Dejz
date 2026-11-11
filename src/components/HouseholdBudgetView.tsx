@@ -28,6 +28,7 @@ import {
   computeMyHouseholdSummary,
   calculateHouseholdSettlement,
   pushHouseholdSyncToServer,
+  toPeriodKey,
 } from '../utils/householdSync';
 import {
   SocialFriend,
@@ -371,11 +372,12 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
   const handleToggleSettled = async () => {
     if (!household) return;
     const isCurrentlySettled =
-      household.settledAt && household.settledPeriodStart === period.startDate;
+      household.settledAt &&
+      toPeriodKey(household.settledPeriodStart) === toPeriodKey(period.startDate);
     const nextHh: HouseholdState = {
       ...household,
       settledAt: isCurrentlySettled ? undefined : new Date().toISOString(),
-      settledPeriodStart: isCurrentlySettled ? undefined : period.startDate,
+      settledPeriodStart: isCurrentlySettled ? undefined : toPeriodKey(period.startDate),
       updatedAt: new Date().toISOString(),
     };
     setHousehold(nextHh);
@@ -628,11 +630,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (partnerMember) {
-                  setPartnerNameInput(partnerMember.name);
-                  setPartnerIncomeInput(String(partnerMember.totalIncome || ''));
-                  setPartnerPaidInput(String(partnerTotalPaid || ''));
-                }
                 setIsSettingsOpen(true);
               }}
               className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"

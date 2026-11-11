@@ -889,6 +889,7 @@ export interface PaymentMethodItem {
   name: string;
   icon: string;
   color?: string;
+  isCustom?: boolean;
 }
 
 const DEFAULT_PAYMENT_METHODS_LIST: PaymentMethodItem[] = [

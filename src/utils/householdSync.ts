@@ -1,3 +1,4 @@
+import { formatIsoDateStockholm } from './swedishDate';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../components/HomeTab';
 import {
   SavingsGoalItem,
@@ -238,10 +239,18 @@ export interface SettlementSummary {
   isSettledForCurrentPeriod: boolean;
 }
 
+/** Periodens start som "ÅÅÅÅ-MM-DD" (svensk tid), oavsett om den kommer som Date eller text */
+export function toPeriodKey(value: string | Date | undefined | null): string {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return String(value).slice(0, 10);
+  return formatIsoDateStockholm(d);
+}
+
 export function calculateHouseholdSettlement(
   household: HouseholdState,
   myKey: string,
-  currentPeriodStart: string
+  currentPeriodStart: string | Date
 ): SettlementSummary {
   const membersList = Object.values(household.members || {});
   const myMember =
@@ -283,7 +292,8 @@ export function calculateHouseholdSettlement(
   const netBalance = partnerMember ? Math.round(myTotalPaid - myFairShare) : 0;
 
   const isSettledForCurrentPeriod = Boolean(
-    household.settledAt && household.settledPeriodStart === currentPeriodStart
+    household.settledAt &&
+    toPeriodKey(household.settledPeriodStart) === toPeriodKey(currentPeriodStart)
   );
 
   return {

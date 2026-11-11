@@ -98,6 +98,8 @@ export const dataService = {
       country: profileData.country || localSavedConfig?.country || undefined,
       locale: profileData.locale || localSavedConfig?.locale || undefined,
       timezone: profileData.timezone || localSavedConfig?.timezone || undefined,
+      savingsPot: Number(profileData.savings_pot ?? localSavedConfig?.savingsPot) || 0,
+      surplusIncome: Number(profileData.surplus_income ?? localSavedConfig?.surplusIncome) || 0,
       payday: profileData.payday,
       paydayType: profileData.payday_type,
       paydayBeforeWeekend: profileData.payday_before_weekend,

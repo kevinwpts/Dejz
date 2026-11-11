@@ -483,7 +483,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                       size={13}
                                       weight="fill"
                                       className="text-emerald-500 shrink-0"
-                                      title="Delad utgift"
+                                      aria-label="Delad utgift"
                                     />
                                   )}
                                 </span>

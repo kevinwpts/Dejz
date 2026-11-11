@@ -75,7 +75,8 @@ export interface Account {
   currency: string;
 }
 
-export interface PaymentMethod {
+/** Ett betalsätt i listan (namn, ikon, färg) */
+export interface PaymentMethodOption {
   name: string;
   icon: string;
   color?: string;
@@ -95,7 +96,7 @@ export interface Config {
   paydayBeforeWeekend: boolean;
   categories: Category[];
   incomeCategories: Category[];
-  paymentMethods: PaymentMethod[];
+  paymentMethods: (PaymentMethodOption | string)[];
   initialSpent: number;
   notifications: {
     salaryDayReminder?: boolean;
@@ -240,7 +241,7 @@ export interface Transaction {
   isBackdated?: boolean;
   logo?: string;
   icon?: string;
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: PaymentMethod | string;
   receiptUrl?: string;
   receiptUrls?: string[];
   splits?: TransactionSplit[];

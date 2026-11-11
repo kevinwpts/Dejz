@@ -4,7 +4,7 @@ export interface SocialFriend {
   email: string;
   phone?: string;
   avatar?: string | null;
-  friendCode: string;
+  friendCode?: string;
   addedAt: string;
   online?: boolean;
   lastSeen?: string;

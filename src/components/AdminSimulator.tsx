@@ -400,6 +400,9 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           category: 'Mat & dryck',
           date: new Date().toISOString().slice(0, 10),
           kind: 'variable',
+          fullAmount: 1680,
+          paidByEmail: partnerFriend.email,
+          paidByName: partnerFriend.name,
         },
         {
           id: 'sofia-exp-2',
@@ -408,6 +411,9 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           category: 'Mat & dryck',
           date: new Date().toISOString().slice(0, 10),
           kind: 'variable',
+          fullAmount: 420,
+          paidByEmail: partnerFriend.email,
+          paidByName: partnerFriend.name,
         },
         {
           id: 'sofia-exp-3',
@@ -416,6 +422,9 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           category: 'Boende',
           date: new Date().toISOString().slice(0, 10),
           kind: 'fixed',
+          fullAmount: 1080,
+          paidByEmail: partnerFriend.email,
+          paidByName: partnerFriend.name,
         },
       ],
       updatedAt: new Date().toISOString(),
@@ -1885,6 +1894,9 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                         category: item.category,
                         date: new Date().toISOString().slice(0, 10),
                         kind: item.kind,
+                        fullAmount: item.amount,
+                        paidByEmail: cur.email,
+                        paidByName: cur.name,
                       };
                       const nextList = [newExp, ...(cur.sharedExpensesList || [])];
                       const nextFixed = nextList

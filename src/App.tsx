@@ -3125,7 +3125,7 @@ export const App: React.FC = () => {
 
     try {
       // Hämta session och Bearer-token FÖRST innan localStorage rensas eller signOut körs
-      const sessionRes = await withFastTimeout(supabase.auth.getSession(), 1500);
+      const sessionRes: any = await withFastTimeout(supabase.auth.getSession(), 1500);
       const session = sessionRes?.data?.session || null;
       const token = session?.access_token || null;
       const sessionUid = session?.user?.id || null;
@@ -3247,7 +3247,7 @@ export const App: React.FC = () => {
 
     try {
       if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
-        const sessionRes = await withFastTimeout(supabase.auth.getSession(), 1500);
+        const sessionRes: any = await withFastTimeout(supabase.auth.getSession(), 1500);
         const token = sessionRes?.data?.session?.access_token;
 
         // Koppla från bank i bakgrunden så det inte låser nollställningen
