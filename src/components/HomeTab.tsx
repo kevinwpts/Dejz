@@ -114,27 +114,8 @@ const SHORT_SWEDISH_MONTHS = [
   'dec',
 ];
 
-export function isFixedExpenseActiveInPeriod(
-  exp: FixedExpenseItem,
-  period: PeriodInfo
-): boolean {
-  if (!exp.isCancelled) return true;
-  if (exp.hasNoMorePayments) return false;
-  if (exp.lastPaymentDate && /^\d{4}-\d{2}$/.test(exp.lastPaymentDate)) {
-    // endDate är ett Date-objekt (inte text) – gör om till "ÅÅÅÅ-MM" innan jämförelsen
-    const end = period.endDate as unknown as Date | string | undefined;
-    const periodEndYm =
-      end instanceof Date && !isNaN(end.getTime())
-        ? `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`
-        : typeof end === 'string'
-        ? end.slice(0, 7)
-        : '';
-    if (periodEndYm && periodEndYm > exp.lastPaymentDate) {
-      return false;
-    }
-  }
-  return true;
-}
+// Flyttad till räknemotorn – exporteras här vidare så att gamla importer fungerar
+export { isFixedExpenseActiveInPeriod } from '../utils/budgetEngine';
 
 export function formatFixedCancellationBadge(exp: FixedExpenseItem): string | null {
   if (!exp.isCancelled) return null;

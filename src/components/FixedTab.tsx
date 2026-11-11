@@ -20,6 +20,7 @@ import {
 } from '../utils/periodEngine';
 import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import { estimateVariableBill } from '../utils/variableBills';
+import { getFixedExpenseAmountInPeriod, PeriodMatches } from '../utils/budgetEngine';
 import { formatIsoDateStockholm } from '../utils/swedishDate';
 import {
   getHouseholdState,
@@ -50,6 +51,8 @@ interface FixedTabProps {
   onDeleteIncome: (id: string) => void;
   onDeleteFixed: (id: string) => void;
   onUpdateFixed?: (exp: FixedExpenseItem) => void;
+  /** Periodens kopplingar mellan dragningar och fasta poster – samma som hemkortet räknar med */
+  periodMatches?: PeriodMatches;
 }
 
 export const FixedTab: React.FC<FixedTabProps> = ({
@@ -67,6 +70,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   onAddFixed,
   onOpenDiscover: _onOpenDiscover,
   onOpenHousehold,
+  periodMatches: periodMatchesFromApp,
 }) => {
 
   const formatPaidDate = (iso?: string) => {
@@ -95,10 +99,13 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     return map;
   }, [fixedExpenses, transactions]);
 
-  const periodMatches = useMemo(() => {
+  // Samma kopplingar som hemkortet räknar med (skickas från App). Reserv om de saknas.
+  const fallbackMatches = useMemo(() => {
+    if (periodMatchesFromApp) return null;
     const periodTxs = transactions.filter((t) => isDateInPeriod(t.date, period));
     return reconcilePeriodRecurringMatches(periodTxs, fixedExpenses, incomes);
-  }, [transactions, period, fixedExpenses, incomes]);
+  }, [periodMatchesFromApp, transactions, period, fixedExpenses, incomes]);
+  const periodMatches = periodMatchesFromApp || fallbackMatches;
 
   // Räkningar vars belopp varierar (t.ex. el) – visas med "≈" tills de dragits
   const variableExpenseIds = useMemo(() => {
@@ -316,20 +323,14 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             sortedExpenses.map((exp) => {
                 const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
                 const isPartnerConnected = hasConnectedHouseholdPartner();
-                const shareRatio =
-                  isPartnerConnected && exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
-                    ? exp.amount / exp.fullAmount
-                    : 1;
-                const actualPaidAmt = matchedTx
-                  ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
-                  : Math.round(Number(exp.amount) || 0);
+                // Samma uträkning som hemkortet (räknemotorn)
+                const actualPaidAmt = Math.round(getFixedExpenseAmountInPeriod(exp, matchedTx, period));
                 const linkedGoalName = exp.linkedGoalId
                   ? savingsGoalsMap.get(exp.linkedGoalId)
                   : undefined;
                 const cancelBadge = formatFixedCancellationBadge(exp);
                 const isActiveInPeriod = isFixedExpenseActiveInPeriod(exp, period);
-                const displayAmt =
-                  !isActiveInPeriod && !matchedTx ? 0 : actualPaidAmt;
+                const displayAmt = actualPaidAmt;
                 const paymentMethodLabel = exp.paymentMethod || 'Autogiro';
 
                 return (

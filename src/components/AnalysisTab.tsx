@@ -32,6 +32,7 @@ import {
   checkIsRecurringTransaction,
   reconcilePeriodRecurringMatches,
 } from '../utils/recurring';
+import { getFixedExpenseAmountInPeriod } from '../utils/budgetEngine';
 import {
   findInternalTransferIds,
   isInternalTransferTransaction,
@@ -257,13 +258,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
     return fixedExpenses.map((exp) => {
       const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
-      const shareRatio =
-        exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
-          ? exp.amount / exp.fullAmount
-          : 1;
-      const effectiveAmt = matchedTx
-        ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
-        : exp.amount;
+      // Samma uträkning som hemkortet (räknemotorn)
+      const effectiveAmt = getFixedExpenseAmountInPeriod(exp, matchedTx, computedPeriod);
       return {
         ...exp,
         type: 'expense' as const,

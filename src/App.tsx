@@ -176,6 +176,14 @@ import {
   reconcilePeriodRecurringMatches,
 } from './utils/recurring';
 import { estimateVariableBill } from './utils/variableBills';
+import {
+  computeDagsbudget,
+  computeKvar,
+  computeKvarFromBalance,
+  computeTotalFixed,
+  computeTotalIncome,
+  computeVariableSpent,
+} from './utils/budgetEngine';
 
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
@@ -3553,62 +3561,32 @@ export const App: React.FC = () => {
   }, [fixedExpenses, period, hasActiveBankConnection]);
 
   // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp + eventuella extra engångsinkomster i perioden)
-  const totalIncome = useMemo(() => {
-    const fixedIncomesSum = incomes.reduce((sum, inc) => {
-      const matchedTx = periodRecurringMatches.matchedIncomeTxByIncId.get(inc.id);
-      if (matchedTx) {
-        return sum + Math.round(Math.abs(Number(matchedTx.amount) || 0));
-      }
-      return sum + (Number(inc.amount) || 0);
-    }, 0);
-
-    let extraPeriodIncomesSum = 0;
-    for (const t of periodTransactions) {
-      if (t.type !== 'income' || t.isExcluded) continue;
-      if (isTransactionManuallyExcluded(t.id)) continue;
-      if (typeof t.id === 'string' && t.id.startsWith('inc-')) continue;
-      if (periodRecurringMatches.claimedIncomeTxIds.has(t.id)) continue;
-      if (t.category === 'Återbetalning') continue;
-      if (t.category === 'Swish' || /swish/i.test(t.title || '')) continue;
-      if (
-        excludeInternalTransfers &&
+  // Allt räknas i räknemotorn (utils/budgetEngine.ts) – samma regler överallt i appen
+  const isIgnoredTx = useCallback(
+    (t: TransactionItem) =>
+      isTransactionManuallyExcluded(t.id) ||
+      (excludeInternalTransfers &&
         (internalTransferIds.has(t.id) ||
-          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-      ) {
-        continue;
-      }
-      extraPeriodIncomesSum += Math.round(Math.abs(Number(t.amount) || 0));
-    }
+          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))),
+    [excludeInternalTransfers, internalTransferIds, bankAccounts, userEmail, userName]
+  );
 
-    return fixedIncomesSum + extraPeriodIncomesSum;
-  }, [
-    incomes,
-    periodTransactions,
-    periodRecurringMatches,
-    excludeInternalTransfers,
-    internalTransferIds,
-    bankAccounts,
-    userEmail,
-    userName,
-  ]);
+  const totalIncome = useMemo(
+    () =>
+      computeTotalIncome({
+        incomes,
+        periodTransactions,
+        matches: periodRecurringMatches,
+        isIgnored: isIgnoredTx,
+      }),
+    [incomes, periodTransactions, periodRecurringMatches, isIgnoredTx]
+  );
 
   // Totala fasta kostnader under aktuell period (faktiskt bokfört belopp för räkningar som redan dragits, annars mallbelopp)
-  const totalFixedExpenses = useMemo(() => {
-    return fixedExpenses.reduce((sum, exp) => {
-      const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
-      if (matchedTx) {
-        const shareRatio =
-          exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
-            ? exp.amount / exp.fullAmount
-            : 1;
-        return sum + Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio);
-      }
-      if (!isFixedExpenseActiveInPeriod(exp, period)) {
-        return sum;
-      }
-      return sum + (Number(exp.amount) || 0);
-    }, 0);
-  }, [fixedExpenses, periodRecurringMatches, period]);
+  const totalFixedExpenses = useMemo(
+    () => computeTotalFixed(fixedExpenses, periodRecurringMatches, period),
+    [fixedExpenses, periodRecurringMatches, period]
+  );
 
   // Enhetlig transaktionslista för både Hem ("Senaste transaktioner"), Historik och Sök:
   // Garanterar att antalet reserverade transaktioner och historikrader alltid är 100% identiskt oavsett flik.
@@ -3689,82 +3667,16 @@ export const App: React.FC = () => {
   // Totala rörliga köp under aktuell period:
   // - Exkluderar ENDAST den specifika transaktion som matchats 1-till-1 mot varje fast utgift (så att 2:a köpet hos samma handlare eller engångsköp hos Apple/Klarna alltid räknas i Rörligt).
   // - Räknar av butiksreturer ('Återbetalning') samt mottagna Swish-utläggsersättningar som inte redan länkats till ett specifikt köp.
-  const totalVariableSpent = useMemo(() => {
-    let grossSpent = 0;
-    let storeRefunds = 0;
-    let unlinkedSwishReimbursements = 0;
-    let unlinkedManualSplitReductions = 0;
-
-    const alreadyLinkedSwishIds = new Set<string>();
-    for (const tx of transactions) {
-      if (tx.linkedSwishTxId) {
-        alreadyLinkedSwishIds.add(tx.linkedSwishTxId);
-      }
-    }
-    for (const tx of periodTransactions) {
-      if (tx.linkedSwishTxId) {
-        alreadyLinkedSwishIds.add(tx.linkedSwishTxId);
-      }
-    }
-
-    for (const t of periodTransactions) {
-      if (t.isExcluded) continue;
-      if (isTransactionManuallyExcluded(t.id)) continue;
-      if (
-        excludeInternalTransfers &&
-        (internalTransferIds.has(t.id) ||
-          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-      ) {
-        continue;
-      }
-
-      if (t.type === 'income') {
-        if (t.category === 'Återbetalning') {
-          storeRefunds += Math.abs(Number(t.amount) || 0);
-        } else if (
-          (t.category === 'Swish' || /swish/i.test(t.title || '')) &&
-          !periodRecurringMatches.claimedIncomeTxIds.has(t.id) &&
-          !alreadyLinkedSwishIds.has(t.id)
-        ) {
-          unlinkedSwishReimbursements += Math.abs(Number(t.amount) || 0);
-        }
-        continue;
-      }
-
-      if (periodRecurringMatches.claimedFixedTxIds.has(t.id)) {
-        continue;
-      }
-
-      if (
-        !t.linkedSwishTxId &&
-        typeof t.originalAmount === 'number' &&
-        t.originalAmount > (Number(t.amount) || 0)
-      ) {
-        unlinkedManualSplitReductions += Math.max(
-          0,
-          t.originalAmount - (Number(t.amount) || 0)
-        );
-      }
-
-      grossSpent += Number(t.amount) || 0;
-    }
-
-    const effectiveSwishDeduction = Math.max(
-      0,
-      unlinkedSwishReimbursements - unlinkedManualSplitReductions
-    );
-
-    return Math.max(0, grossSpent - storeRefunds - effectiveSwishDeduction);
-  }, [
-    transactions,
-    periodTransactions,
-    periodRecurringMatches,
-    excludeInternalTransfers,
-    internalTransferIds,
-    bankAccounts,
-    userEmail,
-    userName,
-  ]);
+  const totalVariableSpent = useMemo(
+    () =>
+      computeVariableSpent({
+        allTransactions: transactions,
+        periodTransactions,
+        matches: periodRecurringMatches,
+        isIgnored: isIgnoredTx,
+      }),
+    [transactions, periodTransactions, periodRecurringMatches, isIgnoredTx]
+  );
 
   // "Saldo just nu" (utan bank): användaren skriver in vad som finns på kontot
   const [manualBalance, setManualBalanceState] = useState<ManualBalance | null>(() =>
@@ -3788,44 +3700,16 @@ export const App: React.FC = () => {
   // Kvar = saldo − räkningar som dras efter att saldot skrevs in − köp sedan dess + inkomster som kommer före lön
   const kvarFromBalance = useMemo(() => {
     if (!activeManualBalance) return null;
-    const atMs = new Date(activeManualBalance.at).getTime();
-    const atDay = formatIsoDateStockholm(new Date(atMs));
-    const dayOf = (d: Date) => formatIsoDateStockholm(d);
-
-    let upcomingFixed = 0;
-    for (const exp of fixedExpenses) {
-      if (!isFixedExpenseActiveInPeriod(exp, period)) continue;
-      const due = getDueDateInPeriod(exp.dueDay || 27, period);
-      if (dayOf(due) <= atDay) continue;
-      const paid = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
-      if (paid && (paid.date || '') <= atDay) continue;
-      upcomingFixed += Number(exp.amount) || 0;
-    }
-
-    let upcomingIncome = 0;
-    for (const inc of incomes) {
-      const payDate = getDueDateInPeriod(inc.payday || targetPayday || 25, period);
-      if (dayOf(payDate) <= atDay) continue;
-      upcomingIncome += Number(inc.amount) || 0;
-    }
-
-    // Köp som lagts in efter saldot (manuella köp har id "tx-<tidpunkt>")
-    let spentSince = 0;
-    for (const t of periodTransactions) {
-      if (t.isExcluded || isTransactionManuallyExcluded(t.id)) continue;
-      if (periodRecurringMatches.claimedFixedTxIds.has(t.id)) continue;
-      const idMs = /^tx-(\d{12,})$/.exec(String(t.id))?.[1];
-      const isAfter = idMs ? Number(idMs) > atMs : (t.date || '') > atDay;
-      if (!isAfter) continue;
-      if (t.type === 'income') {
-        if (typeof t.id === 'string' && t.id.startsWith('inc-')) continue;
-        spentSince -= Math.abs(Number(t.amount) || 0);
-      } else {
-        spentSince += Math.abs(Number(t.amount) || 0);
-      }
-    }
-
-    return Math.round(activeManualBalance.amount - upcomingFixed + upcomingIncome - spentSince);
+    return computeKvarFromBalance({
+      balance: activeManualBalance,
+      fixedExpenses,
+      incomes,
+      period,
+      targetPayday,
+      periodTransactions,
+      matches: periodRecurringMatches,
+      isIgnored: (t) => isTransactionManuallyExcluded(t.id),
+    });
   }, [
     activeManualBalance,
     fixedExpenses,
@@ -3837,16 +3721,22 @@ export const App: React.FC = () => {
   ]);
 
   // Kvar att spendera under aktuell period (kan vara negativt om man gått över budget)
-  const kvarAttSpendera = useMemo(() => {
-    if (kvarFromBalance !== null) return kvarFromBalance;
-    return totalIncome - totalFixedExpenses - totalVariableSpent;
-  }, [kvarFromBalance, totalIncome, totalFixedExpenses, totalVariableSpent]);
+  const kvarAttSpendera = useMemo(
+    () =>
+      computeKvar({
+        kvarFromBalance,
+        totalIncome,
+        totalFixed: totalFixedExpenses,
+        totalVariableSpent,
+      }),
+    [kvarFromBalance, totalIncome, totalFixedExpenses, totalVariableSpent]
+  );
 
   // Dagsbudget
-  const dagsbudget = useMemo(() => {
-    if (period.daysRemaining <= 0 || kvarAttSpendera <= 0) return 0;
-    return Math.round(kvarAttSpendera / period.daysRemaining);
-  }, [kvarAttSpendera, period.daysRemaining]);
+  const dagsbudget = useMemo(
+    () => computeDagsbudget(kvarAttSpendera, period.daysRemaining),
+    [kvarAttSpendera, period.daysRemaining]
+  );
 
   // Synka med Enable Banking
   const handleSyncBank = async () => {
@@ -5498,6 +5388,7 @@ export const App: React.FC = () => {
 
               {activeTab === 'fixed' && (
                 <FixedTab
+                  periodMatches={periodRecurringMatches}
                   period={period}
                   incomes={incomes}
                   fixedExpenses={fixedExpenses}
