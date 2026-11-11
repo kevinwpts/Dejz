@@ -1,45 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import {
-  X,
-  Trash,
-  Check,
-  CaretRight,
-  CaretLeft,
-  Paperclip,
-  FileText,
-  ClockCounterClockwise,
-  ArrowsClockwise,
-  Plus,
-  Scissors,
-  ArrowSquareOut,
-  Sparkle,
-  Info,
-  CalendarBlank,
-} from '@phosphor-icons/react';
-import {
-  FixedExpenseItem,
-  AccountItem,
-  TransactionItem,
-  getTransactionTime,
-  formatFixedCancellationBadge,
-} from '../HomeTab';
-import { ItemLogo } from '../ItemLogo';
-import { CategoryIcon, PaymentMethodIcon, resolveCategoryColor } from '../CategoryIcon';
+import { X, CaretLeft } from '@phosphor-icons/react';
+import { FixedExpenseItem, AccountItem, TransactionItem } from '../HomeTab';
 import { BottomSheet } from '../ui/BottomSheet';
-import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
-import {
-  formatSwedishDateHeading,
-  getItemReceipts,
-  getSwedishDateStr,
-  ReceiptAttachment,
-} from '../../utils/swedishDate';
-import {
-  findMatchingFixedExpense,
-  findTransactionsForFixedExpense,
-  findAllMatchingFixedExpensesByMerchant,
-  isFixedExpenseAmountMatch,
-} from '../../utils/recurring';
+import { getItemReceipts, ReceiptAttachment } from '../../utils/swedishDate';
+import { findMatchingFixedExpense, findTransactionsForFixedExpense } from '../../utils/recurring';
 import {
   getStoredExpenseCategories,
   getStoredPaymentMethods,
@@ -47,17 +12,19 @@ import {
   compressImageFileToDataUrl,
   getSavingsGoals,
 } from '../../utils/appCache';
-import {
-  inferCategoryAndMethodFromName,
-  cleanDisplayMerchantName,
-} from '../../utils/bankHistoryAnalyzer';
-import {
-  fetchLogoForName,
-  getLearnedBrandCategory,
-  isMerchantCategoryIconPreferred,
-  setMerchantCategoryIconPreferred,
-} from '../../utils/logo';
+import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
 import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
+import { FixedViewDetails } from './fixed/FixedViewDetails';
+import { FixedViewEdit } from './fixed/FixedViewEdit';
+import { FixedViewReceiptPreview } from './fixed/FixedViewReceiptPreview';
+import { FixedViewGoalPicker } from './fixed/FixedViewGoalPicker';
+import { FixedViewPaymentPicker } from './fixed/FixedViewPaymentPicker';
+import { FixedViewCategoryPicker } from './fixed/FixedViewCategoryPicker';
+import { FixedViewCancelGuide } from './fixed/FixedViewCancelGuide';
+import { FixedViewCancelPicker } from './fixed/FixedViewCancelPicker';
+import { FixedViewSimilar } from './fixed/FixedViewSimilar';
+import type { CancelGuideData, ModalSubView } from './fixed/shared';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -71,28 +38,6 @@ interface FixedExpenseModalProps {
   onSave?: (data: Omit<FixedExpenseItem, 'id'>) => void;
   onUpdate?: (item: FixedExpenseItem) => void;
   onDelete?: (id: string) => void;
-}
-
-type ModalSubView =
-  | 'details'
-  | 'edit'
-  | 'category-picker'
-  | 'day-picker'
-  | 'payment-picker'
-  | 'goal-picker'
-  | 'share-picker'
-  | 'receipt-preview'
-  | 'similar'
-  | 'cancel-picker'
-  | 'cancel-guide';
-
-interface CancelGuideData {
-  serviceName: string;
-  noticePeriod: string;
-  steps: string[];
-  cancelUrl: string;
-  cancelUrlLabel: string;
-  tip?: string;
 }
 
 export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
@@ -454,579 +399,72 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       {/* ============================================================== */}
       {/* SUB-VIEW 1: LIKNANDE TRANSAKTIONER (Egen vy i arket)           */}
       {/* ============================================================== */}
-      {subView === 'similar' && (
-        <div className={`${slideAnimClass} space-y-5`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView('details', 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              Liknande transaktioner
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="ui-date-header px-1">
-            <span className="font-medium text-[var(--text-secondary)]">
-              {similarInfo.transactions.length}{' '}
-              {similarInfo.transactions.length === 1 ? 'händelse' : 'händelser'}
-            </span>
-            <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
-              Totalt {formatKr(similarInfo.totalAmount)}
-            </span>
-          </div>
-
-          {similarInfo.transactions.length > 0 ? (
-            <div className="ui-sheet-group">
-              {similarInfo.transactions.map((tx) => {
-                const allSameMerchantFixed = findAllMatchingFixedExpensesByMerchant(
-                  tx,
-                  fixedExpenses.length > 0
-                    ? fixedExpenses
-                    : activeExpense
-                    ? [activeExpense]
-                    : []
-                );
-                const hasAmountMatch = allSameMerchantFixed.some((exp) =>
-                  isFixedExpenseAmountMatch(exp, tx.amount)
-                );
-
-                return (
-                  <div
-                    key={tx.id}
-                    className="px-4 py-3 sm:py-3.5 flex items-center justify-between gap-2.5"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (onSelectTransaction) {
-                          onSelectTransaction(tx);
-                        }
-                      }}
-                      className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
-                    >
-                      <ItemLogo
-                        name={tx.title}
-                        category={tx.category}
-                        logoUrl={tx.logo}
-                        size="md"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title block truncate">
-                          {tx.title}
-                        </span>
-                        <span className="ui-row-subtitle tabular-nums">
-                          {formatSwedishDateHeading(tx.date)}
-                        </span>
-                      </div>
-                    </button>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {!hasAmountMatch && onMarkAsFixed && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMarkAsFixed(tx, 'expense');
-                          }}
-                          title="Lägg till detta belopp som egen fast utgift"
-                          className="px-2 py-1 rounded-lg bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
-                        >
-                          <ArrowsClockwise size={11} weight="bold" />
-                          <span>+ Fast</span>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onSelectTransaction) {
-                            onSelectTransaction(tx);
-                          }
-                        }}
-                        className="flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <div className="text-right">
-                          <span className="ui-row-amount">
-                            −{formatKr(tx.amount)}
-                          </span>
-                          <span className="ui-row-meta">
-                            {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
-                              ? 'Reserverat'
-                              : getTransactionTime(tx)}
-                          </span>
-                        </div>
-                        <CaretRight size={12} className="text-[var(--text-muted)]" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="ui-sheet-box text-center text-xs text-[var(--text-muted)] py-6">
-              Inga registrerade banktransaktioner matchar {displayName} ännu.
-            </div>
-          )}
-        </div>
-      )}
+      <FixedViewSimilar
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        onClose={onClose}
+        similarInfo={similarInfo}
+        formatKr={formatKr}
+        fixedExpenses={fixedExpenses}
+        activeExpense={activeExpense}
+        onSelectTransaction={onSelectTransaction}
+        onMarkAsFixed={onMarkAsFixed}
+        displayName={displayName}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 1A: UPPSAGD — ENKLA SCENARION (1 TRYCK)               */}
       {/* ============================================================== */}
-      {subView === 'cancel-picker' && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView('details', 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title truncate max-w-[220px]">
-              Uppsagd · {displayName}
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          {(() => {
-            const SHORT_MONTHS = [
-              'jan',
-              'feb',
-              'mar',
-              'apr',
-              'maj',
-              'jun',
-              'jul',
-              'aug',
-              'sep',
-              'okt',
-              'nov',
-              'dec',
-            ];
-            const nowStr = getSwedishDateStr();
-            const baseYear = parseInt(nowStr.slice(0, 4), 10);
-            const baseMonth = parseInt(nowStr.slice(5, 7), 10) - 1;
-
-            const getMonthOption = (monthsAhead: number) => {
-              const d = new Date(Date.UTC(baseYear, baseMonth + monthsAhead, 1, 12, 0, 0));
-              const y = d.getUTCFullYear();
-              const m = d.getUTCMonth();
-              const ym = `${y}-${String(m + 1).padStart(2, '0')}`;
-              const label =
-                y !== baseYear ? `${SHORT_MONTHS[m]} ${String(y).slice(-2)}` : SHORT_MONTHS[m];
-              return { ym, label };
-            };
-
-            const quickScenarios = [
-              {
-                key: 'none',
-                title: 'Inga fler dragningar',
-                rightLabel: 'Slutar direkt',
-                isSelected: Boolean(activeExpense?.isCancelled && activeExpense?.hasNoMorePayments),
-                onPick: () => {
-                  commitInlineChanges({
-                    isCancelled: true,
-                    hasNoMorePayments: true,
-                    lastPaymentDate: undefined,
-                  });
-                  navigateSubView('details', 'back');
-                },
-              },
-              ...[1, 2, 3, 6].map((mCount) => {
-                const target = getMonthOption(mCount - 1);
-                const isSelected = Boolean(
-                  activeExpense?.isCancelled &&
-                    !activeExpense?.hasNoMorePayments &&
-                    activeExpense?.lastPaymentDate === target.ym
-                );
-                return {
-                  key: `m-${mCount}`,
-                  title: mCount === 1 ? '1 månad kvar' : `${mCount} månader kvar`,
-                  rightLabel: `Sista: ${target.label}`,
-                  isSelected,
-                  onPick: () => {
-                    commitInlineChanges({
-                      isCancelled: true,
-                      hasNoMorePayments: false,
-                      lastPaymentDate: target.ym,
-                    });
-                    navigateSubView('details', 'back');
-                  },
-                };
-              }),
-            ];
-
-            const customMonths = Array.from({ length: 12 }, (_, idx) => getMonthOption(idx));
-
-            return (
-              <div className="space-y-3.5">
-                {activeExpense?.isCancelled && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      commitInlineChanges({
-                        isCancelled: false,
-                        hasNoMorePayments: false,
-                        lastPaymentDate: undefined,
-                      });
-                      navigateSubView('details', 'back');
-                    }}
-                    className="w-full py-3 px-4 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
-                  >
-                    <span>Ångra uppsägning</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                      Gör aktiv igen
-                    </span>
-                  </button>
-                )}
-
-                <div className="ui-sheet-group">
-                  {quickScenarios.map((sc) => (
-                    <button
-                      key={sc.key}
-                      type="button"
-                      onClick={sc.onPick}
-                      className="ui-row-btn"
-                    >
-                      <span
-                        className={
-                          sc.isSelected
-                            ? 'font-semibold text-[var(--text-primary)]'
-                            : 'font-normal text-[var(--text-primary)]'
-                        }
-                      >
-                        {sc.title}
-                      </span>
-                      <span className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                        <span>{sc.rightLabel}</span>
-                        {sc.isSelected && (
-                          <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
-                        )}
-                      </span>
-                    </button>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={() => setShowCustomMonthPicker((prev) => !prev)}
-                    className="ui-row-btn"
-                  >
-                    <span className="font-normal text-[var(--text-primary)]">
-                      Välj sista månad
-                    </span>
-                    <CaretRight
-                      size={12}
-                      className={`text-[var(--text-muted)] transition-transform ${
-                        showCustomMonthPicker ? 'rotate-90' : ''
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {showCustomMonthPicker && (
-                  <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
-                    {customMonths.map((cm) => {
-                      const isSel = Boolean(
-                        activeExpense?.isCancelled &&
-                          !activeExpense?.hasNoMorePayments &&
-                          activeExpense?.lastPaymentDate === cm.ym
-                      );
-                      return (
-                        <button
-                          key={cm.ym}
-                          type="button"
-                          onClick={() => {
-                            commitInlineChanges({
-                              isCancelled: true,
-                              hasNoMorePayments: false,
-                              lastPaymentDate: cm.ym,
-                            });
-                            navigateSubView('details', 'back');
-                          }}
-                          className={`py-2 px-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                            isSel
-                              ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-                          }`}
-                        >
-                          {cm.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <div className="pt-1 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={handleOpenCancelGuide}
-                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1.5 px-3 transition-colors cursor-pointer"
-                  >
-                    Hur säger jag upp hos {displayName}?
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      )}
+      <FixedViewCancelPicker
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        displayName={displayName}
+        onClose={onClose}
+        activeExpense={activeExpense}
+        commitInlineChanges={commitInlineChanges}
+        setShowCustomMonthPicker={setShowCustomMonthPicker}
+        showCustomMonthPicker={showCustomMonthPicker}
+        handleOpenCancelGuide={handleOpenCancelGuide}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 1B: SÄG UPP ABONNEMANG (AI-GUIDE & DIREKTLÄNK)        */}
       {/* ============================================================== */}
-      {subView === 'cancel-guide' && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView('details', 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title truncate max-w-[220px]">
-              Säg upp {displayName}
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          {/* Sammanfattningskort med årlig besparing */}
-          <div className="px-4 py-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <ItemLogo
-                name={displayName}
-                category={category}
-                logoUrl={activeExpense?.logo}
-                size="md"
-                isRecurring={false}
-              />
-              <div className="min-w-0">
-                <span className="ui-row-title">{displayName}</span>
-                <span className="ui-row-subtitle">
-                  −{formatKr(Number(amount) || 0)}/mån · {paymentMethod}
-                </span>
-              </div>
-            </div>
-            <div className="text-right shrink-0">
-              <span className="text-[11px] text-[var(--text-muted)] block">
-                Årlig besparing
-              </span>
-              <span className="font-display font-semibold text-[14px] text-emerald-600 dark:text-emerald-400 tabular-nums">
-                +{formatKr((Number(amount) || 0) * 12)}/år
-              </span>
-            </div>
-          </div>
-
-          {isLoadingCancelGuide ? (
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-5 space-y-3.5 animate-pulse">
-              <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                <Sparkle size={14} weight="fill" className="text-[var(--text-primary)] animate-spin" />
-                <span>Tar fram uppsägningsguide för {displayName}...</span>
-              </div>
-              <div className="h-3.5 w-3/4 rounded bg-[var(--surface-raised)]" />
-              <div className="space-y-2.5 pt-1">
-                <div className="h-10 w-full rounded-xl bg-[var(--surface-raised)]" />
-                <div className="h-10 w-full rounded-xl bg-[var(--surface-raised)]" />
-                <div className="h-10 w-full rounded-xl bg-[var(--surface-raised)]" />
-              </div>
-            </div>
-          ) : (
-            (() => {
-              const guide: CancelGuideData = cancelGuide || {
-                serviceName: displayName,
-                noticePeriod: 'Kontrollera uppsägningstid på Mina Sidor',
-                steps: [
-                  `Logga in på Mina Sidor hos ${displayName}.`,
-                  'Gå till Abonnemang eller Medlemskap och välj Avsluta.',
-                  'Kontrollera att du får en bekräftelse på uppsägningen via e-post.',
-                ],
-                cancelUrl: `https://www.google.com/search?q=${encodeURIComponent(
-                  `${displayName} säga upp abonnemang`
-                )}`,
-                cancelUrlLabel: `Gå till ${displayName}`,
-                tip: 'Låt eventuellt autogiro ligga kvar tills sista fakturan under uppsägningstiden är betald.',
-              };
-
-              return (
-                <div className="space-y-3.5">
-                  {/* Uppsägningstid */}
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-center justify-between gap-2 text-xs">
-                    <span className="text-[var(--text-secondary)] shrink-0">
-                      Uppsägningstid
-                    </span>
-                    <span className="font-medium text-[var(--text-primary)] text-right">
-                      {guide.noticePeriod}
-                    </span>
-                  </div>
-
-                  {/* Steg-för-steg instruktioner */}
-                  <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                        Så säger du upp
-                      </span>
-                      <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1">
-                        <Sparkle size={11} weight="fill" />
-                        <span>AI-guide</span>
-                      </span>
-                    </div>
-
-                    <ol className="space-y-2.5">
-                      {guide.steps.map((step, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start gap-2.5 text-[13px] leading-snug text-[var(--text-primary)]"
-                        >
-                          <span className="w-5 h-5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[11px] font-display font-semibold text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
-                            {idx + 1}
-                          </span>
-                          <span className="flex-1">{step}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-
-                  {/* Smart tips */}
-                  {guide.tip && (
-                    <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] flex items-start gap-2.5 text-[12px] leading-snug text-[var(--text-secondary)]">
-                      <Info size={15} className="text-[var(--text-primary)] shrink-0 mt-0.5" />
-                      <span>{guide.tip}</span>
-                    </div>
-                  )}
-
-                  {/* Direktlänk & Ta bort */}
-                  <div className="space-y-2 pt-1">
-                    <a
-                      href={guide.cancelUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ui-btn-primary"
-                    >
-                      <span>{guide.cancelUrlLabel}</span>
-                      <ArrowSquareOut size={15} weight="bold" />
-                    </a>
-
-                    {onDelete && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setShowDeleteConfirm(true)}
-                          className="ui-btn-secondary"
-                        >
-                          <Trash size={14} />
-                          <span>Redan uppsagt? Ta bort utgift</span>
-                        </button>
-
-                        <ConfirmDialog
-                          isOpen={showDeleteConfirm}
-                          title="Ta bort fast utgift?"
-                          description={`${displayName} tas bort från dina fasta utgifter.`}
-                          confirmLabel="Ta bort"
-                          onConfirm={handleDelete}
-                          onCancel={() => setShowDeleteConfirm(false)}
-                        />
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })()
-          )}
-        </div>
-      )}
+      <FixedViewCancelGuide
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        displayName={displayName}
+        onClose={onClose}
+        category={category}
+        activeExpense={activeExpense}
+        formatKr={formatKr}
+        amount={amount}
+        paymentMethod={paymentMethod}
+        isLoadingCancelGuide={isLoadingCancelGuide}
+        cancelGuide={cancelGuide}
+        onDelete={onDelete}
+        setShowDeleteConfirm={setShowDeleteConfirm}
+        showDeleteConfirm={showDeleteConfirm}
+        handleDelete={handleDelete}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 2: KATEGORIVÄLJARE                                    */}
       {/* ============================================================== */}
-      {subView === 'category-picker' && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView(pickerReturnView, 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              Välj kategori
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="ui-sheet-group">
-            {availableCategories.map((c) => {
-              const isSel = c === category;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => {
-                    setCategory(c);
-                    if (pickerReturnView === 'details') {
-                      commitInlineChanges({ category: c });
-                    }
-                    navigateSubView(pickerReturnView, 'back');
-                  }}
-                  className="ui-row-btn"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <CategoryIcon category={c} size={14} badge={true} />
-                    <span
-                      className={`truncate ${
-                        isSel
-                          ? 'font-medium text-[var(--text-primary)]'
-                          : 'font-normal text-[var(--text-primary)]'
-                      }`}
-                    >
-                      {c}
-                    </span>
-                  </div>
-                  {isSel && (
-                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <FixedViewCategoryPicker
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        pickerReturnView={pickerReturnView}
+        onClose={onClose}
+        availableCategories={availableCategories}
+        category={category}
+        setCategory={setCategory}
+        commitInlineChanges={commitInlineChanges}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 3: DRAGNINGSDAG-VÄLJARE (Ersätter native <select>)    */}
@@ -1073,1018 +511,126 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       {/* ============================================================== */}
       {/* SUB-VIEW 4: BETALSÄTTSVÄLJARE (Ersätter native <select>)       */}
       {/* ============================================================== */}
-      {subView === 'payment-picker' && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView(pickerReturnView, 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              Välj betalsätt
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="ui-sheet-group">
-            {availablePaymentMethods.map((m) => {
-              const isSel = m === paymentMethod;
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => {
-                    setPaymentMethod(m);
-                    if (pickerReturnView === 'details') {
-                      commitInlineChanges({ paymentMethod: m });
-                    }
-                    navigateSubView(pickerReturnView, 'back');
-                  }}
-                  className="ui-row-btn"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <PaymentMethodIcon method={m} size={17} />
-                    <span
-                      className={`truncate ${
-                        isSel
-                          ? 'font-medium text-[var(--text-primary)]'
-                          : 'font-normal text-[var(--text-primary)]'
-                      }`}
-                    >
-                      {m}
-                    </span>
-                  </div>
-                  {isSel && (
-                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <FixedViewPaymentPicker
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        pickerReturnView={pickerReturnView}
+        onClose={onClose}
+        availablePaymentMethods={availablePaymentMethods}
+        paymentMethod={paymentMethod}
+        setPaymentMethod={setPaymentMethod}
+        commitInlineChanges={commitInlineChanges}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 5: SPARMÅLSVÄLJARE                                    */}
       {/* ============================================================== */}
-      {subView === 'goal-picker' && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView(pickerReturnView, 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title">
-              Koppla till sparmål
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="ui-sheet-group">
-            <button
-              type="button"
-              onClick={() => {
-                setLinkedGoalId('');
-                if (pickerReturnView === 'details') {
-                  commitInlineChanges({ linkedGoalId: '' });
-                }
-                navigateSubView(pickerReturnView, 'back');
-              }}
-              className="ui-row-btn"
-            >
-              <span
-                className={`truncate ${
-                  !linkedGoalId
-                    ? 'font-medium text-[var(--text-primary)]'
-                    : 'font-normal text-[var(--text-secondary)]'
-                }`}
-              >
-                Inget sparmål
-              </span>
-              {!linkedGoalId && (
-                <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
-              )}
-            </button>
-
-            {availableGoals.map((g) => {
-              const isSel = g.id === linkedGoalId;
-              return (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => {
-                    setLinkedGoalId(g.id);
-                    if (pickerReturnView === 'details') {
-                      commitInlineChanges({ linkedGoalId: g.id });
-                    }
-                    navigateSubView(pickerReturnView, 'back');
-                  }}
-                  className="ui-row-btn"
-                >
-                  <div className="min-w-0 text-left">
-                    <span
-                      className={`block truncate ${
-                        isSel
-                          ? 'font-medium text-[var(--text-primary)]'
-                          : 'font-normal text-[var(--text-primary)]'
-                      }`}
-                    >
-                      {g.name}
-                    </span>
-                    <span className="text-[11px] text-[var(--text-secondary)] tabular-nums">
-                      {formatKr(g.currentAmount)} av {formatKr(g.targetAmount)}
-                    </span>
-                  </div>
-                  {isSel && (
-                    <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <FixedViewGoalPicker
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        pickerReturnView={pickerReturnView}
+        onClose={onClose}
+        setLinkedGoalId={setLinkedGoalId}
+        commitInlineChanges={commitInlineChanges}
+        linkedGoalId={linkedGoalId}
+        availableGoals={availableGoals}
+        formatKr={formatKr}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 6: INBYGGD KVITTO-VISNING                             */}
       {/* ============================================================== */}
-      {subView === 'receipt-preview' && previewReceipt && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          <div className="ui-sheet-sub-header">
-            <button
-              type="button"
-              onClick={() => navigateSubView(pickerReturnView, 'back')}
-              title="Tillbaka"
-              aria-label="Tillbaka"
-              className="ui-icon-btn"
-            >
-              <CaretLeft size={15} weight="bold" />
-            </button>
-            <span className="ui-sheet-title max-w-[180px]">
-              {previewReceipt.name || 'Kvitto'}
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
-            {previewReceipt.url.startsWith('data:image/') ||
-            /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
-              <img
-                src={previewReceipt.url}
-                alt={previewReceipt.name || 'Kvitto'}
-                className="max-h-[56dvh] w-auto object-contain rounded-xl"
-              />
-            ) : (
-              <iframe
-                src={previewReceipt.url}
-                title={previewReceipt.name || 'Kvitto'}
-                className="w-full h-[52dvh] rounded-xl border-0"
-              />
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <a
-              href={previewReceipt.url}
-              download={previewReceipt.name || `kvitto-${displayName}.jpg`}
-              className="ui-btn-primary"
-            >
-              <FileText size={14} weight="bold" />
-              <span>Spara fil</span>
-            </a>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="ui-btn-secondary"
-            >
-              <Plus size={14} weight="bold" />
-              <span>Bifoga fler</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <FixedViewReceiptPreview
+        subView={subView}
+        previewReceipt={previewReceipt}
+        slideAnimClass={slideAnimClass}
+        navigateSubView={navigateSubView}
+        pickerReturnView={pickerReturnView}
+        onClose={onClose}
+        displayName={displayName}
+        fileInputRef={fileInputRef}
+      />
 
       {/* ============================================================== */}
       {/* SUB-VIEW 7: REDIGERA FAST UTGIFT                               */}
       {/* ============================================================== */}
-      {subView === 'edit' && (
-        <div className={`${slideAnimClass} space-y-4`}>
-          {isCreateMode ? (
-            <div className="ui-sheet-header">
-              <span className="ui-sheet-title">Lägg till fast utgift</span>
-              <button type="button" onClick={onClose} className="ui-icon-btn">
-                <X size={16} />
-              </button>
-            </div>
-          ) : (
-            <div className="ui-sheet-sub-header">
-              <button
-                type="button"
-                onClick={() => {
-                  if (activeExpense) {
-                    setName(activeExpense.name);
-                    setAmount(activeExpense.amount);
-                    setDueDay(activeExpense.dueDay || 27);
-                    setCategory(
-                      normalizeCategoryToValid(activeExpense.category || 'Räkningar', 'expense')
-                    );
-                    setPaymentMethod(activeExpense.paymentMethod || 'Autogiro');
-                    setDraftReceipts(getItemReceipts(activeExpense));
-                  }
-                  navigateSubView('details', 'back');
-                }}
-                title="Tillbaka"
-                aria-label="Tillbaka"
-                className="ui-icon-btn"
-              >
-                <CaretLeft size={15} weight="bold" />
-              </button>
-              <span className="ui-sheet-title">Redigera fast utgift</span>
-              <button type="button" onClick={onClose} className="ui-icon-btn">
-                <X size={16} />
-              </button>
-            </div>
-          )}
-
-          {/* Stort och tydligt inmatningskort för Namn + Belopp med live-logga */}
-          <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4 space-y-3.5">
-            {(() => {
-              const rawOrig = (activeExpense?.originalName || '').trim();
-              const cleanedOrig = rawOrig ? cleanDisplayMerchantName(rawOrig) : '';
-              const originalDisplayName =
-                cleanedOrig && cleanedOrig !== 'Banktransaktion' ? cleanedOrig : rawOrig;
-              const canResetName =
-                !isCreateMode &&
-                Boolean(originalDisplayName) &&
-                name.trim().toLowerCase() !== originalDisplayName.toLowerCase();
-
-              return (
-                <div className="flex items-center gap-3.5">
-                  <label className="flex items-center gap-3.5 cursor-text flex-1 min-w-0">
-                    <ItemLogo
-                      name={name || activeExpense?.name || 'Fast utgift'}
-                      category={category}
-                      logoUrl={activeExpense?.logo}
-                      size="lg"
-                      isRecurring={true}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
-                        Namn
-                      </span>
-                      <input
-                        type="text"
-                        spellCheck={false}
-                        autoCorrect="off"
-                        autoFocus={isCreateMode}
-                        placeholder="Butik eller tjänst"
-                        value={name}
-                        onChange={(e) => {
-                          const nextName = e.target.value;
-                          setName(nextName);
-                          const inferred = inferCategoryAndMethodFromName(nextName, 'fixed');
-                          if (inferred?.category) {
-                            setCategory(inferred.category);
-                          }
-                          if (inferred?.paymentMethod) {
-                            setPaymentMethod(inferred.paymentMethod);
-                          }
-                        }}
-                        className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none focus:ring-0"
-                      />
-                    </div>
-                  </label>
-                  {canResetName && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setName(originalDisplayName);
-                        const inferred = inferCategoryAndMethodFromName(
-                          originalDisplayName,
-                          'fixed'
-                        );
-                        if (inferred?.category) {
-                          setCategory(inferred.category);
-                        }
-                      }}
-                      title={`Återställ ursprungsnamn (${originalDisplayName})`}
-                      aria-label={`Återställ ursprungsnamn (${originalDisplayName})`}
-                      className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
-                    >
-                      <ClockCounterClockwise size={15} weight="bold" />
-                    </button>
-                  )}
-                </div>
-              );
-            })()}
-
-            <div className="border-t border-[var(--border-subtle)] pt-3.5">
-              <label className="block cursor-text">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
-                  Belopp per månad
-                </span>
-                <div className="flex items-baseline justify-between gap-2">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ''))}
-                    className="w-full bg-transparent border-0 p-0 font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
-                  />
-                  <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
-                    kr/mån
-                  </span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div className="ui-sheet-group">
-            <button
-              type="button"
-              onClick={() => navigateSubView('category-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label shrink-0">Kategori</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
-                <CategoryIcon category={category} size={13} />
-                <span>{category}</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigateSubView('day-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label shrink-0">Dragningsdag</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
-                <span>Den {dueDay}:e</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigateSubView('payment-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label shrink-0">Betalsätt</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
-                <PaymentMethodIcon method={paymentMethod} size={15} />
-                <span>{paymentMethod}</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
-            {availableGoals.length > 0 && (
-              <button
-                type="button"
-                onClick={() => navigateSubView('goal-picker', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="ui-info-label shrink-0">Kopplat sparmål</span>
-                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
-                  <span className="truncate">
-                    {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget'}
-                  </span>
-                  <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
-                </span>
-              </button>
-            )}
-
-            {hasConnectedHouseholdPartner() && (
-              <div className="ui-row">
-                <span className="ui-info-label">Delad i hushåll</span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={isShared}
-                  onClick={() => setIsShared((prev) => !prev)}
-                  className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
-                >
-                  <span
-                    className={`ui-switch-thumb ${
-                      isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-            )}
-
-            <div className="ui-row">
-              <span className="ui-info-label">
-                {draftReceipts.length > 0 ? `Kvitton (${draftReceipts.length})` : 'Kvitto'}
-              </span>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="font-medium text-[var(--text-primary)] hover:opacity-75 flex items-center gap-1.5 cursor-pointer"
-              >
-                <Paperclip size={13} />
-                <span>{draftReceipts.length > 0 ? 'Bifoga fler' : 'Bifoga'}</span>
-              </button>
-            </div>
-          </div>
-
-          {draftReceipts.length > 0 && (
-            <div className="space-y-2">
-              {draftReceipts.map((rcpt, idx) => (
-                <div
-                  key={`${rcpt.name}-${idx}`}
-                  className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2"
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPreviewReceipt(rcpt);
-                      navigateSubView('receipt-preview', 'forward');
-                    }}
-                    className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 cursor-pointer"
-                  >
-                    <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-                    <span className="text-xs font-medium text-[var(--text-primary)] truncate">
-                      {rcpt.name || `Kvitto ${idx + 1}`}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveReceiptAt(idx)}
-                    className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer shrink-0"
-                    title="Ta bort kvitto"
-                  >
-                    <Trash size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="space-y-2.5">
-            {isCreateMode ? (
-              <button
-                type="button"
-                onClick={handleCreateSave}
-                disabled={!name.trim() || !(Number(amount) > 0)}
-                className="ui-btn-primary"
-              >
-                <Check size={14} weight="bold" />
-                <span>Spara fast utgift</span>
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    commitInlineChanges();
-                    navigateSubView('details', 'back');
-                  }}
-                  disabled={!name.trim() || !(Number(amount) > 0)}
-                  className="ui-btn-primary"
-                >
-                  <Check size={14} weight="bold" />
-                  <span>Spara ändringar</span>
-                </button>
-
-                {onDelete && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="ui-btn-danger"
-                    >
-                      <Trash size={14} />
-                      <span>Ta bort fast utgift</span>
-                    </button>
-
-                    <ConfirmDialog
-                      isOpen={showDeleteConfirm}
-                      title="Ta bort fast utgift?"
-                      description={`${displayName} tas bort från dina fasta utgifter.`}
-                      confirmLabel="Ta bort"
-                      onConfirm={handleDelete}
-                      onCancel={() => setShowDeleteConfirm(false)}
-                    />
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <FixedViewEdit
+        subView={subView}
+        slideAnimClass={slideAnimClass}
+        isCreateMode={isCreateMode}
+        onClose={onClose}
+        activeExpense={activeExpense}
+        setName={setName}
+        setAmount={setAmount}
+        setDueDay={setDueDay}
+        setCategory={setCategory}
+        setPaymentMethod={setPaymentMethod}
+        setDraftReceipts={setDraftReceipts}
+        navigateSubView={navigateSubView}
+        name={name}
+        category={category}
+        amount={amount}
+        dueDay={dueDay}
+        paymentMethod={paymentMethod}
+        availableGoals={availableGoals}
+        linkedGoalId={linkedGoalId}
+        isShared={isShared}
+        setIsShared={setIsShared}
+        draftReceipts={draftReceipts}
+        fileInputRef={fileInputRef}
+        setPreviewReceipt={setPreviewReceipt}
+        handleRemoveReceiptAt={handleRemoveReceiptAt}
+        handleCreateSave={handleCreateSave}
+        commitInlineChanges={commitInlineChanges}
+        onDelete={onDelete}
+        setShowDeleteConfirm={setShowDeleteConfirm}
+        showDeleteConfirm={showDeleteConfirm}
+        displayName={displayName}
+        handleDelete={handleDelete}
+      />
 
       {/* ============================================================== */}
       {/* HUVUDVY: REN FÖRHANDSGRANSKNING                                */}
       {/* ============================================================== */}
-      {subView === 'details' && !isCreateMode && (
-        <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
-          <div className="ui-sheet-header !mb-0">
-            <span className="ui-sheet-title">Fast utgift</span>
-            <div className="flex items-center gap-1.5">
-              <button type="button" onClick={onClose} className="ui-icon-btn">
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Hero Receipt Header (Direkt redigerbar) */}
-          <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
-            {(() => {
-              void logoPrefTick;
-              const accentColor = resolveCategoryColor(category);
-              const prefersCatIcon = isMerchantCategoryIconPreferred(displayName);
-              return (
-                <>
-                  <div
-                    className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full blur-2xl opacity-15 dark:opacity-20"
-                    style={{ backgroundColor: accentColor }}
-                  />
-                  <div className="relative flex justify-center mb-3.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMerchantCategoryIconPreferred(displayName, !prefersCatIcon);
-                        setLogoPrefTick((t) => t + 1);
-                      }}
-                      title={
-                        prefersCatIcon
-                          ? 'Tryck för att visa företagslogga'
-                          : 'Tryck för att visa kategori-ikon'
-                      }
-                      className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
-                    >
-                      <ItemLogo
-                        key={`fixed-logo-${logoPrefTick}`}
-                        name={displayName}
-                        category={category}
-                        logoUrl={activeExpense?.logo}
-                        size="xl"
-                        isRecurring={true}
-                      />
-                    </button>
-                  </div>
-                </>
-              );
-            })()}
-
-            <div className="flex items-center justify-center gap-1.5 px-3 max-w-md mx-auto">
-              <input
-                type="text"
-                spellCheck={false}
-                autoCorrect="off"
-                value={name}
-                onChange={(e) => {
-                  const nextName = e.target.value;
-                  setName(nextName);
-                  commitInlineChanges({ name: nextName });
-                }}
-                className="font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] text-center bg-transparent border-0 focus:outline-none focus:ring-0 transition-colors w-full p-0"
-                placeholder="Tjänst eller butik"
-              />
-              {(() => {
-                const rawOrig = (activeExpense?.originalName || '').trim();
-                const cleanedOrig = rawOrig ? cleanDisplayMerchantName(rawOrig) : '';
-                const originalDisplayName =
-                  cleanedOrig && cleanedOrig !== 'Banktransaktion' ? cleanedOrig : rawOrig;
-                const canResetName =
-                  Boolean(originalDisplayName) &&
-                  name.trim().toLowerCase() !== originalDisplayName.toLowerCase();
-                if (!canResetName) return null;
-                return (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setName(originalDisplayName);
-                      commitInlineChanges({ name: originalDisplayName });
-                    }}
-                    title={`Återställ till ursprungsnamn (${originalDisplayName})`}
-                    aria-label={`Återställ till ursprungsnamn (${originalDisplayName})`}
-                    className="w-7 h-7 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
-                  >
-                    <ClockCounterClockwise size={13} weight="bold" />
-                  </button>
-                );
-              })()}
-            </div>
-
-            <div className="mt-1 flex items-baseline justify-center">
-              <span className="font-display font-bold text-2xl sm:text-3xl text-[var(--text-primary)] mr-0.5">
-                −
-              </span>
-              <span className="relative inline-block">
-                <span
-                  aria-hidden="true"
-                  className="invisible whitespace-pre font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em]"
-                >
-                  {amount || '0'}
-                </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                spellCheck={false}
-                value={amount}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^\d]/g, '');
-                  setAmount(cleaned);
-                  const num = Number(cleaned);
-                  if (num > 0) {
-                    commitInlineChanges({ amount: num });
-                  }
-                }}
-                className="absolute inset-0 w-full min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-left font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] p-0 text-[var(--text-primary)]"
-                placeholder="0"
-              />
-              </span>
-              <span className="ml-1.5 font-display font-medium text-base text-[var(--text-secondary)]">
-                kr/mån
-              </span>
-            </div>
-
-            {activeExpense?.isCancelled ? (
-              <button
-                type="button"
-                onClick={() => navigateSubView('cancel-picker', 'forward')}
-                className="text-xs font-medium text-amber-600 dark:text-amber-400 hover:opacity-80 mt-1.5 transition-opacity cursor-pointer inline-flex items-center gap-1"
-              >
-                <span>{formatFixedCancellationBadge(activeExpense)}</span>
-                <CaretRight size={11} />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => navigateSubView('day-picker', 'forward')}
-                className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] tabular-nums mt-1.5 transition-colors cursor-pointer inline-flex items-center gap-1"
-              >
-                <span>Dras den {dueDay}:e varje månad</span>
-                <CaretRight size={11} className="text-[var(--text-muted)]" />
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-3.5">
-            {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
-            <div className="grid grid-cols-4 gap-2">
-              <button
-                type="button"
-                onClick={() => navigateSubView('cancel-picker', 'forward')}
-                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${
-                    activeExpense?.isCancelled
-                      ? 'bg-amber-500/15 text-amber-500'
-                      : 'bg-rose-500/10 text-rose-500'
-                  }`}
-                >
-                  <Scissors size={16} />
-                </div>
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                  {activeExpense?.isCancelled ? 'Uppsagd' : 'Säg upp'}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (draftReceipts.length > 0) {
-                    setPreviewReceipt(draftReceipts[0]);
-                    navigateSubView('receipt-preview', 'forward');
-                  } else {
-                    fileInputRef.current?.click();
-                  }
-                }}
-                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group relative"
-              >
-                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform relative">
-                  <Paperclip size={16} weight="regular" />
-                  {draftReceipts.length > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-color)]" />
-                  )}
-                </div>
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                  {draftReceipts.length > 0 ? `${draftReceipts.length} avtal` : 'Kvitto'}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigateSubView('day-picker', 'forward')}
-                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
-              >
-                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
-                  <CalendarBlank size={16} />
-                </div>
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                  Den {dueDay}:e
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigateSubView('similar', 'forward')}
-                className="p-2.5 rounded-2xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer text-center group"
-              >
-                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform">
-                  <ClockCounterClockwise size={16} />
-                </div>
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-full">
-                  {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} dragn.` : 'Historik'}
-                </span>
-              </button>
-            </div>
-
-            {/* 2. Ett enda sammanhållet detaljkort */}
-            <div className="ui-sheet-group">
-              <button
-                type="button"
-                onClick={() => navigateSubView('category-picker', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="ui-info-label">Kategori</span>
-                <span className="ui-info-value flex items-center gap-1.5">
-                  <CategoryIcon category={category} size={13} />
-                  <span>{category}</span>
-                  <CaretRight size={12} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigateSubView('payment-picker', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="ui-info-label">Betalsätt</span>
-                <span className="ui-info-value flex items-center gap-1.5">
-                  <PaymentMethodIcon method={paymentMethod} size={15} />
-                  <span>{paymentMethod}</span>
-                  <CaretRight size={12} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-
-              {activeExpense?.isCancelled && (
-                <button
-                  type="button"
-                  onClick={() => navigateSubView('cancel-picker', 'forward')}
-                  className="ui-row-btn"
-                >
-                  <span className="ui-info-label">Status</span>
-                  <span className="ui-info-value flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-                    <span>{formatFixedCancellationBadge(activeExpense)}</span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => navigateSubView('day-picker', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="ui-info-label">Dragningsdag</span>
-                <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
-                  <span>Den {dueDay}:e varje månad</span>
-                  <CaretRight size={12} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
-
-              {availableGoals.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => navigateSubView('goal-picker', 'forward')}
-                  className="ui-row-btn"
-                >
-                  <span className="ui-info-label">Sparmål</span>
-                  <span className="ui-info-value flex items-center gap-1.5">
-                    <span>
-                      {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget valt'}
-                    </span>
-                    <CaretRight size={12} className="text-[var(--text-muted)]" />
-                  </span>
-                </button>
-              )}
-
-              {resolvedAccountInfo && (
-                <div className="ui-row">
-                  <span className="ui-info-label">Konto</span>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="ui-info-value truncate max-w-[190px] sm:max-w-[230px]">
-                      {resolvedAccountInfo.label} ·{' '}
-                      {showFullAccount
-                        ? resolvedAccountInfo.fullNumber
-                        : resolvedAccountInfo.maskedNumber}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowFullAccount((prev) => !prev)}
-                      className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
-                    >
-                      {showFullAccount ? 'Dölj' : 'Visa'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Bifogade kvitton & avtal (visas endast i listan om kvitto finns; snabbvalsknappen ovan hanterar bifogning) */}
-              {draftReceipts.length > 0 && (
-                <>
-                  {draftReceipts.map((rcpt, idx) => (
-                    <div key={`${rcpt.name}-${idx}`} className="ui-row">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewReceipt(rcpt);
-                          navigateSubView('receipt-preview', 'forward');
-                        }}
-                        className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer flex-1 group"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
-                          {rcpt.url.startsWith('data:image/') ||
-                          /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
-                            <img src={rcpt.url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <Paperclip size={13} />
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-xs font-medium text-[var(--text-primary)] block truncate group-hover:opacity-80">
-                            {rcpt.name || `Kvitto ${idx + 1}`}
-                          </span>
-                          <span className="text-[11px] text-[var(--text-muted)] block">
-                            Klicka för att granska
-                          </span>
-                        </div>
-                      </button>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPreviewReceipt(rcpt);
-                            navigateSubView('receipt-preview', 'forward');
-                          }}
-                          className="px-2 py-1 rounded-md text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                        >
-                          Öppna
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveReceiptAt(idx)}
-                          className="p-1 rounded-md text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                          title="Ta bort kvitto"
-                        >
-                          <Trash size={13} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-
-              {/* Hushållsdelning */}
-              {hasConnectedHouseholdPartner() && (
-                <>
-                  <div className="ui-row">
-                    <span className="ui-info-label">Delad i hushåll</span>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={isShared}
-                      onClick={() => {
-                        const next = !isShared;
-                        setIsShared(next);
-                        commitInlineChanges({ isShared: next });
-                      }}
-                      className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
-                    >
-                      <span
-                        className={`ui-switch-thumb ${
-                          isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {isShared && activeExpense && (
-                    <div className="ui-row">
-                      <span className="ui-info-label">I min egen budget</span>
-                      <div className="flex items-center gap-1 bg-[var(--surface-color)] p-0.5 rounded-lg border border-[var(--border-subtle)]">
-                        {(() => {
-                          const totalBill =
-                            activeExpense.fullAmount && activeExpense.fullAmount > activeExpense.amount
-                              ? activeExpense.fullAmount
-                              : Number(amount) || activeExpense.amount;
-                          const isHalfInPersonal =
-                            Boolean(activeExpense.fullAmount) &&
-                            activeExpense.fullAmount > activeExpense.amount;
-                          return (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const halfAmt = Math.max(1, Math.round(totalBill / 2));
-                                  setAmount(halfAmt);
-                                  if (onUpdate) {
-                                    onUpdate({
-                                      ...activeExpense,
-                                      isShared: true,
-                                      fullAmount: totalBill,
-                                      amount: halfAmt,
-                                    });
-                                  }
-                                }}
-                                className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
-                                  isHalfInPersonal
-                                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                                }`}
-                              >
-                                Min halva ({formatKr(Math.round(totalBill / 2))})
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setAmount(totalBill);
-                                  if (onUpdate) {
-                                    onUpdate({
-                                      ...activeExpense,
-                                      isShared: true,
-                                      fullAmount: totalBill,
-                                      amount: totalBill,
-                                    });
-                                  }
-                                }}
-                                className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
-                                  !isHalfInPersonal
-                                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                                }`}
-                              >
-                                Hela ({formatKr(totalBill)})
-                              </button>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Ta bort fast utgift */}
-            {onDelete && activeExpense && (
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="ui-btn-danger"
-                >
-                  <Trash size={14} />
-                  <span>Ta bort fast utgift</span>
-                </button>
-
-                <ConfirmDialog
-                  isOpen={showDeleteConfirm}
-                  title="Ta bort fast utgift?"
-                  description={`${displayName} tas bort från dina fasta utgifter.`}
-                  confirmLabel="Ta bort"
-                  onConfirm={handleDelete}
-                  onCancel={() => setShowDeleteConfirm(false)}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <FixedViewDetails
+        subView={subView}
+        isCreateMode={isCreateMode}
+        navDirection={navDirection}
+        onClose={onClose}
+        logoPrefTick={logoPrefTick}
+        category={category}
+        displayName={displayName}
+        setLogoPrefTick={setLogoPrefTick}
+        activeExpense={activeExpense}
+        name={name}
+        setName={setName}
+        commitInlineChanges={commitInlineChanges}
+        amount={amount}
+        setAmount={setAmount}
+        navigateSubView={navigateSubView}
+        dueDay={dueDay}
+        draftReceipts={draftReceipts}
+        setPreviewReceipt={setPreviewReceipt}
+        fileInputRef={fileInputRef}
+        similarInfo={similarInfo}
+        paymentMethod={paymentMethod}
+        availableGoals={availableGoals}
+        linkedGoalId={linkedGoalId}
+        resolvedAccountInfo={resolvedAccountInfo}
+        showFullAccount={showFullAccount}
+        setShowFullAccount={setShowFullAccount}
+        handleRemoveReceiptAt={handleRemoveReceiptAt}
+        isShared={isShared}
+        setIsShared={setIsShared}
+        onUpdate={onUpdate}
+        formatKr={formatKr}
+        onDelete={onDelete}
+        setShowDeleteConfirm={setShowDeleteConfirm}
+        showDeleteConfirm={showDeleteConfirm}
+        handleDelete={handleDelete}
+      />
     </BottomSheet>
   );
 };
