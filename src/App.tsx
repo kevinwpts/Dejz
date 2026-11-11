@@ -1,11 +1,6 @@
-import React, { useEffect } from 'react';
-import { getHouseholdState, subscribeToHouseholdRealtime } from './utils/householdSync';
-import { useBudgetTotals } from './app/hooks/useBudgetTotals';
-import { useAccountData } from './app/hooks/useAccountData';
-import { useAppActions } from './app/hooks/useAppActions';
-import { useProfileSettings } from './app/hooks/useProfileSettings';
-import { usePeriodData } from './app/hooks/usePeriodData';
-import { useAppState } from './app/hooks/useAppState';
+import React from 'react';
+import { AppContext } from './app/AppContext';
+import { useAppModel } from './app/useAppModel';
 import { AppTabContent } from './app/components/AppTabContent';
 import { AppHeader } from './app/components/AppHeader';
 import { AppSheetsAndModals } from './app/components/AppSheetsAndModals';
@@ -16,34 +11,14 @@ import { OnboardingScreen } from './app/components/OnboardingScreen';
 import { LandingScreen } from './app/components/LandingScreen';
 
 export const App: React.FC = () => {
-  // Appens tillstånd: inloggad användare, listor, inställningar och öppna fönster
-  const state = useAppState();
-  // Inloggning, data från Supabase och bankkoppling
-  const account = useAccountData(state);
-  // Lönedag, helghantering, namn, e-post och profilbild
-  const profile = useProfileSettings(state);
-  // Löneperioden: konton, period, periodens transaktioner och kopplingar
-  const periodData = usePeriodData({ ...state, ...account });
-  // Hemkortets siffror: inkomst, fasta, rörligt, kvar och dagsbudget
-  const budget = useBudgetTotals({ ...state, ...account, ...periodData });
-  // Alla åtgärder: lägga till/ändra/ta bort köp, fasta utgifter, inkomster, logga ut …
-  const actions = useAppActions({ ...state, ...account, ...periodData });
-
-  // Realtidssynk för Delad budget (Hushåll)
-  const { setAccountMetaVersion } = periodData;
-  useEffect(() => {
-    const hh = getHouseholdState();
-    if (!hh || !hh.householdId || !hh.inviteCode) return;
-    return subscribeToHouseholdRealtime(hh.householdId, hh.inviteCode, () => {
-      setAccountMetaVersion((v) => v + 1);
-    });
-  }, [state.activeTab, state.settingsSubView, setAccountMetaVersion]);
-
-  // Allt som skärmarna behöver
-  const app = { ...state, ...account, ...profile, ...periodData, ...budget, ...actions };
+  const app = useAppModel();
 
   if (app.showLanding || (!app.userId && !app.isInitialLoading && !app.isOnboardingActive)) {
-    return <LandingScreen {...app} />;
+    return (
+      <AppContext.Provider value={app}>
+        <LandingScreen />
+      </AppContext.Provider>
+    );
   }
 
   const shouldShowOnboarding =
@@ -60,10 +35,15 @@ export const App: React.FC = () => {
     })();
 
   if (shouldShowOnboarding) {
-    return <OnboardingScreen {...app} />;
+    return (
+      <AppContext.Provider value={app}>
+        <OnboardingScreen />
+      </AppContext.Provider>
+    );
   }
 
   return (
+    <AppContext.Provider value={app}>
     <div
       style={{ backgroundImage: 'var(--bg-gradient)' }}
       className={`min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)] ${
@@ -71,7 +51,7 @@ export const App: React.FC = () => {
       }`}
     >
       {/* Simulatorväxlare för små skärmar */}
-      <AppHeader {...app} />
+      <AppHeader />
 
       <div
         className={`app-spatial-shell flex-1 flex flex-col min-h-screen ${
@@ -79,18 +59,19 @@ export const App: React.FC = () => {
         }`}
       >
         {/* Sidhuvud, statusrad, sök och notiser */}
-        <AppTopBar {...app} />
+        <AppTopBar />
         {/* Flikarna: Hem, Historik, Analys, Fasta, Inställningar m.m. */}
-        <AppTabContent {...app} />
+        <AppTabContent />
         {/* Blad och bottenmeny: saldo, lägg till köp, flikar */}
-        <AppSheetsAndModals {...app} />
+        <AppSheetsAndModals />
       </div>
 
       {/* Fönster: bank, inkomst, fast utgift, köp, inloggning */}
-      <AppModals {...app} />
+      <AppModals />
       {/* Notiser, kvittovisare och simulator */}
-      <AppOverlays {...app} />
+      <AppOverlays />
     </div>
+    </AppContext.Provider>
   );
 };
 
