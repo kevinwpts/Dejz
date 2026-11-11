@@ -87,7 +87,7 @@ export const EmailVerificationStatus: React.FC<{ compact?: boolean }> = ({ compa
           type="button"
           onClick={send}
           disabled={sending}
-          className="px-3 py-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[12px] font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+          className="px-3 py-1 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-[12px] font-semibold inline-flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
         >
           {sending && <SpinnerGap size={12} className="animate-spin" />}
           Verifiera

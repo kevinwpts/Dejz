@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient';
 import swedishBanksJson from '../data/swedishBanks.json';
+import { appOrigin } from '../utils/platform';
 
 export const SWEDISH_BANKS_CATALOG: BankAspsp[] = swedishBanksJson as BankAspsp[];
 
@@ -450,7 +451,7 @@ export const bankService = {
   }> {
     const defaultRedirectUrl =
       typeof window !== 'undefined' && window.location?.origin
-        ? `${window.location.origin}/bank/callback`
+        ? `${appOrigin()}/bank/callback`
         : null;
 
     return await invokeEnableBanking({

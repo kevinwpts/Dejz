@@ -50,6 +50,8 @@
 ## Bilder och video
 - Använd alltid den **riktiga loggan**: `public/dejz_mork.png` (vit på lila, lila på ljust). Inte den omritade `DejzLogo`-vektorn eller `favicon.png`.
 - Färger: lila gradient `#7356FF → #5B3DF5 → #3F22C9`, ljus bakgrund `#F5F4FA`. Typsnitt: Inter.
+- I appen och på webben: loggan via `<BrandLogo />` (riktiga loggan, valfri färg). Huvudknappar ("gör det här") är alltid lila: `--cta-bg`/`--cta-fg` eller `.ui-btn-primary`. Valda lägen (segment, dagar) är neutrala. Kategoriikoner ligger i en ruta (`--icon-tile-bg`) med samma form som butikslogor.
+- App Store: se `APP_STORE.md`. Använd `apiUrl()` och `appOrigin()` (`src/utils/platform.ts`) för serveranrop och inloggningslänkar – annars fungerar det inte i iPhone-appen.
 - Appbilder tas från demoläget (påhittad användare "Elin", klockan satt till 18:30). Visa aldrig mina riktiga siffror.
 - Format och säkra zoner:
   - **TikTok/Reels/Stories:** 1080 × 1920. Inget viktigt de översta ~260 px eller närmast högerkanten (~150 px).

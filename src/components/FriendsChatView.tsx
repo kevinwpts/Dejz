@@ -56,6 +56,7 @@ import { getSavingsGoals, SavingsGoalItem } from '../utils/appCache';
 import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { CategoryIcon } from './CategoryIcon';
+import { apiUrl } from '../utils/platform';
 
 interface FriendsChatViewProps {
   period: PeriodInfo;
@@ -396,7 +397,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
         sharedCategories: defaultCats,
       });
 
-      const res = await fetch('/api/household/join', {
+      const res = await fetch(apiUrl('/api/household/join'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -636,7 +637,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                                   className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                                     msg.sharedPayload.settled
                                       ? 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)]'
-                                      : 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                                      : 'bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)]'
                                   }`}
                                 >
                                   <Check size={13} weight="bold" />
@@ -667,7 +668,7 @@ export const FriendsChatView: React.FC<FriendsChatViewProps> = ({
                                       msg.sharedPayload?.inviteCode
                                     );
                                   }}
-                                  className="w-full py-2 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                                  className="w-full py-2 px-3 rounded-xl bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
                                 >
                                   <span>Öppna delad budget</span>
                                   <CaretRight size={12} weight="bold" />

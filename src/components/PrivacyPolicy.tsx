@@ -6,7 +6,7 @@ import { X } from '@phosphor-icons/react';
 /*  Håll innehållet i synk med PRIVACY.md i projektroten.              */
 /* ------------------------------------------------------------------ */
 
-export const PRIVACY_UPDATED = '2026-11-06';
+export const PRIVACY_UPDATED = '2026-11-11';
 export const PRIVACY_CONTACT = 'hej@dejz.se';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -42,8 +42,13 @@ export const PrivacyPolicyContent: React.FC = () => (
         används bara för att Dejz ska fungera för dig. Grunden är vårt avtal med dig om att leverera appen.
       </p>
       <p>
+        Kom du till Dejz via en länk från oss, till exempel en annons på TikTok, sparar vi var du kom ifrån (bara
+        kanalens namn, som ”tiktok”). Det hjälper oss att förstå vilken marknadsföring som fungerar. Grunden är vårt
+        berättigade intresse, och uppgiften raderas tillsammans med ditt konto.
+      </p>
+      <p>
         Vi sparar uppgifterna så länge du har ett konto. Du kan radera ditt konto och all data när som helst i appen
-        under Inställningar → Data & säkerhet → Radera konto.
+        under Inställningar → Data & säkerhet → Radera konto. Då raderas allt direkt och kan inte återställas.
       </p>
     </Section>
 
@@ -97,6 +102,7 @@ export const PrivacyPolicyContent: React.FC = () => (
           butiken, aldrig vem du är.
         </li>
         <li>Resend – skickar våra mejl.</li>
+        <li>Google och Apple – om du väljer att logga in med dem får vi ditt namn och din e-postadress.</li>
         <li>Vercel – driftar webbplatsen.</li>
       </ul>
       <p>Bankkoppling via Enable Banking kommer senare. Policyn uppdateras innan den blir tillgänglig.</p>

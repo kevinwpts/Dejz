@@ -756,6 +756,12 @@ h6 {
 
   /* Brand Accents & Colors - Carbon Black Primary & Emerald Inflows */
   --accent-color: #5B3DF5;
+  /* Huvudknappar ("gör det här") – alltid Dejz lila, i både appen och på webben */
+  --cta-bg: #5B3DF5;
+  /* Ruta bakom kategoriikoner (samma form som butikslogor) */
+  --icon-tile-bg: #EFEDF7;
+  --cta-fg: #FFFFFF;
+  --cta-shadow: 0 8px 20px -10px rgba(91, 61, 245, 0.55);
   --accent-hover: #4E30E6;
   --accent-pressed: #4224CC;
   --accent-gradient: none;
@@ -989,6 +995,10 @@ h6 {
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.06);
   --accent-color: #7A63FF;
+  --cta-bg: #6B4EFF;
+  --icon-tile-bg: rgba(255, 255, 255, 0.07);
+  --cta-fg: #FFFFFF;
+  --cta-shadow: 0 8px 24px -12px rgba(107, 78, 255, 0.7);
   --accent-hover: #8B77FF;
   --accent-pressed: #6A52F0;
   --on-accent: #FFFFFF;
@@ -1997,11 +2007,11 @@ b {
 
   /* 6. Buttons & Confirmation Bars (Compact 48px Capsule CTAs & Unified Pill Actions) */
   .ui-btn-primary {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-primary-lg {
-    @apply w-full h-[48px] px-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
+    @apply w-full h-[48px] px-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-[14px] sm:text-[14px] tracking-[-0.005em] flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] disabled:opacity-40 transition-all cursor-pointer;
   }
 
   .ui-btn-secondary {
@@ -2017,7 +2027,7 @@ b {
   }
 
   .ui-btn-sm-primary {
-    @apply px-3 py-1.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-[12px] font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
+    @apply px-3 py-1.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-[12px] font-semibold hover:opacity-90 active:scale-95 flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0;
   }
 
   .ui-confirm-danger {
@@ -2117,7 +2127,7 @@ b {
   }
 
   .ui-switch-on {
-    @apply bg-emerald-500;
+    @apply bg-[var(--accent-color)];
   }
 
   .ui-switch-off {

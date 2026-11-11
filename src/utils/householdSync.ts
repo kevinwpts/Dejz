@@ -8,6 +8,7 @@ import {
 import { PeriodInfo, isDateInPeriod } from './periodEngine';
 import { reconcilePeriodRecurringMatches } from './recurring';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import { apiUrl } from './platform';
 
 export const HOUSEHOLD_STORAGE_KEY = 'dejz_household_state_v1';
 
@@ -100,7 +101,7 @@ export function clearHouseholdStateLocal(
       updatedAt: new Date().toISOString(),
     };
     broadcastHouseholdUpdate(updated);
-    fetch('/api/household/sync', {
+    fetch(apiUrl('/api/household/sync'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -333,7 +334,7 @@ export async function pushHouseholdSyncToServer(state: HouseholdState): Promise<
   saveHouseholdStateLocal(state);
   broadcastHouseholdUpdate(state);
   try {
-    const res = await fetch('/api/household/sync', {
+    const res = await fetch(apiUrl('/api/household/sync'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ household: state }),
@@ -387,7 +388,7 @@ export function subscribeToHouseholdRealtime(
   const intervalId = setInterval(async () => {
     if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
     try {
-      const res = await fetch(`/api/household/state?code=${encodeURIComponent(inviteCode)}`);
+      const res = await fetch(apiUrl(`/api/household/state?code=${encodeURIComponent(inviteCode)}`));
       if (!res.ok) return;
       const data = await res.json();
       const serverHh = data?.household as HouseholdState | undefined;

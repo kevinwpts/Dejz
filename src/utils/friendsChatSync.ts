@@ -1,3 +1,11 @@
+import { apiUrl } from './platform';
+
+/**
+ * Vänner & chatt kräver en egen server (WebSocket + /api/friends/*) som inte finns på dejz.se.
+ * Avstängd tills den finns – annars visas knappar som inte fungerar (och App Store nekar appen).
+ * Slå på genom att sätta VITE_ENABLE_FRIENDS_CHAT="true".
+ */
+export const FRIENDS_CHAT_ENABLED = import.meta.env.VITE_ENABLE_FRIENDS_CHAT === 'true';
 export interface SocialFriend {
   key: string;
   name: string;
@@ -243,12 +251,13 @@ export async function syncFriendsAndChatFromServer(params: {
   userAvatar?: string | null;
   userPhone?: string | null;
 }): Promise<void> {
+  if (!FRIENDS_CHAT_ENABLED) return;
   const userKey = normalizeSocialUserKey(params.userEmail, params.userName);
   const localFriends = getStoredFriends();
   const localRooms = getStoredChatRooms();
 
   try {
-    const res = await fetch('/api/friends/sync', {
+    const res = await fetch(apiUrl('/api/friends/sync'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -327,7 +336,7 @@ export async function addFriendRequest(params: {
   }
 
   try {
-    const res = await fetch('/api/friends/add', {
+    const res = await fetch(apiUrl('/api/friends/add'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -390,7 +399,7 @@ export async function removeFriendRequest(myKey: string, friendKey: string): Pro
   const next = getStoredFriends().filter((f) => f.key !== friendKey);
   saveStoredFriends(next);
   try {
-    await fetch('/api/friends/remove', {
+    await fetch(apiUrl('/api/friends/remove'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userKey: myKey, friendKey }),
@@ -427,7 +436,7 @@ export async function sendChatMessage(params: {
   upsertMessageInLocalRoom(optimisticMsg);
 
   try {
-    const res = await fetch('/api/chat/send', {
+    const res = await fetch(apiUrl('/api/chat/send'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -488,7 +497,7 @@ export async function toggleMessageReaction(params: {
   }
 
   try {
-    await fetch('/api/chat/react', {
+    await fetch(apiUrl('/api/chat/react'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -527,7 +536,7 @@ export async function toggleMessageSplitSettled(params: {
   }
 
   try {
-    await fetch('/api/chat/settle', {
+    await fetch(apiUrl('/api/chat/settle'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -566,7 +575,7 @@ export async function markRoomMessagesAsRead(
   }
 
   try {
-    await fetch('/api/chat/read', {
+    await fetch(apiUrl('/api/chat/read'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -624,6 +633,7 @@ export function connectFriendsChatWebSocket(params: {
   userName?: string | null;
   userAvatar?: string | null;
 }): () => void {
+  if (!FRIENDS_CHAT_ENABLED) return () => {};
   if (typeof window === 'undefined') return () => {};
   const nextKey = normalizeSocialUserKey(params.userEmail, params.userName);
   activeUserKey = nextKey;

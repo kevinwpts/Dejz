@@ -74,7 +74,7 @@ class ErrorBoundary extends Component<Props, State> {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="w-full h-12 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm active:scale-[0.99] transition-all cursor-pointer"
+            className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm active:scale-[0.99] transition-all cursor-pointer"
           >
             Ladda om sidan
           </button>

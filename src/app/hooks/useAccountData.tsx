@@ -45,6 +45,7 @@ import {
   mapBankTransactionsToAppItems,
 } from '../../app/transactionMapping';
 import { reconcileFixedExpensesList, reconcileIncomesList } from '../../app/reconcileLists';
+import { apiUrl } from '../../utils/platform';
 
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
@@ -779,7 +780,7 @@ export function useAccountData({
     if (unresolvedPhones.size === 0) return;
 
     unresolvedPhones.forEach((phone) => {
-      fetch(`/api/swish/lookup?phone=${encodeURIComponent(phone)}`)
+      fetch(apiUrl(`/api/swish/lookup?phone=${encodeURIComponent(phone)}`))
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (data?.name && typeof data.name === 'string') {

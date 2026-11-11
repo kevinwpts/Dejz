@@ -608,7 +608,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 setTransferAmountInput('');
                 setTransferMode('deposit');
               }}
-              className="py-3 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer"
+              className="py-3 px-4 rounded-2xl bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer"
             >
               <Plus size={15} weight="bold" />
               <span>Sätt in</span>
@@ -1250,7 +1250,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   disabled={!goalNameInput.trim()}
                   className={`w-full py-4 rounded-full font-display font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
                     goalNameInput.trim()
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] hover:opacity-90 active:scale-[0.99] cursor-pointer'
+                      ? 'bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] hover:opacity-90 active:scale-[0.99] cursor-pointer'
                       : 'bg-[var(--surface-color)] text-[var(--text-muted)] cursor-not-allowed'
                   }`}
                 >
@@ -1397,7 +1397,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                 <button
                   type="button"
                   onClick={() => navigateWizardStep(3, 'forward')}
-                  className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                  className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <span>Fortsätt</span>
                 </button>
@@ -1439,7 +1439,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   onClick={() => navigateWizardStep(4, 'forward')}
                   className={`w-full py-4 rounded-full font-display font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
                     Number(goalTargetInput) > 0
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] hover:opacity-90 active:scale-[0.99] cursor-pointer'
+                      ? 'bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] hover:opacity-90 active:scale-[0.99] cursor-pointer'
                       : 'bg-[var(--surface-color)] text-[var(--text-muted)] cursor-not-allowed'
                   }`}
                 >
@@ -1616,7 +1616,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   <button
                     type="button"
                     onClick={() => navigateWizardStep(5, 'forward')}
-                    className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                    className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                   >
                     <span>Fortsätt</span>
                   </button>
@@ -1625,7 +1625,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                     type="button"
                     disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
                     onClick={() => handleSaveGoal()}
-                    className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                    className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                   >
                     <span>Skapa sparmål</span>
                   </button>
@@ -1666,7 +1666,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   type="button"
                   disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
                   onClick={() => navigateWizardStep(6, 'forward')}
-                  className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                  className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                 >
                   <span>Fortsätt</span>
                 </button>
@@ -1724,7 +1724,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   type="button"
                   disabled={!goalNameInput.trim() || !(Number(goalTargetInput) > 0)}
                   onClick={() => handleSaveGoal()}
-                  className="w-full py-4 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                  className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
                 >
                   <span>Skapa sparmål</span>
                 </button>
@@ -1864,7 +1864,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           <button
             type="button"
             onClick={openCreateGoal}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
           >
             <Plus size={14} weight="bold" />
             <span>Nytt sparmål</span>

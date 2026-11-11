@@ -19,6 +19,7 @@ import { getMyFriendInviteCode } from '../../utils/friendsChatSync';
 import { setPrivacyBlurMode } from '../../utils/appCache';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { appOrigin } from '../../utils/platform';
 
 export interface ProfileSettingsViewProps {
   onUpdateName: (name: string) => void;
@@ -185,7 +186,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
     }
     try {
       await supabase.auth.resetPasswordForEmail(targetEmail, {
-        redirectTo: window.location.origin,
+        redirectTo: appOrigin(),
       });
       setResetEmailStatus(`Återställningslänk skickad till ${targetEmail}`);
     } catch {

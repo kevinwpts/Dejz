@@ -1,3 +1,4 @@
+import { BrandLogo } from './BrandLogo';
 import React, { useState, useEffect } from 'react';
 import {
   CaretLeft,
@@ -12,6 +13,11 @@ import { supabase } from '../supabaseClient';
 import { WaitlistLanding } from './WaitlistLanding';
 import { rememberConsentFromSignup } from '../utils/marketingConsent';
 import { firstTouchSignupData } from '../utils/attribution';
+import { appOrigin, isNativeApp } from '../utils/platform';
+
+/** "Fortsätt med Apple" krävs av App Store när man erbjuder Google-inloggning (regel 4.8).
+ *  Slås på med VITE_ENABLE_APPLE_SIGNIN="true" när Apple är aktiverat i Supabase (se APP_STORE.md). */
+const APPLE_SIGNIN_ENABLED = import.meta.env.VITE_ENABLE_APPLE_SIGNIN === 'true';
 
 interface LandingPageProps {
   existingEmail?: string | null;
@@ -26,9 +32,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onAuthenticated,
   onContinueExisting,
 }) => {
-  const [activePage, setActivePage] = useState<'landing' | 'auth'>('landing');
+  // I App Store-appen finns ingen marknadsföringssida – appen öppnar direkt på registrering/inloggning
+  const nativeApp = isNativeApp();
+  const [activePage, setActivePage] = useState<'landing' | 'auth'>(nativeApp ? 'auth' : 'landing');
   const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
-  const [view, setView] = useState<AuthViewMode>('login');
+  const [view, setView] = useState<AuthViewMode>(nativeApp ? 'register' : 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -130,7 +138,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     setResetEmailSent(false);
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (provider: 'google' | 'apple' = 'google') => {
     clearErrors();
     setGoogleLoading(true);
 
@@ -147,9 +155,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         // ignore
       }
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: appOrigin(),
         },
       });
       if (error) throw error;
@@ -162,7 +170,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           // ignore
         }
       }
-      setErrorMsg(err.message || 'Kunde inte starta Google-inloggning.');
+      setErrorMsg(err.message || (provider === 'apple' ? 'Kunde inte starta Apple-inloggning.' : 'Kunde inte starta Google-inloggning.'));
       setGoogleLoading(false);
     }
   };
@@ -171,7 +179,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     const cleanEmail = targetEmail.trim();
     if (!cleanEmail) return;
     const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-      redirectTo: window.location.origin,
+      redirectTo: appOrigin(),
     });
     if (error) throw error;
   };
@@ -184,7 +192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         const { error } = await supabase.auth.resend({
           type: 'signup',
           email: email.trim(),
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: appOrigin() },
         });
         if (error) throw error;
       } else {
@@ -239,7 +247,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
-          options: { emailRedirectTo: window.location.origin, data: firstTouchSignupData() },
+          options: { emailRedirectTo: appOrigin(), data: firstTouchSignupData() },
         });
         if (error) throw error;
         // Finns kontot redan svarar Supabase "ok" utan att skicka något mejl (identities är tom).
@@ -334,6 +342,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col justify-between max-w-md mx-auto px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] font-sans select-none overflow-x-hidden">
         {/* Top Bar */}
         <header className="flex items-center justify-between h-12">
+          {nativeApp && !resetEmailSent && view !== 'forgot_password' ? (
+            <span className="w-[34px]" aria-hidden="true" />
+          ) : (
           <button
             type="button"
             onClick={() => {
@@ -352,12 +363,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           >
             <CaretLeft size={18} weight="bold" />
           </button>
+          )}
 
-          <img
-            src="/dejz_mork.png"
-            alt="Dejz"
-            className="dejz-logo h-5 w-auto object-contain dark:invert"
-          />
+          <BrandLogo className="h-5 text-[var(--accent-color)]" />
         </header>
 
         {/* Main Content Area */}
@@ -419,11 +427,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {view !== 'forgot_password' && (
               <div className="space-y-4">
+                {APPLE_SIGNIN_ENABLED && (
+                  <button
+                    type="button"
+                    onClick={() => handleGoogleSignIn('apple')}
+                    disabled={googleLoading || loading}
+                    className="w-full py-3.5 px-4 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-sm flex items-center justify-center gap-2.5 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <svg className="w-[15px] h-[18px] shrink-0" viewBox="0 0 814 1000" fill="currentColor" aria-hidden="true">
+                      <path d="M788 341c-6 4-108 62-108 190 0 148 130 200 134 202-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-128C44 790 0 671 0 558 0 377 118 281 234 281c62 0 113 41 152 41 37 0 95-43 165-43 27 0 123 2 187 96zM557 159c29-35 50-83 50-131 0-7-1-13-2-19-47 2-104 32-138 72-27 30-52 79-52 127 0 7 1 15 2 17 3 0 8 1 13 1 43 0 96-28 127-67z" />
+                    </svg>
+                    <span>Fortsätt med Apple</span>
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={handleGoogleSignIn}
+                  onClick={() => handleGoogleSignIn('google')}
                   disabled={googleLoading || loading}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 px-4 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-semibold text-sm flex items-center justify-center gap-3 hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50"
                 >
                   {googleLoading ? (
                     <SpinnerGap size={18} className="animate-spin" />
@@ -474,7 +495,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           await supabase.auth.resend({
                             type: 'signup',
                             email: email.trim(),
-                            options: { emailRedirectTo: window.location.origin },
+                            options: { emailRedirectTo: appOrigin() },
                           });
                         } catch {
                           // visa skärmen ändå – "Skicka igen" finns där
@@ -486,7 +507,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         setResetEmailSent(true);
                         setResendCooldown(45);
                       }}
-                      className="mt-2.5 w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
+                      className="mt-2.5 w-full py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
                     >
                       {resendingConfirm && <SpinnerGap size={14} className="animate-spin" />}
                       Skicka nytt mejl
@@ -600,7 +621,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 type="submit"
                 disabled={loading || googleLoading}
-                className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-bold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-bold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading && <SpinnerGap size={16} className="animate-spin" />}
                 {view === 'login' && 'Logga in'}

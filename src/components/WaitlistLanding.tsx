@@ -4,7 +4,7 @@ import {
   CaretDown,
 } from '@phosphor-icons/react';
 import { PrivacyPolicySheet } from './PrivacyPolicy';
-import { DejzLogo } from './DejzLogo';
+import { BrandLogo } from './BrandLogo';
 
 export const DEJZ_SLOGAN = 'Se vad du har kvar till nästa lön.';
 
@@ -103,7 +103,7 @@ const ComparisonVisual: React.FC = () => (
     <div className="rounded-container p-5 sm:p-6 text-white bg-[linear-gradient(150deg,#7356FF_0%,#5B3DF5_48%,#3F22C9_100%)] shadow-[0_18px_40px_-18px_rgba(91,61,245,0.6)]">
       <div className="flex items-center justify-between text-xs">
         <span className="inline-flex items-center gap-1.5 font-medium">
-          <DejzLogo className="h-3.5 w-auto" />
+          <BrandLogo className="h-3.5" />
         </span>
         <span className="text-white/75 tabular-nums">6 dagar till lön</span>
       </div>
@@ -118,12 +118,6 @@ const ComparisonVisual: React.FC = () => (
     </div>
   </div>
 );
-
-/* ---------------------- Kommer snart i butikerna ---------------------- */
-
-/** Apples symbol (ikonbibliotekets version har en avskuren botten). */
-
-/** Google Play-symbolen i sina fyra färger (Apples symbol är alltid enfärgad). */
 
 interface WaitlistLandingProps {
   onLogin: () => void;
@@ -196,7 +190,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
       <div className="mx-auto max-w-6xl px-5 sm:px-8 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         {/* Topp */}
         <header className="flex items-center justify-between h-12">
-          <DejzLogo className="h-6 w-auto text-[var(--accent-color)]" />
+          <BrandLogo className="h-6 text-[var(--accent-color)]" />
           <button
             type="button"
             onClick={onLogin}
@@ -317,7 +311,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
 
         <footer className="mt-12 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-3">
-            <DejzLogo className="h-4 w-auto text-[var(--accent-color)]" />
+            <BrandLogo className="h-4 text-[var(--accent-color)]" />
             <span>© {new Date().getFullYear()} Dejz</span>
             <button
               type="button"

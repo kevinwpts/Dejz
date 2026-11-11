@@ -8,6 +8,7 @@ import { getAccountMetaMap, saveAccountMeta } from '../../utils/appCache';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ItemLogo } from '../ItemLogo';
+import { appOrigin } from '../../utils/platform';
 
 export interface BankSettingsViewProps {
   bankAccounts: BankAccount[];
@@ -250,7 +251,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
     if (reconnectingBankId) return;
     setReconnectingBankId(conn.id);
     try {
-      const redirectUrl = `${window.location.origin}/bank/callback`;
+      const redirectUrl = `${appOrigin()}/bank/callback`;
       const res = await bankService.startAuth({
         aspspName: conn.aspsp_name,
         aspspCountry: conn.aspsp_country || 'SE',

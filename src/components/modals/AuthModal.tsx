@@ -1,3 +1,4 @@
+import { appOrigin } from '../../utils/platform';
 import React, { useState, useEffect } from 'react';
 import {
   X,
@@ -11,6 +12,8 @@ import {
 } from '@phosphor-icons/react';
 import { supabase, isSupabaseConfigured } from '../../supabaseClient';
 import { BottomSheet } from '../ui/BottomSheet';
+
+const APPLE_SIGNIN_ENABLED = import.meta.env.VITE_ENABLE_APPLE_SIGNIN === 'true';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -69,7 +72,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setResetEmailSent(false);
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (provider: 'google' | 'apple' = 'google') => {
     handleReset();
     setGoogleLoading(true);
     try {
@@ -80,9 +83,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+          redirectTo: appOrigin(),
         },
       });
       if (error) throw error;
@@ -98,7 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (!cleanEmail) return;
     if (isSupabaseConfigured) {
       const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/reset-password` : undefined,
+        redirectTo: `${appOrigin()}/reset-password`,
       });
       if (error) throw error;
     }
@@ -311,9 +314,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Google Sign In Button */}
           {view !== 'forgot_password' && (
             <>
+              {APPLE_SIGNIN_ENABLED && (
+                <button
+                  type="button"
+                  onClick={() => handleGoogleSignIn('apple')}
+                  disabled={googleLoading || loading}
+                  className="w-full h-[48px] mb-3 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-[14px] flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-40 cursor-pointer"
+                >
+                  <svg className="w-[14px] h-[17px] shrink-0" viewBox="0 0 814 1000" fill="currentColor" aria-hidden="true">
+                    <path d="M788 341c-6 4-108 62-108 190 0 148 130 200 134 202-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-128C44 790 0 671 0 558 0 377 118 281 234 281c62 0 113 41 152 41 37 0 95-43 165-43 27 0 123 2 187 96zM557 159c29-35 50-83 50-131 0-7-1-13-2-19-47 2-104 32-138 72-27 30-52 79-52 127 0 7 1 15 2 17 3 0 8 1 13 1 43 0 96-28 127-67z" />
+                  </svg>
+                  <span>Fortsätt med Apple</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleGoogleSignIn}
+                onClick={() => handleGoogleSignIn('google')}
                 disabled={googleLoading || loading}
                 className="ui-btn-secondary mb-4 gap-2.5"
               >

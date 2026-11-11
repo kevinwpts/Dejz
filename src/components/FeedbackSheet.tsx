@@ -80,7 +80,7 @@ export const FeedbackSheet: React.FC = () => {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="w-full h-12 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm active:scale-[0.99] transition-all cursor-pointer"
+              className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm active:scale-[0.99] transition-all cursor-pointer"
             >
               Klar
             </button>
@@ -116,7 +116,7 @@ export const FeedbackSheet: React.FC = () => {
             <button
               type="submit"
               disabled={!message.trim() || sending}
-              className="w-full h-12 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40"
+              className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40"
             >
               {sending && <SpinnerGap size={16} className="animate-spin" />}
               Skicka

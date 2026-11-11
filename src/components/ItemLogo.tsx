@@ -167,8 +167,8 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     }
 
     return (
-      <div className={`${sizeClasses} flex items-center justify-center shrink-0`}>
-        <CategoryIcon category={category || name} size={iconSize} />
+      <div className={`${sizeClasses} bg-[var(--icon-tile-bg)] flex items-center justify-center shrink-0`}>
+        <CategoryIcon category={category || name} size={Math.round(iconSize * 0.72)} />
       </div>
     );
   };

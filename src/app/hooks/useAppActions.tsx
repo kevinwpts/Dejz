@@ -39,6 +39,7 @@ import { findAllMatchingFixedExpensesByMerchant } from '../../utils/recurring';
 import { useVariableBillEstimates } from './useVariableBillEstimates';
 import { FeedbackToastState } from '../components/AppToasts';
 import { sanitizeTransactionItem } from '../transactionMapping';
+import { apiUrl } from '../../utils/platform';
 
 export interface UseAppActionsContext {
   setSyncingBank: (value: SetStateAction<boolean>) => void;
@@ -1164,7 +1165,7 @@ export function useAppActions({
       let serverDeleted = false;
       if (primaryUid || emailToDelete) {
         const res = await withFastTimeout(
-          fetch('/api/auth/delete-account', {
+          fetch(apiUrl('/api/auth/delete-account'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1275,7 +1276,7 @@ export function useAppActions({
         }
 
         const res = await withFastTimeout(
-          fetch('/api/auth/reset-account', {
+          fetch(apiUrl('/api/auth/reset-account'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

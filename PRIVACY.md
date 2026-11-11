@@ -1,6 +1,6 @@
 # Integritetspolicy för Dejz
 
-Senast uppdaterad: 2026-11-06
+Senast uppdaterad: 2026-11-11
 
 Här förklarar vi enkelt vilka uppgifter Dejz sparar, varför och hur länge. Vi säljer aldrig dina uppgifter.
 
@@ -14,7 +14,9 @@ När du skapar ett konto sparar vi din e-postadress och ditt namn. Lösenordet s
 
 I appen sparar vi det du själv lägger in, till exempel lön, fasta räkningar, sparmål och köp. Uppgifterna används bara för att Dejz ska fungera för dig. Grunden är vårt avtal med dig om att leverera appen.
 
-Vi sparar uppgifterna så länge du har ett konto. Du kan radera ditt konto och all data när som helst i appen under Inställningar → Data & säkerhet → Radera konto.
+Kom du till Dejz via en länk från oss, till exempel en annons på TikTok, sparar vi var du kom ifrån (bara kanalens namn, som ”tiktok”). Det hjälper oss att förstå vilken marknadsföring som fungerar. Grunden är vårt berättigade intresse, och uppgiften raderas tillsammans med ditt konto.
+
+Vi sparar uppgifterna så länge du har ett konto. Du kan radera ditt konto och all data när som helst i appen under Inställningar → Data & säkerhet → Radera konto. Då raderas allt direkt och kan inte återställas.
 
 ## 3. Väntelistan
 Om du skrev upp dig på väntelistan sparade vi:
@@ -42,6 +44,7 @@ Vi använder några leverantörer som bara får behandla uppgifterna för vår r
 - Supabase – databas och inloggning, lagrat inom EU/EES.
 - Google (Gemini) – AI som känner igen butiksnamn och väljer kategori och logga. Vi skickar bara namnet på butiken, aldrig vem du är.
 - Resend – skickar våra mejl.
+- Google och Apple – om du väljer att logga in med dem får vi ditt namn och din e-postadress.
 - Vercel – driftar webbplatsen.
 
 Bankkoppling via Enable Banking kommer senare. Policyn uppdateras innan den blir tillgänglig.

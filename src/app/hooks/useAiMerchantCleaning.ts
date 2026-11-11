@@ -21,6 +21,7 @@ import {
 import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurring';
 
 import { sanitizeTransactionItem } from '../../app/transactionMapping';
+import { apiUrl } from '../../utils/platform';
 
 /**
  * Tyst AI-tvätt i bakgrunden: kryptiska bankrader (t.ex. "ZETTLE*GBG KAF") får ett riktigt
@@ -124,7 +125,7 @@ export function useAiMerchantCleaning({
     const expenseCategories = getStoredExpenseCategories().map((c) => c.name);
     const incomeCategories = getStoredIncomeCategories().map((c) => c.name);
 
-    fetch('/api/ai/clean-merchants', {
+    fetch(apiUrl('/api/ai/clean-merchants'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

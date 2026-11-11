@@ -1,3 +1,4 @@
+import { FRIENDS_CHAT_ENABLED } from '../../utils/friendsChatSync';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { BankModal } from '../../components/modals/BankModal';
@@ -128,12 +129,16 @@ export const AppModals: React.FC = () => {
           incomes={incomes}
           userEmail={userEmail}
           userName={userName}
-          onOpenFriendsChat={(friendKey) => {
-            setIsTxModalOpen(false);
-            setSelectedTransaction(null);
-            setSelectedChatFriendKey(friendKey || null);
-            setActiveTab('friends');
-          }}
+          onOpenFriendsChat={
+            FRIENDS_CHAT_ENABLED
+              ? (friendKey) => {
+              setIsTxModalOpen(false);
+              setSelectedTransaction(null);
+              setSelectedChatFriendKey(friendKey || null);
+              setActiveTab('friends');
+            }
+              : undefined
+          }
           prefill={txPrefill}
           onClose={() => {
             setIsTxModalOpen(false);

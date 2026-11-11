@@ -849,7 +849,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('single')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
                         Endast denna Swish-händelse
                       </button>
@@ -867,7 +867,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('single')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
                         Endast detta köp (rekommenderas)
                       </button>
@@ -885,7 +885,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('same-merchant')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
                         Byt för {bankOriginLabel} ({similarInfo.sameMerchantTransactions.length} st + framtida)
                       </button>
@@ -911,7 +911,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       <button
                         type="button"
                         onClick={() => commitEditChanges('chain')}
-                        className="w-full py-2.5 px-4 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="w-full py-2.5 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                       >
                         Byt bakåt och framåt i tiden
                       </button>

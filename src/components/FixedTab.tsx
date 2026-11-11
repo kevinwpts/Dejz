@@ -288,7 +288,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 <button
                   type="button"
                   onClick={onAddIncome}
-                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
                 >
                   <span>Kom igång</span>
                 </button>
@@ -414,7 +414,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 <button
                   type="button"
                   onClick={onAddFixed}
-                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
                 >
                   <span>Kom igång</span>
                 </button>

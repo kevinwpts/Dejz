@@ -301,7 +301,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                   setSelectedAccountModalId(null);
                   onSelectAccount?.(targetId);
                 }}
-                className="w-full py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] text-[14px] font-semibold tracking-[-0.01em] hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                className="w-full py-3 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-[14px] font-semibold tracking-[-0.01em] hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
               >
                 Visa alla transaktioner ({activeAccountTransactions.length})
               </button>

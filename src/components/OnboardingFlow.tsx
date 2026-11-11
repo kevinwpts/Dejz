@@ -42,6 +42,7 @@ import { OnboardingStepIncomeList } from './onboarding/OnboardingStepIncomeList'
 import { OnboardingStepPayday } from './onboarding/OnboardingStepPayday';
 import { OnboardingStepResult } from './onboarding/OnboardingStepResult';
 import { OnboardingStepBalance } from './onboarding/OnboardingStepBalance';
+import { appOrigin } from '../utils/platform';
 
 interface OnboardingFlowProps {
   initialName: string;
@@ -592,7 +593,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         // ignore
       }
 
-      const redirectUrl = `${window.location.origin}/bank/callback`;
+      const redirectUrl = `${appOrigin()}/bank/callback`;
       const authPromise = bankService.startAuth({
         aspspName: bank.name,
         aspspCountry: bank.country || 'SE',

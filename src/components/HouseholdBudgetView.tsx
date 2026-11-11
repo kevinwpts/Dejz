@@ -39,6 +39,7 @@ import {
 } from '../utils/friendsChatSync';
 import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
+import { apiUrl } from '../utils/platform';
 
 interface HouseholdBudgetViewProps {
   period: PeriodInfo;
@@ -235,7 +236,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
         sharedCategories: defaultCats,
       });
 
-      const res = await fetch('/api/household/join', {
+      const res = await fetch(apiUrl('/api/household/join'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -657,7 +658,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen(true)}
-                  className="px-4 py-2 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                 >
                   <UserPlus size={14} weight="bold" />
                   <span>Koppla ihop med partner</span>
@@ -706,7 +707,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                 <button
                   type="button"
                   onClick={handleToggleSettled}
-                  className="px-4 py-2 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check size={13} weight="bold" />
                   <span>Markera som utjämnat</span>

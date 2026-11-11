@@ -760,8 +760,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   >
                     <div className="w-full flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                          <CategoryIcon category={item.category} size={28} />
+                        <div className="w-10 h-10 rounded-xl bg-[var(--icon-tile-bg)] flex items-center justify-center shrink-0">
+                          <CategoryIcon category={item.category} size={22} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <span className="ui-row-title">

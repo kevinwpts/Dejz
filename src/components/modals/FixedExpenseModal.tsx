@@ -25,6 +25,7 @@ import { FixedViewCancelGuide } from './fixed/FixedViewCancelGuide';
 import { FixedViewCancelPicker } from './fixed/FixedViewCancelPicker';
 import { FixedViewSimilar } from './fixed/FixedViewSimilar';
 import type { CancelGuideData, ModalSubView } from './fixed/shared';
+import { apiUrl } from '../../utils/platform';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -185,7 +186,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
     setIsLoadingCancelGuide(true);
     try {
-      const resp = await fetch('/api/ai/cancel-subscription', {
+      const resp = await fetch(apiUrl('/api/ai/cancel-subscription'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

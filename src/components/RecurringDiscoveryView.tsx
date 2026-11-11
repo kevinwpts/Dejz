@@ -436,7 +436,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleAddCandidate(cand)}
-                      className="h-8 px-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold flex items-center gap-1 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
+                      className="h-8 px-3 rounded-xl bg-[var(--cta-bg)] text-[var(--cta-fg)] text-xs font-semibold flex items-center gap-1 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
                     >
                       <Plus size={12} weight="bold" />
                       <span>Lägg till</span>

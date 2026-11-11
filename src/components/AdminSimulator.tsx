@@ -551,7 +551,7 @@ export const AdminPanelView: React.FC<AdminPanelProps> = ({
           <button
             type="button"
             onClick={startLiveChatSimulation}
-            className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] font-display font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+            className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
           >
             <ChatCircleDots size={16} weight="fill" />
             <span>Simulera chatt sida vid sida</span>
@@ -1486,7 +1486,7 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
                                 className={`w-full py-1.5 px-2.5 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${
                                   m.sharedPayload.settled
                                     ? 'bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-secondary)]'
-                                    : 'bg-[var(--text-primary)] text-[var(--bg-color)]'
+                                    : 'bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)]'
                                 }`}
                               >
                                 <Check size={12} weight="bold" />

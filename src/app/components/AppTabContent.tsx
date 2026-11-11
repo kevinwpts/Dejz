@@ -1,3 +1,4 @@
+import { FRIENDS_CHAT_ENABLED } from '../../utils/friendsChatSync';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { HomeTab, TransactionItem, getTransactionTime } from '../../components/HomeTab';
@@ -857,10 +858,14 @@ export const AppTabContent: React.FC = () => {
                   }}
                   selectedGoalId={selectedGoalIdInView}
                   onSelectGoalId={setSelectedGoalIdInView}
-                  onOpenFriendsChat={(friendKey) => {
-                    setSelectedChatFriendKey(friendKey || null);
-                    setActiveTab('friends');
-                  }}
+                  onOpenFriendsChat={
+                    FRIENDS_CHAT_ENABLED
+                      ? (friendKey) => {
+                      setSelectedChatFriendKey(friendKey || null);
+                      setActiveTab('friends');
+                    }
+                      : undefined
+                  }
                   splitSimulatorActive={splitSimulatorActive}
                   onToggleSplitSimulator={handleToggleSplitSimulator}
                   onStartCreateGoalWizard={() => {

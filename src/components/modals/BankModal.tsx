@@ -21,6 +21,7 @@ import {
 } from '../../services/bankService';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ItemLogo } from '../ItemLogo';
+import { appOrigin } from '../../utils/platform';
 
 interface BankModalProps {
   isOpen: boolean;
@@ -165,7 +166,7 @@ export const BankModal: React.FC<BankModalProps> = ({
     setShowManualCallback(false);
 
     try {
-      const redirectUrl = `${window.location.origin}/bank/callback`;
+      const redirectUrl = `${appOrigin()}/bank/callback`;
       const res = await bankService.startAuth({
         aspspName: bank.name,
         aspspCountry: bank.country || 'SE',
