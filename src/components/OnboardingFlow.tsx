@@ -146,10 +146,11 @@ function clearBankReturnMarker() {
 }
 
 /**
- * Stegordning. Med bank: namn → bank → fasta (förslag från banken) → inkomster → lön → resultat.
+ * Stegordning. Med bank: namn → bank → inkomster (lönen) → fasta → lönedag (hoppas över om lönen
+ * hittades i banken) → resultat. Bekräfta-korten gör att det går på under en minut.
  * Utan bank följer flödet hur man tänker lön till lön: namn → lönedag → inkomst → fasta → resultat.
  */
-const STEP_ORDER_WITH_BANK: OnboardingStep[] = [1, 2, 3, 4, 5, 6];
+const STEP_ORDER_WITH_BANK: OnboardingStep[] = [1, 2, 4, 3, 5, 6];
 // Utan bank: sist frågar vi efter saldot på kontot (steg 7), så "kvar till lön" stämmer från dag ett
 const STEP_ORDER_MANUAL: OnboardingStep[] = [1, 5, 4, 3, 6, 7];
 
@@ -196,7 +197,13 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // bankkopplingen startar, så att man alltid hamnar på "Välj konton" – aldrig på steg 1 igen.
   const [bankReturnPending] = useState<boolean>(() => hasFreshBankReturnMarker());
   const bankEnabled = bankEnabledProp || bankReturnPending || connections.length > 0;
-  const stepOrder = bankEnabled ? STEP_ORDER_WITH_BANK : STEP_ORDER_MANUAL;
+  // Med bank: när lönen hittats i banken behövs inget eget steg för lönedagen
+  const [paydayFromBank, setPaydayFromBank] = useState(false);
+  const stepOrder = bankEnabled
+    ? paydayFromBank
+      ? STEP_ORDER_WITH_BANK.filter((s) => s !== 5)
+      : STEP_ORDER_WITH_BANK
+    : STEP_ORDER_MANUAL;
   const [step, setStep] = useState<OnboardingStep>(() => {
     if (bankReturnPending) return 2;
     try {
@@ -327,6 +334,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   >([]);
 
   const [analyzingBank, setAnalyzingBank] = useState(false);
+  // Med bank visas först ett kort att bekräfta ("Stämmer"); listan finns bakom "Visa och ändra"
+  const [showIncomeList, setShowIncomeList] = useState(false);
+  const [showFixedList, setShowFixedList] = useState(false);
   const [_hasAnalyzedBank, setHasAnalyzedBank] = useState(false);
   const [_isBankDataDetected, setIsBankDataDetected] = useState(false);
   const [verifyingBankReturn, setVerifyingBankReturn] = useState(false);
@@ -605,6 +615,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         [...checkedList].sort((a, b) => b.amount - a.amount)[0];
       if (primaryInc && primaryInc.payday >= 1 && primaryInc.payday <= 31) {
         setPayday(primaryInc.payday);
+        // Lönen kommer från banken – spara lönedagen direkt och hoppa över lönedagssteget
+        if (primaryInc.isFromBank) {
+          try {
+            localStorage.setItem('dejz_target_payday', String(primaryInc.payday));
+            localStorage.setItem('dejz_weekend_handling', weekendHandling);
+          } catch {
+            // ignore
+          }
+          onUpdatePayday?.(primaryInc.payday);
+          onUpdateWeekendHandling?.(weekendHandling);
+          setPaydayFromBank(true);
+        }
       }
     }
 
@@ -844,7 +866,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   const handleSaveSelectedAccounts = async () => {
     const connToSync = activeConnection || connections[0] || null;
     if (!connToSync) {
-      navigateStep(3, 'forward');
+      goNext(2);
       return;
     }
     setSavingAccounts(true);
@@ -870,7 +892,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       setAnalyzingBank(true);
     } finally {
       setSavingAccounts(false);
-      navigateStep(3, 'forward');
+      goNext(2);
     }
   };
 
@@ -895,6 +917,92 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     setSlideDir(dir);
     setStep(next);
   };
+
+
+  // ---------------------------------------------------------------------------
+  // Bekräfta-kort (med bank): visa det banken hittade som EN siffra och EN knapp.
+  // Den som vill ändra något trycker "Visa och ändra" och får hela listan.
+  // ---------------------------------------------------------------------------
+  const bankIncomeItems = suggestedIncomes.filter((i) => i.checked);
+  const bankFixedItems = suggestedFixedExpenses.filter((f) => f.checked);
+  const incomeSummaryMode =
+    bankEnabled &&
+    !showIncomeList &&
+    (analyzingBank || suggestedIncomes.some((i) => i.isFromBank));
+  const fixedSummaryMode =
+    bankEnabled &&
+    !showFixedList &&
+    (analyzingBank || suggestedFixedExpenses.some((f) => f.isFromBank));
+
+  const renderSummaryStep = (opts: {
+    stepKey: string;
+    title: string;
+    subtitle: string;
+    loadingText: string;
+    amountText: string;
+    detailText: string;
+    amountClassName: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+    onShowList: () => void;
+  }) => (
+    <div
+      key={opts.stepKey}
+      className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
+    >
+      <div className="shrink-0 pt-6 pb-4">
+        <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
+          {opts.title}
+        </h1>
+        <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{opts.subtitle}</p>
+      </div>
+
+      <div className="flex-1 min-h-0 flex flex-col justify-center pb-8">
+        <div className="rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-6 py-8 text-center">
+          {analyzingBank ? (
+            <div className="flex flex-col items-center gap-3 py-3 text-sm text-[var(--text-secondary)]">
+              <SpinnerGap size={26} className="animate-spin text-[var(--text-primary)]" />
+              <span>{opts.loadingText}</span>
+            </div>
+          ) : (
+            <>
+              <p
+                className={`font-display font-semibold text-[34px] leading-tight tracking-[-0.02em] tabular-nums ${opts.amountClassName}`}
+              >
+                {opts.amountText}
+              </p>
+              <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">{opts.detailText}</p>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="shrink-0 pt-3 space-y-1">
+        <button
+          type="button"
+          onClick={opts.onConfirm}
+          disabled={analyzingBank}
+          className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-default"
+        >
+          <span>{opts.confirmLabel}</span>
+          <Check size={16} weight="bold" />
+        </button>
+        <button
+          type="button"
+          onClick={opts.onShowList}
+          disabled={analyzingBank}
+          className="w-full py-3 rounded-2xl text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer disabled:opacity-40"
+        >
+          Visa och ändra
+        </button>
+      </div>
+    </div>
+  );
+
+  const listNames = (names: string[], max = 3) =>
+    names.length <= max
+      ? names.join(', ').replace(/, ([^,]*)$/, ' och $1')
+      : `${names.slice(0, max).join(', ')} och ${names.length - max} till`;
 
   const stepIndex = Math.max(0, stepOrder.indexOf(step));
   const goNext = (from: OnboardingStep) => {
@@ -1678,7 +1786,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                         applyConnectedBankState(connections, _bankAccounts);
                         return;
                       }
-                      navigateStep(3, 'forward');
+                      goNext(2);
                     }}
                     className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
                   >
@@ -1688,7 +1796,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => navigateStep(3, 'forward')}
+                    onClick={() => goNext(2)}
                     className="w-full py-2.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                   >
                     Hoppa över just nu
@@ -1703,7 +1811,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {/* ============================================================== */}
       {/* STEG 3: VILKA FASTA UTGIFTER HAR DU? (Bocka i/ur + redigera)   */}
       {/* ============================================================== */}
-      {step === 3 && (
+      {step === 3 &&
+        fixedSummaryMode &&
+        renderSummaryStep({
+          stepKey: 'step-3-summary',
+          title: 'Dina fasta utgifter',
+          subtitle: 'Räkningar och abonnemang som dras varje månad.',
+          loadingText: 'Letar efter dina räkningar …',
+          amountText: `−${formatKr(bankFixedItems.reduce((sum, f) => sum + (Number(f.amount) || 0), 0))}/mån`,
+          detailText:
+            bankFixedItems.length === 0
+              ? 'Inga fasta utgifter valda'
+              : `${bankFixedItems.length} st · ${listNames(
+                  [...bankFixedItems].sort((a, b) => b.amount - a.amount).map((f) => f.name)
+                )}`,
+          amountClassName: 'text-[var(--text-primary)]',
+          confirmLabel: 'Ser rätt ut',
+          onConfirm: handleSaveSuggestedFixed,
+          onShowList: () => setShowFixedList(true),
+        })}
+
+      {step === 3 && !fixedSummaryMode && (
         <div
           key="step-3"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
@@ -1839,7 +1967,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {/* ============================================================== */}
       {/* STEG 4: VILKA FASTA INKOMSTER HAR DU? (Bocka i/ur + redigera)  */}
       {/* ============================================================== */}
-      {step === 4 && (
+      {step === 4 &&
+        incomeSummaryMode &&
+        renderSummaryStep({
+          stepKey: 'step-4-summary',
+          title: bankIncomeItems.length > 1 ? 'Dina inkomster' : 'Din lön',
+          subtitle: 'Vi hittade den bland dina transaktioner. Stämmer det?',
+          loadingText: 'Letar efter din lön …',
+          amountText: `+${formatKr(bankIncomeItems.reduce((sum, i) => sum + (Number(i.amount) || 0), 0))}`,
+          detailText:
+            bankIncomeItems.length === 0
+              ? 'Ingen inkomst vald'
+              : bankIncomeItems.length === 1
+              ? `${bankIncomeItems[0].category === 'Lön' ? 'Lön' : bankIncomeItems[0].name} · den ${bankIncomeItems[0].payday}:e varje månad`
+              : `${listNames(bankIncomeItems.map((i) => i.name))} · varje månad`,
+          amountClassName: 'text-emerald-600 dark:text-emerald-400',
+          confirmLabel: 'Stämmer',
+          onConfirm: handleSaveSuggestedIncomes,
+          onShowList: () => setShowIncomeList(true),
+        })}
+
+      {step === 4 && !incomeSummaryMode && (
         <div
           key="step-4"
           className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
