@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { estimateFromAmounts } from '../utils/variableBills';
 import { SWEDISH_EXPENSE_PRESETS } from '../data/swedishExpensePresets';
 import {
   getMarketingConsent,
@@ -403,7 +404,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             const realDetectedFixed = baseAnalysis.detectedFixedExpenses.map((item, idx) => ({
               id: `bank-det-${idx}`,
               name: item.name,
-              amount: Math.round(item.amount),
+              // Rörliga räkningar (el m.m.): snittet av de senaste 3 dragningarna i stället för bara den senaste
+              amount: (() => {
+                if (!item.isVariable) return Math.round(item.amount);
+                const recent = (item.evidenceAmounts || [])
+                  .map((amt, i) => ({ amt: Math.abs(Number(amt) || 0), date: item.evidenceDates?.[i] || '' }))
+                  .filter((x) => x.amt > 0)
+                  .sort((a, b) => (a.date < b.date ? 1 : -1))
+                  .map((x) => x.amt);
+                return estimateFromAmounts(recent)?.estimate ?? Math.round(item.amount);
+              })(),
               dueDay: item.deductionDay || 27,
               category: item.category || 'Räkningar',
               paymentMethod: item.paymentMethod || 'Autogiro',

@@ -175,6 +175,7 @@ import {
   isFixedExpenseAmountMatch,
   reconcilePeriodRecurringMatches,
 } from './utils/recurring';
+import { estimateVariableBill } from './utils/variableBills';
 
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
@@ -4449,6 +4450,28 @@ export const App: React.FC = () => {
         .catch(() => {});
     }
   };
+
+  // Räkningar som varierar (el m.m.): uppskatta nästa dragning som snittet av de 3 senaste.
+  // Körs högst en gång per räkning och löneperiod, bara innan räkningen dragits, och bara med bank.
+  // Ändrar man beloppet själv efteråt får det stå kvar resten av perioden.
+  useEffect(() => {
+    if (isDemoMode() || !hasActiveBankConnection || !period?.startDate) return;
+    const periodStartIso = formatIsoDateStockholm(period.startDate);
+    for (const exp of fixedExpenses) {
+      if (periodRecurringMatches.matchedFixedIds.has(exp.id)) continue;
+      const est = estimateVariableBill(exp, transactions, periodStartIso);
+      if (!est || Math.abs(est.estimate - (Number(exp.amount) || 0)) < 10) continue;
+      const doneKey = `dejz_varbill_estimate:${exp.id}:${periodStartIso}`;
+      try {
+        if (localStorage.getItem(doneKey)) continue;
+        localStorage.setItem(doneKey, String(est.estimate));
+      } catch {
+        continue;
+      }
+      void handleUpdateFixed({ ...exp, amount: est.estimate });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasActiveBankConnection, period?.startDate, fixedExpenses, transactions, periodRecurringMatches]);
 
   const handleDeleteFixed = async (id: string) => {
     const item = fixedExpensesRef.current.find((f) => f.id === id);

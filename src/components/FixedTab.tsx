@@ -19,6 +19,8 @@ import {
   isDateInPeriod,
 } from '../utils/periodEngine';
 import { reconcilePeriodRecurringMatches } from '../utils/recurring';
+import { estimateVariableBill } from '../utils/variableBills';
+import { formatIsoDateStockholm } from '../utils/swedishDate';
 import {
   getHouseholdState,
   hasConnectedHouseholdPartner,
@@ -67,6 +69,12 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   onOpenHousehold,
 }) => {
 
+  const formatPaidDate = (iso?: string) => {
+    const d = new Date(`${(iso || '').slice(0, 10)}T12:00:00`);
+    if (isNaN(d.getTime())) return '';
+    return `${d.getDate()} ${['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'][d.getMonth()]}`;
+  };
+
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
   };
@@ -91,6 +99,17 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     const periodTxs = transactions.filter((t) => isDateInPeriod(t.date, period));
     return reconcilePeriodRecurringMatches(periodTxs, fixedExpenses, incomes);
   }, [transactions, period, fixedExpenses, incomes]);
+
+  // Räkningar vars belopp varierar (t.ex. el) – visas med "≈" tills de dragits
+  const variableExpenseIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (!period?.startDate) return ids;
+    const startIso = formatIsoDateStockholm(period.startDate);
+    for (const exp of fixedExpenses) {
+      if (estimateVariableBill(exp, transactions, startIso)) ids.add(exp.id);
+    }
+    return ids;
+  }, [fixedExpenses, transactions, period]);
 
   const netAfterFixed = totalIncome - totalFixedExpenses;
 
@@ -353,7 +372,9 @@ export const FixedTab: React.FC<FixedTabProps> = ({
 
                     <div className="text-right shrink-0">
                       <span className="ui-row-amount">
-                        {displayAmt > 0 ? `−${formatKr(displayAmt)}` : '0 kr'}
+                        {displayAmt > 0
+                          ? `${!matchedTx && variableExpenseIds.has(exp.id) ? '≈ ' : ''}−${formatKr(displayAmt)}`
+                          : '0 kr'}
                       </span>
                       <span className="ui-row-meta flex items-center justify-end gap-1">
                         <span
@@ -366,6 +387,10 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         {cancelBadge ? (
                           <span className="text-amber-600 dark:text-amber-400 font-medium">
                             {cancelBadge}
+                          </span>
+                        ) : matchedTx ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            Betald {formatPaidDate(matchedTx.date)}
                           </span>
                         ) : (
                           <span>Den {exp.dueDay || 27}:e</span>

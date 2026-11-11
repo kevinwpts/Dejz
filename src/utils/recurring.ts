@@ -182,6 +182,18 @@ export function findAllMatchingFixedExpensesByMerchant(
         continue;
       }
 
+      // Banker skriver ibland utan å/ä/ö ("ORESUNDSKRAFT") – jämför även utan accenter
+      const foldedName = foldForMatching(exp.name);
+      if (
+        foldedName.length >= 5 &&
+        ` ${foldForMatching(
+          isStr ? tx : [tx.title, tx.rawDescription, tx.counterpartyName, tx.note].filter(Boolean).join(' ')
+        )} `.includes(` ${foldedName}`)
+      ) {
+        matches.push(exp);
+        continue;
+      }
+
       if (isGrocery && !isEverydayGroceryPurchase(expNameNorm) && aliasNorms.length === 0) {
         continue;
       }
@@ -514,6 +526,46 @@ export function checkIsRecurringTransaction(
  * - Returnerar även de faktiska bokförda transaktionerna per fast utgift/inkomst så att pågående period
  *   alltid använder det faktiska beloppet så fort räkningen/lönen har bokförts.
  */
+/** Gemener utan accenter: "ÖRESUNDSKRAFT" och "Oresundskraft" blir lika. */
+export function foldForMatching(value: string): string {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+const word = (w: string) => new RegExp(`(^| )${w}( |$)`);
+const ELECTRICITY = [
+  'vattenfall', 'tibber', 'ellevio', 'fortum', 'e on', 'eon', 'oresundskraft', 'goteborg energi',
+  'skelleftea kraft', 'jamtkraft', 'malarenergi', 'telge energi', 'bixia', 'greenely', 'godel',
+  'kalmar energi', 'jonkoping energi', 'tekniska verken', 'umea energi', 'lulea energi', 'sundsvall elnat',
+].map(word);
+const HOUSING = [
+  'heimstaden', 'akelius', 'balder', 'wallenstam', 'riksbyggen', 'hsb', 'brf', 'bostadsrattsforening',
+  'stena fastigheter', 'victoriahem', 'willhem', 'rikshem', 'hyresvard', 'fastighet', 'fastigheter',
+  'bostader', 'bostad', 'hyra',
+].map(word);
+const PHONE = ['telia', 'tele2', 'telenor', 'hi3g', 'tre sverige', 'comviq', 'halebop', 'vimla', 'fello', 'hallon'].map(word);
+const INTERNET = ['bahnhof', 'bredband2', 'ownit', 'comhem', 'com hem', 'telia', 'tele2', 'telenor', 'tre sverige', 'hi3g'].map(word);
+
+const GENERIC_BILL_NAMES: Array<{ names: string[]; providers: RegExp[] }> = [
+  { names: ['el', 'elen', 'elrakning', 'elraking', 'elavtal', 'elnat', 'strom', 'elrakningen', 'el och natavgift'], providers: ELECTRICITY },
+  { names: ['hyra', 'hyran', 'boende', 'bostad', 'hyresavi', 'manadsavgift', 'avgift brf'], providers: HOUSING },
+  { names: ['telefon', 'mobil', 'mobilabonnemang', 'telefonrakning', 'mobiltelefon', 'mobilrakning'], providers: PHONE },
+  { names: ['internet', 'bredband', 'wifi', 'fiber'], providers: INTERNET },
+];
+
+/** Bolag som kan stå bakom en räkning med ett allmänt namn, t.ex. "El" → elbolag. Annars null. */
+export function getGenericBillProviders(name: string): RegExp[] | null {
+  const n = foldForMatching(name);
+  for (const group of GENERIC_BILL_NAMES) {
+    if (group.names.includes(n)) return group.providers;
+  }
+  return null;
+}
+
 export function reconcilePeriodRecurringMatches(
   periodTransactions: TransactionItem[] = [],
   fixedExpenses: FixedExpenseItem[] = [],
@@ -582,6 +634,34 @@ export function reconcilePeriodRecurringMatches(
     matchedFixedTxByExpId.set(pair.exp.id, pair.tx);
     matchedFixedIds.add(pair.exp.id);
     claimedFixedTxIds.add(pair.tx.id);
+  }
+
+  // 1b. Räkningar med allmänna namn ("El", "Hyra", "Telefon" …) – vanligt när man fyllt i själv.
+  // Banken skriver bolagets namn (Öresundskraft, Heimstaden, Telia …), så namnen matchar aldrig och
+  // dragningen skulle annars räknas dubbelt: både som fast utgift och som vanligt köp.
+  for (const exp of fixedExpenses) {
+    if (matchedFixedTxByExpId.has(exp.id)) continue;
+    const providers = getGenericBillProviders(exp.name);
+    if (!providers) continue;
+    const dueDay = Number(exp.dueDay) || 27;
+    let best: { tx: TransactionItem; dayDist: number } | null = null;
+    for (const tx of expenseTxs) {
+      if (claimedFixedTxIds.has(tx.id)) continue;
+      if (tx.linkedFixedExpenseId && tx.linkedFixedExpenseId !== exp.id) continue;
+      const text = foldForMatching(
+        [tx.title, tx.rawDescription, tx.counterpartyName].filter(Boolean).join(' ')
+      );
+      if (!providers.some((p) => p.test(text))) continue;
+      const txDay = parseInt((tx.date || '').slice(8, 10), 10) || 27;
+      const rawDayDiff = Math.abs(txDay - dueDay);
+      const dayDist = Math.min(rawDayDiff, 31 - rawDayDiff);
+      if (!best || dayDist < best.dayDist) best = { tx, dayDist };
+    }
+    if (best) {
+      matchedFixedTxByExpId.set(exp.id, best.tx);
+      matchedFixedIds.add(exp.id);
+      claimedFixedTxIds.add(best.tx.id);
+    }
   }
 
   // Även explicita "fix-"-poster räknas som fasta
