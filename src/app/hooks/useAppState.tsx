@@ -3,12 +3,6 @@ import { WeekendHandlingMode } from '../../utils/periodEngine';
 import { AppTab } from '../../components/BottomNav';
 import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
 import type { SettingsSubView } from '../../components/settings/subviews';
-import { getSplitSimulatorActive, setSplitSimulatorActive } from '../../utils/simulatorState';
-import {
-  connectFriendsChatWebSocket,
-  getTotalUnreadChatCount,
-  normalizeSocialUserKey,
-} from '../../utils/friendsChatSync';
 import { BankConnection, BankAccount } from '../../services/bankService';
 import {
   loadCachedAppState,
@@ -30,31 +24,6 @@ export function useAppState() {
   const [selectedHistoryAccountId, setSelectedHistoryAccountId] = useState<string | null>(null);
   const [settingsSubView, setSettingsSubView] = useState<SettingsSubView>('main');
   const [autoOpenGoalWizard, setAutoOpenGoalWizard] = useState(false);
-  const [splitSimulatorActive, setSplitSimulatorActiveState] = useState<boolean>(() =>
-    getSplitSimulatorActive()
-  );
-  const [mobileSimPane, setMobileSimPane] = useState<'mine' | 'partner'>('mine');
-
-  useEffect(() => {
-    const onSimChanged = () => {
-      setSplitSimulatorActiveState(getSplitSimulatorActive());
-    };
-    window.addEventListener('dejz:split-simulator-changed', onSimChanged);
-    window.addEventListener('dejz:simulator-toggled', onSimChanged);
-    return () => {
-      window.removeEventListener('dejz:split-simulator-changed', onSimChanged);
-      window.removeEventListener('dejz:simulator-toggled', onSimChanged);
-    };
-  }, []);
-
-  const handleToggleSplitSimulator = useCallback((active: boolean) => {
-    setSplitSimulatorActive(active);
-    setSplitSimulatorActiveState(active);
-    if (!active) {
-      setMobileSimPane('mine');
-    }
-  }, []);
-
   const [undoToast, setUndoToast] = useState<{
     id: string;
     excluded: boolean;
@@ -232,29 +201,6 @@ export function useAppState() {
   const [userAvatar, setUserAvatar] = useState<string | null>(
     () => initialCache?.userAvatar || null
   );
-  const [selectedChatFriendKey, setSelectedChatFriendKey] = useState<string | null>(null);
-  const [socialTick, setSocialTick] = useState(0);
-
-  // Realtids-WebSocket för Vänner & Chatt
-  useEffect(() => {
-    const onSocialUpdate = () => setSocialTick((t) => t + 1);
-    window.addEventListener('dejz:social-updated', onSocialUpdate);
-    const disconnectWs = connectFriendsChatWebSocket({
-      userEmail,
-      userName,
-      userAvatar,
-    });
-    return () => {
-      window.removeEventListener('dejz:social-updated', onSocialUpdate);
-      disconnectWs();
-    };
-  }, [userEmail, userName, userAvatar]);
-
-  const friendsUnreadCount = useMemo(() => {
-    void socialTick;
-    return getTotalUnreadChatCount(normalizeSocialUserKey(userEmail, userName));
-  }, [userEmail, userName, socialTick]);
-
   // Landningssida & Onboarding
   const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(() => {
     try {
@@ -422,14 +368,7 @@ export function useAppState() {
     setIsAuthModalOpen,
     isPasswordRecovery,
     endPasswordRecovery,
-    splitSimulatorActive,
-    setMobileSimPane,
-    mobileSimPane,
-    handleToggleSplitSimulator,
     selectedHistoryAccountId,
-    selectedChatFriendKey,
-    friendsUnreadCount,
-    setSelectedChatFriendKey,
     setIsSearchModalOpen,
     setIsNotificationsModalOpen,
     isSearchModalOpen,

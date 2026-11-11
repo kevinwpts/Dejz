@@ -17,14 +17,11 @@ export const AppSheetsAndModals: React.FC = () => {
     setTxPrefill,
     setIsTxModalOpen,
     activeTab,
-    selectedChatFriendKey,
     setIsSearchModalOpen,
     setIsNotificationsModalOpen,
     setSettingsSubView,
-    setSelectedChatFriendKey,
     setActiveTab,
     settingsSubView,
-    friendsUnreadCount,
     displayTransactions,
     fixedExpenses,
   } = useApp();
@@ -61,48 +58,42 @@ export const AppSheetsAndModals: React.FC = () => {
           }}
         />
 
-        {!(activeTab === 'friends' && Boolean(selectedChatFriendKey)) && (
-          <BottomNav
-            activeTab={activeTab}
-            onAddTransaction={() => {
-              setSelectedTransaction(null);
-              setTxPrefill(null);
-              // Utan taligenkänning i webbläsaren går vi direkt till manuell inmatning
-              if (isVoiceEntrySupported()) setIsAddSheetOpen(true);
-              else setIsTxModalOpen(true);
-            }}
-            onChangeTab={(tab) => {
-              setIsSearchModalOpen(false);
-              setIsNotificationsModalOpen(false);
-              setSettingsSubView('main');
-              if (tab !== 'friends') {
-                setSelectedChatFriendKey(null);
-              }
-              setActiveTab(tab);
-            }}
-            onOpenHousehold={() => {
-              setIsSearchModalOpen(false);
-              setIsNotificationsModalOpen(false);
-              setSettingsSubView('household');
-              setActiveTab('settings');
-            }}
-            onOpenDiscover={() => {
-              setIsSearchModalOpen(false);
-              setIsNotificationsModalOpen(false);
-              setSettingsSubView('discover');
-              setActiveTab('settings');
-            }}
-            activeSettingsSubView={settingsSubView}
-            goalsCount={getSavingsGoals().length}
-            friendsUnreadCount={friendsUnreadCount}
-            savedCount={displayTransactions.filter((t) => t.isHearted).length}
-            packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
-            receiptsCount={
-              displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
-              fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0)
-            }
-          />
-        )}
+        <BottomNav
+          activeTab={activeTab}
+          onAddTransaction={() => {
+            setSelectedTransaction(null);
+            setTxPrefill(null);
+            // Utan taligenkänning i webbläsaren går vi direkt till manuell inmatning
+            if (isVoiceEntrySupported()) setIsAddSheetOpen(true);
+            else setIsTxModalOpen(true);
+          }}
+          onChangeTab={(tab) => {
+            setIsSearchModalOpen(false);
+            setIsNotificationsModalOpen(false);
+            setSettingsSubView('main');
+            setActiveTab(tab);
+          }}
+          onOpenHousehold={() => {
+            setIsSearchModalOpen(false);
+            setIsNotificationsModalOpen(false);
+            setSettingsSubView('household');
+            setActiveTab('settings');
+          }}
+          onOpenDiscover={() => {
+            setIsSearchModalOpen(false);
+            setIsNotificationsModalOpen(false);
+            setSettingsSubView('discover');
+            setActiveTab('settings');
+          }}
+          activeSettingsSubView={settingsSubView}
+          goalsCount={getSavingsGoals().length}
+          savedCount={displayTransactions.filter((t) => t.isHearted).length}
+          packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
+          receiptsCount={
+            displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
+            fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0)
+          }
+        />
       </>
   );
 };

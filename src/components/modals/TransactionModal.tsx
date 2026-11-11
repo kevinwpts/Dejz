@@ -77,7 +77,6 @@ interface TransactionModalProps {
   isInternalTransfer?: boolean;
   userEmail?: string | null;
   userName?: string | null;
-  onOpenFriendsChat?: (friendKey?: string | null) => void;
   /** Förifyllt nytt köp (t.ex. från röstinmatning "Ica 143 kr") */
   prefill?: { title: string; amount?: number } | null;
 }
@@ -113,7 +112,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onTogglePackage,
   userEmail: _userEmail,
   userName: _userName,
-  onOpenFriendsChat: _onOpenFriendsChat,
   prefill = null,
 }) => {
   const isCreateMode = !initialTransaction;

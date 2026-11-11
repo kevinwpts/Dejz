@@ -3,7 +3,6 @@ import { preloadScreens } from './app/lazyScreens';
 import { AppContext } from './app/AppContext';
 import { useAppModel } from './app/useAppModel';
 import { AppTabContent } from './app/components/AppTabContent';
-import { AppHeader } from './app/components/AppHeader';
 import { AppSheetsAndModals } from './app/components/AppSheetsAndModals';
 import { AppOverlays } from './app/components/AppOverlays';
 import { AppModals } from './app/components/AppModals';
@@ -49,17 +48,10 @@ export const App: React.FC = () => {
     <AppContext.Provider value={app}>
     <div
       style={{ backgroundImage: 'var(--bg-gradient)' }}
-      className={`min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)] ${
-        app.splitSimulatorActive ? 'min-[820px]:pr-[410px]' : ''
-      }`}
+      className={`min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]`}
     >
-      {/* Simulatorväxlare för små skärmar */}
-      <AppHeader />
-
       <div
-        className={`app-spatial-shell flex-1 flex flex-col min-h-screen ${
-          app.splitSimulatorActive && app.mobileSimPane === 'partner' ? 'max-[819px]:hidden' : ''
-        }`}
+        className="app-spatial-shell flex-1 flex flex-col min-h-screen"
       >
         {/* Sidhuvud, statusrad, sök och notiser */}
         <AppTopBar />
@@ -71,7 +63,7 @@ export const App: React.FC = () => {
 
       {/* Fönster: bank, inkomst, fast utgift, köp, inloggning */}
       <AppModals />
-      {/* Notiser, kvittovisare och simulator */}
+      {/* Notiser och kvittovisare */}
       <AppOverlays />
     </div>
     </AppContext.Provider>

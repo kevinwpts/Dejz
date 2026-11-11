@@ -4,7 +4,6 @@ import type { TransactionsTab as TransactionsTabT } from '../components/Transact
 import type { FixedTab as FixedTabT } from '../components/FixedTab';
 import type { SettingsTab as SettingsTabT } from '../components/SettingsTab';
 import type { SavingsGoalsView as SavingsGoalsViewT } from '../components/SavingsGoalsView';
-import type { FriendsChatView as FriendsChatViewT } from '../components/FriendsChatView';
 import type { BankModal as BankModalT } from '../components/modals/BankModal';
 import type { IncomeModal as IncomeModalT } from '../components/modals/IncomeModal';
 import type {
@@ -16,9 +15,6 @@ import type { SearchModal as SearchModalT } from '../components/modals/SearchMod
 import type {
   NotificationsModal as NotificationsModalT,
 } from '../components/modals/NotificationsModal';
-import type {
-  PartnerSimulatorColumn as PartnerSimulatorColumnT,
-} from '../components/AdminSimulator';
 import type { OnboardingFlow as OnboardingFlowT } from '../components/OnboardingFlow';
 import type { LandingPage as LandingPageT } from '../components/LandingPage';
 
@@ -61,7 +57,6 @@ export const TransactionsTab = lazyScreen<typeof TransactionsTabT>(() => import(
 export const FixedTab = lazyScreen<typeof FixedTabT>(() => import('../components/FixedTab'), 'FixedTab', tabFallback);
 export const SettingsTab = lazyScreen<typeof SettingsTabT>(() => import('../components/SettingsTab'), 'SettingsTab', tabFallback);
 export const SavingsGoalsView = lazyScreen<typeof SavingsGoalsViewT>(() => import('../components/SavingsGoalsView'), 'SavingsGoalsView', tabFallback);
-export const FriendsChatView = lazyScreen<typeof FriendsChatViewT>(() => import('../components/FriendsChatView'), 'FriendsChatView', tabFallback);
 export const BankModal = lazyScreen<typeof BankModalT>(() => import('../components/modals/BankModal'), 'BankModal');
 export const IncomeModal = lazyScreen<typeof IncomeModalT>(() => import('../components/modals/IncomeModal'), 'IncomeModal');
 export const FixedExpenseModal = lazyScreen<typeof FixedExpenseModalT>(() => import('../components/modals/FixedExpenseModal'), 'FixedExpenseModal');
@@ -69,6 +64,5 @@ export const TransactionModal = lazyScreen<typeof TransactionModalT>(() => impor
 export const AuthModal = lazyScreen<typeof AuthModalT>(() => import('../components/modals/AuthModal'), 'AuthModal');
 export const SearchModal = lazyScreen<typeof SearchModalT>(() => import('../components/modals/SearchModal'), 'SearchModal');
 export const NotificationsModal = lazyScreen<typeof NotificationsModalT>(() => import('../components/modals/NotificationsModal'), 'NotificationsModal');
-export const PartnerSimulatorColumn = lazyScreen<typeof PartnerSimulatorColumnT>(() => import('../components/AdminSimulator'), 'PartnerSimulatorColumn');
 export const OnboardingFlow = lazyScreen<typeof OnboardingFlowT>(() => import('../components/OnboardingFlow'), 'OnboardingFlow', <div className="min-h-dvh bg-[var(--bg-color)]" />);
 export const LandingPage = lazyScreen<typeof LandingPageT>(() => import('../components/LandingPage'), 'LandingPage', <div className="min-h-dvh bg-[var(--bg-color)]" />);

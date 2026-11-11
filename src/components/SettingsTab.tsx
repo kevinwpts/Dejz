@@ -109,9 +109,6 @@ interface SettingsTabProps {
   onSubViewChange?: (view: SettingsSubView) => void;
   selectedGoalId?: string | null;
   onSelectGoalId?: (goalId: string | null) => void;
-  onOpenFriendsChat?: (friendKey?: string | null) => void;
-  splitSimulatorActive?: boolean;
-  onToggleSplitSimulator?: (active: boolean) => void;
   onStartCreateGoalWizard?: () => void;
   onOpenAddFixedModal?: () => void;
   onOpenPreviewFixedModal?: (exp?: any) => void;
@@ -167,9 +164,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onSubViewChange,
   selectedGoalId,
   onSelectGoalId,
-  onOpenFriendsChat,
-  splitSimulatorActive = false,
-  onToggleSplitSimulator,
   onStartCreateGoalWizard,
   onOpenAddFixedModal,
   onOpenPreviewFixedModal,
@@ -478,7 +472,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         fixedExpenses={fixedExpenses}
         transactions={transactions}
         onAddFixed={onAddFixed}
-        onOpenFriendsChat={onOpenFriendsChat}
       />
     );
   }
@@ -929,8 +922,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         incomes={incomes}
         fixedExpenses={fixedExpenses}
         transactions={transactions}
-        splitSimulatorActive={splitSimulatorActive}
-        onToggleSplitSimulator={onToggleSplitSimulator}
         onStartOnboarding={onStartOnboarding}
         onStartCreateGoalWizard={onStartCreateGoalWizard}
         setSubView={setSubView}
@@ -939,7 +930,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         onOpenAddIncomeModal={onOpenAddIncomeModal}
         onOpenAddTransactionModal={onOpenAddTransactionModal}
         onOpenPreviewTransactionModal={onOpenPreviewTransactionModal}
-        onOpenFriendsChat={onOpenFriendsChat}
         onApplyFixedExpenses={onApplyFixedExpenses}
       />
     );
@@ -1263,7 +1253,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             </div>
           </button>
 
-          {/* Admin & Testsimulator (Endast synlig för admin) */}
+          {/* Admin & test (Endast synlig för admin) */}
           {(userEmail || '').trim().toLowerCase() === 'kevinwpts@gmail.com' && (
             <button
               type="button"
@@ -1274,18 +1264,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 <span className="ui-admin-icon-slot">
                   <SlidersHorizontal size={18} weight="regular" />
                 </span>
-                <span className={rowTitleClass}>Admin & Testsimulator</span>
+                <span className={rowTitleClass}>Admin & test</span>
               </div>
               <div className="ui-admin-right">
-                <span
-                  className={`ui-admin-value ${
-                    splitSimulatorActive
-                      ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                      : ''
-                  }`}
-                >
-                  {splitSimulatorActive ? 'Split-Screen På' : 'Scenarion & flöden'}
-                </span>
+                <span className="ui-admin-value">Scenarion & flöden</span>
                 <span className="ui-admin-chevron">
                   <CaretRight size={13} />
                 </span>

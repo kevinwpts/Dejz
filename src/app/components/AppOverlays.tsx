@@ -1,4 +1,3 @@
-import { PartnerSimulatorColumn } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { SetNewPasswordSheet } from '../../components/SetNewPasswordSheet';
@@ -20,15 +19,6 @@ export const AppOverlays: React.FC = () => {
     setFeedbackToast,
     previewReceipt,
     setPreviewReceipt,
-    splitSimulatorActive,
-    mobileSimPane,
-    userEmail,
-    userName,
-    selectedChatFriendKey,
-    setSelectedChatFriendKey,
-    setActiveTab,
-    setMobileSimPane,
-    handleToggleSplitSimulator,
   } = useApp();
   return (
       <>
@@ -67,28 +57,6 @@ export const AppOverlays: React.FC = () => {
         {/* Kvittovisare */}
         <ReceiptPreviewSheet receipt={previewReceipt} onClose={() => setPreviewReceipt(null)} />
 
-        {/* Live Split-Screen Simulator (Du + Motpart sida vid sida på datorn, eller växlingsbar på mindre skärm) */}
-        {splitSimulatorActive && (
-          <div
-            className={
-              mobileSimPane === 'partner'
-                ? 'flex-1 flex justify-center p-2 sm:p-4 min-[820px]:fixed min-[820px]:right-3 min-[820px]:top-3 min-[820px]:bottom-3 min-[820px]:p-0 z-[120] items-stretch'
-                : 'fixed right-3 top-3 bottom-3 z-[120] hidden min-[820px]:flex items-stretch'
-            }
-          >
-            <PartnerSimulatorColumn
-              myUserEmail={userEmail}
-              myUserName={userName}
-              selectedFriendKeyInMyApp={selectedChatFriendKey}
-              onSelectFriendInMyApp={(fk) => {
-                setSelectedChatFriendKey(fk);
-                setActiveTab('friends');
-                setMobileSimPane('mine');
-              }}
-              onCloseSimulator={() => handleToggleSplitSimulator(false)}
-            />
-          </div>
-        )}
       </>
   );
 };

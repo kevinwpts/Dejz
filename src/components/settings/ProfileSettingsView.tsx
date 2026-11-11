@@ -15,7 +15,7 @@ import {
   Copy,
 } from '@phosphor-icons/react';
 import { supabase } from '../../supabaseClient';
-import { getMyFriendInviteCode } from '../../utils/friendsChatSync';
+import { getMyFriendInviteCode } from '../../utils/friends';
 import { setPrivacyBlurMode } from '../../utils/appCache';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -267,13 +267,13 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                 Din personliga kod
               </span>
               <span className="font-display font-bold text-sm tracking-wider text-[var(--text-primary)] tabular-nums block mt-0.5">
-                {getMyFriendInviteCode(userEmail)}
+                {getMyFriendInviteCode()}
               </span>
             </div>
             <button
               type="button"
               onClick={() => {
-                navigator.clipboard?.writeText(getMyFriendInviteCode(userEmail));
+                navigator.clipboard?.writeText(getMyFriendInviteCode());
                 setCopiedPersonalCode(true);
                 setTimeout(() => setCopiedPersonalCode(false), 1800);
               }}

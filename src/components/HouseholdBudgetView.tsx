@@ -6,7 +6,6 @@ import {
   Plus,
   SignOut,
   UserPlus,
-  ChatCircleDots,
   SlidersHorizontal,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
@@ -35,8 +34,7 @@ import {
   getStoredFriends,
   saveStoredFriends,
   getMyFriendInviteCode,
-  sendChatMessage,
-} from '../utils/friendsChatSync';
+} from '../utils/friends';
 import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
 import { apiUrl } from '../utils/platform';
@@ -50,7 +48,6 @@ interface HouseholdBudgetViewProps {
   fixedExpenses: FixedExpenseItem[];
   transactions: TransactionItem[];
   onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<any> | void;
-  onOpenFriendsChat?: (friendKey?: string | null) => void;
 }
 
 export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
@@ -62,7 +59,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
   fixedExpenses,
   transactions,
   onAddFixed,
-  onOpenFriendsChat,
 }) => {
   const [household, setHousehold] = useState<HouseholdState | null>(() => getHouseholdState());
   const [friends, setFriends] = useState<SocialFriend[]>(() => getStoredFriends());
@@ -80,7 +76,7 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
 
   const myKey = useMemo(() => getMemberKey(userEmail, userName), [userEmail, userName]);
-  const myPersonalCode = useMemo(() => getMyFriendInviteCode(userEmail), [userEmail]);
+  const myPersonalCode = useMemo(() => getMyFriendInviteCode(), []);
 
   const expenseCategories = useMemo(
     () =>
@@ -150,20 +146,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
     saveHouseholdStateLocal(nextHh);
     setIsSettingsOpen(false);
     await pushHouseholdSyncToServer(nextHh);
-
-    await sendChatMessage({
-      myKey,
-      myName: mySummary.name || 'Jag',
-      myAvatar: userAvatar,
-      friendKey: friend.key,
-      text: `Jag har kopplat ihop dig med vår delade budget (${nextHh.name})!`,
-      sharedPayload: {
-        kind: 'household_invite',
-        title: nextHh.name,
-        inviteCode: nextHh.inviteCode,
-        householdName: nextHh.name,
-      },
-    });
   };
 
   useEffect(() => {
@@ -609,24 +591,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {partnerMember && onOpenFriendsChat && (
-              <button
-                type="button"
-                onClick={() => {
-                  const matchedFriend = friends.find(
-                    (f) =>
-                      f.key === partnerMember.email ||
-                      f.name.toLowerCase().trim() ===
-                        partnerMember.name.toLowerCase().trim()
-                  );
-                  onOpenFriendsChat(matchedFriend ? matchedFriend.key : null);
-                }}
-                className="w-8 h-8 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                title={`Chatta med ${partnerMember.name}`}
-              >
-                <ChatCircleDots size={15} />
-              </button>
-            )}
 
             <button
               type="button"
@@ -835,19 +799,6 @@ export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({
                   {partnerMember.name}
                 </span>
               </div>
-              {onOpenFriendsChat && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSettingsOpen(false);
-                    onOpenFriendsChat(partnerMember.email || null);
-                  }}
-                  className="px-3 py-1.5 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 cursor-pointer"
-                >
-                  <ChatCircleDots size={13} />
-                  <span>Öppna chatt</span>
-                </button>
-              )}
             </div>
           )}
 

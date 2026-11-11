@@ -15,7 +15,7 @@ Det här är allt som behövs för att Dejz ska godkännas i App Store. Det som 
 | Användarvillkor med egen adress | ✅ https://dejz.se/villkor |
 | Support-sida | ✅ https://dejz.se/support |
 | "Fortsätt med Apple" när Google-inloggning finns (regel 4.8) | ✅ Färdig i koden, slås på när du gjort steg 4 nedan |
-| Inga funktioner som inte fungerar (regel 2.1) | ✅ Vänner & chatt är avstängt (saknar server). Delad budget syns inte för nya användare. |
+| Inga funktioner som inte fungerar (regel 2.1) | ✅ Vänner & chatt är borttaget (saknade server). Delad budget syns inte för nya användare. |
 | Nämner inte andra plattformar (regel 2.3.10) | ✅ Google Play-märken borttagna |
 | Ingen marknadsföringssida i appen | ✅ Appen öppnar direkt på registrering/inloggning |
 | Fungerar i appen, inte bara på webben | ✅ Alla serveranrop och inloggningslänkar pekar på dejz.se i appen |

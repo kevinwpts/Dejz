@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { UserCircle, MagnifyingGlass, Bell, CaretLeft, Eye, EyeSlash, ChatCircleDots, ChatTeardropText } from '@phosphor-icons/react';
+import { UserCircle, MagnifyingGlass, Bell, CaretLeft, Eye, EyeSlash, ChatTeardropText } from '@phosphor-icons/react';
 import { openFeedback } from '../utils/sendFeedback';
 import { getPrivacyBlurMode, setPrivacyBlurMode } from '../utils/appCache';
 
@@ -10,14 +10,12 @@ interface NavbarProps {
   pageTitle?: string | null;
   navigationKey?: string;
   hasUnreadNotifications?: boolean;
-  friendsUnreadCount?: number;
   hideActions?: boolean;
   hideSearch?: boolean;
   onBack?: (() => void) | null;
   onLogoClick?: () => void;
   onProfileClick: () => void;
   onSearchClick: () => void;
-  onFriendsClick?: () => void;
   onNotificationsClick: () => void;
 }
 
@@ -28,14 +26,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   pageTitle,
   navigationKey,
   hasUnreadNotifications = false,
-  friendsUnreadCount = 0,
   hideActions = false,
   hideSearch = false,
   onBack,
   onLogoClick,
   onProfileClick,
   onSearchClick,
-  onFriendsClick,
   onNotificationsClick,
 }) => {
   const [imgError, setImgError] = useState(false);
@@ -231,24 +227,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="w-9 h-9 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
                 >
                   <MagnifyingGlass size={20} weight="regular" />
-                </button>
-              )}
-
-              {onFriendsClick && (
-                <button
-                  type="button"
-                  onClick={onFriendsClick}
-                  title="Vänner & chatt"
-                  aria-label="Vänner & chatt"
-                  className="relative w-9 h-9 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-                >
-                  <ChatCircleDots size={20} weight="regular" />
-                  {friendsUnreadCount > 0 && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-color)]"
-                    />
-                  )}
                 </button>
               )}
 

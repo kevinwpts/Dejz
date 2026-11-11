@@ -11,7 +11,6 @@ export type AppTab =
   | 'saved'
   | 'packages'
   | 'receipts'
-  | 'friends'
   | 'account-detail';
 
 interface BottomNavProps {
@@ -26,7 +25,6 @@ interface BottomNavProps {
   savedCount?: number;
   packagesCount?: number;
   receiptsCount?: number;
-  friendsUnreadCount?: number;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({

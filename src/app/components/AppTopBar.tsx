@@ -3,7 +3,6 @@ import { useApp } from '../AppContext';
 import React from 'react';
 import { Navbar } from '../../components/Navbar';
 import { SETTINGS_SUBVIEW_TITLES } from '../../components/settings/subviews';
-import { getStoredFriends } from '../../utils/friendsChatSync';
 
 export const AppTopBar: React.FC = () => {
   const {
@@ -14,9 +13,6 @@ export const AppTopBar: React.FC = () => {
     settingsSubView,
     selectedHistoryAccountId,
     selectedGoalIdInView,
-    selectedChatFriendKey,
-    friendsUnreadCount,
-    setSelectedChatFriendKey,
     setSelectedGoalIdInView,
     setSettingsSubView,
     setActiveTab,
@@ -44,9 +40,8 @@ export const AppTopBar: React.FC = () => {
           userEmail={userEmail}
           userName={userName}
           userAvatar={userAvatar}
-          navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}:${selectedGoalIdInView || ''}:${selectedChatFriendKey || ''}`}
+          navigationKey={`${activeTab}:${settingsSubView}:${selectedHistoryAccountId || ''}:${selectedGoalIdInView || ''}`}
           hasUnreadNotifications={false}
-          friendsUnreadCount={friendsUnreadCount}
           hideActions={activeTab === 'settings'}
           hideSearch
           pageTitle={
@@ -62,18 +57,9 @@ export const AppTopBar: React.FC = () => {
               ? 'Väntar på paket'
               : activeTab === 'receipts'
               ? 'Kvitton'
-              : activeTab === 'friends'
-              ? selectedChatFriendKey
-                ? getStoredFriends().find((f) => f.key === selectedChatFriendKey)?.name ||
-                  'Chatt'
-                : 'Vänner & chatt'
               : null
           }
           onBack={() => {
-            if (activeTab === 'friends' && selectedChatFriendKey) {
-              setSelectedChatFriendKey(null);
-              return;
-            }
             if (
               selectedGoalIdInView &&
               (activeTab === 'goals' || (activeTab === 'settings' && settingsSubView === 'goals'))

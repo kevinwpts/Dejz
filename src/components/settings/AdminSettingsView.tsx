@@ -12,8 +12,6 @@ export interface AdminSettingsViewProps {
   incomes: IncomeItem[];
   fixedExpenses: FixedExpenseItem[];
   transactions: TransactionItem[];
-  splitSimulatorActive: boolean;
-  onToggleSplitSimulator: (active: boolean) => void;
   onStartOnboarding: () => void;
   onStartCreateGoalWizard: () => void;
   setSubView: (next: SettingsSubView) => void;
@@ -22,7 +20,6 @@ export interface AdminSettingsViewProps {
   onOpenAddIncomeModal: () => void;
   onOpenAddTransactionModal: () => void;
   onOpenPreviewTransactionModal: (tx?: any) => void;
-  onOpenFriendsChat: (friendKey?: string) => void;
   onApplyFixedExpenses: (next: FixedExpenseItem[]) => void;
 }
 
@@ -34,8 +31,6 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
   incomes,
   fixedExpenses,
   transactions,
-  splitSimulatorActive,
-  onToggleSplitSimulator,
   onStartOnboarding,
   onStartCreateGoalWizard,
   setSubView,
@@ -44,7 +39,6 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
   onOpenAddIncomeModal,
   onOpenAddTransactionModal,
   onOpenPreviewTransactionModal,
-  onOpenFriendsChat,
   onApplyFixedExpenses,
 }) => {
   return (
@@ -57,8 +51,6 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
         incomes={incomes}
         fixedExpenses={fixedExpenses}
         transactions={transactions}
-        splitSimulatorActive={splitSimulatorActive}
-        onToggleSplitSimulator={(act) => onToggleSplitSimulator?.(act)}
         onRestartOnboarding={() => onStartOnboarding?.()}
         onStartCreateGoalWizard={() => {
           if (onStartCreateGoalWizard) {
@@ -73,7 +65,6 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
         onOpenAddIncome={() => onOpenAddIncomeModal?.()}
         onOpenAddTransaction={() => onOpenAddTransactionModal?.()}
         onOpenPreviewTransaction={() => onOpenPreviewTransactionModal?.()}
-        onOpenFriendsChat={(fk) => onOpenFriendsChat?.(fk)}
         onOpenHouseholdBudget={() => setSubView('household')}
         onApplyFixedExpenses={onApplyFixedExpenses}
       />

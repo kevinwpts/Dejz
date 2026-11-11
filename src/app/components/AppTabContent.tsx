@@ -1,5 +1,4 @@
-import { FixedTab, AnalysisTab, TransactionsTab, SettingsTab, SavingsGoalsView, FriendsChatView } from '../lazyScreens';
-import { FRIENDS_CHAT_ENABLED } from '../../utils/friendsChatSync';
+import { FixedTab, AnalysisTab, TransactionsTab, SettingsTab, SavingsGoalsView } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { HomeTab, TransactionItem, getTransactionTime } from '../../components/HomeTab';
@@ -15,7 +14,6 @@ import { checkIsRecurringTransaction } from '../../utils/recurring';
 export const AppTabContent: React.FC = () => {
   const {
     activeTab,
-    selectedChatFriendKey,
     performSilentBankSync,
     refreshBankStatus,
     hasActiveBankConnection,
@@ -68,7 +66,6 @@ export const AppTabContent: React.FC = () => {
     autoOpenGoalWizard,
     setAutoOpenGoalWizard,
     userAvatar,
-    setSelectedChatFriendKey,
     setPreviewReceipt,
     connections,
     syncingBank,
@@ -89,14 +86,11 @@ export const AppTabContent: React.FC = () => {
     setIsOnboardingActive,
     handleCategoryMutated,
     settingsSubView,
-    splitSimulatorActive,
-    handleToggleSplitSimulator,
     setFixedExpenses,
   } = useApp();
   return (
       <main className="flex-1 w-full max-w-md mx-auto px-4 pt-4">
         <PullToRefresh
-          disabled={activeTab === 'friends' && Boolean(selectedChatFriendKey)}
           onRefresh={async () => {
             await performSilentBankSync(true);
             await refreshBankStatus();
@@ -282,25 +276,6 @@ export const AppTabContent: React.FC = () => {
                   onSelectGoalId={setSelectedGoalIdInView}
                   autoOpenCreate={autoOpenGoalWizard}
                   onAutoOpenConsumed={() => setAutoOpenGoalWizard(false)}
-                />
-              )}
-
-              {activeTab === 'friends' && (
-                <FriendsChatView
-                  period={period}
-                  userEmail={userEmail}
-                  userName={userName}
-                  userAvatar={userAvatar}
-                  transactions={displayTransactions}
-                  fixedExpenses={fixedExpenses}
-                  incomes={incomes}
-                  initialSelectedFriendKey={selectedChatFriendKey}
-                  onSelectFriendKey={setSelectedChatFriendKey}
-                  onOpenHousehold={() => {
-                    setSettingsSubView('household');
-                    setActiveTab('settings');
-                  }}
-                  onOpenGoals={() => setActiveTab('goals')}
                 />
               )}
 
@@ -853,16 +828,6 @@ export const AppTabContent: React.FC = () => {
                   }}
                   selectedGoalId={selectedGoalIdInView}
                   onSelectGoalId={setSelectedGoalIdInView}
-                  onOpenFriendsChat={
-                    FRIENDS_CHAT_ENABLED
-                      ? (friendKey) => {
-                      setSelectedChatFriendKey(friendKey || null);
-                      setActiveTab('friends');
-                    }
-                      : undefined
-                  }
-                  splitSimulatorActive={splitSimulatorActive}
-                  onToggleSplitSimulator={handleToggleSplitSimulator}
                   onStartCreateGoalWizard={() => {
                     setSelectedGoalIdInView(null);
                     setAutoOpenGoalWizard(true);
