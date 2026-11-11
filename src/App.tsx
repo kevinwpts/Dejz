@@ -34,7 +34,7 @@ import {
 } from './components/AdminSimulator';
 import { ItemLogo } from './components/ItemLogo';
 import { CategoryIcon } from './components/CategoryIcon';
-import { Heart, Package, Paperclip, FileText, Eye, CheckCircle, X } from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, FileText, Eye } from '@phosphor-icons/react';
 import { BankModal } from './components/modals/BankModal';
 import { IncomeModal } from './components/modals/IncomeModal';
 import { FixedExpenseModal } from './components/modals/FixedExpenseModal';
@@ -48,7 +48,6 @@ import { isDemoMode } from './utils/demoUtils';
 import { SearchModal } from './components/modals/SearchModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { PullToRefresh } from './components/ui/PullToRefresh';
-import { BottomSheet } from './components/ui/BottomSheet';
 import { EmptyClusterArtwork } from './components/ui/VisualArtwork';
 import { supabase } from './supabaseClient';
 import { getHouseholdState, subscribeToHouseholdRealtime } from './utils/householdSync';
@@ -123,8 +122,14 @@ import {
   findAllMatchingFixedExpensesByMerchant,
   reconcilePeriodRecurringMatches,
 } from './utils/recurring';
-import { estimateVariableBill } from './utils/variableBills';
 import { useBudgetTotals } from './app/hooks/useBudgetTotals';
+import { useVariableBillEstimates } from './app/hooks/useVariableBillEstimates';
+import {
+  FeedbackToast,
+  FeedbackToastState,
+  ReceiptPreviewSheet,
+  UndoToast,
+} from './app/components/AppToasts';
 import { useAiMerchantCleaning } from './app/hooks/useAiMerchantCleaning';
 import { useSavingsGoalCredit } from './app/hooks/useSavingsGoalCredit';
 
@@ -172,15 +177,6 @@ export const App: React.FC = () => {
   } | null>(null);
   const undoTimerRef = useRef<number | null>(null);
 
-  interface FeedbackToastState {
-    id: string;
-    title: string;
-    subtitle?: string;
-    actionLabel?: string;
-    onAction?: () => void;
-    undoLabel?: string;
-    onUndo?: () => void;
-  }
   const [feedbackToast, setFeedbackToast] = useState<FeedbackToastState | null>(null);
 
   // "Glömt lösenord": personen kom in via länken i mejlet och ska välja ett nytt lösenord
@@ -2354,27 +2350,15 @@ export const App: React.FC = () => {
     }
   };
 
-  // Räkningar som varierar (el m.m.): uppskatta nästa dragning som snittet av de 3 senaste.
-  // Körs högst en gång per räkning och löneperiod, bara innan räkningen dragits, och bara med bank.
-  // Ändrar man beloppet själv efteråt får det stå kvar resten av perioden.
-  useEffect(() => {
-    if (isDemoMode() || !hasActiveBankConnection || !period?.startDate) return;
-    const periodStartIso = formatIsoDateStockholm(period.startDate);
-    for (const exp of fixedExpenses) {
-      if (periodRecurringMatches.matchedFixedIds.has(exp.id)) continue;
-      const est = estimateVariableBill(exp, transactions, periodStartIso);
-      if (!est || Math.abs(est.estimate - (Number(exp.amount) || 0)) < 10) continue;
-      const doneKey = `dejz_varbill_estimate:${exp.id}:${periodStartIso}`;
-      try {
-        if (localStorage.getItem(doneKey)) continue;
-        localStorage.setItem(doneKey, String(est.estimate));
-      } catch {
-        continue;
-      }
-      void handleUpdateFixed({ ...exp, amount: est.estimate });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasActiveBankConnection, period?.startDate, fixedExpenses, transactions, periodRecurringMatches]);
+  // Räkningar som varierar (el m.m.): uppskattning från de 3 senaste dragningarna
+  useVariableBillEstimates({
+    fixedExpenses,
+    transactions,
+    period,
+    periodRecurringMatches,
+    hasActiveBankConnection,
+    onUpdateFixed: handleUpdateFixed,
+  });
 
   const handleDeleteFixed = async (id: string) => {
     const item = fixedExpensesRef.current.find((f) => f.id === id);
@@ -4320,32 +4304,17 @@ export const App: React.FC = () => {
         }}
       />
 
-      {/* Floating Undo Toast for Swipe Exclude */}
-      {undoToast && (
-        <div className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[150] w-[calc(100%-2rem)] max-w-sm animate-fade-in">
-          <div className="px-4 py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xl flex items-center justify-between gap-3 text-xs">
-            <span className="font-medium truncate">
-              {undoToast.excluded
-                ? `${undoToast.title} räknas inte i budget`
-                : `${undoToast.title} räknas med i budget`}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                const { id, excluded } = undoToast;
-                if (undoTimerRef.current) {
-                  window.clearTimeout(undoTimerRef.current);
-                }
-                setUndoToast(null);
-                handleExcludeTransaction(id, !excluded, true);
-              }}
-              className="px-2.5 py-1 rounded-lg bg-[var(--bg-color)]/15 hover:bg-[var(--bg-color)]/25 font-display font-bold shrink-0 cursor-pointer transition-colors"
-            >
-              Ångra
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Ångra-notis när ett köp tas bort ur budgeten */}
+      <UndoToast
+        toast={undoToast}
+        onUndo={() => {
+          if (!undoToast) return;
+          const { id, excluded } = undoToast;
+          if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current);
+          setUndoToast(null);
+          handleExcludeTransaction(id, !excluded, true);
+        }}
+      />
 
       {/* Floating Modern Confirmation Feedback Toast */}
       <FeedbackSheet />
@@ -4359,103 +4328,16 @@ export const App: React.FC = () => {
         onSkip={endPasswordRecovery}
       />
 
-      {feedbackToast && (
-        <div className="fixed bottom-[calc(5.6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-2rem)] max-w-sm animate-fade-in pointer-events-auto">
-          {/* Mörk notis i iOS-/Revolut-stil: en rad text + Ångra */}
-          <div className="pl-3.5 pr-2 py-2 min-h-[48px] rounded-2xl bg-[#16141F] text-white shadow-[0_16px_40px_-12px_rgba(22,20,31,0.45)] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <CheckCircle size={20} weight="fill" className="text-emerald-400 shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[14px] font-medium truncate">{feedbackToast.title}</p>
-                {feedbackToast.subtitle && (
-                  <p className="text-[12px] text-white/60 truncate">{feedbackToast.subtitle}</p>
-                )}
-              </div>
-            </div>
+      <FeedbackToast
+        toast={feedbackToast}
+        onClose={() => {
+          if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+          setFeedbackToast(null);
+        }}
+      />
 
-            <div className="flex items-center shrink-0">
-              {feedbackToast.actionLabel && feedbackToast.onAction && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const action = feedbackToast.onAction;
-                    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
-                    setFeedbackToast(null);
-                    action?.();
-                  }}
-                  className="px-3 py-2 rounded-xl text-[14px] font-semibold text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
-                >
-                  {feedbackToast.actionLabel}
-                </button>
-              )}
-
-              {feedbackToast.undoLabel && feedbackToast.onUndo ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const undo = feedbackToast.onUndo;
-                    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
-                    setFeedbackToast(null);
-                    undo?.();
-                  }}
-                  className="px-3 py-2 rounded-xl text-[14px] font-semibold text-[#B4A8FF] hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
-                >
-                  {feedbackToast.undoLabel}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
-                    setFeedbackToast(null);
-                  }}
-                  className="w-9 h-9 rounded-xl text-white/60 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
-                  aria-label="Stäng"
-                >
-                  <X size={14} weight="bold" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* In-App Receipt Lightbox Sheet */}
-      <BottomSheet
-        isOpen={Boolean(previewReceipt)}
-        onClose={() => setPreviewReceipt(null)}
-        title={previewReceipt?.name || 'Kvitto'}
-        zIndexClass="z-[190]"
-      >
-        {previewReceipt && (
-          <div className="space-y-4">
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
-              {previewReceipt.url.startsWith('data:image/') ||
-              /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
-                <img
-                  src={previewReceipt.url}
-                  alt={previewReceipt.name}
-                  className="max-h-[56dvh] w-auto object-contain rounded-xl"
-                />
-              ) : (
-                <iframe
-                  src={previewReceipt.url}
-                  title={previewReceipt.name}
-                  className="w-full h-[52dvh] rounded-xl border-0"
-                />
-              )}
-            </div>
-            <a
-              href={previewReceipt.url}
-              download={previewReceipt.name || 'kvitto.jpg'}
-              className="ui-btn-primary"
-            >
-              <FileText size={14} weight="bold" />
-              <span>Spara fil</span>
-            </a>
-          </div>
-        )}
-      </BottomSheet>
+      {/* Kvittovisare */}
+      <ReceiptPreviewSheet receipt={previewReceipt} onClose={() => setPreviewReceipt(null)} />
 
       {/* Live Split-Screen Simulator (Du + Motpart sida vid sida på datorn, eller växlingsbar på mindre skärm) */}
       {splitSimulatorActive && (
