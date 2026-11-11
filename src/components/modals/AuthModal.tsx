@@ -1,4 +1,5 @@
 import { appOrigin } from '../../utils/platform';
+import { friendlyAuthError } from '../../utils/authErrors';
 import React, { useState, useEffect } from 'react';
 import {
   X,
@@ -90,7 +91,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       });
       if (error) throw error;
     } catch (err: unknown) {
-      setErrorMsg((err as { message?: string }).message || 'Kunde inte logga in med Google. Försök igen.');
+      const friendly = friendlyAuthError(err);
+      setErrorMsg(friendly.kind === 'unknown' ? 'Kunde inte logga in med Google. Försök igen.' : friendly.message);
     } finally {
       setGoogleLoading(false);
     }
@@ -182,14 +184,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setTimeout(() => onClose(), 400);
       }
     } catch (err: unknown) {
-      const msg = String((err as { message?: string } | null)?.message || '');
-      if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+      const friendly = friendlyAuthError(err);
+      if (friendly.kind === 'invalid_credentials') {
         setHasPasswordError(true);
-        setShakeTrigger((prev) => prev + 1);
       } else {
-        setErrorMsg(msg || 'Kontrollera dina uppgifter och försök igen.');
-        setShakeTrigger((prev) => prev + 1);
+        setErrorMsg(friendly.message);
       }
+      setShakeTrigger((prev) => prev + 1);
     } finally {
       setLoading(false);
     }

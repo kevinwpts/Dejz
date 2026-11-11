@@ -1,4 +1,5 @@
 import { BrandLogo } from './BrandLogo';
+import { friendlyAuthError } from '../utils/authErrors';
 import React, { useState, useEffect } from 'react';
 import {
   CaretLeft,
@@ -170,7 +171,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           // ignore
         }
       }
-      setErrorMsg((err as { message?: string }).message || (provider === 'apple' ? 'Kunde inte starta Apple-inloggning.' : 'Kunde inte starta Google-inloggning.'));
+      const friendly = friendlyAuthError(err);
+      setErrorMsg(
+        friendly.kind !== 'unknown'
+          ? friendly.message
+          : provider === 'apple'
+          ? 'Kunde inte starta Apple-inloggning.'
+          : 'Kunde inte starta Google-inloggning.'
+      );
       setGoogleLoading(false);
     }
   };
@@ -296,7 +304,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         return;
       }
       if (isNetworkError) {
-        setErrorMsg('Ingen anslutning. Kontrollera internet och försök igen.');
+        setErrorMsg(friendlyAuthError(err).message);
         setShakeTrigger((prev) => prev + 1);
         return;
       }
@@ -310,18 +318,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         }
       }
 
-      const errCode = String(authErr?.code || authErr?.error_code || '');
-      if (errCode === 'email_not_confirmed' || /email not confirmed/i.test(msg)) {
-        setErrorMsg('Du har inte bekräftat din e-post än. Hittar du inte mejlet? Vi skickar ett nytt.');
+      const friendly = friendlyAuthError(err);
+      if (friendly.kind === 'email_not_confirmed') {
+        setErrorMsg(friendly.message);
         setNeedsConfirmation(true);
-      } else if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+      } else if (friendly.kind === 'invalid_credentials') {
         setHasPasswordError(true);
         setShakeTrigger((prev) => prev + 1);
-      } else if (msg.includes('User already registered')) {
-        setErrorMsg('E-postadressen är redan registrerad. Testa att logga in istället.');
-        setShakeTrigger((prev) => prev + 1);
       } else {
-        setErrorMsg(msg || 'Ett oväntat fel uppstod.');
+        setErrorMsg(friendly.message);
         setShakeTrigger((prev) => prev + 1);
       }
     } finally {
