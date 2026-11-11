@@ -21,13 +21,7 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import { IncomeItem, FixedExpenseItem } from './HomeTab';
-import {
-  bankService,
-  BankAspsp,
-  BankConnection,
-  BankAccount,
-  SWEDISH_BANKS_CATALOG,
-} from '../services/bankService';
+import { bankService, BankAspsp, BankConnection, BankAccount } from '../services/bankService';
 import { WeekendHandlingMode } from '../utils/periodEngine';
 import {
   extractOnboardingAiCandidates,
@@ -47,49 +41,18 @@ import { ItemLogo } from './ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
 import { BottomSheet } from './ui/BottomSheet';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
-
-export const POPULAR_SWEDISH_BANKS: { id: string; name: string; displayName: string }[] = [
-  { id: 'swedbank', name: 'Swedbank', displayName: 'Swedbank' },
-  { id: 'handelsbanken', name: 'Handelsbanken', displayName: 'Handelsbanken' },
-  { id: 'seb', name: 'SEB', displayName: 'SEB' },
-  { id: 'nordea', name: 'Nordea', displayName: 'Nordea' },
-  { id: 'lansforsakringar', name: 'Länsförsäkringar Bank', displayName: 'Länsförsäkringar' },
-  { id: 'danske', name: 'Danske Bank', displayName: 'Danske Bank' },
-  { id: 'icabanken', name: 'ICA Banken', displayName: 'ICA Banken' },
-  { id: 'sbab', name: 'SBAB', displayName: 'SBAB' },
-  { id: 'avanza', name: 'Avanza', displayName: 'Avanza' },
-];
-
-const EXCLUDED_B2B_OR_FOREIGN_ASPSP_PATTERNS = [
-  /corporate/i,
-  /first card/i,
-  /airplus/i,
-  /airwallex/i,
-  /dipocket/i,
-  /finductive/i,
-  /finom/i,
-  /genome/i,
-  /intergiro/i,
-  /pleo/i,
-  /payhawk/i,
-  /soldo/i,
-  /qonto/i,
-  /paysera/i,
-  /satchel/i,
-  /wallester/i,
-  /worldfirst/i,
-  /viva\.com/i,
-  /transfermate/i,
-  /equals money/i,
-  /3s money/i,
-  /ebanx/i,
-  /nium/i,
-  /banking circle/i,
-];
-
-const CONSUMER_SWEDISH_BANKS: BankAspsp[] = SWEDISH_BANKS_CATALOG.filter(
-  (b) => !EXCLUDED_B2B_OR_FOREIGN_ASPSP_PATTERNS.some((rx) => rx.test(b.name))
-);
+import {
+  BANK_RETURN_MARKER_KEY,
+  CONSUMER_SWEDISH_BANKS,
+  OnboardingStep,
+  POPULAR_SWEDISH_BANKS,
+  STEP_ORDER_MANUAL,
+  STEP_ORDER_WITH_BANK,
+  SheetEditorState,
+  clearBankReturnMarker,
+  hasFreshBankReturnMarker,
+} from './onboarding/onboardingConfig';
+import { BankSummaryStep } from './onboarding/BankSummaryStep';
 
 interface OnboardingFlowProps {
   initialName: string;
@@ -117,56 +80,6 @@ interface OnboardingFlowProps {
   bankEnabled?: boolean;
 }
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-/** Sätts när bankkopplingen startar i introduktionen – se bankReturnPending nedan. */
-const BANK_RETURN_MARKER_KEY = 'dejz_onboarding_bank_return';
-const BANK_RETURN_MAX_AGE_MS = 30 * 60 * 1000;
-
-function hasFreshBankReturnMarker(): boolean {
-  try {
-    const ts = Number(localStorage.getItem(BANK_RETURN_MARKER_KEY));
-    if (!ts) return false;
-    if (Date.now() - ts > BANK_RETURN_MAX_AGE_MS) {
-      localStorage.removeItem(BANK_RETURN_MARKER_KEY);
-      return false;
-    }
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function clearBankReturnMarker() {
-  try {
-    localStorage.removeItem(BANK_RETURN_MARKER_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Stegordning. Med bank: namn → bank → inkomster (lönen) → fasta → lönedag (hoppas över om lönen
- * hittades i banken) → resultat. Bekräfta-korten gör att det går på under en minut.
- * Utan bank följer flödet hur man tänker lön till lön: namn → lönedag → inkomst → fasta → resultat.
- */
-const STEP_ORDER_WITH_BANK: OnboardingStep[] = [1, 2, 4, 3, 5, 6];
-// Utan bank: sist frågar vi efter saldot på kontot (steg 7), så "kvar till lön" stämmer från dag ett
-const STEP_ORDER_MANUAL: OnboardingStep[] = [1, 5, 4, 3, 6, 7];
-
-interface SheetEditorState {
-  mode: 'add' | 'edit';
-  type: 'income' | 'fixed';
-  id?: string;
-  name: string;
-  amount: string;
-  day: number;
-  category: string;
-  paymentMethod?: string;
-  logo?: string;
-  isShared?: boolean;
-  fullAmount?: string;
-}
 
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   initialName,
@@ -933,75 +846,28 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     !showFixedList &&
     (analyzingBank || suggestedFixedExpenses.some((f) => f.isFromBank));
 
-  const renderSummaryStep = (opts: {
-    stepKey: string;
-    title: string;
-    subtitle: string;
-    loadingText: string;
-    amountText: string;
-    detailText: string;
-    amountClassName: string;
-    confirmLabel: string;
-    onConfirm: () => void;
-    onShowList: () => void;
-  }) => (
-    <div
-      key={opts.stepKey}
-      className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-    >
-      <div className="shrink-0 pt-6 pb-4">
-        <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-          {opts.title}
-        </h1>
-        <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{opts.subtitle}</p>
-      </div>
-
-      <div className="flex-1 min-h-0 flex flex-col justify-center pb-8">
-        <div className="rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-6 py-8 text-center">
-          {analyzingBank ? (
-            <div className="flex flex-col items-center gap-3 py-3 text-sm text-[var(--text-secondary)]">
-              <SpinnerGap size={26} className="animate-spin text-[var(--text-primary)]" />
-              <span>{opts.loadingText}</span>
-            </div>
-          ) : (
-            <>
-              <p
-                className={`font-display font-semibold text-[34px] leading-tight tracking-[-0.02em] tabular-nums ${opts.amountClassName}`}
-              >
-                {opts.amountText}
-              </p>
-              <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">{opts.detailText}</p>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="shrink-0 pt-3 space-y-1">
-        <button
-          type="button"
-          onClick={opts.onConfirm}
-          disabled={analyzingBank}
-          className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-default"
-        >
-          <span>{opts.confirmLabel}</span>
-          <Check size={16} weight="bold" />
-        </button>
-        <button
-          type="button"
-          onClick={opts.onShowList}
-          disabled={analyzingBank}
-          className="w-full py-3 rounded-2xl text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer disabled:opacity-40"
-        >
-          Visa och ändra
-        </button>
-      </div>
-    </div>
-  );
 
   const listNames = (names: string[], max = 3) =>
     names.length <= max
       ? names.join(', ').replace(/, ([^,]*)$/, ' och $1')
       : `${names.slice(0, max).join(', ')} och ${names.length - max} till`;
+
+  const sumOf = (items: { amount: number }[]) => items.reduce((sum, x) => sum + (Number(x.amount) || 0), 0);
+  const primaryBankIncome = bankIncomeItems[0];
+  const incomeSummaryAmount = `+${formatKr(sumOf(bankIncomeItems))}`;
+  const incomeSummaryDetail =
+    bankIncomeItems.length === 0
+      ? 'Ingen inkomst vald'
+      : bankIncomeItems.length === 1
+      ? `${primaryBankIncome.category === 'Lön' ? 'Lön' : primaryBankIncome.name} · den ${primaryBankIncome.payday}:e varje månad`
+      : `${listNames(bankIncomeItems.map((i) => i.name))} · varje månad`;
+  const fixedSummaryAmount = `−${formatKr(sumOf(bankFixedItems))}/mån`;
+  const fixedSummaryDetail =
+    bankFixedItems.length === 0
+      ? 'Inga fasta utgifter valda'
+      : `${bankFixedItems.length} st · ${listNames(
+          [...bankFixedItems].sort((a, b) => b.amount - a.amount).map((f) => f.name)
+        )}`;
 
   const stepIndex = Math.max(0, stepOrder.indexOf(step));
   const goNext = (from: OnboardingStep) => {
@@ -1810,25 +1676,22 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {/* ============================================================== */}
       {/* STEG 3: VILKA FASTA UTGIFTER HAR DU? (Bocka i/ur + redigera)   */}
       {/* ============================================================== */}
-      {step === 3 &&
-        fixedSummaryMode &&
-        renderSummaryStep({
-          stepKey: 'step-3-summary',
-          title: 'Dina fasta utgifter',
-          subtitle: 'Räkningar och abonnemang som dras varje månad.',
-          loadingText: 'Letar efter dina räkningar …',
-          amountText: `−${formatKr(bankFixedItems.reduce((sum, f) => sum + (Number(f.amount) || 0), 0))}/mån`,
-          detailText:
-            bankFixedItems.length === 0
-              ? 'Inga fasta utgifter valda'
-              : `${bankFixedItems.length} st · ${listNames(
-                  [...bankFixedItems].sort((a, b) => b.amount - a.amount).map((f) => f.name)
-                )}`,
-          amountClassName: 'text-[var(--text-primary)]',
-          confirmLabel: 'Ser rätt ut',
-          onConfirm: handleSaveSuggestedFixed,
-          onShowList: () => setShowFixedList(true),
-        })}
+      {step === 3 && fixedSummaryMode && (
+        <BankSummaryStep
+          stepKey="step-3-summary"
+          title="Dina fasta utgifter"
+          subtitle="Räkningar och abonnemang som dras varje månad."
+          loadingText="Letar efter dina räkningar …"
+          amountText={fixedSummaryAmount}
+          detailText={fixedSummaryDetail}
+          amountClassName="text-[var(--text-primary)]"
+          confirmLabel="Ser rätt ut"
+          onConfirm={handleSaveSuggestedFixed}
+          onShowList={() => setShowFixedList(true)}
+          animClass={pageAnimClass}
+          loading={analyzingBank}
+        />
+      )}
 
       {step === 3 && !fixedSummaryMode && (
         <div
@@ -1966,25 +1829,22 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {/* ============================================================== */}
       {/* STEG 4: VILKA FASTA INKOMSTER HAR DU? (Bocka i/ur + redigera)  */}
       {/* ============================================================== */}
-      {step === 4 &&
-        incomeSummaryMode &&
-        renderSummaryStep({
-          stepKey: 'step-4-summary',
-          title: bankIncomeItems.length > 1 ? 'Dina inkomster' : 'Din lön',
-          subtitle: 'Vi hittade den bland dina transaktioner. Stämmer det?',
-          loadingText: 'Letar efter din lön …',
-          amountText: `+${formatKr(bankIncomeItems.reduce((sum, i) => sum + (Number(i.amount) || 0), 0))}`,
-          detailText:
-            bankIncomeItems.length === 0
-              ? 'Ingen inkomst vald'
-              : bankIncomeItems.length === 1
-              ? `${bankIncomeItems[0].category === 'Lön' ? 'Lön' : bankIncomeItems[0].name} · den ${bankIncomeItems[0].payday}:e varje månad`
-              : `${listNames(bankIncomeItems.map((i) => i.name))} · varje månad`,
-          amountClassName: 'text-emerald-600 dark:text-emerald-400',
-          confirmLabel: 'Stämmer',
-          onConfirm: handleSaveSuggestedIncomes,
-          onShowList: () => setShowIncomeList(true),
-        })}
+      {step === 4 && incomeSummaryMode && (
+        <BankSummaryStep
+          stepKey="step-4-summary"
+          title={bankIncomeItems.length > 1 ? 'Dina inkomster' : 'Din lön'}
+          subtitle="Vi hittade den bland dina transaktioner. Stämmer det?"
+          loadingText="Letar efter din lön …"
+          amountText={incomeSummaryAmount}
+          detailText={incomeSummaryDetail}
+          amountClassName="text-emerald-600 dark:text-emerald-400"
+          confirmLabel="Stämmer"
+          onConfirm={handleSaveSuggestedIncomes}
+          onShowList={() => setShowIncomeList(true)}
+          animClass={pageAnimClass}
+          loading={analyzingBank}
+        />
+      )}
 
       {step === 4 && !incomeSummaryMode && (
         <div
