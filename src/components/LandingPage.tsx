@@ -11,6 +11,7 @@ import {
 import { supabase } from '../supabaseClient';
 import { WaitlistLanding } from './WaitlistLanding';
 import { rememberConsentFromSignup } from '../utils/marketingConsent';
+import { firstTouchSignupData } from '../utils/attribution';
 
 interface LandingPageProps {
   existingEmail?: string | null;
@@ -183,7 +184,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         const { error } = await supabase.auth.resend({
           type: 'signup',
           email: email.trim(),
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: window.location.origin, data: firstTouchSignupData() },
         });
         if (error) throw error;
       } else {

@@ -4,6 +4,10 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { EmailVerifiedNotice } from './components/EmailVerification';
 import './index.css';
+import { captureFirstTouch } from './utils/attribution';
+
+// Spara utm-länken (t.ex. ?utm_source=tiktok) innan något annat hinner ändra adressen
+captureFirstTouch();
 
 const renderApp = () => {
   let container = document.getElementById('root');

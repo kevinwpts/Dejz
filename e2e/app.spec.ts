@@ -141,3 +141,15 @@ test('profil och inställningar öppnas utan fel', async ({ page }) => {
   await expect(page.getByText('Lönedag').first()).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('utm-länken sparas vid första besöket (och skrivs inte över)', async ({ page }) => {
+  await page.goto('/?utm_source=TikTok&utm_campaign=lansering&demo');
+  await expect(page.getByText('Kvar att spendera').first()).toBeVisible({ timeout: 20_000 });
+  const first = await page.evaluate(() => JSON.parse(localStorage.getItem('dejz_first_touch_v1') || 'null'));
+  expect(first?.utm_source).toBe('tiktok');
+  expect(first?.utm_campaign).toBe('lansering');
+
+  await page.goto('/?utm_source=instagram&demo');
+  const after = await page.evaluate(() => JSON.parse(localStorage.getItem('dejz_first_touch_v1') || 'null'));
+  expect(after?.utm_source).toBe('tiktok');
+});
