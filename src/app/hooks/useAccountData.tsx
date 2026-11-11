@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { useLiveSync } from './useLiveSync';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
 import {
   IncomeItem,
@@ -34,7 +35,6 @@ import {
   getExcludeInternalTransfers,
   getMerchantAliases,
   hydrateAllUserPreferencesFromProfile,
-  pullUserPreferences,
   extractSavedFixedFromProfile,
   extractSavedIncomesFromProfile,
   clearAllLocalAppData,
@@ -52,7 +52,6 @@ import { apiUrl } from '../../utils/platform';
 const SWISH_LOOKUP_ENABLED = import.meta.env.VITE_ENABLE_SWISH_LOOKUP === 'true';
 
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
-const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
 
 export interface AccountDataContext {
   connections: BankConnection[];
@@ -1022,121 +1021,16 @@ export function useAccountData({
     };
   }, [loadSupabaseUserData, performSilentBankSync]);
 
-  // Kontinuerlig automatisk synk i appen
-  const hasActiveBankConnection = useMemo(
-    () => connections.some((c) => c.status === 'active'),
-    [connections]
-  );
-
-  useEffect(() => {
-    if (!userId || !hasActiveBankConnection) return;
-
-    const handleVisibilityOrFocus = () => {
-      if (document.visibilityState === 'visible') {
-        performSilentBankSync(false);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
-    window.addEventListener('focus', handleVisibilityOrFocus);
-
-    const intervalId = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        performSilentBankSync(false);
-      }
-    }, AUTO_SYNC_INTERVAL_MS);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
-      window.removeEventListener('focus', handleVisibilityOrFocus);
-      window.clearInterval(intervalId);
-    };
-  }, [userId, hasActiveBankConnection, performSilentBankSync]);
-
-  // Flera enheter: när appen öppnas igen hämtas inställningar som ändrats på en annan enhet
-  // (sparmål, egna namn, kategorier …). Högst var 30:e sekund. Finns det något nytt laddas
-  // listorna om så att allt visas direkt.
-  useEffect(() => {
-    if (!userId || isDemoMode()) return;
-    let lastPull = Date.now();
-    const onVisible = () => {
-      if (document.visibilityState !== 'visible' || Date.now() - lastPull < 30_000) return;
-      lastPull = Date.now();
-      void pullUserPreferences(userId).then((applied) => {
-        if (applied.length > 0 && userIdRef.current === userId) {
-          setExcludeInternalTransfersState(getExcludeInternalTransfers());
-          void loadSupabaseUserData(userId);
-        }
-      });
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('focus', onVisible);
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('focus', onVisible);
-    };
-  }, [userId, loadSupabaseUserData]);
-
-  // Supabase Realtime: Lyssna på databasändringar med debounce för att undvika synk-stormar
-  useEffect(() => {
-    if (!userId) return;
-
-    let debounceTimer: number | null = null;
-    const scheduleDebouncedRefresh = () => {
-      // Om performSilentBankSync redan körs anropar den själv refreshBankStatus när den är klar
-      if (syncInFlightRef.current) return;
-      if (debounceTimer !== null) {
-        window.clearTimeout(debounceTimer);
-      }
-      debounceTimer = window.setTimeout(() => {
-        debounceTimer = null;
-        if (!syncInFlightRef.current) {
-          refreshBankStatus();
-        }
-      }, 800);
-    };
-
-    const channel = supabase
-      .channel(`dejz-live-bank-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bank_accounts',
-          filter: `user_id=eq.${userId}`,
-        },
-        scheduleDebouncedRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bank_transactions',
-          filter: `user_id=eq.${userId}`,
-        },
-        scheduleDebouncedRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bank_connections',
-          filter: `user_id=eq.${userId}`,
-        },
-        scheduleDebouncedRefresh
-      )
-      .subscribe();
-
-    return () => {
-      if (debounceTimer !== null) {
-        window.clearTimeout(debounceTimer);
-      }
-      supabase.removeChannel(channel);
-    };
-  }, [userId, refreshBankStatus]);
+  const { hasActiveBankConnection } = useLiveSync({
+    userId,
+    userIdRef,
+    connections,
+    syncInFlightRef,
+    setExcludeInternalTransfersState,
+    refreshBankStatus,
+    loadSupabaseUserData,
+    performSilentBankSync,
+  });
 
   return { refreshBankStatus, loadSupabaseUserData, performSilentBankSync, hasActiveBankConnection };
 }

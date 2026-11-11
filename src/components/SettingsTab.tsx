@@ -1,31 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { isDemoMode } from '../utils/demoUtils';
-import { EmailVerificationStatus } from './EmailVerification';
+import { SettingsMainList } from './settings/SettingsMainList';
+import { PaymentMethodsSettingsView } from './settings/PaymentMethodsSettingsView';
 import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
-import {
-  ArrowCounterClockwise,
-  UserCircle,
-  SignOut,
-  CalendarBlank,
-  ShieldCheck,
-  CreditCard,
-  ArrowsLeftRight,
-  Tag,
-  CaretRight,
-  Sun,
-  Moon,
-  Wallet,
-  Plus,
-  Trash,
-  Check,
-  X,
-  ChatCircleText,
-  LockKey,
-  SlidersHorizontal,
-  PiggyBank,
-  Paperclip,
-  Package,
-} from '@phosphor-icons/react';
+
+
 import { BankConnection, BankAccount } from '../services/bankService';
 import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
@@ -34,7 +12,6 @@ import { HouseholdBudgetView } from './HouseholdBudgetView';
 import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
-  saveStoredPaymentMethods,
   compressImageFileToDataUrl,
   getPrivacyBlurMode,
   getSavingsGoals,
@@ -43,11 +20,8 @@ import {
   getTransactionMetaMap,
   getAccountMetaMap,
 } from '../utils/appCache';
-import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../constants';
-import { BottomSheet } from './ui/BottomSheet';
-import { ConfirmDialog } from './ui/ConfirmDialog';
+import { PaymentMethodOption } from '../constants';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
-import { PaymentMethodIcon, AVAILABLE_PAYMENT_METHOD_ICONS } from './CategoryIcon';
 import {
   CookiesPage,
   OpenBankingInfoPage,
@@ -224,12 +198,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>(() =>
     getStoredPaymentMethods()
   );
-  const [pmSheetMode, setPmSheetMode] = useState<'new' | 'edit' | null>(null);
-  const [selectedPm, setSelectedPm] = useState<PaymentMethodOption | null>(null);
-  const [pmFormName, setPmFormName] = useState('');
-  const [pmFormIcon, setPmFormIcon] = useState('credit-card');
-  const [pmDeleteConfirm, setPmDeleteConfirm] = useState(false);
-  const [pmResetConfirm, setPmResetConfirm] = useState(false);
 
   // Bank account edit sheet & disconnect confirm state
   const [editingAccount, setEditingAccount] = useState<AccountItem | null>(null);
@@ -495,242 +463,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // SUB-VIEW: BETALSÄTT
   // ==========================================
   if (subView === 'paymentMethods') {
-    const closePmSheet = () => {
-      setPmSheetMode(null);
-      setSelectedPm(null);
-      setPmDeleteConfirm(false);
-    };
-
-    const handleSavePmSheet = (e: React.FormEvent) => {
-      e.preventDefault();
-      const trimmed = pmFormName.trim();
-      if (!trimmed) return;
-
-      if (pmSheetMode === 'edit' && selectedPm) {
-        const next = paymentMethods.map((m) =>
-          m.id === selectedPm.id ? { ...m, name: trimmed, icon: pmFormIcon } : m
-        );
-        setPaymentMethods(next);
-        saveStoredPaymentMethods(next);
-        closePmSheet();
-        return;
-      }
-
-      if (pmSheetMode === 'new') {
-        if (paymentMethods.some((m) => m.name.toLowerCase() === trimmed.toLowerCase())) {
-          closePmSheet();
-          return;
-        }
-        const next: PaymentMethodOption[] = [
-          ...paymentMethods,
-          { id: `pm-${Date.now()}`, name: trimmed, icon: pmFormIcon, isCustom: true },
-        ];
-        setPaymentMethods(next);
-        saveStoredPaymentMethods(next);
-        closePmSheet();
-      }
-    };
-
-    const handleDeleteMethod = () => {
-      if (!selectedPm || paymentMethods.length <= 1) return;
-      const next = paymentMethods.filter((m) => m.id !== selectedPm.id);
-      setPaymentMethods(next);
-      saveStoredPaymentMethods(next);
-      closePmSheet();
-    };
-
-    const handleResetMethods = () => {
-      setPaymentMethods(DEFAULT_PAYMENT_METHODS);
-      saveStoredPaymentMethods(DEFAULT_PAYMENT_METHODS);
-      setPmResetConfirm(false);
-    };
-
-    const pmUsageCounts: Record<string, number> = {};
-    for (const tx of transactions) {
-      const m = (tx.paymentMethod || '').toLowerCase().trim();
-      if (m) pmUsageCounts[m] = (pmUsageCounts[m] || 0) + 1;
-    }
-    for (const f of fixedExpenses) {
-      const m = (f.paymentMethod || 'Autogiro').toLowerCase().trim();
-      if (m) pmUsageCounts[m] = (pmUsageCounts[m] || 0) + 1;
-    }
-
     return (
-      <div className="ui-page animate-slide-in-right">
-        <div className="ui-admin-card">
-          {paymentMethods.map((method) => {
-            return (
-              <button
-                key={method.id}
-                type="button"
-                onClick={() => {
-                  setSelectedPm(method);
-                  setPmFormName(method.name);
-                  setPmFormIcon(method.icon || method.id || 'credit-card');
-                  setPmDeleteConfirm(false);
-                  setPmSheetMode('edit');
-                }}
-                className="ui-admin-row"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <span className="ui-admin-icon-slot">
-                    <PaymentMethodIcon method={method.name} iconId={method.icon || method.id} size={20} />
-                  </span>
-                  <span className="font-medium text-[13px] sm:text-[14px] text-[var(--text-primary)] truncate">
-                    {method.name}
-                  </span>
-                </div>
-                <div className="ui-admin-right">
-                  <span className="ui-admin-chevron">
-                    <CaretRight size={13} />
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="space-y-2 pt-1">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedPm(null);
-              setPmFormName('');
-              setPmFormIcon('credit-card');
-              setPmDeleteConfirm(false);
-              setPmSheetMode('new');
-            }}
-            className="w-full ui-btn-primary"
-          >
-            <Plus size={15} weight="bold" />
-            <span>Nytt betalsätt</span>
-          </button>
-
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() => setPmResetConfirm(true)}
-              className="ui-reset-btn"
-            >
-              <ArrowCounterClockwise size={13} />
-              <span>Återställ standardbetalsätt</span>
-            </button>
-          </div>
-
-          <ConfirmDialog
-            isOpen={pmResetConfirm}
-            title="Återställ standardbetalsätt?"
-            description="Dina egna betalsätt ersätts med standardvalen."
-            confirmLabel="Återställ"
-            variant="primary"
-            onConfirm={handleResetMethods}
-            onCancel={() => setPmResetConfirm(false)}
-          />
-        </div>
-
-        <BottomSheet
-          isOpen={pmSheetMode !== null}
-          onClose={closePmSheet}
-          contentClassName="px-5 pt-1 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
-        >
-          <div className="ui-sheet-header mb-4">
-            <span className="ui-sheet-title">
-              {pmSheetMode === 'new' ? 'Nytt betalsätt' : 'Redigera betalsätt'}
-            </span>
-            <button
-              type="button"
-              onClick={closePmSheet}
-              className="ui-icon-btn"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <form onSubmit={handleSavePmSheet} className="space-y-4">
-            <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-4">
-              <label className="flex items-center gap-3.5 cursor-text">
-                <div className="w-11 h-11 flex items-center justify-center shrink-0">
-                  <PaymentMethodIcon
-                    method={pmFormName || 'Betalsätt'}
-                    iconId={pmFormIcon}
-                    size={30}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-0.5">
-                    Namn på betalsätt
-                  </span>
-                  <input
-                    type="text"
-                    autoFocus={pmSheetMode === 'new'}
-                    value={pmFormName}
-                    onChange={(e) => setPmFormName(e.target.value)}
-                    placeholder="Namn"
-                    required
-                    className="w-full bg-transparent border-0 p-0 font-display font-semibold text-lg sm:text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
-                  />
-                </div>
-              </label>
-            </div>
-
-            <div className="space-y-1.5">
-              <span className="px-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-                Välj ikon
-              </span>
-              <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
-                {AVAILABLE_PAYMENT_METHOD_ICONS.map((item) => {
-                  const isSelected = pmFormIcon === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      title={item.label}
-                      onClick={() => setPmFormIcon(item.id)}
-                      className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                        isSelected
-                          ? 'bg-[var(--surface-color)] ring-2 ring-[var(--text-primary)] scale-[1.04]'
-                          : 'bg-transparent hover:bg-[var(--surface-color)]'
-                      }`}
-                    >
-                      <PaymentMethodIcon iconId={item.id} size={22} />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-2.5">
-              <button
-                type="submit"
-                className="ui-btn-primary"
-              >
-                <Check size={14} weight="bold" />
-                <span>Spara betalsätt</span>
-              </button>
-
-              {pmSheetMode === 'edit' && paymentMethods.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => setPmDeleteConfirm(true)}
-                  className="ui-btn-danger"
-                >
-                  <Trash size={14} />
-                  <span>Ta bort betalsätt</span>
-                </button>
-              )}
-            </div>
-
-            <ConfirmDialog
-              isOpen={pmDeleteConfirm}
-              title="Ta bort betalsätt?"
-              description={`${pmFormName || 'Betalsättet'} tas bort.`}
-              confirmLabel="Ta bort"
-              onConfirm={handleDeleteMethod}
-              onCancel={() => setPmDeleteConfirm(false)}
-            />
-          </form>
-        </BottomSheet>
-      </div>
+      <PaymentMethodsSettingsView
+        paymentMethods={paymentMethods}
+        setPaymentMethods={setPaymentMethods}
+        transactions={transactions}
+        fixedExpenses={fixedExpenses}
+      />
     );
   }
 
@@ -948,372 +687,27 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
   return (
     <div className="space-y-5 pb-40 sm:pb-44 animate-slide-in-left">
-      {hiddenAvatarInput}
-
-      {/* 1. Konto / Profil */}
-      <div className="ui-admin-card">
-        <button
-          type="button"
-          onClick={() => setSubView('profile')}
-          className="ui-admin-row py-3.5"
-        >
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center shrink-0">
-              {userAvatar ? (
-                <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
-              ) : initialChar ? (
-                <span className="font-display font-semibold text-xs uppercase text-[var(--text-primary)]">
-                  {initialChar}
-                </span>
-              ) : (
-                <UserCircle size={20} weight="regular" className="text-[var(--text-secondary)]" />
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <span className={rowTitleClass}>{userName || 'Konto'}</span>
-              <span className={rowSubClass}>
-                {userEmail || 'Profil, namn och e-post'}
-              </span>
-              {userEmail && !isDemoMode() && <EmailVerificationStatus compact />}
-            </div>
-          </div>
-
-          <span className="ui-admin-chevron">
-            <CaretRight size={14} />
-          </span>
-        </button>
-      </div>
-
-      {/* 2. Mitt – sparmål, kvitton och paket */}
-      {onOpenSection && (
-        <div className="ui-admin-card">
-          {(
-            [
-              { id: 'goals', label: 'Sparmål', icon: PiggyBank },
-              { id: 'receipts', label: 'Kvitton', icon: Paperclip },
-              { id: 'packages', label: 'Väntar på paket', icon: Package },
-            ] as const
-          ).map((item) => {
-            const Icon = item.icon;
-            const count = sectionCounts[item.id] || 0;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onOpenSection(item.id)}
-                className="ui-admin-row"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <span className="ui-admin-icon-slot">
-                    <Icon size={18} weight="regular" />
-                  </span>
-                  <span className={rowTitleClass}>{item.label}</span>
-                </div>
-                <div className="ui-admin-right">
-                  {count > 0 && <span className="ui-admin-value tabular-nums">{count}</span>}
-                  <span className="ui-admin-chevron">
-                    <CaretRight size={13} />
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* 3. Ekonomi */}
-      <section className="space-y-2">
-        <span className={sectionLabelClass}>Ekonomi</span>
-        <div className="ui-admin-card">
-          {/* Bankkonton – bara för admin tills bankkopplingen finns för alla */}
-          {bankEnabled ? (
-            <button
-              type="button"
-              onClick={() => setSubView('bank')}
-              className="ui-admin-row"
-            >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <CreditCard size={18} weight="regular" />
-                </span>
-                <span className={rowTitleClass}>Bankkonton</span>
-              </div>
-              <div className="ui-admin-right">
-                <span
-                  className={`ui-admin-value ${
-                    hasActiveBank
-                      ? 'text-emerald-600 dark:text-emerald-400 font-medium'
-                      : ''
-                  }`}
-                >
-                  {hasActiveBank ? 'Ansluten' : 'Anslut'}
-                </span>
-                <span className="ui-admin-chevron">
-                  <CaretRight size={13} />
-                </span>
-              </div>
-            </button>
-          ) : (
-            <div className="ui-admin-row cursor-default">
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <CreditCard size={18} weight="regular" />
-                </span>
-                <span className={rowTitleClass}>Bankkoppling</span>
-              </div>
-              <div className="ui-admin-right">
-                <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-muted)]">
-                  Kommer snart
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Lönedag */}
-          <button
-            type="button"
-            onClick={() => setSubView('period')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <CalendarBlank size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Lönedag</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-value">Den {targetPayday}:e</span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Kategorier */}
-          <button
-            type="button"
-            onClick={() => setSubView('categories')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <Tag size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Kategorier</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Betalsätt */}
-          <button
-            type="button"
-            onClick={() => setSubView('paymentMethods')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <Wallet size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Betalsätt</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Dölj egna överföringar */}
-          <div className="ui-admin-row-static">
-            <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-3">
-              <span className="ui-admin-icon-slot">
-                <ArrowsLeftRight size={18} weight="regular" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <span className={rowTitleClass}>Dölj egna överföringar</span>
-                <span className={rowSubClass}>
-                  Räknar inte flytt mellan egna konton som inkomst eller utgift
-                </span>
-              </div>
-            </div>
-            {onToggleExcludeInternalTransfers && (
-              <button
-                type="button"
-                role="switch"
-                aria-checked={excludeInternalTransfers}
-                onClick={() => onToggleExcludeInternalTransfers(!excludeInternalTransfers)}
-                className={`ui-switch ${
-                  excludeInternalTransfers ? 'ui-switch-on' : 'ui-switch-off'
-                }`}
-              >
-                <span
-                  className={`ui-switch-thumb ${
-                    excludeInternalTransfers ? 'ui-switch-thumb-on' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. App & konto */}
-      <section className="space-y-1.5">
-        <span className={sectionLabelClass}>App & konto</span>
-        <div className="ui-admin-card">
-          {/* Utseende */}
-          <button
-            type="button"
-            onClick={() => setSubView('appearance')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                {themeMode === 'dark' ? (
-                  <Moon size={18} weight="regular" />
-                ) : (
-                  <Sun size={18} weight="regular" />
-                )}
-              </span>
-              <span className={rowTitleClass}>Utseende</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-value">
-                {themeMode === 'system'
-                  ? 'System'
-                  : themeMode === 'dark'
-                  ? 'Mörkt'
-                  : 'Ljust'}
-              </span>
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Data & säkerhet */}
-          <button
-            type="button"
-            onClick={() => setSubView('security')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <ShieldCheck size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Data & säkerhet</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Hjälp & feedback */}
-          <button
-            type="button"
-            onClick={() => setSubView('feedback')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <ChatCircleText size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Hjälp & feedback</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Villkor & integritet */}
-          <button
-            type="button"
-            onClick={() => setSubView('legal')}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <span className="ui-admin-icon-slot">
-                <LockKey size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Villkor & integritet</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-
-          {/* Admin & test (Endast synlig för admin) */}
-          {(userEmail || '').trim().toLowerCase() === 'kevinwpts@gmail.com' && (
-            <button
-              type="button"
-              onClick={() => setSubView('admin')}
-              className="ui-admin-row"
-            >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <SlidersHorizontal size={18} weight="regular" />
-                </span>
-                <span className={rowTitleClass}>Admin & test</span>
-              </div>
-              <div className="ui-admin-right">
-                <span className="ui-admin-value">Scenarion & flöden</span>
-                <span className="ui-admin-chevron">
-                  <CaretRight size={13} />
-                </span>
-              </div>
-            </button>
-          )}
-        </div>
-      </section>
-
-      {/* 5. Logga ut / Logga in */}
-      <div className="ui-admin-card">
-        {userEmail ? (
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="ui-admin-row hover:bg-rose-500/5"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-5 h-5 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
-                <SignOut size={18} weight="regular" />
-              </div>
-              <span className="text-[13px] sm:text-[14px] font-medium text-rose-600 dark:text-rose-400">
-                Logga ut
-              </span>
-            </div>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onOpenAuth}
-            className="ui-admin-row"
-          >
-            <div className="flex items-center gap-3.5">
-              <span className="ui-admin-icon-slot">
-                <UserCircle size={18} weight="regular" />
-              </span>
-              <span className={rowTitleClass}>Logga in</span>
-            </div>
-            <div className="ui-admin-right">
-              <span className="ui-admin-chevron">
-                <CaretRight size={13} />
-              </span>
-            </div>
-          </button>
-        )}
-      </div>
+      <SettingsMainList
+        hiddenAvatarInput={hiddenAvatarInput}
+        setSubView={setSubView}
+        userAvatar={userAvatar}
+        initialChar={initialChar}
+        rowTitleClass={rowTitleClass}
+        userName={userName}
+        rowSubClass={rowSubClass}
+        userEmail={userEmail}
+        onOpenSection={onOpenSection}
+        sectionCounts={sectionCounts}
+        sectionLabelClass={sectionLabelClass}
+        bankEnabled={bankEnabled}
+        hasActiveBank={hasActiveBank}
+        targetPayday={targetPayday}
+        onToggleExcludeInternalTransfers={onToggleExcludeInternalTransfers}
+        excludeInternalTransfers={excludeInternalTransfers}
+        themeMode={themeMode}
+        onSignOut={onSignOut}
+        onOpenAuth={onOpenAuth}
+      />
     </div>
   );
 };

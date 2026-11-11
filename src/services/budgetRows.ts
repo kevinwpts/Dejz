@@ -1,11 +1,32 @@
 import type { FixedExpense, Income } from '../types';
+import type { Database, Json } from '../types/database';
 
 /**
  * Översättning mellan fasta utgifter/inkomster i appen och raderna i databasen.
- * Extra fält som saknar egen kolumn i äldre databaser sparas i `period_overrides` med _-prefix.
+ * Fält som saknar egen kolumn (t.ex. sista betalning, delad utgift) sparas i `period_overrides` med _-prefix.
  */
-type Overrides = Record<string, unknown>;
-type DbRow = Record<string, unknown> & { id: string; period_overrides?: Overrides | null };
+type Tables = Database['public']['Tables'];
+export type FixedExpenseRow = Tables['fixed_expenses']['Row'];
+export type FixedExpenseInsert = Tables['fixed_expenses']['Insert'];
+export type IncomeSourceRow = Tables['income_sources']['Row'];
+export type IncomeSourceInsert = Tables['income_sources']['Insert'];
+
+type Overrides = { [key: string]: Json | undefined };
+
+/**
+ * Appens objekt (kategorier, sparmål, splits …) sparas i JSON-kolumner.
+ * De är vanlig JSON, men TypeScript kan inte koppla ihop ett `interface` med `Json`
+ * (interface saknar indexsignatur) – åt något håll. Därför de här två avsiktliga typomvandlingarna,
+ * samlade på ett ställe i stället för utspridda `as unknown as`.
+ */
+export function toJson(value: unknown): Json {
+  return value as Json;
+}
+
+/** Läser en JSON-kolumn som appens typ. Ingen kontroll görs – datan är den appen själv har sparat. */
+export function fromJson<T>(value: Json | null | undefined): T {
+  return value as unknown as T;
+}
 
 const isUuid = (id?: string) =>
   Boolean(id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
@@ -38,7 +59,7 @@ export type FixedExpenseRecord = FixedExpenseInput & {
   periodOverrides: Record<string, number>;
 };
 
-export function fixedExpenseToRow(userId: string, expense: FixedExpenseInput): Record<string, unknown> {
+export function fixedExpenseToRow(userId: string, expense: FixedExpenseInput): FixedExpenseInsert {
   const base: Overrides = { ...(expense.periodOverrides || {}) };
   for (const key of FIXED_META_KEYS) delete base[key];
 
@@ -83,20 +104,14 @@ export function fixedExpenseToRow(userId: string, expense: FixedExpenseInput): R
           is_cancelled: true,
           ...(expense.cancellationDate ? { cancellation_date: expense.cancellationDate } : {}),
           ...(expense.cancelledAt ? { cancelled_at: expense.cancelledAt } : {}),
-          ...(expense.lastPaymentDate ? { last_payment_date: expense.lastPaymentDate } : {}),
-          has_no_more_payments: Boolean(expense.hasNoMorePayments),
-          ...(expense.cancellationScenario ? { cancellation_scenario: expense.cancellationScenario } : {}),
         }
       : // "Ångra uppsägning" måste nollställa kolumnerna, annars är den uppsagd igen efter omladdning
         { is_cancelled: false, cancellation_date: null, cancelled_at: null }),
   };
 }
 
-export function fixedExpenseFromRow(e: DbRow): FixedExpenseRecord {
-  const po: Overrides = e.period_overrides || {};
-  const hasNoMore = present(e.has_no_more_payments)
-    ? Boolean(e.has_no_more_payments || po._has_no_more_payments)
-    : Boolean(po._has_no_more_payments ?? false);
+export function fixedExpenseFromRow(e: Partial<FixedExpenseRow> & { id: string }): FixedExpenseRecord {
+  const po = (e.period_overrides as Overrides | null) || {};
   return {
     id: e.id,
     name: e.name as string,
@@ -123,9 +138,9 @@ export function fixedExpenseFromRow(e: DbRow): FixedExpenseRecord {
     isCancelled: Boolean(e.is_cancelled || po._is_cancelled),
     cancellationDate: (e.cancellation_date || po._cancellation_date || undefined) as string | undefined,
     cancelledAt: (e.cancelled_at || po._cancelled_at || undefined) as number | undefined,
-    lastPaymentDate: (e.last_payment_date || po._last_payment_date || undefined) as string | undefined,
-    hasNoMorePayments: hasNoMore,
-    cancellationScenario: (e.cancellation_scenario || po._cancellation_scenario || undefined) as
+    lastPaymentDate: (po._last_payment_date || undefined) as string | undefined,
+    hasNoMorePayments: Boolean(po._has_no_more_payments ?? false),
+    cancellationScenario: (po._cancellation_scenario || undefined) as
       | FixedExpense['cancellationScenario']
       | undefined,
   };
@@ -133,7 +148,7 @@ export function fixedExpenseFromRow(e: DbRow): FixedExpenseRecord {
 
 export type IncomeInput = Income & { originalName?: string };
 
-export function incomeToRow(userId: string, income: IncomeInput): Record<string, unknown> {
+export function incomeToRow(userId: string, income: IncomeInput): IncomeSourceInsert {
   return {
     id: isUuid(income.id) ? income.id : undefined,
     user_id: userId,
@@ -152,8 +167,10 @@ export function incomeToRow(userId: string, income: IncomeInput): Record<string,
   };
 }
 
-export function incomeFromRow(i: DbRow): IncomeInput & { periodOverrides: Record<string, number> } {
-  const po: Overrides = i.period_overrides || {};
+export function incomeFromRow(
+  i: Partial<IncomeSourceRow> & { id: string }
+): IncomeInput & { periodOverrides: Record<string, number> } {
+  const po = (i.period_overrides as Overrides | null) || {};
   return {
     id: i.id,
     name: i.name as string,

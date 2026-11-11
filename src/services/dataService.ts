@@ -1,61 +1,46 @@
-import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
-import { Account, Config, Income, FixedExpense, SavingsGoal, Transaction } from '../types';
+import {
+  Account,
+  Category,
+  Config,
+  HomeWidgetConfig,
+  Income,
+  FixedExpense,
+  MonthlySaving,
+  PaydayType,
+  QuickChoice,
+  SavingsGoal,
+  Transaction,
+} from '../types';
+import type { Database } from '../types/database';
 import { seedDemoData } from '../utils/demoData';
 import { getTransactionReceipts } from '../utils/format';
-import { TransactionRow, transactionFromRow, transactionToRow } from './transactionRows';
+import {
+  TransactionInsert,
+  TransactionRow,
+  TransactionUpdate,
+  transactionFromRow,
+  transactionToRow,
+} from './transactionRows';
 import {
   FixedExpenseInput,
   fixedExpenseFromRow,
   fixedExpenseToRow,
   incomeFromRow,
   incomeToRow,
+  fromJson,
+  toJson,
 } from './budgetRows';
 
 /**
- * dataService pratar med tabeller vars kolumner kan saknas i äldre databaser (se stripKnownMissingColumns
- * och period_overrides-reserven). Därför en flexibel klient här – resten av appen använder den
- * strikt typade klienten (types/database.ts), så att fel kolumnnamn upptäcks direkt.
+ * All läsning och skrivning av appens data i Supabase (och demoläget i localStorage).
+ * Använder den strikt typade klienten: en kolumn som inte finns i databasen ger ett fel när koden byggs.
+ * Varje sparning är ett enda anrop – inga omförsök där kolumner plockas bort.
  */
-const db = supabase as unknown as SupabaseClient<any>;
+const db = supabase;
 
-function extractMissingColumn(error: { message?: string } | null | undefined): string | null {
-  if (!error) return null;
-  const msg = error.message || '';
-  // PostgREST schema cache: Could not find the 'column_name' column of 'table_name' in the schema cache
-  const postgrestMatch = msg.match(/Could not find the ['"]([^'"]+)['"] column/i);
-  if (postgrestMatch && postgrestMatch[1]) return postgrestMatch[1];
-
-  // Postgres 42703: column "column_name" of relation "table_name" does not exist
-  const postgresMatch = msg.match(/column ['"]([^'"]+)['"]/i);
-  if (postgresMatch && postgresMatch[1]) return postgresMatch[1];
-
-  return null;
-}
-
-const missingColumnsByTable: Record<string, Set<string>> = {
-  profiles: new Set<string>(),
-  fixed_expenses: new Set<string>(),
-  income_sources: new Set<string>(),
-  transactions: new Set<string>(),
-};
-
-function stripKnownMissingColumns(table: string, payload: Record<string, unknown>) {
-  const set = missingColumnsByTable[table];
-  if (!set) return;
-  for (const col of set) {
-    if (col in payload) {
-      delete payload[col];
-    }
-  }
-}
-
-function recordMissingColumn(table: string, col: string) {
-  if (!missingColumnsByTable[table]) {
-    missingColumnsByTable[table] = new Set<string>();
-  }
-  missingColumnsByTable[table].add(col);
-}
+type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 export function hasValidSavedCategoryBudgets(cats: unknown): boolean {
   if (!Array.isArray(cats) || cats.length === 0) return false;
@@ -100,11 +85,15 @@ export const dataService = {
       // Ignore localStorage read errors
     }
 
-    const resolvedCategories = hasValidSavedCategoryBudgets(profileData.categories)
-      ? profileData.categories
+    // JSON-kolumnerna innehåller appens egna objekt – tolka dem som rätt typ.
+    const dbCategories = fromJson<Category[] | null>(profileData.categories);
+    const dbSavingsGoals = fromJson<SavingsGoal[] | null>(profileData.savings_goals);
+
+    const resolvedCategories = hasValidSavedCategoryBudgets(dbCategories)
+      ? dbCategories
       : (localSavedConfig?.hasSavedInitialBudget !== false && hasValidSavedCategoryBudgets(localSavedConfig?.categories)
           ? localSavedConfig.categories
-          : (profileData.categories || localSavedConfig?.categories));
+          : (dbCategories || localSavedConfig?.categories));
 
     return {
       currency: profileData.currency,
@@ -116,29 +105,29 @@ export const dataService = {
       savingsPot: Number(profileData.savings_pot ?? localSavedConfig?.savingsPot) || 0,
       surplusIncome: Number(profileData.surplus_income ?? localSavedConfig?.surplusIncome) || 0,
       payday: profileData.payday,
-      paydayType: profileData.payday_type,
+      paydayType: profileData.payday_type as PaydayType,
       paydayBeforeWeekend: profileData.payday_before_weekend,
       categories: resolvedCategories,
-      incomeCategories: profileData.income_categories || localSavedConfig?.incomeCategories,
-      paymentMethods: profileData.payment_methods || ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
+      incomeCategories: fromJson<Category[] | null>(profileData.income_categories) || localSavedConfig?.incomeCategories,
+      paymentMethods: (profileData.payment_methods as Config['paymentMethods'] | null) || ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
       initialSpent: profileData.initial_spent,
-      notifications: profileData.notifications,
+      notifications: profileData.notifications as Config['notifications'],
       securityLock: profileData.security_lock,
       darkMode: (profileData.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark') ? true : false,
       themeMode: (profileData.theme_mode === 'dark' || localSavedConfig?.themeMode === 'dark') ? 'dark' : 'light',
       themeColor: profileData.theme_color || localSavedConfig?.themeColor || 'neutral',
-      quickChoices: profileData.quick_choices || [],
-      savingsGoals: (profileData.savings_goals && Array.isArray(profileData.savings_goals) && profileData.savings_goals.length > 0)
-        ? profileData.savings_goals
+      quickChoices: fromJson<QuickChoice[] | null>(profileData.quick_choices) || [],
+      savingsGoals: (dbSavingsGoals && Array.isArray(dbSavingsGoals) && dbSavingsGoals.length > 0)
+        ? dbSavingsGoals
         : (localSavedConfig?.savingsGoals || []),
       totalSavedLifetime: profileData.total_saved_lifetime || 0,
       monthlySavings: (profileData.monthly_savings !== undefined && profileData.monthly_savings !== null)
         ? profileData.monthly_savings
         : (localSavedConfig?.monthlySavings !== undefined ? localSavedConfig.monthlySavings : 0),
       monthlySavingsItems: Array.isArray(profileData.monthly_savings_items)
-        ? profileData.monthly_savings_items
+        ? fromJson<MonthlySaving[]>(profileData.monthly_savings_items)
         : (Array.isArray(localSavedConfig?.monthlySavingsItems) ? localSavedConfig.monthlySavingsItems : []),
-      appIconTheme: profileData.app_icon_theme,
+      appIconTheme: profileData.app_icon_theme as Config['appIconTheme'],
       includeFixedExpensesInAnalysis: profileData.include_fixed_expenses_in_analysis !== undefined 
         ? profileData.include_fixed_expenses_in_analysis 
         : (localSavedConfig?.includeFixedExpensesInAnalysis !== undefined ? localSavedConfig.includeFixedExpensesInAnalysis : true),
@@ -153,7 +142,7 @@ export const dataService = {
       showFixedExpensesInHistory: (profileData.show_fixed_expenses_in_history !== undefined && profileData.show_fixed_expenses_in_history !== null)
         ? Boolean(profileData.show_fixed_expenses_in_history)
         : (localSavedConfig?.showFixedExpensesInHistory !== undefined ? Boolean(localSavedConfig.showFixedExpensesInHistory) : false),
-      homeWidgets: profileData.home_widgets || localSavedConfig?.homeWidgets || undefined,
+      homeWidgets: fromJson<HomeWidgetConfig[] | null>(profileData.home_widgets) || localSavedConfig?.homeWidgets || undefined,
       hideEmptyCategories: profileData.hide_empty_categories !== undefined
         ? profileData.hide_empty_categories
         : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
@@ -204,7 +193,7 @@ export const dataService = {
     return profileData || { };
   },
 
-  async updateProfile(userId: string, updates: Record<string, unknown>) {
+  async updateProfile(userId: string, updates: ProfileUpdate) {
     if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_profile');
       const profile = saved ? JSON.parse(saved) : {};
@@ -212,32 +201,11 @@ export const dataService = {
       localStorage.setItem('demo_profile', JSON.stringify(updatedProfile));
       return;
     }
-    const payload = { ...updates };
-    let { error } = await db
+    const { error } = await db
       .from('profiles')
-      .update(payload)
+      .update(updates)
       .eq('id', userId);
 
-    let attempts = 0;
-    while (error && attempts < 5) {
-      attempts++;
-      const missingCol = extractMissingColumn(error);
-      if (missingCol && missingCol in payload) {
-        delete payload[missingCol];
-        if (Object.keys(payload).length === 0) {
-          error = null;
-          break;
-        }
-        const retryResult = await db
-          .from('profiles')
-          .update(payload)
-          .eq('id', userId);
-        error = retryResult.error;
-      } else {
-        break;
-      }
-    }
-    
     if (error) throw error;
   },
 
@@ -285,7 +253,8 @@ export const dataService = {
       _onboardingCompleted: true,
     };
 
-    const payload: Record<string, unknown> = {
+    // "Har sparat budget" och "onboarding klar" har inga egna kolumner – de ligger i notifications ovan.
+    const payload: ProfileInsert = {
       id: userId,
       currency: config.currency,
       currency_code: config.currencyCode || null,
@@ -296,77 +265,42 @@ export const dataService = {
       payday: config.payday,
       payday_type: config.paydayType,
       payday_before_weekend: config.paydayBeforeWeekend,
-      categories: config.categories,
-      income_categories: config.incomeCategories,
-      payment_methods: config.paymentMethods,
+      categories: toJson(config.categories),
+      income_categories: toJson(config.incomeCategories),
+      payment_methods: toJson(config.paymentMethods),
       initial_spent: config.initialSpent,
       notifications: notificationsPayload,
       security_lock: config.securityLock,
       dark_mode: Boolean(config.darkMode),
       theme_mode: config.darkMode ? 'dark' : 'light',
       theme_color: config.themeColor || 'neutral',
-      quick_choices: config.quickChoices,
+      quick_choices: toJson(config.quickChoices),
       savings_pot: config.savingsPot,
-      savings_goals: config.savingsGoals,
+      savings_goals: toJson(config.savingsGoals),
       total_saved_lifetime: config.totalSavedLifetime,
       surplus_income: config.surplusIncome,
       monthly_savings: config.monthlySavings !== undefined ? config.monthlySavings : (config.monthlySavingsItems?.reduce((sum, s) => sum + (Number(s.amount) || 0), 0) || 0),
-      monthly_savings_items: config.monthlySavingsItems || [],
+      monthly_savings_items: toJson(config.monthlySavingsItems || []),
       app_icon_theme: config.appIconTheme,
       include_fixed_expenses_in_analysis: config.includeFixedExpensesInAnalysis,
       show_fixed_expenses_in_today_view: config.showFixedExpensesInTodayView,
       show_fixed_expenses_in_calendar: config.showFixedExpensesInCalendar,
       show_fixed_expenses_in_history: config.showFixedExpensesInHistory,
-      home_widgets: config.homeWidgets,
+      home_widgets: toJson(config.homeWidgets),
       hide_empty_categories: config.hideEmptyCategories,
-      has_saved_initial_budget: effectiveHasSavedBudget,
-      onboarding_completed: true,
       updated_at: new Date().toISOString()
     };
-
-    stripKnownMissingColumns('profiles', payload);
 
     let { error } = await db
       .from('profiles')
       .update(payload)
       .eq('id', userId);
-    
-    // Robust fallback if user's Supabase profiles table is missing newly added columns
-    let attempts = 0;
-    while (error && attempts < 35) {
-      attempts++;
-      const missingCol = extractMissingColumn(error);
-      if (missingCol && missingCol in payload) {
-        recordMissingColumn('profiles', missingCol);
-        delete payload[missingCol];
-        const retryResult = await db.from('profiles').update(payload).eq('id', userId);
-        error = retryResult.error;
-      } else {
-        break;
-      }
-    }
 
-    // Fallback to UPSERT if UPDATE fails due to row missing or other issues
+    // Om UPDATE misslyckas (t.ex. profilraden saknas): försök en gång med UPSERT
     if (error) {
       console.warn("[Supabase saveSettings] UPDATE failed, falling back to UPSERT...", error);
-      let upsertError = null;
       const upsertResult = await db.from('profiles').upsert(payload);
-      upsertError = upsertResult.error;
-      
-      let upsertAttempts = 0;
-      while (upsertError && upsertAttempts < 35) {
-        upsertAttempts++;
-        const missingCol = extractMissingColumn(upsertError);
-        if (missingCol && missingCol in payload) {
-          recordMissingColumn('profiles', missingCol);
-          delete payload[missingCol];
-          const retryResult = await db.from('profiles').upsert(payload);
-          upsertError = retryResult.error;
-        } else {
-          break;
-        }
-      }
-      error = upsertError;
+      error = upsertResult.error;
     }
 
     if (error) {
@@ -431,45 +365,24 @@ export const dataService = {
         .upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
     }
 
-    const payload: Record<string, unknown> = { user_id: userId, ...transactionToRow(transaction, 'insert') };
+    const payload: TransactionInsert = { user_id: userId, ...transactionToRow(transaction, 'insert') };
 
-    stripKnownMissingColumns('transactions', payload);
+    const res = await db.from('transactions').insert(payload).select();
+    let data: TransactionRow[] | null = res.data;
+    let error = res.error;
 
-    let data: TransactionRow[] | null = null;
-    let error: PostgrestError | null = null;
-    let attempts = 0;
-
-    while (attempts < 10) {
-      attempts++;
-      const res = await db.from('transactions').insert(payload).select();
-      data = res.data;
-      error = res.error;
-      if (!error) break;
-
-      const missingCol = extractMissingColumn(error);
-      if (missingCol && missingCol in payload) {
-        recordMissingColumn('transactions', missingCol);
-        delete payload[missingCol];
-        continue;
+    // Samma bankköp finns redan (unikt bank-id): använd raden som redan är sparad
+    if (error && error.code === '23505' && transaction.bankTransactionId) {
+      const { data: existingRows } = await db
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .contains('tags', [`bank_tx:${transaction.bankTransactionId}`])
+        .limit(1);
+      if (existingRows && existingRows.length > 0) {
+        data = existingRows;
+        error = null;
       }
-      // Handle unique index conflict on bank_transaction_id idempotently
-      if (
-        error.code === '23505' &&
-        transaction.bankTransactionId
-      ) {
-        const { data: existingRows } = await db
-          .from('transactions')
-          .select('*')
-          .eq('user_id', userId)
-          .contains('tags', [`bank_tx:${transaction.bankTransactionId}`])
-          .limit(1);
-        if (existingRows && existingRows.length > 0) {
-          data = existingRows;
-          error = null;
-          break;
-        }
-      }
-      break;
     }
 
     if (error) {
@@ -505,29 +418,9 @@ export const dataService = {
       return updatedTx;
     }
 
-    const payload: Record<string, unknown> = transactionToRow(transaction, 'update');
+    const payload: TransactionUpdate = transactionToRow(transaction, 'update');
 
-    stripKnownMissingColumns('transactions', payload);
-
-    let data: TransactionRow[] | null = null;
-    let error: PostgrestError | null = null;
-    let attempts = 0;
-
-    while (attempts < 10) {
-      attempts++;
-      const res = await db.from('transactions').update(payload).eq('id', id).select();
-      data = res.data;
-      error = res.error;
-      if (!error) break;
-
-      const missingCol = extractMissingColumn(error);
-      if (missingCol && missingCol in payload) {
-        recordMissingColumn('transactions', missingCol);
-        delete payload[missingCol];
-        continue;
-      }
-      break;
-    }
+    const { data, error } = await db.from('transactions').update(payload).eq('id', id).select();
 
     if (error) throw error;
     if (!data || data.length === 0) throw new Error('Kunde inte uppdatera transaktionen');
@@ -578,26 +471,11 @@ export const dataService = {
       localStorage.setItem('demo_incomes', JSON.stringify(list));
       return;
     }
-    const payload = incomeToRow(userId, income);
+    const { error } = await db
+      .from('income_sources')
+      .upsert(incomeToRow(userId, income));
 
-    const currentPayload: Record<string, unknown> = { ...payload };
-    let attempts = 0;
-    while (attempts < 5) {
-      attempts++;
-      const { error } = await db
-        .from('income_sources')
-        .upsert(currentPayload);
-      
-      if (!error) return;
-
-      const missingCol = extractMissingColumn(error) || (error.message?.includes('note') ? 'note' : null);
-      if (missingCol && missingCol in currentPayload) {
-        console.warn(`[Supabase income_sources] Column "${missingCol}" missing in schema. Stripping and retrying...`);
-        delete currentPayload[missingCol];
-        continue;
-      }
-      throw error;
-    }
+    if (error) throw error;
   },
 
   async deleteIncomeSource(id: string, userId?: string, namesToDelete?: string[]) {    if (id.startsWith('demo-')) {
@@ -658,28 +536,11 @@ export const dataService = {
       return;
     }
 
-    const payload = fixedExpenseToRow(userId, expense);
+    const { error } = await db
+      .from('fixed_expenses')
+      .upsert(fixedExpenseToRow(userId, expense));
 
-    const currentPayload: Record<string, unknown> = { ...payload };
-    stripKnownMissingColumns('fixed_expenses', currentPayload);
-
-    let attempts = 0;
-    while (attempts < 15) {
-      attempts++;
-      const { error } = await db
-        .from('fixed_expenses')
-        .upsert(currentPayload);
-      
-      if (!error) return;
-
-      const missingCol = extractMissingColumn(error);
-      if (missingCol && missingCol in currentPayload) {
-        recordMissingColumn('fixed_expenses', missingCol);
-        delete currentPayload[missingCol];
-        continue;
-      }
-      throw error;
-    }
+    if (error) throw error;
   },
 
   async deleteFixedExpense(id: string, userId?: string, namesToDelete?: string[]) {    if (id.startsWith('demo-')) {
@@ -1116,20 +977,17 @@ export const dataService = {
         .eq('user_id', userId),
     ]);
 
-    // Wave 2: Delete leaf tables in parallel
-    const leafTables = [
-      'transactions',
-      'bank_transactions',
-      'bank_auth_states',
-      'bank_provider_sessions',
-      'fixed_expenses',
-      'income_sources',
-      'savings_goals',
-      'feedback',
-    ];
-    await Promise.allSettled(
-      leafTables.map((table) => db.from(table).delete().eq('user_id', userId))
-    );
+    // Wave 2: Delete leaf tables in parallel (ett anrop per tabell så att varje anrop typkontrolleras)
+    await Promise.allSettled([
+      db.from('transactions').delete().eq('user_id', userId),
+      db.from('bank_transactions').delete().eq('user_id', userId),
+      db.from('bank_auth_states').delete().eq('user_id', userId),
+      db.from('bank_provider_sessions').delete().eq('user_id', userId),
+      db.from('fixed_expenses').delete().eq('user_id', userId),
+      db.from('income_sources').delete().eq('user_id', userId),
+      db.from('savings_goals').delete().eq('user_id', userId),
+      db.from('feedback').delete().eq('user_id', userId),
+    ]);
 
     // Wave 3: Delete parent account tables and clear profile preferences in parallel
     await Promise.allSettled([

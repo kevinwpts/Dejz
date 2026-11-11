@@ -1,5 +1,6 @@
 import type { Transaction, TransactionSplit } from '../types';
 import type { Database } from '../types/database';
+import { toJson } from './budgetRows';
 import { isKnownIconId, isEmojiString } from '../components/CategoryIcon';
 import { getTransactionReceipts, serializeTransactionReceipts } from '../utils/format';
 
@@ -8,6 +9,17 @@ import { getTransactionReceipts, serializeTransactionReceipts } from '../utils/f
  * Ett ställe för det som tidigare fanns i tre kopior (hämta, lägga till, ändra) – och testat.
  */
 export type TransactionRow = Database['public']['Tables']['transactions']['Row'];
+export type TransactionInsert = Database['public']['Tables']['transactions']['Insert'];
+export type TransactionUpdate = Database['public']['Tables']['transactions']['Update'];
+/** En rad att skicka (insert eller update) – `user_id` sätts av den som sparar. */
+export type TransactionRowInput = Omit<TransactionInsert, 'user_id'>;
+
+type OptionalTextColumn =
+  | 'bank_transaction_id'
+  | 'bank_account_id'
+  | 'original_bank_description'
+  | 'original_bank_currency'
+  | 'refund_of_transaction_id';
 
 /** Äldre rader sparade bank-id och återbetalning som taggar ("bank_tx:…") innan kolumnerna fanns. */
 const SYSTEM_TAG_PREFIXES = ['bank_tx:', 'bank_acc:', 'refund_of:'] as const;
@@ -26,7 +38,7 @@ function parseSplits(value: unknown): TransactionSplit[] {
       return [];
     }
   }
-  return Array.isArray(value) ? (value as unknown as TransactionSplit[]) : [];
+  return Array.isArray(value) ? (value as TransactionSplit[]) : [];
 }
 
 /** Taggar som sparas: användarens egna + stjärna och bank-/återbetalnings-id (för äldre databaser). */
@@ -42,15 +54,15 @@ export function buildTransactionTags(tx: Omit<Transaction, 'id'>): string[] {
 }
 
 /**
- * Raden som skickas till databasen.
+ * Raden som skickas till databasen (allt utom `user_id`, som läggs till vid insert).
  * mode 'insert': bankfält skickas bara när de finns.
  * mode 'update': ett bankfält som är satt men tomt nollställs (null) i databasen.
  */
 export function transactionToRow(
   tx: Omit<Transaction, 'id'>,
   mode: 'insert' | 'update'
-): Record<string, unknown> {
-  const row: Record<string, unknown> = {
+): TransactionRowInput {
+  const row: TransactionRowInput = {
     amount: tx.amount,
     category: tx.category,
     note: tx.note,
@@ -63,32 +75,30 @@ export function transactionToRow(
     payment_method: tx.paymentMethod,
     receipt_url: serializeTransactionReceipts(tx.receiptUrls, tx.receiptUrl),
     tags: buildTransactionTags(tx),
-    splits: tx.splits,
+    splits: toJson(tx.splits),
   };
-  const optional: Array<[string, unknown]> = [
-    ['bank_transaction_id', tx.bankTransactionId],
-    ['bank_account_id', tx.bankAccountId],
-    ['original_bank_description', tx.originalBankDescription],
-    ['original_bank_amount', tx.originalBankAmount],
-    ['original_bank_currency', tx.originalBankCurrency],
-    ['refund_of_transaction_id', tx.refundOfTransactionId],
-  ];
-  for (const [col, value] of optional) {
+  const setText = (col: OptionalTextColumn, value: string | undefined) => {
     if (mode === 'insert') {
-      if (col === 'original_bank_amount' ? value !== undefined : Boolean(value)) row[col] = value;
+      if (value) row[col] = value;
     } else if (value !== undefined) {
-      row[col] = col === 'original_bank_amount' ? value ?? null : value || null;
+      row[col] = value || null;
     }
-  }
+  };
+  setText('bank_transaction_id', tx.bankTransactionId);
+  setText('bank_account_id', tx.bankAccountId);
+  setText('original_bank_description', tx.originalBankDescription);
+  if (tx.originalBankAmount !== undefined) row.original_bank_amount = tx.originalBankAmount ?? null;
+  setText('original_bank_currency', tx.originalBankCurrency);
+  setText('refund_of_transaction_id', tx.refundOfTransactionId);
   return row;
 }
 
 /**
  * Raden från databasen som ett köp i appen.
- * `sent` är köpet vi just skickade: används som reserv om databasen saknar en kolumn.
+ * `sent` är köpet vi just skickade: används som reserv för fält som saknas i raden.
  */
 export function transactionFromRow(
-  row: Partial<TransactionRow> & { id: string; is_starred?: boolean | null },
+  row: Partial<TransactionRow> & { id: string },
   sent?: Omit<Transaction, 'id'>
 ): Transaction {
   const storedUrls = Array.isArray(row.receipt_urls)
@@ -116,7 +126,7 @@ export function transactionFromRow(
     receiptUrls,
     tags,
     splits: parseSplits(row.splits),
-    isStarred: Boolean(row.is_starred || tags.includes('starred') || sent?.isStarred),
+    isStarred: Boolean(tags.includes('starred') || sent?.isStarred),
     bankTransactionId:
       row.bank_transaction_id || findTagValue(tags, 'bank_tx:') || sent?.bankTransactionId,
     bankAccountId: row.bank_account_id || findTagValue(tags, 'bank_acc:') || sent?.bankAccountId,
