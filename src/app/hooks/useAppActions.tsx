@@ -1141,7 +1141,7 @@ export function useAppActions({
 
     try {
       // Hämta session och Bearer-token FÖRST innan localStorage rensas eller signOut körs
-      const sessionRes: any = await withFastTimeout(supabase.auth.getSession(), 1500);
+      const sessionRes = await withFastTimeout(supabase.auth.getSession(), 1500);
       const session = sessionRes?.data?.session || null;
       const token = session?.access_token || null;
       const sessionUid = session?.user?.id || null;

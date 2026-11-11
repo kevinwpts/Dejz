@@ -19,6 +19,10 @@ import {
   normalizeCategoryToValid,
 } from '../utils/appCache';
 
+// Rad från databasen (eller demolagringen) – fält kan saknas i äldre data.
+type DbFixedExpenseRow = Partial<FixedExpenseItem> & { deductionDay?: number };
+type DbIncomeRow = Partial<IncomeItem> & { deductionDay?: number };
+
 /**
  * Reconciles Fixed Expenses from DB, local state/cache, and bank detection
  * into a single deterministic, deduplicated list with valid UUIDs.
@@ -29,7 +33,7 @@ import {
  */
 export function reconcileFixedExpensesList(params: {
   currentList: FixedExpenseItem[];
-  dbList?: any[] | null;
+  dbList?: DbFixedExpenseRow[] | null;
   detectedList?: DetectedFixedExpenseWithEvidence[] | null;
   uid?: string | null;
 }): {
@@ -283,7 +287,7 @@ export function reconcileFixedExpensesList(params: {
  */
 export function reconcileIncomesList(params: {
   currentList: IncomeItem[];
-  dbList?: any[] | null;
+  dbList?: DbIncomeRow[] | null;
   detectedList?: DetectedIncomeWithEvidence[] | null;
   targetPayday: number;
   uid?: string | null;

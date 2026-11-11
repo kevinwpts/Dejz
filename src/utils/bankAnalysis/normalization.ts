@@ -407,7 +407,7 @@ export function isInternalTransferOrMicroSavings(
   const rawJson = tx.raw_json || {};
   const remittanceText = Array.isArray(rawJson?.remittance_information)
     ? rawJson.remittance_information
-        .map((r: any) => (typeof r === 'string' ? r : r?.unstructured || ''))
+        .map((r) => (typeof r === 'string' ? r : r?.unstructured || ''))
         .join(' ')
     : typeof rawJson?.remittance_information === 'string'
     ? rawJson.remittance_information

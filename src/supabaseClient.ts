@@ -1,8 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './types/database';
 
-const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {} as any;
-const procEnv = typeof process !== 'undefined' && process.env ? process.env : {} as any;
+const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : ({} as Partial<ImportMetaEnv>);
+const procEnv = typeof process !== 'undefined' && process.env ? process.env : ({} as Record<string, string | undefined>);
 
 export const supabaseUrl = metaEnv.VITE_SUPABASE_URL || procEnv.VITE_SUPABASE_URL || procEnv.SUPABASE_URL || undefined;
 export const supabaseAnonKey = metaEnv.VITE_SUPABASE_ANON_KEY || procEnv.VITE_SUPABASE_ANON_KEY || procEnv.SUPABASE_ANON_KEY || undefined;

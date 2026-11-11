@@ -86,8 +86,8 @@ export const BankModal: React.FC<BankModalProps> = ({
     try {
       const list = await bankService.listBanks('SE', env);
       setBanks(list);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Kunde inte hämta banklistan.');
+    } catch (err: unknown) {
+      setErrorMsg((err as { message?: string }).message || 'Kunde inte hämta banklistan.');
     } finally {
       setLoadingBanks(false);
     }
@@ -186,8 +186,8 @@ export const BankModal: React.FC<BankModalProps> = ({
       } else {
         setStep('authorizing');
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Kunde inte starta autentisering mot banken.');
+    } catch (err: unknown) {
+      setErrorMsg((err as { message?: string }).message || 'Kunde inte starta autentisering mot banken.');
     } finally {
       setStartingAuth(false);
     }
@@ -233,8 +233,8 @@ export const BankModal: React.FC<BankModalProps> = ({
 
       const status = await bankService.getStatus();
       onBankStateUpdated(status.connections, status.accounts);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Kunde inte slutföra bankkopplingen.');
+    } catch (err: unknown) {
+      setErrorMsg((err as { message?: string }).message || 'Kunde inte slutföra bankkopplingen.');
     } finally {
       setExchangingCode(false);
     }
@@ -286,8 +286,8 @@ export const BankModal: React.FC<BankModalProps> = ({
       onBankStateUpdated(synced.connections, synced.accounts);
       setStep('list');
       onClose();
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Kunde inte spara kontoval.');
+    } catch (err: unknown) {
+      setErrorMsg((err as { message?: string }).message || 'Kunde inte spara kontoval.');
     } finally {
       setSavingAccounts(false);
     }

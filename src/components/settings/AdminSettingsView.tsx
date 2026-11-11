@@ -16,10 +16,10 @@ export interface AdminSettingsViewProps {
   onStartCreateGoalWizard: () => void;
   setSubView: (next: SettingsSubView) => void;
   onOpenAddFixedModal: () => void;
-  onOpenPreviewFixedModal: (exp?: any) => void;
+  onOpenPreviewFixedModal: (exp?: FixedExpenseItem) => void;
   onOpenAddIncomeModal: () => void;
   onOpenAddTransactionModal: () => void;
-  onOpenPreviewTransactionModal: (tx?: any) => void;
+  onOpenPreviewTransactionModal: (tx?: TransactionItem) => void;
   onApplyFixedExpenses: (next: FixedExpenseItem[]) => void;
 }
 

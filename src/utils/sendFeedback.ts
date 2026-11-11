@@ -21,7 +21,7 @@ function defaultContext(): Record<string, string> {
       skärm: `${window.innerWidth}×${window.innerHeight}`,
       läge: document.documentElement.classList.contains('dark') ? 'mörkt' : 'ljust',
       hemskärmsapp: String(
-        (window.navigator as any).standalone === true ||
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
           window.matchMedia?.('(display-mode: standalone)').matches
       ),
       tid: new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' }),
@@ -46,11 +46,11 @@ export async function sendFeedback(
     const client = supabase;
     if (!client?.functions?.invoke) throw new Error('not_configured');
     // Max 8 sekunder – användaren ska aldrig fastna med en snurrande knapp
-    const result: any = await Promise.race([
+    const result = await Promise.race([
       client.functions.invoke('send-feedback', {
         body: { type, message: clean, context: { ...defaultContext(), ...extraContext } },
       }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
     ]);
     if (result?.error) throw result.error;
     return true;

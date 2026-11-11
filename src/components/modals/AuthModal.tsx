@@ -89,8 +89,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         },
       });
       if (error) throw error;
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Kunde inte logga in med Google. Försök igen.');
+    } catch (err: unknown) {
+      setErrorMsg((err as { message?: string }).message || 'Kunde inte logga in med Google. Försök igen.');
     } finally {
       setGoogleLoading(false);
     }
@@ -181,8 +181,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
         setTimeout(() => onClose(), 400);
       }
-    } catch (err: any) {
-      const msg = String(err?.message || '');
+    } catch (err: unknown) {
+      const msg = String((err as { message?: string } | null)?.message || '');
       if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
         setHasPasswordError(true);
         setShakeTrigger((prev) => prev + 1);

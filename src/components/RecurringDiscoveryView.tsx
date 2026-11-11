@@ -23,10 +23,10 @@ interface RecurringDiscoveryViewProps {
   bankAccounts?: BankAccount[];
   targetPayday: number;
   paydayBeforeWeekend: boolean;
-  onAddIncome: (data: Omit<IncomeItem, 'id'>) => Promise<any> | void;
-  onAddFixed: (data: Omit<FixedExpenseItem, 'id'>) => Promise<any> | void;
-  onUpdateIncome?: (item: IncomeItem) => Promise<any> | void;
-  onUpdateFixed?: (item: FixedExpenseItem) => Promise<any> | void;
+  onAddIncome: (data: Omit<IncomeItem, 'id'>) => Promise<unknown> | void;
+  onAddFixed: (data: Omit<FixedExpenseItem, 'id'>) => Promise<unknown> | void;
+  onUpdateIncome?: (item: IncomeItem) => Promise<unknown> | void;
+  onUpdateFixed?: (item: FixedExpenseItem) => Promise<unknown> | void;
 }
 
 interface DiscoveredCandidate {

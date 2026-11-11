@@ -195,7 +195,7 @@ export const isVariableItemDue = (
   return ref >= targetDueDate;
 };
 
-export const parseReceiptDate = (dateStr: any): Date | null => {
+export const parseReceiptDate = (dateStr: unknown): Date | null => {
   if (!dateStr) return null;
   if (dateStr instanceof Date && !isNaN(dateStr.getTime())) return dateStr;
   if (typeof dateStr !== 'string') return null;
@@ -255,12 +255,19 @@ export const normalizeFrequencyValue = (freq?: Frequency | string): Frequency =>
   return Frequency.MONTHLY;
 };
 
+// Reservfält i periodOverrides när kolumnerna saknas i äldre databaser.
+type FrequencyOverrides = {
+  _frequency?: Frequency | string;
+  _start_month?: number | string;
+  [key: string]: unknown;
+};
+
 export const isFixedItemDueInPeriod = (
   fe: {
     frequency?: Frequency | string;
     startMonth?: number;
     deductionDay?: number;
-    periodOverrides?: Record<string, any>;
+    periodOverrides?: FrequencyOverrides;
   },
   periodStart: Date,
   periodEnd: Date
@@ -315,7 +322,7 @@ export const isFixedItemScheduledOnDay = (
     frequency?: Frequency | string;
     startMonth?: number;
     deductionDay?: number;
-    periodOverrides?: Record<string, any>;
+    periodOverrides?: FrequencyOverrides;
   },
   date: Date
 ): boolean => {

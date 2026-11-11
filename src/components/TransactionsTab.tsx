@@ -30,7 +30,7 @@ import { BottomSheet } from './ui/BottomSheet';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import { formatSwedishDateHeading, getSwedishDateStr, getItemReceipts } from '../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../utils/recurring';
-import { isDateInPeriod, PeriodInfo } from '../utils/periodEngine';
+import { isDateInPeriod, PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import {
   getStoredExpenseCategories,
   getStoredIncomeCategories,
@@ -53,7 +53,7 @@ interface TransactionsTabProps {
   onExcludeTransaction?: (id: string, exclude: boolean) => void;
   period?: PeriodInfo;
   targetPayday?: number;
-  weekendHandling?: any;
+  weekendHandling?: WeekendHandlingMode;
 }
 
 type TxTypeTab = 'all' | 'expense' | 'income';
@@ -150,10 +150,10 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
       counts.set(cat, (counts.get(cat) || 0) + 1);
     }
     const storedExp = getStoredExpenseCategories()
-      .map((c: any) => (typeof c === 'string' ? c : c?.name))
+      .map((c: string | { name?: string }) => (typeof c === 'string' ? c : c?.name))
       .filter(Boolean);
     const storedInc = getStoredIncomeCategories()
-      .map((c: any) => (typeof c === 'string' ? c : c?.name))
+      .map((c: string | { name?: string }) => (typeof c === 'string' ? c : c?.name))
       .filter(Boolean);
     const allNames = Array.from(
       new Set([...Array.from(counts.keys()), ...storedExp, ...storedInc])
@@ -171,7 +171,7 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
 
   const paymentMethodOptions = useMemo(() => {
     const storedNames = getStoredPaymentMethods()
-      .map((p: any) => (typeof p === 'string' ? p : p?.name))
+      .map((p: string | { name?: string }) => (typeof p === 'string' ? p : p?.name))
       .filter((n): n is string => Boolean(n && typeof n === 'string'));
     const counts = new Map<string, number>();
     for (const tx of sortedTransactions) {

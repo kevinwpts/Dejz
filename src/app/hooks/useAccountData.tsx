@@ -10,6 +10,7 @@ import { flushPendingMarketingConsent } from '../../utils/marketingConsent';
 import { syncFirstTouchToAccount } from '../../utils/attribution';
 import { startActivityTracking } from '../../utils/activity';
 import { isDemoMode } from '../../utils/demoUtils';
+import type { AuthChangeEvent, EmailOtpType, Session, User } from '@supabase/supabase-js';
 import { supabase } from '../../supabaseClient';
 import { bankService, BankConnection, BankAccount } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
@@ -736,9 +737,11 @@ export function useAccountData({
         if (!isOnboardingCallback) {
           setIsBankModalOpen(true);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         pending.done = true;
-        setCallbackStatusMsg(`Kunde inte slutföra bankkoppling: ${err.message || 'Okänt fel'}`);
+        setCallbackStatusMsg(
+          `Kunde inte slutföra bankkoppling: ${(err as { message?: string }).message || 'Okänt fel'}`
+        );
         setTimeout(() => setCallbackStatusMsg(null), 6000);
       }
     };
@@ -797,7 +800,7 @@ export function useAccountData({
 
   // Initiera Supabase-session och trigga en enda koordinerad, atomär hydrering vid appstart
   useEffect(() => {
-    const runCoordinateHydration = async (sessionUser: any) => {
+    const runCoordinateHydration = async (sessionUser: User) => {
       if (isDeletingAccountRef.current) return;
       const uid = sessionUser.id;
       setUserId(uid);
@@ -905,13 +908,13 @@ export function useAccountData({
         const type = params.get('type');
         if (!tokenHash || !type) return;
         // En länk får bara användas en gång – kör aldrig kontrollen två gånger
-        const w = window as any;
+        const w = window as Window & { __dejzEmailLinkCheck?: Promise<void> };
         if (w.__dejzEmailLinkCheck) return w.__dejzEmailLinkCheck;
         w.__dejzEmailLinkCheck = (async () => {
           window.history.replaceState(null, '', '/');
           const { error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
-            type: type as any,
+            type: type as EmailOtpType,
           });
           if (error) {
             // Visa förklaringen på inloggningssidan (läses av LandingPage)
@@ -943,7 +946,7 @@ export function useAccountData({
 
     verifyEmailLinkIfPresent()
       .then(() => supabase.auth.getSession())
-      .then(async ({ data: { session } }: any) => {
+      .then(async ({ data: { session } }) => {
         // Endast lokalt (npm run dev): http://localhost:3000/?demo öppnar appen med påhittad
         // demodata – används för skärmbilder till startsidan. Finns inte i produktionsbygget.
         if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('demo')) {
@@ -978,7 +981,7 @@ export function useAccountData({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       // Gammal återställningslänk (via supabase.co) – be om nytt lösenord även då
       if (event === 'PASSWORD_RECOVERY') {
         try {

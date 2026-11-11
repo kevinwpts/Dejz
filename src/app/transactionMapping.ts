@@ -260,7 +260,7 @@ export function sanitizeTransactionItem(
         description: updated.rawDescription || '',
         counterparty_name: updated.counterpartyName || '',
         raw_json: updated.rawJson,
-      } as any);
+      } as BankTransactionItem);
       if (recat.merchant && !isGenericPlaceholderMerchant(recat.merchant)) {
         const cleanBankLower = recat.merchant.toLowerCase().trim();
         updated.title = recat.merchant;

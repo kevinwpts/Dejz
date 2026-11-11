@@ -7,7 +7,7 @@ export function seedDemoData() {
   }
   const now = Date.now();
   const dayMs = 86400000;
-  const lang = (localStorage.getItem('app_language') as any) || 'sv';
+  const lang = localStorage.getItem('app_language') || 'sv';
 
   const demoConfig: Config = {
     currency: 'kr',
@@ -906,7 +906,7 @@ export function createFreshTestAccount(preferredLang?: string) {
     // ignore
   }
 
-  const lang = (preferredLang as any) || (localStorage.getItem('app_language') as any) || 'sv';
+  const lang = preferredLang || localStorage.getItem('app_language') || 'sv';
 
   const defaultFreshConfig: Config = {
     currency: 'kr',

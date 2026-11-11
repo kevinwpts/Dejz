@@ -4,6 +4,8 @@
  * svensk sommartid (CEST, UTC+2) och vintertid/normaltid (CET, UTC+1).
  */
 
+import type { BankRawJson } from '../app/models';
+
 const STOCKHOLM_TZ = 'Europe/Stockholm';
 
 /**
@@ -147,7 +149,14 @@ export interface ReceiptAttachment {
  * Extraherar alla bifogade kvitton från en transaktion eller fast utgift
  * (kompatibel med både receipts-array och äldre receiptUrl/receiptName).
  */
-export function getItemReceipts(item: any): ReceiptAttachment[] {
+// Allt som kan bära kvitton (transaktion eller fast utgift).
+export interface ReceiptSource {
+  receipts?: ReadonlyArray<Partial<ReceiptAttachment> | null | undefined> | null;
+  receiptUrl?: string | null;
+  receiptName?: string | null;
+}
+
+export function getItemReceipts(item: ReceiptSource | null | undefined): ReceiptAttachment[] {
   if (!item) return [];
   const result: ReceiptAttachment[] = [];
   const seenUrls = new Set<string>();
@@ -255,7 +264,7 @@ export interface BankTxDateSource {
   value_date?: string | null;
   transaction_date?: string | null;
   created_at?: string | null;
-  raw_json?: any;
+  raw_json?: BankRawJson | null;
 }
 
 /**

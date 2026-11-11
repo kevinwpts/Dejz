@@ -1,5 +1,6 @@
 import { BankAccount } from '../services/bankService';
 import { TransactionItem } from '../components/HomeTab';
+import type { BankRawJson } from '../app/models';
 import { isLikelySwishTransactionText } from './bankHistoryAnalyzer';
 
 /**
@@ -141,7 +142,7 @@ function isConfirmedExternalIncomeOrRefund(combinedLower: string): boolean {
  * Kortköp, butiksköp, räkningar, autogiro, lön, bidrag och Swish till andra är ALDRIG interna överföringar.
  */
 export function isInternalTransferTransaction(
-  tx: Partial<TransactionItem> & { rawJson?: any },
+  tx: Partial<TransactionItem> & { rawJson?: BankRawJson },
   userAccounts: BankAccount[] = [],
   userEmail?: string | null,
   userName?: string | null
@@ -160,7 +161,7 @@ export function isInternalTransferTransaction(
 
   const remittanceText = Array.isArray(rawJson?.remittance_information)
     ? rawJson.remittance_information
-        .map((r: any) => (typeof r === 'string' ? r : r?.unstructured || ''))
+        .map((r) => (typeof r === 'string' ? r : r?.unstructured || ''))
         .join(' ')
     : typeof rawJson?.remittance_information === 'string'
     ? rawJson.remittance_information

@@ -573,8 +573,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     setStartingAuth(true);
     setAuthError(null);
 
-    let safetyTimer: any = null;
-    const timeoutPromise = new Promise((_, reject) => {
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+    const timeoutPromise = new Promise<never>((_, reject) => {
       safetyTimer = setTimeout(() => {
         reject(new Error('Initieringen tog för lång tid. Kontrollera din anslutning och försök igen.'));
       }, 14000);
@@ -603,7 +603,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         redirectUrl,
       });
 
-      const res = (await Promise.race([authPromise, timeoutPromise])) as any;
+      const res = await Promise.race([authPromise, timeoutPromise]);
       if (safetyTimer) clearTimeout(safetyTimer);
 
       if (res?.url) {
@@ -611,10 +611,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       } else {
         throw new Error('Kunde inte hämta anslutningslänk från banken.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (safetyTimer) clearTimeout(safetyTimer);
       setConnectingBankName(null);
-      setAuthError(err.message || 'Kunde inte starta autentisering mot banken. Testa igen.');
+      setAuthError((err as { message?: string }).message || 'Kunde inte starta autentisering mot banken. Testa igen.');
     } finally {
       setStartingAuth(false);
     }
@@ -682,7 +682,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   useEffect(() => {
     if (step !== 2 || Boolean(bankCallbackStatusMsg)) return;
     let isCancelled = false;
-    let retryTimer: any = null;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     const checkBankReturn = async (attempt = 0) => {
       if (isCancelled || step !== 2 || Boolean(bankCallbackStatusMsg)) return;

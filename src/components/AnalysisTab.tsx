@@ -38,7 +38,11 @@ import {
   isInternalTransferTransaction,
 } from '../utils/transferDetection';
 import { categorizeBankTransactionForApp } from '../utils/bankHistoryAnalyzer';
+import type { BankAccount, BankTransactionItem } from '../services/bankService';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
+
+// Läsvy över en rad i kategorilistan (köp, fast utgift eller inkomst)
+type SubItemView = Partial<TransactionItem> & Partial<FixedExpenseItem> & Partial<IncomeItem>;
 
 interface AnalysisTabProps {
   period: PeriodInfo;
@@ -51,7 +55,7 @@ interface AnalysisTabProps {
   targetPayday?: number;
   weekendHandling?: WeekendHandlingMode;
   excludeInternalTransfers?: boolean;
-  bankAccounts?: any[];
+  bankAccounts?: BankAccount[];
   userEmail?: string | null;
   userName?: string | null;
   onSelectTransaction?: (tx: TransactionItem) => void;
@@ -381,7 +385,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
           description: refTx.rawDescription || refTx.title || '',
           counterparty_name: refTx.counterpartyName || refTx.title || '',
           raw_json: refTx.rawJson,
-        } as any);
+        } as BankTransactionItem);
         if (
           inferred.category &&
           inferred.category !== 'Övrigt' &&
@@ -818,7 +822,12 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <div className="overflow-hidden">
                       {isExpanded && (
                         <div className="divide-y divide-[var(--border-subtle)]">
-                          {item.items.map((subItem: any, idx: number) => {
+                          {item.items.map((entry, idx) => {
+                            // Raden är ett köp, en fast utgift eller en inkomst
+                            const subItem: SubItemView = entry;
+                            const subTx = 'date' in entry ? entry : null;
+                            const subIncome = 'payday' in entry ? entry : null;
+                            const subFixed = 'dueDay' in entry ? entry : null;
                             const isIncome = subItem.type === 'income';
                             const itemName = subItem.title || subItem.name;
                             const isSubRecurring = Boolean(
@@ -838,12 +847,12 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                 key={subItem.id || `${item.category}-${idx}`}
                                 type="button"
                                 onClick={() => {
-                                  if (subItem.date && onSelectTransaction) {
-                                    onSelectTransaction(subItem);
-                                  } else if (subItem.payday && onSelectIncome) {
-                                    onSelectIncome(subItem);
-                                  } else if (subItem.dueDay && onSelectFixed) {
-                                    onSelectFixed(subItem);
+                                  if (subTx?.date && onSelectTransaction) {
+                                    onSelectTransaction(subTx);
+                                  } else if (subIncome?.payday && onSelectIncome) {
+                                    onSelectIncome(subIncome);
+                                  } else if (subFixed?.dueDay && onSelectFixed) {
+                                    onSelectFixed(subFixed);
                                   }
                                 }}
                                 className="w-full pl-7 sm:pl-9 pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"
@@ -908,20 +917,20 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                                         ? `+${formatKr(subItem.amount)}`
                                         : `−${formatKr(subItem.amount)}`}
                                     </span>
-                                    {subItem.date && (
+                                    {subTx?.date && (
                                       <span className="ui-row-meta">
-                                        {subItem.bookingStatus === 'PDNG' ||
-                                        subItem.bookingStatus === 'HOLD'
+                                        {subTx.bookingStatus === 'PDNG' ||
+                                        subTx.bookingStatus === 'HOLD'
                                           ? 'Reserverat'
                                           : getTransactionTime({
-                                              id: subItem.id,
-                                              title: subItem.title,
+                                              id: subTx.id,
+                                              title: subTx.title,
                                               category: item.category,
-                                              date: subItem.date,
-                                              time: subItem.time,
-                                              note: subItem.note,
-                                              amount: subItem.amount,
-                                              bookingStatus: subItem.bookingStatus,
+                                              date: subTx.date,
+                                              time: subTx.time,
+                                              note: subTx.note,
+                                              amount: subTx.amount,
+                                              bookingStatus: subTx.bookingStatus,
                                             })}
                                       </span>
                                     )}

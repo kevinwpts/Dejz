@@ -12,7 +12,7 @@ function platform(): string {
     const ua = navigator.userAgent;
     const os = /iPhone|iPad|iPod/.test(ua) ? 'iPhone' : /Android/.test(ua) ? 'Android' : /Mac/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'Annat';
     const standalone =
-      (window.navigator as any).standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
     return `${os}${standalone ? ' (hemskärmsapp)' : ' (webbläsare)'}`;
   } catch {
     return 'Okänd';

@@ -47,7 +47,7 @@ interface HouseholdBudgetViewProps {
   incomes: IncomeItem[];
   fixedExpenses: FixedExpenseItem[];
   transactions: TransactionItem[];
-  onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<any> | void;
+  onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<unknown> | void;
 }
 
 export const HouseholdBudgetView: React.FC<HouseholdBudgetViewProps> = ({

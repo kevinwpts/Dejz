@@ -1,9 +1,9 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
-import { Config, Income, FixedExpense, Transaction } from '../types';
+import { Account, Config, Income, FixedExpense, SavingsGoal, Transaction } from '../types';
 import { seedDemoData } from '../utils/demoData';
 import { getTransactionReceipts } from '../utils/format';
-import { transactionFromRow, transactionToRow } from './transactionRows';
+import { TransactionRow, transactionFromRow, transactionToRow } from './transactionRows';
 import {
   FixedExpenseInput,
   fixedExpenseFromRow,
@@ -19,7 +19,7 @@ import {
  */
 const db = supabase as unknown as SupabaseClient<any>;
 
-function extractMissingColumn(error: any): string | null {
+function extractMissingColumn(error: { message?: string } | null | undefined): string | null {
   if (!error) return null;
   const msg = error.message || '';
   // PostgREST schema cache: Could not find the 'column_name' column of 'table_name' in the schema cache
@@ -40,7 +40,7 @@ const missingColumnsByTable: Record<string, Set<string>> = {
   transactions: new Set<string>(),
 };
 
-function stripKnownMissingColumns(table: string, payload: Record<string, any>) {
+function stripKnownMissingColumns(table: string, payload: Record<string, unknown>) {
   const set = missingColumnsByTable[table];
   if (!set) return;
   for (const col of set) {
@@ -57,9 +57,9 @@ function recordMissingColumn(table: string, col: string) {
   missingColumnsByTable[table].add(col);
 }
 
-export function hasValidSavedCategoryBudgets(cats: any): boolean {
+export function hasValidSavedCategoryBudgets(cats: unknown): boolean {
   if (!Array.isArray(cats) || cats.length === 0) return false;
-  const budgetVals = cats.map((c: any) => Number(c?.budget) || 0);
+  const budgetVals = cats.map((c: { budget?: unknown } | null) => Number(c?.budget) || 0);
   const totalSum = budgetVals.reduce((a: number, b: number) => a + b, 0);
   const maxVal = Math.max(...budgetVals, 0);
   const isLegacyPercentDefault = maxVal <= 100 && totalSum <= 100 && totalSum > 0;
@@ -92,7 +92,7 @@ export const dataService = {
     
     if (!profileData) return null;
     
-    let localSavedConfig: any = null;
+    let localSavedConfig: Partial<Config> | null = null;
     try {
       const cached = localStorage.getItem(`user_settings_${userId}`);
       if (cached) localSavedConfig = JSON.parse(cached);
@@ -171,7 +171,7 @@ export const dataService = {
       const savedProfile = localStorage.getItem('demo_profile');
       const profile = savedProfile ? JSON.parse(savedProfile) : { email: 'demo@dejz.se' };
       const savedSettings = localStorage.getItem('demo_settings');
-      let settings: any = null;
+      let settings: Partial<Config> | null = null;
       if (savedSettings) {
         try {
           settings = JSON.parse(savedSettings);
@@ -204,7 +204,7 @@ export const dataService = {
     return profileData || { };
   },
 
-  async updateProfile(userId: string, updates: any) {
+  async updateProfile(userId: string, updates: Record<string, unknown>) {
     if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_profile');
       const profile = saved ? JSON.parse(saved) : {};
@@ -285,7 +285,7 @@ export const dataService = {
       _onboardingCompleted: true,
     };
 
-    const payload: any = {
+    const payload: Record<string, unknown> = {
       id: userId,
       currency: config.currency,
       currency_code: config.currencyCode || null,
@@ -431,12 +431,12 @@ export const dataService = {
         .upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
     }
 
-    const payload: Record<string, any> = { user_id: userId, ...transactionToRow(transaction, 'insert') };
+    const payload: Record<string, unknown> = { user_id: userId, ...transactionToRow(transaction, 'insert') };
 
     stripKnownMissingColumns('transactions', payload);
 
-    let data: any[] | null = null;
-    let error: any = null;
+    let data: TransactionRow[] | null = null;
+    let error: PostgrestError | null = null;
     let attempts = 0;
 
     while (attempts < 10) {
@@ -505,12 +505,12 @@ export const dataService = {
       return updatedTx;
     }
 
-    const payload: Record<string, any> = transactionToRow(transaction, 'update');
+    const payload: Record<string, unknown> = transactionToRow(transaction, 'update');
 
     stripKnownMissingColumns('transactions', payload);
 
-    let data: any[] | null = null;
-    let error: any = null;
+    let data: TransactionRow[] | null = null;
+    let error: PostgrestError | null = null;
     let attempts = 0;
 
     while (attempts < 10) {
@@ -578,9 +578,9 @@ export const dataService = {
       localStorage.setItem('demo_incomes', JSON.stringify(list));
       return;
     }
-    const payload: any = incomeToRow(userId, income);
+    const payload = incomeToRow(userId, income);
 
-    const currentPayload = { ...payload };
+    const currentPayload: Record<string, unknown> = { ...payload };
     let attempts = 0;
     while (attempts < 5) {
       attempts++;
@@ -658,9 +658,9 @@ export const dataService = {
       return;
     }
 
-    const payload: any = fixedExpenseToRow(userId, expense);
+    const payload = fixedExpenseToRow(userId, expense);
 
-    const currentPayload = { ...payload };
+    const currentPayload: Record<string, unknown> = { ...payload };
     stripKnownMissingColumns('fixed_expenses', currentPayload);
 
     let attempts = 0;
@@ -729,7 +729,7 @@ export const dataService = {
 
   async saveAccount(userId: string, account: import('../types').Account) {    if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_accounts');
-      const list: any[] = saved ? JSON.parse(saved) : [];
+      const list: Account[] = saved ? JSON.parse(saved) : [];
       const targetId = account.id && account.id.startsWith('demo-') ? account.id : `demo-acc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       const updatedAccount = { ...account, id: targetId };
       const index = list.findIndex(a => a.id === account.id);
@@ -757,7 +757,7 @@ export const dataService = {
 
   async deleteAccount(id: string) {    if (id.startsWith('demo-')) {
       const saved = localStorage.getItem('demo_accounts');
-      const list: any[] = saved ? JSON.parse(saved) : [];
+      const list: Account[] = saved ? JSON.parse(saved) : [];
       const filtered = list.filter(a => a.id !== id);
       localStorage.setItem('demo_accounts', JSON.stringify(filtered));
       return;
@@ -838,7 +838,7 @@ export const dataService = {
 
   async deleteFeedback(id: string) {
     if (id.startsWith('demo-')) {
-      const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]').filter((f: any) => f.id !== id);
+      const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]').filter((f: { id?: string }) => f.id !== id);
       localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
       return;
     }
@@ -897,7 +897,7 @@ export const dataService = {
     if (profileError) throw profileError;
   },
 
-  distributeSavingsPot(totalPot: number, goals: any[]): any[] {
+  distributeSavingsPot(totalPot: number, goals: SavingsGoal[]): SavingsGoal[] {
     if (!goals || goals.length === 0) return [];
     
     let remaining = totalPot;
@@ -941,7 +941,7 @@ export const dataService = {
             }
 
             if (t.splits && Array.isArray(t.splits)) {
-              const nextSplits = t.splits.map((s: any) => {
+              const nextSplits = t.splits.map((s) => {
                 if ((s.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()) {
                   changed = true;
                   return { ...s, category: trimmedNew };
@@ -1009,7 +1009,7 @@ export const dataService = {
         try {
           const cfg = JSON.parse(savedSettings);
           if (cfg.quickChoices) {
-            cfg.quickChoices = cfg.quickChoices.map((qc: any) =>
+            cfg.quickChoices = cfg.quickChoices.map((qc: { category?: string }) =>
               (qc.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()
                 ? { ...qc, category: trimmedNew }
                 : qc
@@ -1047,7 +1047,7 @@ export const dataService = {
         for (const row of splitRows) {
           if (Array.isArray(row.splits)) {
             let splitChanged = false;
-            const updatedSplits = row.splits.map((s: any) => {
+            const updatedSplits = row.splits.map((s: { category?: string }) => {
               if ((s.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()) {
                 splitChanged = true;
                 return { ...s, category: trimmedNew };

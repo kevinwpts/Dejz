@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import type { BankTransactionItem } from '../../services/bankService';
 import { BottomSheet } from '../ui/BottomSheet';
 import {
   TransactionItem,
@@ -389,7 +390,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         counterparty_name: activeTx.counterpartyName || '',
         raw_json: activeTx.rawJson,
         reconciliation_status: activeTx.reconciliationStatus,
-      } as any,
+      } as BankTransactionItem,
       undefined,
       undefined,
       true

@@ -4,6 +4,7 @@ import { WeekendHandlingMode } from './periodEngine';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { Category } from '../types';
 import { supabase, isLocalDemoMode } from '../supabaseClient';
+import type { Database, Json } from '../types/database';
 
 const APP_CACHE_KEY = 'dejz_app_state_cache_v2';
 const SHOW_ACCOUNTS_ON_HOME_KEY = 'dejz_show_accounts_on_home';
@@ -1474,7 +1475,7 @@ export function migratePendingMetaToBooked(pendingTxId: string, bookedTxId: stri
 
     const existingBookedMeta = fullMap[bookedTxId] || {};
     const needsMigration = Object.keys(pendingMeta).some(
-      (k) => (existingBookedMeta as any)[k] === undefined
+      (k) => existingBookedMeta[k as keyof typeof existingBookedMeta] === undefined
     );
     if (needsMigration) {
       saveTransactionMeta(bookedTxId, {
@@ -1707,9 +1708,70 @@ export function removeSwishPhoneDirectoryEntry(rawPhone: string): void {
 }
 
 // --- Full Supabase Sync & Hydration for All User Choices ---
-export function collectAllUserPreferences(): Record<string, any> {
+// Alla användarval som sparas i profiles.user_preferences.
+export interface UserPreferences {
+  showAccountsOnHome: boolean;
+  excludeInternalTransfers: boolean;
+  excludedTransactionIds: string[];
+  dismissedFixedMerchants: string[];
+  dismissedIncomeMerchants: string[];
+  deletedFixedIds: string[];
+  deletedIncomeIds: string[];
+  savedFixedExpenses: FixedExpenseItem[];
+  savedIncomes: IncomeItem[];
+  manualFixedOverrides: Record<string, ManualFixedOverride>;
+  manualIncomeOverrides: Record<string, ManualIncomeOverride>;
+  merchantAliasesV3: Record<string, { name: string; category: string }>;
+  categoryRemap: Record<string, string>;
+  customExpenseCategories: Category[];
+  customIncomeCategories: Category[];
+  customPaymentMethods: PaymentMethodItem[];
+  transactionMeta: Record<string, TransactionMetaPatch>;
+  accountMeta: Record<string, AccountMetaPatch>;
+  categoryBudgets: Record<string, number>;
+  savingsGoals: SavingsGoalItem[];
+  reviewedTransactionIds: string[];
+  preferCategoryIconMerchants: string[];
+  learnedBrandDomains: Record<string, string>;
+  mySwishPhone: string;
+  swishContacts: unknown[];
+  household: unknown;
+  weekendHandling: string;
+  darkMode: string;
+  onboardingCompleted: boolean;
+  onboardingInProgress: boolean;
+  onboardingStep: string;
+  manualBalance: ManualBalance | null;
+  incomeFirstSeen: Record<string, string>;
+  updatedAt: string;
+}
+
+// Profilrad (eller del av den) som kan bära sparade användarval.
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+export type ProfileWithPreferences = Partial<
+  Pick<
+    ProfileRow,
+    'user_preferences' | 'show_accounts_on_home' | 'exclude_internal_transfers' | 'my_swish_phone' | 'swish_contacts'
+  >
+>;
+
+// Valen är vanlig JSON-data (de sparas även i localStorage), så de kan skickas som Json.
+function toJson(value: unknown): Json {
+  return value as Json;
+}
+
+function readProfilePreferences(profile: ProfileWithPreferences): Partial<UserPreferences> {
+  // JSON från databasen – formen kommer från collectAllUserPreferences.
+  return (
+    profile.user_preferences && typeof profile.user_preferences === 'object'
+      ? profile.user_preferences
+      : {}
+  ) as Partial<UserPreferences>;
+}
+
+export function collectAllUserPreferences(): Partial<UserPreferences> {
   if (typeof window === 'undefined') return {};
-  const safeParse = (key: string, fallback: any) => {
+  const safeParse = <T,>(key: string, fallback: T): T => {
     try {
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
@@ -1740,11 +1802,11 @@ export function collectAllUserPreferences(): Record<string, any> {
     categoryBudgets: getCategoryBudgets(),
     savingsGoals: getSavingsGoals(),
     reviewedTransactionIds: Array.from(getReviewedTransactionIds()),
-    preferCategoryIconMerchants: safeParse('dejz_prefer_category_icon_merchants_v1', []),
-    learnedBrandDomains: safeParse('dejz_learned_brand_domains_v1', {}),
+    preferCategoryIconMerchants: safeParse<string[]>('dejz_prefer_category_icon_merchants_v1', []),
+    learnedBrandDomains: safeParse<Record<string, string>>('dejz_learned_brand_domains_v1', {}),
     mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
-    swishContacts: safeParse('dejz_swish_contacts', []),
-    household: safeParse('dejz_household_state_v1', null),
+    swishContacts: safeParse<unknown[]>('dejz_swish_contacts', []),
+    household: safeParse<unknown>('dejz_household_state_v1', null),
     weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
     darkMode: localStorage.getItem('dejz_dark_mode') || 'light',
     onboardingCompleted:
@@ -1755,8 +1817,8 @@ export function collectAllUserPreferences(): Record<string, any> {
       localStorage.getItem('dejz_onboarding_completed') !== 'true' &&
       localStorage.getItem('dejz_onboarding_in_progress') === 'true',
     onboardingStep: localStorage.getItem('dejz_onboarding_step') || '1',
-    manualBalance: safeParse('dejz_manual_balance_v1', null),
-    incomeFirstSeen: safeParse('dejz_income_first_seen', {}),
+    manualBalance: safeParse<ManualBalance | null>('dejz_manual_balance_v1', null),
+    incomeFirstSeen: safeParse<Record<string, string>>('dejz_income_first_seen', {}),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -1826,14 +1888,15 @@ export function syncAllUserPreferencesToSupabase(immediate = false): void {
       const uid = data?.session?.user?.id;
       if (!uid) return;
       const prefs = collectAllUserPreferences();
-      const payload: Record<string, any> = {
-        user_preferences: prefs,
+      const prefsJson = toJson(prefs);
+      const payload: Database['public']['Tables']['profiles']['Update'] = {
+        user_preferences: prefsJson,
         show_accounts_on_home: prefs.showAccountsOnHome,
         exclude_internal_transfers: prefs.excludeInternalTransfers,
         my_swish_phone: prefs.mySwishPhone,
-        swish_contacts: prefs.swishContacts,
-        categories: prefs.customExpenseCategories,
-        income_categories: prefs.customIncomeCategories,
+        swish_contacts: toJson(prefs.swishContacts),
+        categories: toJson(prefs.customExpenseCategories),
+        income_categories: toJson(prefs.customIncomeCategories),
       };
       // Attempt full update; fallback to user_preferences or base columns if some columns aren't migrated yet
       const { error } = await supabase.from('profiles').update(payload).eq('id', uid);
@@ -1841,7 +1904,7 @@ export function syncAllUserPreferencesToSupabase(immediate = false): void {
         await supabase
           .from('profiles')
           .update({
-            user_preferences: prefs,
+            user_preferences: prefsJson,
           })
           .eq('id', uid);
       }
@@ -1860,31 +1923,22 @@ export function syncAllUserPreferencesToSupabase(immediate = false): void {
   }
 }
 
-export function extractSavedFixedFromProfile(profile: any): FixedExpenseItem[] {
+export function extractSavedFixedFromProfile(profile: ProfileWithPreferences | null | undefined): FixedExpenseItem[] {
   if (!profile || typeof profile !== 'object') return [];
-  const prefs =
-    profile.user_preferences && typeof profile.user_preferences === 'object'
-      ? profile.user_preferences
-      : {};
+  const prefs = readProfilePreferences(profile);
   return Array.isArray(prefs.savedFixedExpenses) ? prefs.savedFixedExpenses : [];
 }
 
-export function extractSavedIncomesFromProfile(profile: any): IncomeItem[] {
+export function extractSavedIncomesFromProfile(profile: ProfileWithPreferences | null | undefined): IncomeItem[] {
   if (!profile || typeof profile !== 'object') return [];
-  const prefs =
-    profile.user_preferences && typeof profile.user_preferences === 'object'
-      ? profile.user_preferences
-      : {};
+  const prefs = readProfilePreferences(profile);
   return Array.isArray(prefs.savedIncomes) ? prefs.savedIncomes : [];
 }
 
-export function hydrateAllUserPreferencesFromProfile(profile: any): void {
+export function hydrateAllUserPreferencesFromProfile(profile: ProfileWithPreferences | null | undefined): void {
   if (typeof window === 'undefined' || !profile || typeof profile !== 'object') return;
   try {
-    const prefs =
-      profile.user_preferences && typeof profile.user_preferences === 'object'
-        ? profile.user_preferences
-        : {};
+    const prefs = readProfilePreferences(profile);
 
     const showAcc =
       typeof profile.show_accounts_on_home === 'boolean'

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { Frequency } from '../../types';
 import {
   fixedExpenseFromRow,
   fixedExpenseToRow,
@@ -17,7 +18,7 @@ const netflix: FixedExpenseInput = {
   amount: 149,
   category: 'Nöje',
   paymentMethod: 'card',
-  frequency: 'monthly',
+  frequency: Frequency.MONTHLY,
   deductionDay: 15,
 };
 

@@ -18,6 +18,11 @@ interface AddEntrySheetProps {
 }
 
 // Webbläsarens taligenkänning (Chrome/Android/Safari) – finns inte i alla typer
+type SpeechRecResultEvent = {
+  results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }>;
+};
+type SpeechRecErrorEvent = { error?: string };
+
 type SpeechRec = {
   lang: string;
   interimResults: boolean;
@@ -26,14 +31,17 @@ type SpeechRec = {
   start: () => void;
   stop: () => void;
   abort: () => void;
-  onresult: ((e: any) => void) | null;
-  onerror: ((e: any) => void) | null;
+  onresult: ((e: SpeechRecResultEvent) => void) | null;
+  onerror: ((e: SpeechRecErrorEvent) => void) | null;
   onend: (() => void) | null;
 };
 
 function getSpeechRecognition(): (new () => SpeechRec) | null {
   if (typeof window === 'undefined') return null;
-  const w = window as any;
+  const w = window as Window & {
+    SpeechRecognition?: new () => SpeechRec;
+    webkitSpeechRecognition?: new () => SpeechRec;
+  };
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
@@ -119,7 +127,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
       rec.interimResults = true;
       rec.continuous = false;
       rec.maxAlternatives = 1;
-      rec.onresult = (e: any) => {
+      rec.onresult = (e) => {
         let interim = '';
         let final = '';
         for (let i = 0; i < e.results.length; i++) {
@@ -132,7 +140,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
         if (shown) lastHeardRef.current = shown;
         setHeard(shown);
       };
-      rec.onerror = (e: any) => {
+      rec.onerror = (e) => {
         const code = e?.error;
         if (code === 'not-allowed' || code === 'service-not-allowed') {
           setError('Mikrofonen är blockerad. Tillåt den i webbläsaren, eller fyll i manuellt.');

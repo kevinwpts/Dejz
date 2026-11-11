@@ -1,5 +1,6 @@
 // Regler för fasta utgifter, butiker, Swish och kategorier. Del av bankanalysen (tidigare utils/bankHistoryAnalyzer.ts).
 import { BankTransactionItem } from '../../services/bankService';
+import type { BankRawJson } from '../../app/models';
 import { SWEDISH_EXPENSE_PRESETS } from '../../data/swedishExpensePresets';
 import { Frequency } from '../../types';
 import { getLogoUrl, getLearnedBrandCategory } from '../logo';
@@ -444,7 +445,7 @@ export function extractSwishPhoneNumber(
  */
 export function isLikelySwishTransactionText(
   text: string | null | undefined,
-  rawJson?: any
+  rawJson?: BankRawJson | null
 ): boolean {
   if (!text || typeof text !== 'string') return false;
   const lower = text.toLowerCase().trim();
@@ -488,7 +489,7 @@ export function formatSwishTitle(
   description: string | null | undefined,
   counterpartyName: string | null | undefined,
   isIncome?: boolean,
-  rawJson?: any,
+  rawJson?: BankRawJson | null,
   ignoreCustomDirectory?: boolean
 ): string {
   const raw = String(description || '').trim();
@@ -1004,7 +1005,7 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
   return formattedWords.join(' ');
 }
 
-export function extractRawJsonFallbackText(rawJson: any): string {
+export function extractRawJsonFallbackText(rawJson: BankRawJson | null | undefined): string {
   if (!rawJson || typeof rawJson !== 'object') return '';
   const parts: string[] = [];
   if (typeof rawJson.creditor?.name === 'string') parts.push(rawJson.creditor.name);
@@ -1192,7 +1193,7 @@ export function categorizeBankTransactionForApp(
  * Mappar bankens ISO 18245 MCC-kod (Merchant Category Code) eller bank_transaction_code
  * till rätt svensk kategori när handlaren är en okänd lokal butik, restaurang eller utlandsköp.
  */
-export function resolveCategoryFromMccCode(rawJson: any): string[] | null {
+export function resolveCategoryFromMccCode(rawJson: BankRawJson | null | undefined): string[] | null {
   if (!rawJson || typeof rawJson !== 'object') return null;
 
   const rawMcc =

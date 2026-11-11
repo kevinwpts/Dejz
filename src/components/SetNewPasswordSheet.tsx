@@ -27,12 +27,12 @@ export const SetNewPasswordSheet: React.FC<{
     setSaving(true);
     setError(null);
     try {
-      const { error: updateError } = await (supabase as any).auth.updateUser({ password });
+      const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
       setPassword('');
       onDone();
-    } catch (err: any) {
-      const msg = String(err?.message || '');
+    } catch (err: unknown) {
+      const msg = String((err as { message?: string } | null)?.message || '');
       setError(
         /different from the old|same password/i.test(msg)
           ? 'Välj ett lösenord som skiljer sig från det gamla.'

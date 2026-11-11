@@ -132,7 +132,63 @@ export interface TransactionItem {
   bankAccountName?: string;
   createdAt?: string;
   sortOrder?: number;
-  rawJson?: any;
+  rawJson?: BankRawJson;
+}
+
+// Konto-/motpartsdata i Enable Banking-svaret.
+export interface BankRawJsonAccount {
+  iban?: string;
+  other?: { identification?: string; [key: string]: unknown };
+  [key: string]: unknown;
+}
+
+// Rådata från Enable Banking (endast fälten appen läser).
+export interface BankRawJson {
+  isInternalTransfer?: boolean;
+  exactSignedSekAmount?: number;
+  remittance_information?: string | Array<string | { unstructured?: string }>;
+  additional_information?: string;
+  merchant_name?: string;
+  creditor?: { name?: string; [key: string]: unknown };
+  debtor?: { name?: string; [key: string]: unknown };
+  creditor_name?: string;
+  debtor_name?: string;
+  ultimate_creditor?: string;
+  ultimate_debtor?: string;
+  creditor_account?: BankRawJsonAccount;
+  debtor_account?: BankRawJsonAccount;
+  balance_after_transaction?: { amount?: string | number; currency?: string; [key: string]: unknown };
+  bank_transaction_code?: {
+    description?: string;
+    code?: string;
+    sub_code?: string;
+    sub_family_code?: string | number;
+    [key: string]: unknown;
+  };
+  proprietary_bank_transaction_code?: string | number;
+  merchant_category_code?: string | number;
+  mcc?: string | number;
+  card_transaction?: {
+    authorized_date?: string;
+    transaction_date_time?: string;
+    transaction_date?: string;
+    merchant_category_code?: string | number;
+    mcc?: string | number;
+    [key: string]: unknown;
+  };
+  instructed_amount?: { amount?: string | number; currency?: string };
+  currency_exchange?: { source_currency?: string; exchange_rate?: string | number; [key: string]: unknown };
+  exchange_rate?: string | number;
+  transaction_date_time?: string;
+  execution_date_time?: string;
+  acceptance_date_time?: string;
+  origination_date_time?: string;
+  origination_date?: string;
+  transaction_date?: string;
+  value_date?: string;
+  booking_date?: string;
+  created_at?: string;
+  [key: string]: unknown;
 }
 
 export function doesTransactionMatchAccount(

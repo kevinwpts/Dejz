@@ -257,7 +257,7 @@ export interface Transaction {
 export interface AppNotification {
   id: string;
   type: 'variable_expense' | 'variable_income' | 'variable_savings' | 'general';
-  item: any;
+  item: FixedExpense | Income | MonthlySaving;
   title: string;
   subtitle: string;
   deductionDay: number;

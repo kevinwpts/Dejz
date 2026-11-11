@@ -7,6 +7,7 @@ import {
 } from './appCache';
 import { PeriodInfo, isDateInPeriod } from './periodEngine';
 import { reconcilePeriodRecurringMatches } from './recurring';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { apiUrl } from './platform';
 
@@ -194,7 +195,7 @@ export function computeMyHouseholdSummary(params: {
     if (recMatches.claimedFixedTxIds.has(tx.id)) continue;
 
     const catLower = (tx.category || '').toLowerCase().trim();
-    const isSharedTx = Boolean((tx as any).isSharedExpense) || sharedCatSet.has(catLower);
+    const isSharedTx = Boolean(tx.isSharedExpense) || sharedCatSet.has(catLower);
     if (!isSharedTx) continue;
 
     const amt = Math.abs(Number(tx.amount) || 0);
@@ -312,7 +313,7 @@ export function calculateHouseholdSettlement(
   };
 }
 
-let activeBroadcastChannel: any = null;
+let activeBroadcastChannel: RealtimeChannel | null = null;
 let activeChannelHouseholdId: string | null = null;
 
 export function broadcastHouseholdUpdate(state: HouseholdState): void {
@@ -365,7 +366,7 @@ export function subscribeToHouseholdRealtime(
         config: { broadcast: { self: false } },
       });
       channel
-        .on('broadcast', { event: 'household-update' }, (msg: any) => {
+        .on('broadcast', { event: 'household-update' }, (msg: { payload?: unknown }) => {
           const incoming = msg?.payload as HouseholdState | undefined;
           if (incoming && incoming.inviteCode) {
             saveHouseholdStateLocal(incoming);

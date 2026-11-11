@@ -4,7 +4,14 @@ import { analyzeBankTransactionsForOnboarding } from '../bankHistoryAnalyzer';
 
 // Bankanalysen i introduktionen: sex månaders påhittad historik för "Elin".
 
-const rows: any[] = [];
+type BankRow = Parameters<typeof analyzeBankTransactionsForOnboarding>[0][number];
+type UserAccount = NonNullable<Parameters<typeof analyzeBankTransactionsForOnboarding>[3]>[number];
+// Testdata innehåller bara de fält analysen läser
+const account = (
+  a: Pick<UserAccount, 'id' | 'name' | 'iban' | 'currency' | 'is_selected'> & { balance?: number }
+) => a as UserAccount;
+
+const rows: BankRow[] = [];
 let n = 0;
 const add = (date: string, amount: number, desc: string, acc = 'acc1') =>
   rows.push({
@@ -12,7 +19,7 @@ const add = (date: string, amount: number, desc: string, acc = 'acc1') =>
     entry_reference: null, transaction_id: null, booking_status: 'BOOK', booking_date: date, value_date: date,
     transaction_date: date, amount, currency: 'SEK', credit_debit_indicator: amount > 0 ? 'CRDT' : 'DBIT',
     description: desc, counterparty_name: desc,
-  });
+  } as BankRow);
 ['2026-06', '2026-07', '2026-08', '2026-09', '2026-10', '2026-11'].forEach((m, i) => {
   add(`${m}-25`, 26400 + i * 10, 'LÖN ACME AB');
   add(`${m}-27`, -8950, 'HEIMSTADEN AB');
@@ -27,9 +34,9 @@ const add = (date: string, amount: number, desc: string, acc = 'acc1') =>
   add(`${m}-12`, 2000, 'Överföring från lönekonto', 'acc2');
   add(`${m}-18`, -250, 'Swish 0701234567');
 });
-const accounts: any[] = [
-  { id: 'acc1', name: 'Lönekonto', iban: 'SE1', currency: 'SEK', balance: 8400, is_selected: true },
-  { id: 'acc2', name: 'Sparkonto', iban: 'SE2', currency: 'SEK', balance: 30000, is_selected: true },
+const accounts: UserAccount[] = [
+  account({ id: 'acc1', name: 'Lönekonto', iban: 'SE1', currency: 'SEK', balance: 8400, is_selected: true }),
+  account({ id: 'acc2', name: 'Sparkonto', iban: 'SE2', currency: 'SEK', balance: 30000, is_selected: true }),
 ];
 const result = analyzeBankTransactionsForOnboarding(rows, 25, true, accounts);
 const fixed = (name: RegExp) => result.detectedFixedExpenses.find((f) => name.test(f.name));

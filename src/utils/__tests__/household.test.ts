@@ -13,7 +13,10 @@ const member = (email: string, name: string, totalIncome: number, fixed: number,
   sharedExpensesList: [],
   updatedAt: '2026-11-01T10:00:00Z',
 });
-const household = (extra: Record<string, unknown> = {}) =>
+type Household = Parameters<typeof calculateHouseholdSettlement>[0];
+
+// Testdata innehåller bara de fält uträkningen läser
+const household = (extra: Partial<Household> = {}) =>
   ({
     householdId: 'h1',
     inviteCode: 'ABC123',
@@ -23,7 +26,7 @@ const household = (extra: Record<string, unknown> = {}) =>
       'sam@x.se': member('sam@x.se', 'Sam', 20000, 1000, 1000),
     },
     ...extra,
-  }) as any;
+  }) as Household;
 
 test('50/50: den som betalat mer får tillbaka mellanskillnaden', () => {
   const s = calculateHouseholdSettlement(household(), 'elin@x.se', '2026-11-25');

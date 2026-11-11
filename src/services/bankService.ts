@@ -1,6 +1,8 @@
 import { supabase } from '../supabaseClient';
 import swedishBanksJson from '../data/swedishBanks.json';
 import { appOrigin } from '../utils/platform';
+import type { BankRawJson } from '../app/models';
+import type { Json } from '../types/database';
 
 export const SWEDISH_BANKS_CATALOG: BankAspsp[] = swedishBanksJson as BankAspsp[];
 
@@ -69,7 +71,7 @@ export interface BankAccount {
   balance_currency: string | null;
   balance_type: string | null;
   balance_label: string | null;
-  balances_json: any[];
+  balances_json: unknown[];
   continuation_key: string | null;
   last_synced_at: string | null;
   created_at: string;
@@ -93,7 +95,7 @@ export interface BankTransactionItem {
   credit_debit_indicator: 'CRDT' | 'DBIT' | null;
   description: string;
   counterparty_name: string | null;
-  raw_json?: any;
+  raw_json?: BankRawJson;
   reconciliation_status?: BankReconciliationStatus;
   linked_transaction_id?: string | null;
   linked_fixed_expense_id?: string | null;
@@ -107,7 +109,7 @@ export interface BankTransactionItem {
   reservation_disappeared_at?: string | null;
   review_reason?: string | null;
   user_decision_at?: string | null;
-  previous_reconciliation_state?: Record<string, any> | null;
+  previous_reconciliation_state?: { [key: string]: Json | undefined } | null;
   created_at: string;
   updated_at: string;
 }
@@ -172,9 +174,9 @@ export function saveTxReconciliationOverlay(
   writeJsonStorage(LOCAL_TX_RECONCILIATION_OVERLAY_KEY, map);
 }
 
-export function compactBankTxRawJson(raw: any): any {
+export function compactBankTxRawJson(raw: BankRawJson | null | undefined): BankRawJson | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
-  const compact: Record<string, any> = {};
+  const compact: BankRawJson = {};
   if (raw.balance_after_transaction?.amount !== undefined) {
     compact.balance_after_transaction = {
       amount: raw.balance_after_transaction.amount,
@@ -296,13 +298,14 @@ async function invokeEnableBanking<T>(payload: Record<string, unknown>, timeoutM
     setTimeout(() => reject(new Error('Begäran mot banktjänsten tog för lång tid. Försök igen.')), timeoutMs)
   );
 
-  const { data, error } = (await Promise.race([invokePromise, timeoutPromise])) as any;
+  const { data, error } = await Promise.race([invokePromise, timeoutPromise]);
 
   if (error) {
     let message = error.message || 'Kunde inte kommunicera med banktjänsten.';
     try {
-      if ('context' in error && (error as any).context) {
-        const errBody = await (error as any).context.json();
+      const errContext = 'context' in error ? (error as { context?: { json: () => Promise<{ error?: string } | null> } }).context : undefined;
+      if (errContext) {
+        const errBody = await errContext.json();
         if (errBody?.error) {
           message = errBody.error;
         }

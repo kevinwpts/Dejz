@@ -161,7 +161,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         },
       });
       if (error) throw error;
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (view === 'register') {
         try {
           localStorage.removeItem('dejz_onboarding_in_progress');
@@ -170,7 +170,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           // ignore
         }
       }
-      setErrorMsg(err.message || (provider === 'apple' ? 'Kunde inte starta Apple-inloggning.' : 'Kunde inte starta Google-inloggning.'));
+      setErrorMsg((err as { message?: string }).message || (provider === 'apple' ? 'Kunde inte starta Apple-inloggning.' : 'Kunde inte starta Google-inloggning.'));
       setGoogleLoading(false);
     }
   };
@@ -281,8 +281,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         setResetEmailSent(true);
         setResendCooldown(45);
       }
-    } catch (err: any) {
-      const msg = String(err?.message || '');
+    } catch (err: unknown) {
+      // Supabase-fel har message och ibland code/error_code
+      const authErr = err as { message?: string; code?: string; error_code?: string } | null;
+      const msg = String(authErr?.message || '');
       const isNetworkError =
         msg.includes('Failed to fetch') ||
         msg.includes('NetworkError') ||
@@ -308,7 +310,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         }
       }
 
-      const errCode = String(err?.code || err?.error_code || '');
+      const errCode = String(authErr?.code || authErr?.error_code || '');
       if (errCode === 'email_not_confirmed' || /email not confirmed/i.test(msg)) {
         setErrorMsg('Du har inte bekräftat din e-post än. Hittar du inte mejlet? Vi skickar ett nytt.');
         setNeedsConfirmation(true);

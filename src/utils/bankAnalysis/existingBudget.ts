@@ -309,7 +309,7 @@ export function getAutoImportableBankTransactions(
   const currentPayday = config?.payday || 25;
   const paydayBeforeWeekend =
     config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true;
-  const availableCategories = (config?.categories || []).map((c: any) =>
+  const availableCategories = (config?.categories || []).map((c) =>
     typeof c === 'string' ? c : c?.name || ''
   );
 

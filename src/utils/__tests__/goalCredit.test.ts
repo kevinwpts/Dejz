@@ -4,11 +4,15 @@ import { creditGoalsFromBankMatches, creditGoalsWithoutBank } from '../goalCredi
 
 // Månadssparande till sparmål: fylls på när det dragits – aldrig två gånger.
 
-const goal = (extra: Record<string, unknown> = {}) =>
-  ({ id: 'g1', name: 'Resa', targetAmount: 20000, currentAmount: 1000, activities: [], ...extra }) as any;
-const saving = (extra: Record<string, unknown> = {}) =>
-  ({ id: 'fx-save', name: 'Sparande: Resa', amount: 1500, dueDay: 25, category: 'Sparande', linkedGoalId: 'g1', ...extra }) as any;
-const tx = (id: string, amount: number, date: string) => ({ id, title: 'Avanza', amount, date, category: 'Sparande' }) as any;
+type Goal = Parameters<typeof creditGoalsFromBankMatches>[0][number];
+type Saving = Parameters<typeof creditGoalsFromBankMatches>[1][number];
+type MatchedTx = Parameters<typeof creditGoalsFromBankMatches>[2] extends Map<string, infer T> ? T : never;
+
+const goal = (extra: Partial<Goal> = {}): Goal =>
+  ({ id: 'g1', name: 'Resa', targetAmount: 20000, currentAmount: 1000, activities: [], ...extra });
+const saving = (extra: Partial<Saving> = {}): Saving =>
+  ({ id: 'fx-save', name: 'Sparande: Resa', amount: 1500, dueDay: 25, category: 'Sparande', linkedGoalId: 'g1', ...extra });
+const tx = (id: string, amount: number, date: string): MatchedTx => ({ id, title: 'Avanza', amount, date, category: 'Sparande' });
 
 test('med bank: dragningen fyller på målet med riktigt belopp', () => {
   const { goals, mutated } = creditGoalsFromBankMatches([goal()], [saving()], new Map([['fx-save', tx('t1', 1600, '2026-11-25')]]));

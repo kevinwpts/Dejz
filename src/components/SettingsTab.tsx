@@ -93,10 +93,10 @@ interface SettingsTabProps {
   onDeleteAccount: () => void;
   onResetAccount: () => void;
   onSelectTransaction?: (tx: TransactionItem) => void;
-  onAddIncome?: (data: Omit<IncomeItem, 'id'>) => Promise<any> | void;
-  onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<any> | void;
-  onUpdateIncome?: (item: IncomeItem) => Promise<any> | void;
-  onUpdateFixed?: (item: FixedExpenseItem) => Promise<any> | void;
+  onAddIncome?: (data: Omit<IncomeItem, 'id'>) => Promise<unknown> | void;
+  onAddFixed?: (data: Omit<FixedExpenseItem, 'id'>) => Promise<unknown> | void;
+  onUpdateIncome?: (item: IncomeItem) => Promise<unknown> | void;
+  onUpdateFixed?: (item: FixedExpenseItem) => Promise<unknown> | void;
   onUpdateEmail?: (email: string) => void;
   onUpdateName?: (name: string) => void;
   onStartOnboarding?: () => void;
@@ -111,10 +111,10 @@ interface SettingsTabProps {
   onSelectGoalId?: (goalId: string | null) => void;
   onStartCreateGoalWizard?: () => void;
   onOpenAddFixedModal?: () => void;
-  onOpenPreviewFixedModal?: (exp?: any) => void;
+  onOpenPreviewFixedModal?: (exp?: FixedExpenseItem) => void;
   onOpenAddIncomeModal?: () => void;
   onOpenAddTransactionModal?: () => void;
-  onOpenPreviewTransactionModal?: (tx?: any) => void;
+  onOpenPreviewTransactionModal?: (tx?: TransactionItem) => void;
   onApplyFixedExpenses?: (next: FixedExpenseItem[]) => void;
   /** Öppnar Sparmål, Kvitton eller Paket (låg tidigare under "Mer" i menyn) */
   onOpenSection?: (section: 'goals' | 'receipts' | 'packages') => void;
