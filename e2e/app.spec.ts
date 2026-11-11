@@ -100,3 +100,44 @@ test('introduktionen utan bank startar och går vidare efter namnet', async ({ p
   await expect(heading).not.toHaveText(/Vad heter du/);
   expect(errors).toEqual([]);
 });
+
+test('en ny fast utgift dras av från "kvar" och syns i fliken Fasta', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openDemo(page);
+  const before = await readHomeCard(page);
+
+  await page.locator('nav button', { hasText: 'Fasta' }).first().click();
+  await page.getByRole('button', { name: 'Lägg till' }).nth(1).click();
+  await page.getByPlaceholder('Butik eller tjänst').fill('Testabonnemang');
+  await page.getByPlaceholder('0').first().fill('500');
+  await page.getByRole('button', { name: 'Spara fast utgift' }).click();
+  await expect(page.getByText('Testabonnemang').first()).toBeVisible();
+
+  await page.locator('nav button', { hasText: 'Hem' }).first().click();
+  await expect
+    .poll(async () => (await readHomeCard(page)).fasta, { timeout: 10_000 })
+    .toBe(before.fasta - 500);
+  const after = await readHomeCard(page);
+  expect(after.kvar).toBe(before.kvar - 500);
+  expect(after.rorligt).toBe(before.rorligt);
+  expect(errors).toEqual([]);
+});
+
+test('ett nytt köp syns i Historik', async ({ page }) => {
+  await openDemo(page);
+  await page.getByRole('button', { name: 'Lägg till köp' }).first().click();
+  await page.getByRole('button', { name: 'Fyll i manuellt' }).click();
+  await page.getByPlaceholder('Butik eller köp').fill('Historiktest');
+  await page.getByPlaceholder('0').first().fill('99');
+  await page.getByRole('button', { name: 'Spara händelse' }).click();
+  await page.locator('nav button', { hasText: 'Historik' }).first().click();
+  await expect(page.getByText('Historiktest').first()).toBeVisible();
+});
+
+test('profil och inställningar öppnas utan fel', async ({ page }) => {
+  const errors = collectErrors(page);
+  await openDemo(page);
+  await page.getByRole('button', { name: 'Profil & inställningar' }).click();
+  await expect(page.getByText('Lönedag').first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
