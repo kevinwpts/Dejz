@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import {
-  calculateCurrentPeriod,
-  PeriodInfo,
-  WeekendHandlingMode,
-  isDateInPeriod,
-} from './utils/periodEngine';
+import { WeekendHandlingMode } from './utils/periodEngine';
 import { Navbar } from './components/Navbar';
 import { BottomNav, AppTab } from './components/BottomNav';
 import { AddEntrySheet, isVoiceEntrySupported } from './components/VoiceEntry';
 import { BalanceSheet } from './components/BalanceSheet';
 import {
   HomeTab,
-  AccountItem,
   IncomeItem,
   FixedExpenseItem,
   TransactionItem,
   getTransactionTime,
-  compareTransactionsChronologically,
 } from './components/HomeTab';
 import { FixedTab } from './components/FixedTab';
 import { AnalysisTab } from './components/AnalysisTab';
@@ -55,20 +48,13 @@ import {
   normalizeSocialUserKey,
 } from './utils/friendsChatSync';
 import { BankConnection, BankAccount } from './services/bankService';
-import { dataService } from './services/dataService';
-import { getLogoUrl } from './utils/logo';
-import { formatBankAccountNumber, getBankAccountTitle } from './utils/bankHistoryAnalyzer';
-import { deduplicateTransactions } from './utils/transactionDedup';
 import { formatSwedishDateHeading, getItemReceipts } from './utils/swedishDate';
 import {
   loadCachedAppState,
-  saveCachedAppState,
   hasCachedBankData,
   getExcludeInternalTransfers,
   setExcludeInternalTransfers,
-  isTransactionManuallyExcluded,
   getMerchantAliases,
-  getAccountMetaMap,
   saveAccountMeta,
   syncAllUserPreferencesToSupabase,
   cancelPendingPreferenceSync,
@@ -76,11 +62,12 @@ import {
   setManualBalance,
   getSavingsGoals,
 } from './utils/appCache';
-import { findInternalTransferIds, isInternalTransferTransaction } from './utils/transferDetection';
-import { checkIsRecurringTransaction, reconcilePeriodRecurringMatches } from './utils/recurring';
+import { checkIsRecurringTransaction } from './utils/recurring';
 import { useBudgetTotals } from './app/hooks/useBudgetTotals';
 import { useAccountData } from './app/hooks/useAccountData';
 import { useAppActions } from './app/hooks/useAppActions';
+import { useProfileSettings } from './app/hooks/useProfileSettings';
+import { usePeriodData } from './app/hooks/usePeriodData';
 import {
   FeedbackToast,
   FeedbackToastState,
@@ -88,10 +75,8 @@ import {
   UndoToast,
 } from './app/components/AppToasts';
 import { useAiMerchantCleaning } from './app/hooks/useAiMerchantCleaning';
-import { useSavingsGoalCredit } from './app/hooks/useSavingsGoalCredit';
 
 import { sanitizeTransactionItem } from './app/transactionMapping';
-import { getPayDatesForIncome } from './app/incomeSchedule';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
@@ -478,273 +463,48 @@ export const App: React.FC = () => {
       weekendHandling,
     });
 
-  const [accountMetaVersion, setAccountMetaVersion] = useState(0);
-  const [selectedGoalIdInView, setSelectedGoalIdInView] = useState<string | null>(null);
-
-  // Konvertera Enable Banking-konton till visningskonton för Hem-fliken
-  const accounts: AccountItem[] = useMemo(() => {
-    const connMap = new Map<string, { name: string; logo?: string | null }>();
-    for (const c of connections) {
-      connMap.set(c.id, { name: c.aspsp_name, logo: c.aspsp_logo });
-    }
-
-    const activeAccs = bankAccounts.filter((a) => a.is_selected !== false);
-    const listToUse = activeAccs.length > 0 ? activeAccs : bankAccounts;
-    const accountMeta = getAccountMetaMap();
-
-    return listToUse.map((ba) => {
-      const connInfo = connMap.get(ba.connection_id);
-      const bankName = connInfo?.name || 'Bank';
-      const originalName = getBankAccountTitle(ba, bankName);
-      const meta = accountMeta[ba.id];
-      const displayName =
-        meta?.customName && meta.customName.trim()
-          ? meta.customName.trim()
-          : originalName;
-      const formattedNumber = formatBankAccountNumber(ba.bban || ba.iban || ba.product || '');
-      return {
-        id: ba.id,
-        name: displayName,
-        originalName,
-        accountNumber: formattedNumber,
-        bankName,
-        balance: Number(ba.balance_amount) || 0,
-        type: 'checking' as const,
-        logo: connInfo?.logo || getLogoUrl(bankName, 'Bank'),
-        excludeFromTotalBalance: Boolean(meta?.excludeFromTotalBalance),
-      };
-    });
-  }, [connections, bankAccounts, accountMetaVersion]);
-
-  const connectedBank = useMemo(() => {
-    const activeConns = connections.filter((c) => c.status === 'active');
-    if (activeConns.length > 0) {
-      return activeConns.map((c) => c.aspsp_name).join(', ');
-    }
-    if (connections.length > 0) {
-      return connections.map((c) => c.aspsp_name).join(', ');
-    }
-    return null;
-  }, [connections]);
-
-  // Beräkna aktuell period (från lönedag till dagen innan nästa lön) med vald helghantering:
-  const period: PeriodInfo = useMemo(() => {
-    return calculateCurrentPeriod(new Date(), targetPayday, weekendHandling);
-  }, [targetPayday, weekendHandling]);
-
-  // Uppdatera lönedag & spara till Supabase + cache
-  const handleUpdatePayday = useCallback(
-    (day: number) => {
-      setTargetPayday(day);
-      saveCachedAppState({ targetPayday: day });
-      if (userId) {
-        dataService.updateProfile(userId, { payday: day }).catch(() => {});
-      }
-    },
-    [userId]
-  );
-
-  // Uppdatera helghantering & spara till Supabase + cache
-  const handleUpdateWeekendHandling = useCallback(
-    (mode: WeekendHandlingMode) => {
-      setWeekendHandling(mode);
-      saveCachedAppState({ weekendHandling: mode });
-      if (userId) {
-        dataService
-          .updateProfile(userId, { payday_before_weekend: mode === 'before' })
-          .catch(() => {});
-      }
-    },
-    [userId]
-  );
-
-  // Uppdatera profilbild
-  const handleUpdateAvatar = useCallback(
-    (avatarDataUrl: string | null) => {
-      setUserAvatar(avatarDataUrl);
-      saveCachedAppState({ userAvatar: avatarDataUrl });
-      if (userId && avatarDataUrl) {
-        dataService.updateProfile(userId, { avatar_url: avatarDataUrl }).catch(() => {});
-      }
-    },
-    [userId]
-  );
-
-  // Uppdatera e-post
-  const handleUpdateEmail = useCallback(
-    (email: string) => {
-      setUserEmail(email);
-      saveCachedAppState({ userEmail: email });
-      if (userId && userId !== 'demo-user' && userId !== 'preview-user') {
-        supabase.auth.updateUser({ email }).catch(() => {});
-      }
-    },
-    [userId]
-  );
-
-  // Uppdatera namn
-  const handleUpdateName = useCallback(
-    (name: string) => {
-      const clean = name.trim();
-      setUserName(clean || null);
-      try {
-        if (clean) {
-          localStorage.setItem('dejz_user_name', clean);
-        } else {
-          localStorage.removeItem('dejz_user_name');
-        }
-      } catch {
-        // ignore
-      }
-      if (userId && userId !== 'demo-user' && userId !== 'preview-user') {
-        supabase.auth.updateUser({ data: { full_name: clean } }).catch(() => {});
-      }
-    },
-    [userId]
-  );
-
-  // Totalt saldo
-  const totalBalance = useMemo(() => {
-    return accounts
-      .filter((a) => !a.excludeFromTotalBalance)
-      .reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
-  }, [accounts]);
-
-  // Alla interna överföringar (enskilda och parvisa mellan egna konton)
-  const internalTransferIds = useMemo(() => {
-    if (!excludeInternalTransfers) return new Set<string>();
-    return findInternalTransferIds(transactions, bankAccounts, userEmail, userName);
-  }, [transactions, excludeInternalTransfers, bankAccounts, userEmail, userName]);
-
-  // Transaktioner som tillhör den aktuella löneperioden (från lönedag till dagen innan nästa lön)
-  const periodTransactions = useMemo(() => {
-    const aliases = getMerchantAliases();
-    const sanitized = transactions
-      .filter((t) => {
-        if (!isDateInPeriod(t.date, period)) return false;
-        if (t.isExcluded) return false;
-        if (isTransactionManuallyExcluded(t.id)) return false;
-        if (
-          excludeInternalTransfers &&
-          (internalTransferIds.has(t.id) ||
-            isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-        ) {
-          return false;
-        }
-        return true;
-      })
-      .map((t) => sanitizeTransactionItem(t, fixedExpenses, incomes, aliases))
-      .filter((t) => {
-        if (
-          excludeInternalTransfers &&
-          (internalTransferIds.has(t.id) ||
-            isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-        ) {
-          return false;
-        }
-        return true;
-      });
-
-    const list = deduplicateTransactions(sanitized);
-
-    list.sort(compareTransactionsChronologically);
-    return list;
-  }, [
-    transactions,
+  // Lönedag, helghantering, namn, e-post och profilbild (app/hooks/useProfileSettings.tsx)
+  const {
+    handleUpdateWeekendHandling,
+    handleUpdateName,
+    handleUpdatePayday,
+    handleUpdateAvatar,
+    handleUpdateEmail,
+  } = useProfileSettings({
+    setTargetPayday,
+    userId,
+    setWeekendHandling,
+    setUserAvatar,
+    setUserEmail,
+    setUserName,
+  });
+  // Löneperioden: konton, period, periodens transaktioner och kopplingar (app/hooks/usePeriodData.tsx)
+  const {
+    setAccountMetaVersion,
+    periodTransactions,
+    periodRecurringMatches,
     period,
-    excludeInternalTransfers,
     internalTransferIds,
+    selectedGoalIdInView,
+    setSelectedGoalIdInView,
+    displayTransactions,
+    connectedBank,
+    accounts,
+    totalBalance,
+  } = usePeriodData({
+    connections,
     bankAccounts,
-    userEmail,
-    userName,
-    fixedExpenses,
-    incomes,
-  ]);
-
-  // 1-till-1-matchning mellan periodens faktiska banktransaktioner och fasta utgifter/inkomster:
-  // Varje fast utgift kan högst kopplas till 1 transaktion per period, och när en fast inkomst/utgift
-  // väl har bokförts används dess faktiska belopp under perioden.
-  const periodRecurringMatches = useMemo(() => {
-    return reconcilePeriodRecurringMatches(periodTransactions, fixedExpenses, incomes);
-  }, [periodTransactions, fixedExpenses, incomes]);
-
-  useSavingsGoalCredit({ fixedExpenses, periodRecurringMatches, period, hasActiveBankConnection });
-
-  // Enhetlig transaktionslista för både Hem ("Senaste transaktioner"), Historik och Sök:
-  // Garanterar att antalet reserverade transaktioner och historikrader alltid är 100% identiskt oavsett flik.
-  const displayTransactions = useMemo(() => {
-    const aliases = getMerchantAliases();
-    const visibleSource = transactions.filter((t) => {
-      if (t.isExcluded) return false;
-      if (isTransactionManuallyExcluded(t.id)) return false;
-      if (
-        excludeInternalTransfers &&
-        (internalTransferIds.has(t.id) ||
-          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-      ) {
-        return false;
-      }
-      return true;
-    });
-    const combined = visibleSource
-      .map((t) => sanitizeTransactionItem(t, fixedExpenses, incomes, aliases))
-      .filter((t) => {
-        if (
-          excludeInternalTransfers &&
-          (internalTransferIds.has(t.id) ||
-            isInternalTransferTransaction(t, bankAccounts, userEmail, userName))
-        ) {
-          return false;
-        }
-        return true;
-      });
-    for (const inc of incomes) {
-      if (!inc.amount || inc.amount <= 0) continue;
-      const payDates = getPayDatesForIncome(inc, targetPayday, weekendHandling === 'before');
-      for (const pDate of payDates) {
-        const genId = `inc-${inc.id}-${pDate}`;
-        if (dismissedTxIds.includes(genId)) continue;
-
-        const isCovered = combined.some((t) => {
-          if (t.type !== 'income') return false;
-          if (t.id === genId) return true;
-          const sameAmount = Math.abs((Number(t.amount) || 0) - inc.amount) <= 5;
-          if (!sameAmount) return false;
-          const d1 = new Date(t.date).getTime();
-          const d2 = new Date(pDate).getTime();
-          return !isNaN(d1) && !isNaN(d2) && Math.abs(d1 - d2) <= 3 * 86400 * 1000;
-        });
-
-        if (!isCovered) {
-          combined.push({
-            id: genId,
-            title: inc.name,
-            amount: inc.amount,
-            type: 'income',
-            category: inc.category || 'Lön',
-            date: pDate,
-            time: '',
-            logo: inc.logo || getLogoUrl(inc.name, inc.category || 'Lön'),
-          });
-        }
-      }
-    }
-    const deduped = deduplicateTransactions(combined);
-    deduped.sort(compareTransactionsChronologically);
-    return deduped;
-  }, [
-    transactions,
-    fixedExpenses,
-    incomes,
     targetPayday,
     weekendHandling,
-    dismissedTxIds,
     excludeInternalTransfers,
-    internalTransferIds,
-    bankAccounts,
+    transactions,
     userEmail,
     userName,
-  ]);
+    fixedExpenses,
+    incomes,
+    hasActiveBankConnection,
+    dismissedTxIds,
+  });
 
   const {
     totalIncome,
