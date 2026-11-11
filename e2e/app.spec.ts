@@ -107,7 +107,11 @@ test('en ny fast utgift dras av från "kvar" och syns i fliken Fasta', async ({ 
   const before = await readHomeCard(page);
 
   await page.locator('nav button', { hasText: 'Fasta' }).first().click();
+  // Vänta tills fliken visas innan vi klickar (annars kan klicket hamna för tidigt)
+  await expect(page.getByText('Fasta utgifter', { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Lägg till' }).nth(1)).toBeVisible();
   await page.getByRole('button', { name: 'Lägg till' }).nth(1).click();
+  await expect(page.getByPlaceholder('Butik eller tjänst')).toBeVisible();
   await page.getByPlaceholder('Butik eller tjänst').fill('Testabonnemang');
   await page.getByPlaceholder('0').first().fill('500');
   await page.getByRole('button', { name: 'Spara fast utgift' }).click();
