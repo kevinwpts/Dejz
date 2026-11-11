@@ -1,11 +1,7 @@
+import { BankModal, IncomeModal, FixedExpenseModal, TransactionModal, AuthModal } from '../lazyScreens';
 import { FRIENDS_CHAT_ENABLED } from '../../utils/friendsChatSync';
 import { useApp } from '../AppContext';
 import React from 'react';
-import { BankModal } from '../../components/modals/BankModal';
-import { IncomeModal } from '../../components/modals/IncomeModal';
-import { FixedExpenseModal } from '../../components/modals/FixedExpenseModal';
-import { TransactionModal } from '../../components/modals/TransactionModal';
-import { AuthModal } from '../../components/modals/AuthModal';
 
 export const AppModals: React.FC = () => {
   const {

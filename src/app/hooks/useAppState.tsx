@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
 import { AppTab } from '../../components/BottomNav';
 import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
-import { SettingsSubView } from '../../components/SettingsTab';
-import { getSplitSimulatorActive, setSplitSimulatorActive } from '../../components/AdminSimulator';
+import type { SettingsSubView } from '../../components/settings/subviews';
+import { getSplitSimulatorActive, setSplitSimulatorActive } from '../../utils/simulatorState';
 import {
   connectFriendsChatWebSocket,
   getTotalUnreadChatCount,

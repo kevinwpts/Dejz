@@ -1,13 +1,8 @@
+import { FixedTab, AnalysisTab, TransactionsTab, SettingsTab, SavingsGoalsView, FriendsChatView } from '../lazyScreens';
 import { FRIENDS_CHAT_ENABLED } from '../../utils/friendsChatSync';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { HomeTab, TransactionItem, getTransactionTime } from '../../components/HomeTab';
-import { FixedTab } from '../../components/FixedTab';
-import { AnalysisTab } from '../../components/AnalysisTab';
-import { TransactionsTab } from '../../components/TransactionsTab';
-import { SettingsTab } from '../../components/SettingsTab';
-import { SavingsGoalsView } from '../../components/SavingsGoalsView';
-import { FriendsChatView } from '../../components/FriendsChatView';
 import { ItemLogo } from '../../components/ItemLogo';
 import { CategoryIcon } from '../../components/CategoryIcon';
 import { Heart, Package, Paperclip, FileText, Eye } from '@phosphor-icons/react';

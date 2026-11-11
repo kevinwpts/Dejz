@@ -47,6 +47,8 @@ import {
 import { reconcileFixedExpensesList, reconcileIncomesList } from '../../app/reconcileLists';
 import { apiUrl } from '../../utils/platform';
 
+const SWISH_LOOKUP_ENABLED = import.meta.env.VITE_ENABLE_SWISH_LOOKUP === 'true';
+
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
 
@@ -777,7 +779,9 @@ export function useAccountData({
       unresolvedPhones.add(phone);
     }
 
-    if (unresolvedPhones.size === 0) return;
+    // Namnuppslag för okända Swish-nummer kräver en server (/api/swish/lookup) som inte finns ännu.
+    // Numren samlas ändå ovan, så att uppslaget kan slås på när servern finns.
+    if (unresolvedPhones.size === 0 || !SWISH_LOOKUP_ENABLED) return;
 
     unresolvedPhones.forEach((phone) => {
       fetch(apiUrl(`/api/swish/lookup?phone=${encodeURIComponent(phone)}`))

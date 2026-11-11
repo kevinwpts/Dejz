@@ -1,3 +1,4 @@
+import { supabase } from '../../supabaseClient';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, CaretLeft } from '@phosphor-icons/react';
 import { FixedExpenseItem, AccountItem, TransactionItem } from '../HomeTab';
@@ -25,7 +26,6 @@ import { FixedViewCancelGuide } from './fixed/FixedViewCancelGuide';
 import { FixedViewCancelPicker } from './fixed/FixedViewCancelPicker';
 import { FixedViewSimilar } from './fixed/FixedViewSimilar';
 import type { CancelGuideData, ModalSubView } from './fixed/shared';
-import { apiUrl } from '../../utils/platform';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -186,20 +186,27 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
     setIsLoadingCancelGuide(true);
     try {
-      const resp = await fetch(apiUrl('/api/ai/cancel-subscription'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: targetName,
-          category,
-          amount: Number(amount) || activeExpense?.amount || 0,
-          paymentMethod,
-        }),
+      // AI-guiden körs i Supabase (edge function find-cancellation-url, Gemini)
+      const { data, error } = await supabase.functions.invoke('find-cancellation-url', {
+        body: { name: targetName, category, language: 'sv' },
       });
-      if (resp.ok) {
-        const data: CancelGuideData = await resp.json();
-        cancelGuideCacheRef.current[cacheKey] = data;
-        setCancelGuide(data);
+      if (!error && data && typeof data.cancelUrl === 'string') {
+        let host = '';
+        try {
+          host = new URL(data.cancelUrl).hostname.replace(/^www\./, '');
+        } catch {
+          host = '';
+        }
+        const guide: CancelGuideData = {
+          serviceName: data.serviceName || targetName,
+          noticePeriod: data.noticePeriod || '',
+          steps: Array.isArray(data.steps) ? data.steps.slice(0, 6) : [],
+          cancelUrl: data.cancelUrl,
+          cancelUrlLabel: host ? `Öppna ${host}` : 'Öppna sidan för uppsägning',
+          tip: data.tips || undefined,
+        };
+        cancelGuideCacheRef.current[cacheKey] = guide;
+        setCancelGuide(guide);
       }
     } catch {
       // Fallback handled below if null

@@ -62,6 +62,7 @@ import { SecuritySettingsView } from './settings/SecuritySettingsView';
 import { BankSettingsView } from './settings/BankSettingsView';
 import { GoalsSettingsView } from './settings/GoalsSettingsView';
 import { ProfileSettingsView } from './settings/ProfileSettingsView';
+import type { SettingsSubView } from './settings/subviews';
 
 interface SettingsTabProps {
   period: PeriodInfo;
@@ -123,47 +124,8 @@ interface SettingsTabProps {
   sectionCounts?: { goals?: number; receipts?: number; packages?: number };
 }
 
-export type SettingsSubView =
-  | 'main'
-  | 'admin'
-  | 'household'
-  | 'discover'
-  | 'categories'
-  | 'goals'
-  | 'paymentMethods'
-  | 'period'
-  | 'bank'
-  | 'appearance'
-  | 'security'
-  | 'preferences'
-  | 'profile'
-  | 'feedback'
-  | 'legal'
-  | 'privacy'
-  | 'terms'
-  | 'psd2'
-  | 'cookies';
-
-export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, string> = {
-  admin: 'Admin & Testsimulator',
-  profile: 'Profil',
-  household: 'Delad ekonomi',
-  discover: 'Hitta fasta poster',
-  categories: 'Kategorier',
-  goals: 'Sparmål & buffert',
-  paymentMethods: 'Betalsätt',
-  period: 'Lönedag',
-  bank: 'Bankkonton',
-  appearance: 'Utseende',
-  preferences: 'Överföringar',
-  security: 'Data & säkerhet',
-  feedback: 'Hjälp & feedback',
-  legal: 'Villkor & integritet',
-  privacy: 'Integritetspolicy',
-  terms: 'Användarvillkor',
-  psd2: 'Open Banking',
-  cookies: 'Cookies & lagring',
-};
+export type { SettingsSubView } from './settings/subviews';
+export { SETTINGS_SUBVIEW_TITLES } from './settings/subviews';
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({
   period,

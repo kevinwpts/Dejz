@@ -1,9 +1,8 @@
+import { SearchModal, NotificationsModal } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { Navbar } from '../../components/Navbar';
-import { SETTINGS_SUBVIEW_TITLES } from '../../components/SettingsTab';
-import { SearchModal } from '../../components/modals/SearchModal';
-import { NotificationsModal } from '../../components/modals/NotificationsModal';
+import { SETTINGS_SUBVIEW_TITLES } from '../../components/settings/subviews';
 import { getStoredFriends } from '../../utils/friendsChatSync';
 
 export const AppTopBar: React.FC = () => {

@@ -83,6 +83,14 @@ Skapa ett konto med påhittad data (lön, några räkningar och köp) och skriv 
 ### Steg 9 – Skärmbilder
 Krävs för 6,9-tumsskärm (1320 × 2868). Säg till så tar jag dem från demoläget med "Elin".
 
+### Steg 10 – Säkerhet i Supabase (5 minuter, gör före lansering)
+1. *Authentication → Settings → Password security* → slå på **Leaked password protection** (stoppar lösenord som läckt på nätet).
+2. *Settings → Billing*: kontrollera att planen har **dagliga säkerhetskopior** (ingår i Pro).
+3. *Settings → Auth → URL Configuration*: lägg till `https://dejz.se/**` och `se.dejz.app://**` som tillåtna adresser.
+
+### Steg 11 – Felövervakning (rekommenderas starkt)
+Skapa ett gratis konto på https://sentry.io (projekt: React). Lägg in DSN-nyckeln i Vercel som `VITE_SENTRY_DSN` och säg till – då kopplar jag in den. Då får du veta direkt när något går fel hos en användare.
+
 ---
 
 ## ⚠️ Saker att inte lova i App Store-texten

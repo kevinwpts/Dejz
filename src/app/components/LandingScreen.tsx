@@ -1,6 +1,6 @@
+import { LandingPage } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
-import { LandingPage } from '../../components/LandingPage';
 import { supabase } from '../../supabaseClient';
 import {
   syncAllUserPreferencesToSupabase,

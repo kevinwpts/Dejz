@@ -1,4 +1,4 @@
-import type { SettingsSubView } from '../SettingsTab';
+import type { SettingsSubView } from './subviews';
 import React from 'react';
 import { CaretRight, Scales, FileText, LockKey, Cookie } from '@phosphor-icons/react';
 

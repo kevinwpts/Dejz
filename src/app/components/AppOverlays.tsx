@@ -1,6 +1,6 @@
+import { PartnerSimulatorColumn } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
-import { PartnerSimulatorColumn } from '../../components/AdminSimulator';
 import { SetNewPasswordSheet } from '../../components/SetNewPasswordSheet';
 import { FeedbackSheet } from '../../components/FeedbackSheet';
 import { FeedbackToast, ReceiptPreviewSheet, UndoToast } from './AppToasts';

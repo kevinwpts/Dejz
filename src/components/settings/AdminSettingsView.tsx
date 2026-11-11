@@ -1,4 +1,4 @@
-import type { SettingsSubView } from '../SettingsTab';
+import type { SettingsSubView } from './subviews';
 import React from 'react';
 import { PeriodInfo } from '../../utils/periodEngine';
 import { AdminPanelView } from '../AdminSimulator';

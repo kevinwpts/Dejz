@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { PeriodInfo, WeekendHandlingMode } from '../../utils/periodEngine';
 import { AppTab } from '../../components/BottomNav';
 import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
-import { SettingsSubView } from '../../components/SettingsTab';
+import type { SettingsSubView } from '../../components/settings/subviews';
 import { supabase } from '../../supabaseClient';
 import { bankService, BankConnection, BankAccount } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
@@ -1263,9 +1263,6 @@ export function useAppActions({
 
     try {
       if (activeUid && activeUid !== 'demo-user' && activeUid !== 'preview-user') {
-        const sessionRes: any = await withFastTimeout(supabase.auth.getSession(), 1500);
-        const token = sessionRes?.data?.session?.access_token;
-
         // Koppla från bank i bakgrunden så det inte låser nollställningen
         if (connsToDisconnect.length > 0) {
           connsToDisconnect
@@ -1275,29 +1272,8 @@ export function useAppActions({
             });
         }
 
-        const res = await withFastTimeout(
-          fetch(apiUrl('/api/auth/reset-account'), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({ userId: activeUid }),
-          }),
-          3500
-        );
-
-        let serverReset = false;
-        if (res && res.ok) {
-          const data = await res.json().catch(() => null);
-          if (data?.success && !data?.localOnly) {
-            serverReset = true;
-          }
-        }
-
-        if (!serverReset) {
-          await withFastTimeout(dataService.deleteAllUserData(activeUid), 3000);
-        }
+        // Nollställ all egen data i Supabase (raderingen skyddas av databasens regler för egna rader)
+        await withFastTimeout(dataService.deleteAllUserData(activeUid), 4000);
       } else if (activeUid) {
         await withFastTimeout(dataService.deleteAllUserData(activeUid), 2000);
       }

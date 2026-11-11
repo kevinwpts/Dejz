@@ -1,8 +1,7 @@
+import { OnboardingFlow, BankModal } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
-import { OnboardingFlow } from '../../components/OnboardingFlow';
 import { isBankEnabledForEmail } from '../../utils/bankFeatureFlag';
-import { BankModal } from '../../components/modals/BankModal';
 import { SetNewPasswordSheet } from '../../components/SetNewPasswordSheet';
 import { syncAllUserPreferencesToSupabase } from '../../utils/appCache';
 

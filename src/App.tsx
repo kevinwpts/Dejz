@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { preloadScreens } from './app/lazyScreens';
 import { AppContext } from './app/AppContext';
 import { useAppModel } from './app/useAppModel';
 import { AppTabContent } from './app/components/AppTabContent';
@@ -12,6 +13,8 @@ import { LandingScreen } from './app/components/LandingScreen';
 
 export const App: React.FC = () => {
   const app = useAppModel();
+  // Ladda ned övriga skärmar i bakgrunden när telefonen är ledig (snabb start, snabba byten)
+  useEffect(() => preloadScreens(), []);
 
   if (app.showLanding || (!app.userId && !app.isInitialLoading && !app.isOnboardingActive)) {
     return (

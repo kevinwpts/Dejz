@@ -8,6 +8,20 @@ export default defineConfig(() => {
   return {
     base: '/',
     plugins: [react(), tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          // Stora bibliotek i egna filer: de ändras sällan, så telefonen kan spara dem mellan uppdateringar
+          manualChunks(id: string) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('@phosphor-icons')) return 'vendor-icons';
+            if (id.includes('@supabase')) return 'vendor-supabase';
+            if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/scheduler/')) return 'vendor-react';
+            return undefined;
+          },
+        },
+      },
+    },
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('https://smddiufwpdpmzhvideto.supabase.co'),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZGRpdWZ3cGRwbXpodmlkZXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNjMyMzMsImV4cCI6MjA4NzkzOTIzM30.HpEtvTqE3E0UgsbOXHRh3qpsyUMpFtPHuRD_GCSF_5o'),

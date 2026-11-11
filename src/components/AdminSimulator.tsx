@@ -1,3 +1,4 @@
+import { getSplitSimulatorActive, setSplitSimulatorActive } from '../utils/simulatorState';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Play,
@@ -22,11 +23,7 @@ import {
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
 import { PeriodInfo } from '../utils/periodEngine';
-import {
-  getSavingsGoals,
-  saveSavingsGoals,
-  SavingsGoalItem,
-} from '../utils/appCache';
+import { getSavingsGoals, saveSavingsGoals, SavingsGoalItem } from '../utils/appCache';
 import {
   HouseholdState,
   HouseholdMemberSummary,
@@ -54,30 +51,9 @@ import {
   normalizeSocialUserKey,
 } from '../utils/friendsChatSync';
 
-const SPLIT_SIMULATOR_STORAGE_KEY = 'dejz_split_simulator_active_v1';
 const AUTO_REPLY_STORAGE_KEY = 'dejz_sim_auto_reply_v1';
 
 const REACTION_EMOJIS = ['❤️', '👍', '🔥', '🎉', '😂'];
-
-export function getSplitSimulatorActive(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return localStorage.getItem(SPLIT_SIMULATOR_STORAGE_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
-export function setSplitSimulatorActive(active: boolean): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(SPLIT_SIMULATOR_STORAGE_KEY, String(active));
-    window.dispatchEvent(new CustomEvent('dejz:simulator-toggled'));
-    window.dispatchEvent(new CustomEvent('dejz:split-simulator-changed'));
-  } catch {
-    // ignore
-  }
-}
 
 function getStoredAutoReply(): boolean {
   if (typeof window === 'undefined') return true;
@@ -1967,3 +1943,5 @@ export const PartnerSimulatorColumn: React.FC<PartnerSimulatorColumnProps> = ({
     </aside>
   );
 };
+
+export { getSplitSimulatorActive, setSplitSimulatorActive };
