@@ -62,13 +62,12 @@ import { bankService, BankConnection, BankAccount } from './services/bankService
 import { dataService } from './services/dataService';
 import { seedDemoData } from './utils/demoData';
 import { Frequency } from './types';
-import { getLogoUrl, saveLearnedBrandDomain } from './utils/logo';
+import { getLogoUrl } from './utils/logo';
 import {
   analyzeBankTransactionsForOnboarding,
   extractSwishPhoneNumber,
   formatBankAccountNumber,
   getBankAccountTitle,
-  needsAiMerchantCleaning,
 } from './utils/bankHistoryAnalyzer';
 import { deduplicateTransactions } from './utils/transactionDedup';
 import {
@@ -99,12 +98,9 @@ import {
   isTransactionManuallyExcluded,
   getMerchantAliases,
   saveMerchantAlias,
-  resolveMerchantAlias,
   removeMerchantAliasForSources,
-  isGenericPlaceholderMerchant,
   normalizeMerchantKey,
   ensureValidUuid,
-  normalizeCategoryToValid,
   propagateCategoryChangeInCache,
   hydrateAllUserPreferencesFromProfile,
   extractSavedFixedFromProfile,
@@ -116,33 +112,21 @@ import {
   syncAllUserPreferencesToSupabase,
   cancelPendingPreferenceSync,
   clearAllLocalAppData,
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-  getManualBalance,
   setManualBalance,
-  ManualBalance,
   getSavingsGoals,
-  saveSavingsGoals,
   resolveSwishPhoneToName,
   saveSwishPhoneDirectoryEntry,
 } from './utils/appCache';
 import { findInternalTransferIds, isInternalTransferTransaction } from './utils/transferDetection';
 import {
   checkIsRecurringTransaction,
-  findMatchingFixedExpense,
-  findMatchingIncome,
   findAllMatchingFixedExpensesByMerchant,
   reconcilePeriodRecurringMatches,
 } from './utils/recurring';
 import { estimateVariableBill } from './utils/variableBills';
-import {
-  computeDagsbudget,
-  computeKvar,
-  computeKvarFromBalance,
-  computeTotalFixed,
-  computeTotalIncome,
-  computeVariableSpent,
-} from './utils/budgetEngine';
+import { useBudgetTotals } from './app/hooks/useBudgetTotals';
+import { useAiMerchantCleaning } from './app/hooks/useAiMerchantCleaning';
+import { useSavingsGoalCredit } from './app/hooks/useSavingsGoalCredit';
 
 import { sanitizeTransactionItem, mapBankTransactionsToAppItems } from './app/transactionMapping';
 import { getPayDatesForIncome } from './app/incomeSchedule';
@@ -364,158 +348,6 @@ export const App: React.FC = () => {
     transactionsRef.current = transactions;
   }, [transactions]);
 
-  // Tyst AI-tvätt i bakgrunden för kryptiska/okända bankrader (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, KLARNA*84920)
-  const aiCleanedKeysRef = useRef<Set<string>>(new Set());
-  const aiCleanInFlightRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    if (aiCleanInFlightRef.current || transactions.length === 0) return;
-
-    const currentAliases = getMerchantAliases();
-    const candidatesByKey = new Map<
-      string,
-      { key: string; rawText: string; amount: number; time: string; type: 'expense' | 'income' }
-    >();
-
-    for (const tx of transactions) {
-      if (!tx || tx.isExcluded) continue;
-      const rawSource = (
-        tx.rawDescription ||
-        tx.counterpartyName ||
-        tx.note ||
-        tx.title ||
-        ''
-      ).trim();
-      if (!rawSource || rawSource.length < 2) continue;
-
-      const normKey = normalizeMerchantKey(rawSource);
-      if (!normKey || aiCleanedKeysRef.current.has(normKey)) continue;
-
-      // Hoppa över om användaren eller tidigare AI-körning redan har sparat ett alias
-      if (resolveMerchantAlias(rawSource, currentAliases)) {
-        aiCleanedKeysRef.current.add(normKey);
-        continue;
-      }
-
-      // Hoppa över om den matchar en fast utgift eller fast inkomst
-      if (
-        tx.type !== 'income' &&
-        fixedExpensesRef.current.length > 0 &&
-        findMatchingFixedExpense(tx, fixedExpensesRef.current)
-      ) {
-        aiCleanedKeysRef.current.add(normKey);
-        continue;
-      }
-      if (
-        tx.type === 'income' &&
-        incomesRef.current.length > 0 &&
-        findMatchingIncome(tx, incomesRef.current)
-      ) {
-        aiCleanedKeysRef.current.add(normKey);
-        continue;
-      }
-
-      const isUncategorizedOrMissingLogo =
-        tx.category === 'Övrigt' ||
-        !getLogoUrl(tx.title, tx.category) ||
-        needsAiMerchantCleaning(rawSource, tx.title, tx.category);
-
-      if (isUncategorizedOrMissingLogo) {
-        if (!candidatesByKey.has(normKey)) {
-          candidatesByKey.set(normKey, {
-            key: normKey,
-            rawText: rawSource,
-            amount: tx.amount,
-            time: getTransactionTime(tx),
-            type: tx.type === 'income' ? 'income' : 'expense',
-          });
-        }
-      } else {
-        aiCleanedKeysRef.current.add(normKey);
-      }
-    }
-
-    if (candidatesByKey.size === 0) return;
-
-    const batchItems = Array.from(candidatesByKey.values()).slice(0, 35);
-    for (const item of batchItems) {
-      aiCleanedKeysRef.current.add(item.key);
-    }
-
-    aiCleanInFlightRef.current = true;
-    const expenseCategories = getStoredExpenseCategories().map((c) => c.name);
-    const incomeCategories = getStoredIncomeCategories().map((c) => c.name);
-
-    fetch('/api/ai/clean-merchants', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: batchItems,
-        expenseCategories,
-        incomeCategories,
-      }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (
-          isDeletingAccountRef.current ||
-          !userIdRef.current ||
-          !data ||
-          !Array.isArray(data.results) ||
-          data.results.length === 0
-        ) {
-          return;
-        }
-
-        let anySaved = false;
-        for (const resItem of data.results) {
-          const orig = candidatesByKey.get(resItem.key);
-          if (!orig) continue;
-          const cleanTrimmed = String(resItem.cleanName || '').trim();
-          const domainTrimmed = String(resItem.domain || '').trim();
-          if (isGenericPlaceholderMerchant(orig.rawText)) {
-            continue;
-          }
-          const validCat = normalizeCategoryToValid(
-            resItem.category,
-            orig.type
-          );
-          // Spara inlärd domän (för företagslogga) och kategori utan att skriva över bankens transaktionsnamn!
-          if (domainTrimmed || (validCat && validCat !== 'Övrigt')) {
-            saveLearnedBrandDomain(orig.rawText, domainTrimmed, validCat);
-            if (cleanTrimmed) {
-              saveLearnedBrandDomain(cleanTrimmed, domainTrimmed, validCat);
-            }
-            anySaved = true;
-          }
-        }
-
-        if (anySaved && !isDeletingAccountRef.current && userIdRef.current) {
-          const updatedAliases = getMerchantAliases();
-          setTransactions((prev) => {
-            const next = deduplicateTransactions(
-              prev.map((t) =>
-                sanitizeTransactionItem(
-                  t,
-                  fixedExpensesRef.current,
-                  incomesRef.current,
-                  updatedAliases
-                )
-              )
-            );
-            saveCachedAppState({ transactions: next });
-            return next;
-          });
-        }
-      })
-      .catch(() => {
-        // Ignorera nätverksfel tyst i bakgrunden
-      })
-      .finally(() => {
-        aiCleanInFlightRef.current = false;
-      });
-  }, [transactions]);
-
   // Inloggad användare i Supabase
   const [userId, setUserId] = useState<string | null>(
     () => initialCache?.userId || null
@@ -621,6 +453,16 @@ export const App: React.FC = () => {
 
   const userIdRef = useRef<string | null>(userId);
   const isDeletingAccountRef = useRef<boolean>(false);
+
+  // Tyst AI-tvätt av kryptiska butiksnamn i bakgrunden (se app/hooks/useAiMerchantCleaning.ts)
+  const aiCleanedKeysRef = useAiMerchantCleaning({
+    transactions,
+    setTransactions,
+    incomesRef,
+    fixedExpensesRef,
+    userIdRef,
+    isDeletingAccountRef,
+  });
   const lastHydratedUserIdRef = useRef<string | null>(initialCache?.userId || null);
   useEffect(() => {
     userIdRef.current = userId;
@@ -1805,152 +1647,7 @@ export const App: React.FC = () => {
     return reconcilePeriodRecurringMatches(periodTransactions, fixedExpenses, incomes);
   }, [periodTransactions, fixedExpenses, incomes]);
 
-  // Automatisk påfyllning av Sparmål när en kopplad fast utgift (t.ex. Avanza månadssparande) matchas i perioden:
-  // Varje unik banktransaktion bokförs högst en gång på målet via `tx-goal-${matchedTx.id}`.
-  useEffect(() => {
-    const linkedExps = fixedExpenses.filter((e) => e.linkedGoalId);
-    if (linkedExps.length === 0) return;
-
-    const goals = getSavingsGoals();
-    if (!goals || goals.length === 0) return;
-
-    let mutated = false;
-    const nextGoals = goals.map((goal) => {
-      let updatedGoal = goal;
-      for (const exp of linkedExps) {
-        if (exp.linkedGoalId !== goal.id) continue;
-        const matchedTx = periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
-        if (!matchedTx) continue;
-
-        const activityId = `tx-goal-${matchedTx.id}`;
-        const alreadyCredited = (updatedGoal.activities || []).some(
-          (a) => a.id === activityId
-        );
-        if (alreadyCredited) continue;
-
-        const shareRatio =
-          exp.isShared && exp.fullAmount && exp.fullAmount > 0 && exp.amount > 0
-            ? exp.amount / exp.fullAmount
-            : 1;
-        const creditAmt = Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio);
-        if (creditAmt <= 0) continue;
-
-        mutated = true;
-        updatedGoal = {
-          ...updatedGoal,
-          currentAmount: (Number(updatedGoal.currentAmount) || 0) + creditAmt,
-          activities: [
-            {
-              id: activityId,
-              text: `${exp.name} (+${creditAmt.toLocaleString('sv-SE')} kr)`,
-              date: matchedTx.date,
-              amount: creditAmt,
-            },
-            ...(updatedGoal.activities || []),
-          ],
-        };
-      }
-      return updatedGoal;
-    });
-
-    if (mutated) {
-      saveSavingsGoals(nextGoals);
-    }
-  }, [fixedExpenses, periodRecurringMatches]);
-
-  // Utan bank: ett månadssparande (fast utgift kopplad till ett sparmål) läggs till i målet
-  // en gång per löneperiod när dragningsdagen har passerat – samma period som det dras av från "kvar".
-  useEffect(() => {
-    if (hasActiveBankConnection) return; // med bank sköts det av matchningen ovan
-    const linkedExps = fixedExpenses.filter(
-      (e) => e.linkedGoalId && !e.isCancelled && Number(e.amount) > 0
-    );
-    if (linkedExps.length === 0 || !period?.startDate) return;
-    const goals = getSavingsGoals();
-    if (!goals || goals.length === 0) return;
-
-    const start = new Date(period.startDate);
-    start.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const periodKey = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(
-      start.getDate()
-    ).padStart(2, '0')}`;
-
-    // Har dragningsdagen (t.ex. den 25:e) inträffat mellan periodens start och idag?
-    const dueDatePassed = (dueDay: number): string | null => {
-      for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
-        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-        if (d.getDate() === Math.min(Math.max(1, dueDay), lastDay)) {
-          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-            d.getDate()
-          ).padStart(2, '0')}`;
-        }
-      }
-      return null;
-    };
-
-    let mutated = false;
-    const nextGoals = goals.map((goal) => {
-      let updatedGoal = goal;
-      for (const exp of linkedExps) {
-        if (exp.linkedGoalId !== goal.id) continue;
-        const dueIso = dueDatePassed(Number(exp.dueDay) || 25);
-        if (!dueIso) continue;
-        const activityId = `fixed-goal-${exp.id}-${periodKey}`;
-        if ((updatedGoal.activities || []).some((a) => a.id === activityId)) continue;
-        const creditAmt = Math.round(Number(exp.amount) || 0);
-        if (creditAmt <= 0) continue;
-        mutated = true;
-        updatedGoal = {
-          ...updatedGoal,
-          currentAmount: (Number(updatedGoal.currentAmount) || 0) + creditAmt,
-          activities: [
-            {
-              id: activityId,
-              text: `Månadssparande (+${creditAmt.toLocaleString('sv-SE')} kr)`,
-              date: dueIso,
-              amount: creditAmt,
-            },
-            ...(updatedGoal.activities || []),
-          ],
-        };
-      }
-      return updatedGoal;
-    });
-
-    if (mutated) {
-      saveSavingsGoals(nextGoals); // skickar själv 'dejz:goals-updated' så vyerna uppdateras
-    }
-  }, [fixedExpenses, period, hasActiveBankConnection]);
-
-  // Total inkomst under aktuell period (faktiskt bokfört belopp för lön/inkomst som redan kommit in, annars mallbelopp + eventuella extra engångsinkomster i perioden)
-  // Allt räknas i räknemotorn (utils/budgetEngine.ts) – samma regler överallt i appen
-  const isIgnoredTx = useCallback(
-    (t: TransactionItem) =>
-      isTransactionManuallyExcluded(t.id) ||
-      (excludeInternalTransfers &&
-        (internalTransferIds.has(t.id) ||
-          isInternalTransferTransaction(t, bankAccounts, userEmail, userName))),
-    [excludeInternalTransfers, internalTransferIds, bankAccounts, userEmail, userName]
-  );
-
-  const totalIncome = useMemo(
-    () =>
-      computeTotalIncome({
-        incomes,
-        periodTransactions,
-        matches: periodRecurringMatches,
-        isIgnored: isIgnoredTx,
-      }),
-    [incomes, periodTransactions, periodRecurringMatches, isIgnoredTx]
-  );
-
-  // Totala fasta kostnader under aktuell period (faktiskt bokfört belopp för räkningar som redan dragits, annars mallbelopp)
-  const totalFixedExpenses = useMemo(
-    () => computeTotalFixed(fixedExpenses, periodRecurringMatches, period),
-    [fixedExpenses, periodRecurringMatches, period]
-  );
+  useSavingsGoalCredit({ fixedExpenses, periodRecurringMatches, period, hasActiveBankConnection });
 
   // Enhetlig transaktionslista för både Hem ("Senaste transaktioner"), Historik och Sök:
   // Garanterar att antalet reserverade transaktioner och historikrader alltid är 100% identiskt oavsett flik.
@@ -2028,79 +1725,31 @@ export const App: React.FC = () => {
     userName,
   ]);
 
-  // Totala rörliga köp under aktuell period:
-  // - Exkluderar ENDAST den specifika transaktion som matchats 1-till-1 mot varje fast utgift (så att 2:a köpet hos samma handlare eller engångsköp hos Apple/Klarna alltid räknas i Rörligt).
-  // - Räknar av butiksreturer ('Återbetalning') samt mottagna Swish-utläggsersättningar som inte redan länkats till ett specifikt köp.
-  const totalVariableSpent = useMemo(
-    () =>
-      computeVariableSpent({
-        allTransactions: transactions,
-        periodTransactions,
-        matches: periodRecurringMatches,
-        isIgnored: isIgnoredTx,
-      }),
-    [transactions, periodTransactions, periodRecurringMatches, isIgnoredTx]
-  );
-
-  // "Saldo just nu" (utan bank): användaren skriver in vad som finns på kontot
-  const [manualBalance, setManualBalanceState] = useState<ManualBalance | null>(() =>
-    getManualBalance()
-  );
-  useEffect(() => {
-    const reload = () => setManualBalanceState(getManualBalance());
-    window.addEventListener('dejz-manual-balance', reload);
-    reload(); // profilen kan ha laddat ett saldo från en annan enhet
-    return () => window.removeEventListener('dejz-manual-balance', reload);
-  }, [isInitialLoading, userId]);
-
-  // Saldot gäller bara i den löneperiod det skrevs in
-  const activeManualBalance = useMemo(() => {
-    if (!manualBalance || hasActiveBankConnection) return null;
-    const at = new Date(manualBalance.at);
-    if (isNaN(at.getTime()) || at.getTime() < period.startDate.getTime()) return null;
-    return manualBalance;
-  }, [manualBalance, period, hasActiveBankConnection]);
-
-  // Kvar = saldo − räkningar som dras efter att saldot skrevs in − köp sedan dess + inkomster som kommer före lön
-  const kvarFromBalance = useMemo(() => {
-    if (!activeManualBalance) return null;
-    return computeKvarFromBalance({
-      balance: activeManualBalance,
-      fixedExpenses,
-      incomes,
-      period,
-      targetPayday,
-      periodTransactions,
-      matches: periodRecurringMatches,
-      isIgnored: (t) => isTransactionManuallyExcluded(t.id),
-    });
-  }, [
+  const {
+    totalIncome,
+    totalFixedExpenses,
+    totalVariableSpent,
+    manualBalance,
     activeManualBalance,
-    fixedExpenses,
+    kvarAttSpendera,
+    dagsbudget,
+  } = useBudgetTotals({
     incomes,
-    period,
-    targetPayday,
+    fixedExpenses,
+    transactions,
     periodTransactions,
     periodRecurringMatches,
-  ]);
-
-  // Kvar att spendera under aktuell period (kan vara negativt om man gått över budget)
-  const kvarAttSpendera = useMemo(
-    () =>
-      computeKvar({
-        kvarFromBalance,
-        totalIncome,
-        totalFixed: totalFixedExpenses,
-        totalVariableSpent,
-      }),
-    [kvarFromBalance, totalIncome, totalFixedExpenses, totalVariableSpent]
-  );
-
-  // Dagsbudget
-  const dagsbudget = useMemo(
-    () => computeDagsbudget(kvarAttSpendera, period.daysRemaining),
-    [kvarAttSpendera, period.daysRemaining]
-  );
+    period,
+    targetPayday,
+    hasActiveBankConnection,
+    excludeInternalTransfers,
+    internalTransferIds,
+    bankAccounts,
+    userEmail,
+    userName,
+    isInitialLoading,
+    userId,
+  });
 
   // Synka med Enable Banking
   const handleSyncBank = async () => {
