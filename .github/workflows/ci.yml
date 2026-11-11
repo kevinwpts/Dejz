@@ -1,0 +1,51 @@
+# Automatiska kontroller vid varje push och pull request.
+# Stoppar inte Vercel, men visar en röd markering på GitHub om något gått sönder.
+name: Kontroller
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typer, tester, bygge och klicktester
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installera paket
+        run: npm ci
+
+      - name: TypeScript (0 fel)
+        run: npm run typecheck
+
+      - name: Tester för räknemotorn
+        run: npm test
+
+      - name: Bygg appen
+        run: npx vite build
+
+      - name: Installera webbläsare för klicktester
+        run: npx playwright install --with-deps chromium
+
+      - name: Klicktester (demoläget)
+        run: npm run e2e
+
+      - name: Spara rapport om klicktester misslyckas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-rapport
+          path: playwright-report/
+          retention-days: 7

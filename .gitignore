@@ -33,3 +33,7 @@ yarn-error.log*
 *.cjs.bak
 patch*
 *.zip
+
+# Klicktester
+test-results/
+playwright-report/
