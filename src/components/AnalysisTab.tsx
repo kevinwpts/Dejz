@@ -37,9 +37,9 @@ import {
   findInternalTransferIds,
   isInternalTransferTransaction,
 } from '../utils/transferDetection';
-import { categorizeBankTransactionForApp } from '../utils/bankHistoryAnalyzer';
-import type { BankAccount, BankTransactionItem } from '../services/bankService';
+import type { BankAccount } from '../services/bankService';
 import { formatSwedishDateHeading } from '../utils/swedishDate';
+import { buildCategoryBreakdown } from '../utils/categoryBreakdown';
 
 // Läsvy över en rad i kategorilistan (köp, fast utgift eller inkomst)
 type SubItemView = Partial<TransactionItem> & Partial<FixedExpenseItem> & Partial<IncomeItem>;
@@ -339,122 +339,24 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
   const totalSpent = periodFixedTotal + periodVariableTotal;
   const netSavings = periodIncomeTotal - totalSpent;
 
-  // Category breakdown (med avräkning av butiksreturer/återköp per handlarkategori så cirkeldiagrammet matchar Rörligt netto)
-  const categoryBreakdown = useMemo(() => {
-    const map = new Map<
-      string,
-      { amount: number; isIncomeCategory: boolean; items: (TransactionItem | FixedExpenseItem | IncomeItem)[] }
-    >();
-
-    for (const tx of variableTransactions) {
-      const cat = tx.category || 'Övrigt';
-      const amt = Number(tx.amount) || 0;
-      const existing = map.get(cat) || { amount: 0, isIncomeCategory: false, items: [] };
-      existing.amount += amt;
-      existing.items.push(tx);
-      map.set(cat, existing);
-    }
-
-    for (const exp of periodFixedList) {
-      const cat = exp.category || 'Räkningar';
-      const amt = Number(exp.amount) || 0;
-      const existing = map.get(cat) || { amount: 0, isIncomeCategory: false, items: [] };
-      existing.amount += amt;
-      existing.items.push(exp);
-      map.set(cat, existing);
-    }
-
-    let remainingManualSplitBuffer = unlinkedManualSplitReductions;
-
-    // Dra av returer ('Återbetalning') och Swish-utlägg från motsvarande utgiftskategori i diagrammet
-    for (const refTx of reimbursementTransactions) {
-      const rawRefAmt = Math.abs(Number(refTx.amount) || 0);
-      if (rawRefAmt <= 0) continue;
-
-      let refAmt = rawRefAmt;
-      if (refTx.category !== 'Återbetalning' && remainingManualSplitBuffer > 0) {
-        const absorbed = Math.min(refAmt, remainingManualSplitBuffer);
-        refAmt -= absorbed;
-        remainingManualSplitBuffer -= absorbed;
-      }
-      if (refAmt <= 0) continue;
-
-      let targetCat = '';
-      if (refTx.category === 'Återbetalning') {
-        const inferred = categorizeBankTransactionForApp({
-          description: refTx.rawDescription || refTx.title || '',
-          counterparty_name: refTx.counterpartyName || refTx.title || '',
-          raw_json: refTx.rawJson,
-        } as BankTransactionItem);
-        if (
-          inferred.category &&
-          inferred.category !== 'Övrigt' &&
-          inferred.category !== 'Återbetalning' &&
-          map.has(inferred.category) &&
-          !map.get(inferred.category)?.isIncomeCategory
-        ) {
-          targetCat = inferred.category;
-        }
-      } else if (refTx.category === 'Swish' && map.has('Swish')) {
-        targetCat = 'Swish';
-      }
-
-      if (!targetCat) {
-        // Fallback: dra av från den största rörliga utgiftskategorin i perioden (exkl. Räkningar/Boende/Sparande)
-        let largestCat = '';
-        let largestAmt = 0;
-        for (const [catName, entry] of map.entries()) {
-          if (
-            !entry.isIncomeCategory &&
-            catName !== 'Räkningar' &&
-            catName !== 'Boende' &&
-            catName !== 'Sparande' &&
-            entry.amount > largestAmt
-          ) {
-            largestAmt = entry.amount;
-            largestCat = catName;
-          }
-        }
-        targetCat = largestCat;
-      }
-
-      if (targetCat && map.has(targetCat)) {
-        const entry = map.get(targetCat)!;
-        entry.amount = Math.max(0, entry.amount - refAmt);
-        entry.items.push(refTx);
-      }
-    }
-
-    for (const inc of periodIncomesList) {
-      const cat = inc.category || 'Lön';
-      const amt = Number(inc.amount) || 0;
-      const existing = map.get(cat) || { amount: 0, isIncomeCategory: true, items: [] };
-      existing.amount += amt;
-      existing.isIncomeCategory = true;
-      existing.items.push(inc);
-      map.set(cat, existing);
-    }
-
-    return Array.from(map.entries())
-      .map(([category, data]) => ({
-        category,
-        amount: data.amount,
-        isIncomeCategory: data.isIncomeCategory,
-        items: data.items,
-      }))
-      .sort((a, b) => {
-        if (a.isIncomeCategory !== b.isIncomeCategory) {
-          return a.isIncomeCategory ? 1 : -1;
-        }
-        return b.amount - a.amount;
-      });
-  }, [
-    variableTransactions,
-    periodFixedList,
-    reimbursementTransactions,
-    unlinkedManualSplitReductions,
-    periodIncomesList,
-  ]);
+  // Kategorilistan: utgifter och inkomster hålls isär (se utils/categoryBreakdown.ts)
+  const categoryBreakdown = useMemo(
+    () =>
+      buildCategoryBreakdown({
+        variableTransactions,
+        periodFixedList,
+        reimbursementTransactions,
+        unlinkedManualSplitReductions,
+        periodIncomesList,
+      }),
+    [
+      variableTransactions,
+      periodFixedList,
+      reimbursementTransactions,
+      unlinkedManualSplitReductions,
+      periodIncomesList,
+    ]
+  );
 
   const [selectedSliceCategory, setSelectedSliceCategory] = useState<string | null>(null);
 
@@ -744,18 +646,18 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
         {categoryBreakdown.length > 0 ? (
           <div className="divide-y divide-[var(--border-subtle)]">
             {categoryBreakdown.map((item) => {
-              const isExpanded = inspectedCategory === item.category;
+              const isExpanded = inspectedCategory === item.key;
 
               return (
-                <div key={item.category} className="transition-colors">
+                <div key={item.key} className="transition-colors">
                   <button
                     type="button"
                     aria-expanded={isExpanded}
                     onClick={() => {
-                      const nextCat = isExpanded ? null : item.category;
-                      setInspectedCategory(nextCat);
+                      const nextKey = isExpanded ? null : item.key;
+                      setInspectedCategory(nextKey);
                       if (!item.isIncomeCategory) {
-                        setSelectedSliceCategory(nextCat);
+                        setSelectedSliceCategory(isExpanded ? null : item.category);
                       }
                     }}
                     className={`w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group ${
@@ -769,7 +671,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                         </div>
                         <div className="min-w-0 flex-1">
                           <span className="ui-row-title">
-                            {item.category}
+                            {item.label}
                           </span>
                           <span className="ui-row-subtitle tabular-nums">
                             {item.items.length}{' '}
