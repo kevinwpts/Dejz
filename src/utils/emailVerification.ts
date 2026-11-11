@@ -13,7 +13,7 @@ export function useEmailVerification() {
 
   const refresh = useCallback(async () => {
     try {
-      const client: any = supabase;
+      const client = supabase;
       if (!client?.auth?.getUser) return;
       const { data } = await client.auth.getUser();
       const user = data?.user;
@@ -48,7 +48,7 @@ export function useEmailVerification() {
 /** Skickar verifieringsmejl till den inloggade användaren */
 export async function sendVerificationEmail(): Promise<'sent' | 'wait' | 'verified' | 'error'> {
   try {
-    const client: any = supabase;
+    const client = supabase;
     const { data, error } = await client.functions.invoke('email-verification', { body: { action: 'send' } });
     if (error) return 'error';
     const s = data?.status;
@@ -65,7 +65,7 @@ export async function confirmVerificationFromUrl(): Promise<'verified' | 'invali
     const token = new URLSearchParams(window.location.search).get('token');
     window.history.replaceState(null, '', '/');
     if (!token) return 'invalid';
-    const client: any = supabase;
+    const client = supabase;
     const { data } = await client.functions.invoke('email-verification', { body: { action: 'confirm', token } });
     const ok = data?.status === 'verified';
     if (ok) window.dispatchEvent(new Event('dejz-email-verified'));

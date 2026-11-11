@@ -21,7 +21,7 @@ function platform(): string {
 
 async function touch() {
   try {
-    const client: any = supabase;
+    const client = supabase;
     if (!client?.rpc) return;
     let last = 0;
     try {

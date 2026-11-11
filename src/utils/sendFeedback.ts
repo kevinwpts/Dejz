@@ -43,7 +43,7 @@ export async function sendFeedback(
   const clean = message.trim();
   if (!clean) return false;
   try {
-    const client: any = supabase;
+    const client = supabase;
     if (!client?.functions?.invoke) throw new Error('not_configured');
     // Max 8 sekunder – användaren ska aldrig fastna med en snurrande knapp
     const result: any = await Promise.race([

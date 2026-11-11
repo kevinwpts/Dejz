@@ -10,7 +10,7 @@ const PENDING_KEY = 'dejz_marketing_consent_pending';
  */
 export async function getMarketingConsent(): Promise<boolean | null> {
   try {
-    const client: any = supabase;
+    const client = supabase;
     if (!client?.auth?.getUser) return null;
     const { data } = await client.auth.getUser();
     const user = data?.user;
@@ -29,7 +29,7 @@ export async function getMarketingConsent(): Promise<boolean | null> {
 /** Sparar svaret (med datum) för den inloggade användaren. */
 export async function setMarketingConsent(consented: boolean, source: ConsentSource): Promise<boolean> {
   try {
-    const client: any = supabase;
+    const client = supabase;
     if (!client?.auth?.getUser) return false;
     const { data } = await client.auth.getUser();
     const user = data?.user;

@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from './types/database';
 
 const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {} as any;
 const procEnv = typeof process !== 'undefined' && process.env ? process.env : {} as any;
@@ -34,7 +35,7 @@ export const isLocalDemoMode =
   new URLSearchParams(window.location.search).has('demo');
 
 export const supabase = isSupabaseConfigured
-  ? createClient(
+  ? createClient<Database>(
       supabaseUrl!,
       supabaseAnonKey!,
       isLocalDemoMode ? { auth: { storageKey: 'dejz-demo-isolated-auth', persistSession: false } } : undefined
@@ -64,4 +65,4 @@ export const supabase = isSupabaseConfigured
       functions: {
         invoke: async () => ({ data: null, error: new Error('Supabase not configured') }),
       },
-    } as any;
+    } as unknown as SupabaseClient<Database>;

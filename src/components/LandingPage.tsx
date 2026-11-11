@@ -184,7 +184,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         const { error } = await supabase.auth.resend({
           type: 'signup',
           email: email.trim(),
-          options: { emailRedirectTo: window.location.origin, data: firstTouchSignupData() },
+          options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
       } else {
@@ -239,7 +239,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: window.location.origin, data: firstTouchSignupData() },
         });
         if (error) throw error;
         // Finns kontot redan svarar Supabase "ok" utan att skicka något mejl (identities är tom).

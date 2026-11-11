@@ -1,8 +1,16 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 import { Config, Income, FixedExpense, Transaction } from '../types';
 import { isKnownIconId, isEmojiString } from '../components/CategoryIcon';
 import { seedDemoData } from '../utils/demoData';
 import { getTransactionReceipts, serializeTransactionReceipts } from '../utils/format';
+
+/**
+ * dataService pratar med tabeller vars kolumner kan saknas i äldre databaser (se stripKnownMissingColumns
+ * och period_overrides-reserven). Därför en flexibel klient här – resten av appen använder den
+ * strikt typade klienten (types/database.ts), så att fel kolumnnamn upptäcks direkt.
+ */
+const db = supabase as unknown as SupabaseClient<any>;
 
 function extractMissingColumn(error: any): string | null {
   if (!error) return null;
@@ -64,7 +72,7 @@ export const dataService = {
       }
       return saved ? JSON.parse(saved) : null;
     }
-    const { data: profileData, error: profileError } = await supabase
+    const { data: profileData, error: profileError } = await db
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -174,7 +182,7 @@ export const dataService = {
           : (settings?.incomeCategories || null),
       };
     }
-    const { data: profileData, error: profileError } = await supabase
+    const { data: profileData, error: profileError } = await db
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -198,7 +206,7 @@ export const dataService = {
       return;
     }
     const payload = { ...updates };
-    let { error } = await supabase
+    let { error } = await db
       .from('profiles')
       .update(payload)
       .eq('id', userId);
@@ -213,7 +221,7 @@ export const dataService = {
           error = null;
           break;
         }
-        const retryResult = await supabase
+        const retryResult = await db
           .from('profiles')
           .update(payload)
           .eq('id', userId);
@@ -311,7 +319,7 @@ export const dataService = {
 
     stripKnownMissingColumns('profiles', payload);
 
-    let { error } = await supabase
+    let { error } = await db
       .from('profiles')
       .update(payload)
       .eq('id', userId);
@@ -324,7 +332,7 @@ export const dataService = {
       if (missingCol && missingCol in payload) {
         recordMissingColumn('profiles', missingCol);
         delete payload[missingCol];
-        const retryResult = await supabase.from('profiles').update(payload).eq('id', userId);
+        const retryResult = await db.from('profiles').update(payload).eq('id', userId);
         error = retryResult.error;
       } else {
         break;
@@ -335,7 +343,7 @@ export const dataService = {
     if (error) {
       console.warn("[Supabase saveSettings] UPDATE failed, falling back to UPSERT...", error);
       let upsertError = null;
-      const upsertResult = await supabase.from('profiles').upsert(payload);
+      const upsertResult = await db.from('profiles').upsert(payload);
       upsertError = upsertResult.error;
       
       let upsertAttempts = 0;
@@ -345,7 +353,7 @@ export const dataService = {
         if (missingCol && missingCol in payload) {
           recordMissingColumn('profiles', missingCol);
           delete payload[missingCol];
-          const retryResult = await supabase.from('profiles').upsert(payload);
+          const retryResult = await db.from('profiles').upsert(payload);
           upsertError = retryResult.error;
         } else {
           break;
@@ -374,7 +382,7 @@ export const dataService = {
         };
       });
     }
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('transactions')
       .select('*')
       .eq('user_id', userId)
@@ -460,7 +468,7 @@ export const dataService = {
       return newTx;
     }
     // First, ensure the profile exists to avoid foreign key violations
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from('profiles')
       .select('id')
       .eq('id', userId)
@@ -468,7 +476,7 @@ export const dataService = {
 
     if (!profile) {
       console.warn('[Data] Profile missing during transaction add, attempting repair...');
-      await supabase
+      await db
         .from('profiles')
         .upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
     }
@@ -534,7 +542,7 @@ export const dataService = {
 
     while (attempts < 10) {
       attempts++;
-      const res = await supabase.from('transactions').insert(payload).select();
+      const res = await db.from('transactions').insert(payload).select();
       data = res.data;
       error = res.error;
       if (!error) break;
@@ -550,7 +558,7 @@ export const dataService = {
         error.code === '23505' &&
         transaction.bankTransactionId
       ) {
-        const { data: existingRows } = await supabase
+        const { data: existingRows } = await db
           .from('transactions')
           .select('*')
           .eq('user_id', userId)
@@ -708,7 +716,7 @@ export const dataService = {
 
     while (attempts < 10) {
       attempts++;
-      const res = await supabase.from('transactions').update(payload).eq('id', id).select();
+      const res = await db.from('transactions').update(payload).eq('id', id).select();
       data = res.data;
       error = res.error;
       if (!error) break;
@@ -783,7 +791,7 @@ export const dataService = {
       localStorage.setItem('demo_transactions', JSON.stringify(filtered));
       return;
     }
-    const { error } = await supabase
+    const { error } = await db
       .from('transactions')
       .delete()
       .eq('id', id);
@@ -796,7 +804,7 @@ export const dataService = {
       const saved = localStorage.getItem('demo_incomes');
       return saved ? JSON.parse(saved) : [];
     }
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('income_sources')
       .select('*')
       .eq('user_id', userId);
@@ -853,7 +861,7 @@ export const dataService = {
     let attempts = 0;
     while (attempts < 5) {
       attempts++;
-      const { error } = await supabase
+      const { error } = await db
         .from('income_sources')
         .upsert(currentPayload);
       
@@ -877,7 +885,7 @@ export const dataService = {
       return;
     }
     if (isUuid(id)) {
-      await supabase
+      await db
         .from('income_sources')
         .delete()
         .eq('id', id);
@@ -885,7 +893,7 @@ export const dataService = {
     if (userId && Array.isArray(namesToDelete) && namesToDelete.length > 0) {
       const validNames = Array.from(new Set(namesToDelete.filter(Boolean)));
       if (validNames.length > 0) {
-        await supabase
+        await db
           .from('income_sources')
           .delete()
           .eq('user_id', userId)
@@ -899,7 +907,7 @@ export const dataService = {
       const saved = localStorage.getItem('demo_fixed');
       return saved ? JSON.parse(saved) : [];
     }
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('fixed_expenses')
       .select('*')
       .eq('user_id', userId);
@@ -1034,7 +1042,7 @@ export const dataService = {
     let attempts = 0;
     while (attempts < 15) {
       attempts++;
-      const { error } = await supabase
+      const { error } = await db
         .from('fixed_expenses')
         .upsert(currentPayload);
       
@@ -1058,7 +1066,7 @@ export const dataService = {
       return;
     }
     if (isUuid(id)) {
-      await supabase
+      await db
         .from('fixed_expenses')
         .delete()
         .eq('id', id);
@@ -1066,7 +1074,7 @@ export const dataService = {
     if (userId && Array.isArray(namesToDelete) && namesToDelete.length > 0) {
       const validNames = Array.from(new Set(namesToDelete.filter(Boolean)));
       if (validNames.length > 0) {
-        await supabase
+        await db
           .from('fixed_expenses')
           .delete()
           .eq('user_id', userId)
@@ -1080,7 +1088,7 @@ export const dataService = {
       const saved = localStorage.getItem('demo_accounts');
       return saved ? JSON.parse(saved) : [];
     }
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('accounts')
       .select('*')
       .eq('user_id', userId);
@@ -1109,7 +1117,7 @@ export const dataService = {
       localStorage.setItem('demo_accounts', JSON.stringify(list));
       return;
     }
-    const { error } = await supabase
+    const { error } = await db
       .from('accounts')
       .upsert({
         id: account.id.includes('-') ? account.id : undefined,
@@ -1130,7 +1138,7 @@ export const dataService = {
       localStorage.setItem('demo_accounts', JSON.stringify(filtered));
       return;
     }
-    const { error } = await supabase
+    const { error } = await db
       .from('accounts')
       .delete()
       .eq('id', id);
@@ -1153,7 +1161,7 @@ export const dataService = {
         localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
         return;
       }
-      const { error } = await supabase
+      const { error } = await db
         .from('feedback')
         .insert({
           user_id: activeUserId,
@@ -1188,7 +1196,7 @@ export const dataService = {
   async getFeedbackList(): Promise<Array<{ id: string; user_id?: string; message: string; created_at: string }>> {
     try {
       const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('feedback')
         .select('*')
         .order('created_at', { ascending: false })
@@ -1210,12 +1218,12 @@ export const dataService = {
       localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
       return;
     }
-    await supabase.from('feedback').delete().eq('id', id);
+    await db.from('feedback').delete().eq('id', id);
   },
 
   async getAdminStats(): Promise<{ totalUsers: number; dbHealthy: boolean; timestamp: string }> {
     try {
-      const { count, error } = await supabase
+      const { count, error } = await db
         .from('profiles')
         .select('*', { count: 'exact', head: true });
       
@@ -1248,7 +1256,7 @@ export const dataService = {
       return;
     }
     // 1. Delete all transactions with category 'Spargris' or 'Budgetökning'
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await db
       .from('transactions')
       .delete()
       .eq('user_id', userId)
@@ -1257,7 +1265,7 @@ export const dataService = {
     if (deleteError) throw deleteError;
 
     // 2. Reset savings_pot in profile
-    const { error: profileError } = await supabase
+    const { error: profileError } = await db
       .from('profiles')
       .update({ savings_pot: 0 })
       .eq('id', userId);
@@ -1397,7 +1405,7 @@ export const dataService = {
       const txTypeFilter = type === 'income' ? 'income' : 'expense';
 
       // 1. Update transactions with matching category
-      await supabase
+      await db
         .from('transactions')
         .update({ category: trimmedNew })
         .eq('user_id', userId)
@@ -1405,7 +1413,7 @@ export const dataService = {
         .ilike('category', trimmedOld);
 
       // 2. Update splits inside transactions if present
-      const { data: splitRows } = await supabase
+      const { data: splitRows } = await db
         .from('transactions')
         .select('id, splits')
         .eq('user_id', userId)
@@ -1423,7 +1431,7 @@ export const dataService = {
               return s;
             });
             if (splitChanged) {
-              await supabase
+              await db
                 .from('transactions')
                 .update({ splits: updatedSplits })
                 .eq('id', row.id);
@@ -1434,7 +1442,7 @@ export const dataService = {
 
       // 3. Fixed expenses
       if (type === 'expense') {
-        await supabase
+        await db
           .from('fixed_expenses')
           .update({ category: trimmedNew })
           .eq('user_id', userId)
@@ -1443,7 +1451,7 @@ export const dataService = {
 
       // 4. Income sources
       if (type === 'income') {
-        await supabase
+        await db
           .from('income_sources')
           .update({ category: trimmedNew })
           .eq('user_id', userId)
@@ -1465,7 +1473,7 @@ export const dataService = {
 
     // Wave 1: Clear nullable foreign-key references in parallel
     await Promise.allSettled([
-      supabase
+      db
         .from('transactions')
         .update({
           refund_of_transaction_id: null,
@@ -1475,7 +1483,7 @@ export const dataService = {
           account_id: null,
         })
         .eq('user_id', userId),
-      supabase
+      db
         .from('bank_transactions')
         .update({
           linked_transfer_bank_tx_id: null,
@@ -1496,14 +1504,14 @@ export const dataService = {
       'feedback',
     ];
     await Promise.allSettled(
-      leafTables.map((table) => supabase.from(table).delete().eq('user_id', userId))
+      leafTables.map((table) => db.from(table).delete().eq('user_id', userId))
     );
 
     // Wave 3: Delete parent account tables and clear profile preferences in parallel
     await Promise.allSettled([
-      supabase.from('bank_accounts').delete().eq('user_id', userId),
-      supabase.from('accounts').delete().eq('user_id', userId),
-      supabase
+      db.from('bank_accounts').delete().eq('user_id', userId),
+      db.from('accounts').delete().eq('user_id', userId),
+      db
         .from('profiles')
         .update({
           user_preferences: {},
@@ -1517,10 +1525,10 @@ export const dataService = {
         .eq('id', userId),
     ]);
 
-    await supabase.from('bank_connections').delete().eq('user_id', userId);
+    await db.from('bank_connections').delete().eq('user_id', userId);
 
     if (includeProfile) {
-      await supabase.from('profiles').delete().eq('id', userId);
+      await db.from('profiles').delete().eq('id', userId);
     }
   }
 };

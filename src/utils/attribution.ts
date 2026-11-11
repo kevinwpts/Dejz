@@ -72,7 +72,7 @@ export async function syncFirstTouchToAccount(): Promise<void> {
   const data = firstTouchSignupData();
   if (!data.utm_source) return;
   try {
-    const client: any = supabase;
+    const client = supabase;
     const { data: userData } = await client.auth.getUser();
     const user = userData?.user;
     if (!user || user.user_metadata?.utm_source) return;
