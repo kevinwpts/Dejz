@@ -254,8 +254,9 @@ export function runCoreBankDetection(
     const minAmt = Math.min(...cand.amounts);
     const maxAmt = Math.max(...cand.amounts);
     const candNameLower = String(cand.name || '').toLowerCase();
+    // Hela ord för el ("El", "Elnät") – inte bokstäverna "el" i t.ex. Telia, Hotel eller Tele2
     const isUtilityVariable =
-      candNameLower.includes('el') ||
+      /(^|[^a-zåäö])(el|elnät|elnat|elavtal|elräkning|elrakning|elhandel)([^a-zåäö]|$)/.test(candNameLower) ||
       candNameLower.includes('öresund') ||
       candNameLower.includes('oresund') ||
       candNameLower.includes('tibber') ||
