@@ -8,6 +8,7 @@ import { CATEGORY_REMAP_KEY, CUSTOM_EXPENSE_CATEGORIES_KEY, CUSTOM_INCOME_CATEGO
 import { ACCOUNT_META_KEY, AccountMetaPatch, CATEGORY_BUDGETS_KEY, REVIEWED_TX_IDS_KEY, SAVINGS_GOALS_KEY, SavingsGoalItem, TRANSACTION_META_KEY, TransactionMetaPatch, getAccountMetaMap, getCategoryBudgets, getLightweightTransactionMetaMapForSync, getReviewedTransactionIds, getSavingsGoals } from './itemMeta';
 import { INCOME_FIRST_SEEN_KEY, MANUAL_BALANCE_KEY, ManualBalance, getManualBalance, safeJson } from './manualBalance';
 import { SHOW_ACCOUNTS_ON_HOME_KEY, loadCachedAppState } from './appState';
+import { PrefSyncMeta, emptyMeta, findDirtyKeys, hashValue, planHydrate } from './prefsMerge';
 
 // --- Full Supabase Sync & Hydration for All User Choices ---
 // Alla användarval som sparas i profiles.user_preferences.
@@ -54,7 +55,7 @@ type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 export type ProfileWithPreferences = Partial<
   Pick<
     ProfileRow,
-    'user_preferences' | 'show_accounts_on_home' | 'exclude_internal_transfers' | 'my_swish_phone' | 'swish_contacts'
+    'id' | 'user_preferences' | 'show_accounts_on_home' | 'exclude_internal_transfers' | 'my_swish_phone' | 'swish_contacts'
   >
 >;
 
@@ -167,6 +168,101 @@ export function clearAllLocalAppData(preserveTheme = false): void {
   }
 }
 
+// --- Synk per nyckel (flera enheter) ---------------------------------------------------------
+// Varje enhet skickar bara det den själv har ändrat, och databasen slår ihop det
+// (merge_user_preferences). Se prefsMerge.ts för reglerna.
+const PREF_SYNC_META_KEY = 'dejz_pref_sync_meta_v1';
+
+function loadPrefSyncMeta(uid: string): PrefSyncMeta {
+  try {
+    const raw = localStorage.getItem(PREF_SYNC_META_KEY);
+    const parsed = raw ? (JSON.parse(raw) as PrefSyncMeta) : null;
+    if (parsed && parsed.uid === uid && parsed.seen && parsed.hash) return parsed;
+  } catch {
+    // ignore
+  }
+  return emptyMeta(uid);
+}
+
+function savePrefSyncMeta(meta: PrefSyncMeta): void {
+  try {
+    localStorage.setItem(PREF_SYNC_META_KEY, JSON.stringify(meta));
+  } catch {
+    // ignore
+  }
+}
+
+/** Kolumner i profiles som speglar vissa val (läses av äldre kod och av servern). */
+function mirrorColumnsFor(
+  dirty: string[],
+  prefs: Partial<UserPreferences>
+): Database['public']['Tables']['profiles']['Update'] {
+  const cols: Database['public']['Tables']['profiles']['Update'] = {};
+  if (dirty.includes('showAccountsOnHome')) cols.show_accounts_on_home = prefs.showAccountsOnHome;
+  if (dirty.includes('excludeInternalTransfers')) cols.exclude_internal_transfers = prefs.excludeInternalTransfers;
+  if (dirty.includes('mySwishPhone')) cols.my_swish_phone = prefs.mySwishPhone;
+  if (dirty.includes('swishContacts')) cols.swish_contacts = toJson(prefs.swishContacts);
+  if (dirty.includes('customExpenseCategories')) cols.categories = toJson(prefs.customExpenseCategories);
+  if (dirty.includes('customIncomeCategories')) cols.income_categories = toJson(prefs.customIncomeCategories);
+  return cols;
+}
+
+let syncInFlight: Promise<void> | null = null;
+let syncAgain = false;
+
+async function performPreferenceSync(): Promise<void> {
+  if (localStorage.getItem('dejz_logged_out') === 'true') return;
+  const { data } = await supabase.auth.getSession();
+  const uid = data?.session?.user?.id;
+  if (!uid) return;
+
+  const meta = loadPrefSyncMeta(uid);
+  // Innan enheten har jämfört med servern skickas ingenting – annars kunde gammal data skriva över ny
+  if (!meta.initialized) return;
+
+  const prefs = collectAllUserPreferences() as Record<string, unknown>;
+  const dirty = findDirtyKeys(prefs, meta);
+  if (dirty.length === 0) return;
+
+  const patch: Record<string, unknown> = {};
+  for (const k of dirty) patch[k] = prefs[k];
+  const { data: written, error } = await supabase.rpc('merge_user_preferences', { patch: toJson(patch) });
+  if (error) return; // försök igen vid nästa ändring
+
+  const stamps = (written && typeof written === 'object' ? written : {}) as Record<string, string>;
+  const latest = loadPrefSyncMeta(uid);
+  // Bara det servern bekräftat räknas som sparat (saknas profilraden försöker vi igen senare)
+  for (const k of dirty) {
+    if (!stamps[k]) continue;
+    latest.seen[k] = stamps[k];
+    latest.hash[k] = hashValue(patch[k]);
+  }
+  savePrefSyncMeta(latest);
+
+  const cols = mirrorColumnsFor(dirty, prefs as Partial<UserPreferences>);
+  if (Object.keys(cols).length > 0) {
+    await supabase.from('profiles').update(cols).eq('id', uid);
+  }
+}
+
+function runPreferenceSync(): void {
+  if (syncInFlight) {
+    syncAgain = true;
+    return;
+  }
+  syncInFlight = performPreferenceSync()
+    .catch(() => {
+      // offline – försök igen vid nästa ändring
+    })
+    .finally(() => {
+      syncInFlight = null;
+      if (syncAgain) {
+        syncAgain = false;
+        runPreferenceSync();
+      }
+    });
+}
+
 export function syncAllUserPreferencesToSupabase(immediate = false): void {
   if (typeof window === 'undefined') return;
   // Demoläget får aldrig skriva inställningar till en riktig profil
@@ -183,45 +279,12 @@ export function syncAllUserPreferencesToSupabase(immediate = false): void {
     clearTimeout(syncTimeout);
     syncTimeout = null;
   }
-
-  const performSync = async () => {
-    try {
-      if (localStorage.getItem('dejz_logged_out') === 'true') return;
-      const { data } = await supabase.auth.getSession();
-      const uid = data?.session?.user?.id;
-      if (!uid) return;
-      const prefs = collectAllUserPreferences();
-      const prefsJson = toJson(prefs);
-      const payload: Database['public']['Tables']['profiles']['Update'] = {
-        user_preferences: prefsJson,
-        show_accounts_on_home: prefs.showAccountsOnHome,
-        exclude_internal_transfers: prefs.excludeInternalTransfers,
-        my_swish_phone: prefs.mySwishPhone,
-        swish_contacts: toJson(prefs.swishContacts),
-        categories: toJson(prefs.customExpenseCategories),
-        income_categories: toJson(prefs.customIncomeCategories),
-      };
-      // Attempt full update; fallback to user_preferences or base columns if some columns aren't migrated yet
-      const { error } = await supabase.from('profiles').update(payload).eq('id', uid);
-      if (error) {
-        await supabase
-          .from('profiles')
-          .update({
-            user_preferences: prefsJson,
-          })
-          .eq('id', uid);
-      }
-    } catch {
-      // ignore offline or schema error
-    }
-  };
-
   if (immediate) {
-    void performSync();
+    runPreferenceSync();
   } else {
     syncTimeout = setTimeout(() => {
       syncTimeout = null;
-      void performSync();
+      runPreferenceSync();
     }, 300);
   }
 }
@@ -238,174 +301,185 @@ export function extractSavedIncomesFromProfile(profile: ProfileWithPreferences |
   return Array.isArray(prefs.savedIncomes) ? prefs.savedIncomes : [];
 }
 
-export function hydrateAllUserPreferencesFromProfile(profile: ProfileWithPreferences | null | undefined): void {
-  if (typeof window === 'undefined' || !profile || typeof profile !== 'object') return;
+/** Var varje synkad inställning ligger i localStorage och hur den skrivs. */
+// Byggs först när den behövs: filerna under cache/ importerar varandra, så nycklarna finns inte vid laddning.
+type PrefStorage = Partial<Record<keyof UserPreferences, { key: string; kind: 'json' | 'bool' | 'string' }>>;
+let prefStorageCache: PrefStorage | null = null;
+function prefStorage(): PrefStorage {
+  if (prefStorageCache) return prefStorageCache;
+  prefStorageCache = {
+  showAccountsOnHome: { key: SHOW_ACCOUNTS_ON_HOME_KEY, kind: 'bool' },
+  excludeInternalTransfers: { key: EXCLUDE_INTERNAL_TRANSFERS_KEY, kind: 'bool' },
+  mySwishPhone: { key: 'dejz_my_swish_phone', kind: 'string' },
+  swishContacts: { key: 'dejz_swish_contacts', kind: 'json' },
+  excludedTransactionIds: { key: EXCLUDED_TX_IDS_KEY, kind: 'json' },
+  dismissedFixedMerchants: { key: DISMISSED_FIXED_KEY, kind: 'json' },
+  dismissedIncomeMerchants: { key: DISMISSED_INCOME_KEY, kind: 'json' },
+  deletedFixedIds: { key: DELETED_FIXED_IDS_KEY, kind: 'json' },
+  deletedIncomeIds: { key: DELETED_INCOME_IDS_KEY, kind: 'json' },
+  manualFixedOverrides: { key: MANUAL_FIXED_OVERRIDES_KEY, kind: 'json' },
+  manualIncomeOverrides: { key: MANUAL_INCOME_OVERRIDES_KEY, kind: 'json' },
+  merchantAliasesV3: { key: MERCHANT_ALIASES_KEY, kind: 'json' },
+  categoryRemap: { key: CATEGORY_REMAP_KEY, kind: 'json' },
+  transactionMeta: { key: TRANSACTION_META_KEY, kind: 'json' },
+  accountMeta: { key: ACCOUNT_META_KEY, kind: 'json' },
+  categoryBudgets: { key: CATEGORY_BUDGETS_KEY, kind: 'json' },
+  savingsGoals: { key: SAVINGS_GOALS_KEY, kind: 'json' },
+  household: { key: 'dejz_household_state_v1', kind: 'json' },
+  reviewedTransactionIds: { key: REVIEWED_TX_IDS_KEY, kind: 'json' },
+  preferCategoryIconMerchants: { key: 'dejz_prefer_category_icon_merchants_v1', kind: 'json' },
+  learnedBrandDomains: { key: 'dejz_learned_brand_domains_v1', kind: 'json' },
+  customExpenseCategories: { key: CUSTOM_EXPENSE_CATEGORIES_KEY, kind: 'json' },
+  customIncomeCategories: { key: CUSTOM_INCOME_CATEGORIES_KEY, kind: 'json' },
+  customPaymentMethods: { key: CUSTOM_PAYMENT_METHODS_KEY, kind: 'json' },
+  };
+  return prefStorageCache;
+}
+
+/** Köpinfo från servern saknar kvittobilder sparade i telefonen – de behålls. */
+function mergeRemoteTransactionMeta(remote: Record<string, TransactionMetaPatch>): Record<string, TransactionMetaPatch> {
+  const local = safeJson<Record<string, TransactionMetaPatch>>(TRANSACTION_META_KEY, {});
+  const merged: Record<string, TransactionMetaPatch> = { ...remote };
+  for (const [id, entry] of Object.entries(local)) {
+    if (!entry) continue;
+    const keep: TransactionMetaPatch = {};
+    if (entry.receiptUrl?.startsWith('data:')) {
+      keep.receiptUrl = entry.receiptUrl;
+      keep.receiptName = entry.receiptName;
+    }
+    const inline = (entry.receipts || []).filter((r) => r?.url?.startsWith('data:'));
+    if (inline.length > 0) keep.receipts = [...(merged[id]?.receipts || []), ...inline];
+    if (Object.keys(keep).length > 0) merged[id] = { ...(merged[id] || {}), ...keep };
+  }
+  return merged;
+}
+
+function writePref(name: keyof UserPreferences, value: unknown): void {
+  const target = prefStorage()[name];
+  if (!target) return;
+  if (value === undefined || value === null) {
+    localStorage.removeItem(target.key);
+    return;
+  }
+  if (target.kind === 'bool') localStorage.setItem(target.key, String(Boolean(value)));
+  else if (target.kind === 'string') localStorage.setItem(target.key, String(value));
+  else if (name === 'transactionMeta')
+    localStorage.setItem(target.key, JSON.stringify(mergeRemoteTransactionMeta(value as Record<string, TransactionMetaPatch>)));
+  else localStorage.setItem(target.key, JSON.stringify(value));
+}
+
+/** Skickar ut händelser så att vyerna läser om det som ändrats. */
+function announceAppliedPreferences(applied: string[]): void {
+  if (applied.length === 0) return;
+  const fire = (name: string) => window.dispatchEvent(new CustomEvent(name));
+  if (applied.includes('savingsGoals')) fire('dejz:goals-updated');
+  if (applied.includes('household')) fire('dejz:household-updated');
+  if (applied.includes('mySwishPhone') || applied.includes('swishContacts')) fire('dejz:swish-directory-updated');
+  fire('dejz:preferences-updated');
+}
+
+/**
+ * Hämtar inställningar från servern till enheten, en nyckel i taget.
+ * Ändringar från andra enheter skrivs in; enhetens egna osparade ändringar behålls och skickas sen.
+ * Returnerar namnen på det som ändrades här.
+ */
+export function hydrateAllUserPreferencesFromProfile(
+  profile: ProfileWithPreferences | null | undefined,
+  uidOverride?: string
+): string[] {
+  if (typeof window === 'undefined' || !profile || typeof profile !== 'object') return [];
+  const uid = uidOverride || profile.id;
+  let applied: string[] = [];
+  let firstTime = false;
   try {
-    const prefs = readProfilePreferences(profile);
+    const typed = readProfilePreferences(profile);
+    const prefs = typed as Record<string, unknown>;
+    // Äldre profiler: vissa val låg bara i egna kolumner
+    const remote: Record<string, unknown> = { ...prefs };
+    if (!('showAccountsOnHome' in remote) && typeof profile.show_accounts_on_home === 'boolean')
+      remote.showAccountsOnHome = profile.show_accounts_on_home;
+    if (!('excludeInternalTransfers' in remote) && typeof profile.exclude_internal_transfers === 'boolean')
+      remote.excludeInternalTransfers = profile.exclude_internal_transfers;
+    if (!('mySwishPhone' in remote) && profile.my_swish_phone) remote.mySwishPhone = profile.my_swish_phone;
+    if (!('swishContacts' in remote) && Array.isArray(profile.swish_contacts)) remote.swishContacts = profile.swish_contacts;
 
-    const showAcc =
-      typeof profile.show_accounts_on_home === 'boolean'
-        ? profile.show_accounts_on_home
-        : typeof prefs.showAccountsOnHome === 'boolean'
-        ? prefs.showAccountsOnHome
-        : null;
-    if (showAcc !== null && localStorage.getItem(SHOW_ACCOUNTS_ON_HOME_KEY) === null) {
-      localStorage.setItem(SHOW_ACCOUNTS_ON_HOME_KEY, String(showAcc));
-    }
-
-    const exclTransfers =
-      typeof profile.exclude_internal_transfers === 'boolean'
-        ? profile.exclude_internal_transfers
-        : typeof prefs.excludeInternalTransfers === 'boolean'
-        ? prefs.excludeInternalTransfers
-        : null;
-    if (exclTransfers !== null && localStorage.getItem(EXCLUDE_INTERNAL_TRANSFERS_KEY) === null) {
-      localStorage.setItem(EXCLUDE_INTERNAL_TRANSFERS_KEY, String(exclTransfers));
-    }
-
-    const swishPhone = profile.my_swish_phone || prefs.mySwishPhone;
-    if (swishPhone && !localStorage.getItem('dejz_my_swish_phone')) {
-      localStorage.setItem('dejz_my_swish_phone', String(swishPhone));
-    }
-
-    const swishContacts = Array.isArray(profile.swish_contacts)
-      ? profile.swish_contacts
-      : Array.isArray(prefs.swishContacts)
-      ? prefs.swishContacts
-      : null;
-    if (swishContacts && swishContacts.length > 0 && !localStorage.getItem('dejz_swish_contacts')) {
-      localStorage.setItem('dejz_swish_contacts', JSON.stringify(swishContacts));
+    if (uid) {
+      const stamps = (prefs._updatedAt && typeof prefs._updatedAt === 'object' ? prefs._updatedAt : {}) as Record<string, string>;
+      const legacyStamp = typeof prefs.updatedAt === 'string' ? prefs.updatedAt : '';
+      const local = collectAllUserPreferences() as Record<string, unknown>;
+      const before = loadPrefSyncMeta(uid);
+      firstTime = !before.initialized;
+      const plan = planHydrate(Object.keys(prefStorage()), local, remote, stamps, legacyStamp, before);
+      for (const k of plan.apply) writePref(k as keyof UserPreferences, remote[k]);
+      // Fingeravtrycket ska spegla hur värdet ser ut i appen efter att det skrivits
+      if (plan.apply.length > 0) {
+        const after = collectAllUserPreferences() as Record<string, unknown>;
+        for (const k of plan.apply) plan.meta.hash[k] = hashValue(after[k]);
+      }
+      savePrefSyncMeta(plan.meta);
+      applied = plan.apply;
     }
 
-    if (Array.isArray(prefs.excludedTransactionIds) && !localStorage.getItem(EXCLUDED_TX_IDS_KEY)) {
-      localStorage.setItem(EXCLUDED_TX_IDS_KEY, JSON.stringify(prefs.excludedTransactionIds));
-    }
-    if (Array.isArray(prefs.dismissedFixedMerchants) && !localStorage.getItem(DISMISSED_FIXED_KEY)) {
-      localStorage.setItem(DISMISSED_FIXED_KEY, JSON.stringify(prefs.dismissedFixedMerchants));
-    }
-    if (Array.isArray(prefs.dismissedIncomeMerchants) && !localStorage.getItem(DISMISSED_INCOME_KEY)) {
-      localStorage.setItem(DISMISSED_INCOME_KEY, JSON.stringify(prefs.dismissedIncomeMerchants));
-    }
-    if (Array.isArray(prefs.deletedFixedIds) && !localStorage.getItem(DELETED_FIXED_IDS_KEY)) {
-      localStorage.setItem(DELETED_FIXED_IDS_KEY, JSON.stringify(prefs.deletedFixedIds));
-    }
-    if (Array.isArray(prefs.deletedIncomeIds) && !localStorage.getItem(DELETED_INCOME_IDS_KEY)) {
-      localStorage.setItem(DELETED_INCOME_IDS_KEY, JSON.stringify(prefs.deletedIncomeIds));
-    }
-    if (prefs.manualFixedOverrides && !localStorage.getItem(MANUAL_FIXED_OVERRIDES_KEY)) {
-      localStorage.setItem(MANUAL_FIXED_OVERRIDES_KEY, JSON.stringify(prefs.manualFixedOverrides));
-    }
-    if (prefs.manualIncomeOverrides && !localStorage.getItem(MANUAL_INCOME_OVERRIDES_KEY)) {
-      localStorage.setItem(MANUAL_INCOME_OVERRIDES_KEY, JSON.stringify(prefs.manualIncomeOverrides));
-    }
-    if (prefs.merchantAliasesV3 && !localStorage.getItem(MERCHANT_ALIASES_KEY)) {
-      localStorage.setItem(MERCHANT_ALIASES_KEY, JSON.stringify(prefs.merchantAliasesV3));
-    }
-    if (prefs.categoryRemap && !localStorage.getItem(CATEGORY_REMAP_KEY)) {
-      localStorage.setItem(CATEGORY_REMAP_KEY, JSON.stringify(prefs.categoryRemap));
-    }
-    if (prefs.transactionMeta && !localStorage.getItem(TRANSACTION_META_KEY)) {
-      localStorage.setItem(TRANSACTION_META_KEY, JSON.stringify(prefs.transactionMeta));
-    }
-    if (prefs.accountMeta && !localStorage.getItem(ACCOUNT_META_KEY)) {
-      localStorage.setItem(ACCOUNT_META_KEY, JSON.stringify(prefs.accountMeta));
-    }
-    if (prefs.categoryBudgets && !localStorage.getItem(CATEGORY_BUDGETS_KEY)) {
-      localStorage.setItem(CATEGORY_BUDGETS_KEY, JSON.stringify(prefs.categoryBudgets));
-    }
-    if (Array.isArray(prefs.savingsGoals) && !localStorage.getItem(SAVINGS_GOALS_KEY)) {
-      localStorage.setItem(SAVINGS_GOALS_KEY, JSON.stringify(prefs.savingsGoals));
-    }
-    if (
-      prefs.household &&
-      typeof prefs.household === 'object' &&
-      !localStorage.getItem('dejz_household_state_v1')
-    ) {
-      localStorage.setItem('dejz_household_state_v1', JSON.stringify(prefs.household));
-    }
-    if (Array.isArray(prefs.reviewedTransactionIds) && !localStorage.getItem(REVIEWED_TX_IDS_KEY)) {
-      localStorage.setItem(REVIEWED_TX_IDS_KEY, JSON.stringify(prefs.reviewedTransactionIds));
-    }
-    if (
-      Array.isArray(prefs.preferCategoryIconMerchants) &&
-      !localStorage.getItem('dejz_prefer_category_icon_merchants_v1')
-    ) {
-      localStorage.setItem(
-        'dejz_prefer_category_icon_merchants_v1',
-        JSON.stringify(prefs.preferCategoryIconMerchants)
-      );
-    }
-    if (
-      prefs.learnedBrandDomains &&
-      typeof prefs.learnedBrandDomains === 'object' &&
-      !localStorage.getItem('dejz_learned_brand_domains_v1')
-    ) {
-      localStorage.setItem(
-        'dejz_learned_brand_domains_v1',
-        JSON.stringify(prefs.learnedBrandDomains)
-      );
-    }
-    if (
-      Array.isArray(prefs.customExpenseCategories) &&
-      prefs.customExpenseCategories.length > 0 &&
-      !localStorage.getItem(CUSTOM_EXPENSE_CATEGORIES_KEY)
-    ) {
-      localStorage.setItem(
-        CUSTOM_EXPENSE_CATEGORIES_KEY,
-        JSON.stringify(prefs.customExpenseCategories)
-      );
-    }
-    if (
-      Array.isArray(prefs.customIncomeCategories) &&
-      prefs.customIncomeCategories.length > 0 &&
-      !localStorage.getItem(CUSTOM_INCOME_CATEGORIES_KEY)
-    ) {
-      localStorage.setItem(
-        CUSTOM_INCOME_CATEGORIES_KEY,
-        JSON.stringify(prefs.customIncomeCategories)
-      );
-    }
-    if (
-      Array.isArray(prefs.customPaymentMethods) &&
-      prefs.customPaymentMethods.length > 0 &&
-      !localStorage.getItem(CUSTOM_PAYMENT_METHODS_KEY)
-    ) {
-      localStorage.setItem(
-        CUSTOM_PAYMENT_METHODS_KEY,
-        JSON.stringify(prefs.customPaymentMethods)
-      );
-    }
     const isAlreadyDoneLocally =
       localStorage.getItem('dejz_onboarding_v2_done') === 'true' ||
       localStorage.getItem('dejz_onboarding_completed') === 'true';
-    if (prefs.onboardingCompleted === true || isAlreadyDoneLocally) {
+    if (typed.onboardingCompleted === true || isAlreadyDoneLocally) {
       localStorage.setItem('dejz_onboarding_v2_done', 'true');
       localStorage.setItem('dejz_onboarding_completed', 'true');
       localStorage.removeItem('dejz_onboarding_in_progress');
-    } else if (prefs.onboardingInProgress === true) {
+    } else if (typed.onboardingInProgress === true) {
       localStorage.setItem('dejz_onboarding_in_progress', 'true');
-      if (prefs.onboardingStep && !localStorage.getItem('dejz_onboarding_step')) {
-        localStorage.setItem('dejz_onboarding_step', String(prefs.onboardingStep));
+      if (typed.onboardingStep && !localStorage.getItem('dejz_onboarding_step')) {
+        localStorage.setItem('dejz_onboarding_step', String(typed.onboardingStep));
       }
     }
 
     // Saldo just nu: den senast inmatade vinner (från vilken enhet som helst)
-    const remoteBalance = prefs.manualBalance;
+    const remoteBalance = typed.manualBalance;
     if (remoteBalance && typeof remoteBalance.amount === 'number' && remoteBalance.at) {
       const local = getManualBalance();
       if (!local || String(remoteBalance.at) > local.at) {
         localStorage.setItem(MANUAL_BALANCE_KEY, JSON.stringify(remoteBalance));
+        applied = [...applied, 'manualBalance'];
       }
     }
-    if (prefs.incomeFirstSeen && typeof prefs.incomeFirstSeen === 'object') {
+    if (typed.incomeFirstSeen && typeof typed.incomeFirstSeen === 'object') {
       const localSeen = safeJson<Record<string, string>>(INCOME_FIRST_SEEN_KEY, {});
-      const merged: Record<string, string> = { ...prefs.incomeFirstSeen };
+      const merged: Record<string, string> = { ...typed.incomeFirstSeen };
       for (const [id, date] of Object.entries(localSeen)) {
         if (!merged[id] || date < merged[id]) merged[id] = date;
       }
       localStorage.setItem(INCOME_FIRST_SEEN_KEY, JSON.stringify(merged));
     }
+
+    // Övriga val (introduktion, saldo, tema …) har egna regler ovan. Första gången räknas det
+    // som redan finns här som "i synk", så att en gammal enhet inte skickar ut gammal data.
+    if (uid) {
+      const meta = loadPrefSyncMeta(uid);
+      const after = collectAllUserPreferences() as Record<string, unknown>;
+      for (const k of Object.keys(after)) {
+        if (k === 'updatedAt' || k in prefStorage()) continue;
+        if (firstTime || (k === 'manualBalance' && applied.includes(k))) meta.hash[k] = hashValue(after[k]);
+      }
+      savePrefSyncMeta(meta);
+    }
   } catch {
     // ignore
   }
+  announceAppliedPreferences(applied);
+  // Skicka det som bara finns här (eller ändrats här) nu när enheten har jämfört med servern
+  syncAllUserPreferencesToSupabase();
+  return applied;
+}
+
+/** Hämtar senaste inställningarna från servern (t.ex. när appen öppnas igen). */
+export async function pullUserPreferences(uid: string): Promise<string[]> {
+  if (!uid || isLocalDemoMode) return [];
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, user_preferences, show_accounts_on_home, exclude_internal_transfers, my_swish_phone, swish_contacts')
+    .eq('id', uid)
+    .maybeSingle();
+  if (error || !data) return [];
+  return hydrateAllUserPreferencesFromProfile(data, uid);
 }

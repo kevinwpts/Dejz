@@ -1422,6 +1422,7 @@ export type Database = {
         }
         Returns: number
       }
+      merge_user_preferences: { Args: { patch: Json }; Returns: Json }
       touch_activity: {
         Args: { p_new_visit?: boolean; p_platform?: string }
         Returns: undefined

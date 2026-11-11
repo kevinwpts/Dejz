@@ -34,6 +34,7 @@ import {
   getExcludeInternalTransfers,
   getMerchantAliases,
   hydrateAllUserPreferencesFromProfile,
+  pullUserPreferences,
   extractSavedFixedFromProfile,
   extractSavedIncomesFromProfile,
   clearAllLocalAppData,
@@ -402,7 +403,7 @@ export function useAccountData({
           setWeekendHandling(resolvedWeekend);
         }
         if (dbProfile) {
-          hydrateAllUserPreferencesFromProfile(dbProfile);
+          hydrateAllUserPreferencesFromProfile(dbProfile, uid);
           setExcludeInternalTransfersState(getExcludeInternalTransfers());
         }
         if (dbProfile?.avatar_url) {
@@ -1051,6 +1052,30 @@ export function useAccountData({
       window.clearInterval(intervalId);
     };
   }, [userId, hasActiveBankConnection, performSilentBankSync]);
+
+  // Flera enheter: när appen öppnas igen hämtas inställningar som ändrats på en annan enhet
+  // (sparmål, egna namn, kategorier …). Högst var 30:e sekund. Finns det något nytt laddas
+  // listorna om så att allt visas direkt.
+  useEffect(() => {
+    if (!userId || isDemoMode()) return;
+    let lastPull = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastPull < 30_000) return;
+      lastPull = Date.now();
+      void pullUserPreferences(userId).then((applied) => {
+        if (applied.length > 0 && userIdRef.current === userId) {
+          setExcludeInternalTransfersState(getExcludeInternalTransfers());
+          void loadSupabaseUserData(userId);
+        }
+      });
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [userId, loadSupabaseUserData]);
 
   // Supabase Realtime: Lyssna på databasändringar med debounce för att undvika synk-stormar
   useEffect(() => {
