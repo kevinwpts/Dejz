@@ -1,6 +1,5 @@
 // Genererad från Supabase (projekt smddiufwpdpmzhvideto). Ändra inte för hand –
 // generera om när databasen ändras (Supabase MCP: generate_typescript_types).
-/* eslint-disable */
 export type Json =
   | string
   | number
