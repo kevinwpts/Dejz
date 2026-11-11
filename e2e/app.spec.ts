@@ -157,3 +157,20 @@ test('utm-länken sparas vid första besöket (och skrivs inte över)', async ({
   const after = await page.evaluate(() => JSON.parse(localStorage.getItem('dejz_first_touch_v1') || 'null'));
   expect(after?.utm_source).toBe('tiktok');
 });
+
+test('hela introduktionen utan bank går att klicka igenom till hemskärmen', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('/?demo&onboarding');
+  const heading = page.locator('h1').first();
+  await expect(heading).toHaveText(/Vad heter du/, { timeout: 20_000 });
+  await page.locator('input').first().fill('Elin');
+  const steps = [/När får du lön/, /Vilka fasta inkomster/, /Vilka fasta utgifter/, /Kvar efter fasta/, /Hur mycket har du på kontot/];
+  for (const next of steps) {
+    await page.getByRole('button', { name: /Fortsätt/ }).last().click();
+    await expect(heading).toHaveText(next);
+  }
+  await page.locator('input').first().fill('8000');
+  await page.getByRole('button', { name: /Fortsätt|Klar|Öppna Dejz|Spara/ }).last().click();
+  await expect(page.getByText('Kvar att spendera').first()).toBeVisible({ timeout: 10_000 });
+  expect(errors).toEqual([]);
+});

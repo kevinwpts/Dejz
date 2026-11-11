@@ -1,25 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { estimateFromAmounts } from '../utils/variableBills';
 import { SWEDISH_EXPENSE_PRESETS } from '../data/swedishExpensePresets';
-import {
-  getMarketingConsent,
-  hasPendingSignupConsent,
-  setMarketingConsent,
-} from '../utils/marketingConsent';
+import { getMarketingConsent, hasPendingSignupConsent } from '../utils/marketingConsent';
 import { isDemoMode } from '../utils/demoUtils';
-import {
-  ArrowRight,
-  CaretLeft,
-  CaretRight,
-  Plus,
-  Trash,
-  Check,
-  X,
-  MagnifyingGlass,
-  ShieldCheck,
-  SpinnerGap,
-  WarningCircle,
-} from '@phosphor-icons/react';
+import { CaretLeft, CaretRight, Plus, Trash, Check, X } from '@phosphor-icons/react';
 import { IncomeItem, FixedExpenseItem } from './HomeTab';
 import { bankService, BankAspsp, BankConnection, BankAccount } from '../services/bankService';
 import { WeekendHandlingMode } from '../utils/periodEngine';
@@ -35,7 +19,6 @@ import {
   getStoredPaymentMethods,
   normalizeCategoryToValid,
   syncAllUserPreferencesToSupabase,
-  setManualBalance,
 } from '../utils/appCache';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
@@ -45,7 +28,6 @@ import {
   BANK_RETURN_MARKER_KEY,
   CONSUMER_SWEDISH_BANKS,
   OnboardingStep,
-  POPULAR_SWEDISH_BANKS,
   STEP_ORDER_MANUAL,
   STEP_ORDER_WITH_BANK,
   SheetEditorState,
@@ -53,6 +35,13 @@ import {
   hasFreshBankReturnMarker,
 } from './onboarding/onboardingConfig';
 import { BankSummaryStep } from './onboarding/BankSummaryStep';
+import { OnboardingStepName } from './onboarding/OnboardingStepName';
+import { OnboardingStepBank } from './onboarding/OnboardingStepBank';
+import { OnboardingStepFixedList } from './onboarding/OnboardingStepFixedList';
+import { OnboardingStepIncomeList } from './onboarding/OnboardingStepIncomeList';
+import { OnboardingStepPayday } from './onboarding/OnboardingStepPayday';
+import { OnboardingStepResult } from './onboarding/OnboardingStepResult';
+import { OnboardingStepBalance } from './onboarding/OnboardingStepBalance';
 
 interface OnboardingFlowProps {
   initialName: string;
@@ -79,7 +68,6 @@ interface OnboardingFlowProps {
   /** Bankkoppling (steg 2) visas bara när den är påslagen – idag bara för admin. */
   bankEnabled?: boolean;
 }
-
 
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   initialName,
@@ -830,7 +818,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     setStep(next);
   };
 
-
   // ---------------------------------------------------------------------------
   // Bekräfta-kort (med bank): visa det banken hittade som EN siffra och EN knapp.
   // Den som vill ändra något trycker "Visa och ändra" och får hela listan.
@@ -845,7 +832,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     bankEnabled &&
     !showFixedList &&
     (analyzingBank || suggestedFixedExpenses.some((f) => f.isFromBank));
-
 
   const listNames = (names: string[], max = 3) =>
     names.length <= max
@@ -1326,352 +1312,44 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
       {/* ============================================================== */}
       {/* STEG 1: FÖRNAMN (Låst skärm, noll scroll, pinnad knapp)        */}
       {/* ============================================================== */}
-      {step === 1 && (
-        <form
-          key="step-1"
-          onSubmit={handleNextFromStep1}
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          <div className="shrink-0 pt-6 pb-4">
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-              Vad heter du?
-            </h1>
-          </div>
-
-          <div className="my-auto py-4">
-            <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
-              <input
-                type="text"
-                autoFocus
-                required
-                placeholder="Skriv ditt förnamn..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="shrink-0 pt-3">
-            <button
-              type="submit"
-              disabled={!name.trim()}
-              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
-            >
-              <span>Fortsätt</span>
-              <ArrowRight size={16} weight="bold" />
-            </button>
-          </div>
-        </form>
-      )}
+      <OnboardingStepName
+        step={step}
+        handleNextFromStep1={handleNextFromStep1}
+        pageAnimClass={pageAnimClass}
+        name={name}
+        setName={setName}
+      />
 
       {/* ============================================================== */}
       {/* STEG 2: KOPPLA DIN BANK (Inline sök + 3x3 grid + kontoval)     */}
       {/* ============================================================== */}
-      {step === 2 && (
-        <div
-          key="step-2"
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          {/* SUB-VIEW: VÄLJ KONTON (Bara kontolistan scrollar, inga dubbla namnfält) */}
-          {step2View === 'select-accounts' && (
-            <div className="flex-1 min-h-0 flex flex-col justify-between">
-              <div className="shrink-0 pt-6 pb-4">
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Välj konton att synka
-                </h1>
-              </div>
-
-              {/* Scrollbar kontolista */}
-              <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
-                {fetchedAccounts.map((acc, idx) => {
-                  const isChecked = selectedAccountIds.includes(acc.id);
-                  const currentName = getSmartAccountDefaultName(acc, idx);
-                  const rawNum = (acc.bban || acc.iban || '').trim();
-                  const formattedNum =
-                    rawNum.length === 11 && /^\d+$/.test(rawNum)
-                      ? `${rawNum.slice(0, 4)}-${rawNum.slice(4)}`
-                      : rawNum || acc.product || 'Bankkonto';
-
-                  return (
-                    <button
-                      key={acc.id}
-                      type="button"
-                      onClick={() => toggleAccountSelection(acc.id)}
-                      className={`w-full p-4 rounded-2xl border flex items-center gap-3.5 text-left transition-all cursor-pointer ${
-                        isChecked
-                          ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
-                          : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
-                      }`}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 transition-colors ${
-                          isChecked
-                            ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                            : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                        }`}
-                      >
-                        {isChecked && <Check size={12} weight="bold" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
-                          {currentName}
-                        </span>
-                        <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">
-                          {formattedNum}
-                        </span>
-                      </div>
-                      {acc.balance_amount !== null && acc.balance_amount !== undefined && (
-                        <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
-                          {formatKr(acc.balance_amount)}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Pinnad knapp */}
-              <div className="shrink-0 pt-3">
-                <button
-                  type="button"
-                  disabled={savingAccounts || selectedAccountIds.length === 0}
-                  onClick={handleSaveSelectedAccounts}
-                  className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
-                >
-                  {savingAccounts ? (
-                    <>
-                      <SpinnerGap size={16} className="animate-spin" />
-                      <span>Synkar valda konton...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Fortsätt</span>
-                      <ArrowRight size={16} weight="bold" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* SUB-VIEW: KOPPLA BANK MED DIREKT SÖKFÄLT + 3x3 GRID PÅ SAMMA SIDA */}
-          {step2View === 'grid' && (
-            <div className="flex-1 min-h-0 flex flex-col justify-between">
-              <div className="shrink-0 pt-6 pb-4">
-                <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-                  Koppla din bank
-                </h1>
-              </div>
-
-              <div className="flex-1 min-h-0 flex flex-col justify-center py-1 space-y-4">
-                {authError && (
-                  <div className="shrink-0 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between gap-2.5 animate-scale-in">
-                    <div className="flex items-center gap-2">
-                      <WarningCircle size={16} weight="fill" className="shrink-0" />
-                      <span>{authError}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setAuthError(null)}
-                      className="text-xs font-semibold underline shrink-0 cursor-pointer"
-                    >
-                      Stäng
-                    </button>
-                  </div>
-                )}
-
-                {(bankCallbackStatusMsg || verifyingBankReturn) && (
-                  <div className="shrink-0 p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-3 text-xs font-medium text-[var(--text-primary)] animate-scale-in">
-                    <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
-                    <span>
-                      {bankCallbackStatusMsg ||
-                        'Verifierar BankID-inloggning och hämtar dina konton...'}
-                    </span>
-                  </div>
-                )}
-
-                {hasConnectedBank ? (
-                  <div className="bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-3xl p-5 space-y-4">
-                    {connections.map((conn) => (
-                      <div key={conn.id} className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="relative shrink-0">
-                            <ItemLogo name={conn.aspsp_name} logoUrl={conn.aspsp_logo || undefined} size="md" />
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--surface-color)]" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="font-display font-semibold text-sm text-[var(--text-primary)] block truncate">
-                              {conn.aspsp_name}
-                            </span>
-                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                              Ansluten
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {_bankAccounts.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => applyConnectedBankState(connections, _bankAccounts)}
-                        className="w-full py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-color)] text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-                      >
-                        Välj vilka konton som ska synkas
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex-1 min-h-0 flex flex-col justify-center space-y-3">
-                    {/* Sökfält direkt på samma sida */}
-                    <div className="relative shrink-0">
-                      <MagnifyingGlass
-                        size={15}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-                      />
-                      <input
-                        type="text"
-                        value={bankSearchQuery}
-                        onChange={(e) => setBankSearchQuery(e.target.value)}
-                        placeholder="Sök bank..."
-                        className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
-                      />
-                      {bankSearchQuery.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setBankSearchQuery('')}
-                          aria-label="Rensa sökning"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
-                        >
-                          <X size={14} weight="bold" />
-                        </button>
-                      )}
-                    </div>
-
-                    {bankSearchQuery.trim().length > 0 ? (
-                      <div className="flex-1 min-h-0 max-h-72 overflow-y-auto no-scrollbar grid grid-cols-3 gap-2 sm:gap-2.5 content-start pr-0.5">
-                        {filteredBanks.length > 0 ? (
-                          filteredBanks.map((b) => {
-                            const isConnecting =
-                              startingAuth && connectingBankName === b.name;
-                            const isAnyConnecting = startingAuth && Boolean(connectingBankName);
-
-                            return (
-                              <button
-                                key={b.name}
-                                type="button"
-                                disabled={isAnyConnecting}
-                                onClick={() => handleSelectBankInline(b)}
-                                className={`p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
-                                  isConnecting
-                                    ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] scale-[0.98]'
-                                    : isAnyConnecting
-                                    ? 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-40 pointer-events-none'
-                                    : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 text-[var(--text-primary)]'
-                                }`}
-                              >
-                                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0 relative">
-                                  {isConnecting ? (
-                                    <SpinnerGap size={24} className="animate-spin text-[var(--bg-color)]" />
-                                  ) : (
-                                    <ItemLogo name={b.name} logoUrl={b.logo || undefined} size="lg" />
-                                  )}
-                                </div>
-                                <span className="font-display font-semibold text-[11px] sm:text-[12px] text-center truncate max-w-full leading-tight">
-                                  {isConnecting ? 'Ansluter...' : b.name}
-                                </span>
-                              </button>
-                            );
-                          })
-                        ) : (
-                          <div className="col-span-3 py-10 text-center text-xs text-[var(--text-muted)]">
-                            Ingen bank hittades
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      /* 3x3 Grid med de 9 vanligaste svenska bankerna */
-                      <div className="grid grid-cols-3 gap-2 sm:gap-2.5 shrink-0">
-                        {POPULAR_SWEDISH_BANKS.map((b) => {
-                          const isConnecting =
-                            startingAuth &&
-                            (connectingBankName === b.name || connectingBankName === b.displayName);
-                          const isAnyConnecting = startingAuth && Boolean(connectingBankName);
-
-                          return (
-                            <button
-                              key={b.id}
-                              type="button"
-                              disabled={isAnyConnecting}
-                              onClick={() => handleSelectBankInline(b)}
-                              className={`p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
-                                isConnecting
-                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] scale-[0.98]'
-                                  : isAnyConnecting
-                                  ? 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-40 pointer-events-none'
-                                  : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 text-[var(--text-primary)]'
-                              }`}
-                            >
-                              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0 relative">
-                                {isConnecting ? (
-                                  <SpinnerGap size={24} className="animate-spin text-[var(--bg-color)]" />
-                                ) : (
-                                  <ItemLogo name={b.displayName} size="lg" />
-                                )}
-                              </div>
-                              <span className="font-display font-semibold text-[11px] sm:text-[12px] text-center truncate max-w-full leading-tight">
-                                {isConnecting ? 'Ansluter...' : b.displayName}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Trygghetsrad */}
-                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--text-muted)] pt-1 shrink-0">
-                      <ShieldCheck size={14} weight="regular" />
-                      <span>Säker koppling via Mobilt BankID</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Pinnad bottenknapp: Visa "Fortsätt" ENDAST om bank är ansluten, annars enbart "Hoppa över just nu" */}
-              <div className="shrink-0 pt-3">
-                {hasConnectedBank ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (
-                        _bankAccounts.length > 0 &&
-                        localStorage.getItem('dejz_onboarding_accounts_confirmed') !== 'true'
-                      ) {
-                        applyConnectedBankState(connections, _bankAccounts);
-                        return;
-                      }
-                      goNext(2);
-                    }}
-                    className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    <span>Fortsätt</span>
-                    <ArrowRight size={16} weight="bold" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => goNext(2)}
-                    className="w-full py-2.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                  >
-                    Hoppa över just nu
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <OnboardingStepBank
+        step={step}
+        pageAnimClass={pageAnimClass}
+        step2View={step2View}
+        fetchedAccounts={fetchedAccounts}
+        selectedAccountIds={selectedAccountIds}
+        getSmartAccountDefaultName={getSmartAccountDefaultName}
+        toggleAccountSelection={toggleAccountSelection}
+        formatKr={formatKr}
+        savingAccounts={savingAccounts}
+        handleSaveSelectedAccounts={handleSaveSelectedAccounts}
+        authError={authError}
+        setAuthError={setAuthError}
+        bankCallbackStatusMsg={bankCallbackStatusMsg}
+        verifyingBankReturn={verifyingBankReturn}
+        hasConnectedBank={hasConnectedBank}
+        connections={connections}
+        _bankAccounts={_bankAccounts}
+        applyConnectedBankState={applyConnectedBankState}
+        bankSearchQuery={bankSearchQuery}
+        setBankSearchQuery={setBankSearchQuery}
+        filteredBanks={filteredBanks}
+        startingAuth={startingAuth}
+        connectingBankName={connectingBankName}
+        handleSelectBankInline={handleSelectBankInline}
+        goNext={goNext}
+      />
 
       {/* ============================================================== */}
       {/* STEG 3: VILKA FASTA UTGIFTER HAR DU? (Bocka i/ur + redigera)   */}
@@ -1693,138 +1371,18 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         />
       )}
 
-      {step === 3 && !fixedSummaryMode && (
-        <div
-          key="step-3"
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          <div className="shrink-0 pt-6 pb-4">
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-              Vilka fasta utgifter har du?
-            </h1>
-            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-              Räkningar som dras varje månad. Tryck och skriv beloppet.
-            </p>
-          </div>
-
-          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
-            {analyzingBank && (
-              <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
-                <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
-                <span>Letar efter dina räkningar …</span>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              {suggestedFixedExpenses.map((item) => (
-                <div
-                  key={item.id}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-2.5 ${
-                    item.checked
-                      ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
-                      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
-                  }`}
-                >
-                  {/* Checkbox med generös träffyta */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSuggestedFixedExpenses((prev) =>
-                        prev.map((p) => (p.id === item.id ? { ...p, checked: !p.checked } : p))
-                      )
-                    }
-                    aria-label={`Välj ${item.name}`}
-                    className="w-9 h-9 -ml-1.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
-                  >
-                    <span
-                      className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                        item.checked
-                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                      }`}
-                    >
-                      {item.checked && <Check size={12} weight="bold" />}
-                    </span>
-                  </button>
-
-                  {/* Rad: tryck för att ändra belopp, namn, kategori eller dag direkt */}
-                  <button
-                    type="button"
-                    onClick={() => openEditSuggestedFixed(item)}
-                    className="flex items-center gap-3 text-left cursor-pointer flex-1 min-w-0"
-                  >
-                    <ItemLogo
-                      name={item.name}
-                      category={item.category}
-                      logoUrl={item.logo}
-                      size="md"
-                      isRecurring={false}
-                    />
-
-                    <div className="min-w-0 flex-1">
-                      <span className="ui-row-title">
-                        {item.name}
-                      </span>
-                      <span className="ui-row-subtitle flex items-center gap-1.5">
-                        <CategoryIcon
-                          category={item.category || 'Räkningar'}
-                          size={11}
-                          className="shrink-0 text-[var(--text-secondary)]"
-                        />
-                        <span className="truncate">
-                          {item.category || 'Räkningar'}
-                        </span>
-                      </span>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="ui-row-amount">
-                        −{formatKr(item.amount)}
-                      </span>
-                      <span className="ui-row-meta">
-                        {item.isShared && hasConnectedHouseholdPartner()
-                          ? `Delad · Den ${item.dueDay}:e`
-                          : `Den ${item.dueDay}:e`}
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className={suggestedFixedExpenses.length > 0 ? 'pt-3' : ''}>
-              {renderQuickChips('fixed')}
-            </div>
-          </div>
-
-          <div className="shrink-0 pt-3 space-y-2">
-            {suggestedFixedExpenses.some((f) => f.checked) && (
-              <div className="flex items-center justify-between px-1 text-xs text-[var(--text-secondary)]">
-                <span>
-                  {suggestedFixedExpenses.filter((f) => f.checked).length} valda fasta utgifter
-                </span>
-                <span className="font-display font-semibold text-[var(--text-primary)] tabular-nums">
-                  -
-                  {formatKr(
-                    suggestedFixedExpenses
-                      .filter((f) => f.checked)
-                      .reduce((sum, f) => sum + (Number(f.amount) || 0), 0)
-                  )}
-                  /mån
-                </span>
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={handleSaveSuggestedFixed}
-              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <span>Fortsätt</span>
-              <ArrowRight size={16} weight="bold" />
-            </button>
-          </div>
-        </div>
-      )}
+      <OnboardingStepFixedList
+        step={step}
+        fixedSummaryMode={fixedSummaryMode}
+        pageAnimClass={pageAnimClass}
+        analyzingBank={analyzingBank}
+        suggestedFixedExpenses={suggestedFixedExpenses}
+        setSuggestedFixedExpenses={setSuggestedFixedExpenses}
+        openEditSuggestedFixed={openEditSuggestedFixed}
+        formatKr={formatKr}
+        renderQuickChips={renderQuickChips}
+        handleSaveSuggestedFixed={handleSaveSuggestedFixed}
+      />
 
       {/* ============================================================== */}
       {/* STEG 4: VILKA FASTA INKOMSTER HAR DU? (Bocka i/ur + redigera)  */}
@@ -1846,365 +1404,61 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         />
       )}
 
-      {step === 4 && !incomeSummaryMode && (
-        <div
-          key="step-4"
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          <div className="shrink-0 pt-6 pb-4">
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-              Vilka fasta inkomster har du?
-            </h1>
-            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-              Det du får in varje månad, efter skatt. Tryck och skriv beloppet.
-            </p>
-          </div>
-
-          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
-            {analyzingBank && (
-              <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
-                <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
-                <span>Analyserar dina inkomster...</span>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              {suggestedIncomes.map((item) => (
-                <div
-                  key={item.id}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-2.5 ${
-                    item.checked
-                      ? 'bg-[var(--surface-color)] border-[var(--border-subtle)]'
-                      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-55'
-                  }`}
-                >
-                  {/* Checkbox med generös träffyta */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSuggestedIncomes((prev) =>
-                        prev.map((p) => (p.id === item.id ? { ...p, checked: !p.checked } : p))
-                      )
-                    }
-                    aria-label={`Välj ${item.name}`}
-                    className="w-9 h-9 -ml-1.5 rounded-xl flex items-center justify-center shrink-0 cursor-pointer"
-                  >
-                    <span
-                      className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
-                        item.checked
-                          ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
-                          : 'border-[var(--border-subtle)] bg-[var(--surface-color)]'
-                      }`}
-                    >
-                      {item.checked && <Check size={12} weight="bold" />}
-                    </span>
-                  </button>
-
-                  {/* Rad: tryck för att ändra belopp, namn, kategori eller dag direkt */}
-                  <button
-                    type="button"
-                    onClick={() => openEditSuggestedIncome(item)}
-                    className="flex items-center gap-3 text-left cursor-pointer flex-1 min-w-0"
-                  >
-                    <ItemLogo
-                      name={item.name}
-                      category={item.category}
-                      logoUrl={item.logo}
-                      size="md"
-                      isRecurring={false}
-                    />
-
-                    <div className="min-w-0 flex-1">
-                      <span className="ui-row-title">
-                        {item.name}
-                      </span>
-                      <span className="ui-row-subtitle flex items-center gap-1.5">
-                        <CategoryIcon
-                          category={item.category || 'Lön'}
-                          size={11}
-                          className="shrink-0 text-[var(--text-secondary)]"
-                        />
-                        <span className="truncate">
-                          {item.category || 'Lön'}
-                        </span>
-                      </span>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="ui-row-amount ui-row-amount-income">
-                        +{formatKr(item.amount)}
-                      </span>
-                      <span className="ui-row-meta">
-                        Den {item.payday}:e
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className={suggestedIncomes.length > 0 ? 'pt-3' : ''}>
-              {renderQuickChips('income')}
-            </div>
-          </div>
-
-          <div className="shrink-0 pt-3 space-y-2">
-            {suggestedIncomes.some((i) => i.checked) && (
-              <div className="flex items-center justify-between px-1 text-xs text-[var(--text-secondary)]">
-                <span>
-                  {suggestedIncomes.filter((i) => i.checked).length} valda inkomster
-                </span>
-                <span className="font-display font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  +
-                  {formatKr(
-                    suggestedIncomes
-                      .filter((i) => i.checked)
-                      .reduce((sum, i) => sum + (Number(i.amount) || 0), 0)
-                  )}
-                  /mån
-                </span>
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={handleSaveSuggestedIncomes}
-              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <span>Fortsätt</span>
-              <ArrowRight size={16} weight="bold" />
-            </button>
-          </div>
-        </div>
-      )}
+      <OnboardingStepIncomeList
+        step={step}
+        incomeSummaryMode={incomeSummaryMode}
+        pageAnimClass={pageAnimClass}
+        analyzingBank={analyzingBank}
+        suggestedIncomes={suggestedIncomes}
+        setSuggestedIncomes={setSuggestedIncomes}
+        openEditSuggestedIncome={openEditSuggestedIncome}
+        formatKr={formatKr}
+        renderQuickChips={renderQuickChips}
+        handleSaveSuggestedIncomes={handleSaveSuggestedIncomes}
+      />
 
       {/* ============================================================== */}
       {/* STEG 5: NÄR FÅR DU LÖN? (Minimalistisk dragrad, auto-förvald)  */}
       {/* ============================================================== */}
-      {step === 5 && (
-        <div
-          key="step-5"
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          <div className="shrink-0 pt-6 pb-4">
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-              När får du lön?
-            </h1>
-          </div>
-
-          <div className="my-auto py-4 space-y-10">
-            {/* Direkt på bakgrunden utan kort/modul */}
-            <div className="space-y-6 py-2">
-              <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums text-center">
-                {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
-              </div>
-
-              <div>
-                <input
-                  type="range"
-                  min={1}
-                  max={31}
-                  value={payday}
-                  onChange={(e) => setPayday(Number(e.target.value))}
-                  aria-label="Välj lönedag"
-                  style={{
-                    background: `linear-gradient(to right, var(--text-primary) 0%, var(--text-primary) ${
-                      ((payday - 1) / 30) * 100
-                    }%, var(--border-subtle) ${
-                      ((payday - 1) / 30) * 100
-                    }%, var(--border-subtle) 100%)`,
-                  }}
-                  className="ui-payday-slider"
-                />
-              </div>
-            </div>
-
-            {/* En enda ren rad för helghantering direkt på bakgrunden */}
-            <div className="pt-4 border-t border-[var(--border-subtle)]/60 flex items-center justify-between gap-4">
-              <span className="font-sans font-medium text-xs sm:text-sm text-[var(--text-secondary)]">
-                Betalas ut fredagen före vid helg
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={weekendHandling === 'before'}
-                onClick={() =>
-                  setWeekendHandling((prev) => (prev === 'before' ? 'none' : 'before'))
-                }
-                className={`ui-switch ${weekendHandling === 'before' ? 'ui-switch-on' : 'ui-switch-off'}`}
-              >
-                <span
-                  className={`ui-switch-thumb ${
-                    weekendHandling === 'before' ? 'ui-switch-thumb-on' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-
-          <div className="shrink-0 pt-3">
-            <button
-              type="button"
-              onClick={handleNextFromStep5Payday}
-              className="w-full py-3.5 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <span>Fortsätt</span>
-              <ArrowRight size={16} weight="bold" />
-            </button>
-          </div>
-        </div>
-      )}
+      <OnboardingStepPayday
+        step={step}
+        pageAnimClass={pageAnimClass}
+        payday={payday}
+        setPayday={setPayday}
+        weekendHandling={weekendHandling}
+        setWeekendHandling={setWeekendHandling}
+        handleNextFromStep5Payday={handleNextFromStep5Payday}
+      />
 
       {/* ============================================================== */}
       {/* STEG 6: AVSKALAD ÖVERSIKT (Ingen dubblettlista, noll scroll)   */}
       {/* ============================================================== */}
-      {step === 6 && (
-        <div
-          key="step-6"
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          <div className="shrink-0 pt-6 pb-4">
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-              Kvar efter fasta räkningar
-            </h1>
-          </div>
-
-          <div className="my-auto py-4 space-y-6">
-            <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums">
-              {formatKr(kvarAttSpendera)}
-            </div>
-
-            <div className="pt-4 border-t border-[var(--border-subtle)]/60 space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-[var(--text-muted)]">
-                  Inkomster
-                </span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                  +{formatKr(totalInc)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-[var(--text-muted)]">
-                  Fasta utgifter
-                </span>
-                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                  −{formatKr(totalFix)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-[var(--text-muted)]">Lönedag</span>
-                <span className="font-semibold text-[var(--text-primary)] tabular-nums">
-                  {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="shrink-0 pt-3">
-            {stepOrder.includes(7) ? (
-              <button
-                type="button"
-                onClick={() => goNext(6)}
-                className="ui-btn-primary py-3.5 text-sm"
-              >
-                <span>Fortsätt</span>
-                <ArrowRight size={16} weight="bold" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onComplete}
-                className="ui-btn-primary py-3.5 text-sm"
-              >
-                <span>Öppna Dejz</span>
-                <Check size={16} weight="bold" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      <OnboardingStepResult
+        step={step}
+        pageAnimClass={pageAnimClass}
+        formatKr={formatKr}
+        kvarAttSpendera={kvarAttSpendera}
+        totalInc={totalInc}
+        totalFix={totalFix}
+        payday={payday}
+        stepOrder={stepOrder}
+        goNext={goNext}
+        onComplete={onComplete}
+      />
 
       {/* ============================================================== */}
       {/* STEG 7 (utan bank): SALDO JUST NU                              */}
       {/* ============================================================== */}
-      {step === 7 && (
-        <form
-          key="step-7"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const amt = Math.round(Number(balanceInput.replace(/\s/g, '').replace(',', '.')));
-            if (balanceInput.trim() !== '' && Number.isFinite(amt)) {
-              setManualBalance({ amount: amt, at: new Date().toISOString() });
-            }
-            onComplete();
-          }}
-          className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
-        >
-          <div className="shrink-0 pt-6 pb-4">
-            <h1 className="font-display font-semibold text-2xl sm:text-3xl tracking-[-0.012em] text-[var(--text-primary)]">
-              Hur mycket har du på kontot just nu?
-            </h1>
-            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-              Kolla i din bankapp. Dejz drar av räkningarna som är kvar före lön – då ser du exakt vad
-              du kan spendera.
-            </p>
-            <p className="mt-2 text-xs text-[var(--text-muted)]">
-              Bankkoppling kommer snart. Tills dess skriver du in saldot själv – det ger dig full koll.
-            </p>
-          </div>
-
-          <div className="my-auto py-4">
-            <label className="flex items-baseline gap-2 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-4 cursor-text">
-              <input
-                type="text"
-                inputMode="numeric"
-                autoFocus
-                placeholder="0"
-                value={balanceInput}
-                onChange={(e) => setBalanceInput(e.target.value.replace(/[^\d\s,.-]/g, ''))}
-                className="flex-1 min-w-0 bg-transparent border-0 p-0 font-display font-semibold text-[34px] leading-none tabular-nums text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:outline-none"
-              />
-              <span className="text-base font-medium text-[var(--text-secondary)]">kr</span>
-            </label>
-          </div>
-
-          <div className="shrink-0 pt-3 space-y-1">
-            {/* Nyhetsbrev: bara för den som inte redan svarat (t.ex. Google-inloggning). Aldrig förkryssat. */}
-            {showConsentQuestion && (
-              <label className="flex items-start gap-3 px-1 pb-3 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={consentChecked}
-                  onChange={(e) => {
-                    setConsentChecked(e.target.checked);
-                    void setMarketingConsent(e.target.checked, 'introduktion');
-                  }}
-                  className="mt-0.5 w-5 h-5 shrink-0 rounded-md accent-[var(--accent-color)] cursor-pointer"
-                />
-                <span className="text-[13px] leading-[1.45] text-[var(--text-secondary)]">
-                  Ja, skicka mig tips och nyheter från Dejz. Du kan avsluta när du vill.
-                </span>
-              </label>
-            )}
-            <button
-              type="submit"
-              disabled={balanceInput.trim() === ''}
-              className="ui-btn-primary py-3.5 text-sm disabled:opacity-35"
-            >
-              <span>Öppna Dejz</span>
-              <Check size={16} weight="bold" />
-            </button>
-            <button
-              type="button"
-              onClick={onComplete}
-              className="w-full py-2.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-            >
-              Hoppa över just nu
-            </button>
-          </div>
-        </form>
-      )}
+      <OnboardingStepBalance
+        step={step}
+        balanceInput={balanceInput}
+        onComplete={onComplete}
+        pageAnimClass={pageAnimClass}
+        setBalanceInput={setBalanceInput}
+        showConsentQuestion={showConsentQuestion}
+        consentChecked={consentChecked}
+        setConsentChecked={setConsentChecked}
+      />
 
       {/* ============================================================== */}
       {/* RIKTIGT BOTTOM-SHEET FÖR ATT LÄGGA TILL / ÄNDRA POSTER         */}
