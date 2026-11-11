@@ -1,17 +1,9 @@
 import type { SettingsSubView } from './subviews';
 import React from 'react';
-import { PeriodInfo } from '../../utils/periodEngine';
 import { AdminPanelView } from '../AdminSimulator';
-import { TransactionItem, FixedExpenseItem, IncomeItem } from '../HomeTab';
+import { TransactionItem, FixedExpenseItem } from '../HomeTab';
 
 export interface AdminSettingsViewProps {
-  period: PeriodInfo;
-  userEmail: string;
-  userName: string;
-  userAvatar: string;
-  incomes: IncomeItem[];
-  fixedExpenses: FixedExpenseItem[];
-  transactions: TransactionItem[];
   onStartOnboarding: () => void;
   onStartCreateGoalWizard: () => void;
   setSubView: (next: SettingsSubView) => void;
@@ -20,17 +12,9 @@ export interface AdminSettingsViewProps {
   onOpenAddIncomeModal: () => void;
   onOpenAddTransactionModal: () => void;
   onOpenPreviewTransactionModal: (tx?: TransactionItem) => void;
-  onApplyFixedExpenses: (next: FixedExpenseItem[]) => void;
 }
 
 export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
-  period,
-  userEmail,
-  userName,
-  userAvatar,
-  incomes,
-  fixedExpenses,
-  transactions,
   onStartOnboarding,
   onStartCreateGoalWizard,
   setSubView,
@@ -39,18 +23,10 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
   onOpenAddIncomeModal,
   onOpenAddTransactionModal,
   onOpenPreviewTransactionModal,
-  onApplyFixedExpenses,
 }) => {
   return (
     <div className="pb-28 animate-slide-in-right">
       <AdminPanelView
-        period={period}
-        userEmail={userEmail}
-        userName={userName}
-        userAvatar={userAvatar}
-        incomes={incomes}
-        fixedExpenses={fixedExpenses}
-        transactions={transactions}
         onRestartOnboarding={() => onStartOnboarding?.()}
         onStartCreateGoalWizard={() => {
           if (onStartCreateGoalWizard) {
@@ -65,8 +41,6 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
         onOpenAddIncome={() => onOpenAddIncomeModal?.()}
         onOpenAddTransaction={() => onOpenAddTransactionModal?.()}
         onOpenPreviewTransaction={() => onOpenPreviewTransactionModal?.()}
-        onOpenHouseholdBudget={() => setSubView('household')}
-        onApplyFixedExpenses={onApplyFixedExpenses}
       />
     </div>
   );

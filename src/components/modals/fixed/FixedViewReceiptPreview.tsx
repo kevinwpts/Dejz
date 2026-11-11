@@ -5,7 +5,7 @@ import { X, CaretLeft, FileText, Plus } from '@phosphor-icons/react';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
 
 export interface FixedViewReceiptPreviewProps {
-  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "share-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
+  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
   previewReceipt: ReceiptAttachment;
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;

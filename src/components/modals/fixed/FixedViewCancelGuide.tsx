@@ -7,7 +7,7 @@ import { ItemLogo } from '../../ItemLogo';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 
 export interface FixedViewCancelGuideProps {
-  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "share-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
+  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   displayName: string;

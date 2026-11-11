@@ -14,11 +14,6 @@ import {
   GoalArtworkIllustration,
   EmptyClusterArtwork,
 } from './ui/VisualArtwork';
-import {
-  getHouseholdState,
-  hasConnectedHouseholdPartner,
-  pushHouseholdSyncToServer,
-} from '../utils/householdSync';
 import { TransactionItem, AccountItem } from './HomeTab';
 import { GoalDetailView } from './goals/GoalDetailView';
 import { GoalCreateWizard } from './goals/GoalCreateWizard';
@@ -75,7 +70,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const [goalTargetInput, setGoalTargetInput] = useState('');
   const [goalCurrentInput, setGoalCurrentInput] = useState('');
   const [goalMonthlyInput, setGoalMonthlyInput] = useState('');
-  const [goalIsShared, setGoalIsShared] = useState(false);
   const [goalLinkedAccountId, setGoalLinkedAccountId] = useState<string | undefined>(undefined);
   const [goalArtworkId, setGoalArtworkId] = useState<string>('piggy');
   const [goalCustomImage, setGoalCustomImage] = useState<string | undefined>(undefined);
@@ -92,10 +86,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   React.useEffect(() => {
     const onSync = () => setSavingsGoals(getSavingsGoals());
     window.addEventListener('dejz:goals-updated', onSync);
-    window.addEventListener('dejz:household-updated', onSync);
     return () => {
       window.removeEventListener('dejz:goals-updated', onSync);
-      window.removeEventListener('dejz:household-updated', onSync);
     };
   }, []);
 
@@ -122,14 +114,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const updateGoals = (next: SavingsGoalItem[]) => {
     setSavingsGoals(next);
     saveSavingsGoals(next);
-    const hh = getHouseholdState();
-    if (hh) {
-      void pushHouseholdSyncToServer({
-        ...hh,
-        sharedSavingsGoals: next.filter((g) => g.isShared),
-        updatedAt: new Date().toISOString(),
-      });
-    }
     if (onGoalsChanged) onGoalsChanged(next);
   };
 
@@ -184,7 +168,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setGoalTargetInput('');
     setGoalCurrentInput('');
     setGoalMonthlyInput('');
-    setGoalIsShared(false);
     setGoalLinkedAccountId(undefined);
     setGoalArtworkId('piggy');
     setGoalCustomImage(undefined);
@@ -246,7 +229,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       name: cleanName,
       targetAmount: cleanTarget,
       currentAmount: cleanCurr,
-      isShared: hasConnectedHouseholdPartner() ? goalIsShared : false,
+      isShared: false,
       linkedAccountId: goalLinkedAccountId,
       linkedAccountName: linkedName,
       artworkId: goalArtworkId,
@@ -443,8 +426,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         accounts={accounts}
         effectiveTotalBalance={effectiveTotalBalance}
         formatKr={formatKr}
-        goalIsShared={goalIsShared}
-        setGoalIsShared={setGoalIsShared}
       />
     );
   }
@@ -533,11 +514,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="ui-row-title truncate">
                         {goal.name}
-                        {hasConnectedHouseholdPartner() && goal.isShared ? (
-                          <span className="text-[11px] font-normal text-[var(--text-secondary)]">
-                            {' '}· Delat
-                          </span>
-                        ) : null}
                       </span>
                       <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums shrink-0">
                         {formatKr(effectiveAmt)}

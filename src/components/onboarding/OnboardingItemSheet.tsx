@@ -4,7 +4,6 @@ import { CaretLeft, CaretRight, Trash, Check, X } from '@phosphor-icons/react';
 import {
   inferCategoryAndMethodFromName,
 } from '../../utils/bankHistoryAnalyzer';
-import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 
 
 import { ItemLogo } from '../ItemLogo';
@@ -26,7 +25,6 @@ export interface OnboardingItemSheetProps {
   availablePaymentMethods: string[];
   handleSaveSheet: (e?: FormEvent<Element>) => void;
   sheetNavDir: "forward" | "back";
-  formatKr: (val: number) => string;
   handleDeleteFromSheet: () => void;
 }
 
@@ -41,7 +39,6 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
   availablePaymentMethods,
   handleSaveSheet,
   sheetNavDir,
-  formatKr,
   handleDeleteFromSheet,
 }) => (
     <BottomSheet
@@ -410,59 +407,6 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                     <CaretRight size={12} className="text-[var(--text-muted)]" />
                   </span>
                 </button>
-
-                {sheetEditor.type === 'fixed' && hasConnectedHouseholdPartner() && (
-                  <div className="ui-row">
-                    <div className="min-w-0">
-                      <span className="text-[var(--text-muted)] block">Dela utgift (50 %)</span>
-                      {sheetEditor.isShared && (
-                        <span className="text-[11px] text-[var(--text-secondary)] tabular-nums block">
-                          Din andel: {formatKr(Number(sheetEditor.amount) || 0)}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={Boolean(sheetEditor.isShared)}
-                      onClick={() =>
-                        setSheetEditor((prev) => {
-                          if (!prev) return prev;
-                          const nextShared = !prev.isShared;
-                          const currAmt = Math.max(0, Math.round(Number(prev.amount) || 0));
-                          if (nextShared) {
-                            const half = Math.max(1, Math.round(currAmt / 2));
-                            return {
-                              ...prev,
-                              isShared: true,
-                              fullAmount: String(currAmt),
-                              amount: String(half),
-                            };
-                          } else {
-                            const restored = Math.max(
-                              currAmt,
-                              Math.round(Number(prev.fullAmount) || currAmt * 2)
-                            );
-                            return {
-                              ...prev,
-                              isShared: false,
-                              amount: String(restored),
-                            };
-                          }
-                        })
-                      }
-                      className={`ui-switch ${
-                        sheetEditor.isShared ? 'ui-switch-on' : 'ui-switch-off'
-                      }`}
-                    >
-                      <span
-                        className={`ui-switch-thumb ${
-                          sheetEditor.isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* Actions */}

@@ -55,13 +55,11 @@ export const TermsPage: React.FC = () => (
 
       <div className="p-5 space-y-2">
         <h3 className="font-display font-bold text-[13px] sm:text-sm text-[var(--text-primary)]">
-          4. Delad ekonomi & användaransvar
+          4. Ditt konto & användaransvar
         </h3>
         <p>
-          Du ansvarar för att hålla din inloggning säker. Om du använder Delad
-          ekonomi (kommande funktion) ansvarar du själv för vilka fasta kostnader,
-          utlägg och sparmål du väljer att dela med medlemmar i ditt hushåll. Delning
-          kan när som helst avslutas med omedelbar verkan.
+          Du ansvarar för att hålla din inloggning säker och för att uppgifterna du
+          lägger in stämmer. Dejz visar en uppskattning baserad på dem.
         </p>
       </div>
 

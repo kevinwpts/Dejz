@@ -12,10 +12,8 @@ import {
   EyeSlash,
   Key,
   EnvelopeSimple,
-  Copy,
 } from '@phosphor-icons/react';
 import { supabase } from '../../supabaseClient';
-import { getMyFriendInviteCode } from '../../utils/friends';
 import { setPrivacyBlurMode } from '../../utils/appCache';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -42,8 +40,6 @@ export interface ProfileSettingsViewProps {
   fileInputRef: MutableRefObject<HTMLInputElement>;
   userAvatar: string;
   onUpdateAvatar: (avatarDataUrl: string) => void;
-  setCopiedPersonalCode: (value: SetStateAction<boolean>) => void;
-  copiedPersonalCode: boolean;
   setEditName: (value: SetStateAction<string>) => void;
   setEditEmail: (value: SetStateAction<string>) => void;
   setEditPhone: (value: SetStateAction<string>) => void;
@@ -84,8 +80,6 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
   fileInputRef,
   userAvatar,
   onUpdateAvatar,
-  setCopiedPersonalCode,
-  copiedPersonalCode,
   setEditName,
   setEditEmail,
   setEditPhone,
@@ -257,43 +251,6 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
 
       {/* Samtycke till nyhetsbrev (opt-in) – kan ändras när som helst */}
       {userEmail && !isDemoMode() && <NewsletterToggle />}
-
-      {/* Personlig kod för vänner & delad ekonomi */}
-      <section className="ui-section">
-        <div className="ui-admin-card">
-          <div className="ui-admin-row-static">
-            <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-normal text-[var(--text-secondary)] block">
-                Din personliga kod
-              </span>
-              <span className="font-display font-bold text-sm tracking-wider text-[var(--text-primary)] tabular-nums block mt-0.5">
-                {getMyFriendInviteCode()}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                navigator.clipboard?.writeText(getMyFriendInviteCode());
-                setCopiedPersonalCode(true);
-                setTimeout(() => setCopiedPersonalCode(false), 1800);
-              }}
-              className="px-3 py-1.5 rounded-full bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-            >
-              {copiedPersonalCode ? (
-                <>
-                  <Check size={13} weight="bold" />
-                  <span>Kopierad</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={13} />
-                  <span>Kopiera</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </section>
 
       {/* Sektion 1: Personuppgifter */}
       <section className="ui-section">

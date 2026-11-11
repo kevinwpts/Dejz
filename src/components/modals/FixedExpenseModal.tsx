@@ -15,7 +15,6 @@ import {
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
 import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
-import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 import { FixedViewDetails } from './fixed/FixedViewDetails';
 import { FixedViewEdit } from './fixed/FixedViewEdit';
 import { FixedViewReceiptPreview } from './fixed/FixedViewReceiptPreview';
@@ -72,7 +71,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [category, setCategory] = useState('Räkningar');
   const [paymentMethod, setPaymentMethod] = useState('Autogiro');
   const [linkedGoalId, setLinkedGoalId] = useState<string>('');
-  const [isShared, setIsShared] = useState<boolean>(false);
   const [draftReceipts, setDraftReceipts] = useState<ReceiptAttachment[]>([]);
   const [previewReceipt, setPreviewReceipt] = useState<ReceiptAttachment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -123,7 +121,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setCategory(normalizeCategoryToValid(initialExpense.category || 'Räkningar', 'expense'));
       setPaymentMethod(initialExpense.paymentMethod || 'Autogiro');
       setLinkedGoalId(initialExpense.linkedGoalId || '');
-      setIsShared(Boolean(initialExpense.isShared));
       setDraftReceipts(getItemReceipts(initialExpense));
       setSubView('details');
       setPickerReturnView('details');
@@ -134,7 +131,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setCategory('Räkningar');
       setPaymentMethod('Autogiro');
       setLinkedGoalId('');
-      setIsShared(false);
       setDraftReceipts([]);
       setSubView('edit');
       setPickerReturnView('edit');
@@ -287,8 +283,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       overrides?.paymentMethod !== undefined ? overrides.paymentMethod : paymentMethod;
     const nextLinkedGoalId =
       overrides?.linkedGoalId !== undefined ? overrides.linkedGoalId : linkedGoalId;
-    const nextIsShared =
-      overrides?.isShared !== undefined ? overrides.isShared : isShared;
     const nextReceipts = overrides?.receipts !== undefined ? overrides.receipts : draftReceipts;
 
     const nextIsCancelled =
@@ -306,7 +300,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       ...activeExpense,
       name: nextName,
       amount: nextAmt,
-      isShared: nextIsShared,
+      isShared: Boolean(activeExpense.isShared),
       dueDay: nextDueDay,
       category: nextCategory,
       paymentMethod: nextPaymentMethod,
@@ -328,7 +322,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       onSave({
         name: cleanName,
         amount: cleanAmt,
-        isShared: hasConnectedHouseholdPartner() ? isShared : false,
+        isShared: false,
         dueDay: Number(dueDay) || 27,
         category: category || 'Räkningar',
         paymentMethod: paymentMethod || 'Autogiro',
@@ -584,8 +578,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
         paymentMethod={paymentMethod}
         availableGoals={availableGoals}
         linkedGoalId={linkedGoalId}
-        isShared={isShared}
-        setIsShared={setIsShared}
         draftReceipts={draftReceipts}
         fileInputRef={fileInputRef}
         setPreviewReceipt={setPreviewReceipt}
@@ -630,10 +622,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
         showFullAccount={showFullAccount}
         setShowFullAccount={setShowFullAccount}
         handleRemoveReceiptAt={handleRemoveReceiptAt}
-        isShared={isShared}
-        setIsShared={setIsShared}
-        onUpdate={onUpdate}
-        formatKr={formatKr}
         onDelete={onDelete}
         setShowDeleteConfirm={setShowDeleteConfirm}
         showDeleteConfirm={showDeleteConfirm}

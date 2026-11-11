@@ -10,7 +10,6 @@ import {
   Trash,
   ArrowsClockwise,
   CaretRight,
-  UserPlus,
   ClockCounterClockwise,
   Sparkle,
   Plus,
@@ -24,9 +23,7 @@ import {
   getSavingsGoals,
   saveSavingsGoals,
   SavingsGoalItem,
-  saveTransactionMeta,
 } from '../../../utils/appCache';
-import { hasConnectedHouseholdPartner } from '../../../utils/householdSync';
 import { formatIsoDateStockholm } from '../../../utils/swedishDate';
 import {
   isMerchantCategoryIconPreferred,
@@ -563,7 +560,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               />
             </div>
 
-            {/* Budget & Hushålls-inställningar samlade */}
+            {/* Budgetinställningar samlade */}
             {onExclude && (
               <div className="ui-row">
                 <span className="ui-info-label">Räkna i budget</span>
@@ -580,37 +577,6 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                   <span
                     className={`ui-switch-thumb ${
                       !isExcluded ? 'ui-switch-thumb-on' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-            )}
-
-            {!isIncome && hasConnectedHouseholdPartner() && (
-              <div className="ui-row">
-                <span className="ui-info-label flex items-center gap-1.5">
-                  <UserPlus size={14} className="text-[var(--text-secondary)]" />
-                  <span>Delat utlägg i hushållet</span>
-                </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={Boolean(activeTx.isSharedExpense)}
-                  onClick={() => {
-                    const nextVal = !activeTx.isSharedExpense;
-                    saveTransactionMeta(activeTx.id, { isSharedExpense: nextVal });
-                    if (onUpdate) {
-                      onUpdate({ ...activeTx, isSharedExpense: nextVal });
-                    }
-                    setLogoPrefTick((t) => t + 1);
-                  }}
-                  className={`ui-switch ${
-                    activeTx.isSharedExpense ? 'ui-switch-on' : 'ui-switch-off'
-                  }`}
-                >
-                  <span
-                    className={`ui-switch-thumb ${
-                      activeTx.isSharedExpense ? 'ui-switch-thumb-on' : 'translate-x-0'
                     }`}
                   />
                 </button>

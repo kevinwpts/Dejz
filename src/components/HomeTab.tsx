@@ -16,12 +16,6 @@ import {
   hasInitializedReviewedTransactions,
   markTransactionsReviewed,
 } from '../utils/appCache';
-import {
-  getHouseholdState,
-  hasConnectedHouseholdPartner,
-  computeMyHouseholdSummary,
-  calculateHouseholdSettlement,
-} from '../utils/householdSync';
 import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
 import { compareTransactionsChronologically, doesTransactionMatchAccount } from '../app/models';
 import { HomeHeroCard } from './home/HomeHeroCard';
@@ -68,9 +62,6 @@ interface HomeTabProps {
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   onExcludeTransaction?: (id: string, exclude: boolean) => void;
   onUpdateTransaction?: (tx: TransactionItem) => void;
-  userEmail?: string | null;
-  userName?: string | null;
-  onNavigateToHousehold?: () => void;
   /** Saldo just nu (utan bank) – visas som en rad under hemkortet */
   manualBalance?: { amount: number; at: string } | null;
   onOpenBalance?: () => void;
@@ -102,9 +93,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   onTogglePackage,
   onExcludeTransaction,
   onUpdateTransaction: _onUpdateTransaction,
-  userEmail,
-  userName,
-  onNavigateToHousehold,
   manualBalance: _manualBalance = null,
   onOpenBalance,
 }) => {
@@ -123,86 +111,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
-  const [heroBudgetMode, setHeroBudgetMode] = useState<'personal' | 'joint'>(() => {
-    if (typeof window === 'undefined') return 'personal';
-    try {
-      return localStorage.getItem('dejz_hero_budget_mode') === 'joint' ? 'joint' : 'personal';
-    } catch {
-      return 'personal';
-    }
-  });
-
-  const handleSetHeroBudgetMode = (mode: 'personal' | 'joint') => {
-    setHeroBudgetMode(mode);
-    try {
-      localStorage.setItem('dejz_hero_budget_mode', mode);
-    } catch {
-      // ignore
-    }
-  };
-
-  const [householdTick, setHouseholdTick] = useState(0);
-
-  useEffect(() => {
-    const onHhUpdate = () => setHouseholdTick((t) => t + 1);
-    window.addEventListener('dejz:household-updated', onHhUpdate);
-    return () => window.removeEventListener('dejz:household-updated', onHhUpdate);
-  }, []);
-
-  const householdBudgetStats = useMemo(() => {
-    void householdTick;
-    const hh = getHouseholdState();
-    if (!hasConnectedHouseholdPartner(hh) || !hh) return null;
-
-    const mySummary = computeMyHouseholdSummary({
-      userEmail,
-      userName,
-      period,
-      incomes,
-      fixedExpenses,
-      transactions,
-      sharedCategories: hh.sharedCategories || ['Mat & dryck', 'Boende', 'Räkningar'],
-    });
-
-    const otherMembers = Object.values(hh.members || {}).filter(
-      (m) => m.email.toLowerCase() !== mySummary.email.toLowerCase()
-    );
-
-    const partnerMember = otherMembers[0] || null;
-
-    const jointIncome =
-      (Number(totalIncome) || 0) +
-      otherMembers.reduce((sum, m) => sum + (Number(m.totalIncome) || 0), 0);
-    const jointFixed =
-      (Number(mySummary.sharedFixedPaid) || 0) +
-      otherMembers.reduce((sum, m) => sum + (Number(m.sharedFixedPaid) || 0), 0);
-    const jointVariable =
-      (Number(mySummary.sharedVariableSpent) || 0) +
-      otherMembers.reduce((sum, m) => sum + (Number(m.sharedVariableSpent) || 0), 0);
-    const jointKvar = jointIncome - jointFixed - jointVariable;
-
-    const settlement = calculateHouseholdSettlement(hh, mySummary.email, period.startDate);
-
-    return {
-      householdName: hh.name || 'Gemensamt hushåll',
-      myName: mySummary.name || 'Jag',
-      partnerName: partnerMember?.name || 'Partner',
-      jointIncome,
-      jointFixed,
-      jointVariable,
-      jointKvar,
-      settlement,
-    };
-  }, [
-    householdTick,
-    userEmail,
-    userName,
-    period,
-    incomes,
-    fixedExpenses,
-    transactions,
-    totalIncome,
-  ]);
   const savingsGoals = useMemo(
     () => getSavingsGoals(),
     [transactions, fixedExpenses, incomes, accounts, totalBalance]
@@ -716,8 +624,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   return (
     <div className="ui-page">
       <HomeHeroCard
-        householdBudgetStats={householdBudgetStats}
-        heroBudgetMode={heroBudgetMode}
         kvarAttSpendera={kvarAttSpendera}
         totalIncome={totalIncome}
         totalFixedExpenses={totalFixedExpenses}
@@ -725,8 +631,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         onOpenBalance={onOpenBalance}
         accounts={accounts}
         period={period}
-        handleSetHeroBudgetMode={handleSetHeroBudgetMode}
-        onNavigateToHousehold={onNavigateToHousehold}
         formatKr={formatKr}
         showBudgetBreakdown={showBudgetBreakdown}
         setShowBudgetBreakdown={setShowBudgetBreakdown}

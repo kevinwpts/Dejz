@@ -1,7 +1,6 @@
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { ArrowRight, Check, SpinnerGap } from '@phosphor-icons/react';
-import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
 
@@ -120,9 +119,7 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
                       −{formatKr(item.amount)}
                     </span>
                     <span className="ui-row-meta">
-                      {item.isShared && hasConnectedHouseholdPartner()
-                        ? `Delad · Den ${item.dueDay}:e`
-                        : `Den ${item.dueDay}:e`}
+                      {`Den ${item.dueDay}:e`}
                     </span>
                   </div>
                 </button>

@@ -73,12 +73,6 @@ export const AppSheetsAndModals: React.FC = () => {
             setSettingsSubView('main');
             setActiveTab(tab);
           }}
-          onOpenHousehold={() => {
-            setIsSearchModalOpen(false);
-            setIsNotificationsModalOpen(false);
-            setSettingsSubView('household');
-            setActiveTab('settings');
-          }}
           onOpenDiscover={() => {
             setIsSearchModalOpen(false);
             setIsNotificationsModalOpen(false);

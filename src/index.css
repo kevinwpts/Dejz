@@ -2225,5 +2225,3 @@ b {
 .dejz-hero .dark\:text-amber-400 { color: #FFE7A3 !important; }
 .dejz-hero .bg-rose-500 { background-color: #FFFFFF !important; }
 .dejz-hero .border-rose-500 { border-color: #FFFFFF !important; }
-/* Text på vita markeringar (t.ex. hushållsväxlaren) */
-.dejz-hero .text-\[var\(--bg-color\)\] { color: var(--hero-to) !important; }

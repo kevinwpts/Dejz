@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLiveSync } from './useLiveSync';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
 import {
@@ -20,7 +20,6 @@ import { Frequency } from '../../types';
 import { getLogoUrl } from '../../utils/logo';
 import {
   analyzeBankTransactionsForOnboarding,
-  extractSwishPhoneNumber,
 } from '../../utils/bankHistoryAnalyzer';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import {
@@ -38,8 +37,6 @@ import {
   extractSavedFixedFromProfile,
   extractSavedIncomesFromProfile,
   clearAllLocalAppData,
-  resolveSwishPhoneToName,
-  saveSwishPhoneDirectoryEntry,
 } from '../../utils/appCache';
 
 import {
@@ -47,9 +44,7 @@ import {
   mapBankTransactionsToAppItems,
 } from '../../app/transactionMapping';
 import { reconcileFixedExpensesList, reconcileIncomesList } from '../../app/reconcileLists';
-import { apiUrl } from '../../utils/platform';
 
-const SWISH_LOOKUP_ENABLED = import.meta.env.VITE_ENABLE_SWISH_LOOKUP === 'true';
 
 const AUTO_SYNC_COOLDOWN_MS = 15 * 60 * 1000; // Minst 15 min mellan automatiska bakgrundssynkningar (PSD2-vänlig kvot, manuell synk körs alltid direkt)
 
@@ -133,7 +128,6 @@ export function useAccountData({
   setWeekendHandling,
   syncInFlightRef,
   targetPayday,
-  transactions,
   transactionsRef,
   userAvatar,
   userId,
@@ -756,8 +750,7 @@ export function useAccountData({
     }
   }, [userId, processPendingBankCallback]);
 
-  // Lyssna på uppdateringar i Swish-nummerkatalogen och slå upp okända telefonnummer i bakgrunden
-  const lookedUpSwishPhonesRef = useRef<Set<string>>(new Set());
+  // Swish-nummer som du själv döpt: visa det nya namnet direkt
   useEffect(() => {
     const handleDirectoryUpdate = () => {
       setTransactions((prev) => prev.map((tx) => sanitizeTransactionItem(tx)));
@@ -765,38 +758,6 @@ export function useAccountData({
     window.addEventListener('dejz:swish-directory-updated', handleDirectoryUpdate);
     return () => window.removeEventListener('dejz:swish-directory-updated', handleDirectoryUpdate);
   }, []);
-
-  useEffect(() => {
-    const unresolvedPhones = new Set<string>();
-    for (const tx of transactions) {
-      if (tx.category !== 'Swish' && !/swish/i.test(tx.title || '') && !/swish/i.test(tx.rawDescription || '')) {
-        continue;
-      }
-      const phone = extractSwishPhoneNumber(
-        `${tx.rawDescription || ''} ${tx.counterpartyName || ''} ${tx.title || ''}`
-      );
-      if (!phone) continue;
-      if (resolveSwishPhoneToName(phone)) continue;
-      if (lookedUpSwishPhonesRef.current.has(phone)) continue;
-      lookedUpSwishPhonesRef.current.add(phone);
-      unresolvedPhones.add(phone);
-    }
-
-    // Namnuppslag för okända Swish-nummer kräver en server (/api/swish/lookup) som inte finns ännu.
-    // Numren samlas ändå ovan, så att uppslaget kan slås på när servern finns.
-    if (unresolvedPhones.size === 0 || !SWISH_LOOKUP_ENABLED) return;
-
-    unresolvedPhones.forEach((phone) => {
-      fetch(apiUrl(`/api/swish/lookup?phone=${encodeURIComponent(phone)}`))
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (data?.name && typeof data.name === 'string') {
-            saveSwishPhoneDirectoryEntry(phone, data.name);
-          }
-        })
-        .catch(() => {});
-    });
-  }, [transactions]);
 
   // Initiera Supabase-session och trigga en enda koordinerad, atomär hydrering vid appstart
   useEffect(() => {

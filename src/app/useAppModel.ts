@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { getHouseholdState, subscribeToHouseholdRealtime } from '../utils/householdSync';
 import { useAccountData } from './hooks/useAccountData';
 import { useAppActions } from './hooks/useAppActions';
 import { useAppState } from './hooks/useAppState';
@@ -24,16 +22,6 @@ export function useAppModel() {
   const budget = useBudgetTotals({ ...state, ...account, ...periodData });
   // Alla åtgärder: lägga till/ändra/ta bort köp, fasta utgifter, inkomster, logga ut …
   const actions = useAppActions({ ...state, ...account, ...periodData });
-
-  // Realtidssynk för Delad budget (Hushåll)
-  const { setAccountMetaVersion } = periodData;
-  useEffect(() => {
-    const hh = getHouseholdState();
-    if (!hh || !hh.householdId || !hh.inviteCode) return;
-    return subscribeToHouseholdRealtime(hh.householdId, hh.inviteCode, () => {
-      setAccountMetaVersion((v) => v + 1);
-    });
-  }, [state.activeTab, state.settingsSubView, setAccountMetaVersion]);
 
   // Allt som skärmarna behöver
   const app = { ...state, ...account, ...profile, ...periodData, ...budget, ...actions };

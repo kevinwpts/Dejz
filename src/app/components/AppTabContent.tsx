@@ -86,7 +86,6 @@ export const AppTabContent: React.FC = () => {
     setIsOnboardingActive,
     handleCategoryMutated,
     settingsSubView,
-    setFixedExpenses,
   } = useApp();
   return (
       <main className="flex-1 w-full max-w-md mx-auto px-4 pt-4">
@@ -132,14 +131,8 @@ export const AppTabContent: React.FC = () => {
                     setSelectedGoalIdInView(null);
                     setActiveTab('goals');
                   }}
-                  onNavigateToHousehold={() => {
-                    setSettingsSubView('household');
-                    setActiveTab('settings');
-                  }}
                   manualBalance={activeManualBalance}
                   onOpenBalance={hasActiveBankConnection ? undefined : () => setIsBalanceSheetOpen(true)}
-                  userEmail={userEmail}
-                  userName={userName}
                   onSelectAccount={(accountId) => {
                     setSelectedHistoryAccountId(accountId);
                     setActiveTab('transactions');
@@ -165,8 +158,6 @@ export const AppTabContent: React.FC = () => {
                   totalFixedExpenses={totalFixedExpenses}
                   transactions={displayTransactions}
                   accounts={accounts}
-                  userEmail={userEmail}
-                  userName={userName}
                   onSelectIncome={(inc) => {
                     setSelectedIncome(inc);
                     setIsIncomeModalOpen(true);
@@ -185,10 +176,6 @@ export const AppTabContent: React.FC = () => {
                   }}
                   onOpenDiscover={() => {
                     setSettingsSubView('discover');
-                    setActiveTab('settings');
-                  }}
-                  onOpenHousehold={() => {
-                    setSettingsSubView('household');
                     setActiveTab('settings');
                   }}
                   onOpenGoals={() => setActiveTab('goals')}
@@ -782,7 +769,6 @@ export const AppTabContent: React.FC = () => {
 
               {activeTab === 'settings' && (
                 <SettingsTab
-                  period={period}
                   connectedBank={connectedBank}
                   connections={connections}
                   bankAccounts={bankAccounts}
@@ -852,9 +838,6 @@ export const AppTabContent: React.FC = () => {
                   onOpenPreviewTransactionModal={(tx) => {
                     setSelectedTransaction(tx);
                     setIsTxModalOpen(true);
-                  }}
-                  onApplyFixedExpenses={(items) => {
-                    setFixedExpenses(items);
                   }}
                   onOpenSection={(section) => {
                     setSelectedGoalIdInView(null);

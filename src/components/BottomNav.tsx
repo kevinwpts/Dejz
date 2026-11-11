@@ -16,7 +16,6 @@ export type AppTab =
 interface BottomNavProps {
   activeTab: AppTab;
   onChangeTab: (tab: AppTab) => void;
-  onOpenHousehold?: () => void;
   onOpenDiscover?: () => void;
   /** Plusknappen: "Lägg till köp" (prata in eller fyll i manuellt) – nåbar från alla flikar */
   onAddTransaction?: () => void;

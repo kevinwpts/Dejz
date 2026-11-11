@@ -6,7 +6,6 @@ export type ModalSubView =
   | 'day-picker'
   | 'payment-picker'
   | 'goal-picker'
-  | 'share-picker'
   | 'receipt-preview'
   | 'similar'
   | 'cancel-picker'

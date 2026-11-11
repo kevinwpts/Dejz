@@ -7,7 +7,6 @@ import { CategoryIcon } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
-import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 import { getTransactionTime } from '../../app/models';
 
@@ -205,17 +204,8 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                   const catLabel = exp.category || 'Räkningar';
                   const matchedTx =
                     periodRecurringMatches.matchedFixedTxByExpId.get(exp.id);
-                  const isPartnerConnected = hasConnectedHouseholdPartner();
-                  const shareRatio =
-                    isPartnerConnected &&
-                    exp.isShared &&
-                    exp.fullAmount &&
-                    exp.fullAmount > 0 &&
-                    exp.amount > 0
-                      ? exp.amount / exp.fullAmount
-                      : 1;
                   const effectiveAmt = matchedTx
-                    ? Math.round(Math.abs(Number(matchedTx.amount) || 0) * shareRatio)
+                    ? Math.round(Math.abs(Number(matchedTx.amount) || 0))
                     : Math.round(Number(exp.amount) || 0);
                   const hasVariableDiff =
                     Boolean(matchedTx) &&
@@ -251,14 +241,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                               size={11}
                               className="shrink-0 text-[var(--text-secondary)]"
                             />
-                            <span className="truncate">
-                              {catLabel}
-                              {isPartnerConnected && exp.isShared
-                                ? exp.fullAmount && exp.fullAmount > exp.amount
-                                  ? ` · Delad (Totalt ${formatKr(exp.fullAmount)})`
-                                  : ' · Delad'
-                                : ''}
-                            </span>
+                            <span className="truncate">{catLabel}</span>
                           </span>
                         </div>
                       </div>
@@ -350,10 +333,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                             const isPending =
                               tx.bookingStatus === 'PDNG' ||
                               tx.bookingStatus === 'HOLD';
-                            const isSplit =
-                              hasConnectedHouseholdPartner() &&
-                              tx.originalAmount !== undefined &&
-                              tx.originalAmount > tx.amount;
                             const hasReceipts = Boolean(
                               (Array.isArray(tx.receipts) &&
                                 tx.receipts.length > 0) ||
@@ -394,11 +373,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                                       <span className="truncate">
                                         {tx.category}
                                       </span>
-                                      {isSplit && tx.originalAmount && (
-                                        <span className="text-[11px] opacity-80 shrink-0">
-                                          · av {formatKr(tx.originalAmount)}
-                                        </span>
-                                      )}
                                       {tx.isHearted && (
                                         <Heart
                                           size={11}

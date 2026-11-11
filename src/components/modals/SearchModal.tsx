@@ -6,7 +6,6 @@ import {
   Heart,
   Package,
   Paperclip,
-  Users,
 } from '@phosphor-icons/react';
 import {
   TransactionItem,
@@ -29,7 +28,6 @@ import {
   isDateInPeriod,
   isDueDayPaidInPeriod,
 } from '../../utils/periodEngine';
-import { hasConnectedHouseholdPartner } from '../../utils/householdSync';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -427,10 +425,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           fixedExpenses,
                           incomes
                         );
-                        const isSplit =
-                          hasConnectedHouseholdPartner() &&
-                          tx.originalAmount !== undefined &&
-                          tx.originalAmount > tx.amount;
                         const statusSub =
                           tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
                             ? 'Reserverat'
@@ -478,14 +472,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                       className="text-[var(--text-secondary)] shrink-0"
                                     />
                                   )}
-                                  {isSplit && (
-                                    <Users
-                                      size={13}
-                                      weight="fill"
-                                      className="text-emerald-500 shrink-0"
-                                      aria-label="Delad utgift"
-                                    />
-                                  )}
                                 </span>
                                 <span className="ui-row-subtitle flex items-center gap-1">
                                   <CategoryIcon
@@ -494,11 +480,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                     className="shrink-0 text-[var(--text-secondary)]"
                                   />
                                   <span className="truncate">{tx.category}</span>
-                                  {isSplit && tx.originalAmount && (
-                                    <span className="text-[11px] opacity-75 shrink-0">
-                                      · av {formatKr(tx.originalAmount)}
-                                    </span>
-                                  )}
                                 </span>
                               </div>
                             </div>

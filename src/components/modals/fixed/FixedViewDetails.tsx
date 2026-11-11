@@ -22,10 +22,9 @@ import {
   isMerchantCategoryIconPreferred,
   setMerchantCategoryIconPreferred,
 } from '../../../utils/logo';
-import { hasConnectedHouseholdPartner } from '../../../utils/householdSync';
 
 export interface FixedViewDetailsProps {
-  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "share-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
+  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
   isCreateMode: boolean;
   navDirection: "forward" | "back";
   onClose: () => void;
@@ -52,10 +51,6 @@ export interface FixedViewDetailsProps {
   showFullAccount: boolean;
   setShowFullAccount: (value: SetStateAction<boolean>) => void;
   handleRemoveReceiptAt: (index: number) => void;
-  isShared: boolean;
-  setIsShared: (value: SetStateAction<boolean>) => void;
-  onUpdate: (item: FixedExpenseItem) => void;
-  formatKr: (val: number) => string;
   onDelete: (id: string) => void;
   setShowDeleteConfirm: (value: SetStateAction<boolean>) => void;
   showDeleteConfirm: boolean;
@@ -90,10 +85,6 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
   showFullAccount,
   setShowFullAccount,
   handleRemoveReceiptAt,
-  isShared,
-  setIsShared,
-  onUpdate,
-  formatKr,
   onDelete,
   setShowDeleteConfirm,
   showDeleteConfirm,
@@ -463,95 +454,6 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
               </>
             )}
 
-            {/* Hushållsdelning */}
-            {hasConnectedHouseholdPartner() && (
-              <>
-                <div className="ui-row">
-                  <span className="ui-info-label">Delad i hushåll</span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isShared}
-                    onClick={() => {
-                      const next = !isShared;
-                      setIsShared(next);
-                      commitInlineChanges({ isShared: next });
-                    }}
-                    className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
-                  >
-                    <span
-                      className={`ui-switch-thumb ${
-                        isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {isShared && activeExpense && (
-                  <div className="ui-row">
-                    <span className="ui-info-label">I min egen budget</span>
-                    <div className="flex items-center gap-1 bg-[var(--surface-color)] p-0.5 rounded-lg border border-[var(--border-subtle)]">
-                      {(() => {
-                        const totalBill =
-                          activeExpense.fullAmount && activeExpense.fullAmount > activeExpense.amount
-                            ? activeExpense.fullAmount
-                            : Number(amount) || activeExpense.amount;
-                        const isHalfInPersonal =
-                          Boolean(activeExpense.fullAmount) &&
-                          activeExpense.fullAmount > activeExpense.amount;
-                        return (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const halfAmt = Math.max(1, Math.round(totalBill / 2));
-                                setAmount(halfAmt);
-                                if (onUpdate) {
-                                  onUpdate({
-                                    ...activeExpense,
-                                    isShared: true,
-                                    fullAmount: totalBill,
-                                    amount: halfAmt,
-                                  });
-                                }
-                              }}
-                              className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
-                                isHalfInPersonal
-                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                              }`}
-                            >
-                              Min halva ({formatKr(Math.round(totalBill / 2))})
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAmount(totalBill);
-                                if (onUpdate) {
-                                  onUpdate({
-                                    ...activeExpense,
-                                    isShared: true,
-                                    fullAmount: totalBill,
-                                    amount: totalBill,
-                                  });
-                                }
-                              }}
-                              className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
-                                !isHalfInPersonal
-                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-                                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                              }`}
-                            >
-                              Hela ({formatKr(totalBill)})
-                            </button>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
           </div>
 
           {/* Ta bort fast utgift */}

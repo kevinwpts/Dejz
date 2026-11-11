@@ -11,7 +11,7 @@ import {
 } from '../../../utils/recurring';
 
 export interface FixedViewSimilarProps {
-  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "share-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
+  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   navigateSubView: (next: ModalSubView, dir?: "forward" | "back") => void;
   onClose: () => void;

@@ -1117,7 +1117,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
         availablePaymentMethods={availablePaymentMethods}
         handleSaveSheet={handleSaveSheet}
         sheetNavDir={sheetNavDir}
-        formatKr={formatKr}
         handleDeleteFromSheet={handleDeleteFromSheet}
       />
     </div>

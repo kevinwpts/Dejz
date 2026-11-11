@@ -21,10 +21,9 @@ import {
   inferCategoryAndMethodFromName,
   cleanDisplayMerchantName,
 } from '../../../utils/bankHistoryAnalyzer';
-import { hasConnectedHouseholdPartner } from '../../../utils/householdSync';
 
 export interface FixedViewEditProps {
-  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "share-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
+  subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
   slideAnimClass: "animate-slide-in-right" | "animate-slide-in-left";
   isCreateMode: boolean;
   onClose: () => void;
@@ -43,8 +42,6 @@ export interface FixedViewEditProps {
   paymentMethod: string;
   availableGoals: SavingsGoalItem[];
   linkedGoalId: string;
-  isShared: boolean;
-  setIsShared: (value: SetStateAction<boolean>) => void;
   draftReceipts: ReceiptAttachment[];
   fileInputRef: MutableRefObject<HTMLInputElement>;
   setPreviewReceipt: (value: SetStateAction<ReceiptAttachment>) => void;
@@ -78,8 +75,6 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
   paymentMethod,
   availableGoals,
   linkedGoalId,
-  isShared,
-  setIsShared,
   draftReceipts,
   fileInputRef,
   setPreviewReceipt,
@@ -279,25 +274,6 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
               </span>
             </button>
-          )}
-
-          {hasConnectedHouseholdPartner() && (
-            <div className="ui-row">
-              <span className="ui-info-label">Delad i hushåll</span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isShared}
-                onClick={() => setIsShared((prev) => !prev)}
-                className={`ui-switch ${isShared ? 'ui-switch-on' : 'ui-switch-off'}`}
-              >
-                <span
-                  className={`ui-switch-thumb ${
-                    isShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
           )}
 
           <div className="ui-row">

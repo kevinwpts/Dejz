@@ -1,9 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  Plus,
-  CaretRight,
-  Users,
-} from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import {
   FixedExpenseItem,
   IncomeItem,
@@ -22,12 +18,6 @@ import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import { estimateVariableBill } from '../utils/variableBills';
 import { getFixedExpenseAmountInPeriod, PeriodMatches } from '../utils/budgetEngine';
 import { formatIsoDateStockholm } from '../utils/swedishDate';
-import {
-  getHouseholdState,
-  hasConnectedHouseholdPartner,
-  calculateHouseholdSettlement,
-  getMemberKey,
-} from '../utils/householdSync';
 import { getSavingsGoals } from '../utils/appCache';
 import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
@@ -39,14 +29,11 @@ interface FixedTabProps {
   totalFixedExpenses: number;
   transactions?: TransactionItem[];
   accounts?: AccountItem[];
-  userEmail?: string | null;
-  userName?: string | null;
   onSelectIncome: (inc: IncomeItem) => void;
   onSelectFixed: (exp: FixedExpenseItem) => void;
   onAddIncome?: () => void;
   onAddFixed?: () => void;
   onOpenDiscover?: () => void;
-  onOpenHousehold?: () => void;
   onOpenGoals?: () => void;
   onDeleteIncome: (id: string) => void;
   onDeleteFixed: (id: string) => void;
@@ -62,14 +49,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
   totalIncome,
   totalFixedExpenses,
   transactions = [],
-  userEmail,
-  userName,
   onSelectIncome,
   onSelectFixed,
   onAddIncome,
   onAddFixed,
   onOpenDiscover: _onOpenDiscover,
-  onOpenHousehold,
   periodMatches: periodMatchesFromApp,
 }) => {
 
@@ -161,54 +145,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           </div>
         </div>
       </section>
-
-      {/* ============================================================== */}
-      {/* GENVÄG: DELAD BUDGET                                           */}
-      {/* ============================================================== */}
-      {(() => {
-        const hh = getHouseholdState();
-        if (!onOpenHousehold || !hh || !hasConnectedHouseholdPartner(hh)) return null;
-
-        const settlement = calculateHouseholdSettlement(
-          hh,
-          getMemberKey(userEmail, userName),
-          period.startDate
-        );
-        if (!settlement.partnerMember) return null;
-
-        return (
-          <button
-            type="button"
-            onClick={onOpenHousehold}
-            className="w-full rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-4 py-3.5 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-                <Users size={17} weight="regular" />
-              </div>
-              <div className="min-w-0">
-                <span className="font-display font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] block truncate">
-                  {hh.name} · Delad budget
-                </span>
-                <span className="text-[11px] text-[var(--text-secondary)] block truncate tabular-nums">
-                  {settlement.isSettledForCurrentPeriod
-                    ? 'Perioden är markerad som utjämnad'
-                    : Math.abs(settlement.netBalance) < 5
-                    ? 'Ni ligger helt jämnt i perioden'
-                    : settlement.netBalance > 0
-                    ? `${settlement.partnerMember.name} är skyldig dig ${formatKr(settlement.netBalance)}`
-                    : `Du är skyldig ${settlement.partnerMember.name} ${formatKr(Math.abs(settlement.netBalance))}`}
-                </span>
-              </div>
-            </div>
-            <CaretRight
-              size={14}
-              weight="bold"
-              className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 transition-colors"
-            />
-          </button>
-        );
-      })()}
 
       {/* ============================================================== */}
       {/* SEKTION 1: INKOMSTER                                           */}
@@ -322,7 +258,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           {sortedExpenses.length > 0 ? (
             sortedExpenses.map((exp) => {
                 const matchedTx = periodMatches?.matchedFixedTxByExpId?.get(exp.id);
-                const isPartnerConnected = hasConnectedHouseholdPartner();
                 // Samma uträkning som hemkortet (räknemotorn)
                 const actualPaidAmt = Math.round(getFixedExpenseAmountInPeriod(exp, matchedTx, period));
                 const linkedGoalName = exp.linkedGoalId
@@ -361,9 +296,6 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                             />
                             <span className="truncate">{exp.category || 'Räkningar'}</span>
                           </span>
-                          {isPartnerConnected && exp.isShared && (
-                            <span className="shrink-0">· Delad</span>
-                          )}
                           {linkedGoalName && (
                             <span className="truncate">· {linkedGoalName}</span>
                           )}

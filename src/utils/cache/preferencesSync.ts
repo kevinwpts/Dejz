@@ -38,7 +38,6 @@ export interface UserPreferences {
   learnedBrandDomains: Record<string, string>;
   mySwishPhone: string;
   swishContacts: unknown[];
-  household: unknown;
   weekendHandling: string;
   darkMode: string;
   onboardingCompleted: boolean;
@@ -110,7 +109,6 @@ export function collectAllUserPreferences(): Partial<UserPreferences> {
     learnedBrandDomains: safeParse<Record<string, string>>('dejz_learned_brand_domains_v1', {}),
     mySwishPhone: localStorage.getItem('dejz_my_swish_phone') || '',
     swishContacts: safeParse<unknown[]>('dejz_swish_contacts', []),
-    household: safeParse<unknown>('dejz_household_state_v1', null),
     weekendHandling: localStorage.getItem('dejz_weekend_handling') || 'before',
     darkMode: localStorage.getItem('dejz_dark_mode') || 'light',
     onboardingCompleted:
@@ -325,7 +323,6 @@ function prefStorage(): PrefStorage {
   accountMeta: { key: ACCOUNT_META_KEY, kind: 'json' },
   categoryBudgets: { key: CATEGORY_BUDGETS_KEY, kind: 'json' },
   savingsGoals: { key: SAVINGS_GOALS_KEY, kind: 'json' },
-  household: { key: 'dejz_household_state_v1', kind: 'json' },
   reviewedTransactionIds: { key: REVIEWED_TX_IDS_KEY, kind: 'json' },
   preferCategoryIconMerchants: { key: 'dejz_prefer_category_icon_merchants_v1', kind: 'json' },
   learnedBrandDomains: { key: 'dejz_learned_brand_domains_v1', kind: 'json' },
@@ -373,7 +370,6 @@ function announceAppliedPreferences(applied: string[]): void {
   if (applied.length === 0) return;
   const fire = (name: string) => window.dispatchEvent(new CustomEvent(name));
   if (applied.includes('savingsGoals')) fire('dejz:goals-updated');
-  if (applied.includes('household')) fire('dejz:household-updated');
   if (applied.includes('mySwishPhone') || applied.includes('swishContacts')) fire('dejz:swish-directory-updated');
   fire('dejz:preferences-updated');
 }

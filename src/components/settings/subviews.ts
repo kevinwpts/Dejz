@@ -2,7 +2,6 @@
 export type SettingsSubView =
   | 'main'
   | 'admin'
-  | 'household'
   | 'discover'
   | 'categories'
   | 'goals'
@@ -23,7 +22,6 @@ export type SettingsSubView =
 export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, string> = {
   admin: 'Admin & Testsimulator',
   profile: 'Profil',
-  household: 'Delad ekonomi',
   discover: 'Hitta fasta poster',
   categories: 'Kategorier',
   goals: 'Sparmål & buffert',

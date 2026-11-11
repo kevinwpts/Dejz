@@ -5,10 +5,9 @@ import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
 
 
 import { BankConnection, BankAccount } from '../services/bankService';
-import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
+import { WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
 import { RecurringDiscoveryView } from './RecurringDiscoveryView';
-import { HouseholdBudgetView } from './HouseholdBudgetView';
 import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
 import {
   getStoredPaymentMethods,
@@ -39,7 +38,6 @@ import { ProfileSettingsView } from './settings/ProfileSettingsView';
 import type { SettingsSubView } from './settings/subviews';
 
 interface SettingsTabProps {
-  period: PeriodInfo;
   connectedBank: string | null;
   connections: BankConnection[];
   bankAccounts?: BankAccount[];
@@ -89,7 +87,6 @@ interface SettingsTabProps {
   onOpenAddIncomeModal?: () => void;
   onOpenAddTransactionModal?: () => void;
   onOpenPreviewTransactionModal?: (tx?: TransactionItem) => void;
-  onApplyFixedExpenses?: (next: FixedExpenseItem[]) => void;
   /** Öppnar Sparmål, Kvitton eller Paket (låg tidigare under "Mer" i menyn) */
   onOpenSection?: (section: 'goals' | 'receipts' | 'packages') => void;
   sectionCounts?: { goals?: number; receipts?: number; packages?: number };
@@ -99,7 +96,6 @@ export type { SettingsSubView } from './settings/subviews';
 export { SETTINGS_SUBVIEW_TITLES } from './settings/subviews';
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({
-  period,
   connectedBank,
   connections,
   bankAccounts = [],
@@ -144,7 +140,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onOpenAddIncomeModal,
   onOpenAddTransactionModal,
   onOpenPreviewTransactionModal,
-  onApplyFixedExpenses,
   onOpenSection,
   sectionCounts = {},
 }) => {
@@ -177,7 +172,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     }
   });
   const [profileSaved, setProfileSaved] = useState(false);
-  const [copiedPersonalCode, setCopiedPersonalCode] = useState(false);
 
   // Password change & reset state in Profile
   const [isPasswordSheetOpen, setIsPasswordSheetOpen] = useState(false);
@@ -365,8 +359,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         fileInputRef={fileInputRef}
         userAvatar={userAvatar}
         onUpdateAvatar={onUpdateAvatar}
-        setCopiedPersonalCode={setCopiedPersonalCode}
-        copiedPersonalCode={copiedPersonalCode}
         setEditName={setEditName}
         setEditEmail={setEditEmail}
         setEditPhone={setEditPhone}
@@ -423,24 +415,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           onCategoryMutated={onCategoryMutated}
         />
       </div>
-    );
-  }
-
-  // ==========================================
-  // SUB-VIEW: DELAD BUDGET (HUSHÅLL)
-  // ==========================================
-  if (subView === 'household') {
-    return (
-      <HouseholdBudgetView
-        period={period}
-        userEmail={userEmail}
-        userName={userName}
-        userAvatar={userAvatar}
-        incomes={incomes}
-        fixedExpenses={fixedExpenses}
-        transactions={transactions}
-        onAddFixed={onAddFixed}
-      />
     );
   }
 
@@ -654,13 +628,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   if (subView === 'admin') {
     return (
       <AdminSettingsView
-        period={period}
-        userEmail={userEmail}
-        userName={userName}
-        userAvatar={userAvatar}
-        incomes={incomes}
-        fixedExpenses={fixedExpenses}
-        transactions={transactions}
         onStartOnboarding={onStartOnboarding}
         onStartCreateGoalWizard={onStartCreateGoalWizard}
         setSubView={setSubView}
@@ -669,7 +636,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         onOpenAddIncomeModal={onOpenAddIncomeModal}
         onOpenAddTransactionModal={onOpenAddTransactionModal}
         onOpenPreviewTransactionModal={onOpenPreviewTransactionModal}
-        onApplyFixedExpenses={onApplyFixedExpenses}
       />
     );
   }

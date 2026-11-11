@@ -17,9 +17,6 @@ import {
   getGoalArtworkTheme,
   GoalArtworkIllustration,
 } from '../ui/VisualArtwork';
-import {
-  hasConnectedHouseholdPartner,
-} from '../../utils/householdSync';
 import { AccountItem } from '../HomeTab';
 import { ItemLogo } from '../ItemLogo';
 
@@ -53,8 +50,6 @@ export interface GoalCreateWizardProps {
   accounts: AccountItem[];
   effectiveTotalBalance: number;
   formatKr: (amount: number) => string;
-  goalIsShared: boolean;
-  setGoalIsShared: (value: SetStateAction<boolean>) => void;
 }
 
 export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
@@ -87,8 +82,6 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
   accounts,
   effectiveTotalBalance,
   formatKr,
-  goalIsShared,
-  setGoalIsShared,
 }) => {
   if (!isCreateWizardOpen || typeof document === 'undefined') return null;
 
@@ -621,26 +614,6 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
                 );
               })}
 
-              {hasConnectedHouseholdPartner() && (
-                <div className="w-full p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-color)]/60 flex items-center justify-between gap-3">
-                  <span className="font-display font-semibold text-sm text-[var(--text-primary)]">
-                    Delat sparmål i hushåll
-                  </span>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={goalIsShared}
-                    onClick={() => setGoalIsShared((p) => !p)}
-                    className={`ui-switch ${goalIsShared ? 'ui-switch-on' : 'ui-switch-off'}`}
-                  >
-                    <span
-                      className={`ui-switch-thumb ${
-                        goalIsShared ? 'ui-switch-thumb-on' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-              )}
             </div>
 
             <div className="shrink-0 pt-3">
