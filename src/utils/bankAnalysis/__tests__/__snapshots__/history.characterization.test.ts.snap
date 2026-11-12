@@ -13,7 +13,7 @@ exports[`analyzeBankTransactionsForOnboarding > bara en ensam inkomst utan löne
 exports[`analyzeBankTransactionsForOnboarding > edgeDates lönedag 1 ingen justering 1`] = `
 {
   "analyzedTransactionCount": 13,
-  "calculatedSpentSincePayday": 1318,
+  "calculatedSpentSincePayday": 1088,
   "detectedFixedExpenses": [
     {
       "amount": 2400,
@@ -1922,7 +1922,7 @@ exports[`analyzeBankTransactionsForOnboarding > manyMerchants lönedag 1 ingen j
 exports[`analyzeBankTransactionsForOnboarding > manyMerchants lönedag 25 före helg 1`] = `
 {
   "analyzedTransactionCount": 55,
-  "calculatedSpentSincePayday": 1876,
+  "calculatedSpentSincePayday": 1629,
   "detectedFixedExpenses": [],
   "detectedIncomes": [],
   "suggestedPayday": null,
@@ -4633,7 +4633,7 @@ exports[`extractOnboardingAiCandidates > konto med annat namn påverkar kandidat
 {
   "baseAnalysis": {
     "analyzedTransactionCount": 55,
-    "calculatedSpentSincePayday": 1876,
+    "calculatedSpentSincePayday": 1629,
     "detectedFixedExpenses": [],
     "detectedIncomes": [],
     "suggestedPayday": null,
@@ -5439,7 +5439,7 @@ exports[`extractOnboardingAiCandidates > manyMerchants 1`] = `
 {
   "baseAnalysis": {
     "analyzedTransactionCount": 55,
-    "calculatedSpentSincePayday": 1876,
+    "calculatedSpentSincePayday": 1629,
     "detectedFixedExpenses": [],
     "detectedIncomes": [],
     "suggestedPayday": null,
@@ -8150,7 +8150,7 @@ exports[`runCoreBankDetection > edgeDates med Elins konton 1`] = `
       "value_date": null,
     },
   ],
-  "periodStartIso": "2026-10-29",
+  "periodStartIso": "2026-10-30",
   "suggestedPayday": 31,
 }
 `;
@@ -8505,7 +8505,7 @@ exports[`runCoreBankDetection > edgeDates utan konton 1`] = `
       "value_date": null,
     },
   ],
-  "periodStartIso": "2026-10-29",
+  "periodStartIso": "2026-10-30",
   "suggestedPayday": 31,
 }
 `;
@@ -10584,7 +10584,7 @@ exports[`runCoreBankDetection > elin med Elins konton 1`] = `
       "value_date": "2026-05-02",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": 25,
 }
 `;
@@ -12663,7 +12663,7 @@ exports[`runCoreBankDetection > elin utan konton 1`] = `
       "value_date": "2026-05-02",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": 25,
 }
 `;
@@ -13083,7 +13083,7 @@ exports[`runCoreBankDetection > gapFill med Elins konton 1`] = `
       "value_date": "2026-08-28",
     },
   ],
-  "periodStartIso": "2026-11-05",
+  "periodStartIso": "2026-11-06",
   "suggestedPayday": 6,
 }
 `;
@@ -13523,7 +13523,7 @@ exports[`runCoreBankDetection > gapFill utan konton 1`] = `
       "value_date": "2026-08-28",
     },
   ],
-  "periodStartIso": "2026-11-05",
+  "periodStartIso": "2026-11-06",
   "suggestedPayday": 6,
 }
 `;
@@ -14862,7 +14862,7 @@ exports[`runCoreBankDetection > irregularIncome med Elins konton 1`] = `
       "value_date": "2026-05-14",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": 25,
 }
 `;
@@ -16201,7 +16201,7 @@ exports[`runCoreBankDetection > irregularIncome utan konton 1`] = `
       "value_date": "2026-05-14",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": 25,
 }
 `;
@@ -17426,7 +17426,7 @@ exports[`runCoreBankDetection > manyMerchants med Elins konton 1`] = `
       "value_date": "2026-10-01",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": null,
 }
 `;
@@ -18651,7 +18651,7 @@ exports[`runCoreBankDetection > manyMerchants utan konton 1`] = `
       "value_date": "2026-10-01",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": null,
 }
 `;
@@ -20586,7 +20586,7 @@ exports[`runCoreBankDetection > subscriptions med Elins konton 1`] = `
       "value_date": "2026-05-01",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": null,
 }
 `;
@@ -22521,7 +22521,7 @@ exports[`runCoreBankDetection > subscriptions utan konton 1`] = `
       "value_date": "2026-05-01",
     },
   ],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": null,
 }
 `;
@@ -22534,7 +22534,7 @@ exports[`runCoreBankDetection > tom lista 1`] = `
   "inflows": [],
   "internalTransferIds": Set {},
   "outflows": [],
-  "periodStartIso": "2026-10-22",
+  "periodStartIso": "2026-10-23",
   "suggestedPayday": null,
 }
 `;
@@ -22773,7 +22773,7 @@ exports[`runCoreBankDetection > transfers med Elins konton 1`] = `
       "value_date": "2026-09-17",
     },
   ],
-  "periodStartIso": "2026-10-20",
+  "periodStartIso": "2026-10-21",
   "suggestedPayday": 21,
 }
 `;
@@ -23079,7 +23079,7 @@ exports[`runCoreBankDetection > transfers utan konton 1`] = `
       "value_date": "2026-09-17",
     },
   ],
-  "periodStartIso": "2026-10-20",
+  "periodStartIso": "2026-10-21",
   "suggestedPayday": 21,
 }
 `;

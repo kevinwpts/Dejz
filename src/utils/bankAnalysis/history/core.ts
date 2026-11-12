@@ -2,6 +2,7 @@
 import { BankAccount, BankTransactionItem } from '../../../services/bankService';
 import { PaydayType, WeekendAdjustment } from '../../../types';
 import { getPeriodBoundaries } from '../../date';
+import { formatIsoDateStockholm } from '../../swedishDate';
 import { DetectedFixedExpenseWithEvidence, DetectedIncomeWithEvidence } from '../types';
 import { findRawBankInternalTransferIds, getNormalizedBankTxAmount } from '../normalization';
 import { getTxDate, isPendingBookingStatus } from '../txFields';
@@ -65,7 +66,8 @@ function computePeriodStartIso(payday: number, paydayBeforeWeekend: boolean): st
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const { start } = getPeriodBoundaries(today, paydayType, payday, adjustment);
-  return start.toISOString().split('T')[0];
+  // Svenskt datum – toISOString() ger UTC, där svensk midnatt fortfarande är dagen före
+  return formatIsoDateStockholm(start);
 }
 
 /**

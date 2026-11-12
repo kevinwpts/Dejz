@@ -120,3 +120,11 @@ describe('små hjälpfunktioner', () => {
     ).toMatchSnapshot();
   });
 });
+
+describe('löneperiodens startdatum', () => {
+  // Fixat: datumet skrevs i UTC, där svensk midnatt är dagen före – perioden började en dag för tidigt
+  // och "spenderat sedan lön" tog med köp från dagen innan lönen.
+  test('lön den 25:e som infaller en söndag börjar fredagen före (23/10), inte torsdag', () => {
+    expect(runCoreBankDetection([], 25, true).periodStartIso).toBe('2026-10-23');
+  });
+});

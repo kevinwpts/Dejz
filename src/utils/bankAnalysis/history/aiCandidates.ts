@@ -36,7 +36,7 @@ const MAX_UNMATCHED_INCOMES = 12;
 
 /** Vardagsköp (kaféer, restauranger, parkering, Swish …) som inte är abonnemang. */
 const EVERYDAY_PURCHASE_PATTERN =
-  /(kafé|kafe|cafe|coffee|bageri|konditori|restaurang|pizza|sushi|burger|krog|bar |pub |lunch|kiosk|automat|parkster|easypark|aimo| Uber |bolt|voi |tier |ryde |taxi|swish|7-eleven|pressbyr)/;
+  /(kafé|kafe|cafe|coffee|bageri|konditori|restaurang|pizza|sushi|burger|krog|bar |pub |lunch|kiosk|automat|parkster|easypark|aimo|\buber\b|bolt|voi |tier |ryde |taxi|swish|7-eleven|pressbyr)/;
 
 /** Insättningar som är överföringar eller returer, inte inkomst. */
 const TRANSFER_OR_REFUND_PATTERN =
