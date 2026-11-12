@@ -8,6 +8,7 @@ import {
   Trash,
   Check,
   ImageSquare,
+  Flag,
 } from '@phosphor-icons/react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -96,6 +97,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
           },
         ];
 
+  // Utan konton finns bara "eget valt belopp" – då är raden bara brus
+  const hasTrackingOptions = accounts.length > 0 || effectiveTotalBalance > 0 || isLinkedToAccount;
+
   const currentArtLabel = selectedGoal.customImageUrl
     ? 'Egen bild'
     : GOAL_ARTWORKS.find((a) => a.id === selectedGoal.artworkId)?.label || 'Spargris';
@@ -144,7 +148,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
       {/* Top Colored Hero Card with Cropped Right Artwork & Inline Editable Name */}
       <section
-        className="relative rounded-3xl overflow-hidden p-5 sm:p-6 min-h-[210px] flex flex-col justify-between text-white shadow-sm"
+        className="relative rounded-card overflow-hidden p-5 sm:p-6 min-h-[210px] flex flex-col justify-between text-white"
         style={{
           background: selectedGoal.customImageUrl
             ? '#111827'
@@ -198,12 +202,12 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 updateSelectedGoal({ name: e.target.value });
               }}
               placeholder="Sparmålets namn"
-              className="w-full bg-transparent border-0 text-sm font-medium text-white/95 placeholder-white/50 focus:outline-none focus:ring-0 transition-colors p-0"
+              className="w-full bg-transparent border-0 text-subhead font-semibold text-white placeholder-white/50 focus:outline-none focus:ring-0 transition-colors p-0"
             />
             <span className="font-display font-bold text-3xl sm:text-4xl text-white tabular-nums tracking-tight block mt-0.5">
               {formatKr(effectiveSelectedAmount)}
             </span>
-            <span className="text-xs text-white/75 tabular-nums block mt-0.5">
+            <span className="text-footnote text-white/80 tabular-nums block mt-1">
               av {formatKr(selectedGoal.targetAmount)}
               {linkedLabel ? ` · ${linkedLabel}` : ''}
             </span>
@@ -230,7 +234,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               setTransferAmountInput('');
               setTransferMode('deposit');
             }}
-            className="py-3 px-4 rounded-2xl bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer"
+            className="ui-btn-primary !h-12"
           >
             <Plus size={15} weight="bold" />
             <span>Sätt in</span>
@@ -243,7 +247,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               setTransferAmountInput('');
               setTransferMode('withdraw');
             }}
-            className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)] font-display font-semibold text-xs flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ui-btn-secondary !h-12 !bg-[var(--surface-color)] shadow-[var(--card-shadow)] disabled:cursor-not-allowed"
           >
             <Minus size={15} weight="bold" />
             <span>Ta ut</span>
@@ -252,7 +256,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
       )}
 
       {/* Sammanhållet detaljkort (direktredigering precis som transaktioner/fasta poster) */}
-      <div className="ui-sheet-group">
+      <div className="ui-sheet-group !bg-[var(--surface-color)] !rounded-card shadow-[var(--card-shadow)]">
         <label className="ui-row cursor-text">
           <span className="ui-info-label">Målbelopp</span>
           <div className="flex items-baseline justify-end gap-1">
@@ -269,23 +273,25 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 }
               }}
               placeholder="10 000"
-              className="bg-transparent border-0 focus:outline-none focus:ring-0 text-right font-display font-semibold tabular-nums text-xs sm:text-footnote text-[var(--text-primary)] max-w-[130px] p-0"
+              className="bg-transparent border-0 focus:outline-none focus:ring-0 text-right tabular-nums text-callout text-[var(--text-primary)] max-w-[130px] p-0"
             />
-            <span className="text-xs text-[var(--text-secondary)]">kr</span>
+            <span className="text-callout text-[var(--text-secondary)]">kr</span>
           </div>
         </label>
 
-        <button
-          type="button"
-          onClick={() => setIsAccountPickerOpen(true)}
-          className="ui-row-btn"
-        >
-          <span className="ui-info-label">Hur sparandet följs</span>
-          <span className="ui-info-value flex items-center gap-1.5">
-            <span>{linkedLabel || 'Eget valt belopp'}</span>
-            <CaretRight size={12} className="text-[var(--text-muted)]" />
-          </span>
-        </button>
+        {hasTrackingOptions && (
+          <button
+            type="button"
+            onClick={() => setIsAccountPickerOpen(true)}
+            className="ui-row-btn"
+          >
+            <span className="ui-info-label">Hur sparandet följs</span>
+            <span className="ui-info-value flex items-center gap-1.5">
+              <span>{linkedLabel || 'Eget valt belopp'}</span>
+              <CaretRight size={12} className="text-[var(--text-muted)]" />
+            </span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -313,11 +319,17 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             return (
               <div
                 key={act.id}
-                className="py-3.5 flex items-center justify-between gap-3.5"
+                className="min-h-[64px] py-3 flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-positive-solid/20 text-positive dark:bg-positive-solid dark:text-on-positive font-display font-bold text-xs flex items-center justify-center shrink-0">
-                    {act.authorInitials || userInitials}
+                  <div className="w-10 h-10 rounded-full bg-[var(--fill-grouped)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+                    {!hasAmt ? (
+                      <Flag size={17} weight="fill" />
+                    ) : (act.amount ?? 0) >= 0 ? (
+                      <Plus size={17} weight="bold" />
+                    ) : (
+                      <Minus size={17} weight="bold" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="ui-row-title block truncate">{displayLabel}</span>
@@ -362,7 +374,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                       }}
                       title="Ta bort aktivitet"
                       aria-label={`Ta bort ${displayLabel}`}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative-solid hover:bg-negative-solid/10 transition-colors cursor-pointer"
+                      className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer"
                     >
                       <Trash size={14} />
                     </button>
@@ -418,11 +430,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             }}
             className="ui-row-btn"
           >
-            <span className="font-normal text-[var(--text-primary)]">
-              Eget valt belopp
+            <span className="min-w-0">
+              <span className="ui-list-row-title block">Eget valt belopp</span>
+              <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
+                Du sätter in och tar ut själv
+              </span>
             </span>
             {!selectedGoal.linkedAccountId && (
-              <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+              <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
             )}
           </button>
 
@@ -439,15 +454,13 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               }}
               className="ui-row-btn"
             >
-              <span className="font-normal text-[var(--text-primary)]">
-                Totalsaldo
-              </span>
+              <span className="ui-list-row-title">Totalsaldo</span>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+                <span className="text-callout text-[var(--text-secondary)] tabular-nums">
                   {formatKr(effectiveTotalBalance)}
                 </span>
                 {selectedGoal.linkedAccountId === '__TOTAL__' && (
-                  <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                  <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
                 )}
               </div>
             </button>
@@ -478,16 +491,16 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 }}
                 className="ui-row-btn"
               >
-                <span className="font-normal text-[var(--text-primary)] truncate">
+                <span className="ui-list-row-title">
                   {acc.name}
                   {hasDuplicateName && last4 ? ` (•••• ${last4})` : ''}
                 </span>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+                  <span className="text-callout text-[var(--text-secondary)] tabular-nums">
                     {formatKr(accBal)}
                   </span>
                   {isSelected && (
-                    <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                    <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
                   )}
                 </div>
               </button>
@@ -502,14 +515,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         onClose={() => setIsArtworkPickerOpen(false)}
         title="Välj bild"
       >
-        <div className="grid grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-4 gap-3 p-0.5">
           <button
             type="button"
             onClick={() => galleryInputRef.current?.click()}
             className={`aspect-square rounded-2xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer relative overflow-hidden ${
               selectedGoal.customImageUrl
-                ? 'ring-2 ring-[var(--text-primary)]'
-                : 'bg-[var(--bg-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
+                ? 'ring-2 ring-offset-2 ring-offset-[var(--surface-color)] ring-[var(--cta-bg)]'
+                : 'bg-[var(--fill-grouped)]'
             }`}
             title="Välj egen bild"
           >
@@ -522,7 +535,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             ) : (
               <>
                 <ImageSquare size={20} className="text-[var(--text-primary)]" />
-                <span className="text-micro font-medium text-[var(--text-secondary)]">
+                <span className="text-caption font-medium text-[var(--text-secondary)]">
                   Egen bild
                 </span>
               </>
@@ -549,8 +562,8 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 style={{ backgroundColor: art.tileBg }}
                 className={`aspect-square rounded-2xl p-2 flex items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
                   isSelected
-                    ? 'ring-2 ring-[var(--text-primary)] scale-95'
-                    : 'opacity-85 hover:opacity-100'
+                    ? 'ring-2 ring-offset-2 ring-offset-[var(--surface-color)] ring-[var(--cta-bg)]'
+                    : ''
                 }`}
               >
                 <GoalArtworkIllustration artworkId={art.id} className="w-full h-full" />
@@ -573,9 +586,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <div className="space-y-4">
           <div className="ui-field-card">
             <label className="block cursor-text">
-              <span className="text-caption font-semibold text-[var(--text-muted)] block mb-1">
-                Belopp
-              </span>
+              <span className="ui-field-label block mb-1">Belopp</span>
               <div className="flex items-baseline justify-between gap-2">
                 <input
                   type="text"
@@ -585,10 +596,10 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   onChange={(e) =>
                     setTransferAmountInput(e.target.value.replace(/[^\d]/g, ''))
                   }
-                  placeholder="500"
-                  className="w-full bg-transparent border-0 p-0 font-display font-bold text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 tabular-nums focus:outline-none"
+                  placeholder="0"
+                  className="w-full bg-transparent border-0 p-0 font-display font-bold text-3xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 tabular-nums focus:outline-none"
                 />
-                <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
+                <span className="font-display font-semibold text-subhead text-[var(--text-muted)] shrink-0">
                   kr
                 </span>
               </div>
@@ -611,9 +622,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               return (
                 <div className="space-y-2">
                   <span className="ui-field-label block px-1">
-                    Eller välj en spar-händelse från banken
+                    Eller välj en sparöverföring
                   </span>
-                  <div className="space-y-1.5">
+                  <div className="ui-sheet-group">
                     {recentSavingsTxs.map((tx) => {
                       const amt = Math.round(Math.abs(Number(tx.amount) || 0));
                       return (
@@ -643,17 +654,17 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                             setTransferMode(null);
                             setTransferAmountInput('');
                           }}
-                          className="w-full rounded-xl bg-[var(--bg-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2 text-left transition-colors cursor-pointer"
+                          className="ui-row-btn"
                         >
                           <div className="min-w-0">
-                            <span className="text-xs font-semibold text-[var(--text-primary)] block truncate">
+                            <span className="ui-list-row-title block">
                               {tx.title}
                             </span>
-                            <span className="text-caption text-[var(--text-secondary)] block">
+                            <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
                               {formatSwedishDateHeading(tx.date)}
                             </span>
                           </div>
-                          <span className="font-display font-bold text-xs text-positive tabular-nums shrink-0">
+                          <span className="ui-row-amount-income shrink-0">
                             +{formatKr(amt)}
                           </span>
                         </button>
@@ -667,10 +678,10 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
           <button
             type="button"
             onClick={handleConfirmTransfer}
+            disabled={!(Number(transferAmountInput) > 0)}
             className="ui-btn-primary"
           >
-            <Check size={14} weight="bold" />
-            <span>Bekräfta</span>
+            {transferMode === 'withdraw' ? 'Ta ut' : 'Sätt in'}
           </button>
         </div>
       </BottomSheet>

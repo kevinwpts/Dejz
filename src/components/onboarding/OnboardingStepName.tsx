@@ -25,19 +25,20 @@ export const OnboardingStepName: React.FC<OnboardingStepNameProps> = ({
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="ui-step-title">
+          <h1 className="ui-step-title text-balance">
             Vad heter du?
           </h1>
+          <p className="ui-onb-subtitle">Så vet vi vad vi ska kalla dig.</p>
         </div>
 
-        <div className="my-auto py-4">
-          <div className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] focus-within:border-[var(--text-primary)] rounded-3xl px-5 py-4 transition-colors">
+        <div className="flex-1 min-h-0 pt-2">
+          <div className="ui-onb-input-card">
             <input
               aria-label="Förnamn"
               type="text"
               autoFocus
               required
-              placeholder="Skriv ditt förnamn..."
+              placeholder="Ditt förnamn"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-transparent border-0 p-0 font-display font-semibold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)]/60 focus:outline-none"
@@ -49,7 +50,7 @@ export const OnboardingStepName: React.FC<OnboardingStepNameProps> = ({
           <button
             type="submit"
             disabled={!name.trim()}
-            className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-35 transition-all cursor-pointer"
+            className="ui-btn-primary"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />

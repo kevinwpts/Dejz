@@ -19,41 +19,40 @@ export const ResetEmailSentView: React.FC<ResetEmailSentViewProps> = ({
   onChangeEmail,
   onResend,
 }) => (
-  <main className="my-auto py-8 space-y-6 animate-scale-in">
-    <EnvelopeSimple size={48} weight="light" className="ui-empty-icon" />
-
-    <div className="space-y-2 text-center px-2">
-      <h1 className="ui-step-title">Kolla din inkorg</h1>
-      <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-        Vi har skickat en länk till din e-postadress:
-      </p>
-      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
-        <span className="truncate max-w-[260px]">{email.trim()}</span>
-      </div>
-      <p className="text-meta text-[var(--text-muted)] pt-2 leading-relaxed max-w-xs mx-auto">
-        {sentKind === 'signup'
-          ? 'Klicka på länken i mejlet för att bekräfta ditt konto – sen är du igång. Hittar du det inte? Kika i skräpposten.'
-          : 'Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.'}
-      </p>
+  <main className="flex-1 pt-14 pb-6 flex flex-col items-center text-center animate-scale-in">
+    <div className="ui-auth-icon-tile">
+      <EnvelopeSimple size={30} weight="regular" />
     </div>
 
-    <div className="flex items-center justify-between px-1 pt-2">
-      <button
-        type="button"
-        onClick={onChangeEmail}
-        className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-      >
-        Fel e-post? Ändra
-      </button>
+    <h1 className="ui-step-title mt-6">Kolla din inkorg</h1>
+    <p className="mt-2 text-subhead leading-snug text-[var(--text-secondary)]">
+      Vi har skickat en länk till
+    </p>
+    <p className="mt-0.5 text-subhead font-semibold text-[var(--text-primary)] max-w-full truncate">
+      {email.trim()}
+    </p>
+    <p className="mt-4 text-subhead leading-relaxed text-[var(--text-secondary)] max-w-[320px]">
+      {sentKind === 'signup'
+        ? 'Klicka på länken i mejlet för att bekräfta ditt konto – sen är du igång. Hittar du det inte? Kika i skräpposten.'
+        : 'Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.'}
+    </p>
 
+    <div className="w-full mt-8 space-y-2">
       <button
         type="button"
         disabled={resendCooldown > 0 || resending}
         onClick={onResend}
-        className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
+        className="ui-auth-btn-surface"
       >
-        {resending && <SpinnerGap size={12} className="animate-spin" />}
+        {resending && <SpinnerGap size={16} className="animate-spin" />}
         {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : 'Skicka igen'}
+      </button>
+      <button
+        type="button"
+        onClick={onChangeEmail}
+        className="ui-onb-skip-btn"
+      >
+        Fel e-post? Ändra
       </button>
     </div>
   </main>

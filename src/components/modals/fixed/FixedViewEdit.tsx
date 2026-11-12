@@ -2,7 +2,7 @@ import type { SavingsGoalItem } from '../../../utils/cache/itemMeta';
 import type { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import { Trash, Check, CaretRight, Paperclip, ClockCounterClockwise } from '@phosphor-icons/react';
+import { Trash, CaretRight, Paperclip, ClockCounterClockwise } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
@@ -167,7 +167,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                     }}
                     title={`Återställ ursprungsnamn (${originalDisplayName})`}
                     aria-label={`Återställ ursprungsnamn (${originalDisplayName})`}
-                    className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
+                    className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
                   >
                     <ClockCounterClockwise size={15} weight="bold" />
                   </button>
@@ -176,7 +176,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
             );
           })()}
 
-          <div className="border-t border-[var(--border-subtle)] pt-3.5">
+          <div className="border-t border-[var(--separator)] pt-3.5">
             <label className="block cursor-text">
               <span className="ui-field-label block mb-0.5">
                 Belopp per månad
@@ -205,7 +205,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
             className="ui-row-btn"
           >
             <span className="ui-info-label shrink-0">Kategori</span>
-            <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+            <span className="ui-info-value flex items-center gap-1.5">
               <CategoryIcon category={category} size={13} />
               <span>{category}</span>
               <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -218,7 +218,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
             className="ui-row-btn"
           >
             <span className="ui-info-label shrink-0">Dragningsdag</span>
-            <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+            <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
               <span>Den {dueDay}:e</span>
               <CaretRight size={12} className="text-[var(--text-muted)]" />
             </span>
@@ -230,7 +230,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
             className="ui-row-btn"
           >
             <span className="ui-info-label shrink-0">Betalsätt</span>
-            <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+            <span className="ui-info-value flex items-center gap-1.5">
               <PaymentMethodIcon method={paymentMethod} size={15} />
               <span>{paymentMethod}</span>
               <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -244,7 +244,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
               className="ui-row-btn"
             >
               <span className="ui-info-label shrink-0">Kopplat sparmål</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
+              <span className="ui-info-value flex items-center gap-1.5 min-w-0">
                 <span className="truncate">
                   {availableGoals.find((g) => g.id === linkedGoalId)?.name || 'Inget'}
                 </span>
@@ -273,7 +273,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
             {draftReceipts.map((rcpt, idx) => (
               <div
                 key={rcpt.url}
-                className="rounded-2xl bg-[var(--fill-grouped)] px-3.5 py-2.5 flex items-center justify-between gap-2"
+                className="rounded-card-nested bg-[var(--fill-grouped)] px-4 py-2 min-h-[50px] flex items-center justify-between gap-2"
               >
                 <button
                   type="button"
@@ -283,8 +283,8 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                   }}
                   className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 cursor-pointer"
                 >
-                  <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-                  <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                  <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
+                  <span className="ui-list-row-title text-callout">
                     {rcpt.name || `Kvitto ${idx + 1}`}
                   </span>
                 </button>
@@ -292,10 +292,10 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                   aria-label="Ta bort kvitto"
                   type="button"
                   onClick={() => handleRemoveReceiptAt(idx)}
-                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer shrink-0"
+                  className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer shrink-0"
                   title="Ta bort kvitto"
                 >
-                  <Trash size={13} />
+                  <Trash size={16} />
                 </button>
               </div>
             ))}
@@ -310,7 +310,6 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
               disabled={!name.trim() || !(Number(amount) > 0)}
               className="ui-btn-primary"
             >
-              <Check size={14} weight="bold" />
               <span>Spara fast utgift</span>
             </button>
           ) : (
@@ -324,7 +323,6 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                 disabled={!name.trim() || !(Number(amount) > 0)}
                 className="ui-btn-primary"
               >
-                <Check size={14} weight="bold" />
                 <span>Spara ändringar</span>
               </button>
 

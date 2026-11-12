@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Check,
+  CheckCircle,
   Plus,
   ArrowClockwise,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
+import { EmptyState } from './ui/EmptyState';
 import { bankService } from '../services/bankService';
 import { BankAccount } from '../services/bank/types';
 import { analyzeBankTransactionsForOnboarding } from '../utils/bankAnalysis/history/onboarding';
@@ -382,13 +383,13 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
           {[1, 2, 3].map((n) => (
             <div key={n} className="py-3.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--surface-raised)]" />
+                <div className="w-10 h-10 rounded-full bg-[var(--fill-grouped)]" />
                 <div className="space-y-1.5">
-                  <div className="w-28 h-3.5 rounded bg-[var(--surface-raised)]" />
-                  <div className="w-20 h-2.5 rounded bg-[var(--surface-raised)]" />
+                  <div className="w-28 h-3.5 rounded bg-[var(--fill-grouped)]" />
+                  <div className="w-20 h-2.5 rounded bg-[var(--fill-grouped)]" />
                 </div>
               </div>
-              <div className="w-20 h-7 rounded-xl bg-[var(--surface-raised)]" />
+              <div className="w-20 h-8 rounded-full bg-[var(--fill-grouped)]" />
             </div>
           ))}
         </div>
@@ -462,7 +463,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
                     <button
                       type="button"
                       onClick={() => handleAddCandidate(cand)}
-                      className="h-8 px-3 rounded-xl bg-[var(--cta-bg)] text-[var(--cta-fg)] text-xs font-semibold flex items-center gap-1 hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
+                      className="ui-btn-sm-primary"
                     >
                       <Plus size={12} weight="bold" />
                       <span>Lägg till</span>
@@ -474,23 +475,17 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
           </div>
         </section>
       ) : (
-        <section className="ui-empty-state-page">
-          <div className="w-11 h-11 rounded-full bg-positive-solid/15 text-positive flex items-center justify-center mx-auto mb-3">
-            <Check size={20} weight="bold" />
-          </div>
-          <h3 className="ui-empty-title">Inga saknade fasta poster</h3>
-          <p className="ui-empty-sub mb-5">
-            Alla upptäckta inkomster och fasta utgifter finns redan i din ekonomiöversikt.
-          </p>
-          <button
-            type="button"
-            onClick={rescan}
-            className="ui-btn-secondary max-w-[180px] mx-auto"
-          >
-            <ArrowClockwise size={14} />
-            <span>Skanna igen</span>
-          </button>
-        </section>
+        <EmptyState
+          icon={CheckCircle}
+          title="Allt är redan med"
+          description="Vi hittade inga fler återkommande inkomster eller räkningar i dina köp."
+          action={
+            <button type="button" onClick={rescan} className="ui-btn-secondary bg-[var(--surface-color)] shadow-[var(--card-shadow)]">
+              <ArrowClockwise size={16} />
+              <span>Sök igen</span>
+            </button>
+          }
+        />
       )}
     </div>
   );

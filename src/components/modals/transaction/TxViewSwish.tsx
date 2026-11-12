@@ -1,7 +1,6 @@
 import { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { Trash, Check } from '@phosphor-icons/react';
 import { TransactionItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { saveTransactionMeta } from '../../../utils/cache/itemMeta';
@@ -73,7 +72,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                     <div className="min-w-0">
                       <span className="ui-row-title block truncate">{activeTx.title}</span>
                       <span className="ui-row-subtitle tabular-nums">
-                        Totalt belopp: {formatKr(baseFullAmt)}
+                        Totalt {formatKr(baseFullAmt)}
                       </span>
                     </div>
                   </div>
@@ -92,7 +91,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                       swishSplitMode === 'equal' ? 'ui-segmented-tab-active' : ''
                     }`}
                   >
-                    Dela lika (50/50)
+                    Hälften var
                   </button>
                   <button
                     type="button"
@@ -104,13 +103,13 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                       swishSplitMode === 'custom' ? 'ui-segmented-tab-active' : ''
                     }`}
                   >
-                    Anpassat belopp
+                    Eget belopp
                   </button>
                 </div>
 
                 {swishSplitMode === 'custom' && (
                   <div className="pt-1">
-                    <span className="text-caption font-medium text-[var(--text-secondary)] block mb-1">
+                    <span className="ui-field-label block mb-1.5">
                       Belopp att få tillbaka (kr)
                     </span>
                     <input
@@ -122,28 +121,20 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                         setSwishCustomShare(e.target.value.replace(/[^\d]/g, ''))
                       }
                       placeholder={String(halfAmt)}
-                      className="w-full px-3.5 py-2 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] font-display font-semibold text-base text-[var(--text-primary)] tabular-nums focus:outline-none"
+                      className="w-full h-11 px-3.5 rounded-xl bg-[var(--surface-color)] border-0 font-display font-semibold text-base text-[var(--text-primary)] tabular-nums focus:outline-none focus:shadow-[0_0_0_2px_var(--accent-soft)]"
                     />
                   </div>
                 )}
 
                 {/* Tydlig fördelning */}
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[var(--border-subtle)]">
-                  <div className="p-3 rounded-xl bg-[var(--surface-color)]">
-                    <span className="text-caption text-[var(--text-secondary)] block">
-                      Din del i budget
-                    </span>
-                    <span className="font-display font-bold text-base text-[var(--text-primary)] tabular-nums mt-0.5 block">
-                      {formatKr(myRemainingShare)}
-                    </span>
+                <div className="pt-3 border-t border-[var(--separator)] space-y-2.5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-callout text-[var(--text-secondary)]">Din del i budgeten</span>
+                    <span className="ui-row-amount">{formatKr(myRemainingShare)}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-positive-solid/10 text-right">
-                    <span className="text-caption text-positive block font-medium">
-                      Att få tillbaka
-                    </span>
-                    <span className="font-display font-bold text-base text-positive tabular-nums mt-0.5 block">
-                      +{formatKr(friendShare)}
-                    </span>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-callout text-[var(--text-secondary)]">Att få tillbaka</span>
+                    <span className="ui-row-amount-income">+{formatKr(friendShare)}</span>
                   </div>
                 </div>
               </div>
@@ -172,8 +163,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                   }}
                   className="ui-btn-primary"
                 >
-                  <Check size={14} weight="bold" />
-                  <span>Räkna bara min del ({formatKr(myRemainingShare)}) i budget</span>
+                  <span>Räkna bara min del</span>
                 </button>
 
                 <button
@@ -191,7 +181,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                   className="ui-btn-secondary"
                 >
                   <SwishLogo size={15} />
-                  <span>Öppna Swish för att begära {formatKr(friendShare)}</span>
+                  <span>Begär {formatKr(friendShare)} med Swish</span>
                 </button>
 
                 {isAlreadySplit && (
@@ -219,8 +209,7 @@ export const TxViewSwish: React.FC<TxViewSwishProps> = ({
                     }}
                     className="ui-btn-danger"
                   >
-                    <Trash size={13} />
-                    <span>Återställ till hela beloppet ({formatKr(baseFullAmt)})</span>
+                    <span>Återställ hela beloppet</span>
                   </button>
                 )}
               </div>

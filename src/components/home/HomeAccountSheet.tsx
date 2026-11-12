@@ -118,28 +118,28 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     setAccountNameDraft(activeModalAccount.name);
                     setIsEditingAccountName(true);
                   }}
-                  className="mt-2.5 inline-flex items-center gap-1.5 text-[16px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] hover:opacity-80 transition-opacity cursor-pointer"
+                  className="mt-3 inline-flex items-center gap-1.5 text-[17px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] hover:opacity-80 transition-opacity cursor-pointer"
                   title="Byt namn på kontot"
                 >
                   <span>{activeModalAccount.name}</span>
-                  <PencilSimple size={13} className="text-[var(--text-muted)]" />
+                  <PencilSimple size={14} className="text-[var(--text-muted)]" />
                 </button>
               )}
 
-              <div className="font-display text-[28px] sm:text-[32px] font-semibold tracking-[-0.025em] text-[var(--text-primary)] tabular-nums mt-1 leading-tight">
+              <div className="font-display text-[34px] font-bold tracking-[-0.035em] text-[var(--text-primary)] tabular-nums mt-1 leading-tight">
                 {formatKr(activeModalAccount.balance)}
               </div>
             </div>
 
             {/* Kontouppgifter & Inställningar */}
-            <div className="rounded-2xl bg-[var(--surface-raised)]/60 border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)] px-3.5">
+            <div className="ui-sheet-group">
               {activeModalAccount.accountNumber && (
-                <div className="py-2.5 flex items-center justify-between gap-3">
-                  <div>
-                    <span className="text-meta text-[var(--text-secondary)] block">
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-footnote text-[var(--text-secondary)] block">
                       Kontonummer
                     </span>
-                    <span className="text-footnote font-medium text-[var(--text-primary)] tabular-nums">
+                    <span className="text-subhead font-medium text-[var(--text-primary)] tabular-nums">
                       {activeModalAccount.accountNumber}
                     </span>
                   </div>
@@ -154,16 +154,16 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                         setTimeout(() => setCopiedAccountNumber(false), 2000);
                       }
                     }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-meta font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
+                    className="ui-pill-btn bg-[var(--surface-color)] shrink-0"
                   >
                     {copiedAccountNumber ? (
                       <>
-                        <Check size={12} weight="bold" className="text-positive-solid" />
+                        <Check size={14} weight="bold" className="text-positive" />
                         <span>Kopierat</span>
                       </>
                     ) : (
                       <>
-                        <Copy size={12} />
+                        <Copy size={14} weight="bold" />
                         <span>Kopiera</span>
                       </>
                     )}
@@ -172,12 +172,12 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
               )}
 
               {/* Räkna med i Totalt saldo */}
-              <div className="py-2.5 flex items-center justify-between gap-3">
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="text-footnote font-normal text-[var(--text-primary)] block">
+                  <span className="text-subhead font-normal text-[var(--text-primary)] block">
                     Räkna med i Totalt saldo
                   </span>
-                  <span className="text-meta text-[var(--text-secondary)] block">
+                  <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
                     Inkludera kontots saldo på hemskärmen
                   </span>
                 </div>
@@ -191,17 +191,13 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                       excludeFromTotalBalance: !activeModalAccount.excludeFromTotalBalance,
                     });
                   }}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                    !activeModalAccount.excludeFromTotalBalance
-                      ? 'bg-[var(--text-primary)]'
-                      : 'bg-[var(--border-subtle)]'
+                  className={`ui-switch ${
+                    !activeModalAccount.excludeFromTotalBalance ? 'ui-switch-on' : 'ui-switch-off'
                   }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--bg-color)] shadow transition duration-200 ease-in-out ${
-                      !activeModalAccount.excludeFromTotalBalance
-                        ? 'translate-x-5'
-                        : 'translate-x-0'
+                    className={`ui-switch-thumb ${
+                      !activeModalAccount.excludeFromTotalBalance ? 'ui-switch-thumb-on' : 'translate-x-0'
                     }`}
                   />
                 </button>
@@ -210,9 +206,9 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
 
             {/* Senaste händelser på kontot */}
             <div>
-              <div className="flex items-center justify-between mb-1.5 px-0.5">
-                <span className="text-meta font-medium text-[var(--text-secondary)]">
-                  Senaste händelser ({activeAccountTransactions.length})
+              <div className="flex items-center justify-between mb-2 px-1">
+                <span className="text-footnote font-medium text-[var(--text-secondary)]">
+                  Senaste händelser
                 </span>
                 {activeAccountTransactions.length > 0 && (
                   <button
@@ -222,7 +218,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                       setSelectedAccountModalId(null);
                       onSelectAccount?.(targetId);
                     }}
-                    className="text-meta font-medium text-[var(--text-primary)] hover:opacity-75 transition-opacity cursor-pointer"
+                    className="text-footnote font-semibold text-[var(--on-accent-container)] hover:opacity-75 transition-opacity cursor-pointer"
                   >
                     Visa alla
                   </button>
@@ -230,7 +226,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
               </div>
 
               {activeAccountTransactions.length > 0 ? (
-                <div className="rounded-2xl bg-[var(--surface-raised)]/40 border border-[var(--border-subtle)] px-3 divide-y divide-[var(--border-subtle)]">
+                <div className="ui-sheet-group">
                   {activeAccountTransactions.slice(0, 6).map((tx) => {
                     const isIncome = tx.type === 'income';
                     const isPending =
@@ -248,7 +244,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                           setSelectedAccountModalId(null);
                           onSelectTransaction(tx);
                         }}
-                        className="ui-tx-row"
+                        className="ui-tx-row px-4"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <ItemLogo
@@ -291,8 +287,8 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                   })}
                 </div>
               ) : (
-                <div className="rounded-2xl bg-[var(--surface-raised)]/40 border border-[var(--border-subtle)] py-6 text-center text-footnote text-[var(--text-secondary)]">
-                  Inga bokförda händelser på detta konto än
+                <div className="ui-sheet-group py-6 px-4 text-center text-callout text-[var(--text-secondary)]">
+                  Inga händelser på kontot än
                 </div>
               )}
             </div>
@@ -305,7 +301,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                   setSelectedAccountModalId(null);
                   onSelectAccount?.(targetId);
                 }}
-                className="w-full py-3 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-callout font-semibold tracking-[-0.01em] hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                className="ui-btn-primary"
               >
                 Visa alla transaktioner ({activeAccountTransactions.length})
               </button>

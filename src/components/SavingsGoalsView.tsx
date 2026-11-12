@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   Plus,
+  PiggyBank,
 } from '@phosphor-icons/react';
 import { getSavingsGoals, saveSavingsGoals, SavingsGoalItem } from '../utils/cache/itemMeta';
 import { compressImageFileToDataUrl } from '../utils/cache/merchants';
@@ -8,7 +9,6 @@ import {
   GOAL_ARTWORKS,
   getGoalArtworkTheme,
   GoalArtworkIllustration,
-  EmptyClusterArtwork,
 } from './ui/VisualArtwork';
 import { TransactionItem, AccountItem } from '../app/models';
 import { GoalDetailView } from './goals/GoalDetailView';
@@ -473,7 +473,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
             {totalTarget > 0 && (
               <div className="text-right">
                 <span className="ui-stat-label">Totala mål</span>
-                <span className="font-display font-semibold text-sm text-[var(--text-secondary)] tabular-nums block mt-0.5">
+                <span className="font-display font-semibold text-subhead text-[var(--text-secondary)] tabular-nums block mt-0.5">
                   {formatKr(totalTarget)}
                 </span>
               </div>
@@ -485,7 +485,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
       {savingsGoals.length > 0 ? (
         <section className="ui-section">
           <div className="ui-section-header">
-            <h2 className="ui-section-title">Mål</h2>
+            <h2 className="ui-section-title">Dina mål</h2>
             <button
               type="button"
               onClick={openCreateGoal}
@@ -512,10 +512,10 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                   key={goal.id}
                   type="button"
                   onClick={() => setSelectedGoalId(goal.id)}
-                  className="w-full py-4 flex items-center gap-3.5 text-left hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+                  className="w-full py-3.5 flex items-center gap-3 text-left active:opacity-60 transition-opacity cursor-pointer"
                 >
                   <div
-                    className="w-11 h-11 rounded-full overflow-hidden relative shrink-0 border border-black/5 dark:border-white/10"
+                    className="w-10 h-10 rounded-full overflow-hidden relative shrink-0"
                     style={{
                       backgroundColor: goal.customImageUrl ? undefined : theme.tileBg,
                     }}
@@ -527,24 +527,24 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute -right-2.5 top-0.5 w-11 h-11">
+                      <div className="absolute -right-2 top-0.5 w-10 h-10">
                         <GoalArtworkIllustration artworkId={goal.artworkId} />
                       </div>
                     )}
                   </div>
 
-                  <div className="min-w-0 flex-1 space-y-2">
+                  <div className="min-w-0 flex-1 space-y-1.5">
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="ui-row-title truncate">
                         {goal.name}
                       </span>
-                      <span className="font-display font-semibold text-sm text-[var(--text-primary)] tabular-nums shrink-0">
+                      <span className="ui-row-amount shrink-0">
                         {formatKr(effectiveAmt)}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-color)] overflow-hidden">
+                      <div className="flex-1 h-1.5 rounded-full bg-[var(--segment-track)] overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
@@ -553,8 +553,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
                           }}
                         />
                       </div>
-                      <span className="text-caption font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
-                        {pct} %
+                      <span className="text-meta text-[var(--text-secondary)] tabular-nums shrink-0">
+                        {pct} % av {formatKr(goal.targetAmount)}
                       </span>
                     </div>
                   </div>
@@ -565,21 +565,19 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         </section>
       ) : (
         <section className="ui-empty-state-page animate-fade-in">
-          <EmptyClusterArtwork variant="savings" />
-          <p className="ui-empty-title">
-            Spara till dina drömmar
+          <span className="ui-empty-badge" aria-hidden="true">
+            <PiggyBank size={28} weight="fill" />
+          </span>
+          <p className="ui-empty-title">Inga sparmål än</p>
+          <p className="ui-empty-sub">
+            Sätt ett mål – en resa, en buffert eller något du drömmer om – och se hur nära du är.
           </p>
-          <p className="ui-empty-sub max-w-[260px] mx-auto mb-5">
-            Skapa ditt första sparmål för att börja följa dina framsteg
-          </p>
-          <button
-            type="button"
-            onClick={openCreateGoal}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
-          >
-            <Plus size={14} weight="bold" />
-            <span>Nytt sparmål</span>
-          </button>
+          <div className="mt-6 w-full max-w-xs mx-auto">
+            <button type="button" onClick={openCreateGoal} className="ui-btn-primary">
+              <Plus size={16} weight="bold" />
+              <span>Nytt sparmål</span>
+            </button>
+          </div>
         </section>
       )}
 

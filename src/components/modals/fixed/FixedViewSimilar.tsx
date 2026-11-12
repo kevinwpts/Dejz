@@ -1,7 +1,7 @@
 import type { ModalSubView } from './shared';
 import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import React from 'react';
-import { CaretRight, ArrowsClockwise } from '@phosphor-icons/react';
+import { CaretRight, Plus } from '@phosphor-icons/react';
 import { FixedExpenseItem, TransactionItem, getTransactionTime } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
@@ -38,12 +38,12 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
   <>
     {subView === 'similar' && (
       <div className={`${slideAnimClass} space-y-5`}>
-        <SheetHeader title="Liknande transaktioner" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
+        <SheetHeader title="Tidigare dragningar" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         <div className="ui-date-header px-1">
           <span className="font-medium text-[var(--text-secondary)]">
             {similarInfo.transactions.length}{' '}
-            {similarInfo.transactions.length === 1 ? 'händelse' : 'händelser'}
+            {similarInfo.transactions.length === 1 ? 'dragning' : 'dragningar'}
           </span>
           <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
             Totalt {formatKr(similarInfo.totalAmount)}
@@ -103,10 +103,10 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
                           onMarkAsFixed(tx, 'expense');
                         }}
                         title="Lägg till detta belopp som egen fast utgift"
-                        className="px-2 py-1 rounded-lg bg-[var(--fill-grouped)] hover:opacity-90 text-caption font-medium text-[var(--text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
+                        className="ui-btn-sm !bg-[var(--surface-color)]"
                       >
-                        <ArrowsClockwise size={11} weight="bold" />
-                        <span>+ Fast</span>
+                        <Plus size={12} weight="bold" />
+                        <span>Fast</span>
                       </button>
                     )}
                     <button
@@ -136,7 +136,7 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
             })}
           </div>
         ) : (
-          <div className="ui-sheet-box text-center text-xs text-[var(--text-muted)] py-6">
+          <div className="ui-sheet-box text-center text-callout text-[var(--text-secondary)] py-8">
             Inga registrerade banktransaktioner matchar {displayName} ännu.
           </div>
         )}

@@ -2332,11 +2332,24 @@ b {
   .ui-chip-sm {
     @apply h-7 px-2.5 rounded-full bg-[var(--surface-color)] text-meta font-medium text-[var(--text-primary)] flex items-center gap-1.5 shadow-[var(--card-shadow)] active:scale-[0.96] transition-all cursor-pointer;
   }
+  /* Bekräftelserutor och val-dialoger: svävande kort nere vid tummen i mobilen, mitt på i större fönster */
+  .ui-dialog-scrim {
+    @apply fixed inset-0 z-[260] flex items-end justify-center px-3 bg-[var(--scrim-color)] backdrop-blur-[2px] sm:items-center sm:p-5;
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
+  }
+  .ui-dialog-card {
+    @apply w-full max-w-[420px] rounded-modal bg-[var(--surface-elevated)] p-5 pt-6 shadow-[var(--shadow-modal)] sm:max-w-[360px];
+  }
   .ui-dialog-btn-primary {
-    @apply w-full h-11 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-callout font-semibold hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
+    @apply w-full h-12 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
+  }
+  .ui-dialog-btn-danger {
+    @apply w-full h-12 px-4 rounded-full text-white text-subhead font-semibold hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
+    /* Riktigt rött (inte rosa) – samma i ljust och mörkt, vit text klarar kontrastkravet */
+    background: #E5484D;
   }
   .ui-dialog-btn-secondary {
-    @apply w-full h-11 px-4 rounded-full bg-[var(--fill-grouped)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
+    @apply w-full h-12 px-4 rounded-full bg-[color-mix(in_srgb,var(--text-primary)_8%,transparent)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer;
   }
   .ui-btn-primary-flow {
     @apply w-full h-[52px] rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-subhead flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer;
@@ -2487,3 +2500,175 @@ b {
 .dejz-hero .dark\:text-caution { color: #FFE7A3 !important; }
 .dejz-hero .bg-negative-solid { background-color: #FFFFFF !important; }
 .dejz-hero .border-negative-solid { border-color: #FFFFFF !important; }
+
+/* === Hem, Historik, Analys, Fasta (notiser, tomma lägen) === */
+/* Notis (toast): svävar 12 px ovanför bottenmenyn, samma bredd som menyraden. */
+.ui-toast-wrap {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(max(env(safe-area-inset-bottom, 0px), 8px) + 88px);
+  max-width: 420px;
+  margin: 0 auto;
+}
+.ui-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px 8px 16px;
+  border-radius: 18px;
+  background: var(--toast-bg);
+  color: var(--toast-fg);
+  box-shadow: 0 1px 2px rgba(22, 20, 31, 0.12), 0 12px 32px -8px rgba(22, 20, 31, 0.4);
+  animation: ui-toast-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+/* Mörkt läge: ljusare yta + hårfin kant, annars försvinner notisen mot bakgrunden */
+.dark .ui-toast {
+  background: #2C2A37;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.7);
+}
+.ui-toast-action {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: var(--text-callout);
+  font-weight: 600;
+  color: var(--toast-action);
+  cursor: pointer;
+  transition: background-color 150ms, transform 150ms;
+}
+.ui-toast-action:hover { background: rgba(255, 255, 255, 0.1); }
+.ui-toast-action:active { transform: scale(0.96); }
+@keyframes ui-toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-toast { animation: none; }
+}
+/* Sekretessläge: dölj även hemkortets Inkomst/Fasta/Rörligt och radbelopp (läckte förut) */
+html.privacy-blur .ui-stat-value:not(.no-privacy-blur),
+html.privacy-blur .ui-row-amount:not(.no-privacy-blur),
+html.privacy-blur .ui-row-amount-income:not(.no-privacy-blur) {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  user-select: none;
+}
+
+/* === Inställningar, kvitton, paket (settings area) === */
+/* Gruppetikett ovanför ett listkort i Inställningar ("Ekonomi", "Personuppgifter") – samma överallt */
+.ui-settings-label {
+  display: block;
+  padding: 0 16px 6px;
+  font-size: var(--text-footnote);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+/* Listkort med kategorirutor (30 px) i stället för små ikoner – avdelaren börjar vid texten */
+.ui-admin-card-tiles .ui-admin-row:not(:last-child)::after {
+  left: 3.625rem;
+}
+/* Ikon i tomma lägen: lugn lila ruta i stället för färgglada illustrationer */
+.ui-empty-badge {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--on-accent-container);
+  flex-shrink: 0;
+}
+/* Röstinmatning: mjuk puls runt mikrofonen (stannar inom bladet, klipps inte) */
+.ui-mic-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--brand);
+  opacity: 0.35;
+  animation: ui-mic-pulse 1.4s ease-out infinite;
+}
+@keyframes ui-mic-pulse {
+  from { transform: scale(1); opacity: 0.35; }
+  to { transform: scale(1.35); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-mic-pulse { animation: none; opacity: 0.2; transform: scale(1.12); }
+}
+
+/* === Startsida, inloggning, publika sidor och introduktion === */
+@layer components {
+  /* Underrubrik under stegrubriken – samma i alla steg */
+  .ui-onb-subtitle {
+    @apply mt-2 text-subhead leading-snug text-[var(--text-secondary)];
+  }
+  /* Stort inmatningsfält direkt under rubriken (namn, saldo) */
+  .ui-onb-input-card {
+    @apply rounded-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-5 py-4;
+  }
+  /* En inställningsrad i ett kort (t.ex. helgregeln för lönedag) */
+  .ui-onb-row-card {
+    @apply rounded-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-4 min-h-[56px] py-2.5 flex items-center justify-between gap-4;
+  }
+  .ui-onb-summary-card {
+    --row-inset: 0px;
+  }
+  .ui-onb-summary-row {
+    @apply min-h-[48px] flex items-center justify-between gap-3;
+  }
+  /* Textknapp under huvudknappen ("Hoppa över just nu", "Inte nu") */
+  .ui-onb-skip-btn {
+    @apply w-full h-11 text-subhead font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer;
+  }
+  /* Förslagschips i introduktionen */
+  .ui-onb-chip {
+    @apply h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-subhead font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer;
+  }
+  .ui-onb-chip-other {
+    @apply h-10 pl-3 pr-4 rounded-full bg-[var(--fill-grouped)] active:scale-[0.97] text-subhead font-medium text-[var(--text-secondary)] flex items-center gap-1.5 transition-all cursor-pointer;
+  }
+  .ui-onb-group-label {
+    @apply px-1 text-footnote font-semibold text-[var(--text-secondary)];
+  }
+  /* Inloggning: fältkort utan kantlinje, felmarkering som ring */
+  .ui-auth-field-card {
+    @apply rounded-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] overflow-hidden transition-shadow;
+  }
+  .ui-auth-field-card-error {
+    box-shadow: 0 0 0 1.5px var(--negative-solid), var(--card-shadow);
+  }
+  .ui-auth-field-divider {
+    @apply relative;
+  }
+  .ui-auth-field-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    right: 0;
+    height: 1px;
+    background-color: var(--separator);
+  }
+  .ui-auth-alert {
+    @apply p-4 rounded-card-nested bg-[var(--danger-container)] text-negative text-callout font-medium leading-snug flex items-start gap-2.5;
+  }
+  .ui-auth-alert-btn {
+    @apply mt-3 h-9 px-4 rounded-full bg-[var(--surface-color)] text-footnote font-semibold text-[var(--text-primary)] inline-flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-60;
+  }
+  .ui-auth-footer-link {
+    @apply text-callout font-semibold text-[var(--accent-color)] hover:opacity-80 cursor-pointer;
+  }
+  /* Rund ikon överst i bekräftelse- och fellägen */
+  .ui-auth-icon-tile {
+    @apply w-16 h-16 rounded-full bg-[var(--accent-soft)] text-[var(--on-accent-container)] flex items-center justify-center shrink-0;
+  }
+  /* Sekundär knapp direkt på sidbakgrunden (vit yta, syns i ljust läge) */
+  .ui-auth-btn-surface {
+    @apply w-full h-[52px] px-5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-subhead font-semibold text-[var(--text-primary)] hover:opacity-90 active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer;
+  }
+}

@@ -1,12 +1,8 @@
 import type { SavingsGoalItem } from '../../utils/cache/itemMeta';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { CaretDown, CaretRight } from '@phosphor-icons/react';
-import {
-  getGoalArtworkTheme,
-  GoalArtworkIllustration,
-  TiltedGoalsPromoArtwork,
-} from '../ui/VisualArtwork';
+import { CaretDown, CaretRight, PiggyBank } from '@phosphor-icons/react';
+import { getGoalArtworkTheme, GoalArtworkIllustration } from '../ui/VisualArtwork';
 
 export interface HomeGoalsCardProps {
   onNavigateToGoals?: () => void;
@@ -31,7 +27,25 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
       {/* ============================================================== */}
       {/* MODUL 2.5: SPARMÅL · BUFFERT & DRÖMMAR                         */}
       {/* ============================================================== */}
-      {onNavigateToGoals && (
+      {onNavigateToGoals && savingsGoals.length === 0 && (
+        // Inga sparmål än: en enda tydlig rad i stället för "Sparmål 0 kr" + illustration
+        <button
+          type="button"
+          onClick={onNavigateToGoals}
+          className="w-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card p-4 flex items-center gap-3 text-left active:scale-[0.99] transition-transform cursor-pointer"
+        >
+          <span className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--on-accent-container)] flex items-center justify-center shrink-0">
+            <PiggyBank size={22} weight="fill" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="ui-row-title">Skapa ett sparmål</span>
+            <span className="ui-row-subtitle">Spara till en resa, buffert eller dröm</span>
+          </span>
+          <CaretRight size={16} weight="bold" className="text-[var(--text-muted)] shrink-0" />
+        </button>
+      )}
+
+      {onNavigateToGoals && savingsGoals.length > 0 && (
         <section className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card px-4 py-4 sm:px-5">
           <button
             type="button"
@@ -49,7 +63,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
             title={showGoals ? 'Dölj sparmål' : 'Visa sparmål'}
           >
             <div className="min-w-0">
-              <span className="text-meta text-[var(--text-secondary)] font-normal block">
+              <span className="text-footnote text-[var(--text-secondary)] font-normal block">
                 Sparmål
               </span>
               <div className="font-display text-[20px] sm:text-[20px] font-semibold tracking-[-0.015em] leading-tight text-[var(--text-primary)] tabular-nums mt-0.5">
@@ -74,9 +88,9 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
             }`}
           >
             <div className="overflow-hidden">
-              <div className="pt-2.5 border-t border-[var(--border-subtle)]">
+              <div className="pt-2.5 border-t border-[var(--separator)]">
                 {savingsGoals.length > 0 ? (
-                  <div className="divide-y divide-[var(--border-subtle)]">
+                  <div className="divide-y divide-[var(--separator)]">
                     {savingsGoals.map((goal) => {
                       const effectiveGoalAmt = resolveHomeGoalAmount(goal);
                       const pct =
@@ -113,11 +127,15 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
 
                           <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-baseline justify-between gap-2">
-                              <span className="font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-snug text-[var(--text-primary)] truncate">
+                              <span className="font-medium text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate">
                                 {goal.name}
                               </span>
-                              <span className="font-display font-semibold text-callout tracking-[-0.01em] text-[var(--text-primary)] tabular-nums shrink-0">
-                                {formatKr(effectiveGoalAmt)}
+                              {/* Sparat av målet – säger mer än samma summa som i rubriken */}
+                              <span className="privacy-blur-amount text-footnote tabular-nums shrink-0 text-[var(--text-secondary)]">
+                                <span className="font-display font-semibold text-subhead tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
+                                  {formatKr(effectiveGoalAmt).replace(' kr', '')}
+                                </span>
+                                {goal.targetAmount > 0 ? ` av ${formatKr(goal.targetAmount)}` : ' kr'}
                               </span>
                             </div>
 
@@ -131,7 +149,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
                                   }}
                                 />
                               </div>
-                              <span className="text-caption font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                              <span className="text-footnote font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
                                 {pct} %
                               </span>
                             </div>
@@ -140,24 +158,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
                       );
                     })}
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={onNavigateToGoals}
-                    className="w-full pt-1 flex items-center justify-between gap-3 text-left hover:opacity-90 transition-opacity cursor-pointer"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <span className="font-normal text-footnote sm:text-callout text-[var(--text-primary)] leading-snug block">
-                        Spara till en resa, buffert eller dröm
-                      </span>
-                      <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-0.5">
-                        <span>Skapa ditt första sparmål</span>
-                        <CaretRight size={11} />
-                      </span>
-                    </div>
-                    <TiltedGoalsPromoArtwork />
-                  </button>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

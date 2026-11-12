@@ -27,7 +27,10 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
   onSave,
 }) => (
   <div className="space-y-4">
-    <div className="space-y-2.5 max-h-80 overflow-y-auto pr-0.5">
+    <p className="text-subhead leading-snug text-[var(--text-secondary)] px-1">
+      Välj vilka konton Dejz ska räkna med.
+    </p>
+    <div className="space-y-2.5 max-h-80 overflow-y-auto">
       {fetchedAccounts.map((acc, idx) => {
         const isChecked = selectedAccountIds.includes(acc.id);
         const fallbackLabel = getCleanAccountTypeLabel(acc, idx);
@@ -40,11 +43,7 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
         return (
           <div
             key={acc.id}
-            className={`rounded-2xl border overflow-hidden transition-all ${
-              isChecked
-                ? 'bg-[var(--fill-grouped)] border-transparent'
-                : 'bg-[var(--fill-grouped)] border-transparent opacity-60'
-            }`}
+            className="rounded-card-nested bg-[var(--fill-grouped)] overflow-hidden"
           >
             <button
               type="button"
@@ -66,14 +65,14 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
                   </span>
                 </div>
               </div>
-              <span className="ui-row-amount text-sm shrink-0">
+              <span className="ui-row-amount shrink-0">
                 {formatBankKr(acc.balance_amount, acc.balance_currency || acc.currency)}
               </span>
             </button>
 
             {isChecked && (
-              <label className="ui-input-row border-t border-[var(--border-subtle)]">
-                <span className="text-[var(--text-muted)] shrink-0">Kontonamn</span>
+              <label className="ui-input-row border-t border-[var(--separator)]">
+                <span className="text-[var(--text-secondary)] shrink-0">Visas som</span>
                 <input
                   type="text"
                   value={currentCustomName}

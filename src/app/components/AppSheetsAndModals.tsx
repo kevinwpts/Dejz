@@ -3,9 +3,7 @@ import React from 'react';
 import { BottomNav } from '../../components/BottomNav';
 import { AddEntrySheet, isVoiceEntrySupported } from '../../components/VoiceEntry';
 import { BalanceSheet } from '../../components/BalanceSheet';
-import { getItemReceipts } from '../../utils/swedishDate';
 import { setManualBalance } from '../../utils/cache/manualBalance';
-import { useSavingsGoals } from '../../utils/hooks/useSavingsGoals';
 
 export const AppSheetsAndModals: React.FC = () => {
   const {
@@ -22,11 +20,7 @@ export const AppSheetsAndModals: React.FC = () => {
     setIsNotificationsModalOpen,
     setSettingsSubView,
     setActiveTab,
-    settingsSubView,
-    displayTransactions,
-    fixedExpenses,
   } = useApp();
-  const savingsGoals = useSavingsGoals();
   return (
       <>
         <BalanceSheet
@@ -75,20 +69,6 @@ export const AppSheetsAndModals: React.FC = () => {
             setSettingsSubView('main');
             setActiveTab(tab);
           }}
-          onOpenDiscover={() => {
-            setIsSearchModalOpen(false);
-            setIsNotificationsModalOpen(false);
-            setSettingsSubView('discover');
-            setActiveTab('settings');
-          }}
-          activeSettingsSubView={settingsSubView}
-          goalsCount={savingsGoals.length}
-          savedCount={displayTransactions.filter((t) => t.isHearted).length}
-          packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
-          receiptsCount={
-            displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +
-            fixedExpenses.reduce((sum, f) => sum + getItemReceipts(f).length, 0)
-          }
         />
       </>
   );

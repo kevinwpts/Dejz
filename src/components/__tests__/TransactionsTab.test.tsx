@@ -78,7 +78,7 @@ describe('historiken', () => {
   test('rensa sökningen visar allt igen', async () => {
     const { user } = renderTab();
     await user.type(screen.getByRole('textbox', { name: 'Sök' }), 'zzz');
-    expect(screen.getByText('Inga transaktioner hittades')).toBeTruthy();
+    expect(screen.getByText('Inga träffar för ”zzz”')).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Rensa sökning' }));
     expect(rowTitles()).toHaveLength(5);
   });
@@ -132,7 +132,7 @@ describe('historiken', () => {
 
   test('utan köp visas ett tomt läge', () => {
     renderTab({ transactions: [] });
-    expect(screen.getByText('Inga transaktioner hittades')).toBeTruthy();
+    expect(screen.getByText('Inga köp än')).toBeTruthy();
   });
 
   test('"Lägg till" finns bara när det går att lägga till', async () => {

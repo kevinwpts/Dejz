@@ -12,7 +12,6 @@ import { reconcilePeriodRecurringMatches } from '../utils/recurring/periodReconc
 import { estimateVariableBill } from '../utils/variableBills';
 import { formatIsoDateStockholm } from '../utils/swedishDate';
 import { useSavingsGoals } from '../utils/hooks/useSavingsGoals';
-import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
 interface FixedTabProps {
   period: PeriodInfo;
@@ -34,6 +33,25 @@ interface FixedTabProps {
   /** Periodens kopplingar mellan dragningar och fasta poster – samma som hemkortet räknar med */
   periodMatches?: PeriodMatches;
 }
+
+/** Tomt läge i en lista: en enda tydlig rad att trycka på (ersätter illustration + dubbla knappar) */
+const EmptyAddRow: React.FC<{ title: string; subtitle: string; onClick?: () => void }> = ({
+  title,
+  subtitle,
+  onClick,
+}) => (
+  <button type="button" onClick={onClick} disabled={!onClick} className="ui-tx-row">
+    <span className="flex items-center gap-3 min-w-0 flex-1">
+      <span className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--on-accent-container)] flex items-center justify-center shrink-0">
+        <Plus size={20} weight="bold" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="ui-row-title text-[var(--on-accent-container)]">{title}</span>
+        <span className="ui-row-subtitle">{subtitle}</span>
+      </span>
+    </span>
+  </button>
+);
 
 export const FixedTab: React.FC<FixedTabProps> = ({
   period,
@@ -110,8 +128,8 @@ export const FixedTab: React.FC<FixedTabProps> = ({
             <span className="ui-stat-label">
               Inkomster
             </span>
-            <span className="ui-stat-value text-positive">
-              +{formatKr(totalIncome)}
+            <span className={`ui-stat-value ${totalIncome > 0 ? 'text-positive' : 'text-[var(--text-primary)]'}`}>
+              {totalIncome > 0 ? '+' : ''}{formatKr(totalIncome)}
             </span>
           </div>
 
@@ -120,7 +138,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               Fasta utgifter
             </span>
             <span className="ui-stat-value text-[var(--text-primary)]">
-              −{formatKr(totalFixedExpenses)}
+              {Math.round(totalFixedExpenses) !== 0 ? '−' : ''}{formatKr(totalFixedExpenses)}
             </span>
           </div>
 
@@ -149,7 +167,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           <h2 className="ui-section-title">
             Inkomster
           </h2>
-          {onAddIncome && (
+          {onAddIncome && sortedIncomes.length > 0 && (
             <button
               type="button"
               onClick={onAddIncome}
@@ -207,24 +225,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               );
             })
           ) : (
-            <div className="py-9 px-4 text-center">
-              <EmptyClusterArtwork variant="income" />
-              <p className="font-display font-semibold text-sm text-[var(--text-primary)]">
-                Du har inga fasta inkomster än
-              </p>
-              <p className="text-xs text-[var(--text-secondary)] max-w-[260px] mx-auto mt-1 mb-4 leading-relaxed">
-                Lägg till din lön eller fasta inkomster för att få exakt koll på din lön-till-lön-budget.
-              </p>
-              {onAddIncome && (
-                <button
-                  type="button"
-                  onClick={onAddIncome}
-                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
-                >
-                  <span>Kom igång</span>
-                </button>
-              )}
-            </div>
+            <EmptyAddRow
+              title="Lägg till din lön"
+              subtitle="Då vet Dejz hur mycket som kommer in"
+              onClick={onAddIncome}
+            />
           )}
         </div>
       </section>
@@ -237,7 +242,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
           <h2 className="ui-section-title">
             Fasta utgifter
           </h2>
-          {onAddFixed && (
+          {onAddFixed && sortedExpenses.length > 0 && (
             <button
               type="button"
               onClick={onAddFixed}
@@ -276,7 +281,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                         category={exp.category}
                         logoUrl={exp.logo}
                         size="md"
-                        isRecurring={true}
+                        isRecurring={false}
                       />
                       <div className="min-w-0 flex-1">
                         <span className="ui-row-title truncate block">
@@ -329,24 +334,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                 );
               })
           ) : (
-            <div className="py-9 px-4 text-center">
-              <EmptyClusterArtwork variant="fixed" />
-              <p className="font-display font-semibold text-sm text-[var(--text-primary)]">
-                Du har inga fasta utgifter än
-              </p>
-              <p className="text-xs text-[var(--text-secondary)] max-w-[270px] mx-auto mt-1 mb-4 leading-relaxed">
-                Lägg till dina fasta betalningar. Då får du en fullständig översikt över kommande räkningar och vad som är kvar att spendera.
-              </p>
-              {onAddFixed && (
-                <button
-                  type="button"
-                  onClick={onAddFixed}
-                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-display font-semibold text-xs transition-transform active:scale-95 cursor-pointer"
-                >
-                  <span>Kom igång</span>
-                </button>
-              )}
-            </div>
+            <EmptyAddRow
+              title="Lägg till en räkning"
+              subtitle="Hyra, el, mobil, streaming …"
+              onClick={onAddFixed}
+            />
           )}
         </div>
       </section>

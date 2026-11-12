@@ -34,7 +34,7 @@ describe('nytt sparmål', () => {
     await user.click(screen.getByRole('button', { name: /Nytt sparmål/ }));
     expect(heading()).toBe('Vad sparar du till?');
     expect(continueBtn().disabled).toBe(true);
-    await user.type(screen.getByPlaceholderText('t.ex. Buffert eller Resa'), 'Resa till Japan');
+    await user.type(screen.getByPlaceholderText('Namn på målet'), 'Resa till Japan');
     await user.click(continueBtn());
 
     expect(heading()).toBe('Välj bild till ditt mål');
@@ -75,7 +75,7 @@ describe('nytt sparmål', () => {
   test('"Hoppa över" månadssparandet skapar målet utan att dra pengar varje månad', async () => {
     const { user, onCreateMonthlySaving } = renderView();
     await user.click(screen.getByRole('button', { name: /Nytt sparmål/ }));
-    await user.type(screen.getByPlaceholderText('t.ex. Buffert eller Resa'), 'Buffert');
+    await user.type(screen.getByPlaceholderText('Namn på målet'), 'Buffert');
     await user.click(continueBtn());
     await user.click(continueBtn());
     await typeDigits(user, '10000');
@@ -95,7 +95,7 @@ describe('nytt sparmål', () => {
     const savings = makeAccount({ id: 'acc-spar', name: 'Sparkonto', balance: 7300.6, type: 'savings' });
     const { user } = renderView({ accounts: [savings] });
     await user.click(screen.getByRole('button', { name: /Nytt sparmål/ }));
-    await user.type(screen.getByPlaceholderText('t.ex. Buffert eller Resa'), 'Buffert');
+    await user.type(screen.getByPlaceholderText('Namn på målet'), 'Buffert');
     await user.click(continueBtn());
     await user.click(continueBtn());
     await typeDigits(user, '20000');
@@ -112,19 +112,20 @@ describe('nytt sparmål', () => {
     });
   });
 
-  test('Tillbaka går ett steg bakåt, och från första steget stängs guiden', async () => {
+  test('Tillbaka går ett steg bakåt, och Stäng stänger guiden', async () => {
     const { user } = renderView();
     await user.click(screen.getByRole('button', { name: /Nytt sparmål/ }));
-    await user.type(screen.getByPlaceholderText('t.ex. Buffert eller Resa'), 'Bil');
+    await user.type(screen.getByPlaceholderText('Namn på målet'), 'Bil');
     await user.click(continueBtn());
     expect(heading()).toBe('Välj bild till ditt mål');
 
     await user.click(screen.getByRole('button', { name: 'Tillbaka' }));
     expect(heading()).toBe('Vad sparar du till?');
     // Namnet finns kvar
-    expect((screen.getByPlaceholderText('t.ex. Buffert eller Resa') as HTMLInputElement).value).toBe('Bil');
+    expect((screen.getByPlaceholderText('Namn på målet') as HTMLInputElement).value).toBe('Bil');
 
-    await user.click(screen.getByRole('button', { name: 'Tillbaka' }));
+    // Första steget har ingen tillbakapil – stängknappen stänger guiden
+    await user.click(screen.getByRole('button', { name: 'Stäng' }));
     expect(screen.queryByText('Vad sparar du till?')).toBeNull();
     expect(getSavingsGoals()).toHaveLength(0);
   });
@@ -132,7 +133,7 @@ describe('nytt sparmål', () => {
   test('tangentbordet fungerar också för beloppen (siffror, sudda och Enter)', async () => {
     const { user } = renderView();
     await user.click(screen.getByRole('button', { name: /Nytt sparmål/ }));
-    await user.type(screen.getByPlaceholderText('t.ex. Buffert eller Resa'), 'Resa{Enter}');
+    await user.type(screen.getByPlaceholderText('Namn på målet'), 'Resa{Enter}');
     expect(heading()).toBe('Välj bild till ditt mål');
     await user.click(continueBtn());
 
@@ -146,7 +147,7 @@ describe('nytt sparmål', () => {
   test('beloppet stannar vid nio siffror', async () => {
     const { user } = renderView();
     await user.click(screen.getByRole('button', { name: /Nytt sparmål/ }));
-    await user.type(screen.getByPlaceholderText('t.ex. Buffert eller Resa'), 'Hus');
+    await user.type(screen.getByPlaceholderText('Namn på målet'), 'Hus');
     await user.click(continueBtn());
     await user.click(continueBtn());
     await typeDigits(user, '1234567890');

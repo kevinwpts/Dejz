@@ -363,9 +363,9 @@ export function createOnboardingSheetActions({
         key={c.name}
         type="button"
         onClick={() => openAddSheet(type, c)}
-        className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
+        className="ui-onb-chip"
       >
-        <Plus size={14} weight="bold" className="text-[var(--text-secondary)]" />
+        <Plus size={14} weight="bold" className="text-[var(--accent-color)]" />
         <span>{c.name}</span>
       </button>
     );
@@ -377,7 +377,7 @@ export function createOnboardingSheetActions({
             if (groupChips.length === 0) return null;
             return (
               <div key={group.title} className="space-y-2">
-                <p className="text-xs font-medium text-[var(--text-muted)]">{group.title}</p>
+                <p className="ui-onb-group-label">{group.title}</p>
                 <div className="flex flex-wrap gap-2">{groupChips.map(renderChip)}</div>
               </div>
             );
@@ -385,7 +385,7 @@ export function createOnboardingSheetActions({
           <button
             type="button"
             onClick={() => openAddSheet(type)}
-            className="h-10 pl-3 pr-4 rounded-full border border-dashed border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-secondary)] flex items-center gap-1.5 transition-all cursor-pointer"
+            className="ui-onb-chip-other"
           >
             <Plus size={14} weight="bold" />
             <span>Annat</span>
@@ -400,16 +400,16 @@ export function createOnboardingSheetActions({
             key={c.name}
             type="button"
             onClick={() => openAddSheet(type, c)}
-            className="h-10 pl-3 pr-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5 transition-all cursor-pointer"
+            className="ui-onb-chip"
           >
-            <Plus size={14} weight="bold" className="text-[var(--text-secondary)]" />
+            <Plus size={14} weight="bold" className="text-[var(--accent-color)]" />
             <span>{c.name}</span>
           </button>
         ))}
         <button
           type="button"
           onClick={() => openAddSheet(type)}
-          className="h-10 pl-3 pr-4 rounded-full border border-dashed border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] active:scale-[0.97] text-sm font-semibold text-[var(--text-secondary)] flex items-center gap-1.5 transition-all cursor-pointer"
+          className="ui-onb-chip-other"
         >
           <Plus size={14} weight="bold" />
           <span>Annat</span>

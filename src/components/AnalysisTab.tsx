@@ -125,8 +125,8 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
             <span className="ui-stat-label">
               Inkomst
             </span>
-            <span className="ui-stat-value text-positive">
-              +{formatKr(periodIncomeTotal)}
+            <span className={`ui-stat-value ${periodIncomeTotal > 0 ? 'text-positive' : 'text-[var(--text-primary)]'}`}>
+              {periodIncomeTotal > 0 ? '+' : ''}{formatKr(periodIncomeTotal)}
             </span>
           </div>
 
@@ -135,7 +135,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
               Utgifter
             </span>
             <span className="ui-stat-value text-[var(--text-primary)]">
-              −{formatKr(totalSpent)}
+              {Math.round(totalSpent) !== 0 ? '−' : ''}{formatKr(totalSpent)}
             </span>
           </div>
 
@@ -150,7 +150,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                   : 'text-negative'
               }`}
             >
-              {netSavings >= 0 ? formatKr(netSavings) : formatKr(netSavings)}
+              {formatKr(netSavings)}
             </span>
           </div>
         </div>

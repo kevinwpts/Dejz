@@ -36,7 +36,7 @@ export const AppearanceSettingsView: React.FC<AppearanceSettingsViewProps> = ({
                 <div
                   className={`w-full aspect-[4/5] rounded-2xl p-2.5 border-2 transition-all overflow-hidden relative flex flex-col justify-between ${
                     isSelected
-                      ? 'border-[var(--text-primary)] shadow-sm scale-[1.02]'
+                      ? 'border-[var(--text-primary)]'
                       : 'border-[var(--border-subtle)] opacity-80 group-hover:opacity-100'
                   } ${
                     opt.id === 'light'
@@ -98,23 +98,23 @@ export const AppearanceSettingsView: React.FC<AppearanceSettingsViewProps> = ({
                 </div>
 
                 <span
-                  className={`text-xs ${
+                  className={`text-footnote ${
                     isSelected
                       ? 'font-semibold text-[var(--text-primary)]'
-                      : 'font-medium text-[var(--text-muted)]'
+                      : 'font-medium text-[var(--text-secondary)]'
                   }`}
                 >
                   {opt.label}
                 </span>
 
                 <div
-                  className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                  className={`w-[22px] h-[22px] rounded-full border-[1.5px] flex items-center justify-center transition-colors ${
                     isSelected
                       ? 'bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-color)]'
                       : 'border-[var(--border-control)] bg-transparent'
                   }`}
                 >
-                  {isSelected && <Check size={11} weight="bold" />}
+                  {isSelected && <Check size={12} weight="bold" />}
                 </div>
               </button>
             );

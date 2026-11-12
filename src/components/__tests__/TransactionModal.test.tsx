@@ -230,8 +230,8 @@ describe('köpfönstret – byta namn: bara det här köpet eller fler?', () => 
 describe('köpfönstret – nytt köp', () => {
   test('Spara är avstängt tills både namn och belopp finns', async () => {
     const { user } = renderModal({ initialTransaction: null });
-    sheetTitle('Lägg till händelse');
-    const save = () => screen.getByRole('button', { name: /Spara händelse/ }) as HTMLButtonElement;
+    sheetTitle('Nytt köp');
+    const save = () => screen.getByRole('button', { name: /Spara (köp|inkomst)/ }) as HTMLButtonElement;
     expect(save().disabled).toBe(true);
     await user.type(nameInput(), 'Ica');
     expect(save().disabled).toBe(true);
@@ -243,7 +243,7 @@ describe('köpfönstret – nytt köp', () => {
     const { user, onSave, onClose } = renderModal({ initialTransaction: null });
     await user.type(nameInput(), '  Bio med Sara  ');
     await user.type(amountInput(), '180');
-    await user.click(screen.getByRole('button', { name: /Spara händelse/ }));
+    await user.click(screen.getByRole('button', { name: /Spara (köp|inkomst)/ }));
 
     expect(onSave).toHaveBeenCalledOnce();
     const saved = onSave.mock.calls[0][0];
@@ -259,7 +259,7 @@ describe('köpfönstret – nytt köp', () => {
     expect(screen.getByPlaceholderText('Inkomstkälla')).toBeTruthy();
     await user.type(screen.getByPlaceholderText('Inkomstkälla'), 'Extrajobb');
     await user.type(amountInput(), '1500');
-    await user.click(screen.getByRole('button', { name: /Spara händelse/ }));
+    await user.click(screen.getByRole('button', { name: /Spara (köp|inkomst)/ }));
     expect(onSave.mock.calls[0][0]).toMatchObject({ title: 'Extrajobb', amount: 1500, type: 'income', category: 'Lön' });
   });
 
@@ -268,13 +268,13 @@ describe('köpfönstret – nytt köp', () => {
     expect((nameInput() as HTMLInputElement).value).toBe('Ica');
     expect((amountInput() as HTMLInputElement).value).toBe('143');
     expect(onSave).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', { name: /Spara händelse/ }));
+    await user.click(screen.getByRole('button', { name: /Spara (köp|inkomst)/ }));
     expect(onSave.mock.calls[0][0]).toMatchObject({ title: 'Ica', amount: 143 });
   });
 
   test('stängd ruta visar ingenting', () => {
     render(<TransactionModal isOpen={false} initialTransaction={null} onClose={vi.fn()} />);
-    expect(screen.queryByText('Lägg till händelse')).toBeNull();
+    expect(screen.queryByText('Lägg till köp')).toBeNull();
   });
 });
 

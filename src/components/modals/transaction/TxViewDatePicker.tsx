@@ -104,18 +104,18 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                         }
                         navigateSubView(pickerReturnView, 'back');
                       }}
-                      className={`p-2.5 rounded-2xl text-left transition-all cursor-pointer active:scale-[0.98] ${
+                      className={`px-3 py-2.5 rounded-card-nested text-left transition-all cursor-pointer active:scale-[0.98] ${
                         isSel
-                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xs'
+                          ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
                           : 'bg-[var(--fill-grouped)] hover:opacity-90 text-[var(--text-primary)]'
                       }`}
                     >
-                      <span className="font-display font-semibold text-xs block">
+                      <span className="font-semibold text-callout block">
                         {p.label}
                       </span>
                       <span
-                        className={`text-caption block truncate mt-0.5 tabular-nums ${
-                          isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
+                        className={`text-footnote block truncate mt-0.5 tabular-nums ${
+                          isSel ? 'opacity-80' : 'text-[var(--text-secondary)]'
                         }`}
                       >
                         {p.sub}
@@ -126,7 +126,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
               </div>
 
               {/* Kalender-matris */}
-              <div className="rounded-3xl bg-[var(--fill-grouped)] p-3.5 space-y-3">
+              <div className="rounded-card-nested bg-[var(--fill-grouped)] p-3.5 space-y-3">
                 <div className="flex items-center justify-between px-1">
                   <button
                     type="button"
@@ -138,11 +138,11 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                       )
                     }
                     aria-label="Föregående månad"
-                    className="ui-icon-btn w-8 h-8 rounded-xl"
+                    className="ui-icon-btn-surface"
                   >
                     <CaretLeft size={14} weight="bold" />
                   </button>
-                  <span className="font-display font-semibold text-xs sm:text-sm text-[var(--text-primary)] tabular-nums">
+                  <span className="font-display font-semibold text-subhead text-[var(--text-primary)] tabular-nums">
                     {monthNames[pickerYearMonth.month]} {pickerYearMonth.year}
                   </span>
                   <button
@@ -155,7 +155,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                       )
                     }
                     aria-label="Nästa månad"
-                    className="ui-icon-btn w-8 h-8 rounded-xl"
+                    className="ui-icon-btn-surface"
                   >
                     <CaretRight size={14} weight="bold" />
                   </button>
@@ -165,7 +165,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                   {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((w) => (
                     <span
                       key={w}
-                      className="text-micro font-medium text-[var(--text-muted)] py-0.5"
+                      className="text-footnote font-medium text-[var(--text-muted)] py-1"
                     >
                       {w}
                     </span>
@@ -194,7 +194,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                           isSel
                             ? 'ui-day-btn-active'
                             : isTodayCell
-                            ? 'ring-1 ring-[var(--text-muted)]/40 font-semibold'
+                            ? '!text-[var(--accent-color)] font-semibold'
                             : ''
                         }`}
                       >

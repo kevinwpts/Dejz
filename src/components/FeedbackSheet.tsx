@@ -4,9 +4,9 @@ import { FeedbackType, OPEN_FEEDBACK_EVENT, sendFeedback } from '../utils/sendFe
 import { SheetHeader } from './ui/SheetHeader';
 
 const TYPES: { id: Exclude<FeedbackType, 'crash'>; label: string; placeholder: string }[] = [
-  { id: 'idea', label: '💡 Idé', placeholder: 'Vad skulle göra Dejz bättre för dig?' },
-  { id: 'bug', label: '🐛 Något är fel', placeholder: 'Vad hände? Vad gjorde du precis innan?' },
-  { id: 'praise', label: '💜 Beröm', placeholder: 'Vad gillar du med Dejz?' },
+  { id: 'idea', label: 'Idé', placeholder: 'Vad skulle göra Dejz bättre för dig?' },
+  { id: 'bug', label: 'Något är fel', placeholder: 'Vad hände? Vad gjorde du precis innan?' },
+  { id: 'praise', label: 'Beröm', placeholder: 'Vad gillar du med Dejz?' },
 ];
 
 /**
@@ -56,7 +56,7 @@ export const FeedbackSheet: React.FC = () => {
       <div className="absolute inset-0 bg-[var(--scrim-color)] animate-fade-in" onClick={() => setOpen(false)} />
       <div className="relative w-full sm:max-w-md bg-[var(--surface-color)] rounded-t-modal sm:rounded-modal px-5 sm:px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] shadow-[var(--shadow-modal)] animate-scale-in">
         <SheetHeader
-          title={sent ? 'Tack! 💜' : 'Hjälp oss göra Dejz bättre'}
+          title={sent ? 'Tack för din feedback' : 'Hjälp oss göra Dejz bättre'}
           subtitle={sent ? undefined : 'Allt du skriver läses av en riktig människa.'}
           onClose={() => setOpen(false)}
           className="!static !mx-0 !px-0 !bg-transparent"
@@ -66,7 +66,7 @@ export const FeedbackSheet: React.FC = () => {
           <div className="space-y-5">
             <div className="flex items-start gap-3 ui-field-card">
               <CheckCircle size={22} weight="fill" className="text-positive-solid shrink-0 mt-0.5" />
-              <p className="text-sm text-[var(--text-secondary)] leading-[1.5]">
+              <p className="text-callout text-[var(--text-secondary)] leading-[1.5]">
                 Din feedback har skickats. Jag läser allt som kommer in och hör av mig om jag har en fråga.
                 <span className="block mt-1 text-[var(--text-primary)] font-medium">– Kevin, grundare av Dejz</span>
               </p>
@@ -74,25 +74,21 @@ export const FeedbackSheet: React.FC = () => {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm active:scale-[0.99] transition-all cursor-pointer"
+              className="ui-btn-primary"
             >
               Klar
             </button>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="ui-segmented grid-cols-3">
               {TYPES.map((t) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => setType(t.id)}
                   aria-pressed={type === t.id}
-                  className={`h-10 rounded-xl text-footnote font-medium border transition-all cursor-pointer active:scale-[0.97] ${
-                    type === t.id
-                      ? 'bg-[var(--accent-soft)] border-[var(--accent-color)] text-[var(--text-primary)]'
-                      : 'bg-[var(--fill-grouped)] border-transparent text-[var(--text-secondary)]'
-                  }`}
+                  className={type === t.id ? 'ui-segmented-tab-active' : 'ui-segmented-tab'}
                 >
                   {t.label}
                 </button>
@@ -106,12 +102,12 @@ export const FeedbackSheet: React.FC = () => {
               rows={4}
               autoFocus
               maxLength={2000}
-              className="w-full rounded-2xl bg-[var(--fill-grouped)] px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-color)] resize-none"
+              className="w-full rounded-card-nested bg-[var(--fill-grouped)] px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-color)] resize-none"
             />
             <button
               type="submit"
               disabled={!message.trim() || sending}
-              className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40"
+              className="ui-btn-primary"
             >
               {sending && <SpinnerGap size={16} className="animate-spin" />}
               Skicka

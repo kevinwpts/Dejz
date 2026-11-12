@@ -36,17 +36,17 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="ui-step-title">
+          <h1 className="ui-step-title text-balance">
             Vilka fasta inkomster har du?
           </h1>
-          <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+          <p className="ui-onb-subtitle">
             Det du får in varje månad, efter skatt. Tryck och skriv beloppet.
           </p>
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
           {analyzingBank && (
-            <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-2.5 text-footnote text-[var(--text-secondary)] animate-pulse">
               <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
               <span>Analyserar dina inkomster...</span>
             </div>
@@ -128,9 +128,12 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
 
         <div className="shrink-0 pt-3 space-y-2">
           {suggestedIncomes.some((i) => i.checked) && (
-            <div className="flex items-center justify-between px-1 text-xs text-[var(--text-secondary)]">
+            <div className="flex items-center justify-between px-1 text-footnote text-[var(--text-secondary)]">
               <span>
-                {suggestedIncomes.filter((i) => i.checked).length} valda inkomster
+                {(() => {
+                  const n = suggestedIncomes.filter((i) => i.checked).length;
+                  return n === 1 ? '1 vald inkomst' : `${n} valda inkomster`;
+                })()}
               </span>
               <span className="font-display font-semibold text-positive tabular-nums">
                 +
@@ -146,7 +149,7 @@ export const OnboardingStepIncomeList: React.FC<OnboardingStepIncomeListProps> =
           <button
             type="button"
             onClick={handleSaveSuggestedIncomes}
-            className="ui-btn-primary-flow"
+            className="ui-btn-primary"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />

@@ -1,6 +1,5 @@
-// Delade småbitar för listflikarna (Sparade, Paket): gruppering per dag, dagsrubrik med summa och ikonerna under köpets namn.
+// Delade småbitar för listflikarna (Kvitton, Paket): gruppering per dag och dagsrubrik med summa.
 import React from 'react';
-import { Heart, Package, Paperclip } from '@phosphor-icons/react';
 import type { TransactionItem } from '../../models';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
 
@@ -41,19 +40,3 @@ export const DateGroupHeader: React.FC<{ dateKey: string; dayItems: TransactionI
     </div>
   );
 };
-
-/** Hjärta, paket och gem (kvitto) – visas bara när köpet har den markeringen. */
-export const TxFlagIcons: React.FC<{ tx: TransactionItem; showReceipt: boolean }> = ({
-  tx,
-  showReceipt,
-}) => (
-  <>
-    {tx.isHearted && <Heart size={11} weight="fill" className="text-negative-solid shrink-0" />}
-    {tx.isWaitingForPackage && (
-      <Package size={11} weight="fill" className="text-caution-solid shrink-0" />
-    )}
-    {showReceipt && tx.receiptUrl && (
-      <Paperclip size={11} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-    )}
-  </>
-);

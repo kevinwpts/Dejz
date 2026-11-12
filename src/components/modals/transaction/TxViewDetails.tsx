@@ -200,7 +200,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             {formatKr(Number(amount) || activeTx.amount)}
           </div>
 
-          <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+          <p className="text-footnote text-[var(--text-secondary)] tabular-nums mt-1.5">
             {formatSwedishDateHeading(isBankSynced ? activeTx.date : date || activeTx.date)}
             {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
               ? ' · Reserverat'
@@ -346,7 +346,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                       }}
                       className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer flex-1 group"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
                         {rcpt.url.startsWith('data:image/') ||
                         /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
                           <img src={rcpt.url} alt="" className="w-full h-full object-cover" />
@@ -355,35 +355,23 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                         )}
                       </div>
                       <div className="min-w-0">
-                        <span className="text-xs font-medium text-[var(--text-primary)] block truncate group-hover:opacity-80">
+                        <span className="ui-list-row-title text-callout block group-hover:opacity-80">
                           {rcpt.name || `Kvitto ${idx + 1}`}
                         </span>
-                        <span className="text-caption text-[var(--text-muted)] block">
-                          Klicka för att granska
+                        <span className="text-footnote text-[var(--text-secondary)] block">
+                          Kvitto · tryck för att visa
                         </span>
                       </div>
                     </button>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewReceipt(rcpt);
-                          navigateSubView('receipt-preview', 'forward');
-                        }}
-                        className="px-2 py-1 rounded-md text-caption text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                      >
-                        Öppna
-                      </button>
-                      <button
-                        aria-label="Ta bort kvitto"
-                        type="button"
-                        onClick={() => handleRemoveReceiptAt(idx)}
-                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer"
-                        title="Ta bort kvitto"
-                      >
-                        <Trash size={13} />
-                      </button>
-                    </div>
+                    <button
+                      aria-label="Ta bort kvitto"
+                      type="button"
+                      onClick={() => handleRemoveReceiptAt(idx)}
+                      className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer shrink-0"
+                      title="Ta bort kvitto"
+                    >
+                      <Trash size={16} />
+                    </button>
                   </div>
                 ))}
               </>
@@ -395,7 +383,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               <input
                 aria-label="Anteckning"
                 type="text"
-                placeholder="Lägg till anteckning..."
+                placeholder="Lägg till"
                 value={note}
                 onChange={(e) => {
                   const nextNote = e.target.value;
@@ -404,7 +392,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                     onUpdate({ ...activeTx, note: nextNote.trim() || undefined });
                   }
                 }}
-                className="font-normal text-right text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent border-0 p-0 text-xs sm:text-sm focus:outline-none flex-1 ml-3"
+                className="min-w-0 font-normal text-right text-[var(--text-secondary)] placeholder-[var(--text-muted)] bg-transparent border-0 p-0 text-callout focus:outline-none focus:text-[var(--text-primary)] flex-1 ml-3"
               />
             </div>
 
@@ -435,22 +423,22 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             {/* Sparmålskoppling om Sparande */}
             {(() => {
               const goals: SavingsGoalItem[] = getSavingsGoals();
-              if (goals.length === 0 || (activeTx.category !== 'Sparande' && isIncome)) {
-                return null;
-              }
+              if (goals.length === 0) return null;
               const txActId = `tx-goal-${activeTx.id}`;
               const linkedGoal = goals.find((g) =>
                 (g.activities || []).some((a) => a.id === txActId)
               );
+              // Bara överföringar till sparande kan räknas in i ett mål – inte matköp o.d.
+              if (!linkedGoal && activeTx.category !== 'Sparande') return null;
 
               return (
                 <div className="ui-row flex-col items-stretch gap-2 py-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="ui-info-label text-[var(--text-primary)] flex items-center gap-1.5 min-w-0">
+                    <span className="ui-info-label flex items-center gap-1.5 min-w-0">
                       <span className="truncate">
                         {linkedGoal
                           ? `Kopplad till sparmål: ${linkedGoal.name}`
-                          : 'Räkna in mot sparmål'}
+                          : 'Lägg till i sparmål'}
                       </span>
                     </span>
                     {linkedGoal && (
@@ -530,9 +518,9 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
 
             {/* Rå banktext diskret längst ner i detaljkortet */}
             {rawBankText && (
-              <div className="ui-row items-start py-2.5 bg-[var(--surface-hover)]/25">
-                <span className="text-meta text-[var(--text-muted)] shrink-0 pt-0.5">Banktext</span>
-                <span className="text-meta text-right break-words max-w-[230px] sm:max-w-[265px] text-[var(--text-secondary)] font-normal leading-snug">
+              <div className="ui-row items-start">
+                <span className="ui-info-label">Banktext</span>
+                <span className="text-footnote text-right break-words min-w-0 text-[var(--text-secondary)] font-normal leading-snug pt-px">
                   {rawBankText}
                 </span>
               </div>

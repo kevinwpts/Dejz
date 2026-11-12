@@ -112,7 +112,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
                 <span className="ui-admin-icon-slot">
                   <PaymentMethodIcon method={method.name} iconId={method.icon || method.id} size={20} />
                 </span>
-                <span className="ui-list-row-title-medium">
+                <span className="ui-list-row-title">
                   {method.name}
                 </span>
               </div>
@@ -205,7 +205,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
             <span className="px-1 ui-field-label block">
               Välj ikon
             </span>
-            <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)]">
+            <div className="ui-sheet-box grid grid-cols-6 gap-1.5 p-2.5">
               {AVAILABLE_PAYMENT_METHOD_ICONS.map((item) => {
                 const isSelected = pmFormIcon === item.id;
                 return (
@@ -216,10 +216,10 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
                     type="button"
                     title={item.label}
                     onClick={() => setPmFormIcon(item.id)}
-                    className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                    className={`h-11 rounded-xl flex items-center justify-center text-[var(--text-primary)] transition-all cursor-pointer active:scale-95 ${
                       isSelected
-                        ? 'bg-[var(--surface-color)] ring-2 ring-[var(--text-primary)] scale-[1.04]'
-                        : 'bg-transparent hover:bg-[var(--surface-color)]'
+                        ? 'bg-[var(--surface-color)] shadow-[var(--segment-thumb-shadow)] ring-2 ring-[var(--text-primary)]'
+                        : 'bg-transparent'
                     }`}
                   >
                     <PaymentMethodIcon iconId={item.id} size={22} />

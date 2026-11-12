@@ -82,31 +82,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 setResetEmailSent(false);
                 switchView('login', 'back');
               }}
-              className="text-xs font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
+              className="ui-auth-footer-link"
             >
               Tillbaka till inloggning
             </button>
           ) : (
             <>
               {view === 'login' && (
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-callout text-[var(--text-secondary)]">
                   Inget konto än?{' '}
                   <button
                     type="button"
                     onClick={() => switchView('register')}
-                    className="font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
+                    className="ui-auth-footer-link"
                   >
                     Skapa konto
                   </button>
                 </p>
               )}
               {view === 'register' && (
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-callout text-[var(--text-secondary)]">
                   Har du redan ett konto?{' '}
                   <button
                     type="button"
                     onClick={() => switchView('login', 'back')}
-                    className="font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
+                    className="ui-auth-footer-link"
                   >
                     Logga in
                   </button>
@@ -116,7 +116,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <button
                   type="button"
                   onClick={() => switchView('login', 'back')}
-                  className="text-xs font-bold text-[var(--text-primary)] hover:underline cursor-pointer"
+                  className="ui-auth-footer-link"
                 >
                   Tillbaka till inloggning
                 </button>

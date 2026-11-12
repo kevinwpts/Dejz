@@ -1,7 +1,7 @@
 import type { ModalSubView } from './shared';
 import type { RefObject } from 'react';
 import React from 'react';
-import { FileText, Plus } from '@phosphor-icons/react';
+import { DownloadSimple, Plus } from '@phosphor-icons/react';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
 import { SheetHeader } from '../../ui/SheetHeader';
 
@@ -31,7 +31,7 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
       <div className={`${slideAnimClass} space-y-4`}>
         <SheetHeader title={previewReceipt.name || 'Kvitto'} onBack={() => navigateSubView(pickerReturnView, 'back')} onClose={onClose} flush />
 
-        <div className="rounded-2xl bg-[var(--fill-grouped)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+        <div className="rounded-card-nested bg-[var(--fill-grouped)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
           {previewReceipt.url.startsWith('data:image/') ||
           /\.(png|jpe?g|webp|gif)$/i.test(previewReceipt.url) ? (
             <img
@@ -52,17 +52,17 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
           <a
             href={previewReceipt.url}
             download={previewReceipt.name || `kvitto-${displayName}.jpg`}
-            className="ui-btn-primary"
+            className="ui-btn-secondary"
           >
-            <FileText size={14} weight="bold" />
-            <span>Spara fil</span>
+            <DownloadSimple size={16} weight="bold" />
+            <span>Spara</span>
           </a>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="ui-btn-secondary"
           >
-            <Plus size={14} weight="bold" />
+            <Plus size={16} weight="bold" />
             <span>Bifoga fler</span>
           </button>
         </div>

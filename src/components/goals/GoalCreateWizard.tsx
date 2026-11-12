@@ -8,7 +8,7 @@ import { StepName } from './wizard/StepName';
 import { StepArtwork } from './wizard/StepArtwork';
 import { StepAccountLink } from './wizard/StepAccountLink';
 import { StepTargetAmount, StepCurrentAmount, StepMonthlyAmount } from './wizard/AmountSteps';
-import { SheetHeader } from '../ui/SheetHeader';
+import { CaretLeft, X } from '@phosphor-icons/react';
 
 export interface GoalCreateWizardProps {
   isCreateWizardOpen: boolean;
@@ -50,6 +50,16 @@ const STEP_HEADINGS: Record<CreateWizardStep, string> = {
   5: 'Hur mycket har du sparat hittills?',
   6: 'Hur mycket sparar du varje månad?',
 };
+
+/** Kort förklaring under rubriken – bara där steget behöver det. */
+const STEP_SUBTITLES: Partial<Record<CreateWizardStep, string>> = {
+  1: 'Ge målet ett namn, t.ex. en resa eller en buffert.',
+  4: 'Välj ett konto så följer målet saldot automatiskt.',
+  5: 'Har du inget sparat än hoppar du bara över.',
+  6: 'Dras automatiskt från det du har kvar varje lönedag.',
+};
+
+const TOTAL_STEPS = 6;
 
 /** Guiden "Nytt sparmål" – skalet (ark, rubrik, tillbaka/hoppa över). Varje steg ligger i ./wizard/. */
 export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
@@ -112,41 +122,78 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
     }
   };
 
+  const subtitle = STEP_SUBTITLES[wizardStep];
+  const canSkip = wizardStep === 5 || wizardStep === 6;
+
   return createPortal(
     <div
       className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px] flex flex-col justify-end animate-fade-in"
       onClick={() => setIsCreateWizardOpen(false)}
     >
-      {/* Subtle stacked card edge behind the sheet (matches Lunar modal stack) */}
-      <div
-        className="w-[92%] max-w-[416px] mx-auto h-3 rounded-t-3xl bg-[var(--surface-color)]/60 border-t border-x border-[var(--border-subtle)]/60 -mb-1 pointer-events-none"
-        aria-hidden="true"
-      />
-
-      {/* Sheet Container (Does NOT cover the whole screen) */}
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Nytt sparmål"
+        aria-labelledby="goal-wizard-title"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md mx-auto h-[89dvh] max-h-[89dvh] rounded-t-sheet bg-[var(--bg-color)] text-[var(--text-primary)] shadow-modal flex flex-col justify-between px-6 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none animate-slide-up"
+        className="w-full max-w-md mx-auto h-[92dvh] max-h-[92dvh] rounded-t-sheet bg-[var(--bg-color)] text-[var(--text-primary)] shadow-modal flex flex-col px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] font-sans overflow-hidden select-none animate-slide-up"
       >
-        {/* 1. TOP HEADER (Circular Back button + optional Hoppa över pill + Centered Question) */}
-        <header className="shrink-0">
-          <SheetHeader
-            title={STEP_HEADINGS[wizardStep]}
-            onBack={handleBackNavigation}
-            flush
-            className="!static !mx-0 !px-0 !bg-transparent"
-            actions={
-              wizardStep === 5 || wizardStep === 6 ? (
-                <button type="button" onClick={handleSkip} className="ui-pill-btn">
-                  Hoppa över
-                </button>
-              ) : undefined
-            }
-          />
+        {/* Rad med tillbaka · steg-mätare · hoppa över / stäng */}
+        <header className="shrink-0 flex items-center gap-3 h-9">
+          {wizardStep > 1 ? (
+            <button
+              type="button"
+              onClick={handleBackNavigation}
+              aria-label="Tillbaka"
+              title="Tillbaka"
+              className="ui-icon-btn-surface"
+            >
+              <CaretLeft size={15} weight="bold" />
+            </button>
+          ) : null}
+          <div
+            className="flex-1 flex items-center gap-1"
+            role="progressbar"
+            aria-label={`Steg ${wizardStep} av ${TOTAL_STEPS}`}
+            aria-valuemin={1}
+            aria-valuemax={TOTAL_STEPS}
+            aria-valuenow={wizardStep}
+          >
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <span
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                  i < wizardStep ? 'bg-[var(--cta-bg)]' : 'bg-[var(--segment-track)]'
+                }`}
+              />
+            ))}
+          </div>
+          {canSkip && (
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="h-8 px-1 text-subhead font-medium text-[var(--accent-color)] active:opacity-60 cursor-pointer shrink-0"
+            >
+              Hoppa över
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsCreateWizardOpen(false)}
+            aria-label="Stäng"
+            className="ui-icon-btn-surface"
+          >
+            <X size={14} weight="bold" />
+          </button>
         </header>
+
+        <div className="shrink-0 pt-6 pb-2">
+          <h2 id="goal-wizard-title" className="ui-step-title">
+            {STEP_HEADINGS[wizardStep]}
+          </h2>
+          {subtitle && (
+            <p className="mt-2 text-subhead leading-snug text-[var(--text-secondary)]">{subtitle}</p>
+          )}
+        </div>
 
         {wizardStep === 1 && (
           <StepName

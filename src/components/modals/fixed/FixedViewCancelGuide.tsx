@@ -50,7 +50,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
         <SheetHeader title={<>Säg upp {displayName}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         {/* Sammanfattningskort med årlig besparing */}
-        <div className="px-4 py-3 rounded-2xl bg-[var(--fill-grouped)] flex items-center justify-between gap-3">
+        <div className="px-4 py-3 rounded-card-nested bg-[var(--fill-grouped)] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <ItemLogo
               name={displayName}
@@ -67,18 +67,18 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
             </div>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-caption text-[var(--text-muted)] block">
-              Årlig besparing
+            <span className="ui-row-amount-income">
+              +{formatKr((Number(amount) || 0) * 12)}
             </span>
-            <span className="font-display font-semibold text-callout text-positive tabular-nums">
-              +{formatKr((Number(amount) || 0) * 12)}/år
+            <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
+              sparat per år
             </span>
           </div>
         </div>
 
         {isLoadingCancelGuide ? (
-          <div className="rounded-2xl bg-[var(--fill-grouped)] p-5 space-y-3.5 animate-pulse">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+          <div className="rounded-card-nested bg-[var(--fill-grouped)] p-5 space-y-3.5 animate-pulse">
+            <div className="flex items-center gap-2 text-footnote text-[var(--text-secondary)]">
               <Sparkle size={14} weight="fill" className="text-[var(--text-primary)] animate-spin" />
               <span>Tar fram uppsägningsguide för {displayName}...</span>
             </div>
@@ -108,47 +108,42 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
 
             return (
               <div className="space-y-3.5">
-                {/* Uppsägningstid */}
-                <div className="px-3.5 py-2.5 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-between gap-2 text-xs">
-                  <span className="text-[var(--text-secondary)] shrink-0">
-                    Uppsägningstid
-                  </span>
-                  <span className="font-medium text-[var(--text-primary)] text-right">
-                    {guide.noticePeriod}
-                  </span>
-                </div>
-
-                {/* Steg-för-steg instruktioner */}
-                <div className="ui-field-card space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-meta font-medium text-[var(--text-secondary)]">
+                {/* Steg-för-steg instruktioner + uppsägningstid i ett kort */}
+                <div className="ui-field-card space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-display font-semibold text-subhead text-[var(--text-primary)]">
                       Så säger du upp
                     </span>
-                    <span className="text-caption text-[var(--text-muted)] flex items-center gap-1">
-                      <Sparkle size={11} weight="fill" />
+                    <span className="text-footnote text-[var(--text-secondary)] flex items-center gap-1 shrink-0">
+                      <Sparkle size={12} weight="fill" />
                       <span>AI-guide</span>
                     </span>
                   </div>
 
-                  <ol className="space-y-2.5">
+                  <ol className="space-y-3">
                     {guide.steps.map((step, idx) => (
                       <li
                         key={step}
-                        className="flex items-start gap-2.5 text-footnote leading-snug text-[var(--text-primary)]"
+                        className="flex items-start gap-3 text-subhead leading-snug text-[var(--text-primary)]"
                       >
-                        <span className="w-5 h-5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-caption font-display font-semibold text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
+                        <span className="w-6 h-6 rounded-full bg-[var(--surface-color)] text-footnote font-display font-semibold text-[var(--text-primary)] flex items-center justify-center shrink-0 tabular-nums">
                           {idx + 1}
                         </span>
-                        <span className="flex-1">{step}</span>
+                        <span className="flex-1 pt-0.5">{step}</span>
                       </li>
                     ))}
                   </ol>
+
+                  <div className="pt-3 border-t border-[var(--separator)] text-footnote leading-snug">
+                    <span className="text-[var(--text-secondary)]">Uppsägningstid: </span>
+                    <span className="text-[var(--text-primary)]">{guide.noticePeriod}</span>
+                  </div>
                 </div>
 
-                {/* Smart tips */}
+                {/* Tips */}
                 {guide.tip && (
-                  <div className="px-3.5 py-2.5 rounded-xl bg-[var(--fill-grouped)] flex items-start gap-2.5 text-meta leading-snug text-[var(--text-secondary)]">
-                    <Info size={15} className="text-[var(--text-primary)] shrink-0 mt-0.5" />
+                  <div className="px-1 flex items-start gap-2.5 text-footnote leading-snug text-[var(--text-secondary)]">
+                    <Info size={16} className="shrink-0 mt-px" />
                     <span>{guide.tip}</span>
                   </div>
                 )}

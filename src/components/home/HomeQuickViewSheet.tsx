@@ -74,7 +74,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
 
               if (incomes.length === 0 && extraIncomeTxs.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-footnote text-[var(--text-secondary)]">
+                  <div className="ui-list-card py-10 text-center text-callout text-[var(--text-secondary)]">
                     Inga inkomster
                   </div>
                 );
@@ -229,7 +229,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                           category={catLabel}
                           logoUrl={exp.logo}
                           size="md"
-                          isRecurring={true}
+                          isRecurring={false}
                         />
                         <div className="min-w-0 flex-1">
                           <span className="ui-row-title truncate block">
@@ -267,7 +267,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                 })}
               </div>
             ) : (
-              <div className="ui-list-card py-10 text-center text-footnote text-[var(--text-secondary)]">
+              <div className="ui-list-card py-10 text-center text-callout text-[var(--text-secondary)]">
                 Inga fasta utgifter
               </div>
             ))}
@@ -276,8 +276,8 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
             (() => {
               if (variablePeriodTransactions.length === 0) {
                 return (
-                  <div className="ui-list-card py-10 text-center text-footnote text-[var(--text-secondary)]">
-                    Inga rörliga utgifter i perioden
+                  <div className="ui-list-card py-10 text-center text-callout text-[var(--text-secondary)]">
+                    Inga köp än den här löneperioden
                   </div>
                 );
               }

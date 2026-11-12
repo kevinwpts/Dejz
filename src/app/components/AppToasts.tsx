@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, FileText, X } from '@phosphor-icons/react';
+import { CheckCircle, DownloadSimple, X } from '@phosphor-icons/react';
 import { BottomSheet } from '../../components/ui/BottomSheet';
 
 /* Små fristående notiser och blad som visas ovanpå appen. Flyttade från App.tsx. */
@@ -21,16 +21,15 @@ export const UndoToast: React.FC<{
 }> = ({ toast, onUndo }) => {
   if (!toast) return null;
   return (
-    <div className="fixed bottom-[calc(5.2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[150] w-[calc(100%-2rem)] max-w-sm animate-fade-in">
-      <div className="px-4 py-3 rounded-2xl bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xl flex items-center justify-between gap-3 text-xs">
-        <span className="font-medium truncate">
-          {toast.excluded ? `${toast.title} räknas inte i budget` : `${toast.title} räknas med i budget`}
-        </span>
-        <button
-          type="button"
-          onClick={onUndo}
-          className="px-2.5 py-1 rounded-lg bg-[var(--bg-color)]/15 hover:bg-[var(--bg-color)]/25 font-display font-bold shrink-0 cursor-pointer transition-colors"
-        >
+    <div className="ui-toast-wrap z-[150]" role="status" aria-live="polite">
+      <div key={toast.id} className="ui-toast">
+        <div className="min-w-0 flex-1">
+          <p className="text-callout font-medium truncate">
+            {toast.excluded ? 'Räknas inte i budget' : 'Räknas med i budget'}
+          </p>
+          <p className="text-footnote text-on-toast/60 truncate">{toast.title}</p>
+        </div>
+        <button type="button" onClick={onUndo} className="ui-toast-action">
           Ångra
         </button>
       </div>
@@ -38,27 +37,24 @@ export const UndoToast: React.FC<{
   );
 };
 
-/** Mörk bekräftelsenotis i iOS-/Revolut-stil: en rad text + valfri knapp eller Ångra */
+/** Bekräftelsenotis i iOS-/Revolut-stil: svävar ovanför bottenmenyn, en rad text + valfri knapp eller Ångra */
 export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose: () => void }> = ({
   toast,
   onClose,
 }) => {
   if (!toast) return null;
   return (
-    <div className="fixed bottom-[calc(5.6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[220] w-[calc(100%-2rem)] max-w-sm animate-fade-in pointer-events-auto">
-      {/* Mörk notis i iOS-/Revolut-stil: en rad text + Ångra */}
-      <div className="pl-3.5 pr-2 py-2 min-h-[48px] rounded-2xl bg-toast text-on-toast shadow-[var(--toast-shadow)] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <CheckCircle size={20} weight="fill" className="text-positive shrink-0" />
-          <div className="min-w-0">
-            <p className="text-callout font-medium truncate">{toast.title}</p>
-            {toast.subtitle && (
-              <p className="text-meta text-white/60 truncate">{toast.subtitle}</p>
-            )}
-          </div>
+    <div className="ui-toast-wrap z-[220] pointer-events-auto" role="status" aria-live="polite">
+      <div key={toast.id} className="ui-toast">
+        <CheckCircle size={22} weight="fill" className="text-positive shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="text-callout font-medium truncate">{toast.title}</p>
+          {toast.subtitle && (
+            <p className="text-footnote text-on-toast/60 truncate">{toast.subtitle}</p>
+          )}
         </div>
 
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center shrink-0 -mr-1.5">
           {toast.actionLabel && toast.onAction && (
             <button
               type="button"
@@ -67,7 +63,7 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
                 onClose();
                 action?.();
               }}
-              className="px-3 py-2 rounded-xl text-callout font-semibold text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="ui-toast-action text-on-toast"
             >
               {toast.actionLabel}
             </button>
@@ -81,7 +77,7 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
                 onClose();
                 undo?.();
               }}
-              className="px-3 py-2 rounded-xl text-callout font-semibold text-toast-action hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+              className="ui-toast-action"
             >
               {toast.undoLabel}
             </button>
@@ -89,10 +85,10 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-xl text-white/60 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full text-on-toast/60 hover:text-on-toast hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
-              <X size={14} weight="bold" />
+              <X size={16} weight="bold" />
             </button>
           )}
         </div>
@@ -109,18 +105,18 @@ export const ReceiptPreviewSheet: React.FC<{
   <BottomSheet
     isOpen={Boolean(receipt)}
     onClose={onClose}
-    title={receipt?.name || 'Kvitto'}
+    title="Kvitto"
     zIndexClass="z-[190]"
   >
     {receipt && (
       <div className="space-y-4">
-        <div className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] p-2 overflow-hidden flex items-center justify-center max-h-[60dvh]">
+        <div className="rounded-card-nested bg-[var(--fill-grouped)] p-3 overflow-hidden flex items-center justify-center max-h-[60dvh]">
           {receipt.url.startsWith('data:image/') ||
           /\.(png|jpe?g|webp|gif)$/i.test(receipt.url) ? (
             <img
               src={receipt.url}
               alt={receipt.name}
-              className="max-h-[56dvh] w-auto object-contain rounded-xl"
+              className="max-h-[56dvh] w-auto object-contain rounded-lg"
             />
           ) : (
             <iframe
@@ -133,10 +129,10 @@ export const ReceiptPreviewSheet: React.FC<{
         <a
           href={receipt.url}
           download={receipt.name || 'kvitto.jpg'}
-          className="ui-btn-primary"
+          className="ui-btn-secondary"
         >
-          <FileText size={14} weight="bold" />
-          <span>Spara fil</span>
+          <DownloadSimple size={18} weight="bold" />
+          <span>Spara kvittot</span>
         </a>
       </div>
     )}

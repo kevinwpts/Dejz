@@ -28,13 +28,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
     <div className="pb-28 animate-slide-in-right">
       <AdminPanelView
         onRestartOnboarding={() => onStartOnboarding?.()}
-        onStartCreateGoalWizard={() => {
-          if (onStartCreateGoalWizard) {
-            onStartCreateGoalWizard();
-          } else {
-            setSubView('goals');
-          }
-        }}
+        onStartCreateGoalWizard={() => onStartCreateGoalWizard?.()}
         onOpenAddFixed={() => onOpenAddFixedModal?.()}
         onOpenPreviewFixed={() => onOpenPreviewFixedModal?.()}
         onOpenDiscoverSubscriptions={() => setSubView('discover')}

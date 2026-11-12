@@ -97,11 +97,11 @@ describe('lägga till ett köp', () => {
     render(<Harness onAdd={onAdd} />);
 
     await user.click(screen.getByRole('button', { name: 'Lägg till köp' }));
-    expect(screen.getByText('Lägg till händelse')).toBeTruthy();
+    expect(screen.getByText('Nytt köp')).toBeTruthy();
 
     await user.type(screen.getByPlaceholderText('Butik eller köp'), 'Ica Maxi');
     await user.type(screen.getByPlaceholderText('0'), '432');
-    await user.click(screen.getByRole('button', { name: /Spara händelse/ }));
+    await user.click(screen.getByRole('button', { name: /Spara (köp|inkomst)/ }));
 
     expect(onAdd).toHaveBeenCalledOnce();
     expect(onAdd.mock.calls[0][0]).toMatchObject({ title: 'Ica Maxi', amount: 432, type: 'expense' });
@@ -117,7 +117,7 @@ describe('lägga till ett köp', () => {
     expect(screen.getByText('Tryck och prata')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: /Fyll i manuellt/ }));
-    expect(screen.getByText('Lägg till händelse')).toBeTruthy();
+    expect(screen.getByText('Nytt köp')).toBeTruthy();
     expect((screen.getByPlaceholderText('Butik eller köp') as HTMLInputElement).value).toBe('');
     expect(onAdd).not.toHaveBeenCalled();
   });
@@ -139,7 +139,7 @@ describe('lägga till ett köp', () => {
     expect((screen.getByPlaceholderText('0') as HTMLInputElement).value).toBe('143');
     expect(onAdd).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: /Spara händelse/ }));
+    await user.click(screen.getByRole('button', { name: /Spara (köp|inkomst)/ }));
     expect(onAdd.mock.calls[0][0]).toMatchObject({ title: 'Ica', amount: 143 });
   });
 });

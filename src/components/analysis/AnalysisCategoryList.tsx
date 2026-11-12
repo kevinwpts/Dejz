@@ -1,6 +1,6 @@
 // Kategorilistan i Analys-fliken: en rad per kategori som fälls ut och visar periodens poster
 import React from 'react';
-import { CaretRight, CaretDown, Heart, Package, Paperclip } from '@phosphor-icons/react';
+import { CaretRight, CaretDown, ChartPieSlice, Heart, Package, Paperclip } from '@phosphor-icons/react';
 import { type TransactionItem, type FixedExpenseItem, type IncomeItem, getTransactionTime } from '../../app/models';
 import { CategoryIcon, categoryColorStyle } from '../CategoryIcon';
 import { ItemLogo } from '../ItemLogo';
@@ -75,7 +75,7 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
           onSelectFixed(fixedExpenses.find((f) => f.id === subFixed.id) ?? subFixed);
         }
       }}
-      className="w-full pl-7 sm:pl-9 pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group"
+      className="w-full pl-[68px] pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <ItemLogo
@@ -86,7 +86,7 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
           isRecurring={isSubRecurring}
         />
         <div className="min-w-0 flex-1">
-          <span className="ui-row-title text-footnote sm:text-callout">
+          <span className="ui-row-title">
             {itemName}
           </span>
           <span className="ui-row-subtitle flex items-center gap-1.5">
@@ -192,7 +192,7 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
                   }
                 }}
                 className={`w-full px-4 sm:px-5 py-3.5 flex flex-col gap-2 text-left active:bg-[var(--press-overlay)] transition-colors cursor-pointer group ${
-                  isExpanded ? 'bg-[var(--bg-color)]/45' : ''
+                  isExpanded ? 'bg-[var(--fill-grouped)]' : ''
                 }`}
               >
                 <div className="w-full flex items-center justify-between gap-3">
@@ -251,13 +251,13 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
               <div
                 className={`grid transition-all duration-200 ease-out ${
                   isExpanded
-                    ? 'grid-rows-[1fr] opacity-100 border-t border-[var(--border-subtle)] bg-[var(--bg-color)]/65 dark:bg-[var(--bg-color)]/40'
+                    ? 'grid-rows-[1fr] opacity-100 border-t border-[var(--separator)] bg-[var(--fill-grouped)]'
                     : 'grid-rows-[0fr] opacity-0'
                 }`}
               >
                 <div className="overflow-hidden">
                   {isExpanded && (
-                    <div className="divide-y divide-[var(--border-subtle)]">
+                    <div className="divide-y divide-[var(--separator)]">
                       {item.items.map((entry) => (
                         <CategoryEntryRow
                           key={entry.id}
@@ -275,10 +275,12 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
         })}
       </div>
     ) : (
-      <div className="py-10 text-center border-t border-[var(--border-subtle)]">
-        <p className="ui-empty-sub">
-          Inga poster i perioden
-        </p>
+      <div className="ui-empty-state py-10">
+        <span className="ui-empty-badge" aria-hidden="true">
+          <ChartPieSlice size={28} weight="fill" />
+        </span>
+        <p className="ui-empty-title">Inga utgifter den här perioden</p>
+        <p className="ui-empty-sub">När du lägger till köp och räkningar ser du här vart pengarna går.</p>
       </div>
     )}
   </section>

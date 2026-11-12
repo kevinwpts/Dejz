@@ -1,6 +1,7 @@
 import { SearchModal, NotificationsModal } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
+import { CheckCircle, SpinnerGap, WarningCircle } from '@phosphor-icons/react';
 import { Navbar } from '../../components/Navbar';
 import { SETTINGS_SUBVIEW_TITLES } from '../../components/settings/subviews';
 
@@ -51,8 +52,6 @@ export const AppTopBar: React.FC = () => {
                 : SETTINGS_SUBVIEW_TITLES[settingsSubView]
               : activeTab === 'goals'
               ? 'Sparmål'
-              : activeTab === 'saved'
-              ? 'Sparade köp'
               : activeTab === 'packages'
               ? 'Väntar på paket'
               : activeTab === 'receipts'
@@ -62,7 +61,7 @@ export const AppTopBar: React.FC = () => {
           onBack={() => {
             if (
               selectedGoalIdInView &&
-              (activeTab === 'goals' || (activeTab === 'settings' && settingsSubView === 'goals'))
+              activeTab === 'goals'
             ) {
               setSelectedGoalIdInView(null);
               return;
@@ -82,8 +81,7 @@ export const AppTopBar: React.FC = () => {
             } else if (
               activeTab === 'goals' ||
               activeTab === 'receipts' ||
-              activeTab === 'packages' ||
-              activeTab === 'saved'
+              activeTab === 'packages'
             ) {
               // Sparmål, kvitton och paket öppnas från profilen – tillbaka dit
               setSettingsSubView('main');
@@ -117,9 +115,19 @@ export const AppTopBar: React.FC = () => {
         />
 
         {callbackStatusMsg && (
-          <div className="max-w-md mx-auto w-full px-4 pt-3">
-            <div className="p-3 rounded-xl bg-positive-solid/10 border border-positive-solid/20 text-positive text-xs font-semibold text-center">
-              {callbackStatusMsg}
+          // Statusrad för bankkopplingen: snurra medan det pågår, varning vid fel, bock när klart
+          <div className="max-w-md mx-auto w-full px-4 pt-3" role="status" aria-live="polite">
+            <div className="ui-card px-4 py-3 flex items-center gap-3">
+              {/kunde inte|fel/i.test(callbackStatusMsg) ? (
+                <WarningCircle size={20} weight="fill" className="text-negative shrink-0" />
+              ) : /\.\.\.$|…$/.test(callbackStatusMsg) ? (
+                <SpinnerGap size={20} weight="bold" className="text-[var(--on-accent-container)] animate-spin shrink-0" />
+              ) : (
+                <CheckCircle size={20} weight="fill" className="text-positive shrink-0" />
+              )}
+              <p className="text-callout font-medium text-[var(--text-primary)] min-w-0">
+                {callbackStatusMsg.replace(/\.\.\.$/, ' …')}
+              </p>
             </div>
           </div>
         )}

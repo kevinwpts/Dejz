@@ -77,7 +77,7 @@ export const BankSelectAccountsSheet: React.FC<BankSelectAccountsSheetProps> = (
                   <span className="ui-option-title">
                     {accTitle}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">
+                  <span className="text-footnote text-[var(--text-secondary)] block tabular-nums mt-0.5">
                     {formattedNum}
                   </span>
                 </div>
@@ -106,7 +106,7 @@ export const BankSelectAccountsSheet: React.FC<BankSelectAccountsSheetProps> = (
             type="button"
             disabled={reconnectingBankId === selectingAccountsConn.id}
             onClick={() => onReconnect(selectingAccountsConn)}
-            className="w-full py-2.5 px-4 rounded-2xl bg-[var(--fill-grouped)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
+            className="ui-btn-danger text-[var(--text-secondary)] disabled:opacity-50"
           >
             {reconnectingBankId === selectingAccountsConn.id
               ? `Öppnar ${selectingAccountsConn.aspsp_name}...`

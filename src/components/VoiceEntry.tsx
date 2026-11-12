@@ -22,6 +22,8 @@ interface AddEntrySheetProps {
 type SpeechRecResultEvent = {
   results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }>;
 };
+const VOICE_UNAVAILABLE = { title: 'Rösten fungerar inte här', hint: 'Fyll i köpet manuellt i stället.' };
+
 type SpeechRecErrorEvent = { error?: string };
 
 type SpeechRec = {
@@ -71,7 +73,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
 }) => {
   const [heard, setHeard] = useState('');
   const [listening, setListening] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ title: string; hint: string } | null>(null);
   const recRef = useRef<SpeechRec | null>(null);
   const finalRef = useRef('');
   // Senaste text som syntes på skärmen – iPhone markerar ofta aldrig resultatet som "klart"
@@ -157,11 +159,11 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
       rec.onerror = (e) => {
         const code = e?.error;
         if (code === 'not-allowed' || code === 'service-not-allowed') {
-          setError('Mikrofonen är blockerad. Tillåt den i webbläsaren, eller fyll i manuellt.');
+          setError({ title: 'Mikrofonen är blockerad', hint: 'Tillåt mikrofonen i webbläsarens inställningar.' });
         } else if (code === 'no-speech') {
-          setError('Jag hörde inget. Tryck och försök igen.');
+          setError({ title: 'Jag hörde inget', hint: 'Tryck på mikrofonen och försök igen.' });
         } else if (code !== 'aborted') {
-          setError('Rösten fungerar inte här just nu. Fyll i manuellt.');
+          setError(VOICE_UNAVAILABLE);
         }
       };
       rec.onend = () => {
@@ -176,7 +178,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
       setListening(true);
     } catch {
       setListening(false);
-      setError('Rösten fungerar inte här just nu. Fyll i manuellt.');
+      setError(VOICE_UNAVAILABLE);
     }
   };
 
@@ -185,7 +187,7 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
       <div className="space-y-6">
         <SheetHeader title="Lägg till köp" onClose={onClose} flush />
 
-        <div className="flex flex-col items-center text-center gap-4">
+        <div className="flex flex-col items-center text-center gap-5 pt-2">
           <button
             type="button"
             onClick={listening ? finishListening : startListening}
@@ -193,21 +195,23 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
             className="ui-fab relative w-24 h-24"
           >
             {listening && (
-              <span className="absolute inset-0 rounded-full bg-brand/40 animate-ping" />
+              <span className="ui-mic-pulse" aria-hidden="true" />
             )}
             <Microphone size={38} weight="fill" className="relative" />
           </button>
 
-          <div className="min-h-[52px] flex flex-col items-center justify-center gap-1">
+          <div className="min-h-[56px] flex flex-col items-center justify-center gap-1" aria-live="polite">
             {heard ? (
-              <p className="font-display font-semibold text-xl text-[var(--text-primary)]">{heard}</p>
+              <p className="font-display font-semibold text-[22px] tracking-[-0.02em] text-[var(--text-primary)]">
+                ”{heard}”
+              </p>
             ) : (
-              <p className="font-display font-semibold text-base text-[var(--text-primary)]">
-                {listening ? 'Lyssnar …' : 'Tryck och prata'}
+              <p className="font-display font-semibold text-[17px] tracking-[-0.015em] text-[var(--text-primary)]">
+                {error ? error.title : listening ? 'Lyssnar …' : 'Tryck och prata'}
               </p>
             )}
-            <p className="text-sm text-[var(--text-secondary)]">
-              {error || 'Säg t.ex. ”Ica 143 kronor”'}
+            <p className="text-callout text-[var(--text-secondary)] max-w-[280px] text-pretty">
+              {error ? error.hint : heard ? 'Tryck på mikrofonen när du är klar' : 'Säg t.ex. ”Ica 143 kronor”'}
             </p>
           </div>
         </div>
@@ -218,9 +222,9 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
             stopListening();
             onManual();
           }}
-          className="w-full py-3.5 rounded-2xl bg-[var(--fill-grouped)] hover:opacity-90 text-sm font-semibold text-[var(--text-primary)] flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          className="ui-btn-secondary"
         >
-          <Keyboard size={18} />
+          <Keyboard size={20} />
           <span>Fyll i manuellt</span>
         </button>
       </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { PeriodInfo } from '../../utils/periodEngine';
 import { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 import { BottomSheet } from '../ui/BottomSheet';
-import { EmptyClusterArtwork } from '../ui/VisualArtwork';
+import { Bell } from '@phosphor-icons/react';
 import { SheetHeader } from '../ui/SheetHeader';
 
 interface NotificationsModalProps {
@@ -26,7 +26,6 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
-      surfaceClass="bg-[var(--bg-color)]"
       maxHeightClass="max-h-[88dvh]"
       zIndexClass="z-[120]"
       disablePadding={true}
@@ -39,12 +38,14 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
       {/* Empty State */}
       <div className="p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
         <section className="ui-empty-state">
-          <EmptyClusterArtwork variant="notifications" />
+          <span className="ui-empty-badge" aria-hidden="true">
+            <Bell size={28} weight="fill" />
+          </span>
           <p className="ui-empty-title">
             Inga nya notiser
           </p>
           <p className="ui-empty-sub">
-            När något viktigt händer med dina konton eller räkningar dyker det upp här.
+            När något viktigt händer med din budget dyker det upp här.
           </p>
         </section>
       </div>

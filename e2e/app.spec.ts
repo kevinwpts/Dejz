@@ -68,7 +68,7 @@ test('ett nytt köp minskar "kvar" med exakt beloppet', async ({ page }) => {
   await page.getByRole('button', { name: 'Fyll i manuellt' }).click();
   await page.getByPlaceholder('Butik eller köp').fill('Testköp');
   await page.getByPlaceholder('0').first().fill('250');
-  await page.getByRole('button', { name: 'Spara händelse' }).click();
+  await page.getByRole('button', { name: 'Spara köp' }).click();
 
   await expect
     .poll(async () => (await readHomeCard(page)).kvar, { timeout: 10_000 })
@@ -133,7 +133,7 @@ test('ett nytt köp syns i Historik', async ({ page }) => {
   await page.getByRole('button', { name: 'Fyll i manuellt' }).click();
   await page.getByPlaceholder('Butik eller köp').fill('Historiktest');
   await page.getByPlaceholder('0').first().fill('99');
-  await page.getByRole('button', { name: 'Spara händelse' }).click();
+  await page.getByRole('button', { name: 'Spara köp' }).click();
   await page.locator('nav button', { hasText: 'Historik' }).first().click();
   await expect(page.getByText('Historiktest').first()).toBeVisible();
 });

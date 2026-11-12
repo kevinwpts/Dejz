@@ -58,17 +58,17 @@ export const SetNewPasswordSheet: React.FC<{
         className="relative w-full sm:max-w-md bg-[var(--surface-color)] rounded-t-modal sm:rounded-modal px-5 sm:px-7 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-[var(--shadow-modal)] animate-scale-in space-y-5"
       >
         <div className="space-y-2">
-          <span className="w-11 h-11 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)] flex items-center justify-center">
-            <LockSimple size={20} weight="bold" />
+          <span className="w-12 h-12 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)] flex items-center justify-center">
+            <LockSimple size={22} weight="bold" />
           </span>
-          <h2 className="font-display font-semibold text-xl text-[var(--text-primary)]">Välj nytt lösenord</h2>
-          <p className="text-sm text-[var(--text-secondary)] leading-[1.5]">
+          <h2 className="pt-2 font-display font-bold text-2xl tracking-[-0.025em] text-[var(--text-primary)]">Välj nytt lösenord</h2>
+          <p className="text-subhead text-[var(--text-secondary)] leading-relaxed text-pretty">
             Du är inloggad via länken i mejlet. Välj ett nytt lösenord så kan du logga in som vanligt nästa gång.
           </p>
         </div>
 
-        <label className="block rounded-2xl bg-[var(--fill-grouped)] px-4 py-3.5 cursor-text">
-          <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">Nytt lösenord</span>
+        <label className="block rounded-card-nested bg-[var(--fill-grouped)] px-4 py-3.5 cursor-text">
+          <span className="ui-field-label block mb-1">Nytt lösenord</span>
           <span className="flex items-center gap-2">
             <input
               type={show ? 'text' : 'password'}
@@ -94,8 +94,8 @@ export const SetNewPasswordSheet: React.FC<{
         </label>
 
         {error && (
-          <p className="flex items-center gap-1.5 text-xs font-medium text-negative">
-            <WarningCircle size={14} weight="bold" />
+          <p className="flex items-center gap-1.5 px-1 text-footnote font-medium text-negative">
+            <WarningCircle size={16} weight="fill" />
             {error}
           </p>
         )}
@@ -104,7 +104,7 @@ export const SetNewPasswordSheet: React.FC<{
           <button
             type="submit"
             disabled={saving}
-            className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+            className="ui-btn-primary"
           >
             {saving && <SpinnerGap size={16} className="animate-spin" />}
             Spara nytt lösenord
@@ -112,7 +112,7 @@ export const SetNewPasswordSheet: React.FC<{
           <button
             type="button"
             onClick={onSkip}
-            className="w-full py-2.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+            className="ui-onb-skip-btn"
           >
             Inte nu
           </button>

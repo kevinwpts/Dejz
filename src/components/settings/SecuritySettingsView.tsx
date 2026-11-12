@@ -35,12 +35,11 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
             <span className="ui-admin-icon-slot">
               <DownloadSimple size={18} weight="regular" />
             </span>
-            <span className="ui-list-row-title-medium">
-              Exportera data
+            <span className="ui-list-row-title">
+              Ladda ner mina data
             </span>
           </div>
           <div className="ui-admin-right">
-            <span className="ui-admin-value">JSON</span>
             <span className="ui-admin-chevron">
               <CaretRight size={13} />
             </span>
@@ -57,7 +56,7 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
             <span className="ui-admin-icon-slot">
               <ArrowCounterClockwise size={18} weight="regular" />
             </span>
-            <span className="ui-list-row-title-medium">
+            <span className="ui-list-row-title">
               Nollställ data
             </span>
           </div>
@@ -77,12 +76,10 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
           className="ui-admin-row disabled:opacity-50"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <span className="w-5 h-5 flex items-center justify-center shrink-0 text-negative">
+            <span className="ui-admin-icon-slot text-negative">
               <Trash size={18} weight="regular" />
             </span>
-            <span className="font-medium text-footnote sm:text-callout text-negative truncate">
-              Radera konto
-            </span>
+            <span className="ui-list-row-title text-negative">Radera konto</span>
           </div>
           <div className="ui-admin-right">
             <span className="ui-admin-chevron">
@@ -101,7 +98,7 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
             ? 'Ditt konto och all data tas bort. Detta går inte att ångra.'
             : 'Alla poster och bankkopplingar tas bort så att du kan börja om.'
         }
-        confirmLabel={securityConfirmAction === 'delete' ? 'Radera' : 'Nollställ'}
+        confirmLabel={securityConfirmAction === 'delete' ? 'Radera konto' : 'Nollställ'}
         variant="danger"
         onConfirm={async () => {
           const action = securityConfirmAction;

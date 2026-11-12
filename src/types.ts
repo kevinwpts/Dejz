@@ -1,6 +1,7 @@
 export enum PaymentMethod {
   AUTOGIRO = 'Autogiro',
-  KORTBETALNING = 'Kortbetalning',
+  // Samma namn som standardbetalsättet "Kort" (annars visas både "Kort" och "Kortbetalning" i väljaren)
+  KORTBETALNING = 'Kort',
   SWISH = 'Swish',
 }
 

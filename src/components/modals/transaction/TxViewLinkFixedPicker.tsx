@@ -81,13 +81,13 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
                     >
                       {item.name}
                     </span>
-                    <span className="text-caption text-[var(--text-secondary)] tabular-nums">
+                    <span className="text-footnote text-[var(--text-secondary)] tabular-nums block mt-0.5">
                       {formatKr(item.amount)}/mån · Den {dayNum}:e
                     </span>
                   </div>
                 </div>
                 {isMatched && (
-                  <Check size={14} weight="bold" className="text-positive-solid shrink-0" />
+                  <Check size={16} weight="bold" className="text-[var(--accent-color)] shrink-0" />
                 )}
               </button>
             );
@@ -100,7 +100,7 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
                 onLinkToFixed(activeTx, null, isIncome ? 'income' : 'expense');
                 navigateSubView(pickerReturnView, 'back');
               }}
-              className="ui-row-btn text-negative-solid"
+              className="ui-row-btn text-negative"
             >
               <span className="font-medium">Ta bort koppling till fast post</span>
             </button>
@@ -111,12 +111,10 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
           <button
             type="button"
             onClick={() => onMarkAsFixed(activeTx, isIncome ? 'income' : 'expense')}
-            className="ui-btn-secondary w-full flex items-center justify-center gap-1.5"
+            className="ui-btn-secondary"
           >
-            <Plus size={14} weight="bold" />
-            <span>
-              Skapa som ny fast {isIncome ? 'inkomst' : 'utgift'} ({activeTx.title})
-            </span>
+            <Plus size={16} weight="bold" />
+            <span>Skapa ny fast {isIncome ? 'inkomst' : 'utgift'}</span>
           </button>
         )}
       </div>

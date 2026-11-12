@@ -24,19 +24,19 @@ const TITLES: Record<PublicPageKind, string> = {
 };
 
 const Support: React.FC = () => (
-  <div className="space-y-6 text-sm leading-relaxed text-[var(--text-secondary)]">
+  <div className="space-y-6 text-subhead leading-relaxed text-[var(--text-secondary)]">
     <p>
       Har du en fråga, hittat ett fel eller vill ge feedback? Mejla oss så svarar vi så snart vi kan, oftast samma
       dag.
     </p>
     <a
       href={`mailto:${PRIVACY_CONTACT}`}
-      className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] font-semibold"
+      className="ui-btn-primary"
     >
-      {PRIVACY_CONTACT}
+      Mejla {PRIVACY_CONTACT}
     </a>
-    <section className="space-y-2">
-      <h3 className="font-display font-semibold text-subhead text-[var(--text-primary)]">Vanliga frågor</h3>
+    <section className="space-y-3 pt-2">
+      <h3 className="font-display font-semibold text-base tracking-[-0.01em] text-[var(--text-primary)]">Vanliga frågor</h3>
       <p>
         <strong className="text-[var(--text-primary)]">Hur raderar jag mitt konto?</strong> I appen under
         Inställningar → Data &amp; säkerhet → Radera konto. Allt raderas direkt och kan inte återställas.
@@ -58,21 +58,25 @@ export const PublicInfoPage: React.FC<{ kind: PublicPageKind }> = ({ kind }) => 
   }, [kind]);
   return (
     <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-primary)] font-sans">
-      <header className="max-w-2xl mx-auto px-5 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-4 flex items-center justify-between">
+      <header className="max-w-2xl mx-auto px-5 pt-[calc(1rem+env(safe-area-inset-top,0px))] h-[calc(4rem+env(safe-area-inset-top,0px))] flex items-center justify-between">
         <a href="/" aria-label="Till Dejz startsida">
           <BrandLogo className="h-6 text-[var(--accent-color)]" />
         </a>
-        <a href="/" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+        <a href="/" className="h-9 px-4 -mr-1 inline-flex items-center rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-80">
           Till appen
         </a>
       </header>
       <main className="max-w-2xl mx-auto px-5 pb-16">
-        <h1 className="font-display font-semibold text-3xl tracking-[-0.02em] mb-6">{TITLES[kind]}</h1>
-        <div className="rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-6">
-          {kind === 'integritet' && <PrivacyPolicyContent />}
-          {kind === 'villkor' && <TermsPage />}
-          {kind === 'support' && <Support />}
-        </div>
+        <h1 className="font-display font-bold text-[2rem] leading-tight tracking-[-0.03em] mt-6 mb-6">{TITLES[kind]}</h1>
+        {/* Villkoren har egna kort (samma som i appen) – lägg dem inte i ett kort till */}
+        {kind === 'villkor' ? (
+          <TermsPage />
+        ) : (
+          <div className="ui-card-p sm:p-7">
+            {kind === 'integritet' && <PrivacyPolicyContent />}
+            {kind === 'support' && <Support />}
+          </div>
+        )}
       </main>
     </div>
   );

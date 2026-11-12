@@ -2,7 +2,7 @@ import type { RecurringMatchResult } from '../../../utils/recurring/checkRecurri
 import { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import { Paperclip, Trash, CaretRight, Check, ClockCounterClockwise, CalendarBlank, Plus } from '@phosphor-icons/react';
+import { Paperclip, Trash, CaretRight, ClockCounterClockwise, CalendarBlank, Plus } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { TransactionItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
@@ -94,7 +94,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
     {subView === 'edit' && (
       <div className={slideAnimClass}>
         {isCreateMode ? (
-          <SheetHeader title="Lägg till händelse" onClose={onClose} />
+          <SheetHeader title={isIncome ? 'Ny inkomst' : 'Nytt köp'} onClose={onClose} />
         ) : (
           <SheetHeader
             variant="edit"
@@ -189,7 +189,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                     }}
                     title={`Återställ ursprungsnamn (${defaultCleanBankTitle})`}
                     aria-label={`Återställ ursprungsnamn (${defaultCleanBankTitle})`}
-                    className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
+                    className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
                   >
                     <ClockCounterClockwise size={15} weight="bold" />
                   </button>
@@ -197,7 +197,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
             </div>
 
             {!isCreateMode && rawBankText && (
-              <div className="flex items-center justify-between gap-2 pt-1 text-caption text-[var(--text-muted)]">
+              <div className="flex items-center justify-between gap-2 pt-1 text-footnote text-[var(--text-tertiary)]">
                 <span className="truncate" title={rawBankText}>
                   Banktext:{' '}
                   <span className="font-medium text-[var(--text-secondary)]">
@@ -207,7 +207,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
               </div>
             )}
 
-            <div className="border-t border-[var(--border-subtle)] pt-3.5">
+            <div className="border-t border-[var(--separator)] pt-3.5">
               {!isBankSynced ? (
                 <label className="block cursor-text">
                   <span className="ui-field-label block mb-0.5">
@@ -226,7 +226,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                           : 'text-[var(--text-primary)]'
                       }`}
                     />
-                    <span className="font-display font-semibold text-sm text-[var(--text-muted)] shrink-0">
+                    <span className="font-display font-semibold text-subhead text-[var(--text-muted)] shrink-0">
                       kr
                     </span>
                   </div>
@@ -260,7 +260,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
               className="ui-row-btn"
             >
               <span className="ui-info-label shrink-0">Kategori</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+              <span className="ui-info-value flex items-center gap-1.5">
                 <CategoryIcon category={category} size={13} />
                 <span>{category}</span>
                 <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -274,7 +274,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
               className="ui-row-btn"
             >
               <span className="ui-info-label shrink-0">Betalsätt</span>
-              <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+              <span className="ui-info-value flex items-center gap-1.5">
                 <PaymentMethodIcon method={paymentMethod} size={15} />
                 <span>{paymentMethod}</span>
                 <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -297,7 +297,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                 className="ui-row-btn"
               >
                 <span className="ui-info-label shrink-0">Datum</span>
-                <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+                <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
                   <CalendarBlank size={13} className="text-[var(--text-secondary)]" />
                   <span>{formatSwedishFullDate(date)}</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -330,8 +330,8 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                       }}
                       className="flex items-center gap-2 min-w-0 flex-1 text-left hover:opacity-80 cursor-pointer"
                     >
-                      <Paperclip size={13} weight="bold" className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="text-xs font-medium text-[var(--text-primary)] truncate">
+                      <Paperclip size={15} className="text-[var(--text-secondary)] shrink-0" />
+                      <span className="ui-list-row-title text-callout">
                         {rcpt.name || `Kvitto ${idx + 1}`}
                       </span>
                     </button>
@@ -339,23 +339,22 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                       aria-label="Ta bort kvitto"
                       type="button"
                       onClick={() => handleRemoveReceiptAt(idx)}
-                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer shrink-0"
+                      className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer shrink-0"
                       title="Ta bort kvitto"
                     >
-                      <Trash size={13} />
+                      <Trash size={16} />
                     </button>
                   </div>
                 ))}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="ui-row-btn text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  className="ui-row-btn text-[var(--accent-color)]"
                 >
-                  <span className="flex items-center gap-2">
-                    <Plus size={13} weight="bold" className="text-positive-solid" />
+                  <span className="flex items-center gap-2 font-medium">
+                    <Plus size={15} weight="bold" />
                     <span>Bifoga fler kvitton</span>
                   </span>
-                  <Paperclip size={13} className="text-[var(--text-muted)]" />
                 </button>
               </>
             ) : (
@@ -365,9 +364,9 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                 className="ui-row-btn"
               >
                 <span className="ui-info-label shrink-0">Kvitto</span>
-                <span className="font-normal text-[var(--text-secondary)] flex items-center gap-1.5">
+                <span className="ui-info-value flex items-center gap-1.5">
                   <Paperclip size={13} />
-                  <span>Bifoga kvitto</span>
+                  <span>Bifoga</span>
                   <CaretRight size={12} className="text-[var(--text-muted)]" />
                 </span>
               </button>
@@ -379,10 +378,9 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
               type="button"
               onClick={handleCreateSave}
               disabled={!title.trim() || !(Number(amount) > 0)}
-              className="ui-btn-primary py-3.5"
+              className="ui-btn-primary"
             >
-              <Check size={14} weight="bold" />
-              <span>Spara händelse</span>
+              <span>{isIncome ? 'Spara inkomst' : 'Spara köp'}</span>
             </button>
           ) : (
             <div className="space-y-2.5">
@@ -392,7 +390,6 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                 disabled={!title.trim()}
                 className="ui-btn-primary"
               >
-                <Check size={14} weight="bold" />
                 <span>Spara ändringar</span>
               </button>
 

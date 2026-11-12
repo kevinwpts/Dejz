@@ -190,15 +190,15 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                   <button
                     type="button"
                     onClick={handleJumpToToday}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--accent-soft)] text-footnote font-semibold text-[var(--on-accent-container)] transition-all cursor-pointer active:scale-95"
                   >
-                    <ArrowCounterClockwise size={11} weight="bold" />
+                    <ArrowCounterClockwise size={12} weight="bold" />
                     <span>Idag</span>
                   </button>
                 )}
               </div>
               {selectedDayItems.length > 0 && (
-                <span className="tabular-nums font-medium text-[var(--text-secondary)]">
+                <span className="privacy-blur-amount tabular-nums font-medium text-[var(--text-secondary)]">
                   {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '−' : ''}
                   {formatKr(Math.abs(selectedDayNet))}
                 </span>

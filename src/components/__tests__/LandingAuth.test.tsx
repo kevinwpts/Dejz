@@ -103,11 +103,11 @@ describe('inloggning', () => {
     const { user, open, onAuthenticated } = renderLanding();
     await open();
     await fillAndSubmit(user, 'elin@exempel.se', 'fel-losen');
-    expect(await screen.findByText('Fel lösenord. Kontrollera och försök igen.')).toBeTruthy();
+    expect(await screen.findByText('Fel e-post eller lösenord. Försök igen.')).toBeTruthy();
     expect(onAuthenticated).not.toHaveBeenCalled();
 
     await user.type(passwordInput(), 'x');
-    expect(screen.queryByText('Fel lösenord. Kontrollera och försök igen.')).toBeNull();
+    expect(screen.queryByText('Fel e-post eller lösenord. Försök igen.')).toBeNull();
   });
 
   test('obekräftad e-post: "Skicka nytt mejl" skickar bekräftelsen igen', async () => {

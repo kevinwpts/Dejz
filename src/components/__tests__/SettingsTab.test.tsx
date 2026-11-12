@@ -115,9 +115,24 @@ describe('inställningar – huvudlistan', () => {
     expect(props.onToggleExcludeInternalTransfers).toHaveBeenCalledWith(false);
   });
 
-  test('Logga ut loggar ut', async () => {
+  test('Logga ut frågar först och loggar ut först efter bekräftelse', async () => {
     const { user, props } = renderSettings();
     await user.click(row('Logga ut'));
+    expect(props.onSignOut).not.toHaveBeenCalled();
+    const dialog = screen.getByRole('alertdialog');
+    expect(dialog.textContent).toContain('Logga ut?');
+
+    // Avbryt stänger utan att logga ut
+    await user.click(screen.getByRole('button', { name: 'Avbryt' }));
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    expect(props.onSignOut).not.toHaveBeenCalled();
+
+    await user.click(row('Logga ut'));
+    const confirm = screen
+      .getAllByRole('button', { name: 'Logga ut' })
+      .find((b) => screen.getByRole('alertdialog').contains(b));
+    if (!confirm) throw new Error('Ingen bekräftelseknapp');
+    await user.click(confirm);
     expect(props.onSignOut).toHaveBeenCalledOnce();
   });
 

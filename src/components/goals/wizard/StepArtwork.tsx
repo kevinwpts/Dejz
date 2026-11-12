@@ -35,11 +35,11 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
 
   return (
     <div
-      className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden pt-3 ${animClass}`}
+      className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden pt-2 ${animClass}`}
     >
-      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 py-1 pr-0.5">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3 p-1 -mx-1">
         <div
-          className="relative rounded-2xl overflow-hidden px-4 py-4 min-h-[76px] flex items-center justify-between text-white shadow-sm transition-colors duration-200"
+          className="relative rounded-card-nested overflow-hidden px-4 py-4 min-h-[76px] flex items-center justify-between text-white transition-colors duration-200"
           style={{
             background: goalCustomImage ? '#111827' : activeTheme.heroBg,
           }}
@@ -69,22 +69,22 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
           </div>
         </div>
 
-        <div className="relative shrink-0">
-          <MagnifyingGlass size={15} className="ui-input-icon" />
+        <div className="ui-search-box shrink-0">
+          <MagnifyingGlass size={16} className="text-[var(--text-muted)] shrink-0" />
           <input
             aria-label="Sök bild"
             type="text"
             value={artworkSearch}
             onChange={(e) => setArtworkSearch(e.target.value)}
-            placeholder="Sök bild..."
-            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+            placeholder="Sök bild, t.ex. resa"
+            className="ui-search-input"
           />
           {artworkSearch.length > 0 && (
             <button
               type="button"
               onClick={() => setArtworkSearch('')}
               aria-label="Rensa sökning"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="ui-clear-btn"
             >
               <X size={14} weight="bold" />
             </button>
@@ -97,8 +97,8 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
             onClick={() => galleryInputRef.current?.click()}
             className={`aspect-square rounded-2xl p-2.5 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative overflow-hidden ${
               goalCustomImage
-                ? 'ring-2 ring-[var(--text-primary)]'
-                : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]'
+                ? 'ring-2 ring-offset-2 ring-offset-[var(--bg-color)] ring-[var(--cta-bg)]'
+                : 'bg-[var(--surface-color)] shadow-[var(--card-shadow)]'
             }`}
           >
             {goalCustomImage ? (
@@ -110,7 +110,7 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
                 />
                 <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center p-2">
                   <ImageSquare size={22} weight="bold" className="text-white mb-1" />
-                  <span className="text-caption font-medium text-white leading-tight">
+                  <span className="text-footnote font-medium text-white leading-tight">
                     Byt bild
                   </span>
                 </div>
@@ -122,7 +122,7 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
                   weight="regular"
                   className="text-[var(--text-primary)] mb-1.5"
                 />
-                <span className="text-caption font-medium text-[var(--text-primary)] leading-tight">
+                <span className="text-footnote font-medium text-[var(--text-primary)] leading-tight">
                   Egen bild
                 </span>
               </>
@@ -140,13 +140,13 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
                 style={{ backgroundColor: art.tileBg }}
                 className={`aspect-square rounded-2xl p-2 flex items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
                   isSelected
-                    ? 'ring-[2.5px] ring-[var(--text-primary)] scale-[0.98]'
-                    : 'opacity-90 hover:opacity-100'
+                    ? 'ring-2 ring-offset-2 ring-offset-[var(--bg-color)] ring-[var(--cta-bg)]'
+                    : ''
                 }`}
               >
                 <GoalArtworkIllustration artworkId={art.id} className="w-full h-full" />
                 {isSelected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center shadow-sm">
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] flex items-center justify-center">
                     <Check size={11} weight="bold" />
                   </div>
                 )}
@@ -160,7 +160,7 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
         <button
           type="button"
           onClick={onContinue}
-          className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+          className="ui-btn-primary"
         >
           <span>Fortsätt</span>
         </button>

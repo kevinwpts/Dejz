@@ -42,18 +42,18 @@ export const TxRenameScopeDialog: React.FC<TxRenameScopeDialogProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[260] flex items-center justify-center p-5 bg-black/45 backdrop-blur-xs animate-fade-in"
+      className="ui-dialog-scrim animate-fade-in"
       onClick={onDismiss}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="tx-rename-scope-title"
-        className="w-full max-w-[348px] rounded-modal bg-[var(--surface-color)] border border-[var(--border-subtle)] p-5 shadow-2xl space-y-4 animate-scale-in"
+        className="ui-dialog-card animate-sheet-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="text-center">
-          <h3 id="tx-rename-scope-title" className="font-display font-semibold text-base text-[var(--text-primary)]">
+        <div className="space-y-2 px-1 pt-1 pb-6 text-center">
+          <h3 id="tx-rename-scope-title" className="font-display text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug">
             {isTitleChanged
               ? activeSwishPhone
                 ? 'Byt namn på Swish?'
@@ -63,13 +63,13 @@ export const TxRenameScopeDialog: React.FC<TxRenameScopeDialogProps> = ({
               : 'Ändra kategorin på fler köp?'}
           </h3>
           {!activeSwishPhone && !(isTitleChanged && isAggregatorTx) && (
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              Välj du flera gäller det även nya köp som kommer in.
+            <p className="text-subhead text-[var(--text-secondary)] leading-normal text-balance">
+              Väljer du flera gäller det även framtida köp.
             </p>
           )}
         </div>
 
-        <div className="space-y-2 pt-1">
+        <div className="space-y-2">
           {isTitleChanged && activeSwishPhone ? (
             <>
               <button
@@ -155,7 +155,7 @@ export const TxRenameScopeDialog: React.FC<TxRenameScopeDialogProps> = ({
           <button
             type="button"
             onClick={onDismiss}
-            className="w-full py-2 rounded-2xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+            className="w-full h-12 rounded-full text-subhead font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
           >
             Avbryt
           </button>

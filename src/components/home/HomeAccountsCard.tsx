@@ -52,7 +52,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
           title={showAccounts ? 'Dölj konton' : 'Visa konton'}
         >
           <div className="min-w-0">
-            <span className="text-meta text-[var(--text-secondary)] font-normal block">
+            <span className="text-footnote text-[var(--text-secondary)] font-normal block">
               Totalt saldo
             </span>
             {isInitialLoading && accounts.length === 0 ? (
@@ -82,9 +82,9 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
           }`}
         >
           <div className="overflow-hidden">
-            <div className="pt-2.5 border-t border-[var(--border-subtle)]">
+            <div className="pt-2.5 border-t border-[var(--separator)]">
               {accounts.length > 0 ? (
-                <div className="divide-y divide-[var(--border-subtle)]">
+                <div className="divide-y divide-[var(--separator)]">
                   {accounts.map((acc) => {
                     const hasDuplicateName =
                       accounts.filter(
@@ -115,13 +115,13 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                             size="sm"
                           />
                           <div className="min-w-0 flex-1">
-                            <span className="font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-snug text-[var(--text-primary)] block truncate">
+                            <span className="font-medium text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] block truncate">
                               {acc.name}
                             </span>
                             {(acc.bankName ||
                               (hasDuplicateName && last4) ||
                               acc.excludeFromTotalBalance) && (
-                              <span className="text-meta font-normal text-[var(--text-secondary)] block truncate mt-0.5">
+                              <span className="text-footnote font-normal text-[var(--text-secondary)] block truncate mt-0.5">
                                 {acc.bankName}
                                 {hasDuplicateName && last4 ? ` · •••• ${last4}` : ''}
                                 {acc.excludeFromTotalBalance ? ' · Ej i totalt' : ''}
@@ -131,7 +131,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span
-                            className={`font-display font-semibold text-callout tracking-[-0.01em] tabular-nums ${
+                            className={`font-display font-semibold text-subhead tracking-[-0.01em] tabular-nums ${
                               acc.excludeFromTotalBalance
                                 ? 'text-[var(--text-secondary)]'
                                 : 'text-[var(--text-primary)]'
@@ -140,8 +140,8 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                             {formatKr(acc.balance)}
                           </span>
                           <CaretRight
-                            size={12}
-                            weight="regular"
+                            size={14}
+                            weight="bold"
                             className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
                           />
                         </div>

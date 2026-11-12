@@ -51,6 +51,13 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
     period,
   });
 
+  // Historik för ett konto utan andra filter: tom lista = kontot har inga händelser (inte "inga träffar")
+  const isAccountOnly =
+    Boolean(filters.activeAccount) &&
+    filters.activeFilterCount === 1 &&
+    filters.typeTab === 'all' &&
+    !filters.searchQuery.trim();
+
   return (
     <div className="ui-page">
       {/* Sökfält, Filterknapp (Bottom Sheet) & Segmented Control */}
@@ -78,6 +85,17 @@ export const TransactionsTab: React.FC<TransactionsTabProps> = ({
         onToggleHeart={onToggleHeart}
         onTogglePackage={onTogglePackage}
         onExcludeTransaction={onExcludeTransaction}
+        searchQuery={filters.searchQuery}
+        isFiltered={!isAccountOnly && (filters.activeFilterCount > 0 || filters.typeTab !== 'all')}
+        emptyTitle={isAccountOnly ? 'Inga händelser på kontot än' : undefined}
+        onClearFilters={
+          filters.activeFilterCount > 0
+            ? () => {
+                filters.resetAllFilters();
+                filters.setTypeTab('all');
+              }
+            : undefined
+        }
       />
     </div>
   );

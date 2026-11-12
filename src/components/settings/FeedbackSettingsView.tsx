@@ -62,68 +62,70 @@ export const FeedbackSettingsView: React.FC<FeedbackSettingsViewProps> = ({
 
   return (
     <div className="ui-page animate-slide-in-right">
-      <div className="ui-card-p">
-        <form onSubmit={handleSendFeedback} className="space-y-4">
-          <div className="ui-segmented grid-cols-3">
-            {[
-              { id: 'idea' as const, label: 'Förslag' },
-              { id: 'bug' as const, label: 'Bugg' },
-              { id: 'praise' as const, label: 'Beröm' },
-            ].map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setFeedbackType(t.id)}
-                className={`ui-segmented-tab ${
-                  feedbackType === t.id ? 'ui-segmented-tab-active' : ''
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+      <form onSubmit={handleSendFeedback} className="space-y-3">
+        <span className="ui-settings-label">Vad vill du berätta?</span>
+        <div className="ui-segmented grid-cols-3">
+          {[
+            { id: 'idea' as const, label: 'Förslag' },
+            { id: 'bug' as const, label: 'Bugg' },
+            { id: 'praise' as const, label: 'Beröm' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setFeedbackType(t.id)}
+              aria-pressed={feedbackType === t.id}
+              className={`ui-segmented-tab ${feedbackType === t.id ? 'ui-segmented-tab-active' : ''}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-          <textarea
-            aria-label="Ditt meddelande"
-            rows={4}
-            value={feedbackMessage}
-            onChange={(e) => setFeedbackMessage(e.target.value)}
-            placeholder="Ditt meddelande"
-            required
-            className="ui-box-input resize-none"
-          />
+        <textarea
+          aria-label="Ditt meddelande"
+          rows={5}
+          value={feedbackMessage}
+          onChange={(e) => setFeedbackMessage(e.target.value)}
+          placeholder={
+            feedbackType === 'bug'
+              ? 'Vad hände, och vad gjorde du precis innan?'
+              : feedbackType === 'praise'
+              ? 'Vad gillar du med Dejz?'
+              : 'Vad skulle göra Dejz bättre för dig?'
+          }
+          required
+          className="block w-full rounded-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] p-4 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none focus:outline-none focus:shadow-[0_0_0_2px_var(--accent-soft)]"
+        />
 
-          {feedbackSent && (
-            <div className="p-3 rounded-xl bg-positive-solid/10 border border-positive-solid/20 text-positive text-xs font-semibold text-center animate-fade-in">
-              Tack för din feedback!
-            </div>
-          )}
+        {feedbackSent ? (
+          <p role="status" className="px-4 text-footnote font-medium text-positive animate-fade-in">
+            Tack! Vi läser allt som kommer in.
+          </p>
+        ) : (
+          <p className="px-4 text-footnote text-[var(--text-secondary)]">
+            Går direkt till oss som bygger Dejz.
+          </p>
+        )}
 
-          <button
-            type="submit"
-            disabled={!feedbackMessage.trim() || feedbackSending}
-            className="ui-btn-primary"
-          >
-            <PaperPlaneTilt size={15} weight="bold" />
-            <span>{feedbackSending ? 'Skickar...' : 'Skicka'}</span>
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={!feedbackMessage.trim() || feedbackSending}
+          className="ui-btn-primary"
+        >
+          <PaperPlaneTilt size={16} weight="bold" />
+          <span>{feedbackSending ? 'Skickar…' : 'Skicka'}</span>
+        </button>
+      </form>
 
       {onStartOnboarding && (
         <div className="ui-admin-card">
-          <button
-            type="button"
-            onClick={onStartOnboarding}
-            className="ui-admin-row"
-          >
+          <button type="button" onClick={onStartOnboarding} className="ui-admin-row">
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <span className="ui-admin-icon-slot">
                 <Compass size={18} weight="regular" />
               </span>
-              <span className="ui-list-row-title">
-                Visa introduktionsguiden igen
-              </span>
+              <span className="ui-list-row-title">Visa introduktionen igen</span>
             </div>
             <span className="ui-admin-chevron">
               <CaretRight size={13} />

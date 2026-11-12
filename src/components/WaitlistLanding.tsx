@@ -98,14 +98,14 @@ const FAQ = [
 const ComparisonVisual: React.FC = () => (
   <div aria-hidden="true">
     {/* Dejz */}
-    <div className="rounded-container p-5 sm:p-6 text-white bg-[image:var(--brand-gradient)] shadow-[0_18px_40px_-18px_rgba(91,61,245,0.6)]">
-      <div className="flex items-center justify-between text-xs">
+    <div className="rounded-container p-5 sm:p-6 text-white bg-[image:var(--brand-gradient)] shadow-[var(--cta-shadow)]">
+      <div className="flex items-center justify-between text-footnote">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <BrandLogo className="h-3.5" />
         </span>
         <span className="text-white/75 tabular-nums">6 dagar till lön</span>
       </div>
-      <div className="mt-3 text-sm text-white/80">Kvar att spendera till lön</div>
+      <div className="mt-3 text-subhead text-white/80">Kvar att spendera till lön</div>
       <div className="mt-0.5 font-display text-[2.5rem] leading-none font-semibold tracking-[-0.035em] tabular-nums">
         2 340 kr
       </div>
@@ -138,15 +138,15 @@ const SignupCta: React.FC<{
       className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 h-14 px-8 rounded-pill font-display font-semibold text-base tracking-[-0.01em] active:scale-[0.98] transition-all cursor-pointer ${
         onDark
           ? 'bg-white text-brand-deep hover:bg-white/90'
-          : 'bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 shadow-[0_12px_30px_-12px_rgba(91,61,245,0.6)]'
+          : 'bg-[var(--cta-bg)] text-[var(--cta-fg)] hover:opacity-90 shadow-[var(--cta-shadow)]'
       }`}
     >
       Skapa konto – gratis
       <ArrowRight size={18} weight="bold" />
     </button>
     {!hideNote && (
-      <p className={`mt-3 text-sm ${onDark ? 'text-white/75' : 'text-[var(--text-muted)]'}`}>
-        Gratis · Ingen nedladdning · Funkar direkt i mobilen
+      <p className={`mt-3 text-callout ${onDark ? 'text-white/75' : 'text-[var(--text-tertiary)]'}`}>
+        Inget kort · Ingen nedladdning · Funkar i mobilen
       </p>
     )}
   </div>
@@ -193,7 +193,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <button
             type="button"
             onClick={onLogin}
-            className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer px-2 py-1"
+            className="h-9 px-4 -mr-1 rounded-pill bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] hover:opacity-80 active:scale-[0.97] transition-all cursor-pointer"
           >
             Logga in
           </button>
@@ -217,7 +217,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
               <button
                 type="button"
                 onClick={onContinueExisting}
-                className="mt-4 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer truncate max-w-full"
+                className="mt-4 text-callout font-semibold text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer truncate max-w-full"
               >
                 Fortsätt som {existingEmail} →
               </button>
@@ -265,11 +265,11 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             {STEPS.map((s, i) => (
               <div key={s.src} className="flex flex-col items-center text-center">
                 <PhoneFrame src={s.src} alt={s.alt} className="w-[230px] sm:w-full sm:max-w-[250px]" />
-                <span className="mt-7 w-7 h-7 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-semibold flex items-center justify-center">
+                <span className="mt-7 w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--on-accent-container)] text-callout font-semibold tabular-nums flex items-center justify-center">
                   {i + 1}
                 </span>
-                <h3 className="mt-3 font-display font-semibold text-lg tracking-[-0.01em]">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-[var(--text-secondary)] leading-[1.5] max-w-xs">{s.text}</p>
+                <h3 className="mt-3 font-display font-semibold text-xl tracking-[-0.02em]">{s.title}</h3>
+                <p className="mt-2 text-base text-[var(--text-secondary)] leading-[1.5] max-w-xs text-pretty">{s.text}</p>
               </div>
             ))}
           </div>
@@ -280,10 +280,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <h2 className="text-center font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em]">
             Vanliga frågor
           </h2>
-          <div className="mt-8 rounded-card bg-[var(--surface-color)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+          <div className="mt-8 rounded-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] divide-y divide-[var(--separator)] overflow-hidden">
             {FAQ.map((item) => (
-              <details key={item.q} className="group px-5 py-4 sm:px-6">
-                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none font-display font-semibold text-base [&::-webkit-details-marker]:hidden">
+              <details key={item.q} className="group px-5 sm:px-6">
+                <summary className="min-h-[60px] py-4 flex items-center justify-between gap-4 cursor-pointer list-none font-display font-semibold text-base tracking-[-0.01em] [&::-webkit-details-marker]:hidden">
                   {item.q}
                   <CaretDown
                     size={16}
@@ -291,24 +291,24 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
                     className="shrink-0 text-[var(--text-muted)] transition-transform group-open:rotate-180"
                   />
                 </summary>
-                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-[1.55]">{item.a}</p>
+                <p className="-mt-1 pb-5 text-base text-[var(--text-secondary)] leading-[1.5] text-pretty">{item.a}</p>
               </details>
             ))}
           </div>
         </section>
 
         {/* Avslutande CTA */}
-        <section className="relative overflow-hidden mt-24 sm:mt-32 rounded-container text-white px-6 py-12 sm:px-12 sm:py-16 text-center bg-[radial-gradient(120%_90%_at_100%_0%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_55%),radial-gradient(80%_70%_at_0%_100%,rgba(255,140,210,0.3)_0%,rgba(255,140,210,0)_60%),var(--brand-gradient)] shadow-[0_24px_60px_-24px_rgba(91,61,245,0.7)]">
+        <section className="relative overflow-hidden mt-24 sm:mt-32 rounded-container text-white px-6 py-12 sm:px-12 sm:py-16 text-center bg-[radial-gradient(120%_90%_at_100%_0%,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0)_55%),var(--brand-gradient)] shadow-[var(--cta-shadow)]">
           <h2 className="font-display font-semibold text-[1.875rem] leading-[1.08] sm:text-[2.5rem] tracking-[-0.04em] text-balance">
             Se vad du har kvar till nästa lön.
           </h2>
-          <p className="mt-3 text-white/80 max-w-md mx-auto">
+          <p className="mt-3 text-base text-white/80 max-w-md mx-auto text-pretty">
             Kom igång på två minuter, utan kort. Bankkoppling kommer snart.
           </p>
           <SignupCta onSignup={onSignup} onDark hideNote className="mt-8" />
         </section>
 
-        <footer className="mt-12 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
+        <footer className="mt-12 pt-6 border-t border-[var(--separator)] flex flex-col sm:flex-row items-center justify-between gap-4 text-footnote text-[var(--text-tertiary)]">
           <div className="flex items-center gap-3">
             <BrandLogo className="h-4 text-[var(--accent-color)]" />
             <span>© {currentYear} Dejz</span>
@@ -325,7 +325,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
             onClick={onLogin}
             className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            Har du redan ett konto? Logga in
+            Har du redan ett konto? <span className="font-semibold text-[var(--accent-color)]">Logga in</span>
           </button>
         </footer>
       </div>

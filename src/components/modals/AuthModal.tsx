@@ -220,19 +220,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       {resetEmailSent ? (
         /* Modern "Check your inbox" screen in modal */
         <div className="py-6 text-center space-y-5 animate-scale-in">
-          <EnvelopeSimple size={48} weight="light" className="ui-empty-icon" />
+          <span className="ui-empty-badge" aria-hidden="true">
+            <EnvelopeSimple size={26} weight="regular" />
+          </span>
 
           <div className="space-y-2 px-2">
             <h2 className="font-display font-semibold text-xl sm:text-2xl tracking-[-0.012em] text-[var(--text-primary)]">
               Kolla din inkorg
             </h2>
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-callout text-[var(--text-secondary)]">
               Vi har skickat en återställningslänk till:
             </p>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-semibold text-[var(--text-primary)] max-w-full">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--fill-grouped)] text-callout font-semibold text-[var(--text-primary)] max-w-full">
               <span className="truncate max-w-[240px]">{email.trim()}</span>
             </div>
-            <p className="text-meta text-[var(--text-muted)] pt-1 leading-relaxed max-w-xs mx-auto">
+            <p className="text-footnote text-[var(--text-secondary)] pt-1 leading-relaxed max-w-xs mx-auto">
               Klicka på länken i mejlet för att välja ett nytt lösenord. Hittar du det inte? Kika i skräpposten.
             </p>
           </div>
@@ -241,7 +243,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={() => setResetEmailSent(false)}
-              className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              className="text-footnote font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
             >
               Fel e-post? Ändra
             </button>
@@ -250,7 +252,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               disabled={resendCooldown > 0 || resending}
               onClick={handleResendReset}
-              className="text-xs font-semibold text-[var(--text-primary)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
+              className="text-footnote font-semibold text-[var(--text-primary)] hover:opacity-75 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5"
             >
               {resending && <SpinnerGap size={12} className="animate-spin" />}
               {resendCooldown > 0 ? `Skicka igen om ${resendCooldown}s` : 'Skicka igen'}
@@ -287,7 +289,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* General Non-Password Error Notice */}
           {errorMsg && !hasPasswordError && (
-            <div className="mb-4 p-3 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-xs animate-scale-in flex items-start gap-2">
+            <div className="mb-4 p-3 rounded-card-nested bg-negative-solid/10 text-negative text-footnote animate-scale-in flex items-start gap-2">
               <WarningCircle size={15} className="shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
@@ -342,9 +344,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div className="relative my-4 text-center">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[var(--border-subtle)]" />
+                  <div className="w-full border-t border-[var(--separator)]" />
                 </div>
-                <span className="relative px-3 bg-[var(--surface-color)] text-caption text-[var(--text-muted)] font-medium">
+                <span className="relative px-3 bg-[var(--surface-color)] text-footnote text-[var(--text-secondary)]">
                   eller med e-post
                 </span>
               </div>
@@ -356,13 +358,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div
               key={shakeTrigger}
               className={`ui-sheet-group transition-all ${
-                hasPasswordError
-                  ? 'border-negative-solid/50 ring-1 ring-negative-solid/20 animate-shake'
-                  : ''
+                hasPasswordError ? 'ring-[1.5px] ring-negative-solid animate-shake' : ''
               }`}
             >
               <label className="px-4 py-3.5 block cursor-text">
-                <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
+                <span className="ui-field-label block mb-1">
                   E-postadress
                 </span>
                 <input
@@ -379,12 +379,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </label>
 
               {view !== 'forgot_password' && (
-                <label className="px-4 py-3.5 block cursor-text">
-                  <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1">
-                    Lösenord
-                  </span>
+                <div className="px-4 py-3.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="ui-field-label">Lösenord</span>
+                    {view === 'login' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setView('forgot_password');
+                          handleReset();
+                        }}
+                        className="text-footnote font-medium text-[var(--accent-color)] hover:opacity-80 cursor-pointer"
+                      >
+                        Glömt lösenord?
+                      </button>
+                    )}
+                  </div>
                   <div className="flex items-center justify-between gap-2">
                     <input
+                      aria-label="Lösenord"
                       type={showPassword ? 'text' : 'password'}
                       required
                       placeholder={view === 'register' ? 'Minst 6 tecken' : 'Ditt lösenord'}
@@ -401,47 +414,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       aria-label={showPassword ? 'Dölj lösenord' : 'Visa lösenord'}
                       className="ui-clear-btn"
                     >
-                      {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
+                      {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                </label>
+                </div>
               )}
 
               {/* Inline Password Error micro-banner */}
               {hasPasswordError && (
-                <div className="px-3.5 py-2 bg-negative-solid/5 flex items-center justify-between text-caption text-negative font-medium animate-scale-in">
-                  <div className="flex items-center gap-1.5">
-                    <WarningCircle size={13} weight="bold" className="shrink-0" />
-                    <span>Fel lösenord. Kontrollera och försök igen.</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setView('forgot_password');
-                      handleReset();
-                    }}
-                    className="font-semibold underline hover:opacity-80 cursor-pointer shrink-0 ml-2"
-                  >
-                    Glömt?
-                  </button>
+                <div className="px-4 py-3 flex items-center gap-2 text-footnote text-negative font-medium animate-scale-in">
+                  <WarningCircle size={16} weight="fill" className="shrink-0" />
+                  <span>Fel e-post eller lösenord. Försök igen.</span>
                 </div>
               )}
             </div>
 
-            {view === 'login' && (
-              <div className="flex justify-end -mt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setView('forgot_password');
-                    handleReset();
-                  }}
-                  className="text-caption font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                >
-                  Glömt lösenord?
-                </button>
-              </div>
-            )}
 
             <button
               type="submit"

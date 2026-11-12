@@ -251,7 +251,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
       </div>
 
       {/* Spacious Divided List of Categories with Inset Dividers */}
-      <div className="ui-admin-card">
+      <div className="ui-admin-card ui-admin-card-tiles">
         {currentList.map((cat) => {
           const count = usageCounts[cat.name.toLowerCase().trim()] || 0;
           return (
@@ -261,11 +261,9 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
               onClick={() => openEditSheet(cat)}
               className="ui-admin-row"
             >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <span className="ui-admin-icon-slot">
-                  <CategoryIcon category={cat.name} iconId={cat.icon} size={20} badge={false} />
-                </span>
-                <span className="ui-list-row-title-medium">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <CategoryIcon category={cat.name} iconId={cat.icon} size={16} badge />
+                <span className="ui-list-row-title">
                   {cat.name}
                 </span>
               </div>
@@ -329,14 +327,12 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           {/* Stort och tydligt inmatningskort med live-ikon */}
           <div className="ui-field-card">
             <label className="flex items-center gap-3.5 cursor-text">
-              <div className="w-11 h-11 flex items-center justify-center shrink-0">
-                <CategoryIcon
-                  category={formName || 'Kategori'}
-                  iconId={formIcon}
-                  size={30}
-                  badge={false}
-                />
-              </div>
+              <CategoryIcon
+                category={formName || 'Kategori'}
+                iconId={formIcon}
+                size={30}
+                badge
+              />
               <div className="flex-1 min-w-0">
                 <span className="ui-field-label block mb-0.5">
                   Namn på kategori
@@ -365,7 +361,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
             <span className="px-1 ui-field-label block">
               Välj ikon
             </span>
-            <div className="grid grid-cols-6 gap-2 p-3 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] max-h-56 overflow-y-auto">
+            <div className="ui-sheet-box grid grid-cols-6 gap-1.5 p-2.5 max-h-56 overflow-y-auto">
               {AVAILABLE_CATEGORY_ICONS.map((item) => {
                 const isSelected = formIcon === item.id;
                 return (
@@ -376,10 +372,10 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
                     type="button"
                     title={item.label}
                     onClick={() => setFormIcon(item.id)}
-                    className={`h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+                    className={`h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
                       isSelected
-                        ? 'bg-[var(--surface-color)] ring-2 ring-[var(--text-primary)] scale-[1.04]'
-                        : 'bg-transparent hover:bg-[var(--surface-color)]'
+                        ? 'bg-[var(--surface-color)] shadow-[var(--segment-thumb-shadow)] ring-2 ring-[var(--text-primary)]'
+                        : 'bg-transparent'
                     }`}
                   >
                     <CategoryIcon iconId={item.id} size={22} badge={false} />

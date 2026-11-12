@@ -1,6 +1,6 @@
 // Inkomstfönstret: lägg till ny inkomst eller redigera en befintlig.
 import React from 'react';
-import { Check, CaretRight } from '@phosphor-icons/react';
+import { CaretRight } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon } from '../../CategoryIcon';
@@ -88,7 +88,7 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
           </label>
         </div>
 
-        <div className="border-t border-[var(--border-subtle)] pt-3.5">
+        <div className="border-t border-[var(--separator)] pt-3.5">
           <label className="block cursor-text">
             <span className="ui-field-label block mb-0.5">
               Belopp per månad
@@ -117,7 +117,7 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
           className="ui-row-btn"
         >
           <span className="ui-info-label shrink-0">Kategori</span>
-          <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5">
+          <span className="ui-info-value flex items-center gap-1.5">
             <CategoryIcon category={category} size={13} />
             <span>{category}</span>
             <CaretRight size={12} className="text-[var(--text-muted)]" />
@@ -130,7 +130,7 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
           className="ui-row-btn"
         >
           <span className="ui-info-label shrink-0">Utbetalningsdag</span>
-          <span className="font-normal text-[var(--text-primary)] flex items-center gap-1.5 tabular-nums">
+          <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
             <span>Den {payday}:e</span>
             <CaretRight size={12} className="text-[var(--text-muted)]" />
           </span>
@@ -151,7 +151,6 @@ export const IncomeViewEdit: React.FC<IncomeViewEditProps> = ({
           disabled={!name.trim() || !(Number(amount) > 0)}
           className="ui-btn-primary"
         >
-          <Check size={14} weight="bold" />
           <span>{isCreateMode ? 'Spara inkomst' : 'Spara ändringar'}</span>
         </button>
       </div>

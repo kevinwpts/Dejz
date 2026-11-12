@@ -114,9 +114,9 @@ describe('analys – den här perioden', () => {
     expect(onSelectIncome).toHaveBeenCalledWith(expect.objectContaining({ id: 'inc-lon', amount: 24800 }));
   });
 
-  test('utan något alls visas "Inga poster i perioden"', () => {
+  test('utan något alls visas ett tomt läge', () => {
     renderTab({ incomes: [], fixedExpenses: [], transactions: [] });
-    expect(screen.getByText('Inga poster i perioden')).toBeTruthy();
+    expect(screen.getByText('Inga utgifter den här perioden')).toBeTruthy();
     expect(stat('Kvar')).toBe('0 kr');
   });
 });

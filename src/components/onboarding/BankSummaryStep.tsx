@@ -37,10 +37,10 @@ export const BankSummaryStep: React.FC<{
     className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${animClass}`}
   >
     <div className="shrink-0 pt-6 pb-4">
-      <h1 className="ui-step-title">
+      <h1 className="ui-step-title text-balance">
         {title}
       </h1>
-      <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{subtitle}</p>
+      <p className="ui-onb-subtitle">{subtitle}</p>
     </div>
 
     <div className="flex-1 min-h-0 flex flex-col justify-center pb-8">

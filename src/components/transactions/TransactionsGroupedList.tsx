@@ -1,6 +1,6 @@
 // Transaktionslistan grupperad per dag (datumrubrik + dagssumma + svepbara rader), eller tomt läge.
 import React from 'react';
-import { Receipt, Package, Heart, Paperclip } from '@phosphor-icons/react';
+import { Receipt, MagnifyingGlass, Package, Heart, Paperclip } from '@phosphor-icons/react';
 import { type FixedExpenseItem, type IncomeItem, type TransactionItem, getTransactionTime } from '../../app/models';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
@@ -17,6 +17,13 @@ interface TransactionsGroupedListProps {
   onToggleHeart?: (id: string, isHearted: boolean) => void;
   onTogglePackage?: (id: string, isWaitingForPackage: boolean) => void;
   onExcludeTransaction?: (id: string, exclude: boolean) => void;
+  /** Sökord som inte gav träffar (för tomläget) */
+  searchQuery?: string;
+  /** Är något filter/segment/konto valt? Då betyder tom lista "inga träffar", inte "inga köp" */
+  isFiltered?: boolean;
+  onClearFilters?: () => void;
+  /** Egen rubrik för tomläget (t.ex. ett konto utan händelser) */
+  emptyTitle?: string;
 }
 
 export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = ({
@@ -27,14 +34,41 @@ export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = (
   onToggleHeart,
   onTogglePackage,
   onExcludeTransaction,
+  searchQuery = '',
+  isFiltered = false,
+  onClearFilters,
+  emptyTitle,
 }) => {
   if (groupedByDate.length === 0) {
+    const query = searchQuery.trim();
+    const isSearchOrFilter = query.length > 0 || isFiltered;
     return (
-      <section className="ui-empty-state-page animate-fade-in">
-        <Receipt size={48} weight="light" className="ui-empty-icon" />
+      <section className="ui-empty-state pt-16 animate-fade-in">
+        <span className="ui-empty-badge" aria-hidden="true">
+          {isSearchOrFilter ? (
+            <MagnifyingGlass size={28} weight="bold" />
+          ) : (
+            <Receipt size={28} weight="fill" />
+          )}
+        </span>
         <p className="ui-empty-title">
-          Inga transaktioner hittades
+          {emptyTitle ||
+            (query ? `Inga träffar för ”${query}”` : isFiltered ? 'Inga träffar' : 'Inga köp än')}
         </p>
+        <p className="ui-empty-sub">
+          {emptyTitle
+            ? 'Nya köp och inkomster på kontot dyker upp här.'
+            : isFiltered
+            ? 'Prova ett annat sökord eller ta bort ett filter.'
+            : query
+            ? 'Kolla stavningen eller prova ett annat ord.'
+            : 'Köp och inkomster du lägger till hamnar här. Tryck på + för att börja.'}
+        </p>
+        {isFiltered && onClearFilters && (
+          <button type="button" onClick={onClearFilters} className="ui-section-action mt-4">
+            Rensa filter
+          </button>
+        )}
       </section>
     );
   }

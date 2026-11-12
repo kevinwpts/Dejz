@@ -1,6 +1,6 @@
 // Inkomstfönstret: detaljvy för en fast inkomst (kategori, dag, konto, historik, ta bort).
 import React from 'react';
-import { PencilSimple, Trash, CaretRight, ClockCounterClockwise } from '@phosphor-icons/react';
+import { PencilSimple, Trash, CaretRight } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import type { IncomeItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
@@ -135,7 +135,7 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
           <span className="ml-1.5 font-display font-medium text-base text-positive/70">/mån</span>
         </div>
 
-        <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+        <p className="text-footnote text-[var(--text-secondary)] tabular-nums mt-1.5">
           Utbetalas den {payday}:e varje månad
         </p>
       </div>
@@ -177,20 +177,9 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
             onClick={() => navigateSubView('similar', 'forward')}
             className="ui-row-btn"
           >
-            <span className="ui-info-label flex items-center gap-2">
-              <ClockCounterClockwise
-                size={14}
-                className="text-[var(--text-secondary)] shrink-0"
-              />
-              <span>Liknande utbetalningar</span>
-            </span>
-            <span className="flex items-center gap-1.5 text-[var(--text-secondary)] font-normal tabular-nums shrink-0">
-              <span>
-                {similarInfo.transactions.length} st
-                {similarInfo.transactions.length > 0
-                  ? ` · +${formatKr(similarInfo.totalAmount)}`
-                  : ''}
-              </span>
+            <span className="ui-info-label">Tidigare utbetalningar</span>
+            <span className="ui-info-value flex items-center gap-1.5 tabular-nums shrink-0">
+              <span>{similarInfo.transactions.length} st</span>
               <CaretRight size={12} className="text-[var(--text-muted)]" />
             </span>
           </button>

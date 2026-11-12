@@ -78,7 +78,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
         {step2View === 'select-accounts' && (
           <div className="flex-1 min-h-0 flex flex-col justify-between">
             <div className="shrink-0 pt-6 pb-4">
-              <h1 className="ui-step-title">
+              <h1 className="ui-step-title text-balance">
                 Välj konton att synka
               </h1>
             </div>
@@ -114,7 +114,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       <span className="ui-option-title">
                         {currentName}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5">
+                      <span className="text-footnote text-[var(--text-tertiary)] block tabular-nums mt-0.5">
                         {formattedNum}
                       </span>
                     </div>
@@ -134,7 +134,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                 type="button"
                 disabled={savingAccounts || selectedAccountIds.length === 0}
                 onClick={handleSaveSelectedAccounts}
-                className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-sans font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+                className="ui-btn-primary"
               >
                 {savingAccounts ? (
                   <>
@@ -156,14 +156,15 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
         {step2View === 'grid' && (
           <div className="flex-1 min-h-0 flex flex-col justify-between">
             <div className="shrink-0 pt-6 pb-4">
-              <h1 className="ui-step-title">
+              <h1 className="ui-step-title text-balance">
                 Koppla din bank
               </h1>
+              <p className="ui-onb-subtitle">Dejz läser dina köp och räkningar automatiskt.</p>
             </div>
 
-            <div className="flex-1 min-h-0 flex flex-col justify-center py-1 space-y-4">
+            <div className="flex-1 min-h-0 flex flex-col pt-2 space-y-4">
               {authError && (
-                <div className="shrink-0 p-3.5 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-xs flex items-center justify-between gap-2.5 animate-scale-in">
+                <div className="shrink-0 p-3.5 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-footnote flex items-center justify-between gap-2.5 animate-scale-in">
                   <div className="flex items-center gap-2">
                     <WarningCircle size={16} weight="fill" className="shrink-0" />
                     <span>{authError}</span>
@@ -171,7 +172,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                   <button
                     type="button"
                     onClick={() => setAuthError(null)}
-                    className="text-xs font-semibold underline shrink-0 cursor-pointer"
+                    className="text-footnote font-semibold underline shrink-0 cursor-pointer"
                   >
                     Stäng
                   </button>
@@ -179,7 +180,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
               )}
 
               {(bankCallbackStatusMsg || verifyingBankReturn) && (
-                <div className="shrink-0 p-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-3 text-xs font-medium text-[var(--text-primary)] animate-scale-in">
+                <div className="shrink-0 p-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-3 text-footnote font-medium text-[var(--text-primary)] animate-scale-in">
                   <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
                   <span>
                     {bankCallbackStatusMsg ||
@@ -189,7 +190,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
               )}
 
               {hasConnectedBank ? (
-                <div className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-3xl p-5 space-y-4">
+                <div className="bg-[var(--surface-color)] shadow-[var(--card-shadow)] rounded-card p-5 space-y-4">
                   {connections.map((conn) => (
                     <div key={conn.id} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
@@ -201,7 +202,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                           <span className="ui-option-title">
                             {conn.aspsp_name}
                           </span>
-                          <span className="text-xs text-positive font-medium">
+                          <span className="block text-footnote text-positive font-medium">
                             Ansluten
                           </span>
                         </div>
@@ -213,14 +214,14 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     <button
                       type="button"
                       onClick={() => applyConnectedBankState(connections, _bankAccounts)}
-                      className="w-full py-2.5 rounded-xl bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                      className="ui-btn-primary"
                     >
                       Välj vilka konton som ska synkas
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="flex-1 min-h-0 flex flex-col justify-center space-y-3">
+                <div className="flex-1 min-h-0 flex flex-col space-y-3">
                   {/* Sökfält direkt på samma sida */}
                   <div className="relative shrink-0">
                     <MagnifyingGlass
@@ -232,8 +233,8 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       type="text"
                       value={bankSearchQuery}
                       onChange={(e) => setBankSearchQuery(e.target.value)}
-                      placeholder="Sök bank..."
-                      className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] transition-colors"
+                      placeholder="Sök bank"
+                      className="w-full h-11 pl-9 pr-8 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-subhead text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none transition-colors"
                     />
                     {bankSearchQuery.length > 0 && (
                       <button
@@ -261,12 +262,12 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                               type="button"
                               disabled={isAnyConnecting}
                               onClick={() => handleSelectBankInline(b)}
-                              className={`p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
+                              className={`p-2.5 sm:p-3 rounded-card-nested shadow-[var(--card-shadow)] flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
                                 isConnecting
-                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] scale-[0.98]'
+                                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[0.98]'
                                   : isAnyConnecting
-                                  ? 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-40 pointer-events-none'
-                                  : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 text-[var(--text-primary)]'
+                                  ? 'bg-[var(--surface-color)] opacity-40 pointer-events-none'
+                                  : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
                               }`}
                             >
                               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0 relative">
@@ -283,7 +284,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                           );
                         })
                       ) : (
-                        <div className="col-span-3 py-10 text-center text-xs text-[var(--text-muted)]">
+                        <div className="col-span-3 py-10 text-center text-subhead text-[var(--text-secondary)]">
                           Ingen bank hittades
                         </div>
                       )}
@@ -303,12 +304,12 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                             type="button"
                             disabled={isAnyConnecting}
                             onClick={() => handleSelectBankInline(b)}
-                            className={`p-2.5 sm:p-3 rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
+                            className={`p-2.5 sm:p-3 rounded-card-nested shadow-[var(--card-shadow)] flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all duration-150 active:scale-95 cursor-pointer group ${
                               isConnecting
-                                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] scale-[0.98]'
+                                ? 'bg-[var(--text-primary)] text-[var(--bg-color)] scale-[0.98]'
                                 : isAnyConnecting
-                                ? 'bg-[var(--surface-color)] border-[var(--border-subtle)] opacity-40 pointer-events-none'
-                                : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border-[var(--border-subtle)] hover:border-[var(--text-primary)]/40 text-[var(--text-primary)]'
+                                ? 'bg-[var(--surface-color)] opacity-40 pointer-events-none'
+                                : 'bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
                             }`}
                           >
                             <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-150 group-hover:scale-105 shrink-0 relative">
@@ -328,7 +329,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                   )}
 
                   {/* Trygghetsrad */}
-                  <div className="flex items-center justify-center gap-1.5 text-caption text-[var(--text-muted)] pt-1 shrink-0">
+                  <div className="flex items-center justify-center gap-1.5 text-footnote text-[var(--text-tertiary)] pt-2 shrink-0">
                     <ShieldCheck size={14} weight="regular" />
                     <span>Säker koppling via Mobilt BankID</span>
                   </div>
@@ -351,7 +352,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     }
                     goNext(2);
                   }}
-                  className="ui-btn-primary-flow"
+                  className="ui-btn-primary"
                 >
                   <span>Fortsätt</span>
                   <ArrowRight size={16} weight="bold" />
@@ -360,7 +361,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                 <button
                   type="button"
                   onClick={() => goNext(2)}
-                  className="w-full py-2.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  className="ui-onb-skip-btn"
                 >
                   Hoppa över just nu
                 </button>

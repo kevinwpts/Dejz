@@ -7,9 +7,6 @@ import {
   Paperclip,
   Check,
   ArrowsClockwise,
-  Bank,
-  CalendarBlank,
-  Sparkle,
 } from '@phosphor-icons/react';
 import type { AccountItem } from '../../app/models';
 import { doesTransactionMatchAccount } from '../../app/models';
@@ -42,29 +39,23 @@ const ATTRIBUTE_OPTIONS: {
   id: SpecialAttributeFilter;
   label: string;
   icon: typeof Heart;
-  iconColor: string;
 }[] = [
-  { id: 'saved', label: 'Sparade köp', icon: Heart, iconColor: 'text-negative-solid' },
-  { id: 'packages', label: 'Väntar på paket', icon: Package, iconColor: 'text-caution-solid' },
-  {
-    id: 'receipts',
-    label: 'Har bifogat kvitto',
-    icon: Paperclip,
-    iconColor: 'text-[var(--text-secondary)]',
-  },
-  {
-    id: 'recurring',
-    label: 'Fasta utgifter & abonnemang',
-    icon: ArrowsClockwise,
-    iconColor: 'text-[var(--text-secondary)]',
-  },
-  {
-    id: 'large',
-    label: 'Stora belopp (> 500 kr)',
-    icon: Receipt,
-    iconColor: 'text-[var(--text-secondary)]',
-  },
+  { id: 'saved', label: 'Sparade köp', icon: Heart },
+  { id: 'packages', label: 'Väntar på paket', icon: Package },
+  { id: 'receipts', label: 'Har kvitto', icon: Paperclip },
+  { id: 'recurring', label: 'Fasta utgifter och abonnemang', icon: ArrowsClockwise },
+  { id: 'large', label: 'Över 500 kr', icon: Receipt },
 ];
+
+/** Ett utseende för alla val-brickor i arket. Valt läge är neutralt (mörk/ljus bricka), inte lila. */
+const chipClass = (isSel: boolean) =>
+  `h-9 px-3 rounded-full text-footnote flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.97] ${
+    isSel
+      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
+      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] font-normal'
+  }`;
+
+const SECTION_LABEL = 'px-1 text-footnote font-medium text-[var(--text-secondary)]';
 
 export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = ({
   isOpen,
@@ -97,7 +88,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
-      title="Filtrera transaktioner"
+      title="Filtrera"
       subtitle={
         activeFilterCount > 0
           ? `${activeFilterCount} filter aktiva · ${filteredTransactions.length} träffar`
@@ -128,10 +119,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
         {/* 1. BANKKONTO */}
         {accounts.length > 0 && (
           <div className="space-y-2">
-            <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-              <Bank size={13} />
-              <span>Bankkonto</span>
-            </span>
+            <span className={SECTION_LABEL}>Konto</span>
             <div className="ui-sheet-group">
               <button
                 type="button"
@@ -148,7 +136,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   Alla anslutna konton
                 </span>
                 {!activeAccount && (
-                  <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  <Check size={16} weight="bold" className="text-[var(--text-primary)] shrink-0" />
                 )}
               </button>
 
@@ -183,19 +171,19 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                         >
                           {acc.name}
                         </span>
-                        <span className="text-caption text-[var(--text-secondary)] block truncate tabular-nums">
+                        <span className="text-footnote text-[var(--text-secondary)] block truncate tabular-nums">
                           {acc.bankName}
                           {last4 ? ` · •••• ${last4}` : ''} · {accTxCount} händelser
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-display font-medium text-xs text-[var(--text-secondary)] tabular-nums">
+                      <span className="font-display font-medium text-footnote text-[var(--text-secondary)] tabular-nums">
                         {formatKr(acc.balance)}
                       </span>
                       {isSel && (
                         <Check
-                          size={14}
+                          size={16}
                           weight="bold"
                           className="text-[var(--text-primary)] shrink-0"
                         />
@@ -210,10 +198,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
 
         {/* 2. TIDSPERIOD */}
         <div className="space-y-2">
-          <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-            <CalendarBlank size={13} />
-            <span>Tidsperiod</span>
-          </span>
+          <span className={SECTION_LABEL}>Tidsperiod</span>
           <div className="grid grid-cols-2 gap-2">
             {DATE_RANGE_OPTIONS.map((opt) => {
               const isSel = dateRange === opt.id;
@@ -222,14 +207,14 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   key={opt.id}
                   type="button"
                   onClick={() => setDateRange(opt.id)}
-                  className={`px-3 py-2.5 rounded-xl border text-xs text-left transition-all cursor-pointer flex items-center justify-between gap-1.5 ${
+                  className={`h-11 px-3.5 rounded-xl text-footnote text-left transition-all cursor-pointer active:scale-[0.98] flex items-center justify-between gap-1.5 ${
                     isSel
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
+                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-medium'
+                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] font-normal'
                   }`}
                 >
                   <span className="truncate">{opt.label}</span>
-                  {isSel && <Check size={12} weight="bold" className="shrink-0" />}
+                  {isSel && <Check size={14} weight="bold" className="shrink-0" />}
                 </button>
               );
             })}
@@ -239,44 +224,40 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
         {/* 3. KATEGORIER */}
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">
-              Kategorier
-            </span>
+            <span className="text-footnote font-medium text-[var(--text-secondary)]">Kategorier</span>
             {selectedCategories.length > 0 && (
               <button
                 type="button"
                 onClick={() => setSelectedCategories([])}
-                className="text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                className="text-footnote font-semibold text-[var(--on-accent-container)] hover:opacity-75 cursor-pointer"
               >
                 Rensa
               </button>
             )}
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {categoryOptions.map(({ name: catName, count }) => {
               const isSel = selectedCategories.includes(catName);
+              // Kategorier utan en enda händelse ger bara en tom lista – visa dem inte
+              if (count === 0 && !isSel) return null;
               const catColor = resolveCategoryColor(catName);
               return (
                 <button
                   key={catName}
                   type="button"
                   onClick={() => toggleCategory(catName)}
-                  className={`px-2.5 py-2 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                    isSel
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
-                  }`}
+                  className={chipClass(isSel)}
                 >
                   <CategoryIcon
                     category={catName}
-                    size={13}
+                    size={14}
                     color={isSel ? 'currentColor' : catColor}
                   />
                   <span>{catName}</span>
                   {count > 0 && (
                     <span
-                      className={`text-caption tabular-nums ${
-                        isSel ? 'opacity-80' : 'text-[var(--text-muted)]'
+                      className={`text-footnote tabular-nums ${
+                        isSel ? 'opacity-70' : 'text-[var(--text-muted)]'
                       }`}
                     >
                       {count}
@@ -290,10 +271,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
 
         {/* 4. EGENSKAPER & MARKERINGAR */}
         <div className="space-y-2">
-          <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-            <Sparkle size={13} />
-            <span>Markeringar & typ</span>
-          </span>
+          <span className={SECTION_LABEL}>Visa bara</span>
           <div className="ui-sheet-group">
             {ATTRIBUTE_OPTIONS.map((opt) => {
               const Icon = opt.icon;
@@ -305,12 +283,8 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   onClick={() => toggleAttribute(opt.id)}
                   className="ui-row-btn"
                 >
-                  <span className="flex items-center gap-2.5 min-w-0">
-                    <Icon
-                      size={15}
-                      weight={opt.id === 'saved' || opt.id === 'packages' ? 'fill' : 'regular'}
-                      className={opt.iconColor}
-                    />
+                  <span className="flex items-center gap-3 min-w-0">
+                    <Icon size={18} className="text-[var(--text-secondary)] shrink-0" />
                     <span
                       className={
                         isSel
@@ -321,11 +295,11 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                       {opt.label}
                     </span>
                   </span>
-                  <span className="flex items-center gap-2 text-xs text-[var(--text-secondary)] tabular-nums shrink-0">
+                  <span className="flex items-center gap-2 text-footnote text-[var(--text-secondary)] tabular-nums shrink-0">
                     <span>{attributeCounts[opt.id]}</span>
                     {isSel && (
                       <Check
-                        size={14}
+                        size={16}
                         weight="bold"
                         className="text-[var(--text-primary)]"
                       />
@@ -339,18 +313,12 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
 
         {/* 5. BETALSÄTT */}
         <div className="space-y-2">
-          <span className="px-1 text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
-            <span>Betalsätt</span>
-          </span>
-          <div className="flex flex-wrap gap-1.5">
+          <span className={SECTION_LABEL}>Betalsätt</span>
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setSelectedPaymentMethod(null)}
-              className={`px-3 py-1.5 rounded-xl border text-xs transition-all cursor-pointer ${
-                !selectedPaymentMethod
-                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                  : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
-              }`}
+              className={chipClass(!selectedPaymentMethod)}
             >
               Alla
             </button>
@@ -361,11 +329,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   key={pm}
                   type="button"
                   onClick={() => setSelectedPaymentMethod(isSel ? null : pm)}
-                  className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
-                    isSel
-                      ? 'bg-[var(--text-primary)] text-[var(--bg-color)] border-[var(--text-primary)] font-medium'
-                      : 'bg-[var(--fill-grouped)] text-[var(--text-primary)] border-transparent hover:opacity-90 font-normal'
-                  }`}
+                  className={chipClass(isSel)}
                 >
                   <PaymentMethodIcon method={pm} size={14} />
                   <span>{pm}</span>

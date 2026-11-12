@@ -9,7 +9,6 @@ interface BankConnectionsSectionProps {
   connectedBank: string | null;
   onReconnect: (conn: BankConnection) => void;
   onSelectAccounts: (conn: BankConnection) => void;
-  onDisconnect: (connId: string) => void;
 }
 
 export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
@@ -17,15 +16,12 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
   connectedBank,
   onReconnect,
   onSelectAccounts,
-  onDisconnect,
 }) => {
   // Klockan läses en gång när vyn visas – inte under varje render
   const [nowMs] = useState(() => Date.now());
   return (
-    <div className="space-y-1.5">
-      <span className="px-2 ui-field-label block">
-        Ansluten bank
-      </span>
+    <section>
+      <span className="ui-settings-label">Ansluten bank</span>
       <div className="ui-group-card">
         {connections.length > 0 ? (
           connections.map((conn) => {
@@ -49,16 +45,16 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
                   <div className="min-w-0">
                     <span className="ui-row-title">{conn.aspsp_name}</span>
                     {isExpired ? (
-                      <span className="text-xs text-negative font-medium block">
+                      <span className="text-footnote text-negative font-medium block mt-0.5">
                         Samtycket har gått ut · Förnya åtkomst
                       </span>
                     ) : isExpiringSoon ? (
-                      <span className="text-xs text-caution font-medium block">
+                      <span className="text-footnote text-caution font-medium block mt-0.5">
                         Samtycke går ut om {computedDaysLeft}{' '}
                         {computedDaysLeft === 1 ? 'dag' : 'dagar'}
                       </span>
                     ) : (
-                      <span className="text-xs text-positive font-medium block">
+                      <span className="text-footnote text-positive font-medium block mt-0.5">
                         Ansluten
                       </span>
                     )}
@@ -69,7 +65,7 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => onReconnect(conn)}
-                      className="px-2.5 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                      className="ui-btn-sm-primary"
                     >
                       Förnya
                     </button>
@@ -77,18 +73,11 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectAccounts(conn)}
-                      className="px-2.5 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
+                      className="ui-btn-sm"
                     >
                       Välj konton
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => onDisconnect(conn.id)}
-                    className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
-                  >
-                    Koppla från
-                  </button>
                 </div>
               </div>
             );
@@ -99,21 +88,15 @@ export const BankConnectionsSection: React.FC<BankConnectionsSectionProps> = ({
               <ItemLogo name={connectedBank || 'Bank'} size="md" />
               <div className="min-w-0">
                 <span className="ui-row-title">{connectedBank}</span>
-                <span className="text-xs text-positive font-medium block">
+                <span className="text-footnote text-positive font-medium block mt-0.5">
                   Ansluten
                 </span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => onDisconnect('__default__')}
-              className="px-3 py-1.5 rounded-xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer shrink-0"
-            >
-              Koppla från
-            </button>
           </div>
         )}
       </div>
-    </div>
+
+    </section>
   );
 };

@@ -6,18 +6,21 @@ import { FixedTabContent } from './tabs/FixedTabContent';
 import { AnalysisTabContent } from './tabs/AnalysisTabContent';
 import { TransactionsTabContent } from './tabs/TransactionsTabContent';
 import { GoalsTab } from './tabs/GoalsTab';
-import { SavedTab } from './tabs/SavedTab';
 import { PackagesTab } from './tabs/PackagesTab';
 import { ReceiptsTab } from './tabs/ReceiptsTab';
 import { SettingsTabContent } from './tabs/SettingsTabContent';
 
 /** Innehållet för den valda fliken, med "dra ner för att uppdatera". Varje flik ligger i mappen tabs/. */
 export const AppTabContent: React.FC = () => {
-  const { activeTab, selectedHistoryAccountId, performSilentBankSync, refreshBankStatus } = useApp();
+  const { activeTab, selectedHistoryAccountId, accounts, performSilentBankSync, refreshBankStatus } = useApp();
   // iOS-liknande stor rubrik på flikarna (Hem har hemkortet som rubrik)
+  // Historik för ett konto: kontots namn som rubrik (annars försvann rubriken helt)
+  const historyAccountName = selectedHistoryAccountId
+    ? accounts.find((a) => a.id === selectedHistoryAccountId)?.name
+    : undefined;
   const largeTitle =
-    activeTab === 'transactions' && !selectedHistoryAccountId
-      ? 'Historik'
+    activeTab === 'transactions'
+      ? historyAccountName || 'Historik'
       : activeTab === 'analysis'
       ? 'Analys'
       : activeTab === 'fixed'
@@ -38,7 +41,6 @@ export const AppTabContent: React.FC = () => {
           {activeTab === 'analysis' && <AnalysisTabContent />}
           {activeTab === 'transactions' && <TransactionsTabContent />}
           {activeTab === 'goals' && <GoalsTab />}
-          {activeTab === 'saved' && <SavedTab />}
           {activeTab === 'packages' && <PackagesTab />}
           {activeTab === 'receipts' && <ReceiptsTab />}
           {activeTab === 'settings' && <SettingsTabContent />}

@@ -74,7 +74,7 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
         <div className="ui-sheet-group">
 
           <div className="ui-row">
-            <span className="text-[var(--text-muted)] shrink-0">Bank</span>
+            <span className="text-[var(--text-secondary)] shrink-0">Bank</span>
             <span className="font-medium text-[var(--text-primary)]">
               {editingAccount.bankName || editingAccount.bank || connectedBank || 'Bank'}
             </span>
@@ -82,8 +82,8 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
 
           {editingAccount.accountNumber && (
             <div className="ui-row">
-              <span className="text-[var(--text-muted)] shrink-0">Kontonummer</span>
-              <span className="font-display font-medium text-xs text-[var(--text-secondary)] tabular-nums">
+              <span className="text-[var(--text-secondary)] shrink-0">Kontonummer</span>
+              <span className="font-medium text-[var(--text-primary)] tabular-nums">
                 {editingAccount.accountNumber}
               </span>
             </div>
@@ -94,7 +94,7 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
               <span className="text-[var(--text-primary)] font-medium block">
                 Synka och visa i översikten
               </span>
-              <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+              <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
                 Räkna med saldo och händelser från detta konto
               </span>
             </div>
@@ -122,9 +122,9 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
             type="button"
             disabled={savingAccountEdit}
             onClick={onSyncNow}
-            className="w-full py-3 px-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
+            className="ui-btn-secondary"
           >
-            <ArrowClockwise size={14} className={savingAccountEdit ? 'animate-spin' : ''} />
+            <ArrowClockwise size={16} className={savingAccountEdit ? 'animate-spin' : ''} />
             <span>{savingAccountEdit ? 'Synkar konto...' : 'Synka detta konto nu'}</span>
           </button>
 

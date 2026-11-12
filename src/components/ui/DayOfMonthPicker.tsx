@@ -27,47 +27,32 @@ export const DayOfMonthPicker: React.FC<DayOfMonthPickerProps> = ({
   minimal = false,
 }) => {
   return (
-    <div
-      className={
-        minimal
-          ? 'space-y-2'
-          : 'rounded-3xl bg-[var(--surface-color)] border border-[var(--border-subtle)] p-4 sm:p-5 space-y-3'
-      }
-    >
+    <div className={minimal ? 'space-y-2' : 'ui-sheet-box space-y-3'}>
       {showHeader && (
-        <div className="flex items-center justify-between px-0.5 pb-1 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between px-0.5">
           <span className="ui-field-label">
             {title || (mode === 'payday' ? 'Lönedag' : 'Förfallodag')}
           </span>
-          <span className="text-xs font-semibold text-[var(--text-primary)] tabular-nums">
+          <span className="text-footnote font-semibold text-[var(--text-primary)] tabular-nums">
             Den {selectedDay}:e
           </span>
         </div>
       )}
 
-      {/* Dagar 1-31 */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+      {/* Dagar 1–31: neutral markering av vald dag (svart/vit), inga extra prickar */}
+      <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
           const isSelected = Number(selectedDay) === day;
-          const isCommonHighlight =
-            !isSelected &&
-            (mode === 'payday' ? day === 25 : day === 28 || day === 25);
-
           return (
             <button
               key={day}
               type="button"
               onClick={() => onSelectDay(day)}
-              className={`h-10 sm:h-11 rounded-2xl font-display text-footnote sm:text-sm tabular-nums transition-all cursor-pointer flex flex-col items-center justify-center relative select-none active:scale-95 ${
-                isSelected
-                  ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold shadow-sm scale-[1.05] ring-2 ring-[var(--text-primary)]/15'
-                  : 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--fill-grouped)] font-medium hover:scale-105'
-              }`}
+              aria-pressed={isSelected}
+              aria-label={`Den ${day}:e`}
+              className={`${isSelected ? 'ui-day-btn-active' : 'ui-day-btn'} select-none active:scale-95`}
             >
               <span>{day}</span>
-              {isCommonHighlight && (
-                <span className="w-1 h-1 rounded-full bg-positive-solid absolute bottom-1.5" />
-              )}
             </button>
           );
         })}

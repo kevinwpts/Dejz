@@ -226,12 +226,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               title="Tillbaka"
               className="p-2 -ml-2 text-[var(--text-primary)] hover:opacity-70 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
             >
-              <CaretLeft size={18} weight="bold" />
+              <CaretLeft size={20} weight="bold" />
             </button>
 
             {/* Search input */}
             <div className="ui-search-box flex-1">
-              <MagnifyingGlass size={15} className="text-[var(--text-muted)] shrink-0" />
+              <MagnifyingGlass size={18} className="text-[var(--text-muted)] shrink-0" />
               <input
                 aria-label="Sök"
                 type="text"
@@ -246,9 +246,9 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   type="button"
                   onClick={() => setQuery('')}
                   aria-label="Rensa sökning"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
-                  <X size={14} />
+                  <X size={16} weight="bold" />
                 </button>
               )}
             </div>
@@ -260,11 +260,12 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-lg mx-auto px-4 py-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] space-y-4">
           {!isSearchingOrFiltered ? (
-            <section className="ui-empty-state-page">
-              <MagnifyingGlass size={48} weight="light" className="ui-empty-icon" />
-              <p className="ui-empty-title">
-                Sök bland alla dina händelser
-              </p>
+            <section className="ui-empty-state pt-24">
+              <span className="ui-empty-badge" aria-hidden="true">
+                <MagnifyingGlass size={28} weight="bold" />
+              </span>
+              <p className="ui-empty-title">Sök bland allt</p>
+              <p className="ui-empty-sub">Butik, kategori, belopp eller anteckning.</p>
             </section>
           ) : hasResults ? (
             <div className="space-y-4">
@@ -275,7 +276,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     <h2 className="ui-section-title">
                       Inkomster
                     </h2>
-                    <span className="ui-row-amount-income text-footnote sm:text-sm">
+                    <span className="ui-row-amount-income w-auto">
                       +{formatKr(totalMatchedIncomes)}
                     </span>
                   </div>
@@ -334,7 +335,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     <h2 className="ui-section-title">
                       Fasta utgifter
                     </h2>
-                    <span className="ui-row-amount text-footnote sm:text-sm">
+                    <span className="ui-row-amount w-auto">
                       −{formatKr(totalMatchedFixed)}
                     </span>
                   </div>
@@ -389,18 +390,19 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
               {/* Transactions - Grupperade per datum */}
               {groupedTransactionsByDate.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {groupedTransactionsByDate.map((group) => (
-                    <section key={group.dateKey} className="ui-list-card">
-                      <div className="pt-3 pb-2 flex items-center justify-between gap-2 border-b border-[var(--border-subtle)]">
-                        <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                    <div key={group.dateKey}>
+                      {/* Datumrubrik utanför kortet – samma som i Historik */}
+                      <div className="ui-date-header">
+                        <span className="font-semibold text-[var(--text-primary)]">
                           {group.label}
                         </span>
                         <span
-                          className={`text-xs font-display font-medium tabular-nums ${
+                          className={`font-display font-medium tabular-nums ${
                             group.net > 0
                               ? 'text-positive'
-                              : 'text-[var(--text-muted)]'
+                              : 'text-[var(--text-secondary)]'
                           }`}
                         >
                           {group.net > 0
@@ -411,6 +413,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                         </span>
                       </div>
 
+                      <section className="ui-list-card">
                       {group.items.map((tx) => {
                         const isIncome = tx.type === 'income';
                         const recurringStatus = checkIsRecurringTransaction(
@@ -442,7 +445,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                 isRecurring={recurringStatus.isRecurring}
                               />
                               <div className="min-w-0 flex-1">
-                                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                                <span className="ui-row-title flex items-center gap-1.5">
                                   <span className="truncate">{tx.title}</span>
                                   {tx.isHearted && (
                                     <Heart
@@ -494,17 +497,19 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           </button>
                         );
                       })}
-                    </section>
+                      </section>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <section className="ui-empty-state-page">
-              <MagnifyingGlass size={48} weight="light" className="ui-empty-icon" />
-              <p className="ui-empty-title">
-                Inga träffar för din sökning
-              </p>
+            <section className="ui-empty-state pt-24">
+              <span className="ui-empty-badge" aria-hidden="true">
+                <MagnifyingGlass size={28} weight="bold" />
+              </span>
+              <p className="ui-empty-title">Inga träffar för ”{query.trim()}”</p>
+              <p className="ui-empty-sub">Kolla stavningen eller prova ett annat ord.</p>
             </section>
           )}
         </div>

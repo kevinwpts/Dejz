@@ -6,6 +6,7 @@ import { BankConnection, BankAccount } from '../../services/bank/types';
 import { AccountItem } from '../../app/models';
 import { getAccountMetaMap } from '../../utils/cache/itemMeta';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { EmptyState } from '../ui/EmptyState';
 import { createBankAccountActions } from './bank/bankAccountActions';
 import { BankConnectionsSection } from './bank/BankConnectionsSection';
 import { BankAccountsSection } from './bank/BankAccountsSection';
@@ -147,7 +148,6 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
             connectedBank={connectedBank}
             onReconnect={handleReconnectBankForMoreAccounts}
             onSelectAccounts={handleOpenSelectConnAccounts}
-            onDisconnect={setDisconnectConfirmConnId}
           />
 
           {/* Kontolista där varje konto öppnar kontoinställningar/detaljer */}
@@ -156,9 +156,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
               displayAccountItems={displayAccountItems}
               bankAccounts={bankAccounts}
               connectedBank={connectedBank}
-              hasConnections={connections.length > 0}
               syncingAccountId={syncingAccountId}
-              onOpenSelectAccounts={() => handleOpenSelectConnAccounts(connections[0])}
               onOpenAccountDetail={handleOpenAccountDetail}
               onQuickSyncAccount={handleQuickSyncAccount}
             />
@@ -170,10 +168,10 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
               type="button"
               onClick={onSyncBank}
               disabled={syncingBank}
-              className="py-3 px-4 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-xs font-semibold text-[var(--text-primary)] flex items-center justify-center gap-1.5 hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-colors cursor-pointer"
+              className="ui-btn-secondary bg-[var(--surface-color)] shadow-[var(--card-shadow)]"
             >
-              <ArrowClockwise size={14} className={syncingBank ? 'animate-spin' : ''} />
-              <span>{syncingBank ? 'Synkar...' : 'Synka nu'}</span>
+              <ArrowClockwise size={16} className={syncingBank ? 'animate-spin' : ''} />
+              <span>{syncingBank ? 'Synkar…' : 'Synka nu'}</span>
             </button>
 
             <button
@@ -181,9 +179,26 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
               onClick={onOpenBank}
               className="ui-btn-primary"
             >
-              <Plus size={15} weight="bold" />
+              <Plus size={16} weight="bold" />
               <span>Lägg till bank</span>
             </button>
+          </div>
+
+          {/* Koppla från ligger för sig själv – en riskabel handling ska inte sitta bredvid "Välj konton" */}
+          <div className="ui-admin-card">
+            {(connections.length > 0
+              ? connections.map((c) => ({ id: c.id, name: c.aspsp_name }))
+              : [{ id: '__default__', name: connectedBank || 'banken' }]
+            ).map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setDisconnectConfirmConnId(c.id)}
+                className="ui-admin-row justify-center"
+              >
+                <span className="ui-list-row-title text-negative">Koppla från {c.name}</span>
+              </button>
+            ))}
           </div>
 
           {/* Kontodetaljer / Redigera konto */}
@@ -232,21 +247,16 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
           />
         </>
       ) : (
-        <section className="ui-empty-state-page">
-          <Bank size={52} weight="light" className="ui-empty-icon" />
-          <h3 className="ui-empty-title">Ingen bank ansluten</h3>
-          <p className="ui-empty-sub mb-6">
-            Anslut din bank med Mobilt BankID för att hämta konton och köp automatiskt.
-          </p>
-          <button
-            type="button"
-            onClick={onOpenBank}
-            className="w-full max-w-xs ui-btn-primary"
-          >
-            <Bank size={15} />
-            <span>Anslut bank</span>
-          </button>
-        </section>
+        <EmptyState
+          icon={Bank}
+          title="Ingen bank ansluten"
+          description="Anslut med Mobilt BankID så hämtas dina konton och köp automatiskt."
+          action={
+            <button type="button" onClick={onOpenBank} className="ui-btn-primary">
+              <span>Anslut bank</span>
+            </button>
+          }
+        />
       )}
     </div>
   );

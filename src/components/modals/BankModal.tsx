@@ -109,10 +109,10 @@ export const BankModal: React.FC<BankModalProps> = ({
               <LockKey size={26} weight="duotone" />
             </div>
             <div className="space-y-1">
-              <h4 className="font-display font-bold text-base text-[var(--text-primary)]">
+              <h4 className="ui-empty-title">
                 Logga in först
               </h4>
-              <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
+              <p className="ui-empty-sub">
                 Logga in på ditt konto för att ansluta och synka din bank.
               </p>
             </div>
@@ -130,7 +130,7 @@ export const BankModal: React.FC<BankModalProps> = ({
         ) : (
           <>
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-negative-solid/10 border border-negative-solid/20 text-negative text-xs flex items-start gap-2">
+              <div className="p-3.5 rounded-card-nested bg-negative-solid/10 text-negative text-footnote leading-snug flex items-start gap-2.5">
                 <WarningCircle size={16} className="shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>

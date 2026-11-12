@@ -1,6 +1,6 @@
 // Periodväljaren i Analys-fliken: pilar + periodknapp, och bladet där man väljer period
 import React from 'react';
-import { CalendarBlank, CaretRight, CaretLeft, CaretDown, Check } from '@phosphor-icons/react';
+import { CaretRight, CaretLeft, CaretDown, Check } from '@phosphor-icons/react';
 import type { PeriodInfo } from '../../utils/periodEngine';
 import { BottomSheet } from '../ui/BottomSheet';
 
@@ -24,27 +24,22 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.max(-5, prev - 1))}
       disabled={periodOffset <= -5}
-      className="w-9 h-9 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
+      className="w-10 h-10 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-0 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
       title="Föregående period"
     >
-      <CaretLeft size={14} weight="bold" />
+      <CaretLeft size={16} weight="bold" />
     </button>
 
     <button
       type="button"
       onClick={onOpenMenu}
-      className="h-9 px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] active:scale-[0.97] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+      className="h-10 px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] active:scale-[0.97] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
     >
-      <CalendarBlank
-        size={14}
-        weight="duotone"
-        className="text-[var(--text-secondary)] shrink-0"
-      />
       <span className="font-display font-semibold text-callout text-[var(--text-primary)] tabular-nums">
         {period.startLabel} – {period.endLabel}
       </span>
       <CaretDown
-        size={11}
+        size={12}
         weight="bold"
         className="text-[var(--text-muted)] shrink-0"
       />
@@ -55,10 +50,10 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       type="button"
       onClick={() => setPeriodOffset((prev) => Math.min(0, prev + 1))}
       disabled={periodOffset >= 0}
-      className="w-9 h-9 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 transition-all cursor-pointer shrink-0 active:scale-95"
+      className="w-10 h-10 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-0 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
       title="Nästa period"
     >
-      <CaretRight size={14} weight="bold" />
+      <CaretRight size={16} weight="bold" />
     </button>
   </div>
 );
@@ -90,26 +85,18 @@ export const AnalysisPeriodSheet: React.FC<AnalysisPeriodSheetProps> = ({
             onClick={() => onSelectOffset(p.offset)}
             className="ui-row-btn"
           >
-            <div className="flex items-center gap-2.5">
-              <CalendarBlank
-                size={15}
-                weight={isSelected ? 'fill' : 'regular'}
-                className={
-                  isSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'
-                }
-              />
-              <span
-                className={`tabular-nums ${
-                  isSelected
-                    ? 'font-bold text-[var(--text-primary)]'
-                    : 'font-medium text-[var(--text-primary)]'
-                }`}
-              >
-                {p.info.startLabel} – {p.info.endLabel}
-              </span>
-            </div>
+            <span
+              className={`tabular-nums text-[var(--text-primary)] ${
+                isSelected ? 'font-semibold' : 'font-normal'
+              }`}
+            >
+              {p.info.startLabel} – {p.info.endLabel}
+              {p.offset === 0 && (
+                <span className="font-normal text-[var(--text-secondary)]"> · Nu</span>
+              )}
+            </span>
             {isSelected && (
-              <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+              <Check size={18} weight="bold" className="text-[var(--on-accent-container)] shrink-0" />
             )}
           </button>
         );

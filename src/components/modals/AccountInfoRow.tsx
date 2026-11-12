@@ -20,7 +20,7 @@ export function AccountInfoRow({ info }: { info: AccountDisplayInfo }) {
             type="button"
             onClick={() => setShowFull((prev) => !prev)}
             aria-label={showFull ? 'Dölj kontonummer' : 'Visa kontonummer'}
-            className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
+            className="text-callout font-medium text-[var(--accent-color)] active:opacity-60 cursor-pointer shrink-0"
           >
             {showFull ? 'Dölj' : 'Visa'}
           </button>

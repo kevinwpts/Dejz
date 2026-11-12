@@ -128,13 +128,13 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
             <button
               type="button"
               onClick={() => navigateSubView('cancel-picker', 'forward')}
-              className="text-xs font-medium text-caution hover:opacity-80 mt-1.5 transition-opacity cursor-pointer inline-flex items-center gap-1"
+              className="text-footnote font-medium text-caution hover:opacity-80 mt-1.5 transition-opacity cursor-pointer inline-flex items-center gap-1"
             >
               <span>{formatFixedCancellationBadge(activeExpense)}</span>
               <CaretRight size={11} />
             </button>
           ) : (
-            <p className="text-xs text-[var(--text-secondary)] tabular-nums mt-1.5">
+            <p className="text-footnote text-[var(--text-secondary)] tabular-nums mt-1.5">
               Dras den {dueDay}:e varje månad
             </p>
           )}
@@ -152,7 +152,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                 className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${
                   activeExpense?.isCancelled
                     ? 'bg-caution-solid/15 text-caution-solid'
-                    : 'bg-negative-solid/10 text-negative-solid'
+                    : 'bg-[var(--surface-color)] text-[var(--text-primary)]'
                 }`}
               >
                 <Scissors size={16} />
@@ -181,7 +181,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                 )}
               </div>
               <span className="ui-action-tile-label">
-                {draftReceipts.length > 0 ? `${draftReceipts.length} avtal` : 'Kvitto'}
+                {draftReceipts.length > 0 ? `${draftReceipts.length} kvitto` : 'Kvitto'}
               </span>
             </button>
 
@@ -194,7 +194,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                 <ClockCounterClockwise size={16} />
               </div>
               <span className="ui-action-tile-label">
-                {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} dragn.` : 'Historik'}
+                {similarInfo.transactions.length > 0 ? `${similarInfo.transactions.length} dragningar` : 'Historik'}
               </span>
             </button>
           </div>
@@ -286,7 +286,7 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                       }}
                       className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer flex-1 group"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-[var(--surface-color)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
                         {rcpt.url.startsWith('data:image/') ||
                         /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
                           <img src={rcpt.url} alt="" className="w-full h-full object-cover" />
@@ -295,35 +295,23 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
                         )}
                       </div>
                       <div className="min-w-0">
-                        <span className="text-xs font-medium text-[var(--text-primary)] block truncate group-hover:opacity-80">
+                        <span className="ui-list-row-title text-callout block group-hover:opacity-80">
                           {rcpt.name || `Kvitto ${idx + 1}`}
                         </span>
-                        <span className="text-caption text-[var(--text-muted)] block">
-                          Klicka för att granska
+                        <span className="text-footnote text-[var(--text-secondary)] block">
+                          Kvitto · tryck för att visa
                         </span>
                       </div>
                     </button>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPreviewReceipt(rcpt);
-                          navigateSubView('receipt-preview', 'forward');
-                        }}
-                        className="px-2 py-1 rounded-md text-caption text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
-                      >
-                        Öppna
-                      </button>
-                      <button
-                        aria-label="Ta bort kvitto"
-                        type="button"
-                        onClick={() => handleRemoveReceiptAt(idx)}
-                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-negative-solid transition-colors cursor-pointer"
-                        title="Ta bort kvitto"
-                      >
-                        <Trash size={13} />
-                      </button>
-                    </div>
+                    <button
+                      aria-label="Ta bort kvitto"
+                      type="button"
+                      onClick={() => handleRemoveReceiptAt(idx)}
+                      className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer shrink-0"
+                      title="Ta bort kvitto"
+                    >
+                      <Trash size={16} />
+                    </button>
                   </div>
                 ))}
               </>

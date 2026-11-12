@@ -2,6 +2,7 @@ import { logWarn } from '../utils/logger';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { sendFeedback } from '../utils/sendFeedback';
 import { reportError } from '../utils/monitoring';
+import { WarningCircle } from '@phosphor-icons/react';
 
 interface Props {
   children: ReactNode;
@@ -63,12 +64,14 @@ class ErrorBoundary extends Component<Props, State> {
     const { reported, note, noteSent, sendingNote, error } = this.state;
 
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-[var(--bg-color)] text-[var(--text-primary)] px-4 py-10">
-        <div className="w-full max-w-sm bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-container p-6 space-y-5 shadow-[var(--shadow-modal)]">
-          <div className="space-y-2 text-center">
-            <div className="text-4xl" aria-hidden="true">😕</div>
-            <h1 className="font-display font-semibold text-xl">Hoppsan, något gick fel</h1>
-            <p className="text-sm text-[var(--text-secondary)] leading-[1.5]">
+      <div className="min-h-dvh flex flex-col bg-[var(--bg-color)] text-[var(--text-primary)] px-6 pt-[calc(4rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+        <div className="w-full max-w-sm mx-auto flex-1 flex flex-col">
+          <div className="flex flex-col items-center text-center">
+            <div className="ui-auth-icon-tile" aria-hidden="true">
+              <WarningCircle size={32} weight="regular" />
+            </div>
+            <h1 className="mt-6 font-display font-bold text-2xl tracking-[-0.025em]">Hoppsan, något gick fel</h1>
+            <p className="mt-2 text-subhead text-[var(--text-secondary)] leading-relaxed max-w-[300px] text-balance">
               {reported
                 ? 'Vi har fått en rapport om felet och tittar på det. Ladda om så brukar det fungera igen.'
                 : 'Ladda om sidan så brukar det fungera igen.'}
@@ -78,16 +81,16 @@ class ErrorBoundary extends Component<Props, State> {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="w-full h-12 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm active:scale-[0.99] transition-all cursor-pointer"
+            className="ui-btn-primary mt-8"
           >
             Ladda om sidan
           </button>
 
           {noteSent ? (
-            <p className="text-sm text-center text-[var(--text-secondary)]">Tack! Det hjälper oss att hitta felet 💜</p>
+            <p className="mt-10 text-subhead text-center text-[var(--text-secondary)]">Tack! Det hjälper oss att hitta felet.</p>
           ) : (
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-[var(--text-secondary)]" htmlFor="crash-note">
+            <div className="mt-10 space-y-3">
+              <label className="block text-footnote font-medium text-[var(--text-secondary)] px-1" htmlFor="crash-note">
                 Vill du berätta vad du gjorde precis innan? (frivilligt)
               </label>
               <textarea
@@ -97,13 +100,13 @@ class ErrorBoundary extends Component<Props, State> {
                 rows={3}
                 maxLength={1000}
                 placeholder="T.ex. jag tryckte på Spara på en fast utgift"
-                className="w-full rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-color)] resize-none"
+                className="w-full rounded-card-nested bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-4 py-3 text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none resize-none"
               />
               <button
                 type="button"
                 onClick={this.sendNote}
                 disabled={!note.trim() || sendingNote}
-                className="w-full h-11 rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] text-sm font-semibold text-[var(--text-primary)] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-40"
+                className="ui-auth-btn-surface"
               >
                 {sendingNote ? 'Skickar…' : 'Skicka'}
               </button>
@@ -111,9 +114,9 @@ class ErrorBoundary extends Component<Props, State> {
           )}
 
           {error && (
-            <details className="text-xs text-[var(--text-muted)]">
-              <summary className="cursor-pointer">Teknisk information</summary>
-              <pre className="mt-2 whitespace-pre-wrap break-all font-mono">{error.toString()}</pre>
+            <details className="mt-auto pt-8 text-footnote text-[var(--text-tertiary)]">
+              <summary className="cursor-pointer text-center">Teknisk information</summary>
+              <pre className="mt-2 whitespace-pre-wrap break-all font-mono text-left">{error.toString()}</pre>
             </details>
           )}
         </div>

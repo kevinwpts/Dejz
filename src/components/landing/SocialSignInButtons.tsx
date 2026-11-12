@@ -23,7 +23,7 @@ export const SocialSignInButtons: React.FC<SocialSignInButtonsProps> = ({
         type="button"
         onClick={() => onSignIn('apple')}
         disabled={disabled}
-        className="w-full py-3.5 px-4 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-sm flex items-center justify-center gap-2.5 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50"
+        className="w-full h-[52px] px-4 rounded-full bg-black text-white dark:bg-white dark:text-black font-semibold text-subhead flex items-center justify-center gap-2.5 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-50"
       >
         <svg className="w-[15px] h-[18px] shrink-0" viewBox="0 0 814 1000" fill="currentColor" aria-hidden="true">
           <path d="M788 341c-6 4-108 62-108 190 0 148 130 200 134 202-1 3-21 72-69 142-43 62-88 124-156 124s-86-40-165-40c-77 0-104 41-166 41s-106-57-156-128C44 790 0 671 0 558 0 377 118 281 234 281c62 0 113 41 152 41 37 0 95-43 165-43 27 0 123 2 187 96zM557 159c29-35 50-83 50-131 0-7-1-13-2-19-47 2-104 32-138 72-27 30-52 79-52 127 0 7 1 15 2 17 3 0 8 1 13 1 43 0 96-28 127-67z" />
@@ -35,12 +35,12 @@ export const SocialSignInButtons: React.FC<SocialSignInButtonsProps> = ({
       type="button"
       onClick={() => onSignIn('google')}
       disabled={disabled}
-      className="w-full py-3.5 px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)] font-semibold text-sm flex items-center justify-center gap-3 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-50"
+      className="w-full h-[52px] px-4 rounded-full bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)] font-semibold text-subhead flex items-center justify-center gap-3 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-50"
     >
       {googleLoading ? (
         <SpinnerGap size={18} className="animate-spin" />
       ) : (
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+        <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -63,9 +63,9 @@ export const SocialSignInButtons: React.FC<SocialSignInButtonsProps> = ({
     </button>
 
     <div className="flex items-center gap-3">
-      <div className="h-px bg-[var(--border-subtle)] flex-1" />
-      <span className="text-xs font-medium text-[var(--text-muted)]">eller med e-post</span>
-      <div className="h-px bg-[var(--border-subtle)] flex-1" />
+      <div className="h-px bg-[var(--separator)] flex-1" />
+      <span className="text-footnote text-[var(--text-tertiary)]">eller med e-post</span>
+      <div className="h-px bg-[var(--separator)] flex-1" />
     </div>
   </div>
 );

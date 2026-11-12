@@ -30,13 +30,14 @@ export const HomeSinceLastSheet: React.FC<HomeSinceLastSheetProps> = ({
         title="Sedan sist"
       >
         <div className="space-y-4">
-          <div className="flex items-baseline justify-between px-1">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">
-              {sinceLastVisitTxs.length} {sinceLastVisitTxs.length === 1 ? 'köp' : 'köp'}
-            </span>
-            <span className="font-display font-bold text-2xl sm:text-3xl tracking-[-0.02em] text-[var(--text-primary)] tabular-nums">
+          {/* Summan först, stort – sedan vad den består av */}
+          <div className="px-1">
+            <div className="font-display font-bold text-[34px] leading-none tracking-[-0.035em] text-[var(--text-primary)] tabular-nums">
               −{formatKr(sinceLastVisitTxs.reduce((s, t) => s + (Number(t.amount) || 0), 0))}
-            </span>
+            </div>
+            <p className="mt-1.5 text-callout text-[var(--text-secondary)]">
+              {sinceLastVisitTxs.length === 1 ? '1 nytt köp' : `${sinceLastVisitTxs.length} nya köp`} sedan du var här sist
+            </p>
           </div>
 
           <div className="ui-sheet-group">
@@ -79,7 +80,7 @@ export const HomeSinceLastSheet: React.FC<HomeSinceLastSheetProps> = ({
             onClick={dismissSinceLastVisit}
             className="w-full ui-btn-primary"
           >
-            <span>OK</span>
+            <span>Klart</span>
           </button>
         </div>
       </BottomSheet>

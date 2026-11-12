@@ -63,9 +63,9 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               type="button"
               onClick={() => setSearchQuery('')}
               aria-label="Rensa sökning"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
-              <X size={14} />
+              <X size={16} weight="bold" />
             </button>
           )}
         </div>
@@ -78,15 +78,13 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
           aria-label={`Filtrera transaktioner${
             activeFilterCount > 0 ? ` (${activeFilterCount} aktiva)` : ''
           }`}
-          className={`w-11 h-11 rounded-xl flex items-center justify-center relative transition-all active:scale-[0.96] cursor-pointer shrink-0 ${
-            activeFilterCount > 0
-              ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
-              : 'bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-[var(--text-primary)]'
+          className={`w-11 h-11 rounded-xl flex items-center justify-center relative transition-all active:scale-[0.96] cursor-pointer shrink-0 bg-[var(--surface-color)] shadow-[var(--card-shadow)] ${
+            activeFilterCount > 0 ? 'text-[var(--on-accent-container)]' : 'text-[var(--text-primary)]'
           }`}
         >
-          <SlidersHorizontal size={18} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
+          <SlidersHorizontal size={20} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] text-micro font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
+            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-caption font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
               {activeFilterCount}
             </span>
           )}
@@ -99,7 +97,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             title="Lägg till händelse"
             className="h-11 px-3.5 rounded-xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] text-callout font-semibold text-[var(--text-primary)] flex items-center gap-1.5 active:scale-[0.96] transition-all cursor-pointer shrink-0"
           >
-            <Plus size={15} weight="bold" />
+            <Plus size={16} weight="bold" />
             <span>Lägg till</span>
           </button>
         )}
@@ -133,10 +131,10 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             <button
               type="button"
               onClick={() => handleSetAccount(null)}
-              className="ui-chip-sm"
+              className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{formatAccountShortLabel(activeAccount, accounts)}</span>
-              <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
             </button>
           )}
 
@@ -144,10 +142,10 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             <button
               type="button"
               onClick={() => setDateRange('all')}
-              className="ui-chip-sm"
+              className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{getDateRangeChipLabel(dateRange)}</span>
-              <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
             </button>
           )}
 
@@ -156,11 +154,11 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               key={cat}
               type="button"
               onClick={() => toggleCategory(cat)}
-              className="ui-chip-sm"
+              className="ui-chip-sm h-8 px-3 text-footnote"
             >
-              <CategoryIcon category={cat} size={11} />
+              <CategoryIcon category={cat} size={13} />
               <span>{cat}</span>
-              <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
             </button>
           ))}
 
@@ -169,10 +167,10 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               key={attr}
               type="button"
               onClick={() => toggleAttribute(attr)}
-              className="ui-chip-sm"
+              className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{getAttributeChipLabel(attr)}</span>
-              <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
             </button>
           ))}
 
@@ -180,10 +178,10 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             <button
               type="button"
               onClick={() => setSelectedPaymentMethod(null)}
-              className="ui-chip-sm"
+              className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{selectedPaymentMethod}</span>
-              <X size={11} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
             </button>
           )}
 
@@ -191,7 +189,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             <button
               type="button"
               onClick={resetAllFilters}
-              className="px-2 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="h-8 px-2 text-footnote font-semibold text-[var(--on-accent-container)] hover:opacity-75 cursor-pointer"
             >
               Rensa alla
             </button>
@@ -204,7 +202,9 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
         activeFilterCount > 0 ||
         typeTab !== 'all' ||
         Boolean(activeAccount)) && (
-        <div className="rounded-xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] px-3.5 py-2 flex items-center justify-between gap-2 text-xs tabular-nums">
+        // Summering som vanlig text (inte ett eget kort) – döljs när inget hittas, då talar tomläget
+        filteredTransactions.length > 0 && (
+        <div className="px-1 pt-1 flex items-center justify-between gap-2 text-footnote tabular-nums">
           <span className="text-[var(--text-secondary)]">
             <span className="font-semibold text-[var(--text-primary)]">
               {filteredTransactions.length}
@@ -228,6 +228,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             );
           })()}
         </div>
+        )
       )}
     </div>
   );

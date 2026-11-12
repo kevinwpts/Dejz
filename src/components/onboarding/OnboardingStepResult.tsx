@@ -34,37 +34,32 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="ui-step-title">
+          <h1 className="ui-step-title text-balance">
             Kvar efter fasta räkningar
           </h1>
+          <p className="ui-onb-subtitle">Det här har du kvar av varje lön, före vardagsköp.</p>
         </div>
 
-        <div className="my-auto py-4 space-y-6">
-          <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums">
+        <div className="flex-1 min-h-0 pt-6 space-y-6">
+          <div className="font-display font-bold text-5xl tracking-tight text-[var(--text-primary)] tabular-nums">
             {formatKr(kvarAttSpendera)}
           </div>
 
-          <div className="pt-4 border-t border-[var(--border-subtle)]/60 space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--text-muted)]">
-                Inkomster
-              </span>
+          <div className="ui-list-card ui-onb-summary-card text-subhead">
+            <div className="ui-onb-summary-row">
+              <span className="text-[var(--text-secondary)]">Inkomster</span>
               <span className="font-semibold text-positive tabular-nums">
                 +{formatKr(totalInc)}
               </span>
             </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--text-muted)]">
-                Fasta utgifter
-              </span>
+            <div className="ui-onb-summary-row">
+              <span className="text-[var(--text-secondary)]">Fasta utgifter</span>
               <span className="font-semibold text-[var(--text-primary)] tabular-nums">
                 −{formatKr(totalFix)}
               </span>
             </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-[var(--text-muted)]">Lönedag</span>
+            <div className="ui-onb-summary-row">
+              <span className="text-[var(--text-secondary)]">Lönedag</span>
               <span className="font-semibold text-[var(--text-primary)] tabular-nums">
                 {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
               </span>
@@ -77,7 +72,7 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
             <button
               type="button"
               onClick={() => goNext(6)}
-              className="ui-btn-primary py-3.5 text-sm"
+              className="ui-btn-primary"
             >
               <span>Fortsätt</span>
               <ArrowRight size={16} weight="bold" />
@@ -86,7 +81,7 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
             <button
               type="button"
               onClick={onComplete}
-              className="ui-btn-primary py-3.5 text-sm"
+              className="ui-btn-primary"
             >
               <span>Öppna Dejz</span>
               <Check size={16} weight="bold" />

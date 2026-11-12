@@ -33,7 +33,7 @@ export const EmailVerifiedNotice: React.FC = () => {
           <WarningCircle size={20} weight="fill" className="text-caution shrink-0" />
         )}
         <p className="text-callout font-medium">
-          {ok ? 'Din e-post är verifierad ✓' : 'Länken har gått ut. Skicka en ny från profilen.'}
+          {ok ? 'Din e-post är verifierad' : 'Länken har gått ut. Skicka en ny från profilen.'}
         </p>
       </div>
     </div>

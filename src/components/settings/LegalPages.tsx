@@ -14,9 +14,9 @@ export const PrivacySettingsPage: React.FC = () => (
 
 export const TermsPage: React.FC = () => (
   <div className="ui-page animate-slide-in-right">
-    <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+    <div className="ui-group-card text-subhead text-[var(--text-secondary)] leading-relaxed">
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           1. Om tjänsten & avtalets omfattning
         </h3>
         <p>
@@ -27,7 +27,7 @@ export const TermsPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           2. Bankkoppling & tredjepartsleverantörer
         </h3>
         <p>
@@ -39,7 +39,7 @@ export const TermsPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           3. Ingen finansiell rådgivning & beräkningsansvar
         </h3>
         <p>
@@ -54,7 +54,7 @@ export const TermsPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           4. Ditt konto & användaransvar
         </h3>
         <p>
@@ -64,7 +64,7 @@ export const TermsPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           5. Uppsägning, radering & tillämplig lag
         </h3>
         <p>
@@ -84,9 +84,9 @@ export const TermsPage: React.FC = () => (
 
 export const CookiesPage: React.FC = () => (
   <div className="ui-page animate-slide-in-right">
-    <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+    <div className="ui-group-card text-subhead text-[var(--text-secondary)] leading-relaxed">
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           1. Tekniskt nödvändig lokal lagring
         </h3>
         <p>
@@ -99,7 +99,7 @@ export const CookiesPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           2. Isolering mellan konton & rensning vid utloggning
         </h3>
         <p>
@@ -110,7 +110,7 @@ export const CookiesPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           3. Inga annons- eller spårningscookies
         </h3>
         <p>
@@ -124,9 +124,9 @@ export const CookiesPage: React.FC = () => (
 
 export const OpenBankingInfoPage: React.FC = () => (
   <div className="ui-page animate-slide-in-right">
-    <div className="ui-group-card text-xs text-[var(--text-secondary)] leading-relaxed divide-y divide-[var(--border-subtle)]">
+    <div className="ui-group-card text-subhead text-[var(--text-secondary)] leading-relaxed">
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           1. Reglerad Open Banking via Enable Banking (PSD2)
         </h3>
         <p>
@@ -147,7 +147,7 @@ export const OpenBankingInfoPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           2. Personuppgiftsansvar & biträdesavtal
         </h3>
         <p>
@@ -162,7 +162,7 @@ export const OpenBankingInfoPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           3. Endast läsrättigheter (Read-Only)
         </h3>
         <p>
@@ -174,7 +174,7 @@ export const OpenBankingInfoPage: React.FC = () => (
       </div>
 
       <div className="p-5 space-y-2">
-        <h3 className="ui-legal-heading">
+        <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-[var(--text-primary)]">
           4. Giltighetstid & hur du avslutar bankkopplingen
         </h3>
         <p>

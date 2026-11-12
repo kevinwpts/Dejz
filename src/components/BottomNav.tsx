@@ -8,7 +8,6 @@ export type AppTab =
   | 'fixed'
   | 'settings'
   | 'goals'
-  | 'saved'
   | 'packages'
   | 'receipts'
   | 'account-detail';
@@ -16,14 +15,8 @@ export type AppTab =
 interface BottomNavProps {
   activeTab: AppTab;
   onChangeTab: (tab: AppTab) => void;
-  onOpenDiscover?: () => void;
   /** Plusknappen: "Lägg till köp" (prata in eller fyll i manuellt) – nåbar från alla flikar */
   onAddTransaction?: () => void;
-  activeSettingsSubView?: string;
-  goalsCount?: number;
-  savedCount?: number;
-  packagesCount?: number;
-  receiptsCount?: number;
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({

@@ -29,41 +29,39 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="ui-step-title">
+          <h1 className="ui-step-title text-balance">
             När får du lön?
           </h1>
+          <p className="ui-onb-subtitle">Dejz räknar från lön till lön – inte per kalendermånad.</p>
         </div>
 
-        <div className="my-auto py-4 space-y-10">
-          {/* Direkt på bakgrunden utan kort/modul */}
-          <div className="space-y-6 py-2">
-            <div className="font-display font-bold text-5xl sm:text-6xl tracking-tight text-[var(--text-primary)] tabular-nums text-center">
+        <div className="flex-1 min-h-0 pt-6 space-y-8">
+          <div className="space-y-6">
+            <div className="font-display font-bold text-5xl tracking-tight text-[var(--text-primary)] tabular-nums text-center">
               {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
             </div>
 
-            <div>
-              <input
-                type="range"
-                min={1}
-                max={31}
-                value={payday}
-                onChange={(e) => setPayday(Number(e.target.value))}
-                aria-label="Välj lönedag"
-                style={{
-                  background: `linear-gradient(to right, var(--cta-bg) 0%, var(--cta-bg) ${
-                    ((payday - 1) / 30) * 100
-                  }%, var(--segment-track) ${
-                    ((payday - 1) / 30) * 100
-                  }%, var(--segment-track) 100%)`,
-                }}
-                className="ui-payday-slider"
-              />
-            </div>
+            <input
+              type="range"
+              min={1}
+              max={31}
+              value={payday}
+              onChange={(e) => setPayday(Number(e.target.value))}
+              aria-label="Välj lönedag"
+              style={{
+                background: `linear-gradient(to right, var(--cta-bg) 0%, var(--cta-bg) ${
+                  ((payday - 1) / 30) * 100
+                }%, var(--segment-track) ${
+                  ((payday - 1) / 30) * 100
+                }%, var(--segment-track) 100%)`,
+              }}
+              className="ui-payday-slider"
+            />
           </div>
 
-          {/* En enda ren rad för helghantering direkt på bakgrunden */}
-          <div className="pt-4 border-t border-[var(--border-subtle)]/60 flex items-center justify-between gap-4">
-            <span className="font-sans font-medium text-xs sm:text-sm text-[var(--text-secondary)]">
+          {/* Helghantering: en grupperad rad som i iOS Inställningar */}
+          <div className="ui-onb-row-card">
+            <span className="text-subhead text-[var(--text-primary)]">
               Betalas ut fredagen före vid helg
             </span>
             <button
@@ -89,7 +87,7 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
           <button
             type="button"
             onClick={handleNextFromStep5Payday}
-            className="ui-btn-primary-flow"
+            className="ui-btn-primary"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />

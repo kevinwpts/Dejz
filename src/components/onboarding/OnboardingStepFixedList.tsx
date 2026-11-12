@@ -36,17 +36,17 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
         className={`flex-1 min-h-0 flex flex-col justify-between overflow-hidden ${pageAnimClass}`}
       >
         <div className="shrink-0 pt-6 pb-4">
-          <h1 className="ui-step-title">
+          <h1 className="ui-step-title text-balance">
             Vilka fasta utgifter har du?
           </h1>
-          <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+          <p className="ui-onb-subtitle">
             Räkningar som dras varje månad. Tryck och skriv beloppet.
           </p>
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pr-0.5 space-y-2.5 pb-2">
           {analyzingBank && (
-            <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-2.5 text-xs text-[var(--text-secondary)] animate-pulse">
+            <div className="p-3.5 rounded-2xl bg-[var(--surface-color)] shadow-[var(--card-shadow)] flex items-center gap-2.5 text-footnote text-[var(--text-secondary)] animate-pulse">
               <SpinnerGap size={18} className="animate-spin text-[var(--text-primary)] shrink-0" />
               <span>Letar efter dina räkningar …</span>
             </div>
@@ -128,13 +128,15 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
 
         <div className="shrink-0 pt-3 space-y-2">
           {suggestedFixedExpenses.some((f) => f.checked) && (
-            <div className="flex items-center justify-between px-1 text-xs text-[var(--text-secondary)]">
+            <div className="flex items-center justify-between px-1 text-footnote text-[var(--text-secondary)]">
               <span>
-                {suggestedFixedExpenses.filter((f) => f.checked).length} valda fasta utgifter
+                {(() => {
+                  const n = suggestedFixedExpenses.filter((f) => f.checked).length;
+                  return n === 1 ? '1 vald fast utgift' : `${n} valda fasta utgifter`;
+                })()}
               </span>
               <span className="font-display font-semibold text-[var(--text-primary)] tabular-nums">
-                -
-                {formatKr(
+                −{formatKr(
                   suggestedFixedExpenses
                     .filter((f) => f.checked)
                     .reduce((sum, f) => sum + (Number(f.amount) || 0), 0)
@@ -146,7 +148,7 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
           <button
             type="button"
             onClick={handleSaveSuggestedFixed}
-            className="ui-btn-primary-flow"
+            className="ui-btn-primary"
           >
             <span>Fortsätt</span>
             <ArrowRight size={16} weight="bold" />

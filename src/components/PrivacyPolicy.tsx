@@ -11,14 +11,14 @@ export const PRIVACY_CONTACT = 'hej@dejz.se';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <section className="space-y-2">
-    <h3 className="font-display font-semibold text-subhead text-[var(--text-primary)]">{title}</h3>
-    <div className="space-y-2 text-sm leading-relaxed text-[var(--text-secondary)]">{children}</div>
+    <h3 className="font-display font-semibold text-base tracking-[-0.01em] text-[var(--text-primary)]">{title}</h3>
+    <div className="space-y-2 text-subhead leading-relaxed text-[var(--text-secondary)]">{children}</div>
   </section>
 );
 
 export const PrivacyPolicyContent: React.FC = () => (
-  <div className="space-y-6">
-    <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
+  <div className="space-y-7">
+    <p className="text-subhead leading-relaxed text-[var(--text-secondary)]">
       Här förklarar vi enkelt vilka uppgifter Dejz sparar, varför och hur länge. Vi säljer aldrig dina uppgifter.
     </p>
 
@@ -119,7 +119,7 @@ export const PrivacyPolicyContent: React.FC = () => (
       </p>
     </Section>
 
-    <p className="text-xs text-[var(--text-muted)]">Senast uppdaterad: {PRIVACY_UPDATED}</p>
+    <p className="text-footnote text-[var(--text-tertiary)]">Senast uppdaterad: {PRIVACY_UPDATED}</p>
   </div>
 );
 

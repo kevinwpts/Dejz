@@ -45,7 +45,6 @@ export const SettingsTabContent: React.FC = () => {
     handleCategoryMutated,
     settingsSubView,
     setSettingsSubView,
-    selectedGoalIdInView,
     setSelectedGoalIdInView,
     setAutoOpenGoalWizard,
     setActiveTab,
@@ -101,8 +100,6 @@ export const SettingsTabContent: React.FC = () => {
         setSelectedGoalIdInView(null);
         setSettingsSubView(next);
       }}
-      selectedGoalId={selectedGoalIdInView}
-      onSelectGoalId={setSelectedGoalIdInView}
       onStartCreateGoalWizard={() => {
         setSelectedGoalIdInView(null);
         setAutoOpenGoalWizard(true);

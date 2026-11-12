@@ -25,7 +25,6 @@ import { LegalMenuView } from './settings/LegalMenuView';
 import { FeedbackSettingsView } from './settings/FeedbackSettingsView';
 import { SecuritySettingsView } from './settings/SecuritySettingsView';
 import { BankSettingsView } from './settings/BankSettingsView';
-import { GoalsSettingsView } from './settings/GoalsSettingsView';
 import { ProfileSettingsView } from './settings/ProfileSettingsView';
 import type { SettingsSubView } from './settings/subviews';
 import { getSwedishDateStr } from '../utils/swedishDate';
@@ -72,8 +71,6 @@ interface SettingsTabProps {
   ) => void;
   subView?: SettingsSubView;
   onSubViewChange?: (view: SettingsSubView) => void;
-  selectedGoalId?: string | null;
-  onSelectGoalId?: (goalId: string | null) => void;
   onStartCreateGoalWizard?: () => void;
   onOpenAddFixedModal?: () => void;
   onOpenPreviewFixedModal?: (exp?: FixedExpenseItem) => void;
@@ -143,8 +140,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onCategoryMutated,
   subView: controlledSubView,
   onSubViewChange,
-  selectedGoalId,
-  onSelectGoalId,
   onStartCreateGoalWizard,
   onOpenAddFixedModal,
   onOpenPreviewFixedModal,
@@ -370,11 +365,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         setShowNewPassword={setShowNewPassword}
         passwordStatus={passwordStatus}
         passwordSaving={passwordSaving}
-        securityConfirmAction={securityConfirmAction}
-        securityProcessing={securityProcessing}
-        setSecurityProcessing={setSecurityProcessing}
-        onDeleteAccount={onDeleteAccount}
-        setSecurityConfirmAction={setSecurityConfirmAction}
       />
     );
   }
@@ -418,21 +408,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }
 
   // ==========================================
-  // SUB-VIEW: SPARMÅL & BUFFERT
-  // ==========================================
-  if (subView === 'goals') {
-    return (
-      <GoalsSettingsView
-        userName={userName}
-        transactions={transactions}
-        accounts={accounts}
-        selectedGoalId={selectedGoalId}
-        onSelectGoalId={onSelectGoalId}
-      />
-    );
-  }
-
-  // ==========================================
   // SUB-VIEW: BETALSÄTT
   // ==========================================
   if (subView === 'paymentMethods') {
@@ -454,21 +429,28 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
     return (
       <div className="ui-page animate-slide-in-right">
-        <DayOfMonthPicker
-          selectedDay={targetPayday}
-          onSelectDay={onUpdatePayday}
-          mode="payday"
-        />
+        <section>
+          <span className="ui-settings-label">Vilken dag får du lön?</span>
+          <div className="ui-card-p">
+            <DayOfMonthPicker
+              selectedDay={targetPayday}
+              onSelectDay={onUpdatePayday}
+              mode="payday"
+              minimal
+            />
+          </div>
+          <p className="px-4 pt-2 text-footnote text-[var(--text-secondary)]">
+            Dejz räknar från lön till lön, så att du ser vad du har kvar fram till nästa.
+          </p>
+        </section>
 
-        <div className="ui-card-p">
-          <div className="flex items-center justify-between gap-4">
+        <div className="ui-admin-card">
+          <div className="ui-admin-row-static">
             <div className="min-w-0 flex-1">
-              <span className="ui-row-title text-callout sm:text-sm">
-                Helghantering
+              <span className="ui-list-row-title block">Lön före helg</span>
+              <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
+                Infaller lönedagen på en helg räknar vi med fredagen före.
               </span>
-              <p className="ui-row-subtitle">
-                Fredagen före om lönedagen infaller på helg
-              </p>
             </div>
             <button
               type="button"
@@ -644,27 +626,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   // MAIN SETTINGS & PROFILE MENU (Clean grouped layout with generous breathing room)
   // ==========================================
   const initialChar = (userName || userEmail || '').trim().charAt(0);
-  const rowTitleClass =
-    'font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate';
-  const rowSubClass =
-    'font-normal text-meta leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate';
-  const sectionLabelClass =
-    'px-1 pt-1.5 pb-0.5 text-callout sm:text-subhead font-semibold tracking-[-0.01em] text-[var(--text-primary)] block';
-
   return (
-    <div className="space-y-5 pb-40 sm:pb-44 animate-slide-in-left">
+    <div className="space-y-6 pb-40 sm:pb-44 animate-slide-in-left">
       <SettingsMainList
         hiddenAvatarInput={hiddenAvatarInput}
         setSubView={setSubView}
         userAvatar={userAvatar}
         initialChar={initialChar}
-        rowTitleClass={rowTitleClass}
         userName={userName}
-        rowSubClass={rowSubClass}
         userEmail={userEmail}
         onOpenSection={onOpenSection}
         sectionCounts={sectionCounts}
-        sectionLabelClass={sectionLabelClass}
         bankEnabled={bankEnabled}
         hasActiveBank={hasActiveBank}
         targetPayday={targetPayday}

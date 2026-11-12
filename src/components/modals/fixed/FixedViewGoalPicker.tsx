@@ -58,7 +58,7 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
               Inget sparmål
             </span>
             {!linkedGoalId && (
-              <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+              <Check size={16} weight="bold" className="text-[var(--accent-color)] shrink-0" />
             )}
           </button>
 
@@ -87,12 +87,12 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
                   >
                     {g.name}
                   </span>
-                  <span className="text-caption text-[var(--text-secondary)] tabular-nums">
+                  <span className="text-footnote text-[var(--text-secondary)] tabular-nums block mt-0.5">
                     {formatKr(g.currentAmount)} av {formatKr(g.targetAmount)}
                   </span>
                 </div>
                 {isSel && (
-                  <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  <Check size={16} weight="bold" className="text-[var(--accent-color)] shrink-0" />
                 )}
               </button>
             );

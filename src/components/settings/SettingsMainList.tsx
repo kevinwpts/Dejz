@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { isDemoMode } from '../../utils/demoUtils';
 import { EmailVerificationStatus } from '../EmailVerification';
 import {
@@ -20,10 +21,6 @@ import {
   Paperclip,
   Package,
 } from '@phosphor-icons/react';
-
-
-
-
 import type { SettingsSubView } from './subviews';
 
 export interface SettingsMainListProps {
@@ -31,13 +28,10 @@ export interface SettingsMainListProps {
   setSubView: (next: SettingsSubView) => void;
   userAvatar?: string | null;
   initialChar: string;
-  rowTitleClass: "font-normal text-footnote sm:text-callout tracking-[-0.005em] leading-[1.35] text-[var(--text-primary)] block truncate";
   userName?: string | null;
-  rowSubClass: "font-normal text-meta leading-[1.35] text-[var(--text-secondary)] mt-0.5 block truncate";
   userEmail: string | null;
   onOpenSection?: (section: "goals" | "receipts" | "packages") => void;
   sectionCounts: { goals?: number; receipts?: number; packages?: number; };
-  sectionLabelClass: "px-1 pt-1.5 pb-0.5 text-callout sm:text-subhead font-semibold tracking-[-0.01em] text-[var(--text-primary)] block";
   bankEnabled: boolean;
   hasActiveBank: boolean;
   targetPayday: number;
@@ -53,13 +47,10 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
   setSubView,
   userAvatar,
   initialChar,
-  rowTitleClass,
   userName,
-  rowSubClass,
   userEmail,
   onOpenSection,
   sectionCounts,
-  sectionLabelClass,
   bankEnabled,
   hasActiveBank,
   targetPayday,
@@ -68,7 +59,10 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
   themeMode,
   onSignOut,
   onOpenAuth,
-}) => (
+}) => {
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const rowTitleClass = 'ui-list-row-title block';
+  return (
     <>
       {hiddenAvatarInput}
 
@@ -80,21 +74,23 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
           className="ui-admin-row py-3.5"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-full bg-[var(--fill-grouped)] overflow-hidden flex items-center justify-center shrink-0">
               {userAvatar ? (
                 <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
               ) : initialChar ? (
-                <span className="font-display font-semibold text-xs uppercase text-[var(--text-primary)]">
+                <span className="font-display font-semibold text-lg uppercase text-[var(--text-primary)]">
                   {initialChar}
                 </span>
               ) : (
-                <UserCircle size={20} weight="regular" className="text-[var(--text-secondary)]" />
+                <UserCircle size={26} weight="regular" className="text-[var(--text-secondary)]" />
               )}
             </div>
 
             <div className="min-w-0 flex-1">
-              <span className={rowTitleClass}>{userName || 'Konto'}</span>
-              <span className={rowSubClass}>
+              <span className="font-display font-semibold text-base tracking-[-0.01em] text-[var(--text-primary)] block truncate">
+                {userName || 'Konto'}
+              </span>
+              <span className="text-footnote text-[var(--text-secondary)] mt-0.5 block truncate">
                 {userEmail || 'Profil, namn och e-post'}
               </span>
               {userEmail && !isDemoMode() && <EmailVerificationStatus compact />}
@@ -102,7 +98,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
           </div>
 
           <span className="ui-admin-chevron">
-            <CaretRight size={14} />
+            <CaretRight size={13} />
           </span>
         </button>
       </div>
@@ -145,8 +141,8 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
       )}
 
       {/* 3. Ekonomi */}
-      <section className="space-y-2">
-        <span className={sectionLabelClass}>Ekonomi</span>
+      <section>
+        <span className="ui-settings-label">Ekonomi</span>
         <div className="ui-admin-card">
           {/* Bankkonton – bara för admin tills bankkopplingen finns för alla */}
           {bankEnabled ? (
@@ -185,7 +181,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
                 <span className={rowTitleClass}>Bankkoppling</span>
               </div>
               <div className="ui-admin-right">
-                <span className="px-2.5 py-0.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-muted)]">
+                <span className="ui-admin-value">
                   Kommer snart
                 </span>
               </div>
@@ -258,8 +254,8 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
               </span>
               <div className="min-w-0 flex-1">
                 <span className={rowTitleClass}>Dölj egna överföringar</span>
-                <span className={rowSubClass}>
-                  Räknar inte flytt mellan egna konton som inkomst eller utgift
+                <span className="text-footnote text-[var(--text-secondary)] mt-0.5 block">
+                  Flytt mellan dina egna konton räknas inte som inkomst eller utgift
                 </span>
               </div>
             </div>
@@ -286,8 +282,8 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
       </section>
 
       {/* 3. App & konto */}
-      <section className="space-y-1.5">
-        <span className={sectionLabelClass}>App & konto</span>
+      <section>
+        <span className="ui-settings-label">App & konto</span>
         <div className="ui-admin-card">
           {/* Utseende */}
           <button
@@ -405,16 +401,14 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
         {userEmail ? (
           <button
             type="button"
-            onClick={onSignOut}
-            className="ui-admin-row hover:bg-negative-solid/5"
+            onClick={() => setConfirmSignOut(true)}
+            className="ui-admin-row"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-5 h-5 flex items-center justify-center text-negative shrink-0">
+              <span className="ui-admin-icon-slot text-negative">
                 <SignOut size={18} weight="regular" />
-              </div>
-              <span className="text-footnote sm:text-callout font-medium text-negative">
-                Logga ut
               </span>
+              <span className="ui-list-row-title text-negative">Logga ut</span>
             </div>
           </button>
         ) : (
@@ -437,5 +431,19 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmSignOut}
+        title="Logga ut?"
+        description="Du kan logga in igen när du vill. Dina uppgifter finns kvar."
+        confirmLabel="Logga ut"
+        variant="primary"
+        onConfirm={() => {
+          setConfirmSignOut(false);
+          onSignOut();
+        }}
+        onCancel={() => setConfirmSignOut(false)}
+      />
     </>
-);
+  );
+};

@@ -41,13 +41,13 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
   } = form;
 
   return (
-    <main className={`my-auto py-8 space-y-6 ${animClass}`}>
-      <div className="space-y-1.5">
+    <main className={`flex-1 pt-8 pb-6 space-y-6 ${animClass}`}>
+      <div>
         <h1 className="ui-step-title">{TITLES[view]}</h1>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {view === 'login' && 'Logga in för att komma åt din ekonomi.'}
-          {view === 'register' && 'Kom igång på under en minut.'}
-          {view === 'forgot_password' && 'Ange din e-post så skickar vi en återställningslänk.'}
+        <p className="ui-onb-subtitle">
+          {view === 'login' && 'Välkommen tillbaka.'}
+          {view === 'register' && 'Gratis – och klart på två minuter.'}
+          {view === 'forgot_password' && 'Skriv din e-post så skickar vi en länk där du väljer ett nytt lösenord.'}
         </p>
       </div>
 
@@ -61,8 +61,8 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
 
       {/* General Non-Password Error Notice (if any) */}
       {errorMsg && !hasPasswordError && (
-        <div className="p-3.5 rounded-2xl bg-negative-solid/10 border border-negative-solid/20 flex items-start gap-2.5 text-negative text-xs font-medium animate-scale-in">
-          <WarningCircle size={16} weight="bold" className="shrink-0 mt-0.5" />
+        <div className="ui-auth-alert animate-scale-in">
+          <WarningCircle size={18} weight="fill" className="shrink-0 mt-px" />
           <div className="min-w-0 flex-1">
             <span>{errorMsg}</span>
             {needsConfirmation && (
@@ -70,7 +70,7 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
                 type="button"
                 disabled={resendingConfirm}
                 onClick={handleResendConfirmation}
-                className="mt-2.5 w-full py-2.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-footnote font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60"
+                className="ui-auth-alert-btn"
               >
                 {resendingConfirm && <SpinnerGap size={14} className="animate-spin" />}
                 Skicka nytt mejl
@@ -84,14 +84,10 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
         {/* Hairline Divided Card with Modern Shake & Inline Validation Feedback */}
         <div
           key={shakeTrigger}
-          className={`rounded-3xl bg-[var(--surface-color)] border transition-all overflow-hidden ${
-            hasPasswordError
-              ? 'border-negative-solid/50 ring-1 ring-negative-solid/20 animate-shake'
-              : 'border-[var(--border-subtle)]'
-          }`}
+          className={`ui-auth-field-card ${hasPasswordError ? 'ui-auth-field-card-error animate-shake' : ''}`}
         >
-          <label className="px-4.5 py-4 block cursor-text">
-            <span className="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">
+          <label className="px-4 py-3.5 block cursor-text">
+            <span className="ui-field-label block mb-1">
               E-postadress
             </span>
             <input
@@ -108,14 +104,14 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
           </label>
 
           {view !== 'forgot_password' && (
-            <div className="border-t border-[var(--border-subtle)] px-4.5 py-4">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-medium text-[var(--text-secondary)]">Lösenord</span>
+            <div className="ui-auth-field-divider px-4 py-3.5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="ui-field-label">Lösenord</span>
                 {view === 'login' && (
                   <button
                     type="button"
                     onClick={() => switchView('forgot_password', 'forward')}
-                    className="text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                    className="text-footnote font-medium text-[var(--accent-color)] hover:opacity-80 cursor-pointer"
                   >
                     Glömt lösenord?
                   </button>
@@ -132,7 +128,7 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
                     setPassword(e.target.value);
                     if (hasPasswordError || errorMsg) clearErrors();
                   }}
-                  placeholder="Minst 6 tecken"
+                  placeholder={view === 'register' ? 'Minst 6 tecken' : 'Ditt lösenord'}
                   className="ui-field-input"
                 />
                 <button
@@ -149,18 +145,9 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
 
           {/* Modern Inline Error Micro-banner (Replaces big clumsy red rectangle) */}
           {hasPasswordError && (
-            <div className="px-4 py-2.5 bg-negative-solid/5 border-t border-negative-solid/15 flex items-center justify-between text-meta text-negative font-medium animate-scale-in">
-              <div className="flex items-center gap-1.5">
-                <WarningCircle size={14} weight="bold" className="shrink-0" />
-                <span>Fel lösenord. Kontrollera och försök igen.</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => switchView('forgot_password', 'forward')}
-                className="font-semibold underline hover:opacity-80 cursor-pointer shrink-0 ml-2 text-caption"
-              >
-                Glömt?
-              </button>
+            <div className="ui-auth-field-divider px-4 py-3 flex items-center gap-2 text-footnote text-negative font-medium animate-scale-in">
+              <WarningCircle size={16} weight="fill" className="shrink-0" />
+              <span>Fel e-post eller lösenord. Försök igen.</span>
             </div>
           )}
         </div>
@@ -183,15 +170,15 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
         <button
           type="submit"
           disabled={loading || googleLoading}
-          className="w-full py-3.5 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-bold text-sm hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+          className="ui-btn-primary"
         >
           {loading && <SpinnerGap size={16} className="animate-spin" />}
           {view === 'login' && 'Logga in'}
           {view === 'register' && 'Skapa konto'}
           {view === 'forgot_password' && (
             <>
-              <span>Skicka återställningslänk</span>
-              <PaperPlaneTilt size={15} weight="bold" />
+              <span>Skicka länk</span>
+              <PaperPlaneTilt size={16} weight="bold" />
             </>
           )}
         </button>

@@ -27,7 +27,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
   onSubmitManualCallback,
 }) => (
   <div className="space-y-4">
-    <div className="text-center pb-2">
+    <div className="text-center pb-2 pt-2">
       <div className="flex justify-center mb-3.5">
         <ItemLogo
           name={selectedBank?.name || 'Bank'}
@@ -35,11 +35,11 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
           size="xl"
         />
       </div>
-      <h4 className="font-display font-bold text-lg text-[var(--text-primary)]">
+      <h4 className="font-display font-semibold text-xl tracking-[-0.02em] text-[var(--text-primary)]">
         {selectedBank?.name}
       </h4>
-      <p className="text-xs text-[var(--text-muted)] mt-1">
-        Legitimera dig med Mobilt BankID för att hämta dina konton.
+      <p className="text-subhead leading-snug text-[var(--text-secondary)] mt-1.5 max-w-[280px] mx-auto">
+        Logga in med BankID så hämtar vi dina konton. Vi kan bara läsa – aldrig flytta pengar.
       </p>
     </div>
 
@@ -58,7 +58,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
         <button
           type="button"
           onClick={() => setShowManualCallback(true)}
-          className="text-caption font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          className="h-10 px-3 text-footnote font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
         >
           Öppnades inloggningen i en annan flik?
         </button>
@@ -66,7 +66,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
     ) : (
       <form
         onSubmit={onSubmitManualCallback}
-        className="pt-3 border-t border-[var(--border-subtle)] space-y-2 animate-fade-in"
+        className="pt-3 border-t border-[var(--separator)] space-y-2 animate-fade-in"
       >
         <div className="flex gap-2">
           <input
@@ -74,13 +74,13 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
             type="text"
             value={manualCallbackUrl}
             onChange={(e) => setManualCallbackUrl(e.target.value)}
-            placeholder="Klistra in återkopplingslänk..."
-            className="flex-1 px-3.5 py-3 rounded-xl bg-[var(--fill-grouped)] text-base font-normal text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+            placeholder="Klistra in länken från banken"
+            className="ui-box-input flex-1 min-w-0"
           />
           <button
             type="submit"
             disabled={exchangingCode || !manualCallbackUrl.trim()}
-            className="ui-btn-sm-primary px-4"
+            className="ui-btn-sm-primary !h-[50px] px-4"
           >
             {exchangingCode ? 'Verifierar...' : 'Slutför'}
           </button>

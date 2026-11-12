@@ -21,10 +21,8 @@ interface StepAccountLinkProps {
 }
 
 const cardClass = (selected: boolean) =>
-  `ui-option-card ${
-    selected
-      ? 'bg-[var(--surface-color)] border-[var(--text-primary)]/40'
-      : 'bg-[var(--surface-color)]/50 border-[var(--border-subtle)] opacity-65'
+  `ui-option-card bg-[var(--surface-color)] shadow-[var(--card-shadow)] ${
+    selected ? 'border-[var(--cta-bg)]' : 'border-transparent'
   }`;
 
 const checkboxClass = (selected: boolean) =>
@@ -52,8 +50,8 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
         </div>
         <div className="min-w-0 flex-1">
           <span className="ui-option-title">Eget valt belopp</span>
-          <span className="text-xs text-[var(--text-muted)] block mt-0.5">
-            Välj startbelopp i nästa steg och uppdatera själv
+          <span className="text-footnote text-[var(--text-secondary)] block mt-0.5 leading-snug">
+            Du fyller i hur mycket du har sparat och sätter in själv
           </span>
         </div>
       </button>
@@ -67,16 +65,16 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
           <div className={checkboxClass(goalLinkedAccountId === '__TOTAL__')}>
             {goalLinkedAccountId === '__TOTAL__' && <Check size={12} weight="bold" />}
           </div>
-          <div className="w-8 h-8 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
             <Bank size={15} weight="regular" />
           </div>
           <div className="min-w-0 flex-1">
             <span className="ui-option-title">Totalsaldo</span>
-            <span className="text-xs text-[var(--text-muted)] block mt-0.5">
+            <span className="text-footnote text-[var(--text-secondary)] block mt-0.5 leading-snug">
               Alla konton · Synkas automatiskt
             </span>
           </div>
-          <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+          <span className="text-subhead font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
             {formatKr(effectiveTotalBalance)}
           </span>
         </button>
@@ -109,14 +107,14 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
             <div className="min-w-0 flex-1">
               <span className="ui-option-title">{acc.name}</span>
               {(showBankSub || (hasDuplicateName && last4)) && (
-                <span className="text-xs text-[var(--text-muted)] block tabular-nums mt-0.5 truncate">
+                <span className="text-footnote text-[var(--text-secondary)] block tabular-nums mt-0.5 truncate">
                   {showBankSub ? acc.bankName : ''}
                   {showBankSub && hasDuplicateName && last4 ? ' · ' : ''}
                   {hasDuplicateName && last4 ? `•••• ${last4}` : ''}
                 </span>
               )}
             </div>
-            <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+            <span className="text-subhead font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
               {formatKr(accBal)}
             </span>
           </button>
@@ -129,7 +127,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
         <button
           type="button"
           onClick={onContinue}
-          className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all cursor-pointer"
+          className="ui-btn-primary"
         >
           <span>Fortsätt</span>
         </button>
@@ -138,7 +136,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
           type="button"
           disabled={!canSave}
           onClick={onSave}
-          className="w-full py-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] shadow-[var(--cta-shadow)] font-display font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 transition-all cursor-pointer"
+          className="ui-btn-primary"
         >
           <span>Skapa sparmål</span>
         </button>

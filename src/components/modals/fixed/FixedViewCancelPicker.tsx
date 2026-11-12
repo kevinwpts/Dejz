@@ -1,7 +1,7 @@
 import type { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
-import { Check, CaretRight } from '@phosphor-icons/react';
+import { Check, CaretRight, Sparkle } from '@phosphor-icons/react';
 import { FixedExpenseItem } from '../../../app/models';
 import { getSwedishDateStr } from '../../../utils/swedishDate';
 import { SheetHeader } from '../../ui/SheetHeader';
@@ -34,7 +34,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
   <>
     {subView === 'cancel-picker' && (
       <div className={`${slideAnimClass} space-y-4`}>
-        <SheetHeader title={<>Uppsagd · {displayName}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
+        <SheetHeader title={<>Säg upp {displayName}</>} onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         {(() => {
           const SHORT_MONTHS = [
@@ -90,7 +90,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
               return {
                 key: `m-${mCount}`,
                 title: mCount === 1 ? '1 månad kvar' : `${mCount} månader kvar`,
-                rightLabel: `Sista: ${target.label}`,
+                rightLabel: `Sista i ${target.label}`,
                 isSelected,
                 onPick: () => {
                   commitInlineChanges({
@@ -107,7 +107,27 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
           const customMonths = Array.from({ length: 12 }, (_, idx) => getMonthOption(idx));
 
           return (
-            <div className="space-y-3.5">
+            <div className="space-y-4">
+              {/* Guiden först – det är oftast det man vill veta */}
+              <button
+                type="button"
+                onClick={handleOpenCancelGuide}
+                className="ui-sheet-group ui-row-btn w-full"
+              >
+                <span className="flex items-center gap-3 min-w-0">
+                  <span className="w-8 h-8 rounded-full bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                    <Sparkle size={16} weight="fill" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="ui-list-row-title block">Hur säger jag upp?</span>
+                    <span className="text-footnote text-[var(--text-secondary)] block truncate mt-0.5">
+                      Steg för steg för {displayName}
+                    </span>
+                  </span>
+                </span>
+                <CaretRight size={12} className="text-[var(--text-muted)] shrink-0" />
+              </button>
+
               {activeExpense?.isCancelled && (
                 <button
                   type="button"
@@ -119,15 +139,14 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                     });
                     navigateSubView('details', 'back');
                   }}
-                  className="w-full py-3 px-4 rounded-2xl bg-[var(--fill-grouped)] hover:opacity-90 text-xs font-medium text-[var(--text-primary)] flex items-center justify-between transition-colors cursor-pointer"
+                  className="ui-sheet-group ui-row-btn w-full"
                 >
-                  <span>Ångra uppsägning</span>
-                  <span className="text-positive font-semibold">
-                    Gör aktiv igen
-                  </span>
+                  <span className="text-[var(--text-primary)]">Ångra uppsägning</span>
+                  <span className="text-[var(--accent-color)] font-medium">Gör aktiv igen</span>
                 </button>
               )}
 
+              <p className="ui-field-label px-1 -mb-2">När dras pengarna sista gången?</p>
               <div className="ui-sheet-group">
                 {quickScenarios.map((sc) => (
                   <button
@@ -145,10 +164,10 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                     >
                       {sc.title}
                     </span>
-                    <span className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                    <span className="flex items-center gap-2 text-callout text-[var(--text-secondary)] tabular-nums">
                       <span>{sc.rightLabel}</span>
                       {sc.isSelected && (
-                        <Check size={14} weight="bold" className="text-[var(--text-primary)]" />
+                        <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
                       )}
                     </span>
                   </button>
@@ -160,7 +179,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                   className="ui-row-btn"
                 >
                   <span className="font-normal text-[var(--text-primary)]">
-                    Välj sista månad
+                    Välj annan månad
                   </span>
                   <CaretRight
                     size={12}
@@ -172,7 +191,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
               </div>
 
               {showCustomMonthPicker && (
-                <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-[var(--fill-grouped)]">
+                <div className="grid grid-cols-4 gap-2 p-3 rounded-card-nested bg-[var(--fill-grouped)]">
                   {customMonths.map((cm) => {
                     const isSel = Boolean(
                       activeExpense?.isCancelled &&
@@ -191,7 +210,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                           });
                           navigateSubView('details', 'back');
                         }}
-                        className={`py-2 px-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                        className={`h-10 px-2 rounded-xl text-callout font-medium tabular-nums transition-all cursor-pointer ${
                           isSel
                             ? 'bg-[var(--text-primary)] text-[var(--bg-color)]'
                             : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
@@ -204,15 +223,6 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                 </div>
               )}
 
-              <div className="pt-1 flex justify-center">
-                <button
-                  type="button"
-                  onClick={handleOpenCancelGuide}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1.5 px-3 transition-colors cursor-pointer"
-                >
-                  Hur säger jag upp hos {displayName}?
-                </button>
-              </div>
             </div>
           );
         })()}

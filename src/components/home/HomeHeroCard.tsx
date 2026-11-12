@@ -19,6 +19,10 @@ export interface HomeHeroCardProps {
   setActiveHeroPopup: (value: SetStateAction<"income" | "fixed" | "variable" | null>) => void;
 }
 
+/** "+24 800 kr" / "−11 414 kr" – men "0 kr" utan tecken när beloppet är noll */
+const signed = (sign: '+' | '−', amount: number, formatKr: (n: number) => string) =>
+  Math.round(amount) === 0 ? formatKr(0) : `${sign}${formatKr(amount)}`;
+
 export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
   kvarAttSpendera,
   totalIncome,
@@ -106,7 +110,11 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
 
               <div className="mt-0.5">
                 {isInitialLoading && accounts.length === 0 ? (
-                  <div className="h-11 w-44 rounded-2xl bg-[var(--surface-raised)] animate-pulse mt-1.5" />
+                  // Samma höjd som beloppet + stapeln, så att kortet inte hoppar när siffrorna laddats
+                  <div aria-hidden="true">
+                    <div className="h-[46px] w-44 rounded-xl bg-[var(--surface-raised)] animate-pulse mt-2" />
+                    <div className="dejz-hero-track mt-5 h-1.5 rounded-full" />
+                  </div>
                 ) : (
                   <div className="min-w-0">
                     <div
@@ -181,10 +189,10 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                       <span>Inkomst</span>
                     </span>
                     {isInitialLoading && accounts.length === 0 ? (
-                      <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                      <div className="h-5 w-16 rounded-md bg-[var(--surface-raised)] animate-pulse mt-0.5" />
                     ) : (
                       <span className="ui-stat-value text-positive">
-                        +{formatKr(totalIncome)}
+                        {signed('+', totalIncome, formatKr)}
                       </span>
                     )}
                   </button>
@@ -198,10 +206,10 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                       <span>Fasta</span>
                     </span>
                     {isInitialLoading && accounts.length === 0 ? (
-                      <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                      <div className="h-5 w-16 rounded-md bg-[var(--surface-raised)] animate-pulse mt-0.5" />
                     ) : (
                       <span className="ui-stat-value text-[var(--text-primary)]">
-                        −{formatKr(totalFixedExpenses)}
+                        {signed('−', totalFixedExpenses, formatKr)}
                       </span>
                     )}
                   </button>
@@ -215,10 +223,10 @@ export const HomeHeroCard: React.FC<HomeHeroCardProps> = ({
                       <span>Rörligt</span>
                     </span>
                     {isInitialLoading && accounts.length === 0 ? (
-                      <div className="h-4 w-12 rounded bg-[var(--surface-raised)] animate-pulse mt-1" />
+                      <div className="h-5 w-16 rounded-md bg-[var(--surface-raised)] animate-pulse mt-0.5" />
                     ) : (
                       <span className="ui-stat-value text-[var(--text-primary)]">
-                        −{formatKr(totalVariableSpent)}
+                        {signed('−', totalVariableSpent, formatKr)}
                       </span>
                     )}
                   </button>

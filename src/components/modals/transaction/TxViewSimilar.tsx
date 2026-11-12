@@ -31,12 +31,12 @@ export const TxViewSimilar: React.FC<TxViewSimilarProps> = ({
   <>
     {subView === 'similar' && activeTx && (
       <div className={`${slideAnimClass} space-y-3.5`}>
-        <SheetHeader title="Liknande transaktioner" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
+        <SheetHeader title="Tidigare köp" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         <div className="ui-date-header px-1">
           <span className="font-medium text-[var(--text-secondary)]">
             {similarInfo.transactions.length}{' '}
-            {similarInfo.transactions.length === 1 ? 'händelse' : 'händelser'}
+            köp
           </span>
           <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
             Totalt {formatKr(similarInfo.totalAmount)}
@@ -69,18 +69,10 @@ export const TxViewSimilar: React.FC<TxViewSimilarProps> = ({
                     size="md"
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="ui-row-title">
-                        {tx.title}
-                      </span>
-                      {isCurrent && (
-                        <span className="text-caption font-normal text-[var(--text-secondary)] shrink-0">
-                          · Denna
-                        </span>
-                      )}
-                    </div>
+                    <span className="ui-row-title">{tx.title}</span>
                     <span className="ui-row-subtitle tabular-nums">
                       {formatSwedishDateHeading(tx.date)}
+                      {isCurrent ? ' · Det här köpet' : ''}
                     </span>
                   </div>
                 </div>

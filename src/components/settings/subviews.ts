@@ -4,13 +4,11 @@ export type SettingsSubView =
   | 'admin'
   | 'discover'
   | 'categories'
-  | 'goals'
   | 'paymentMethods'
   | 'period'
   | 'bank'
   | 'appearance'
   | 'security'
-  | 'preferences'
   | 'profile'
   | 'feedback'
   | 'legal'
@@ -24,12 +22,10 @@ export const SETTINGS_SUBVIEW_TITLES: Record<Exclude<SettingsSubView, 'main'>, s
   profile: 'Profil',
   discover: 'Hitta fasta poster',
   categories: 'Kategorier',
-  goals: 'Sparmål & buffert',
   paymentMethods: 'Betalsätt',
   period: 'Lönedag',
   bank: 'Bankkonton',
   appearance: 'Utseende',
-  preferences: 'Överföringar',
   security: 'Data & säkerhet',
   feedback: 'Hjälp & feedback',
   legal: 'Villkor & integritet',

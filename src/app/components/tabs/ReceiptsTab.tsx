@@ -1,14 +1,66 @@
 // Fliken "Kvitton": alla fasta utgifter och köp som har ett bifogat kvitto, med snabbknapp för att öppna kvittot.
 import React from 'react';
-import { Paperclip, FileText, Eye } from '@phosphor-icons/react';
+import { Receipt, FileText, Eye } from '@phosphor-icons/react';
 import { useApp } from '../../AppContext';
-import { getTransactionTime } from '../../models';
 import { ItemLogo } from '../../../components/ItemLogo';
 import { CategoryIcon } from '../../../components/CategoryIcon';
-import { EmptyClusterArtwork } from '../../../components/ui/VisualArtwork';
-import { getItemReceipts } from '../../../utils/swedishDate';
+import { EmptyState } from '../../../components/ui/EmptyState';
+import { formatSwedishDateHeading, getItemReceipts } from '../../../utils/swedishDate';
+import type { ReceiptAttachment } from '../../../utils/swedishDate';
 import { checkIsRecurringTransaction } from '../../../utils/recurring/checkRecurring';
-import { TxFlagIcons, formatKr } from './tabListParts';
+import { formatKr } from './tabListParts';
+
+/** En rad i kvittolistan: logga, namn, kategori · antal kvitton, belopp och en knapp som öppnar kvittot. */
+const ReceiptRow: React.FC<{
+  name: string;
+  category: string;
+  logo?: string;
+  isRecurring: boolean;
+  amountText: string;
+  isIncome?: boolean;
+  meta: string;
+  receipts: ReceiptAttachment[];
+  onOpenItem: () => void;
+  onPreview: (r: ReceiptAttachment) => void;
+}> = ({ name, category, logo, isRecurring, amountText, isIncome, meta, receipts, onOpenItem, onPreview }) => {
+  const first = receipts[0];
+  return (
+    <div className="ui-tx-row-static">
+      <button
+        type="button"
+        onClick={onOpenItem}
+        className="flex items-center gap-3 min-w-0 flex-1 text-left active:opacity-60 transition-opacity cursor-pointer"
+      >
+        <ItemLogo name={name} category={category} logoUrl={logo} size="md" isRecurring={isRecurring} />
+        <div className="min-w-0 flex-1">
+          <span className="ui-row-title">{name}</span>
+          <span className="ui-row-subtitle">
+            <CategoryIcon category={category} size={11} className="shrink-0" />
+            <span className="truncate">
+              {category}
+              {receipts.length > 1 ? ` · ${receipts.length} kvitton` : ''}
+            </span>
+          </span>
+        </div>
+        <div className="text-right shrink-0">
+          <span className={isIncome ? 'ui-row-amount-income' : 'ui-row-amount'}>{amountText}</span>
+          <span className="ui-row-meta">{meta}</span>
+        </div>
+      </button>
+      {first && (
+        <button
+          aria-label="Öppna kvitto"
+          type="button"
+          onClick={() => onPreview(first)}
+          className="ui-icon-btn"
+          title="Öppna kvitto"
+        >
+          {first.url.startsWith('data:image/') ? <Eye size={16} /> : <FileText size={16} />}
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const ReceiptsTab: React.FC = () => {
   const {
@@ -22,195 +74,81 @@ export const ReceiptsTab: React.FC = () => {
     setPreviewReceipt,
   } = useApp();
 
-  const hasReceipts =
-    displayTransactions.some((t) => getItemReceipts(t).length > 0) ||
-    fixedExpenses.some((f) => getItemReceipts(f).length > 0);
+  const fixedWithReceipts = fixedExpenses.filter((f) => getItemReceipts(f).length > 0);
+  const txWithReceipts = displayTransactions
+    .filter((t) => getItemReceipts(t).length > 0)
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  if (fixedWithReceipts.length === 0 && txWithReceipts.length === 0) {
+    return (
+      <div className="ui-page">
+        <EmptyState
+          icon={Receipt}
+          title="Inga kvitton än"
+          description="Fota eller ladda upp ett kvitto när du lägger in ett köp, så samlas alla här."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="ui-page">
-      {hasReceipts ? (
-        <section className="ui-list-card">
-          <div className="divide-y divide-[var(--border-subtle)]">
-            {fixedExpenses
-              .filter((f) => getItemReceipts(f).length > 0)
-              .map((exp) => {
-                const expReceipts = getItemReceipts(exp);
-                const formattedAmt = formatKr(exp.amount);
-                return (
-                  <div
-                    key={`receipt-fix-${exp.id}`}
-                    className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-footnote sm:text-sm"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedFixedExpense(exp ?? null);
-                        setIsFixedModalOpen(true);
-                      }}
-                      className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
-                    >
-                      <ItemLogo
-                        name={exp.name}
-                        category={exp.category}
-                        logoUrl={exp.logo}
-                        size="md"
-                        isRecurring={true}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title">{exp.name}</span>
-                        <span className="ui-row-subtitle flex items-center gap-1.5">
-                          <CategoryIcon
-                            category={exp.category || 'Räkningar'}
-                            size={11}
-                            className="shrink-0 text-[var(--text-secondary)]"
-                          />
-                          <span className="truncate">{exp.category}</span>
-                          <Paperclip
-                            size={11}
-                            weight="bold"
-                            className="text-[var(--text-secondary)] shrink-0"
-                          />
-                          {expReceipts.length > 1 && (
-                            <span className="text-micro font-bold text-[var(--text-secondary)]">
-                              {expReceipts.length} st
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                    </button>
-
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <div className="text-right">
-                        <span className="ui-row-amount">−{formattedAmt}</span>
-                        <span className="ui-row-meta truncate max-w-[110px]">
-                          {expReceipts.length > 1
-                            ? `${expReceipts.length} kvitton`
-                            : expReceipts[0]?.name || 'Kvitto'}
-                        </span>
-                      </div>
-                      {expReceipts[0] && (
-                        <button
-                          aria-label="Öppna kvitto"
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewReceipt({
-                              url: expReceipts[0].url,
-                              name: expReceipts[0].name || exp.name || 'Kvitto',
-                            });
-                          }}
-                          className="ui-icon-btn"
-                          title="Öppna kvitto"
-                        >
-                          {expReceipts[0].url.startsWith('data:image/') ? (
-                            <Eye size={14} />
-                          ) : (
-                            <FileText size={14} />
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-            {displayTransactions
-              .filter((t) => getItemReceipts(t).length > 0)
-              .map((tx) => {
-                const txReceipts = getItemReceipts(tx);
-                const isIncome = tx.type === 'income';
-                const recurring = checkIsRecurringTransaction(tx, fixedExpenses, incomes);
-                const formattedAmt = formatKr(tx.amount);
-                return (
-                  <div
-                    key={`receipt-tx-${tx.id}`}
-                    className="py-3 sm:py-3.5 flex items-center justify-between gap-3.5 text-footnote sm:text-sm"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedTransaction(tx ?? null);
-                        setIsTxModalOpen(true);
-                      }}
-                      className="flex items-center gap-3.5 min-w-0 flex-1 text-left hover:opacity-85 transition-opacity cursor-pointer"
-                    >
-                      <ItemLogo
-                        name={tx.title}
-                        category={tx.category}
-                        logoUrl={tx.logo}
-                        size="md"
-                        isRecurring={recurring.isRecurring}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <span className="ui-row-title">{tx.title}</span>
-                        <span className="ui-row-subtitle flex items-center gap-1.5">
-                          <CategoryIcon
-                            category={tx.category}
-                            size={11}
-                            className="shrink-0 text-[var(--text-secondary)]"
-                          />
-                          <span className="truncate">{tx.category}</span>
-                          <TxFlagIcons tx={tx} showReceipt={false} />
-                          <Paperclip
-                            size={11}
-                            weight="bold"
-                            className="text-[var(--text-secondary)] shrink-0"
-                          />
-                          <span className="truncate">
-                            ·{' '}
-                            {txReceipts.length > 1
-                              ? `${txReceipts.length} kvitton`
-                              : txReceipts[0]?.name || 'Kvitto'}
-                          </span>
-                        </span>
-                      </div>
-                    </button>
-
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <div className="text-right">
-                        <span className={`ui-row-amount ${isIncome ? 'ui-row-amount-income' : ''}`}>
-                          {isIncome ? `+${formattedAmt}` : `−${formattedAmt}`}
-                        </span>
-                        <span className="ui-row-meta">
-                          {tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
-                            ? 'Reserverat'
-                            : getTransactionTime(tx)}
-                        </span>
-                      </div>
-                      {txReceipts[0] && (
-                        <button
-                          aria-label="Öppna kvitto"
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewReceipt({
-                              url: txReceipts[0].url,
-                              name: txReceipts[0].name || tx.title || 'Kvitto',
-                            });
-                          }}
-                          className="ui-icon-btn"
-                          title="Öppna kvitto"
-                        >
-                          {txReceipts[0].url.startsWith('data:image/') ? (
-                            <Eye size={14} />
-                          ) : (
-                            <FileText size={14} />
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+      {fixedWithReceipts.length > 0 && (
+        <section>
+          <span className="ui-settings-label">Fasta utgifter</span>
+          <div className="ui-list-card">
+            {fixedWithReceipts.map((exp) => (
+              <ReceiptRow
+                key={`receipt-fix-${exp.id}`}
+                name={exp.name}
+                category={exp.category || 'Räkningar'}
+                logo={exp.logo}
+                isRecurring
+                amountText={`−${formatKr(exp.amount)}`}
+                meta="Varje månad"
+                receipts={getItemReceipts(exp)}
+                onOpenItem={() => {
+                  setSelectedFixedExpense(exp ?? null);
+                  setIsFixedModalOpen(true);
+                }}
+                onPreview={(r) => setPreviewReceipt({ url: r.url, name: r.name || exp.name || 'Kvitto' })}
+              />
+            ))}
           </div>
         </section>
-      ) : (
-        <section className="ui-empty-state-page animate-fade-in">
-          <EmptyClusterArtwork variant="receipts" />
-          <p className="ui-empty-title">Inga bifogade kvitton än</p>
-          <p className="ui-empty-sub">
-            Fota eller ladda upp kvitton på dina köp och fasta utgifter så samlas alla här.
-          </p>
+      )}
+
+      {txWithReceipts.length > 0 && (
+        <section>
+          {fixedWithReceipts.length > 0 && <span className="ui-settings-label">Köp</span>}
+          <div className="ui-list-card">
+            {txWithReceipts.map((tx) => {
+              const isIncome = tx.type === 'income';
+              const amt = formatKr(tx.amount);
+              return (
+                <ReceiptRow
+                  key={`receipt-tx-${tx.id}`}
+                  name={tx.title}
+                  category={tx.category}
+                  logo={tx.logo}
+                  isRecurring={checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring}
+                  amountText={isIncome ? `+${amt}` : `−${amt}`}
+                  isIncome={isIncome}
+                  meta={
+                    tx.bookingStatus === 'PDNG' || tx.bookingStatus === 'HOLD'
+                      ? 'Reserverat'
+                      : formatSwedishDateHeading(tx.date)
+                  }
+                  receipts={getItemReceipts(tx)}
+                  onOpenItem={() => {
+                    setSelectedTransaction(tx ?? null);
+                    setIsTxModalOpen(true);
+                  }}
+                  onPreview={(r) => setPreviewReceipt({ url: r.url, name: r.name || tx.title || 'Kvitto' })}
+                />
+              );
+            })}
+          </div>
         </section>
       )}
     </div>

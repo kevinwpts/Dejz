@@ -11,9 +11,7 @@ interface BankAccountsSectionProps {
   displayAccountItems: AccountItem[];
   bankAccounts: BankAccount[];
   connectedBank: string | null;
-  hasConnections: boolean;
   syncingAccountId: string | null;
-  onOpenSelectAccounts: () => void;
   onOpenAccountDetail: (acc: AccountItem) => void;
   onQuickSyncAccount: (e: React.MouseEvent, acc: AccountItem) => void;
 }
@@ -22,27 +20,12 @@ export const BankAccountsSection: React.FC<BankAccountsSectionProps> = ({
   displayAccountItems,
   bankAccounts,
   connectedBank,
-  hasConnections,
   syncingAccountId,
-  onOpenSelectAccounts,
   onOpenAccountDetail,
   onQuickSyncAccount,
 }) => (
-  <div className="space-y-1.5">
-    <div className="flex items-center justify-between px-2">
-      <span className="ui-field-label">
-        Konton
-      </span>
-      {hasConnections && (
-        <button
-          type="button"
-          onClick={onOpenSelectAccounts}
-          className="text-xs font-semibold text-[var(--accent-primary)] hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          Välj konton att synka
-        </button>
-      )}
-    </div>
+  <section>
+    <span className="ui-settings-label">Konton</span>
     <div className="ui-group-card">
       {displayAccountItems.map((acc) => {
         const cleanName = stripRawAccountDigits(acc.name) || 'Bankkonto';
@@ -77,7 +60,7 @@ export const BankAccountsSection: React.FC<BankAccountsSectionProps> = ({
                   type="button"
                   onClick={(e) => onQuickSyncAccount(e, acc)}
                   disabled={isSyncingThis}
-                  className="px-3 py-1.5 rounded-xl bg-[var(--accent-primary)] text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer flex items-center gap-1.5"
+                  className="ui-btn-sm-primary disabled:opacity-50"
                 >
                   <ArrowClockwise
                     size={13}
@@ -101,5 +84,5 @@ export const BankAccountsSection: React.FC<BankAccountsSectionProps> = ({
         );
       })}
     </div>
-  </div>
+  </section>
 );
