@@ -22,6 +22,7 @@ import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurr
 
 import { sanitizeTransactionItem } from '../../app/transactionMapping';
 import { apiUrl } from '../../utils/platform';
+import { isDemoMode } from '../../utils/demoUtils';
 
 /** Skickar en omgång kryptiska bankrader till AI-tvätten. Ger `null` om servern svarar med fel. */
 async function fetchMerchantCleaning(
@@ -52,10 +53,10 @@ export function useAiMerchantCleaning({
 }: {
   transactions: TransactionItem[];
   setTransactions: React.Dispatch<React.SetStateAction<TransactionItem[]>>;
-  incomesRef: React.MutableRefObject<IncomeItem[]>;
-  fixedExpensesRef: React.MutableRefObject<FixedExpenseItem[]>;
-  userIdRef: React.MutableRefObject<string | null>;
-  isDeletingAccountRef: React.MutableRefObject<boolean>;
+  incomesRef: React.RefObject<IncomeItem[]>;
+  fixedExpensesRef: React.RefObject<FixedExpenseItem[]>;
+  userIdRef: React.RefObject<string | null>;
+  isDeletingAccountRef: React.RefObject<boolean>;
 }) {
   // Tyst AI-tvätt i bakgrunden för kryptiska/okända bankrader (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, KLARNA*84920)
   const aiCleanedKeysRef = useRef<Set<string>>(new Set());
@@ -68,7 +69,8 @@ export function useAiMerchantCleaning({
   }, []);
 
   useEffect(() => {
-    if (aiCleanInFlightRef.current || transactions.length === 0) return;
+    // Demoläget är helt fristående: inga AI-anrop med påhittade köp (kostar pengar, ger olika demobilder).
+    if (isDemoMode() || aiCleanInFlightRef.current || transactions.length === 0) return;
 
     const currentAliases = getMerchantAliases();
     const candidatesByKey = new Map<

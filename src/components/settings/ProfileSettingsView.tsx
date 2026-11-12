@@ -37,7 +37,7 @@ export interface ProfileSettingsViewProps {
   setResetEmailStatus: (value: SetStateAction<string | null>) => void;
   userName?: string | null;
   hiddenAvatarInput: React.ReactElement;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   userAvatar?: string | null;
   onUpdateAvatar?: (avatarDataUrl: string | null) => void;
   setEditName: (value: SetStateAction<string>) => void;

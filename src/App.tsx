@@ -17,9 +17,9 @@ export const App: React.FC = () => {
 
   if (app.showLanding || (!app.userId && !app.isInitialLoading && !app.isOnboardingActive)) {
     return (
-      <AppContext.Provider value={app}>
+      <AppContext value={app}>
         <LandingScreen />
-      </AppContext.Provider>
+      </AppContext>
     );
   }
 
@@ -38,14 +38,14 @@ export const App: React.FC = () => {
 
   if (shouldShowOnboarding) {
     return (
-      <AppContext.Provider value={app}>
+      <AppContext value={app}>
         <OnboardingScreen />
-      </AppContext.Provider>
+      </AppContext>
     );
   }
 
   return (
-    <AppContext.Provider value={app}>
+    <AppContext value={app}>
     <div
       style={{ backgroundImage: 'var(--bg-gradient)' }}
       className={`min-h-screen bg-[var(--bg-color)] bg-no-repeat text-[var(--text-primary)] flex flex-col font-sans transition-colors selection:bg-[var(--text-primary)] selection:text-[var(--bg-color)]`}
@@ -66,7 +66,7 @@ export const App: React.FC = () => {
       {/* Notiser och kvittovisare */}
       <AppOverlays />
     </div>
-    </AppContext.Provider>
+    </AppContext>
   );
 };
 

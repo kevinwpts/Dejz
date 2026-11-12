@@ -47,7 +47,7 @@ export interface GoalDetailViewProps {
   accounts: AccountItem[];
   effectiveTotalBalance: number;
   isArtworkPickerOpen: boolean;
-  galleryInputRef: RefObject<HTMLInputElement>;
+  galleryInputRef: RefObject<HTMLInputElement | null>;
   transactions: TransactionItem[];
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import { supabase } from '../../supabaseClient';
 import type { BankConnection, BankAccount } from '../../services/bankService';
 import { isDemoMode } from '../../utils/demoUtils';
@@ -9,9 +9,9 @@ const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minu
 
 export interface LiveSyncContext {
   userId: string | null;
-  userIdRef: MutableRefObject<string | null>;
+  userIdRef: RefObject<string | null>;
   connections: BankConnection[];
-  syncInFlightRef: MutableRefObject<boolean>;
+  syncInFlightRef: RefObject<boolean>;
   setExcludeInternalTransfersState: (value: boolean) => void;
   refreshBankStatus: () => Promise<{ connections: BankConnection[]; accounts: BankAccount[] }>;
   loadSupabaseUserData: (uid: string) => Promise<{ connections: BankConnection[]; accounts: BankAccount[] }>;

@@ -1,4 +1,4 @@
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
 import {
   ArrowCounterClockwise,
@@ -17,7 +17,7 @@ import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/mo
 import { getTransactionTime } from '../../app/models';
 
 export interface HomeTimelineProps {
-  timelineScrollRef: MutableRefObject<HTMLDivElement | null>;
+  timelineScrollRef: RefObject<HTMLDivElement | null>;
   handleTimelineScroll: () => void;
   handleMouseDown: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   handleMouseMove: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -31,8 +31,8 @@ export interface HomeTimelineProps {
   incomes: IncomeItem[];
   periodRecurringMatches: { claimedFixedTxIds: Set<string>; matchedFixedTxByExpId: Map<string, TransactionItem>; matchedFixedIds: Set<string>; claimedIncomeTxIds: Set<string>; matchedIncomeTxByIncId: Map<string, TransactionItem>; matchedIncomeIds: Set<string>; };
   fixedExpenses: FixedExpenseItem[];
-  dayButtonRefs: MutableRefObject<Record<string, HTMLButtonElement | null>>;
-  dragStateRef: MutableRefObject<{ isDown: boolean; startX: number; scrollLeft: number; hasDragged: boolean; }>;
+  dayButtonRefs: RefObject<Record<string, HTMLButtonElement | null>>;
+  dragStateRef: RefObject<{ isDown: boolean; startX: number; scrollLeft: number; hasDragged: boolean; }>;
   setSelectedDateKey: (value: SetStateAction<string>) => void;
   isInitialLoading: boolean;
   isTodayScrolledOut: boolean;

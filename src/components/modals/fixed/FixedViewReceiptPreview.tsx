@@ -12,7 +12,7 @@ export interface FixedViewReceiptPreviewProps {
   pickerReturnView: "details" | "edit";
   onClose: () => void;
   displayName: string;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
 }
 
 export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = ({

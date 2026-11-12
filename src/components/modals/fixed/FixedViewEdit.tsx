@@ -42,7 +42,7 @@ export interface FixedViewEditProps {
   availableGoals: SavingsGoalItem[];
   linkedGoalId: string;
   draftReceipts: ReceiptAttachment[];
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
   handleRemoveReceiptAt: (index: number) => void;
   handleCreateSave: () => void;

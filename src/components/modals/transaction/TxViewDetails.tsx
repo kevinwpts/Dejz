@@ -54,7 +54,7 @@ export interface TxViewDetailsProps {
   date: string;
   draftReceipts: ReceiptAttachment[];
   setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   onLinkToFixed?: (tx: TransactionItem, item: FixedExpenseItem | IncomeItem | null, kind: "expense" | "income") => void;
   onMarkAsFixed?: (tx: TransactionItem, kind: "expense" | "income") => void;
   incomes: IncomeItem[];

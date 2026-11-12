@@ -20,15 +20,15 @@ export interface PendingBankCallback {
 
 export interface AccountDataContext {
   connections: BankConnection[];
-  fixedExpensesRef: React.MutableRefObject<FixedExpenseItem[]>;
-  hydrationInFlightRef: React.MutableRefObject<string | null>;
-  incomesRef: React.MutableRefObject<IncomeItem[]>;
-  isDeletingAccountRef: React.MutableRefObject<boolean>;
-  lastHydratedUserIdRef: React.MutableRefObject<string | null>;
-  lastSyncTimestampRef: React.MutableRefObject<number>;
-  pendingBankCallbackRef: React.MutableRefObject<PendingBankCallback | null>;
-  pendingRefreshRef: React.MutableRefObject<boolean>;
-  refreshInFlightRef: React.MutableRefObject<Promise<BankStatusResult> | null>;
+  fixedExpensesRef: React.RefObject<FixedExpenseItem[]>;
+  hydrationInFlightRef: React.RefObject<string | null>;
+  incomesRef: React.RefObject<IncomeItem[]>;
+  isDeletingAccountRef: React.RefObject<boolean>;
+  lastHydratedUserIdRef: React.RefObject<string | null>;
+  lastSyncTimestampRef: React.RefObject<number>;
+  pendingBankCallbackRef: React.RefObject<PendingBankCallback | null>;
+  pendingRefreshRef: React.RefObject<boolean>;
+  refreshInFlightRef: React.RefObject<Promise<BankStatusResult> | null>;
   setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
   setCallbackStatusMsg: React.Dispatch<React.SetStateAction<string | null>>;
   setConnections: React.Dispatch<React.SetStateAction<BankConnection[]>>;
@@ -46,12 +46,12 @@ export interface AccountDataContext {
   setUserId: React.Dispatch<React.SetStateAction<string | null>>;
   setUserName: React.Dispatch<React.SetStateAction<string | null>>;
   setWeekendHandling: React.Dispatch<React.SetStateAction<WeekendHandlingMode>>;
-  syncInFlightRef: React.MutableRefObject<boolean>;
+  syncInFlightRef: React.RefObject<boolean>;
   targetPayday: number;
   transactions: TransactionItem[];
-  transactionsRef: React.MutableRefObject<TransactionItem[]>;
+  transactionsRef: React.RefObject<TransactionItem[]>;
   userAvatar: string | null;
   userId: string | null;
-  userIdRef: React.MutableRefObject<string | null>;
+  userIdRef: React.RefObject<string | null>;
   weekendHandling: WeekendHandlingMode;
 }

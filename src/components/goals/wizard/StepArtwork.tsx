@@ -12,7 +12,7 @@ interface StepArtworkProps {
   goalCustomImage: string | undefined;
   artworkSearch: string;
   setArtworkSearch: (value: string) => void;
-  galleryInputRef: RefObject<HTMLInputElement>;
+  galleryInputRef: RefObject<HTMLInputElement | null>;
   filteredArtworks: GoalArtworkTheme[];
   /** Personen valde en av de färdiga bilderna. */
   onPickArtwork: (artworkId: string) => void;

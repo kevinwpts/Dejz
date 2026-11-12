@@ -32,7 +32,7 @@ export interface GoalCreateWizardProps {
   setGoalNameInput: (value: SetStateAction<string>) => void;
   artworkSearch: string;
   setArtworkSearch: (value: SetStateAction<string>) => void;
-  galleryInputRef: RefObject<HTMLInputElement>;
+  galleryInputRef: RefObject<HTMLInputElement | null>;
   filteredArtworks: GoalArtworkTheme[];
   setGoalCustomImage: (value: SetStateAction<string | undefined>) => void;
   setHasManuallyPickedArtwork: (value: SetStateAction<boolean>) => void;

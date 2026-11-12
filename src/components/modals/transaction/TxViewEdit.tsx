@@ -49,7 +49,7 @@ export interface TxViewEditProps {
   draftReceipts: ReceiptAttachment[];
   setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
   handleRemoveReceiptAt: (index: number) => void;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   handleCreateSave: () => void;
   handleSaveEditClick: () => void;
   handleCancelEdit: () => void;

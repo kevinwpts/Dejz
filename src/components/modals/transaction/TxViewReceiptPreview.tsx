@@ -13,7 +13,7 @@ export interface TxViewReceiptPreviewProps {
   pickerReturnView: "details" | "edit";
   onClose: () => void;
   activeTx: TransactionItem | null;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
 }
 
 export const TxViewReceiptPreview: React.FC<TxViewReceiptPreviewProps> = ({

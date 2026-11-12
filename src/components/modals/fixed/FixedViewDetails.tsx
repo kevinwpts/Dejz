@@ -38,7 +38,7 @@ export interface FixedViewDetailsProps {
   dueDay: number;
   draftReceipts: ReceiptAttachment[];
   setPreviewReceipt: (value: SetStateAction<ReceiptAttachment | null>) => void;
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   similarInfo: SimilarTransactionsSummary;
   paymentMethod: string;
   availableGoals: SavingsGoalItem[];

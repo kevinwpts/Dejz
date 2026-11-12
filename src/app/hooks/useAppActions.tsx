@@ -1,4 +1,4 @@
-import type { MutableRefObject, SetStateAction } from 'react';
+import type { RefObject, SetStateAction } from 'react';
 import { PeriodInfo, WeekendHandlingMode } from '../../utils/periodEngine';
 import { AppTab } from '../../components/BottomNav';
 import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
@@ -13,15 +13,15 @@ import { useTransactionActions } from './useTransactionActions';
 
 export interface UseAppActionsContext {
   setSyncingBank: (value: SetStateAction<boolean>) => void;
-  lastSyncTimestampRef: MutableRefObject<number>;
+  lastSyncTimestampRef: RefObject<number>;
   refreshBankStatus: () => Promise<{ connections: BankConnection[]; accounts: BankAccount[]; }>;
   connections: BankConnection[];
   userId: string | null;
-  incomesRef: MutableRefObject<IncomeItem[]>;
+  incomesRef: RefObject<IncomeItem[]>;
   setIncomes: (value: SetStateAction<IncomeItem[]>) => void;
-  userIdRef: MutableRefObject<string | null>;
-  transactionsRef: MutableRefObject<TransactionItem[]>;
-  fixedExpensesRef: MutableRefObject<FixedExpenseItem[]>;
+  userIdRef: RefObject<string | null>;
+  transactionsRef: RefObject<TransactionItem[]>;
+  fixedExpensesRef: RefObject<FixedExpenseItem[]>;
   setTransactions: (value: SetStateAction<TransactionItem[]>) => void;
   setFixedExpenses: (value: SetStateAction<FixedExpenseItem[]>) => void;
   setIsTxModalOpen: (value: SetStateAction<boolean>) => void;
@@ -35,9 +35,9 @@ export interface UseAppActionsContext {
   periodRecurringMatches: { claimedFixedTxIds: Set<string>; matchedFixedTxByExpId: Map<string, TransactionItem>; matchedFixedIds: Set<string>; claimedIncomeTxIds: Set<string>; matchedIncomeTxByIncId: Map<string, TransactionItem>; matchedIncomeIds: Set<string>; };
   hasActiveBankConnection: boolean;
   setDismissedTxIds: (value: SetStateAction<string[]>) => void;
-  undoTimerRef: MutableRefObject<number | null>;
+  undoTimerRef: RefObject<number | null>;
   setUndoToast: (value: SetStateAction<{ id: string; excluded: boolean; title: string; } | null>) => void;
-  lastHydratedUserIdRef: MutableRefObject<string | null>;
+  lastHydratedUserIdRef: RefObject<string | null>;
   setUserId: (value: SetStateAction<string | null>) => void;
   setUserEmail: (value: SetStateAction<string | null>) => void;
   setUserName: (value: SetStateAction<string | null>) => void;
@@ -48,9 +48,9 @@ export interface UseAppActionsContext {
   setShowLanding: (value: SetStateAction<boolean>) => void;
   setIsOnboardingActive: (value: SetStateAction<boolean>) => void;
   userEmail: string | null;
-  isDeletingAccountRef: MutableRefObject<boolean>;
-  pendingRefreshRef: MutableRefObject<boolean>;
-  aiCleanedKeysRef: MutableRefObject<Set<string>>;
+  isDeletingAccountRef: RefObject<boolean>;
+  pendingRefreshRef: RefObject<boolean>;
+  aiCleanedKeysRef: RefObject<Set<string>>;
   setTargetPayday: (value: SetStateAction<number>) => void;
   setWeekendHandling: (value: SetStateAction<WeekendHandlingMode>) => void;
   setCallbackStatusMsg: (value: SetStateAction<string | null>) => void;
