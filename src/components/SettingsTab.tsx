@@ -36,6 +36,7 @@ import { BankSettingsView } from './settings/BankSettingsView';
 import { GoalsSettingsView } from './settings/GoalsSettingsView';
 import { ProfileSettingsView } from './settings/ProfileSettingsView';
 import type { SettingsSubView } from './settings/subviews';
+import { getSwedishDateStr } from '../utils/swedishDate';
 
 interface SettingsTabProps {
   connectedBank: string | null;
@@ -94,6 +95,27 @@ interface SettingsTabProps {
 
 export type { SettingsSubView } from './settings/subviews';
 export { SETTINGS_SUBVIEW_TITLES } from './settings/subviews';
+
+// Sparade värden läses utanför komponenten – React Compiler kan inte optimera try/catch med villkor.
+function readStoredPhone(): string {
+  try {
+    return localStorage.getItem('dejz_user_phone') || '';
+  } catch {
+    return '';
+  }
+}
+
+function readStoredThemeMode(): 'light' | 'dark' | 'system' {
+  try {
+    const savedPref = localStorage.getItem('dejz_theme_pref');
+    if (savedPref === 'light' || savedPref === 'dark' || savedPref === 'system') {
+      return savedPref;
+    }
+    return localStorage.getItem('dejz_dark_mode') === 'dark' ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+}
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({
   connectedBank,
@@ -164,13 +186,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   }, [subView]);
   const [editName, setEditName] = useState(userName || '');
   const [editEmail, setEditEmail] = useState(userEmail || '');
-  const [editPhone, setEditPhone] = useState<string>(() => {
-    try {
-      return localStorage.getItem('dejz_user_phone') || '';
-    } catch {
-      return '';
-    }
-  });
+  const [editPhone, setEditPhone] = useState<string>(readStoredPhone);
   const [profileSaved, setProfileSaved] = useState(false);
 
   // Password change & reset state in Profile
@@ -218,17 +234,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [feedbackSent, setFeedbackSent] = useState(false);
 
   // Theme state ('light' | 'dark' | 'system')
-  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>(() => {
-    try {
-      const savedPref = localStorage.getItem('dejz_theme_pref');
-      if (savedPref === 'light' || savedPref === 'dark' || savedPref === 'system') {
-        return savedPref;
-      }
-      return localStorage.getItem('dejz_dark_mode') === 'dark' ? 'dark' : 'light';
-    } catch {
-      return 'light';
-    }
-  });
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>(readStoredThemeMode);
 
   // Uppdatera fälten när namn/e-post ändras utifrån (justeras direkt under render)
   const [prevUserName, setPrevUserName] = useState(userName);
@@ -320,7 +326,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `dejz-dataexport-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `dejz-dataexport-${getSwedishDateStr()}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

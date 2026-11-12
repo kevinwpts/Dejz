@@ -26,6 +26,40 @@ import type { LandingPage as LandingPageT } from '../components/LandingPage';
 type Loader = () => Promise<unknown>;
 const loaders: Loader[] = [];
 
+interface ScreenEntry<P> {
+  /** Komponenten när koden har laddats, annars null */
+  Loaded: React.ComponentType<P> | null;
+  load: () => Promise<void>;
+}
+
+/**
+ * Visar skärmen när koden har laddats, annars `fallback`. `ready` (state) styr vad som visas,
+ * så att React Compiler – som memoiserar renderingen – ritar om när koden har laddats klart.
+ */
+function LazyScreenHost<P extends object>({
+  entry,
+  fallback,
+  screenProps,
+}: {
+  entry: ScreenEntry<P>;
+  fallback: React.ReactNode;
+  screenProps: P;
+}) {
+  const [ready, setReady] = useState(() => entry.Loaded !== null);
+  useEffect(() => {
+    if (ready) return;
+    let active = true;
+    void entry.load().then(() => {
+      if (active) setReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [ready, entry]);
+  const Loaded = entry.Loaded;
+  return ready && Loaded ? <Loaded {...screenProps} /> : <>{fallback}</>;
+}
+
 /**
  * Skärm som laddas vid behov. Visar `fallback` tills koden har hämtats (en gång per app-start).
  * Egen liten laddare i stället för React.lazy, så att props är fullt typade.
@@ -35,32 +69,22 @@ function lazyScreen<C extends React.ComponentType<P>, P extends object = React.C
   name: string,
   fallback: React.ReactNode = null
 ): React.FC<P> {
-  let Loaded: React.ComponentType<P> | null = null;
   let pending: Promise<void> | null = null;
-  const load = () => {
-    pending ??= loader().then((mod) => {
-      // Modulen exporterar komponenten under sitt namn (t.ex. export const SettingsTab)
-      Loaded = mod[name] as React.ComponentType<P>;
-    });
-    return pending;
-  };
-  loaders.push(load);
-
-  const Wrapped: React.FC<P> = (props) => {
-    // `ready` finns för att rendera om när koden har laddats klart
-    const [ready, setReady] = useState(Loaded !== null);
-    useEffect(() => {
-      if (ready || Loaded) return;
-      let active = true;
-      void load().then(() => {
-        if (active) setReady(true);
+  const entry: ScreenEntry<P> = {
+    Loaded: null,
+    load: () => {
+      pending ??= loader().then((mod) => {
+        // Modulen exporterar komponenten under sitt namn (t.ex. export const SettingsTab)
+        entry.Loaded = mod[name] as React.ComponentType<P>;
       });
-      return () => {
-        active = false;
-      };
-    }, [ready]);
-    return Loaded ? <Loaded {...props} /> : <>{fallback}</>;
+      return pending;
+    },
   };
+  loaders.push(entry.load);
+
+  const Wrapped: React.FC<P> = (props) => (
+    <LazyScreenHost entry={entry} fallback={fallback} screenProps={props} />
+  );
   Wrapped.displayName = `Lazy(${name})`;
   return Wrapped;
 }

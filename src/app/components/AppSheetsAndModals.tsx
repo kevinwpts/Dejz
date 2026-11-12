@@ -4,7 +4,8 @@ import { BottomNav } from '../../components/BottomNav';
 import { AddEntrySheet, isVoiceEntrySupported } from '../../components/VoiceEntry';
 import { BalanceSheet } from '../../components/BalanceSheet';
 import { getItemReceipts } from '../../utils/swedishDate';
-import { setManualBalance, getSavingsGoals } from '../../utils/appCache';
+import { setManualBalance } from '../../utils/appCache';
+import { useSavingsGoals } from '../../utils/hooks/useSavingsGoals';
 
 export const AppSheetsAndModals: React.FC = () => {
   const {
@@ -25,6 +26,7 @@ export const AppSheetsAndModals: React.FC = () => {
     displayTransactions,
     fixedExpenses,
   } = useApp();
+  const savingsGoals = useSavingsGoals();
   return (
       <>
         <BalanceSheet
@@ -80,7 +82,7 @@ export const AppSheetsAndModals: React.FC = () => {
             setActiveTab('settings');
           }}
           activeSettingsSubView={settingsSubView}
-          goalsCount={getSavingsGoals().length}
+          goalsCount={savingsGoals.length}
           savedCount={displayTransactions.filter((t) => t.isHearted).length}
           packagesCount={displayTransactions.filter((t) => t.isWaitingForPackage).length}
           receiptsCount={

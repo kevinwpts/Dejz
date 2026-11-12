@@ -1,4 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useRetainedValue } from './useRetainedValue';
+import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
 import { IncomeItem, AccountItem, TransactionItem } from '../HomeTab';
 import { BottomSheet } from '../ui/BottomSheet';
 import {
@@ -42,11 +44,8 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
   const isCreateMode = !initialIncome;
 
   // Retain last active item during 240ms exit animation
-  const lastIncomeRef = useRef<IncomeItem | null>(null);
-  if (initialIncome) {
-    lastIncomeRef.current = initialIncome;
-  }
-  const activeIncome = isCreateMode ? null : initialIncome || lastIncomeRef.current;
+  const lastIncome = useRetainedValue(initialIncome);
+  const activeIncome = isCreateMode ? null : lastIncome;
 
   const [subView, setSubView] = useState<ModalSubView>('details');
   const [pickerReturnView, setPickerReturnView] = useState<'details' | 'edit'>('details');
@@ -69,10 +68,10 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
   };
 
   // Kategorierna ligger i localStorage – läs om dem varje gång rutan öppnas
-  const availableIncomeCategories = useMemo(() => {
-    void isOpen;
-    return getStoredIncomeCategories().map((c) => c.name);
-  }, [isOpen]);
+  const availableIncomeCategories = useExternalSnapshot(
+    () => getStoredIncomeCategories().map((c) => c.name),
+    [isOpen]
+  );
 
   // Fyll i/återställ formuläret när rutan öppnas eller en annan inkomst väljs.
   // Görs under render ("adjust state when a prop changes") i stället för i en effekt.

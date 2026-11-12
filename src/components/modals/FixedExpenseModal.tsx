@@ -1,4 +1,7 @@
 import { supabase } from '../../supabaseClient';
+import { useRetainedValue } from './useRetainedValue';
+import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
+import { useSavingsGoals } from '../../utils/hooks/useSavingsGoals';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, CaretLeft } from '@phosphor-icons/react';
 import { FixedExpenseItem, AccountItem, TransactionItem } from '../HomeTab';
@@ -10,8 +13,7 @@ import {
   getStoredExpenseCategories,
   getStoredPaymentMethods,
   normalizeCategoryToValid,
-  compressImageFileToDataUrl,
-  getSavingsGoals,
+  compressReceiptFiles,
 } from '../../utils/appCache';
 import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
 import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
@@ -41,6 +43,38 @@ interface FixedExpenseModalProps {
   onDelete?: (id: string) => void;
 }
 
+/**
+ * Hämtar AI-guiden för uppsägning (Supabase edge function find-cancellation-url, Gemini).
+ * null om den inte gick att hämta. Ligger utanför komponenten – React Compiler kan inte
+ * optimera komponenter med try/finally.
+ */
+async function fetchCancelGuide(targetName: string, category: string): Promise<CancelGuideData | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('find-cancellation-url', {
+      body: { name: targetName, category, language: 'sv' },
+    });
+    if (!error && data && typeof data.cancelUrl === 'string') {
+      let host = '';
+      try {
+        host = new URL(data.cancelUrl).hostname.replace(/^www\./, '');
+      } catch {
+        host = '';
+      }
+      return {
+        serviceName: data.serviceName || targetName,
+        noticePeriod: data.noticePeriod || '',
+        steps: Array.isArray(data.steps) ? data.steps.slice(0, 6) : [],
+        cancelUrl: data.cancelUrl,
+        cancelUrlLabel: host ? `Öppna ${host}` : 'Öppna sidan för uppsägning',
+        tip: data.tips || undefined,
+      };
+    }
+  } catch {
+    // Ingen guide – rutan visar sitt reservläge
+  }
+  return null;
+}
+
 export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   isOpen,
   initialExpense,
@@ -57,11 +91,8 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const isCreateMode = !initialExpense;
 
   // Retain last active item during 240ms exit animation
-  const lastExpenseRef = useRef<FixedExpenseItem | null>(null);
-  if (initialExpense) {
-    lastExpenseRef.current = initialExpense;
-  }
-  const activeExpense = isCreateMode ? null : initialExpense || lastExpenseRef.current;
+  const lastExpense = useRetainedValue(initialExpense);
+  const activeExpense = isCreateMode ? null : lastExpense;
 
   const [subView, setSubView] = useState<ModalSubView>('details');
   const [pickerReturnView, setPickerReturnView] = useState<'details' | 'edit'>('details');
@@ -99,23 +130,20 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   };
 
   // Listorna ligger i localStorage – läs om dem varje gång rutan öppnas
-  const availableCategories = useMemo(() => {
-    void isOpen;
-    return getStoredExpenseCategories().map((c) => c.name);
-  }, [isOpen]);
-  const availablePaymentMethods = useMemo(() => {
-    void isOpen;
-    const stored = getStoredPaymentMethods().map((m) => m.name);
-    if (paymentMethod && !stored.includes(paymentMethod)) {
-      return [...stored, paymentMethod];
-    }
-    return stored;
-  }, [isOpen, paymentMethod]);
+  const availableCategories = useExternalSnapshot(
+    () => getStoredExpenseCategories().map((c) => c.name),
+    [isOpen]
+  );
+  const storedPaymentMethods = useExternalSnapshot(
+    () => getStoredPaymentMethods().map((m) => m.name),
+    [isOpen]
+  );
+  const availablePaymentMethods =
+    paymentMethod && !storedPaymentMethods.includes(paymentMethod)
+      ? [...storedPaymentMethods, paymentMethod]
+      : storedPaymentMethods;
 
-  const availableGoals = useMemo(() => {
-    void isOpen;
-    return getSavingsGoals();
-  }, [isOpen]);
+  const availableGoals = useSavingsGoals();
 
   // Fyll i/återställ formuläret när rutan öppnas eller en annan räkning väljs.
   // Görs under render ("adjust state when a prop changes") i stället för i en effekt.
@@ -205,34 +233,12 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     }
 
     setIsLoadingCancelGuide(true);
-    try {
-      // AI-guiden körs i Supabase (edge function find-cancellation-url, Gemini)
-      const { data, error } = await supabase.functions.invoke('find-cancellation-url', {
-        body: { name: targetName, category, language: 'sv' },
-      });
-      if (!error && data && typeof data.cancelUrl === 'string') {
-        let host = '';
-        try {
-          host = new URL(data.cancelUrl).hostname.replace(/^www\./, '');
-        } catch {
-          host = '';
-        }
-        const guide: CancelGuideData = {
-          serviceName: data.serviceName || targetName,
-          noticePeriod: data.noticePeriod || '',
-          steps: Array.isArray(data.steps) ? data.steps.slice(0, 6) : [],
-          cancelUrl: data.cancelUrl,
-          cancelUrlLabel: host ? `Öppna ${host}` : 'Öppna sidan för uppsägning',
-          tip: data.tips || undefined,
-        };
-        cancelGuideCacheRef.current[cacheKey] = guide;
-        setCancelGuide(guide);
-      }
-    } catch {
-      // Fallback handled below if null
-    } finally {
-      setIsLoadingCancelGuide(false);
+    const guide = await fetchCancelGuide(targetName, category);
+    if (guide) {
+      cancelGuideCacheRef.current[cacheKey] = guide;
+      setCancelGuide(guide);
     }
+    setIsLoadingCancelGuide(false);
   };
 
   const resolvedAccountInfo = useMemo(() => {
@@ -341,12 +347,9 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    try {
-      const uploaded: ReceiptAttachment[] = [];
-      for (const file of files) {
-        const dataUrl = await compressImageFileToDataUrl(file, 1280, 0.74);
-        uploaded.push({ url: dataUrl, name: file.name || 'Bifogat kvitto' });
-      }
+    // Komprimeringen (med try/catch) ligger i compressReceiptFiles – React Compiler kan inte optimera try/catch med villkor
+    const uploaded = await compressReceiptFiles(files);
+    if (uploaded) {
       const nextReceipts = [...draftReceipts, ...uploaded];
       setDraftReceipts(nextReceipts);
       if (!isCreateMode && onUpdate && activeExpense) {
@@ -357,8 +360,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
           receiptName: nextReceipts[0]?.name,
         });
       }
-    } catch {
-      // ignore
     }
     e.target.value = '';
   };

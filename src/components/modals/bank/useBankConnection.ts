@@ -52,58 +52,99 @@ export function useBankConnection({
   const [accountCustomNames, setAccountCustomNames] = useState<Record<string, string>>({});
   const [savingAccounts, setSavingAccounts] = useState(false);
 
-  const loadBanks = useCallback(async (env: BankEnvironment) => {
+  // Hämtar banklistan. State sätts först när svaret kommit, så den kan startas från en effekt.
+  const fetchBanks = useCallback(
+    (env: BankEnvironment): Promise<void> =>
+      bankService
+        .listBanks('SE', env)
+        .then(
+          (list) => setBanks(list),
+          (err: unknown) =>
+            setErrorMsg((err as { message?: string }).message || 'Kunde inte hämta banklistan.')
+        )
+        .finally(() => setLoadingBanks(false)),
+    []
+  );
+
+  // "Försök igen"-knappen
+  const loadBanks = useCallback((env: BankEnvironment) => {
     setLoadingBanks(true);
     setErrorMsg(null);
-    try {
-      const list = await bankService.listBanks('SE', env);
-      setBanks(list);
-    } catch (err: unknown) {
-      setErrorMsg((err as { message?: string }).message || 'Kunde inte hämta banklistan.');
-    } finally {
-      setLoadingBanks(false);
+    return fetchBanks(env);
+  }, [fetchBanks]);
+
+  // Banklistan hämtas varje gång listvyn visas. Laddningsläget sätts direkt under render
+  // ("adjust state when a prop changes") och själva hämtningen görs i effekten nedan.
+  const shouldLoadBanks = Boolean(isOpen && userEmail && step === 'list');
+  const [prevLoadDeps, setPrevLoadDeps] = useState<{
+    shouldLoad: boolean;
+    userEmail: string | null;
+    environment: BankEnvironment;
+  } | null>(null);
+  if (
+    prevLoadDeps === null ||
+    prevLoadDeps.shouldLoad !== shouldLoadBanks ||
+    prevLoadDeps.userEmail !== userEmail ||
+    prevLoadDeps.environment !== environment
+  ) {
+    setPrevLoadDeps({ shouldLoad: shouldLoadBanks, userEmail, environment });
+    if (shouldLoadBanks) {
+      setLoadingBanks(true);
+      setErrorMsg(null);
     }
-  }, []);
+  }
 
   useEffect(() => {
     if (isOpen && userEmail && step === 'list') {
-      loadBanks(environment);
+      void fetchBanks(environment);
     }
-  }, [isOpen, userEmail, environment, step, loadBanks]);
+  }, [isOpen, userEmail, environment, step, fetchBanks]);
 
-  const handleSelectBank = useCallback(async (bank: BankAspsp, reconnectConnectionId?: string | null) => {
+  // Steg 1 (direkt): visa vald bank och laddning
+  const beginSelectBank = (bank: BankAspsp) => {
     setSelectedBank(bank);
     setStartingAuth(true);
     setErrorMsg(null);
     setShowManualCallback(false);
+  };
 
-    try {
-      const redirectUrl = `${appOrigin()}/bank/callback`;
-      const res = await bankService.startAuth({
-        aspspName: bank.name,
-        aspspCountry: bank.country || 'SE',
-        aspspLogo: bank.logo,
-        originContext: 'settings',
-        environment,
-        reconnectConnectionId: reconnectConnectionId || null,
-        redirectUrl,
-      });
+  // Steg 2 (asynkront): starta bankinloggningen. Sätter state först efter svaret.
+  const startBankAuth = useCallback(
+    (bank: BankAspsp, reconnectConnectionId?: string | null): Promise<void> =>
+      bankService
+        .startAuth({
+          aspspName: bank.name,
+          aspspCountry: bank.country || 'SE',
+          aspspLogo: bank.logo,
+          originContext: 'settings',
+          environment,
+          reconnectConnectionId: reconnectConnectionId || null,
+          redirectUrl: `${appOrigin()}/bank/callback`,
+        })
+        .then(
+          (res) => {
+            setAuthUrl(res.url);
+            setAuthState(res.state);
 
-      setAuthUrl(res.url);
-      setAuthState(res.state);
+            const isInIframe = window.self !== window.top;
+            if (!isInIframe) {
+              window.location.assign(res.url);
+            } else {
+              setStep('authorizing');
+            }
+          },
+          (err: unknown) => {
+            setErrorMsg((err as { message?: string }).message || 'Kunde inte starta autentisering mot banken.');
+          }
+        )
+        .finally(() => setStartingAuth(false)),
+    [environment]
+  );
 
-      const isInIframe = window.self !== window.top;
-      if (!isInIframe) {
-        window.location.assign(res.url);
-      } else {
-        setStep('authorizing');
-      }
-    } catch (err: unknown) {
-      setErrorMsg((err as { message?: string }).message || 'Kunde inte starta autentisering mot banken.');
-    } finally {
-      setStartingAuth(false);
-    }
-  }, [environment]);
+  const handleSelectBank = (bank: BankAspsp, reconnectConnectionId?: string | null) => {
+    beginSelectBank(bank);
+    return startBankAuth(bank, reconnectConnectionId);
+  };
 
   // När rutan är stängd: nollställ flödet. Görs under render i stället för i en
   // effekt; villkoret gör att det bara sker när något faktiskt behöver nollställas.
@@ -122,25 +163,46 @@ export function useBankConnection({
     setErrorMsg(null);
   }
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (preselectedBankName && step === 'list' && !startingAuth) {
+  // Förvald bank (t.ex. "Anslut Swedbank"): välj den automatiskt när listvyn visas.
+  // Valet visas direkt under render; inloggningen startas av effekten nedan.
+  const [prevAutoSelectDeps, setPrevAutoSelectDeps] = useState<{
+    isOpen: boolean;
+    preselectedBankName: string | null | undefined;
+    banks: BankAspsp[];
+    step: BankStep;
+    startingAuth: boolean;
+  } | null>(null);
+  const [pendingAutoSelect, setPendingAutoSelect] = useState<{ bank: BankAspsp } | null>(null);
+  if (
+    prevAutoSelectDeps === null ||
+    prevAutoSelectDeps.isOpen !== isOpen ||
+    prevAutoSelectDeps.preselectedBankName !== preselectedBankName ||
+    prevAutoSelectDeps.banks !== banks ||
+    prevAutoSelectDeps.step !== step ||
+    prevAutoSelectDeps.startingAuth !== startingAuth
+  ) {
+    setPrevAutoSelectDeps({ isOpen, preselectedBankName, banks, step, startingAuth });
+    if (isOpen && preselectedBankName && step === 'list' && !startingAuth) {
       const cleanTarget = preselectedBankName.trim().toLowerCase();
       const existingMatch = banks.find((b) => {
         const bn = b.name.toLowerCase();
         return bn === cleanTarget || bn.includes(cleanTarget) || cleanTarget.includes(bn);
       });
-      handleSelectBank(
-        existingMatch || {
-          name: preselectedBankName,
-          country: 'SE',
-          logo: null,
-          bic: null,
-        }
-      );
+      const bank: BankAspsp = existingMatch || {
+        name: preselectedBankName,
+        country: 'SE',
+        logo: null,
+        bic: null,
+      };
+      beginSelectBank(bank);
+      setPendingAutoSelect({ bank });
     }
-  }, [isOpen, preselectedBankName, banks, step, startingAuth, handleSelectBank]);
+  }
+
+  useEffect(() => {
+    if (!pendingAutoSelect) return;
+    void startBankAuth(pendingAutoSelect.bank);
+  }, [pendingAutoSelect, startBankAuth]);
 
   // Poll status when window regains focus after bank auth
   useEffect(() => {

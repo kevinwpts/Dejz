@@ -3,7 +3,7 @@ import React from 'react';
 import { useApp } from '../../AppContext';
 import { SettingsTab } from '../../lazyScreens';
 import { getItemReceipts } from '../../../utils/swedishDate';
-import { getSavingsGoals } from '../../../utils/appCache';
+import { useSavingsGoals } from '../../../utils/hooks/useSavingsGoals';
 
 export const SettingsTabContent: React.FC = () => {
   const {
@@ -54,6 +54,7 @@ export const SettingsTabContent: React.FC = () => {
     setSelectedIncome,
     setIsIncomeModalOpen,
   } = useApp();
+  const savingsGoals = useSavingsGoals();
 
   return (
     <SettingsTab
@@ -132,7 +133,7 @@ export const SettingsTabContent: React.FC = () => {
         setActiveTab(section);
       }}
       sectionCounts={{
-        goals: getSavingsGoals().length,
+        goals: savingsGoals.length,
         packages: displayTransactions.filter((t) => t.isWaitingForPackage).length,
         receipts:
           displayTransactions.reduce((sum, t) => sum + getItemReceipts(t).length, 0) +

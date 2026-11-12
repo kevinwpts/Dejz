@@ -7,7 +7,6 @@ import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import {
   getShowBudgetBreakdownOnHome,
   getShowAccountsOnHome,
-  getSavingsGoals,
   markTransactionsReviewed,
 } from '../utils/appCache';
 import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
@@ -21,6 +20,7 @@ import { HomeAccountSheet } from './home/HomeAccountSheet';
 import { HomeSinceLastSheet } from './home/HomeSinceLastSheet';
 import { useSinceLastVisit } from './home/useSinceLastVisit';
 import { useHomeTimeline } from './home/useHomeTimeline';
+import { useSavingsGoals } from '../utils/hooks/useSavingsGoals';
 
 // Typer och hjälpfunktioner finns i app/models.ts – exporteras här vidare så att gamla importer fungerar
 export type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
@@ -67,6 +67,16 @@ interface HomeTabProps {
   onOpenBalance?: () => void;
 }
 
+// Visa sparmål på Hem (standard: ja). Utanför komponenten – React Compiler kan inte optimera try/catch med villkor.
+function readShowGoalsOnHome(): boolean {
+  try {
+    const saved = localStorage.getItem('dejz_show_goals_home');
+    return saved === null ? true : saved === 'true';
+  } catch {
+    return true;
+  }
+}
+
 export const HomeTab: React.FC<HomeTabProps> = ({
   period,
   connectedBank: _connectedBank,
@@ -100,26 +110,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     getShowBudgetBreakdownOnHome()
   );
   const [showAccounts, setShowAccounts] = useState<boolean>(() => getShowAccountsOnHome());
-  const [showGoals, setShowGoals] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('dejz_show_goals_home');
-      return saved === null ? true : saved === 'true';
-    } catch {
-      return true;
-    }
-  });
+  const [showGoals, setShowGoals] = useState<boolean>(readShowGoalsOnHome);
   const [activeHeroPopup, setActiveHeroPopup] = useState<'income' | 'fixed' | 'variable' | null>(
     null
   );
-  const savingsGoals = useMemo(() => {
-    // Sparmålen ligger i localStorage – läs om dem när köp, räkningar, inkomster eller saldon ändras
-    void transactions;
-    void fixedExpenses;
-    void incomes;
-    void accounts;
-    void totalBalance;
-    return getSavingsGoals();
-  }, [transactions, fixedExpenses, incomes, accounts, totalBalance]);
+  // Sparmålen ligger i localStorage – läses vid varje rendering och när de sparas
+  const savingsGoals = useSavingsGoals();
   const resolveHomeGoalAmount = useCallback(
     (g: (typeof savingsGoals)[number]): number => {
       if (g.linkedAccountId === '__TOTAL__') {

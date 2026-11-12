@@ -7,7 +7,12 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     base: '/',
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      // React Compiler: memoiserar komponenter och hooks automatiskt, så att bara det som
+      // faktiskt ändrats ritas om. Reglerna i eslint.config.js (react-hooks) håller koden kompatibel.
+      react({ babel: { plugins: [['babel-plugin-react-compiler', {}]] } }),
+      tailwindcss(),
+    ],
     build: {
       rollupOptions: {
         output: {

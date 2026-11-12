@@ -19,7 +19,7 @@ import {
   getGoalArtworkTheme,
   GoalArtworkIllustration,
 } from '../ui/VisualArtwork';
-import { formatSwedishDateHeading } from '../../utils/swedishDate';
+import { formatSwedishDateHeading, getSwedishDateStr } from '../../utils/swedishDate';
 
 
 import { TransactionItem, AccountItem } from '../HomeTab';
@@ -78,7 +78,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   transactions,
 }) => {
   // Dagens datum läses en gång (används bara om målet saknar skapat-datum)
-  const [todayIso] = React.useState(() => new Date().toISOString().slice(0, 10));
+  const [todayIso] = React.useState(() => getSwedishDateStr());
   const theme = getGoalArtworkTheme(selectedGoal.artworkId);
   const effectiveSelectedAmount = resolveGoalAmount(selectedGoal);
   const linkedLabel = resolveGoalLinkedLabel(selectedGoal);
@@ -112,7 +112,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   const handleConfirmTransfer = () => {
     const amt = Math.max(0, Math.round(Number(transferAmountInput) || 0));
     if (amt <= 0 || !transferMode) return;
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = getSwedishDateStr();
 
     const next = savingsGoals.map((g) => {
       if (g.id !== selectedGoal.id) return g;
@@ -634,7 +634,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                                     text: tx.title,
                                     date:
                                       tx.date ||
-                                      new Date().toISOString().slice(0, 10),
+                                      getSwedishDateStr(),
                                     amount: amt,
                                   },
                                   ...(g.activities || activities),

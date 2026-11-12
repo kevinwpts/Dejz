@@ -30,7 +30,9 @@ export default tseslint.config(
         'warn',
         { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_', caughtErrors: 'all', caughtErrorsIgnorePattern: '^_' },
       ],
-      'react-hooks/rules-of-hooks': 'error',
+      // React Compilers regler (refs, purity, immutability …) som fel – koden måste följa
+      // Reacts regler för att kompilatorn (vite.config.ts) ska kunna optimera den.
+      ...Object.fromEntries(Object.keys(reactHooks.configs['recommended-latest'].rules).map((rule) => [rule, 'error'])),
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
@@ -39,6 +41,21 @@ export default tseslint.config(
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/utils/logger.ts', 'src/**/__tests__/**'],
     rules: { 'no-console': 'error' },
+  },
+  {
+    // "Idag" ska vara svenskt datum. toISOString() ger UTC – mellan 00 och 02 svensk tid blir det gårdagen.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/utils/swedishDate.ts', 'src/**/__tests__/**', 'src/test/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.property.name=/^(slice|split|substring)$/][callee.object.callee.property.name='toISOString']",
+          message: 'Använd getSwedishDateStr() / formatIsoDateStockholm() från utils/swedishDate – toISOString() ger UTC-datum.',
+        },
+      ],
+    },
   },
   {
     // Node-skript i CommonJS (.cjs) får använda require

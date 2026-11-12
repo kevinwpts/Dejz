@@ -17,8 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../HomeTab';
-import { ItemLogo } from '../../ItemLogo';
-import { CategoryIcon, PaymentMethodIcon, resolveCategoryColor } from '../../CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { formatSwedishDateHeading, ReceiptAttachment } from '../../../utils/swedishDate';
 import {
   getSavingsGoals,
@@ -26,12 +25,11 @@ import {
   SavingsGoalItem,
 } from '../../../utils/appCache';
 import { formatIsoDateStockholm } from '../../../utils/swedishDate';
-import {
-  isMerchantCategoryIconPreferred,
-  setMerchantCategoryIconPreferred,
-} from '../../../utils/logo';
+
+
 import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
 import { AccountInfoRow } from '../AccountInfoRow';
+import { DetailHeroLogo } from '../DetailHeroLogo';
 
 export interface TxViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -188,44 +186,14 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
 
         {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
         <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
-          {(() => {
-            void logoPrefTick;
-            const accentColor = resolveCategoryColor(category || activeTx.category);
-            const prefersCatIcon = isMerchantCategoryIconPreferred(title || activeTx.title);
-            return (
-              <>
-                <div
-                  className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full blur-2xl opacity-15 dark:opacity-20"
-                  style={{ backgroundColor: accentColor }}
-                />
-                <div className="relative flex justify-center mb-3.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMerchantCategoryIconPreferred(title || activeTx.title, !prefersCatIcon);
-                      setLogoPrefTick((t) => t + 1);
-                    }}
-                    title={
-                      prefersCatIcon
-                        ? 'Tryck för att visa företagslogga'
-                        : 'Tryck för att visa kategori-ikon'
-                    }
-                    aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
-                    className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
-                  >
-                    <ItemLogo
-                      key={`tx-logo-${logoPrefTick}`}
-                      name={title || activeTx.title}
-                      category={category || activeTx.category}
-                      logoUrl={activeTx.logo}
-                      size="xl"
-                      isRecurring={Boolean(recurringStatus.isRecurring)}
-                    />
-                  </button>
-                </div>
-              </>
-            );
-          })()}
+          <DetailHeroLogo
+            name={title || activeTx.title}
+            category={category || activeTx.category}
+            logoUrl={activeTx.logo}
+            isRecurring={Boolean(recurringStatus.isRecurring)}
+            refreshKey={logoPrefTick}
+            onToggled={() => setLogoPrefTick((t) => t + 1)}
+          />
 
           {/* Namnet är text – tryck för att ändra (öppnar redigering, som i Revolut/Monzo) */}
           <button

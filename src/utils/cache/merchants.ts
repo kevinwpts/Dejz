@@ -2,6 +2,7 @@
 import { TRANSACTION_META_KEY } from './itemMeta';
 import { extractMerchantKeyVariants, normalizeMerchantKey } from './appState';
 import { syncAllUserPreferencesToSupabase } from './preferencesSync';
+import type { ReceiptAttachment } from '../swedishDate';
 
 // --- Permanent Ignored / Blacklisted Merchants for Fixed Items ---
 export const DISMISSED_FIXED_KEY = 'dejz_dismissed_fixed_merchants_v1';
@@ -538,6 +539,20 @@ export function compressImageFileToDataUrl(
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+}
+
+/** Komprimerar valda kvitton (bilder eller PDF). null om någon fil inte gick att läsa. */
+export async function compressReceiptFiles(files: File[]): Promise<ReceiptAttachment[] | null> {
+  try {
+    const uploaded: ReceiptAttachment[] = [];
+    for (const file of files) {
+      const dataUrl = await compressImageFileToDataUrl(file, 1280, 0.74);
+      uploaded.push({ url: dataUrl, name: file.name || 'Bifogat kvitto' });
+    }
+    return uploaded;
+  } catch {
+    return null;
+  }
 }
 
 export function getManualFixedOverrides(): Record<string, ManualFixedOverride> {

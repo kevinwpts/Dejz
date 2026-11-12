@@ -26,6 +26,8 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const touchStartRef = useRef<{ x: number; y: number; startOffset: number } | null>(null);
   const isHorizontalSwipeRef = useRef<boolean | null>(null);
+  // Fingret ligger på raden: ingen animation, raden följer fingret direkt
+  const [isTouching, setIsTouching] = useState(false);
 
   const ACTION_WIDTH = onToggleExclude ? 148 : 100;
 
@@ -38,6 +40,7 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
       startOffset: offsetX,
     };
     isHorizontalSwipeRef.current = null;
+    setIsTouching(true);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -61,6 +64,7 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
   const handleTouchEnd = () => {
     if (!touchStartRef.current) return;
     touchStartRef.current = null;
+    setIsTouching(false);
 
     if (offsetX < -ACTION_WIDTH / 2.2) {
       setOffsetX(-ACTION_WIDTH);
@@ -159,7 +163,7 @@ export const SwipeableTxRow: React.FC<SwipeableTxRowProps> = ({
         }}
         style={{
           transform: offsetX !== 0 ? `translateX(${offsetX}px)` : undefined,
-          transition: touchStartRef.current ? 'none' : 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+          transition: isTouching ? 'none' : 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}
         className="relative z-10 bg-[var(--surface-color)]"
       >

@@ -36,6 +36,7 @@ import { OnboardingStepIncomeList } from './onboarding/OnboardingStepIncomeList'
 import { OnboardingStepPayday } from './onboarding/OnboardingStepPayday';
 import { OnboardingStepResult } from './onboarding/OnboardingStepResult';
 import { OnboardingStepBalance } from './onboarding/OnboardingStepBalance';
+import { useExternalSnapshot } from '../utils/hooks/useExternalSnapshot';
 
 export interface OnboardingFlowProps {
   initialName: string;
@@ -292,25 +293,25 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   // Kategorierna ligger i localStorage – läs om dem när redigeringsrutan öppnas/byter läge
   const sheetEditorType = sheetEditor?.type;
   const sheetEditorMode = sheetEditor?.mode;
-  const availableExpenseCategories = React.useMemo(() => {
-    void sheetEditorType;
-    void sheetEditorMode;
-    return getStoredExpenseCategories().map((c) => c.name);
-  }, [sheetEditorType, sheetEditorMode]);
+  // Kategorierna ligger i localStorage – läs om dem när redigeringsbladet byts
+  const availableExpenseCategories = useExternalSnapshot(
+    () => getStoredExpenseCategories().map((c) => c.name),
+    [sheetEditorType, sheetEditorMode]
+  );
 
-  const availableIncomeCategories = React.useMemo(() => {
-    void sheetEditorType;
-    void sheetEditorMode;
-    return getStoredIncomeCategories().map((c) => c.name);
-  }, [sheetEditorType, sheetEditorMode]);
+  const availableIncomeCategories = useExternalSnapshot(
+    () => getStoredIncomeCategories().map((c) => c.name),
+    [sheetEditorType, sheetEditorMode]
+  );
 
+  const sheetPaymentMethod = sheetEditor?.paymentMethod;
   const availablePaymentMethods = React.useMemo(() => {
     const stored = getStoredPaymentMethods().map((m) => m.name);
-    if (sheetEditor?.paymentMethod && !stored.includes(sheetEditor.paymentMethod)) {
-      return [...stored, sheetEditor.paymentMethod];
+    if (sheetPaymentMethod && !stored.includes(sheetPaymentMethod)) {
+      return [...stored, sheetPaymentMethod];
     }
     return stored;
-  }, [sheetEditor?.paymentMethod]);
+  }, [sheetPaymentMethod]);
 
   // Fyll i namnet från kontot om fältet är tomt (justeras direkt under render)
   if (initialName && !name) {

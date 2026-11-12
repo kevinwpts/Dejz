@@ -19,6 +19,7 @@ import {
 } from '../../../utils/logo';
 import type { IncomeAccountInfo, ModalSubView, NavigateSubView } from './shared';
 import { AccountInfoRow } from '../AccountInfoRow';
+import { useExternalSnapshot } from '../../../utils/hooks/useExternalSnapshot';
 
 export interface IncomeViewDetailsProps {
   subView: ModalSubView;
@@ -65,6 +66,11 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
   setShowDeleteConfirm,
   handleDelete,
 }) => {
+  // Logga eller kategoriikon? Läses om när användaren växlar (logoPrefTick höjs)
+  const prefersCatIcon = useExternalSnapshot(
+    () => isMerchantCategoryIconPreferred(displayName),
+    [displayName, logoPrefTick]
+  );
   if (subView !== 'details' || isCreateMode) return null;
   return (
     <div className={navDirection === 'back' ? 'animate-slide-in-left' : ''}>
@@ -89,35 +95,29 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
       <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
         <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full bg-positive-solid blur-2xl opacity-15 dark:opacity-20" />
         <div className="relative flex justify-center mb-3.5">
-          {(() => {
-            void logoPrefTick;
-            const prefersCatIcon = isMerchantCategoryIconPreferred(displayName);
-            return (
-              <button
-                type="button"
-                onClick={() => {
-                  setMerchantCategoryIconPreferred(displayName, !prefersCatIcon);
-                  setLogoPrefTick((t) => t + 1);
-                }}
-                title={
-                  prefersCatIcon
-                    ? 'Tryck för att visa företagslogga'
-                    : 'Tryck för att visa kategori-ikon'
-                }
-                aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
-                className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
-              >
-                <ItemLogo
-                  key={`income-logo-${logoPrefTick}`}
-                  name={displayName}
-                  category={category}
-                  logoUrl={activeIncome?.logo}
-                  size="xl"
-                  isRecurring={true}
-                />
-              </button>
-            );
-          })()}
+          <button
+            type="button"
+            onClick={() => {
+              setMerchantCategoryIconPreferred(displayName, !prefersCatIcon);
+              setLogoPrefTick((t) => t + 1);
+            }}
+            title={
+              prefersCatIcon
+                ? 'Tryck för att visa företagslogga'
+                : 'Tryck för att visa kategori-ikon'
+            }
+            aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
+            className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
+          >
+            <ItemLogo
+              key={`income-logo-${logoPrefTick}`}
+              name={displayName}
+              category={category}
+              logoUrl={activeIncome?.logo}
+              size="xl"
+              isRecurring={true}
+            />
+          </button>
         </div>
 
         {/* Namnet är text – tryck för att ändra (öppnar redigering) */}

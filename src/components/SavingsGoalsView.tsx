@@ -18,6 +18,7 @@ import { TransactionItem, AccountItem } from './HomeTab';
 import { GoalDetailView } from './goals/GoalDetailView';
 import { GoalCreateWizard } from './goals/GoalCreateWizard';
 import type { CreateWizardStep } from './goals/goalHelpers';
+import { getSwedishDateStr } from '../utils/swedishDate';
 
 interface SavingsGoalsViewProps {
   onGoalsChanged?: (goals: SavingsGoalItem[]) => void;
@@ -31,6 +32,15 @@ interface SavingsGoalsViewProps {
   onSelectGoalId?: (goalId: string | null) => void;
   autoOpenCreate?: boolean;
   onAutoOpenConsumed?: () => void;
+}
+
+/** Komprimerar en vald bild; null om det inte gick. Utanför komponenten – React Compiler kan inte optimera try/catch med villkor. */
+async function compressGoalImage(file: File): Promise<string | null> {
+  try {
+    return await compressImageFileToDataUrl(file, 640, 0.82);
+  } catch {
+    return null;
+  }
 }
 
 export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
@@ -194,8 +204,8 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const dataUrl = await compressImageFileToDataUrl(file, 640, 0.82);
+    const dataUrl = await compressGoalImage(file);
+    if (dataUrl !== null) {
       if (!isCreateWizardOpen && selectedGoalId) {
         const next = savingsGoals.map((g) =>
           g.id === selectedGoalId ? { ...g, customImageUrl: dataUrl } : g
@@ -206,8 +216,6 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
         setGoalCustomImage(dataUrl);
         setHasManuallyPickedArtwork(true);
       }
-    } catch {
-      // ignore
     }
     e.target.value = '';
   };
@@ -235,7 +243,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
 
     if (!cleanName || cleanTarget <= 0) return;
 
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const todayIso = getSwedishDateStr();
     const newId = `goal-${Date.now()}`;
     const newGoal: SavingsGoalItem = {
       id: newId,

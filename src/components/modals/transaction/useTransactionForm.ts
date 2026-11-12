@@ -1,5 +1,5 @@
 // Formulärets state för köpfönstret: återställning vid öppning, AI-kategori och spara/avbryt/radera.
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { TransactionItem } from '../../HomeTab';
 import type { SimilarTransactionsSummary } from '../../../utils/recurring';
 import {
@@ -12,7 +12,7 @@ import {
   getStoredIncomeCategories,
   getStoredPaymentMethods,
   normalizeCategoryToValid,
-  compressImageFileToDataUrl,
+  compressReceiptFiles,
   saveSwishPhoneDirectoryEntry,
   removeSwishPhoneDirectoryEntry,
 } from '../../../utils/appCache';
@@ -22,6 +22,7 @@ import {
 } from '../../../utils/bankHistoryAnalyzer';
 import { fetchLogoForName, getLearnedBrandCategory } from '../../../utils/logo';
 import { getDefaultPaymentMethodForTx, ModalSubView } from './shared';
+import { useExternalSnapshot } from '../../../utils/hooks/useExternalSnapshot';
 
 /** Hur långt ett namnbyte/kategoribyte ska gälla */
 export type TxRenameScope = 'single' | 'same-merchant' | 'chain';
@@ -118,20 +119,19 @@ export function useTransactionForm({
   const isIncome = isCreateMode ? txType === 'income' : activeTx?.type === 'income';
 
   // Listorna ligger i localStorage – läs om dem varje gång rutan öppnas
-  const availableCategories = useMemo(() => {
-    void isOpen;
-    const list = isIncome ? getStoredIncomeCategories() : getStoredExpenseCategories();
-    return list.map((c) => c.name);
-  }, [isOpen, isIncome]);
+  const availableCategories = useExternalSnapshot(
+    () => (isIncome ? getStoredIncomeCategories() : getStoredExpenseCategories()).map((c) => c.name),
+    [isOpen, isIncome]
+  );
 
-  const availablePaymentMethods = useMemo(() => {
-    void isOpen;
-    const stored = getStoredPaymentMethods().map((m) => m.name);
-    if (paymentMethod && !stored.includes(paymentMethod)) {
-      return [...stored, paymentMethod];
-    }
-    return stored;
-  }, [isOpen, paymentMethod]);
+  const storedPaymentMethods = useExternalSnapshot(
+    () => getStoredPaymentMethods().map((m) => m.name),
+    [isOpen]
+  );
+  const availablePaymentMethods =
+    paymentMethod && !storedPaymentMethods.includes(paymentMethod)
+      ? [...storedPaymentMethods, paymentMethod]
+      : storedPaymentMethods;
 
   // Fyll i/återställ formuläret när rutan öppnas, ett annat köp väljs eller
   // förifyllningen byts. Görs under render ("adjust state when a prop changes")
@@ -386,12 +386,8 @@ export function useTransactionForm({
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    try {
-      const uploaded: ReceiptAttachment[] = [];
-      for (const file of files) {
-        const dataUrl = await compressImageFileToDataUrl(file, 1280, 0.74);
-        uploaded.push({ url: dataUrl, name: file.name || 'Bifogat kvitto' });
-      }
+    const uploaded = await compressReceiptFiles(files);
+    if (uploaded) {
       const nextReceipts = [...draftReceipts, ...uploaded];
       setDraftReceipts(nextReceipts);
       if (!isCreateMode && onUpdate && activeTx) {
@@ -402,8 +398,6 @@ export function useTransactionForm({
           receiptName: nextReceipts[0]?.name,
         });
       }
-    } catch {
-      // ignore
     }
     e.target.value = '';
   };

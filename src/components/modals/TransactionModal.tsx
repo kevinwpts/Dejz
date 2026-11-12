@@ -1,4 +1,5 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
+import { useRetainedValue } from './useRetainedValue';
 import { BottomSheet } from '../ui/BottomSheet';
 import {
   TransactionItem,
@@ -98,28 +99,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const isCreateMode = !initialTransaction;
 
   // Retain last active transaction during 240ms exit animation
-  const lastTxRef = useRef<TransactionItem | null>(null);
-  if (initialTransaction) {
-    lastTxRef.current = initialTransaction;
-  }
-  const activeTx = isCreateMode ? null : initialTransaction || lastTxRef.current;
+  const lastTx = useRetainedValue(initialTransaction);
+  const activeTx = isCreateMode ? null : lastTx;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const similarInfo = useMemo(
-    () =>
-      findSimilarTransactionsForTransaction(
-        activeTx,
-        transactions,
-        fixedExpenses,
-        incomes
-      ),
-    [activeTx, transactions, fixedExpenses, incomes]
+  // Memoiseras automatiskt av React Compiler (räknas bara om när posten eller listorna ändras)
+  const similarInfo = findSimilarTransactionsForTransaction(
+    activeTx,
+    transactions,
+    fixedExpenses,
+    incomes
   );
-
-  const resolvedAccountInfo = useMemo(
-    () => resolveTxAccountInfo(activeTx, accounts),
-    [activeTx, accounts]
-  );
+  const resolvedAccountInfo = resolveTxAccountInfo(activeTx, accounts);
 
   const isBankSynced = isTxBankSynced(activeTx);
   const rawBankText = getRawBankText(activeTx);

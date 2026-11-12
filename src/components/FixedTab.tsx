@@ -18,7 +18,7 @@ import { reconcilePeriodRecurringMatches } from '../utils/recurring';
 import { estimateVariableBill } from '../utils/variableBills';
 import { getFixedExpenseAmountInPeriod, PeriodMatches } from '../utils/budgetEngine';
 import { formatIsoDateStockholm } from '../utils/swedishDate';
-import { getSavingsGoals } from '../utils/appCache';
+import { useSavingsGoals } from '../utils/hooks/useSavingsGoals';
 import { EmptyClusterArtwork } from './ui/VisualArtwork';
 
 interface FixedTabProps {
@@ -75,16 +75,15 @@ export const FixedTab: React.FC<FixedTabProps> = ({
     return [...fixedExpenses].sort((a, b) => (a.dueDay || 27) - (b.dueDay || 27));
   }, [fixedExpenses]);
 
+  // Sparmålen ligger i localStorage – läses vid varje rendering och när de sparas
+  const savingsGoals = useSavingsGoals();
   const savingsGoalsMap = useMemo(() => {
-    // Sparmålen ligger i localStorage – läs om dem när fasta utgifter eller köp ändras
-    void fixedExpenses;
-    void transactions;
     const map = new Map<string, string>();
-    for (const g of getSavingsGoals()) {
+    for (const g of savingsGoals) {
       map.set(g.id, g.name);
     }
     return map;
-  }, [fixedExpenses, transactions]);
+  }, [savingsGoals]);
 
   // Samma kopplingar som hemkortet räknar med (skickas från App). Reserv om de saknas.
   const fallbackMatches = useMemo(() => {

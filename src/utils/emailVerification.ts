@@ -3,6 +3,31 @@ import { supabase } from '../supabaseClient';
 
 export type VerificationStatus = 'unknown' | 'verified' | 'unverified';
 
+/** Hämtar aktuell status; null = okänd (ingen inloggning eller fel) – då visas inget */
+async function fetchVerificationStatus(): Promise<VerificationStatus | null> {
+  try {
+    const client = supabase;
+    if (!client?.auth?.getUser) return null;
+    const { data } = await client.auth.getUser();
+    const user = data?.user;
+    if (!user) return null;
+    const provider = user.app_metadata?.provider;
+    const confirmedAt = user.email_confirmed_at ? new Date(user.email_confirmed_at).getTime() : 0;
+    const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+    // Bekräftad via länk (en stund efter att kontot skapades) = verifierad
+    if (provider && provider !== 'email') return 'verified';
+    if (confirmedAt && createdAt && confirmedAt - createdAt > 15_000) return 'verified';
+    const { data: row } = await client
+      .from('email_verification')
+      .select('verified_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    return row?.verified_at ? 'verified' : 'unverified';
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Är e-posten verifierad? Google-konton och konton som bekräftades via länk
  * (när "Confirm email" var påslaget) räknas som verifierade. Övriga kollas i
@@ -12,35 +37,20 @@ export function useEmailVerification() {
   const [status, setStatus] = useState<VerificationStatus>('unknown');
 
   const refresh = useCallback(async () => {
-    try {
-      const client = supabase;
-      if (!client?.auth?.getUser) return;
-      const { data } = await client.auth.getUser();
-      const user = data?.user;
-      if (!user) return;
-      const provider = user.app_metadata?.provider;
-      const confirmedAt = user.email_confirmed_at ? new Date(user.email_confirmed_at).getTime() : 0;
-      const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
-      // Bekräftad via länk (en stund efter att kontot skapades) = verifierad
-      if (provider && provider !== 'email') return setStatus('verified');
-      if (confirmedAt && createdAt && confirmedAt - createdAt > 15_000) return setStatus('verified');
-      const { data: row } = await client
-        .from('email_verification')
-        .select('verified_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      setStatus(row?.verified_at ? 'verified' : 'unverified');
-    } catch {
-      // okänd status – visa inget
-    }
+    const next = await fetchVerificationStatus();
+    if (next) setStatus(next);
   }, []);
 
   useEffect(() => {
-    void refresh();
-    const onVerified = () => void refresh();
-    window.addEventListener('dejz-email-verified', onVerified);
-    return () => window.removeEventListener('dejz-email-verified', onVerified);
-  }, [refresh]);
+    const load = () => {
+      void fetchVerificationStatus().then((next) => {
+        if (next) setStatus(next);
+      });
+    };
+    load();
+    window.addEventListener('dejz-email-verified', load);
+    return () => window.removeEventListener('dejz-email-verified', load);
+  }, []);
 
   return { status, refresh };
 }

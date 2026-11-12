@@ -24,6 +24,7 @@ import { reconcilePeriodRecurringMatches } from '../../utils/recurring';
 import { useSavingsGoalCredit } from './useSavingsGoalCredit';
 import { sanitizeTransactionItem } from '../transactionMapping';
 import { getPayDatesForIncome } from '../incomeSchedule';
+import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
 
 export interface UsePeriodDataContext {
   connections: BankConnection[];
@@ -57,6 +58,14 @@ export function usePeriodData({
   const [accountMetaVersion, setAccountMetaVersion] = useState(0);
   const [selectedGoalIdInView, setSelectedGoalIdInView] = useState<string | null>(null);
 
+  // Egna kontonamn/inställningar (localStorage). Läses om när kontona ändras eller när
+  // accountMetaVersion höjs (egna kontonamn/inställningar sparade).
+  const accountMeta = useExternalSnapshot(getAccountMetaMap, [
+    connections,
+    bankAccounts,
+    accountMetaVersion,
+  ]);
+
   // Konvertera Enable Banking-konton till visningskonton för Hem-fliken
   const accounts: AccountItem[] = useMemo(() => {
     const connMap = new Map<string, { name: string; logo?: string | null }>();
@@ -66,9 +75,6 @@ export function usePeriodData({
 
     const activeAccs = bankAccounts.filter((a) => a.is_selected !== false);
     const listToUse = activeAccs.length > 0 ? activeAccs : bankAccounts;
-    // accountMetaVersion höjs när egna kontonamn/inställningar sparas – då läses de om här
-    void accountMetaVersion;
-    const accountMeta = getAccountMetaMap();
 
     return listToUse.map((ba) => {
       const connInfo = connMap.get(ba.connection_id);
@@ -92,18 +98,16 @@ export function usePeriodData({
         excludeFromTotalBalance: Boolean(meta?.excludeFromTotalBalance),
       };
     });
-  }, [connections, bankAccounts, accountMetaVersion]);
+  }, [connections, bankAccounts, accountMeta]);
 
-  const connectedBank = useMemo(() => {
-    const activeConns = connections.filter((c) => c.status === 'active');
-    if (activeConns.length > 0) {
-      return activeConns.map((c) => c.aspsp_name).join(', ');
-    }
-    if (connections.length > 0) {
-      return connections.map((c) => c.aspsp_name).join(', ');
-    }
-    return null;
-  }, [connections]);
+  // Bankernas namn (de aktiva i första hand). React Compiler memoiserar uträkningen.
+  const activeConnections = connections.filter((c) => c.status === 'active');
+  const connectedBank =
+    activeConnections.length > 0
+      ? activeConnections.map((c) => c.aspsp_name).join(', ')
+      : connections.length > 0
+        ? connections.map((c) => c.aspsp_name).join(', ')
+        : null;
 
   // Beräkna aktuell period (från lönedag till dagen innan nästa lön) med vald helghantering:
   const period: PeriodInfo = useMemo(() => {

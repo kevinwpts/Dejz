@@ -10,6 +10,19 @@ import { AppTopBar } from './app/components/AppTopBar';
 import { OnboardingScreen } from './app/components/OnboardingScreen';
 import { LandingScreen } from './app/components/LandingScreen';
 
+// Påbörjad introduktion som inte är klar (läses utanför komponenten: React Compiler kan inte
+// optimera komponenter som innehåller try/catch med villkor)
+function isOnboardingInProgress(): boolean {
+  try {
+    return (
+      localStorage.getItem('dejz_onboarding_in_progress') === 'true' &&
+      localStorage.getItem('dejz_onboarding_v2_done') !== 'true'
+    );
+  } catch {
+    return false;
+  }
+}
+
 export const App: React.FC = () => {
   const app = useAppModel();
   // Ladda ned övriga skärmar i bakgrunden när telefonen är ledig (snabb start, snabba byten)
@@ -23,18 +36,7 @@ export const App: React.FC = () => {
     );
   }
 
-  const shouldShowOnboarding =
-    app.isOnboardingActive ||
-    (() => {
-      try {
-        return (
-          localStorage.getItem('dejz_onboarding_in_progress') === 'true' &&
-          localStorage.getItem('dejz_onboarding_v2_done') !== 'true'
-        );
-      } catch {
-        return false;
-      }
-    })();
+  const shouldShowOnboarding = app.isOnboardingActive || isOnboardingInProgress();
 
   if (shouldShowOnboarding) {
     return (

@@ -13,16 +13,14 @@ import {
   Scissors,
 } from '@phosphor-icons/react';
 import { FixedExpenseItem, formatFixedCancellationBadge } from '../../HomeTab';
-import { ItemLogo } from '../../ItemLogo';
-import { CategoryIcon, PaymentMethodIcon, resolveCategoryColor } from '../../CategoryIcon';
+import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
-import {
-  isMerchantCategoryIconPreferred,
-  setMerchantCategoryIconPreferred,
-} from '../../../utils/logo';
+
+
 import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
 import { AccountInfoRow } from '../AccountInfoRow';
+import { DetailHeroLogo } from '../DetailHeroLogo';
 
 export interface FixedViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";
@@ -103,44 +101,14 @@ export const FixedViewDetails: React.FC<FixedViewDetailsProps> = ({
 
         {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
         <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
-          {(() => {
-            void logoPrefTick;
-            const accentColor = resolveCategoryColor(category);
-            const prefersCatIcon = isMerchantCategoryIconPreferred(displayName);
-            return (
-              <>
-                <div
-                  className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-32 rounded-full blur-2xl opacity-15 dark:opacity-20"
-                  style={{ backgroundColor: accentColor }}
-                />
-                <div className="relative flex justify-center mb-3.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMerchantCategoryIconPreferred(displayName, !prefersCatIcon);
-                      setLogoPrefTick((t) => t + 1);
-                    }}
-                    title={
-                      prefersCatIcon
-                        ? 'Tryck för att visa företagslogga'
-                        : 'Tryck för att visa kategori-ikon'
-                    }
-                    aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
-                    className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
-                  >
-                    <ItemLogo
-                      key={`fixed-logo-${logoPrefTick}`}
-                      name={displayName}
-                      category={category}
-                      logoUrl={activeExpense?.logo}
-                      size="xl"
-                      isRecurring={true}
-                    />
-                  </button>
-                </div>
-              </>
-            );
-          })()}
+          <DetailHeroLogo
+            name={displayName}
+            category={category}
+            logoUrl={activeExpense?.logo}
+            isRecurring
+            refreshKey={logoPrefTick}
+            onToggled={() => setLogoPrefTick((t) => t + 1)}
+          />
 
           {/* Namnet är text – tryck för att ändra (öppnar redigering) */}
           <button
