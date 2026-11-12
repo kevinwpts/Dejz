@@ -18,6 +18,7 @@ import {
   setMerchantCategoryIconPreferred,
 } from '../../../utils/logo';
 import type { IncomeAccountInfo, ModalSubView, NavigateSubView } from './shared';
+import { AccountInfoRow } from '../AccountInfoRow';
 
 export interface IncomeViewDetailsProps {
   subView: ModalSubView;
@@ -35,8 +36,6 @@ export interface IncomeViewDetailsProps {
   setLogoPrefTick: (value: SetStateAction<number>) => void;
   formatKr: (val: number) => string;
   resolvedAccountInfo: IncomeAccountInfo | null;
-  showFullAccount: boolean;
-  setShowFullAccount: (value: SetStateAction<boolean>) => void;
   similarInfo: SimilarTransactionsSummary;
   onDelete?: (id: string) => void;
   showDeleteConfirm: boolean;
@@ -60,8 +59,6 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
   setLogoPrefTick,
   formatKr,
   resolvedAccountInfo,
-  showFullAccount,
-  setShowFullAccount,
   similarInfo,
   onDelete,
   showDeleteConfirm,
@@ -178,24 +175,7 @@ export const IncomeViewDetails: React.FC<IncomeViewDetailsProps> = ({
           </button>
 
           {resolvedAccountInfo && (
-            <div className="ui-row">
-              <span className="ui-info-label">Konto</span>
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="ui-info-value truncate max-w-[190px] sm:max-w-[230px]">
-                  {resolvedAccountInfo.label} ·{' '}
-                  {showFullAccount
-                    ? resolvedAccountInfo.fullNumber
-                    : resolvedAccountInfo.maskedNumber}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowFullAccount((prev) => !prev)}
-                  className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
-                >
-                  {showFullAccount ? 'Dölj' : 'Visa'}
-                </button>
-              </div>
-            </div>
+            <AccountInfoRow info={resolvedAccountInfo} />
           )}
 
           {/* Navigationsrad till Liknande transaktioner */}

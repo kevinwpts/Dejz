@@ -58,25 +58,30 @@ export function useAnalysisData({
   userName,
   periodOffset,
 }: AnalysisDataInput) {
-  // Generate available periods (current + past 5 periods)
+  // Nuvarande period + de fem före. Varje period räknas från dagen före förra periodens start –
+  // inte med setMonth(-1), som "rinner över" den 29–31:a (31 mars − 1 mån = 3 mars) och då
+  // kan ge samma period två gånger eller hoppa över en (t.ex. när lönen flyttats för helg).
   const availablePeriods = useMemo(() => {
     const list: { offset: number; info: PeriodInfo }[] = [];
+    let refDate = new Date();
     for (let i = 0; i >= -5; i--) {
-      const refDate = new Date();
-      refDate.setMonth(refDate.getMonth() + i);
-      list.push({
-        offset: i,
-        info: calculateCurrentPeriod(refDate, targetPayday, weekendHandling),
-      });
+      const info = calculateCurrentPeriod(refDate, targetPayday, weekendHandling);
+      list.push({ offset: i, info });
+      refDate = new Date(
+        info.startDate.getFullYear(),
+        info.startDate.getMonth(),
+        info.startDate.getDate() - 1,
+        12
+      );
     }
     return list;
   }, [targetPayday, weekendHandling]);
 
-  const computedPeriod = useMemo(() => {
-    const refDate = new Date();
-    refDate.setMonth(refDate.getMonth() + periodOffset);
-    return calculateCurrentPeriod(refDate, targetPayday, weekendHandling);
-  }, [periodOffset, targetPayday, weekendHandling]);
+  const computedPeriod = useMemo(
+    () =>
+      (availablePeriods.find((p) => p.offset === periodOffset) ?? availablePeriods[0]).info,
+    [availablePeriods, periodOffset]
+  );
 
   const internalTransferIds = useMemo(() => {
     if (!excludeInternalTransfers) return new Set<string>();

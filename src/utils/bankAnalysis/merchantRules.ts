@@ -5,8 +5,8 @@ import { SWEDISH_EXPENSE_PRESETS } from '../../data/swedishExpensePresets';
 import { Frequency } from '../../types';
 import { getLogoUrl, getLearnedBrandCategory } from '../logo';
 import { resolveMerchantAlias, resolveSwishPhoneToName } from '../appCache';
-import { isInternalTransferOrMicroSavings } from './normalization';
-import { inferCategoryAndMethodFromName } from './existingBudget';
+import { isInternalTransferOrMicroSavings } from './normalization/internalTransfer';
+import { inferCategoryAndMethodFromName } from './existingBudget/manualCategory';
 
 // ---------------------------------------------------------------------------
 // 3. FIXED EXPENSE & EVERYDAY MERCHANT RULES

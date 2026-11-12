@@ -1,3 +1,4 @@
+import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
 // Gemensamma typer för fönstret för fasta inkomster.
 
 /** Vilken vy som visas i inkomstfönstret */
@@ -10,8 +11,4 @@ export type NavigateSubView = (next: ModalSubView, dir?: 'forward' | 'back') => 
 
 export type SlideAnimClass = 'animate-slide-in-right' | 'animate-slide-in-left';
 
-export interface IncomeAccountInfo {
-  label: string;
-  fullNumber: string;
-  maskedNumber: string;
-}
+export type IncomeAccountInfo = AccountDisplayInfo;

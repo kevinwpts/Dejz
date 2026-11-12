@@ -8,12 +8,9 @@ import {
   formatSwishTitle,
   isLikelySwishTransactionText,
 } from '../../../utils/bankHistoryAnalyzer';
+import { describeAccount, type AccountDisplayInfo } from '../../../utils/accountDisplay';
 
-export interface TxAccountInfo {
-  label: string;
-  fullNumber: string;
-  maskedNumber: string;
-}
+export type TxAccountInfo = AccountDisplayInfo;
 
 /** Vilket konto köpet gjordes från, med maskerat och fullt kontonummer */
 export function resolveTxAccountInfo(
@@ -35,36 +32,7 @@ export function resolveTxAccountInfo(
     accounts.find((a) => a.type === 'checking') ||
     accounts[0];
 
-  const baseLabel = (raw || (checking ? `${checking.bankName} · ${checking.name}` : 'Lönekonto'))
-    .replace(/\s*·\s*[•*·\d\s-]{4,}$/g, '')
-    .replace(/\b\d[\d\s-]{5,}\b/g, '')
-    .replace(/\s*·\s*$/, '')
-    .trim() || 'Lönekonto';
-
-  const rawAccNum = (checking?.accountNumber || '').trim();
-  const digitsInRaw = (raw.match(/\d[\d\s-]{3,}\d/)?.[0] || '').trim();
-  const sourceNum = rawAccNum || digitsInRaw;
-  const digitsOnly = sourceNum.replace(/\D/g, '');
-
-  let fullNumber: string;
-  let maskedNumber: string;
-  if (digitsOnly.length >= 7) {
-    fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
-    maskedNumber = `•••• ${digitsOnly.slice(-4)}`;
-  } else if (digitsOnly.length >= 4) {
-    const last4 = digitsOnly.slice(-4);
-    fullNumber = `5231-00 ${last4.slice(0, 2)} ${last4.slice(2)}`;
-    maskedNumber = `•••• ${last4}`;
-  } else {
-    fullNumber = '5231-00 482 19';
-    maskedNumber = '•••• 8219';
-  }
-
-  return {
-    label: baseLabel,
-    fullNumber,
-    maskedNumber,
-  };
+  return describeAccount(raw, checking);
 }
 
 /** Om köpet kommer från banken (då går belopp och datum inte att ändra) */

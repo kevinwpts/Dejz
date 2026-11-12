@@ -14,6 +14,7 @@ import { IncomeViewSimilar } from './income/IncomeViewSimilar';
 import { IncomeViewCategoryPicker, IncomeViewDayPicker } from './income/IncomeViewPickers';
 import { IncomeViewEdit } from './income/IncomeViewEdit';
 import { IncomeViewDetails } from './income/IncomeViewDetails';
+import { describeAccount } from '../../utils/accountDisplay';
 
 interface IncomeModalProps {
   isOpen: boolean;
@@ -55,7 +56,6 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
   const [payday, setPayday] = useState<number>(25);
   const [category, setCategory] = useState('Lön');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showFullAccount, setShowFullAccount] = useState(false);
   const [logoPrefTick, setLogoPrefTick] = useState(0);
 
   const navigateSubView = (next: ModalSubView, dir: 'forward' | 'back' = 'forward') => {
@@ -106,7 +106,6 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
       }
       setNavDirection('forward');
       setShowDeleteConfirm(false);
-      setShowFullAccount(false);
     }
   }
 
@@ -129,36 +128,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
 
     if (!raw && !checking) return null;
 
-    const baseLabel = (raw || (checking ? `${checking.bankName} · ${checking.name}` : 'Lönekonto'))
-      .replace(/\s*·\s*[•*·\d\s-]{4,}$/g, '')
-      .replace(/\b\d[\d\s-]{5,}\b/g, '')
-      .replace(/\s*·\s*$/, '')
-      .trim() || 'Lönekonto';
-
-    const rawAccNum = (checking?.accountNumber || '').trim();
-    const digitsInRaw = (raw.match(/\d[\d\s-]{3,}\d/)?.[0] || '').trim();
-    const sourceNum = rawAccNum || digitsInRaw;
-    const digitsOnly = sourceNum.replace(/\D/g, '');
-
-    let fullNumber: string;
-    let maskedNumber: string;
-    if (digitsOnly.length >= 7) {
-      fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
-      maskedNumber = `•••• ${digitsOnly.slice(-4)}`;
-    } else if (digitsOnly.length >= 4) {
-      const last4 = digitsOnly.slice(-4);
-      fullNumber = `5231-00 ${last4.slice(0, 2)} ${last4.slice(2)}`;
-      maskedNumber = `•••• ${last4}`;
-    } else {
-      fullNumber = '5231-00 482 19';
-      maskedNumber = '•••• 8219';
-    }
-
-    return {
-      label: baseLabel,
-      fullNumber,
-      maskedNumber,
-    };
+    return describeAccount(raw, checking);
   }, [activeIncome, transactions, accounts]);
 
   const similarInfo = useMemo(
@@ -313,8 +283,6 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
         setLogoPrefTick={setLogoPrefTick}
         formatKr={formatKr}
         resolvedAccountInfo={resolvedAccountInfo}
-        showFullAccount={showFullAccount}
-        setShowFullAccount={setShowFullAccount}
         similarInfo={similarInfo}
         onDelete={onDelete}
         showDeleteConfirm={showDeleteConfirm}

@@ -8,5 +8,14 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
     environment: 'node',
+    // Stänger av nätet (fetch) i alla tester och städar efter skärmtester
+    setupFiles: ['src/test/setup.ts'],
+    // `npm run test:coverage` – hur stor del av koden testerna kör (rapport i mappen coverage/)
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/__tests__/**', 'src/test/**', 'src/**/*.d.ts'],
+      reporter: ['text-summary', 'json-summary', 'html'],
+    },
   },
 });

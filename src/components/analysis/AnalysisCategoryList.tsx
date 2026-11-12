@@ -69,9 +69,11 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
         if (subTx?.date && onSelectTransaction) {
           onSelectTransaction(subTx);
         } else if (subIncome?.payday && onSelectIncome) {
-          onSelectIncome(subIncome);
+          // Öppna den sparade inkomsten – raden här visar periodens belopp, som inte får sparas som budget
+          onSelectIncome(incomes.find((i) => i.id === subIncome.id) ?? subIncome);
         } else if (subFixed?.dueDay && onSelectFixed) {
-          onSelectFixed(subFixed);
+          // Öppna den sparade fasta utgiften, inte periodens kopia med månadens faktiska dragning
+          onSelectFixed(fixedExpenses.find((f) => f.id === subFixed.id) ?? subFixed);
         }
       }}
       className="w-full pl-7 sm:pl-9 pr-4 sm:pr-5 py-3 flex items-center justify-between gap-3 text-left hover:bg-[var(--surface-hover)] active:scale-[0.99] transition-all cursor-pointer group"

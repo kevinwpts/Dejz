@@ -25,6 +25,7 @@ import { FixedViewCancelGuide } from './fixed/FixedViewCancelGuide';
 import { FixedViewCancelPicker } from './fixed/FixedViewCancelPicker';
 import { FixedViewSimilar } from './fixed/FixedViewSimilar';
 import type { CancelGuideData, ModalSubView } from './fixed/shared';
+import { describeAccount } from '../../utils/accountDisplay';
 
 interface FixedExpenseModalProps {
   isOpen: boolean;
@@ -74,7 +75,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
   const [draftReceipts, setDraftReceipts] = useState<ReceiptAttachment[]>([]);
   const [previewReceipt, setPreviewReceipt] = useState<ReceiptAttachment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showFullAccount, setShowFullAccount] = useState(false);
   const [logoPrefTick, setLogoPrefTick] = useState(0);
   const [showCustomMonthPicker, setShowCustomMonthPicker] = useState(false);
   const [cancelGuide, setCancelGuide] = useState<CancelGuideData | null>(null);
@@ -156,7 +156,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
       setPreviewReceipt(null);
       setNavDirection('forward');
       setShowDeleteConfirm(false);
-      setShowFullAccount(false);
       setShowCustomMonthPicker(false);
       setCancelGuide(null);
       setIsLoadingCancelGuide(false);
@@ -255,36 +254,7 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
 
     if (!raw && !checking) return null;
 
-    const baseLabel = (raw || (checking ? `${checking.bankName} · ${checking.name}` : 'Lönekonto'))
-      .replace(/\s*·\s*[•*·\d\s-]{4,}$/g, '')
-      .replace(/\b\d[\d\s-]{5,}\b/g, '')
-      .replace(/\s*·\s*$/, '')
-      .trim() || 'Lönekonto';
-
-    const rawAccNum = (checking?.accountNumber || '').trim();
-    const digitsInRaw = (raw.match(/\d[\d\s-]{3,}\d/)?.[0] || '').trim();
-    const sourceNum = rawAccNum || digitsInRaw;
-    const digitsOnly = sourceNum.replace(/\D/g, '');
-
-    let fullNumber: string;
-    let maskedNumber: string;
-    if (digitsOnly.length >= 7) {
-      fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
-      maskedNumber = `•••• ${digitsOnly.slice(-4)}`;
-    } else if (digitsOnly.length >= 4) {
-      const last4 = digitsOnly.slice(-4);
-      fullNumber = `5231-00 ${last4.slice(0, 2)} ${last4.slice(2)}`;
-      maskedNumber = `•••• ${last4}`;
-    } else {
-      fullNumber = '5231-00 482 19';
-      maskedNumber = '•••• 8219';
-    }
-
-    return {
-      label: baseLabel,
-      fullNumber,
-      maskedNumber,
-    };
+    return describeAccount(raw, checking);
   }, [activeExpense, transactions, accounts]);
 
   const similarInfo = useMemo(
@@ -641,8 +611,6 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
         availableGoals={availableGoals}
         linkedGoalId={linkedGoalId}
         resolvedAccountInfo={resolvedAccountInfo}
-        showFullAccount={showFullAccount}
-        setShowFullAccount={setShowFullAccount}
         handleRemoveReceiptAt={handleRemoveReceiptAt}
         onDelete={onDelete}
         setShowDeleteConfirm={setShowDeleteConfirm}

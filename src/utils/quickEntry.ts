@@ -33,6 +33,8 @@ export function parseQuickEntry(text: string): { name: string; amount: number } 
     .replace(/[.,!?]+$/, '')
     .trim();
   if (!trimmedName || !Number.isFinite(amount) || amount <= 0) return null;
+  // "89 kr" / "143 kronor" är bara ett belopp – valutan är inget namn på ett köp
+  if (/^(kr|kronor|sek|:-)$/i.test(trimmedName)) return null;
 
   // Stor bokstav först, som i resten av appen ("ica" → "Ica")
   const prettyName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);

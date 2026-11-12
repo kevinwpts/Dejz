@@ -32,8 +32,9 @@ export const WizardNumpad: React.FC<WizardNumpadProps> = ({ value, onChange }) =
         </button>
       ))}
 
-      <button type="button" onClick={() => appendDigit('00')} className={KEY_CLASS}>
-        ,
+      {/* Sparmål räknas i hela kronor – knappen lägger till två nollor (snabbt till hundratal) */}
+      <button type="button" onClick={() => appendDigit('00')} aria-label="Två nollor" className={KEY_CLASS}>
+        00
       </button>
 
       <button type="button" onClick={() => appendDigit('0')} className={KEY_CLASS}>

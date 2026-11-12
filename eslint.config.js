@@ -7,7 +7,7 @@ import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['dist', 'ios', 'android', 'node_modules', 'playwright-report', 'test-results'] },
+  { ignores: ['dist', 'ios', 'android', 'node_modules', 'playwright-report', 'test-results', 'coverage'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -96,7 +96,6 @@ export function useTransactionForm({
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
-  const [showFullAccount, setShowFullAccount] = useState(false);
   const [logoPrefTick, setLogoPrefTick] = useState(0);
   const [swishSplitMode, setSwishSplitMode] = useState<'equal' | 'custom'>('equal');
   const [swishCustomShare, setSwishCustomShare] = useState<string>('');
@@ -179,7 +178,6 @@ export function useTransactionForm({
         setNavDirection('forward');
         setShowDeleteConfirm(false);
         setShowSimilarPopup(false);
-        setShowFullAccount(false);
       } else {
         const todayIso = getTodayIsoStockholm();
         setTxType('expense');
@@ -451,8 +449,6 @@ export function useTransactionForm({
     setShowSimilarPopup,
     pickerYearMonth,
     setPickerYearMonth,
-    showFullAccount,
-    setShowFullAccount,
     logoPrefTick,
     setLogoPrefTick,
     swishSplitMode,

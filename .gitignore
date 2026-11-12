@@ -34,6 +34,9 @@ yarn-error.log*
 patch*
 *.zip
 
+# Testtäckning (npm run test:coverage)
+coverage/
+
 # Klicktester
 test-results/
 playwright-report/

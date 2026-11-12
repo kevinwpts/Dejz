@@ -153,8 +153,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     setShowSimilarPopup,
     pickerYearMonth,
     setPickerYearMonth,
-    showFullAccount,
-    setShowFullAccount,
     logoPrefTick,
     setLogoPrefTick,
     swishSplitMode,
@@ -361,8 +359,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         similarInfo={similarInfo}
         paymentMethod={paymentMethod}
         resolvedAccountInfo={resolvedAccountInfo}
-        showFullAccount={showFullAccount}
-        setShowFullAccount={setShowFullAccount}
         handleRemoveReceiptAt={handleRemoveReceiptAt}
         note={note}
         setNote={setNote}

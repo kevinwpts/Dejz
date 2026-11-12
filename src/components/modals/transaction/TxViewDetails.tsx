@@ -30,6 +30,8 @@ import {
   isMerchantCategoryIconPreferred,
   setMerchantCategoryIconPreferred,
 } from '../../../utils/logo';
+import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
+import { AccountInfoRow } from '../AccountInfoRow';
 
 export interface TxViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -61,9 +63,7 @@ export interface TxViewDetailsProps {
   fixedExpenses: FixedExpenseItem[];
   similarInfo: SimilarTransactionsSummary;
   paymentMethod: string;
-  resolvedAccountInfo: { label: string; fullNumber: string; maskedNumber: string; } | null;
-  showFullAccount: boolean;
-  setShowFullAccount: (value: SetStateAction<boolean>) => void;
+  resolvedAccountInfo: AccountDisplayInfo | null;
   handleRemoveReceiptAt: (index: number) => void;
   note: string;
   setNote: (value: SetStateAction<string>) => void;
@@ -108,8 +108,6 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
   similarInfo,
   paymentMethod,
   resolvedAccountInfo,
-  showFullAccount,
-  setShowFullAccount,
   handleRemoveReceiptAt,
   note,
   setNote,
@@ -385,24 +383,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             )}
 
             {resolvedAccountInfo && (
-              <div className="ui-row">
-                <span className="ui-info-label">Konto</span>
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="ui-info-value truncate max-w-[190px] sm:max-w-[230px]">
-                    {resolvedAccountInfo.label} ·{' '}
-                    {showFullAccount
-                      ? resolvedAccountInfo.fullNumber
-                      : resolvedAccountInfo.maskedNumber}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowFullAccount((prev) => !prev)}
-                    className="px-2 py-0.5 rounded-md bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] border border-[var(--border-subtle)] text-caption font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer shrink-0"
-                  >
-                    {showFullAccount ? 'Dölj' : 'Visa'}
-                  </button>
-                </div>
-              </div>
+              <AccountInfoRow info={resolvedAccountInfo} />
             )}
 
             {/* Bifogade kvitton (visas endast i listan om kvitto finns; snabbvalsknappen ovan hanterar bifogning) */}
