@@ -47,19 +47,19 @@ const PhoneFrame: React.FC<{
 
 const STEPS = [
   {
-    src: '/screens/ekonomi.webp?v=13',
+    src: '/screens/ekonomi.webp?v=14',
     alt: 'Dejz – inkomster och fasta utgifter',
     title: 'Lägg in lön och räkningar',
     text: 'En gång, på under två minuter. Skriv in ditt saldo så drar Dejz av räkningarna som är kvar före lön.',
   },
   {
-    src: '/screens/historik.webp?v=13',
+    src: '/screens/historik.webp?v=14',
     alt: 'Dejz – historik över köp',
     title: 'Logga köp på sekunder',
     text: 'Tryck på + och säg "Ica 342" – Dejz fyller i resten. När du lägger in köpen själv märker du direkt vart pengarna tar vägen.',
   },
   {
-    src: '/screens/analys.webp?v=13',
+    src: '/screens/analys.webp?v=14',
     alt: 'Dejz – analys av utgifter per kategori',
     title: 'Se vart pengarna tar vägen',
     text: 'En tydlig överblick per kategori för varje löneperiod – inte per kalendermånad.',
@@ -228,10 +228,10 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
           <div className="relative mx-auto w-full max-w-[420px] h-[560px] sm:h-[620px]">
             <div className="absolute inset-x-6 top-16 bottom-6 rounded-full bg-[radial-gradient(closest-side,rgba(91,61,245,0.22),transparent)] blur-2xl" />
             <div className="hidden sm:block absolute right-0 top-12 w-[230px] rotate-[6deg]">
-              <PhoneFrame src="/screens/analys.webp?v=13" alt="" />
+              <PhoneFrame src="/screens/analys.webp?v=14" alt="" />
             </div>
             <div className="absolute left-1/2 -translate-x-1/2 sm:left-2 sm:translate-x-0 top-0 w-[255px] sm:w-[270px]">
-              <PhoneFrame src="/screens/home.webp?v=13" alt="Dejz hemskärm – kvar att spendera" eager />
+              <PhoneFrame src="/screens/home.webp?v=14" alt="Dejz hemskärm – kvar att spendera" eager />
             </div>
           </div>
         </section>
