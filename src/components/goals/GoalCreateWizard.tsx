@@ -156,7 +156,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
               title="Tillbaka"
               className="ui-icon-btn-surface"
             >
-              <CaretLeft size={15} weight="bold" />
+              <CaretLeft size={15} />
             </button>
           ) : null}
           <div
@@ -191,7 +191,7 @@ export const GoalCreateWizard: React.FC<GoalCreateWizardProps> = ({
             aria-label="Stäng"
             className="ui-icon-btn-surface"
           >
-            <X size={14} weight="bold" />
+            <X size={14} />
           </button>
         </header>
 

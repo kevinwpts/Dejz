@@ -63,7 +63,7 @@ export const FixedViewCategoryPicker: React.FC<FixedViewCategoryPickerProps> = (
                   </span>
                 </div>
                 {isSel && (
-                  <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  <Check size={14} className="text-[var(--text-primary)] shrink-0" />
                 )}
               </button>
             );

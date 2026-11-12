@@ -225,7 +225,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               title="Tillbaka"
               className="p-2 -ml-2 text-[var(--text-primary)] hover:opacity-70 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
             >
-              <CaretLeft size={20} weight="bold" />
+              <CaretLeft size={20} />
             </button>
 
             {/* Search input */}
@@ -247,7 +247,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   aria-label="Rensa sökning"
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
-                  <X size={16} weight="bold" />
+                  <X size={16} />
                 </button>
               )}
             </div>
@@ -261,7 +261,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           {!isSearchingOrFiltered ? (
             <section className="ui-empty-state pt-24">
               <span className="ui-empty-badge" aria-hidden="true">
-                <MagnifyingGlass size={28} weight="bold" />
+                <MagnifyingGlass size={28} />
               </span>
               <p className="ui-empty-title">Sök bland allt</p>
               <p className="ui-empty-sub">Butik, kategori, belopp eller anteckning.</p>
@@ -388,7 +388,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           {group.label}
                         </span>
                         <span
-                          className={`font-display font-medium tabular-nums ${
+                          className={`font-display font-normal tabular-nums ${
                             group.net > 0
                               ? 'text-positive'
                               : 'text-[var(--text-secondary)]'
@@ -453,7 +453,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                                   {tx.receiptUrl && (
                                     <Paperclip
                                       size={13}
-                                      weight="bold"
                                       className="text-[var(--text-secondary)] shrink-0"
                                     />
                                   )}
@@ -490,7 +489,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           ) : (
             <section className="ui-empty-state pt-24">
               <span className="ui-empty-badge" aria-hidden="true">
-                <MagnifyingGlass size={28} weight="bold" />
+                <MagnifyingGlass size={28} />
               </span>
               <p className="ui-empty-title">Inga träffar för ”{query.trim()}”</p>
               <p className="ui-empty-sub">Kolla stavningen eller prova ett annat ord.</p>

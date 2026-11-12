@@ -134,7 +134,7 @@ export const BankAccountDetailSheet: React.FC<BankAccountDetailSheetProps> = ({
             disabled={savingAccountEdit || !accountNameInput.trim()}
             className="ui-btn-primary"
           >
-            <Check size={14} weight="bold" />
+            <Check size={14} />
             <span>{savingAccountEdit ? 'Sparar...' : 'Spara'}</span>
           </button>
         </div>

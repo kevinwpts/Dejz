@@ -57,7 +57,7 @@ export const TxViewReceiptPreview: React.FC<TxViewReceiptPreviewProps> = ({
             download={previewReceipt.name || `kvitto-${activeTx?.date || 'ny'}.jpg`}
             className="ui-btn-secondary"
           >
-            <DownloadSimple size={16} weight="bold" />
+            <DownloadSimple size={16} />
             <span>Spara</span>
           </a>
           <button
@@ -65,7 +65,7 @@ export const TxViewReceiptPreview: React.FC<TxViewReceiptPreviewProps> = ({
             onClick={() => fileInputRef.current?.click()}
             className="ui-btn-secondary"
           >
-            <Plus size={16} weight="bold" />
+            <Plus size={16} />
             <span>Bifoga fler</span>
           </button>
         </div>

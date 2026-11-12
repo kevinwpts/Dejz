@@ -49,7 +49,7 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
 
           <div className="ui-onb-row-card">
             <div className="min-w-0 flex-1">
-              <span className="text-subhead font-medium text-[var(--text-primary)] block">
+              <span className="text-subhead font-normal text-[var(--text-primary)] block">
                 Lön före helg
               </span>
               <span className="text-footnote text-[var(--text-secondary)] block mt-0.5">
@@ -82,7 +82,7 @@ export const OnboardingStepPayday: React.FC<OnboardingStepPaydayProps> = ({
             className="ui-btn-primary"
           >
             <span>Fortsätt</span>
-            <ArrowRight size={16} weight="bold" />
+            <ArrowRight size={16} />
           </button>
         </div>
       </div>

@@ -499,7 +499,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
               onClick={openCreateGoal}
               className="ui-section-action"
             >
-              <Plus size={13} weight="bold" />
+              <Plus size={13} />
               <span>Lägg till</span>
             </button>
           </div>
@@ -583,7 +583,7 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
           </p>
           <div className="mt-6 w-full max-w-xs mx-auto">
             <button type="button" onClick={openCreateGoal} className="ui-btn-primary">
-              <Plus size={16} weight="bold" />
+              <Plus size={16} />
               <span>Nytt sparmål</span>
             </button>
           </div>

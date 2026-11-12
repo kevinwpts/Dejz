@@ -25,6 +25,11 @@ interface SheetHeaderProps {
   actions?: React.ReactNode;
   /** Utan avstånd under huvudet (t.ex. när ett kvitto-huvud följer direkt) */
   flush?: boolean;
+  /**
+   * Detaljvyer (som Revolut): rund ✕ längst till vänster, åtgärder till höger och ingen synlig
+   * rubrik – namnet står stort i huvudet under. Rubriken finns kvar för skärmläsare.
+   */
+  closeStart?: boolean;
   className?: string;
 }
 
@@ -39,6 +44,7 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
   cancelLabel = 'Avbryt',
   actions,
   flush = false,
+  closeStart = false,
   className = '',
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -51,6 +57,32 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
   const closeAction = variant === 'edit' ? onCancel : onClose;
   const closeLabel = variant === 'edit' ? cancelLabel : 'Stäng';
 
+  const closeButton = closeAction && (
+    <button
+      type="button"
+      onClick={closeAction}
+      aria-label={closeLabel}
+      title={closeLabel}
+      className="ui-icon-btn"
+    >
+      <X size={16} />
+    </button>
+  );
+
+  if (closeStart) {
+    return (
+      <div ref={rootRef} className={`${base} gap-2`}>
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          {closeButton}
+          <h2 id={titleId} className="ui-sheet-title sr-only">
+            {title}
+          </h2>
+        </div>
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      </div>
+    );
+  }
+
   return (
     <div ref={rootRef} className={`${base} gap-2`}>
       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -62,7 +94,7 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
             aria-label="Tillbaka"
             className="ui-icon-btn"
           >
-            <CaretLeft size={15} weight="bold" />
+            <CaretLeft size={16} />
           </button>
         )}
         <div className="min-w-0">
@@ -79,17 +111,7 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
       {(actions || closeAction) && (
         <div className="flex items-center gap-2 shrink-0">
           {actions}
-          {closeAction && (
-            <button
-              type="button"
-              onClick={closeAction}
-              aria-label={closeLabel}
-              title={closeLabel}
-              className="ui-icon-btn"
-            >
-              <X size={14} weight="bold" />
-            </button>
-          )}
+          {closeButton}
         </div>
       )}
     </div>

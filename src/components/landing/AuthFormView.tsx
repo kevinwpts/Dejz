@@ -178,7 +178,7 @@ export const AuthFormView: React.FC<AuthFormViewProps> = ({ form, animClass }) =
           {view === 'forgot_password' && (
             <>
               <span>Skicka länk</span>
-              <PaperPlaneTilt size={16} weight="bold" />
+              <PaperPlaneTilt size={16} />
             </>
           )}
         </button>

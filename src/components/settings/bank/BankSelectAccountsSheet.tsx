@@ -71,7 +71,7 @@ export const BankSelectAccountsSheet: React.FC<BankSelectAccountsSheetProps> = (
                 <div
                   className={`ui-checkbox ${isChecked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                 >
-                  {isChecked && <Check size={12} weight="bold" />}
+                  {isChecked && <Check size={14} />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <span className="ui-option-title">
@@ -98,7 +98,7 @@ export const BankSelectAccountsSheet: React.FC<BankSelectAccountsSheetProps> = (
             onClick={onSave}
             className="ui-btn-primary"
           >
-            <Check size={14} weight="bold" />
+            <Check size={14} />
             <span>{savingConnAccounts ? 'Synkar valda konton...' : 'Spara och synka'}</span>
           </button>
 

@@ -136,7 +136,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   Alla anslutna konton
                 </span>
                 {!activeAccount && (
-                  <Check size={16} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  <Check size={16} className="text-[var(--text-primary)] shrink-0" />
                 )}
               </button>
 
@@ -184,7 +184,6 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                       {isSel && (
                         <Check
                           size={16}
-                          weight="bold"
                           className="text-[var(--text-primary)] shrink-0"
                         />
                       )}
@@ -214,7 +213,7 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                   }`}
                 >
                   <span className="truncate">{opt.label}</span>
-                  {isSel && <Check size={14} weight="bold" className="shrink-0" />}
+                  {isSel && <Check size={14} className="shrink-0" />}
                 </button>
               );
             })}
@@ -300,7 +299,6 @@ export const TransactionsFilterSheet: React.FC<TransactionsFilterSheetProps> = (
                     {isSel && (
                       <Check
                         size={16}
-                        weight="bold"
                         className="text-[var(--text-primary)]"
                       />
                     )}

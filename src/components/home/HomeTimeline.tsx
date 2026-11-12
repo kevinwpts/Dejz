@@ -184,20 +184,20 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
           {!isInitialLoading && (
             <div className="ui-date-header px-1">
               <div className="flex items-center gap-2 min-w-0">
-                <span>{formatSwedishDateHeading(selectedDateKey)}</span>
+                <span className="font-semibold text-[var(--text-primary)]">{formatSwedishDateHeading(selectedDateKey)}</span>
                 {(selectedDateKey !== todayStr || isTodayScrolledOut) && (
                   <button
                     type="button"
                     onClick={handleJumpToToday}
                     className="ui-btn-sm h-7 px-2.5"
                   >
-                    <ArrowCounterClockwise size={12} weight="bold" />
+                    <ArrowCounterClockwise size={14} />
                     <span>Idag</span>
                   </button>
                 )}
               </div>
               {selectedDayItems.length > 0 && (
-                <span className="privacy-blur-amount tabular-nums font-medium text-[var(--text-secondary)]">
+                <span className="privacy-blur-amount tabular-nums font-normal text-[var(--text-secondary)]">
                   {selectedDayNet > 0 ? '+' : selectedDayNet < 0 ? '−' : ''}
                   {formatKr(Math.abs(selectedDayNet))}
                 </span>
@@ -259,7 +259,6 @@ export const HomeTimeline: React.FC<HomeTimelineProps> = ({
                         {hasReceipts && (
                           <Paperclip
                             size={11}
-                            weight="bold"
                             className="text-[var(--text-secondary)] shrink-0 ml-0.5"
                           />
                         )}

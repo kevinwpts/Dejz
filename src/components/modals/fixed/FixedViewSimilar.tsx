@@ -41,11 +41,11 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
         <SheetHeader title="Tidigare dragningar" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         <div className="ui-date-header px-1">
-          <span className="font-medium text-[var(--text-secondary)]">
+          <span className="font-normal text-[var(--text-secondary)]">
             {similarInfo.transactions.length}{' '}
             {similarInfo.transactions.length === 1 ? 'dragning' : 'dragningar'}
           </span>
-          <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
+          <span className="font-display font-normal text-[var(--text-primary)] tabular-nums">
             Totalt {formatKr(similarInfo.totalAmount)}
           </span>
         </div>
@@ -105,7 +105,7 @@ export const FixedViewSimilar: React.FC<FixedViewSimilarProps> = ({
                         title="Lägg till detta belopp som egen fast utgift"
                         className="ui-btn-sm"
                       >
-                        <Plus size={12} weight="bold" />
+                        <Plus size={12} />
                         <span>Fast</span>
                       </button>
                     )}

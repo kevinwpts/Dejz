@@ -139,7 +139,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
           }}
           className="w-full ui-btn-primary"
         >
-          <Plus size={15} weight="bold" />
+          <Plus size={15} />
           <span>Nytt betalsätt</span>
         </button>
 
@@ -218,7 +218,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
               type="submit"
               className="ui-btn-primary"
             >
-              <Check size={14} weight="bold" />
+              <Check size={14} />
               <span>Spara betalsätt</span>
             </button>
 

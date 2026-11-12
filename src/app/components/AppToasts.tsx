@@ -88,7 +88,7 @@ export const FeedbackToast: React.FC<{ toast: FeedbackToastState | null; onClose
               className="w-9 h-9 rounded-full text-on-toast/60 hover:text-on-toast hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
-              <X size={16} weight="bold" />
+              <X size={16} />
             </button>
           )}
         </div>
@@ -131,7 +131,7 @@ export const ReceiptPreviewSheet: React.FC<{
           download={receipt.name ? `Kvitto ${receipt.name}` : 'kvitto'}
           className="ui-btn-secondary"
         >
-          <DownloadSimple size={18} weight="bold" />
+          <DownloadSimple size={18} />
           <span>Spara kvittot</span>
         </a>
       </div>

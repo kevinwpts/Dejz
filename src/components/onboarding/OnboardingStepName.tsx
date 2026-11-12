@@ -53,7 +53,7 @@ export const OnboardingStepName: React.FC<OnboardingStepNameProps> = ({
             className="ui-btn-primary"
           >
             <span>Fortsätt</span>
-            <ArrowRight size={16} weight="bold" />
+            <ArrowRight size={16} />
           </button>
         </div>
       </form>

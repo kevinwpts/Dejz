@@ -54,7 +54,7 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
             download={previewReceipt.name || `kvitto-${displayName}.jpg`}
             className="ui-btn-secondary"
           >
-            <DownloadSimple size={16} weight="bold" />
+            <DownloadSimple size={16} />
             <span>Spara</span>
           </a>
           <button
@@ -62,7 +62,7 @@ export const FixedViewReceiptPreview: React.FC<FixedViewReceiptPreviewProps> = (
             onClick={() => fileInputRef.current?.click()}
             className="ui-btn-secondary"
           >
-            <Plus size={16} weight="bold" />
+            <Plus size={16} />
             <span>Bifoga fler</span>
           </button>
         </div>

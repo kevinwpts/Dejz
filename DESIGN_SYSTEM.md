@@ -18,7 +18,7 @@ Allt utseende i Dejz styrs från **ett ställe: `src/index.css`**. Komponenterna
 | Typsnitt | `--font-sans`, `--font-display` (i `@theme`) | All text |
 | Textstorlekar | `--text-micro` … `--text-subhead` (i `@theme`) | All småtext |
 | Notiser | `--toast-bg`, `--toast-fg`, `--toast-action` | Ångra- och bekräftelsenotiser |
-| Grupper i ark, avdelare, tryck | `--fill-grouped`, `--separator`, `--press-overlay`, `--card-shadow` | Rader i ark, listkort, tryckkänsla |
+| Grupper i ark, linjer, tryck | `--fill-grouped`, `--separator`, `--press-overlay`, `--card-shadow` | Rader i ark, listkort, tryckkänsla |
 | Segmentväljare och reglage | `--segment-track`, `--segment-thumb`, `--segment-thumb-shadow` | Alla/Utgifter/Inkomster, Utgift/Inkomst, av-läge för reglage |
 | Valt läge (plattor, chips, dagar) | `--selected-bg`, `--selected-fg`, `--selected-ring` | Dagväljare, filterchips, ikonval, Utseende, val-kort |
 | Sekundära knappar | `--btn-secondary-fill` | Alla grå knappar (`ui-btn-secondary`, `ui-btn-sm`, `ui-pill-btn`, dialogernas Avbryt) |
@@ -49,16 +49,18 @@ Använd alltid namnet för vad färgen **betyder**:
 ## Utseendet i korthet (iOS "inset grouped")
 
 - **Kort har inga kantlinjer.** Vit yta (`--surface-color`) på grå bakgrund + mycket mjuk skugga (`--card-shadow`). I mörkt läge: ljusare yta mot nästan svart bakgrund, ingen skugga.
-- **Avdelare börjar efter ikonen** (`.ui-list-card`: 52 px, `.ui-inset-divide`: 68 px, `.ui-list-card-check`: 92 px). Sätt `--row-inset` om en lista behöver annat.
+- **Inga avdelare mellan rader** (som Revolut/iOS 18). Rader skiljs åt av luft: listrader (`ui-tx-row`) är minst 72 px, inställningsrader (`ui-admin-row`) 56 px. Kortet behåller sin rundade yta.
 - **Grupper inne i ark** (`ui-sheet-group`, `ui-field-card`, `ui-action-tile`) har grå fyllning `--fill-grouped` – aldrig kantlinje. Skriv `bg-[var(--fill-grouped)]` för egna rutor i ark, inte `bg-[var(--bg-color)] border …`.
-- **Tre textnivåer:** sidrubrik (`ui-large-title`, 30 px fet) · radtext (`ui-row-title`, 15 px medium) · sekundärtext (`ui-row-subtitle`, 13 px). Belopp: `ui-row-amount` (15 px), detaljvyer 34 px, hemkortet 46 px – alltid `tabular-nums` och tät spärrning.
+- **Tre textnivåer:** sidrubrik (`ui-large-title`, 30 px fet) · radtext (`ui-row-title`, 15 px **normal vikt**) · sekundärtext (`ui-row-subtitle`, 13 px). Belopp i rader: `ui-row-amount` (15 px, normal vikt, inkomster gröna). Fet/halvfet bara för rubriker, datumrubriker, stora belopp (hemkortet 46 px, detaljvyer 34 px) och huvudknappar. Belopp alltid `tabular-nums`.
 - **Etiketter skrivs i vanlig skiftläge** ("Namn", "Belopp") – inga VERSALER.
 - **Tryckkänsla:** knappar krymper lite (`active:scale-[0.97]`), rader får en svag ton (`active:bg-[var(--press-overlay)]`). Allt stängs av vid "Reducera rörelse".
-- **Kategoriikoner** är en ikonfamilj (Phosphor, fylld) i en ruta tonad med kategorins färg (`.ui-cat-tile` + `categoryColorStyle()` från `CategoryIcon.tsx`). Små ikoner i undertexter tar textens färg. Butikslogor ligger i `.ui-logo-tile` – samma form och storlek.
+- **Loggor och kategoriikoner är runda** – samma cirkel överallt (40 px i listor, 64 px i detaljvyer). Butikslogor (`.ui-logo-tile`) fyller cirkeln på vit botten utan kant; ordbilder och okända får en bokstavscirkel (`MonogramTile`). Kategoriikoner (Phosphor, fylld) ligger i en cirkel tonad med kategorins färg (`.ui-cat-tile` + `categoryColorStyle()`).
+- **Gränssnittsikoner:** Phosphor `regular` överallt (toppradens knappar, stäng, pilar, "+ Lägg till"). Undantag: vald flik i bottenmenyn och statusikoner är `fill`. Inga `bold`/`duotone`.
+- **Detaljvyer** (köp, fast utgift, inkomst): rund ✕ till vänster, åtgärder till höger (`SheetHeader closeStart`). Huvud: stor rund logga, namnet i grått, beloppet stort och fett, datum litet. Infokort (`ui-detail-card`) – ett kort per grupp, inga avdelare. Korta värden: grå etikett till vänster, värdet till höger (`DetailLinkRow` i accentfärg om det går att trycka). Lång text (anteckning, banktext): etikett överst, värdet under (`DetailStackRow`).
 
 ## Arkhuvud – alltid `<SheetHeader />`
 
-Alla ark och dialoger använder komponenten `src/components/ui/SheetHeader.tsx` (även `BottomSheet` med `title`). **Ett enda mönster:** `[‹] Rubrik` till vänster (17 px) · åtgärder till höger · rund ✕ sist. Huvudknappen ("Spara") ligger alltid längst ner i arket.
+Alla ark och dialoger använder komponenten `src/components/ui/SheetHeader.tsx` (även `BottomSheet` med `title`). **Mönster:** `[‹] Rubrik` till vänster (17 px) · åtgärder till höger · rund ✕ sist. Undantag: detaljvyer (`closeStart`) har ✕ till vänster och ingen synlig rubrik. Huvudknappen ("Spara") ligger alltid längst ner i arket.
 
 - `onBack` ger tillbakapil i undervyer.
 - `variant="edit"` (redigering från en detaljvy) ser likadan ut – ✕ avbryter då redigeringen utan att spara (tillgängligt namn "Avbryt").
@@ -105,7 +107,8 @@ Rader i Inställningar ("Logga ut", "Radera konto") får vara röda rader.
 - **Valt läge:** `ui-selected` (plattor, chips), `ui-chip-active`, `ui-day-btn-active` – alla med samma mjuka lila ton
 - **Sidor och ark:** `ui-large-title` (stor rubrik på flikarna), `ui-sheet-header`, `ui-sheet-sub-header`, `ui-sheet-title`, `ui-sheet-group`, `ui-step-title`
 - **Bottenmeny:** `ui-tabbar`, `ui-tabbar-item` / `-active`, `ui-fab` (plusknappen), `ui-tabbar-fade`
-- **Listor och rader:** `ui-list-card`, `ui-inset-divide`, `ui-row`, `ui-row-btn`, `ui-row-title`, `ui-row-subtitle`, `ui-row-amount`, `ui-tx-row`, `ui-list-row-title`
+- **Listor och rader:** `ui-list-card`, `ui-row`, `ui-row-btn`, `ui-row-title`, `ui-row-subtitle`, `ui-row-amount`, `ui-tx-row`, `ui-list-row-title`
+- **Detaljvyer:** `ui-detail-hero`, `ui-detail-title`, `ui-detail-amount` (+ `-income`), `ui-detail-meta`, `ui-detail-card`, `ui-detail-row`, `ui-detail-label`, `ui-detail-value`, `ui-detail-value-link`, `ui-detail-stack`
 - **Bockrutor:** `ui-checkbox` + `ui-checkbox-on` (lila fylld cirkel) / `ui-checkbox-off` (ring)
 - **Ikonrutor:** `ui-cat-tile` (kategorifärgad), `ui-cat-glyph`, `ui-logo-tile` (butikslogga)
 - **Formulär:** `ui-field-card`, `ui-field-label`, `ui-field-input`, `ui-field-input-lg`, `ui-checkbox`, `ui-input-icon`, `ui-search-box`, `ui-switch`, `ui-segmented`

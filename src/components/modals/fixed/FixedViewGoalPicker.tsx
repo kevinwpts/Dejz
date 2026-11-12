@@ -58,7 +58,7 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
               Inget sparmål
             </span>
             {!linkedGoalId && (
-              <Check size={16} weight="bold" className="text-[var(--accent-color)] shrink-0" />
+              <Check size={16} className="text-[var(--accent-color)] shrink-0" />
             )}
           </button>
 
@@ -92,7 +92,7 @@ export const FixedViewGoalPicker: React.FC<FixedViewGoalPickerProps> = ({
                   </span>
                 </div>
                 {isSel && (
-                  <Check size={16} weight="bold" className="text-[var(--accent-color)] shrink-0" />
+                  <Check size={16} className="text-[var(--accent-color)] shrink-0" />
                 )}
               </button>
             );

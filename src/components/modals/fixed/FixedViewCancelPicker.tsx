@@ -167,7 +167,7 @@ export const FixedViewCancelPicker: React.FC<FixedViewCancelPickerProps> = ({
                     <span className="flex items-center gap-2 text-callout text-[var(--text-secondary)] tabular-nums">
                       <span>{sc.rightLabel}</span>
                       {sc.isSelected && (
-                        <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
+                        <Check size={16} className="text-[var(--accent-color)]" />
                       )}
                     </span>
                   </button>

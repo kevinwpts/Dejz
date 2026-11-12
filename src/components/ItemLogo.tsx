@@ -138,21 +138,21 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     sm: 24,
     md: 30,
     lg: 34,
-    xl: 44,
+    xl: 50,
   }[size];
 
   const badgeSizeClasses = {
     sm: 'w-3.5 h-3.5 -bottom-0.5 -right-0.5',
     md: 'w-4 h-4 -bottom-1 -right-1',
     lg: 'w-[18px] h-[18px] -bottom-1 -right-1',
-    xl: 'w-5 h-5 -bottom-1 -right-1',
+    xl: 'w-6 h-6 -bottom-0.5 -right-0.5',
   }[size];
 
   const badgeIconSize = {
     sm: 8,
     md: 9,
     lg: 10,
-    xl: 11,
+    xl: 13,
   }[size];
 
   const renderInnerContent = () => {
@@ -189,7 +189,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
             isVerified
               ? isFullBleedTile
                 ? 'w-full h-full object-cover scale-[1.04]'
-                : 'w-[70%] h-[70%] object-contain'
+                : 'w-full h-full object-cover'
               : 'absolute w-px h-px opacity-0 pointer-events-none'
           }
           loading="lazy"
@@ -238,7 +238,7 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
         title="Fast / återkommande"
         className={`absolute ${badgeSizeClasses} rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] ring-2 ring-[var(--surface-color)] flex items-center justify-center pointer-events-none z-10`}
       >
-        <ArrowsClockwise size={badgeIconSize} weight="bold" />
+        <ArrowsClockwise size={badgeIconSize} />
       </span>
     </div>
   );

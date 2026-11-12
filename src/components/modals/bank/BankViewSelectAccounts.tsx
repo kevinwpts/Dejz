@@ -54,7 +54,7 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
                 <div
                   className={`ui-checkbox ${isChecked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                 >
-                  {isChecked && <Check size={12} weight="bold" />}
+                  {isChecked && <Check size={14} />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <span className="ui-row-title">
@@ -71,7 +71,7 @@ export const BankViewSelectAccounts: React.FC<BankViewSelectAccountsProps> = ({
             </button>
 
             {isChecked && (
-              <label className="ui-input-row border-t border-[var(--separator)]">
+              <label className="ui-input-row">
                 <span className="text-[var(--text-secondary)] shrink-0">Visas som</span>
                 <input
                   type="text"

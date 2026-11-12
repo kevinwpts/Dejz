@@ -82,9 +82,9 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
           }`}
         >
           <div className="overflow-hidden">
-            <div className="pt-2.5 border-t border-[var(--separator)]">
+            <div className="pt-1">
               {accounts.length > 0 ? (
-                <div className="divide-y divide-[var(--separator)]">
+                <div>
                   {accounts.map((acc) => {
                     const hasDuplicateName =
                       accounts.filter(
@@ -115,7 +115,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                             size="sm"
                           />
                           <div className="min-w-0 flex-1">
-                            <span className="font-medium text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] block truncate">
+                            <span className="ui-row-title">
                               {acc.name}
                             </span>
                             {(acc.bankName ||
@@ -131,7 +131,7 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span
-                            className={`font-display font-semibold text-subhead tracking-[-0.01em] tabular-nums ${
+                            className={`font-display font-normal text-subhead tracking-[-0.01em] tabular-nums ${
                               acc.excludeFromTotalBalance
                                 ? 'text-[var(--text-secondary)]'
                                 : 'text-[var(--text-primary)]'
@@ -141,7 +141,6 @@ export const HomeAccountsCard: React.FC<HomeAccountsCardProps> = ({
                           </span>
                           <CaretRight
                             size={14}
-                            weight="bold"
                             className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
                           />
                         </div>

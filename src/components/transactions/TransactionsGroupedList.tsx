@@ -45,7 +45,7 @@ export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = (
       <section className="ui-empty-state pt-16 animate-fade-in">
         <span className="ui-empty-badge" aria-hidden="true">
           {isSearchOrFilter ? (
-            <MagnifyingGlass size={28} weight="bold" />
+            <MagnifyingGlass size={28} />
           ) : (
             <Receipt size={28} weight="fill" />
           )}
@@ -82,7 +82,7 @@ export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = (
               {group.label}
             </span>
             <span
-              className={`font-display font-medium tabular-nums ${
+              className={`font-display font-normal tabular-nums ${
                 group.net > 0
                   ? 'text-positive'
                   : 'text-[var(--text-secondary)]'
@@ -164,7 +164,6 @@ export const TransactionsGroupedList: React.FC<TransactionsGroupedListProps> = (
                           {hasReceipts && (
                             <Paperclip
                               size={11}
-                              weight="bold"
                               className="text-[var(--text-secondary)] shrink-0 ml-0.5"
                             />
                           )}

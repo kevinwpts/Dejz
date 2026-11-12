@@ -417,7 +417,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
             className="ui-header-btn"
             aria-label="Tillbaka"
           >
-            <CaretLeft size={18} weight="bold" />
+            <CaretLeft size={18} />
           </button>
         </div>
 

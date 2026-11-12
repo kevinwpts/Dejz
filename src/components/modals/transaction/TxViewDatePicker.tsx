@@ -140,7 +140,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                     aria-label="Föregående månad"
                     className="ui-icon-btn-surface"
                   >
-                    <CaretLeft size={14} weight="bold" />
+                    <CaretLeft size={14} />
                   </button>
                   <span className="font-display font-semibold text-subhead text-[var(--text-primary)] tabular-nums">
                     {monthNames[pickerYearMonth.month]} {pickerYearMonth.year}
@@ -157,7 +157,7 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                     aria-label="Nästa månad"
                     className="ui-icon-btn-surface"
                   >
-                    <CaretRight size={14} weight="bold" />
+                    <CaretRight size={14} />
                   </button>
                 </div>
 

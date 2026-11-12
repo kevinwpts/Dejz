@@ -116,7 +116,6 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
             {hasSubReceipts && (
               <Paperclip
                 size={11}
-                weight="bold"
                 className="text-[var(--text-secondary)] shrink-0"
               />
             )}
@@ -157,7 +156,6 @@ const CategoryEntryRow: React.FC<CategoryEntryRowProps> = ({
         </div>
         <CaretRight
           size={12}
-          weight="bold"
           className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
         />
       </div>
@@ -198,7 +196,7 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
                 <div className="w-full flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
-                      className="w-10 h-10 rounded-xl ui-cat-tile flex items-center justify-center shrink-0"
+                      className="w-10 h-10 rounded-full ui-cat-tile flex items-center justify-center shrink-0"
                       style={categoryColorStyle(item.category)}
                     >
                       <CategoryIcon category={item.category} size={20} muted />
@@ -223,7 +221,7 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
                   <div className="flex items-center gap-2.5 shrink-0">
                     <div className="text-right">
                       <span
-                        className={`font-display font-semibold text-subhead sm:text-subhead tabular-nums block ${
+                        className={`font-display font-normal text-subhead tracking-[-0.01em] tabular-nums block ${
                           item.isIncomeCategory
                             ? 'text-positive'
                             : 'text-[var(--text-primary)]'
@@ -238,7 +236,6 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
                     </div>
                     <CaretDown
                       size={14}
-                      weight="bold"
                       className={`text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-transform duration-200 ${
                         isExpanded ? 'rotate-180 text-[var(--text-primary)]' : ''
                       }`}
@@ -251,13 +248,13 @@ export const AnalysisCategoryList: React.FC<AnalysisCategoryListProps> = ({
               <div
                 className={`grid transition-all duration-200 ease-out ${
                   isExpanded
-                    ? 'grid-rows-[1fr] opacity-100 border-t border-[var(--separator)] bg-[var(--fill-grouped)]'
+                    ? 'grid-rows-[1fr] opacity-100 bg-[var(--fill-grouped)]'
                     : 'grid-rows-[0fr] opacity-0'
                 }`}
               >
                 <div className="overflow-hidden">
                   {isExpanded && (
-                    <div className="divide-y divide-[var(--separator)]">
+                    <div>
                       {item.items.map((entry) => (
                         <CategoryEntryRow
                           key={entry.id}

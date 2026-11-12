@@ -113,7 +113,7 @@ export const FeedbackSettingsView: React.FC<FeedbackSettingsViewProps> = ({
           disabled={!feedbackMessage.trim() || feedbackSending}
           className="ui-btn-primary"
         >
-          <PaperPlaneTilt size={16} weight="bold" />
+          <PaperPlaneTilt size={16} />
           <span>{feedbackSending ? 'Skickar…' : 'Skicka'}</span>
         </button>
       </form>

@@ -166,7 +166,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
                     className="ui-btn-primary"
                   >
                     <span>{guide.cancelUrlLabel}</span>
-                    <ArrowSquareOut size={15} weight="bold" />
+                    <ArrowSquareOut size={15} />
                   </a>
 
                   {onDelete && (

@@ -27,7 +27,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       className="w-10 h-10 rounded-full bg-[var(--btn-secondary-fill)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
       title="Föregående period"
     >
-      <CaretLeft size={16} weight="bold" />
+      <CaretLeft size={16} />
     </button>
 
     <button
@@ -40,7 +40,6 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       </span>
       <CaretDown
         size={12}
-        weight="bold"
         className="text-[var(--text-muted)] shrink-0"
       />
     </button>
@@ -53,7 +52,7 @@ export const AnalysisPeriodNav: React.FC<AnalysisPeriodNavProps> = ({
       className="w-10 h-10 rounded-full bg-[var(--btn-secondary-fill)] flex items-center justify-center text-[var(--text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer shrink-0 active:scale-95"
       title="Nästa period"
     >
-      <CaretRight size={16} weight="bold" />
+      <CaretRight size={16} />
     </button>
   </div>
 );
@@ -96,7 +95,7 @@ export const AnalysisPeriodSheet: React.FC<AnalysisPeriodSheetProps> = ({
               )}
             </span>
             {isSelected && (
-              <Check size={18} weight="bold" className="text-[var(--on-accent-container)] shrink-0" />
+              <Check size={18} className="text-[var(--on-accent-container)] shrink-0" />
             )}
           </button>
         );

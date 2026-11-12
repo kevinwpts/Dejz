@@ -286,7 +286,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
           <button type="submit" disabled={!hasProfileChanges && !profileSaved} className="w-full ui-btn-primary">
             {profileSaved ? (
               <>
-                <Check size={16} weight="bold" />
+                <Check size={16} />
                 <span>Sparat</span>
               </>
             ) : (

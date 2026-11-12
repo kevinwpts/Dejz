@@ -4,19 +4,19 @@ import React from 'react';
 
 export type LogoTileSize = 'sm' | 'md' | 'lg' | 'xl';
 
-/** Samma mått och hörn som butiks- och kategorirutorna. */
+/** Samma runda form för butikslogor, bokstavsrutor och kategoriikoner (40 px i listor, 64 px i detaljvyer). */
 export const LOGO_TILE_SIZE_CLASSES: Record<LogoTileSize, string> = {
-  sm: 'w-8 h-8 rounded-xl',
-  md: 'w-10 h-10 rounded-xl',
-  lg: 'w-11 h-11 rounded-2xl',
-  xl: 'w-14 h-14 rounded-2xl',
+  sm: 'w-8 h-8 rounded-full',
+  md: 'w-10 h-10 rounded-full',
+  lg: 'w-11 h-11 rounded-full',
+  xl: 'w-16 h-16 rounded-full',
 };
 
 const LETTER_CLASSES: Record<LogoTileSize, string> = {
   sm: 'text-callout',
   md: 'text-base',
   lg: 'text-lg',
-  xl: 'text-xl',
+  xl: 'text-2xl',
 };
 
 const MONO_TINT_COUNT = 8;
@@ -54,7 +54,7 @@ export const MonogramTile: React.FC<MonogramTileProps> = ({
   const index = tint ?? monogramTintIndex(name);
   return (
     <div
-      className={`${LOGO_TILE_SIZE_CLASSES[size]} ui-cat-tile flex items-center justify-center shrink-0 select-none font-display font-bold leading-none ${LETTER_CLASSES[size]} ${className}`}
+      className={`${LOGO_TILE_SIZE_CLASSES[size]} ui-cat-tile flex items-center justify-center shrink-0 select-none font-display font-semibold leading-none ${LETTER_CLASSES[size]} ${className}`}
       style={{ '--cat': `var(--mono-${index})` } as React.CSSProperties}
       aria-hidden="true"
     >

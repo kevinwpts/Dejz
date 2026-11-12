@@ -91,7 +91,7 @@ export const OnboardingStepBalance: React.FC<OnboardingStepBalanceProps> = ({
             className="ui-btn-primary"
           >
             <span>Öppna Dejz</span>
-            <Check size={16} weight="bold" />
+            <Check size={16} />
           </button>
           <button
             type="button"

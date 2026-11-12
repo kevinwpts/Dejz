@@ -35,6 +35,10 @@ function collectErrors(page: Page) {
 }
 
 async function openDemo(page: Page, query = '') {
+  // Fast klocka (18:30 svensk tid) – annars blir demons "dagens köp" tomma strax efter midnatt
+  // och testerna beror på vilken tid de körs.
+  await page.clock.install({ time: new Date('2026-11-12T18:30:00+01:00') });
+  await page.clock.resume();
   await page.goto(`/?demo${query}`);
   await expect(page.getByText('Kvar att spendera').first()).toBeVisible({ timeout: 20_000 });
 }

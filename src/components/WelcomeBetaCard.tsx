@@ -48,7 +48,7 @@ export const WelcomeBetaCard: React.FC = () => {
         aria-label="Stäng"
         className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
       >
-        <X size={14} weight="bold" />
+        <X size={14} />
       </button>
       <div className="pr-8">
         <p className="font-display font-semibold text-[17px] tracking-[-0.015em] text-[var(--text-primary)]">Välkommen till Dejz</p>
@@ -61,7 +61,7 @@ export const WelcomeBetaCard: React.FC = () => {
         onClick={() => openFeedback('idea')}
         className="mt-3.5 h-10 px-4 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-callout font-semibold inline-flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer"
       >
-        <ChatTeardropText size={16} weight="bold" />
+        <ChatTeardropText size={16} />
         Ge feedback
       </button>
     </section>

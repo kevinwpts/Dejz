@@ -134,7 +134,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                                 : `Den ${inc.payday || 25}:e`}
                             </span>
                             {matchedTx && (
-                              <span className="text-positive font-medium">
+                              <span className="text-positive">
                                 · Utbetald
                               </span>
                             )}
@@ -244,7 +244,7 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                               : `Den ${exp.dueDay || 28}:e`}
                           </span>
                           {matchedTx && (
-                            <span className="text-positive font-medium">
+                            <span className="text-positive">
                               · Betald
                             </span>
                           )}
@@ -303,11 +303,11 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                     return (
                       <div key={dateKey}>
                         <div className="ui-date-header">
-                          <span className="font-medium text-[var(--text-secondary)]">
+                          <span className="font-semibold text-[var(--text-primary)]">
                             {formatSwedishDateHeading(dateKey)}
                           </span>
                           <span
-                            className={`font-display font-medium tabular-nums ${
+                            className={`font-display font-normal tabular-nums ${
                               dayNet > 0
                                 ? 'text-positive'
                                 : 'text-[var(--text-secondary)]'
@@ -379,7 +379,6 @@ export const HomeQuickViewSheet: React.FC<HomeQuickViewSheetProps> = ({
                                       {hasReceipts && (
                                         <Paperclip
                                           size={11}
-                                          weight="bold"
                                           className="text-[var(--text-secondary)] shrink-0 ml-0.5"
                                         />
                                       )}

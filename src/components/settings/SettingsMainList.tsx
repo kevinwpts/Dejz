@@ -164,7 +164,7 @@ export const SettingsMainList: React.FC<SettingsMainListProps> = ({
                 <span
                   className={`ui-admin-value ${
                     hasActiveBank
-                      ? 'text-positive font-medium'
+                      ? 'text-positive'
                       : ''
                   }`}
                 >

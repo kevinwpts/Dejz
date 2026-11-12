@@ -67,7 +67,7 @@ export const TxViewPaymentPicker: React.FC<TxViewPaymentPickerProps> = ({
                   </span>
                 </div>
                 {isSel && (
-                  <Check size={14} weight="bold" className="text-[var(--text-primary)] shrink-0" />
+                  <Check size={14} className="text-[var(--text-primary)] shrink-0" />
                 )}
               </button>
             );

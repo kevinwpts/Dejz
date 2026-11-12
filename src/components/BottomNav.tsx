@@ -69,7 +69,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               aria-label="Lägg till köp"
               className="ui-fab"
             >
-              <Plus size={26} weight="bold" />
+              <Plus size={26} />
             </button>
           )}
         </div>

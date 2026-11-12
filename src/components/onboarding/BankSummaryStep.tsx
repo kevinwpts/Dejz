@@ -71,7 +71,7 @@ export const BankSummaryStep: React.FC<{
         className="ui-btn-primary-flow disabled:opacity-40 disabled:cursor-default"
       >
         <span>{confirmLabel}</span>
-        <Check size={16} weight="bold" />
+        <Check size={16} />
       </button>
       <button
         type="button"

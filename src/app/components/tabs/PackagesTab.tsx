@@ -72,7 +72,7 @@ export const PackagesTab: React.FC = () => {
                       title="Markera som mottaget"
                       className="ui-icon-btn w-9 h-9"
                     >
-                      <Check size={16} weight="bold" />
+                      <Check size={16} />
                     </button>
                   </div>
                 );

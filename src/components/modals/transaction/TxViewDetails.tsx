@@ -3,7 +3,7 @@ import type { SimilarTransactionsSummary } from '../../../utils/recurring/simila
 import { ModalSubView, getDefaultPaymentMethodForTx } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
-import { Heart, Package, Paperclip, Trash, ArrowsClockwise, CaretRight, PencilSimple, Plus } from '@phosphor-icons/react';
+import { Heart, Package, Paperclip, Trash, ArrowsClockwise, PencilSimple, Plus } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
@@ -15,6 +15,7 @@ import type { AccountDisplayInfo } from '../../../utils/accountDisplay';
 import { AccountInfoRow } from '../AccountInfoRow';
 import { DetailHeroLogo } from '../DetailHeroLogo';
 import { SheetHeader } from '../../ui/SheetHeader';
+import { DetailLinkRow, DetailRow, DetailStackRow } from '../DetailRows';
 
 export interface TxViewDetailsProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";
@@ -110,6 +111,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
         <SheetHeader
           title={isIncome ? 'Inkomst' : 'Köp'}
           flush
+          closeStart
           onClose={onClose}
           actions={
             <>
@@ -118,7 +120,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                 onClick={() => navigateSubView('edit', 'forward')}
                 className="ui-pill-btn"
               >
-                <PencilSimple size={14} weight="bold" />
+                <PencilSimple size={16} />
                 Redigera
               </button>
             </>
@@ -126,7 +128,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
         />
 
         {/* Kvitto-huvud: bara läsning. Ändringar görs via Redigera eller raderna nedan. */}
-        <div className="ui-hero-header relative overflow-hidden pt-5 mb-5 pb-5">
+        <div className="ui-detail-hero">
           <DetailHeroLogo
             name={title || activeTx.title}
             category={category || activeTx.category}
@@ -148,16 +150,12 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             </h2>
           </button>
 
-          <div
-            className={`mt-1.5 font-display font-bold tabular-nums text-[34px] leading-tight tracking-[-0.04em] ${
-              isIncome ? 'text-positive-solid' : 'text-[var(--text-primary)]'
-            }`}
-          >
+          <div className={isIncome ? 'ui-detail-amount-income' : 'ui-detail-amount'}>
             {isIncome ? '+' : '−'}
             {formatKr(Number(amount) || activeTx.amount)}
           </div>
 
-          <p className="text-footnote text-[var(--text-secondary)] tabular-nums mt-1.5">
+          <p className="ui-detail-meta">
             {formatSwedishDateHeading(isBankSynced ? activeTx.date : date || activeTx.date)}
             {activeTx.bookingStatus === 'PDNG' || activeTx.bookingStatus === 'HOLD'
               ? ' · Reserverat'
@@ -167,7 +165,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
           </p>
         </div>
 
-        <div className="space-y-3.5">
+        <div className="space-y-3">
           {/* 1. Kompakta snabbåtgärder (Apple Wallet / Revolut-stil) */}
           <div className={`grid gap-2 ${!isIncome && onTogglePackage ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <button
@@ -264,138 +262,90 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             )}
           </div>
 
-          {/* 2. Ett enda sammanhållet detaljkort (allt i ett lugnt flöde) */}
-          <div className="ui-sheet-group">
-            <button
-              type="button"
-              onClick={() => navigateSubView('similar', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label">{isIncome ? 'Tidigare inkomster' : 'Tidigare köp'}</span>
-              <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
-                <span>{similarInfo.transactions.length}</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
-            <button
-              type="button"
+          {/* 2. Infokort: en grupp per kort, inga avdelare (Revolut-stil) */}
+          <div className="ui-detail-card">
+            <DetailLinkRow
+              label="Kategori"
+              icon={<CategoryIcon category={category || activeTx.category} size={13} />}
+              value={category || activeTx.category}
               onClick={() => navigateSubView('category-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label">Kategori</span>
-              <span className="ui-info-value flex items-center gap-1.5">
-                <CategoryIcon category={category || activeTx.category} size={13} />
-                <span>{category || activeTx.category}</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
-            <button
-              type="button"
+            />
+            <DetailLinkRow
+              label="Betalsätt"
+              icon={<PaymentMethodIcon method={paymentMethod || getDefaultPaymentMethodForTx(activeTx)} size={15} />}
+              value={paymentMethod || getDefaultPaymentMethodForTx(activeTx)}
               onClick={() => navigateSubView('payment-picker', 'forward')}
-              className="ui-row-btn"
-            >
-              <span className="ui-info-label">Betalsätt</span>
-              <span className="ui-info-value flex items-center gap-1.5">
-                <PaymentMethodIcon method={paymentMethod || getDefaultPaymentMethodForTx(activeTx)} size={15} />
-                <span>{paymentMethod || getDefaultPaymentMethodForTx(activeTx)}</span>
-                <CaretRight size={12} className="text-[var(--text-muted)]" />
-              </span>
-            </button>
-
+            />
             {isBankSynced ? (
-              <div className="ui-row">
-                <span className="ui-info-label">Bokfört datum</span>
-                <span className="ui-info-value tabular-nums">
-                  {formatSwedishDateHeading(activeTx.date)}
-                </span>
-              </div>
+              <DetailRow label="Bokfört datum">
+                <span className="ui-detail-value">{formatSwedishDateHeading(activeTx.date)}</span>
+              </DetailRow>
             ) : (
-              <button
-                type="button"
+              <DetailLinkRow
+                label="Datum"
+                value={formatSwedishDateHeading(date || activeTx.date)}
                 onClick={() => navigateSubView('date-picker', 'forward')}
-                className="ui-row-btn"
-              >
-                <span className="ui-info-label">Datum</span>
-                <span className="ui-info-value flex items-center gap-1.5 tabular-nums">
-                  <span>{formatSwedishDateHeading(date || activeTx.date)}</span>
-                  <CaretRight size={12} className="text-[var(--text-muted)]" />
-                </span>
-              </button>
+              />
             )}
-
             {resolvedAccountInfo && (
               <AccountInfoRow info={resolvedAccountInfo} />
             )}
+          </div>
 
-            {/* Bifogade kvitton (visas endast i listan om kvitto finns; snabbvalsknappen ovan hanterar bifogning) */}
-            {draftReceipts.length > 0 && (
-              <>
-                {draftReceipts.map((rcpt, idx) => (
-                  <div key={rcpt.url} className="ui-row">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewReceipt(rcpt);
-                        navigateSubView('receipt-preview', 'forward');
-                      }}
-                      className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer flex-1 group"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
-                        {rcpt.url.startsWith('data:image/') ||
-                        /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
-                          <img src={rcpt.url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <Paperclip size={13} />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="ui-list-row-title text-callout block group-hover:opacity-80">
-                          {draftReceipts.length > 1 ? `Kvitto ${idx + 1}` : 'Kvitto'}
-                        </span>
-                        <span className="text-footnote text-[var(--text-secondary)] block">
-                          Tryck för att visa
-                        </span>
-                      </div>
-                    </button>
-                    <button
-                      aria-label="Ta bort kvitto"
-                      type="button"
-                      onClick={() => handleRemoveReceiptAt(idx)}
-                      className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer shrink-0"
-                      title="Ta bort kvitto"
-                    >
-                      <Trash size={16} />
-                    </button>
-                  </div>
-                ))}
-              </>
-            )}
-
-            {/* Anteckning direkt i kortet */}
-            <div className="ui-row">
-              <span className="ui-info-label shrink-0">Anteckning</span>
-              <input
-                aria-label="Anteckning"
-                type="text"
-                placeholder="Lägg till"
-                value={note}
-                onChange={(e) => {
-                  const nextNote = e.target.value;
-                  setNote(nextNote);
-                  if (activeTx && onUpdate) {
-                    onUpdate({ ...activeTx, note: nextNote.trim() || undefined });
-                  }
-                }}
-                className="min-w-0 font-normal text-right text-[var(--text-secondary)] placeholder-[var(--text-muted)] bg-transparent border-0 p-0 text-callout focus:outline-none focus:text-[var(--text-primary)] flex-1 ml-3"
-              />
+          {/* Bifogade kvitton (visas endast i listan om kvitto finns; snabbvalsknappen ovan hanterar bifogning) */}
+          {draftReceipts.length > 0 && (
+            <div className="ui-detail-card">
+              {draftReceipts.map((rcpt, idx) => (
+                <div key={rcpt.url} className="ui-detail-row">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPreviewReceipt(rcpt);
+                      navigateSubView('receipt-preview', 'forward');
+                    }}
+                    className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer flex-1 group"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 overflow-hidden">
+                      {rcpt.url.startsWith('data:image/') ||
+                      /\.(png|jpe?g|webp|gif)$/i.test(rcpt.url) ? (
+                        <img src={rcpt.url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Paperclip size={13} />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="ui-list-row-title text-callout block group-hover:opacity-80">
+                        {draftReceipts.length > 1 ? `Kvitto ${idx + 1}` : 'Kvitto'}
+                      </span>
+                      <span className="text-footnote text-[var(--text-secondary)] block">
+                        Tryck för att visa
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-label="Ta bort kvitto"
+                    type="button"
+                    onClick={() => handleRemoveReceiptAt(idx)}
+                    className="w-8 h-8 -mr-1.5 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-negative active:bg-[var(--press-overlay)] transition-colors cursor-pointer shrink-0"
+                    title="Ta bort kvitto"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
+          )}
+
+          <div className="ui-detail-card">
+            <DetailLinkRow
+              label={isIncome ? 'Tidigare inkomster' : 'Tidigare köp'}
+              value={`${similarInfo.transactions.length} st`}
+              onClick={() => navigateSubView('similar', 'forward')}
+            />
 
             {/* Budgetinställningar samlade */}
             {onExclude && (
-              <div className="ui-row">
-                <span className="ui-info-label">Räkna i budget</span>
+              <DetailRow label="Räkna i budget">
                 <button
                   type="button"
                   role="switch"
@@ -413,7 +363,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                     }`}
                   />
                 </button>
-              </div>
+              </DetailRow>
             )}
 
             {/* Sparmålskoppling om Sparande */}
@@ -428,9 +378,9 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               if (!linkedGoal && activeTx.category !== 'Sparande') return null;
 
               return (
-                <div className="ui-row flex-col items-stretch gap-2 py-3">
+                <div className="ui-detail-stack gap-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="ui-info-label flex items-center gap-1.5 min-w-0">
+                    <span className="ui-detail-label shrink flex items-center gap-1.5 min-w-0">
                       <span className="truncate">
                         {linkedGoal
                           ? `Kopplad till sparmål: ${linkedGoal.name}`
@@ -464,7 +414,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                           saveSavingsGoals(nextGoals);
                           setLogoPrefTick((t) => t + 1);
                         }}
-                        className="text-footnote font-medium text-negative hover:opacity-80 cursor-pointer shrink-0"
+                        className="text-callout font-normal text-negative hover:opacity-80 cursor-pointer shrink-0"
                       >
                         Koppla bort
                       </button>
@@ -502,7 +452,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
                           }}
                           className="ui-chip-sm"
                         >
-                          <Plus size={12} weight="bold" className="text-[var(--accent-color)]" />
+                          <Plus size={12} className="text-[var(--accent-color)]" />
                           <span>{g.name}</span>
                         </button>
                       ))}
@@ -512,14 +462,30 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
               );
             })()}
 
-            {/* Rå banktext diskret längst ner i detaljkortet */}
+          </div>
+
+          {/* Lång text: etikett överst, värdet under */}
+          <div className="ui-detail-card">
+            <DetailStackRow label="Anteckning">
+              <input
+                aria-label="Anteckning"
+                type="text"
+                placeholder="Lägg till en anteckning"
+                value={note}
+                onChange={(e) => {
+                  const nextNote = e.target.value;
+                  setNote(nextNote);
+                  if (activeTx && onUpdate) {
+                    onUpdate({ ...activeTx, note: nextNote.trim() || undefined });
+                  }
+                }}
+                className="ui-detail-stack-value"
+              />
+            </DetailStackRow>
             {rawBankText && (
-              <div className="ui-row items-start">
-                <span className="ui-info-label">Banktext</span>
-                <span className="text-footnote text-right break-words min-w-0 text-[var(--text-secondary)] font-normal leading-snug pt-px">
-                  {rawBankText}
-                </span>
-              </div>
+              <DetailStackRow label="Banktext">
+                <span className="ui-detail-stack-value">{rawBankText}</span>
+              </DetailStackRow>
             )}
           </div>
 

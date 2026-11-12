@@ -41,7 +41,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
             <span className="ui-row-title">Skapa ett sparmål</span>
             <span className="ui-row-subtitle">Spara till en resa, buffert eller dröm</span>
           </span>
-          <CaretRight size={16} weight="bold" className="text-[var(--text-muted)] shrink-0" />
+          <CaretRight size={16} className="text-[var(--text-muted)] shrink-0" />
         </button>
       )}
 
@@ -88,9 +88,9 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
             }`}
           >
             <div className="overflow-hidden">
-              <div className="pt-2.5 border-t border-[var(--separator)]">
+              <div className="pt-1">
                 {savingsGoals.length > 0 ? (
-                  <div className="divide-y divide-[var(--separator)]">
+                  <div>
                     {savingsGoals.map((goal) => {
                       const effectiveGoalAmt = resolveHomeGoalAmount(goal);
                       const pct =
@@ -127,12 +127,12 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
 
                           <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex items-baseline justify-between gap-2">
-                              <span className="font-medium text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate">
+                              <span className="font-normal text-subhead tracking-[-0.01em] leading-snug text-[var(--text-primary)] truncate">
                                 {goal.name}
                               </span>
                               {/* Sparat av målet – säger mer än samma summa som i rubriken */}
                               <span className="privacy-blur-amount text-footnote tabular-nums shrink-0 text-[var(--text-secondary)]">
-                                <span className="font-display font-semibold text-subhead tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
+                                <span className="font-display font-normal text-subhead tracking-[-0.01em] text-[var(--text-primary)] tabular-nums">
                                   {formatKr(effectiveGoalAmt).replace(' kr', '')}
                                 </span>
                                 {goal.targetAmount > 0 ? ` av ${formatKr(goal.targetAmount)}` : ' kr'}
@@ -149,7 +149,7 @@ export const HomeGoalsCard: React.FC<HomeGoalsCardProps> = ({
                                   }}
                                 />
                               </div>
-                              <span className="text-footnote font-medium text-[var(--text-secondary)] tabular-nums shrink-0">
+                              <span className="text-footnote font-normal text-[var(--text-secondary)] tabular-nums shrink-0">
                                 {pct} %
                               </span>
                             </div>

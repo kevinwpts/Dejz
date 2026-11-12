@@ -76,7 +76,7 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
               aria-label="Rensa sökning"
               className="ui-clear-btn"
             >
-              <X size={14} weight="bold" />
+              <X size={14} />
             </button>
           )}
         </div>
@@ -99,7 +99,7 @@ export const StepArtwork: React.FC<StepArtworkProps> = ({
                   className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/35 flex flex-col items-center justify-center p-2">
-                  <ImageSquare size={22} weight="bold" className="text-white mb-1" />
+                  <ImageSquare size={22} className="text-white mb-1" />
                   <span className="text-footnote font-medium text-white leading-tight">
                     Byt bild
                   </span>

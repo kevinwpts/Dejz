@@ -101,7 +101,7 @@ export const AppearanceSettingsView: React.FC<AppearanceSettingsViewProps> = ({
                     isSelected ? 'font-semibold' : 'font-medium'
                   }`}
                 >
-                  {isSelected && <Check size={13} weight="bold" />}
+                  {isSelected && <Check size={14} />}
                   {opt.label}
                 </span>
               </button>

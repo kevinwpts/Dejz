@@ -42,7 +42,7 @@ const EmptyAddRow: React.FC<{ title: string; subtitle: string; onClick?: () => v
   <button type="button" onClick={onClick} disabled={!onClick} className="ui-tx-row">
     <span className="flex items-center gap-3 min-w-0 flex-1">
       <span className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--on-accent-container)] flex items-center justify-center shrink-0">
-        <Plus size={20} weight="bold" />
+        <Plus size={20} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="ui-row-title text-[var(--on-accent-container)]">{title}</span>
@@ -166,7 +166,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               onClick={onAddIncome}
               className="ui-section-action"
             >
-              <Plus size={13} weight="bold" />
+              <Plus size={13} />
               <span>Lägg till</span>
             </button>
           )}
@@ -240,7 +240,7 @@ export const FixedTab: React.FC<FixedTabProps> = ({
               onClick={onAddFixed}
               className="ui-section-action"
             >
-              <Plus size={13} weight="bold" />
+              <Plus size={13} />
               <span>Lägg till</span>
             </button>
           )}
@@ -295,11 +295,11 @@ export const FixedTab: React.FC<FixedTabProps> = ({
                       </span>
                       <span className="ui-row-meta">
                         {cancelBadge ? (
-                          <span className="text-caution font-medium">
+                          <span className="text-caution">
                             {cancelBadge}
                           </span>
                         ) : matchedTx ? (
-                          <span className="text-positive font-medium">
+                          <span className="text-positive">
                             Betald ✓
                           </span>
                         ) : (

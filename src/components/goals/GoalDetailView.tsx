@@ -221,7 +221,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             }}
             className="ui-btn-primary !h-12"
           >
-            <Plus size={15} weight="bold" />
+            <Plus size={15} />
             <span>Sätt in</span>
           </button>
 
@@ -234,7 +234,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             }}
             className="ui-btn-secondary !h-12 disabled:cursor-not-allowed"
           >
-            <Minus size={15} weight="bold" />
+            <Minus size={15} />
             <span>Ta ut</span>
           </button>
         </section>
@@ -311,9 +311,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     {!hasAmt ? (
                       <Flag size={17} weight="fill" />
                     ) : (act.amount ?? 0) >= 0 ? (
-                      <Plus size={17} weight="bold" />
+                      <Plus size={17} />
                     ) : (
-                      <Minus size={17} weight="bold" />
+                      <Minus size={17} />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -422,7 +422,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </span>
             </span>
             {!selectedGoal.linkedAccountId && (
-              <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
+              <Check size={16} className="text-[var(--accent-color)]" />
             )}
           </button>
 
@@ -445,7 +445,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   {formatKr(effectiveTotalBalance)}
                 </span>
                 {selectedGoal.linkedAccountId === '__TOTAL__' && (
-                  <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
+                  <Check size={16} className="text-[var(--accent-color)]" />
                 )}
               </div>
             </button>
@@ -485,7 +485,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     {formatKr(accBal)}
                   </span>
                   {isSelected && (
-                    <Check size={16} weight="bold" className="text-[var(--accent-color)]" />
+                    <Check size={16} className="text-[var(--accent-color)]" />
                   )}
                 </div>
               </button>

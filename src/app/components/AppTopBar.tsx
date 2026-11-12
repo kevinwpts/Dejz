@@ -121,7 +121,7 @@ export const AppTopBar: React.FC = () => {
               {/kunde inte|fel/i.test(callbackStatusMsg) ? (
                 <WarningCircle size={20} weight="fill" className="text-negative shrink-0" />
               ) : /\.\.\.$|…$/.test(callbackStatusMsg) ? (
-                <SpinnerGap size={20} weight="bold" className="text-[var(--on-accent-container)] animate-spin shrink-0" />
+                <SpinnerGap size={20} className="text-[var(--on-accent-container)] animate-spin shrink-0" />
               ) : (
                 <CheckCircle size={20} weight="fill" className="text-positive shrink-0" />
               )}

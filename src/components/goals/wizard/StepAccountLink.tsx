@@ -47,7 +47,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
     <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
       <button type="button" onClick={onUnlink} className={cardClass(!goalLinkedAccountId)}>
         <div className={checkboxClass(!goalLinkedAccountId)}>
-          {!goalLinkedAccountId && <Check size={12} weight="bold" />}
+          {!goalLinkedAccountId && <Check size={14} />}
         </div>
         <div className="min-w-0 flex-1">
           <span className="ui-option-title">Eget valt belopp</span>
@@ -64,7 +64,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
           className={cardClass(goalLinkedAccountId === '__TOTAL__')}
         >
           <div className={checkboxClass(goalLinkedAccountId === '__TOTAL__')}>
-            {goalLinkedAccountId === '__TOTAL__' && <Check size={12} weight="bold" />}
+            {goalLinkedAccountId === '__TOTAL__' && <Check size={14} />}
           </div>
           <div className="w-9 h-9 rounded-xl bg-[var(--fill-grouped)] flex items-center justify-center text-[var(--text-primary)] shrink-0">
             <Bank size={15} weight="regular" />
@@ -75,7 +75,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
               Alla konton · Synkas automatiskt
             </span>
           </div>
-          <span className="text-subhead font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+          <span className="text-subhead font-normal tabular-nums text-[var(--text-primary)] shrink-0">
             {formatKr(effectiveTotalBalance)}
           </span>
         </button>
@@ -102,7 +102,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
             className={cardClass(isSelected)}
           >
             <div className={checkboxClass(isSelected)}>
-              {isSelected && <Check size={12} weight="bold" />}
+              {isSelected && <Check size={14} />}
             </div>
             <ItemLogo name={acc.bankName || acc.name} category="Bank" logoUrl={acc.logo} size="sm" />
             <div className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ export const StepAccountLink: React.FC<StepAccountLinkProps> = ({
                 </span>
               )}
             </div>
-            <span className="text-subhead font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+            <span className="text-subhead font-normal tabular-nums text-[var(--text-primary)] shrink-0">
               {formatKr(accBal)}
             </span>
           </button>

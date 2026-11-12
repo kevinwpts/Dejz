@@ -48,19 +48,19 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
           <div className="ui-list-card ui-onb-summary-card text-subhead">
             <div className="ui-onb-summary-row">
               <span className="text-[var(--text-secondary)]">Inkomster</span>
-              <span className="font-semibold text-positive tabular-nums">
+              <span className="font-normal text-positive tabular-nums">
                 +{formatKr(totalInc)}
               </span>
             </div>
             <div className="ui-onb-summary-row">
               <span className="text-[var(--text-secondary)]">Fasta utgifter</span>
-              <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+              <span className="font-normal text-[var(--text-primary)] tabular-nums">
                 −{formatKr(totalFix)}
               </span>
             </div>
             <div className="ui-onb-summary-row">
               <span className="text-[var(--text-secondary)]">Lönedag</span>
-              <span className="font-semibold text-[var(--text-primary)] tabular-nums">
+              <span className="font-normal text-[var(--text-primary)] tabular-nums">
                 {payday === 31 ? 'Sista dagen' : `Den ${payday}:e`}
               </span>
             </div>
@@ -75,7 +75,7 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
               className="ui-btn-primary"
             >
               <span>Fortsätt</span>
-              <ArrowRight size={16} weight="bold" />
+              <ArrowRight size={16} />
             </button>
           ) : (
             <button
@@ -84,7 +84,7 @@ export const OnboardingStepResult: React.FC<OnboardingStepResultProps> = ({
               className="ui-btn-primary"
             >
               <span>Öppna Dejz</span>
-              <Check size={16} weight="bold" />
+              <Check size={16} />
             </button>
           )}
         </div>

@@ -252,7 +252,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
       </div>
 
       {/* Spacious Divided List of Categories with Inset Dividers */}
-      <div className="ui-admin-card ui-admin-card-tiles">
+      <div className="ui-admin-card">
         {currentList.map((cat) => {
           const count = usageCounts[cat.name.toLowerCase().trim()] || 0;
           return (
@@ -288,7 +288,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
           onClick={openNewSheet}
           className="w-full ui-btn-primary"
         >
-          <Plus size={15} weight="bold" />
+          <Plus size={15} />
           <span>Ny kategori</span>
         </button>
 
@@ -376,7 +376,7 @@ export const CategorySettings: React.FC<CategorySettingsProps> = ({
               type="submit"
               className="ui-btn-primary"
             >
-              <Check size={14} weight="bold" />
+              <Check size={14} />
               <span>Spara kategori</span>
             </button>
 

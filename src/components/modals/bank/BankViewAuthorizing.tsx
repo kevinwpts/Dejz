@@ -46,7 +46,7 @@ export const BankViewAuthorizing: React.FC<BankViewAuthorizingProps> = ({
       className="ui-btn-primary"
     >
       <span>Öppna {selectedBank?.name}</span>
-      <ArrowSquareOut size={15} weight="bold" />
+      <ArrowSquareOut size={15} />
     </a>
 
     {!showManualCallback ? (

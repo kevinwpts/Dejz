@@ -192,7 +192,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                     aria-label={`Återställ ursprungsnamn (${defaultCleanBankTitle})`}
                     className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
                   >
-                    <ClockCounterClockwise size={15} weight="bold" />
+                    <ClockCounterClockwise size={15} />
                   </button>
                 )}
             </div>
@@ -349,7 +349,7 @@ export const TxViewEdit: React.FC<TxViewEditProps> = ({
                   className="ui-row-btn text-[var(--accent-color)]"
                 >
                   <span className="flex items-center gap-2 font-medium">
-                    <Plus size={15} weight="bold" />
+                    <Plus size={15} />
                     <span>Bifoga fler kvitton</span>
                   </span>
                 </button>

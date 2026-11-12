@@ -52,7 +52,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             aria-label="Tillbaka"
             title="Tillbaka"
           >
-            <CaretLeft size={18} weight="bold" />
+            <CaretLeft size={18} />
           </button>
           )}
 

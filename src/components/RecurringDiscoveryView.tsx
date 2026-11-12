@@ -410,7 +410,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
                 onClick={handleAddAllMissing}
                 className="ui-section-action"
               >
-                <Plus size={13} weight="bold" />
+                <Plus size={13} />
                 <span>Lägg till alla</span>
               </button>
             )}
@@ -459,7 +459,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
                       onClick={() => handleAddCandidate(cand)}
                       className="ui-btn-sm-primary"
                     >
-                      <Plus size={12} weight="bold" />
+                      <Plus size={12} />
                       <span>Lägg till</span>
                     </button>
                   </div>

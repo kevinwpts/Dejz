@@ -87,7 +87,7 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
                   </div>
                 </div>
                 {isMatched && (
-                  <Check size={16} weight="bold" className="text-[var(--accent-color)] shrink-0" />
+                  <Check size={16} className="text-[var(--accent-color)] shrink-0" />
                 )}
               </button>
             );
@@ -113,7 +113,7 @@ export const TxViewLinkFixedPicker: React.FC<TxViewLinkFixedPickerProps> = ({
             onClick={() => onMarkAsFixed(activeTx, isIncome ? 'income' : 'expense')}
             className="ui-btn-secondary"
           >
-            <Plus size={16} weight="bold" />
+            <Plus size={16} />
             <span>Skapa ny fast {isIncome ? 'inkomst' : 'utgift'}</span>
           </button>
         )}

@@ -59,7 +59,7 @@ export const SetNewPasswordSheet: React.FC<{
       >
         <div className="space-y-2">
           <span className="w-12 h-12 rounded-full bg-[var(--accent-soft)] text-[var(--accent-color)] flex items-center justify-center">
-            <LockSimple size={22} weight="bold" />
+            <LockSimple size={22} />
           </span>
           <h2 className="pt-2 font-display font-bold text-2xl tracking-[-0.025em] text-[var(--text-primary)]">Välj nytt lösenord</h2>
           <p className="text-subhead text-[var(--text-secondary)] leading-relaxed text-pretty">

@@ -934,7 +934,7 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
     const box = Math.max(size + 14, 28);
     return (
       <span
-        className={`ui-cat-tile rounded-lg inline-flex items-center justify-center shrink-0 select-none ${className}`}
+        className={`ui-cat-tile rounded-full inline-flex items-center justify-center shrink-0 select-none ${className}`}
         style={{ ...categoryColorStyle(category || iconId, color), width: box, height: box }}
         aria-hidden="true"
       >

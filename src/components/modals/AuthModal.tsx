@@ -236,7 +236,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             aria-label="Tillbaka"
             title="Tillbaka"
           >
-            <CaretLeft size={16} weight="bold" />
+            <CaretLeft size={16} />
           </button>
         ) : (
           <span aria-hidden="true" />
@@ -249,7 +249,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           aria-label="Stäng"
           title="Stäng"
         >
-          <X size={15} weight="bold" />
+          <X size={15} />
         </button>
       </header>
 
@@ -395,7 +395,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ) : (
                 <>
                   <span>Skicka länk</span>
-                  <PaperPlaneTilt size={16} weight="bold" />
+                  <PaperPlaneTilt size={16} />
                 </>
               )}
             </button>

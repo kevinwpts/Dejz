@@ -179,7 +179,7 @@ export const BankSettingsView: React.FC<BankSettingsViewProps> = ({
               onClick={onOpenBank}
               className="ui-btn-primary"
             >
-              <Plus size={16} weight="bold" />
+              <Plus size={16} />
               <span>Lägg till bank</span>
             </button>
           </div>

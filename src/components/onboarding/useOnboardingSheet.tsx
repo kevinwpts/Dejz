@@ -365,7 +365,7 @@ export function createOnboardingSheetActions({
         onClick={() => openAddSheet(type, c)}
         className="ui-onb-chip"
       >
-        <Plus size={14} weight="bold" className="text-[var(--accent-color)]" />
+        <Plus size={14} className="text-[var(--accent-color)]" />
         <span>{c.name}</span>
       </button>
     );
@@ -387,7 +387,7 @@ export function createOnboardingSheetActions({
             onClick={() => openAddSheet(type)}
             className="ui-onb-chip-other"
           >
-            <Plus size={14} weight="bold" />
+            <Plus size={14} />
             <span>Annat</span>
           </button>
         </div>
@@ -402,7 +402,7 @@ export function createOnboardingSheetActions({
             onClick={() => openAddSheet(type, c)}
             className="ui-onb-chip"
           >
-            <Plus size={14} weight="bold" className="text-[var(--accent-color)]" />
+            <Plus size={14} className="text-[var(--accent-color)]" />
             <span>{c.name}</span>
           </button>
         ))}
@@ -411,7 +411,7 @@ export function createOnboardingSheetActions({
           onClick={() => openAddSheet(type)}
           className="ui-onb-chip-other"
         >
-          <Plus size={14} weight="bold" />
+          <Plus size={14} />
           <span>Annat</span>
         </button>
       </div>

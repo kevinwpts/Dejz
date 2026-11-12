@@ -108,7 +108,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                     <div
                       className={`ui-checkbox ${isChecked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                     >
-                      {isChecked && <Check size={12} weight="bold" />}
+                      {isChecked && <Check size={14} />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="ui-option-title">
@@ -119,7 +119,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                       </span>
                     </div>
                     {acc.balance_amount !== null && acc.balance_amount !== undefined && (
-                      <span className="text-sm font-semibold tabular-nums text-[var(--text-primary)] shrink-0">
+                      <span className="text-sm font-normal tabular-nums text-[var(--text-primary)] shrink-0">
                         {formatKr(acc.balance_amount)}
                       </span>
                     )}
@@ -144,7 +144,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                 ) : (
                   <>
                     <span>Fortsätt</span>
-                    <ArrowRight size={16} weight="bold" />
+                    <ArrowRight size={16} />
                   </>
                 )}
               </button>
@@ -243,7 +243,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                         aria-label="Rensa sökning"
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                       >
-                        <X size={14} weight="bold" />
+                        <X size={14} />
                       </button>
                     )}
                   </div>
@@ -355,7 +355,7 @@ export const OnboardingStepBank: React.FC<OnboardingStepBankProps> = ({
                   className="ui-btn-primary"
                 >
                   <span>Fortsätt</span>
-                  <ArrowRight size={16} weight="bold" />
+                  <ArrowRight size={16} />
                 </button>
               ) : (
                 <button

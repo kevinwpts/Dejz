@@ -106,7 +106,7 @@ export const BankModal: React.FC<BankModalProps> = ({
         {!userEmail ? (
           <div className="py-4 text-center space-y-4">
             <div className="ui-hero-icon">
-              <LockKey size={26} weight="duotone" />
+              <LockKey size={26} />
             </div>
             <div className="space-y-1">
               <h4 className="ui-empty-title">

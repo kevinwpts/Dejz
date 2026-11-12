@@ -63,7 +63,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               aria-label="Rensa sökning"
               className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
             >
-              <X size={16} weight="bold" />
+              <X size={16} />
             </button>
           )}
         </div>
@@ -80,7 +80,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             activeFilterCount > 0 ? 'text-[var(--on-accent-container)]' : 'text-[var(--text-primary)]'
           }`}
         >
-          <SlidersHorizontal size={20} weight={activeFilterCount > 0 ? 'bold' : 'regular'} />
+          <SlidersHorizontal size={20} />
           {activeFilterCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] text-caption font-bold flex items-center justify-center ring-2 ring-[var(--bg-color)] pointer-events-none tabular-nums">
               {activeFilterCount}
@@ -121,7 +121,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{formatAccountShortLabel(activeAccount, accounts)}</span>
-              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} className="text-[var(--text-muted)]" />
             </button>
           )}
 
@@ -132,7 +132,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{getDateRangeChipLabel(dateRange)}</span>
-              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} className="text-[var(--text-muted)]" />
             </button>
           )}
 
@@ -145,7 +145,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
             >
               <CategoryIcon category={cat} size={13} />
               <span>{cat}</span>
-              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} className="text-[var(--text-muted)]" />
             </button>
           ))}
 
@@ -157,7 +157,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{getAttributeChipLabel(attr)}</span>
-              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} className="text-[var(--text-muted)]" />
             </button>
           ))}
 
@@ -168,7 +168,7 @@ export const TransactionsSearchBar: React.FC<TransactionsSearchBarProps> = ({
               className="ui-chip-sm h-8 px-3 text-footnote"
             >
               <span>{selectedPaymentMethod}</span>
-              <X size={12} weight="bold" className="text-[var(--text-muted)]" />
+              <X size={12} className="text-[var(--text-muted)]" />
             </button>
           )}
 

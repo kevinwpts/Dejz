@@ -73,7 +73,7 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
                   <span
                     className={`ui-checkbox ${item.checked ? 'ui-checkbox-on' : 'ui-checkbox-off'}`}
                   >
-                    {item.checked && <Check size={13} weight="bold" />}
+                    {item.checked && <Check size={14} />}
                   </span>
                 </button>
 
@@ -141,7 +141,7 @@ export const OnboardingStepFixedList: React.FC<OnboardingStepFixedListProps> = (
             className="ui-btn-primary"
           >
             <span>Fortsätt</span>
-            <ArrowRight size={16} weight="bold" />
+            <ArrowRight size={16} />
           </button>
         </div>
       </div>

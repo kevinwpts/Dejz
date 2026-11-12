@@ -34,11 +34,11 @@ export const TxViewSimilar: React.FC<TxViewSimilarProps> = ({
         <SheetHeader title="Tidigare köp" onBack={() => navigateSubView('details', 'back')} onClose={onClose} flush />
 
         <div className="ui-date-header px-1">
-          <span className="font-medium text-[var(--text-secondary)]">
+          <span className="font-normal text-[var(--text-secondary)]">
             {similarInfo.transactions.length}{' '}
             köp
           </span>
-          <span className="font-display font-medium text-[var(--text-primary)] tabular-nums">
+          <span className="font-display font-normal text-[var(--text-primary)] tabular-nums">
             Totalt {formatKr(similarInfo.totalAmount)}
           </span>
         </div>

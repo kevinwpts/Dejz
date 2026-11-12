@@ -111,7 +111,6 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                       {isSel && (
                         <Check
                           size={14}
-                          weight="bold"
                           className="text-[var(--text-primary)] shrink-0"
                         />
                       )}
@@ -161,7 +160,6 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                       {isSel && (
                         <Check
                           size={14}
-                          weight="bold"
                           className="text-[var(--text-primary)] shrink-0"
                         />
                       )}
@@ -348,7 +346,7 @@ export const OnboardingItemSheet: React.FC<OnboardingItemSheetProps> = ({
                   disabled={!sheetEditor.name.trim() || !(Number(sheetEditor.amount) > 0)}
                   className="ui-btn-primary"
                 >
-                  <Check size={14} weight="bold" />
+                  <Check size={14} />
                   <span>Spara</span>
                 </button>
 

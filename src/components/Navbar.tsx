@@ -174,12 +174,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="ui-header-btn z-10"
                 aria-label="Tillbaka"
               >
-                <CaretLeft size={18} weight="bold" />
+                <CaretLeft size={20} />
               </button>
               <span className="absolute left-14 right-14 text-center font-display font-semibold text-[17px] tracking-[-0.02em] text-[var(--text-primary)] truncate pointer-events-none">
                 {pageTitle}
               </span>
-              <div className="w-9 shrink-0" aria-hidden="true" />
+              <div className="w-10 shrink-0" aria-hidden="true" />
             </>
           ) : (
             <button
@@ -189,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Profil & inställningar"
               className="flex items-center gap-2.5 py-1 pr-1 focus:outline-none hover:opacity-90 active:scale-95 transition-all cursor-pointer group shrink-0"
             >
-              <span className="w-9 h-9 rounded-full bg-[var(--header-btn-bg)] text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
+              <span className="w-10 h-10 rounded-full bg-[var(--header-btn-bg)] text-[var(--text-primary)] flex items-center justify-center overflow-hidden shrink-0">
                 {userAvatar && !imgError ? (
                   <img
                     src={userAvatar}
@@ -202,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {initialChar}
                   </span>
                 ) : (
-                  <UserCircle size={22} weight="duotone" className="text-[var(--text-secondary)]" />
+                  <UserCircle size={22} className="text-[var(--text-secondary)]" />
                 )}
               </span>
             </button>
@@ -219,7 +219,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 aria-pressed={privacyBlur}
                 className="ui-header-btn"
               >
-                {privacyBlur ? <EyeSlash size={19} weight="bold" /> : <Eye size={19} weight="bold" />}
+                {privacyBlur ? <EyeSlash size={20} /> : <Eye size={20} />}
               </button>
 
               {!hideSearch && (
@@ -230,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   aria-label="Sök"
                   className="ui-header-btn"
                 >
-                  <MagnifyingGlass size={19} weight="bold" />
+                  <MagnifyingGlass size={20} />
                 </button>
               )}
 
@@ -241,7 +241,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 aria-label="Skicka feedback"
                 className="ui-header-btn"
               >
-                <ChatTeardropText size={19} weight="bold" />
+                <ChatTeardropText size={20} />
               </button>
 
               <button
@@ -251,11 +251,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 aria-label="Notiser"
                 className="ui-header-btn relative"
               >
-                <Bell size={19} weight="bold" />
+                <Bell size={20} />
                 {hasUnreadNotifications && (
                   <span
                     aria-hidden="true"
-                    className="absolute top-2 right-2 w-2 h-2 rounded-full bg-negative-solid ring-2 ring-[var(--bg-color)]"
+                    className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-negative-solid ring-2 ring-[var(--bg-color)]"
                   />
                 )}
               </button>

@@ -99,7 +99,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     className="w-8 h-8 rounded-full bg-[var(--cta-bg)] text-[var(--cta-fg)] flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-transform"
                     title="Spara namn"
                   >
-                    <Check size={14} weight="bold" />
+                    <Check size={14} />
                   </button>
                   <button
                     aria-label="Avbryt"
@@ -138,7 +138,7 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                     <span className="text-footnote text-[var(--text-secondary)] block">
                       Kontonummer
                     </span>
-                    <span className="text-subhead font-medium text-[var(--text-primary)] tabular-nums">
+                    <span className="text-subhead font-normal text-[var(--text-primary)] tabular-nums">
                       {formatAccountNumberShort(activeModalAccount.accountNumber)}
                     </span>
                   </div>
@@ -157,12 +157,12 @@ export const HomeAccountSheet: React.FC<HomeAccountSheetProps> = ({
                   >
                     {copiedAccountNumber ? (
                       <>
-                        <Check size={14} weight="bold" className="text-positive" />
+                        <Check size={14} className="text-positive" />
                         <span>Kopierat</span>
                       </>
                     ) : (
                       <>
-                        <Copy size={14} weight="bold" />
+                        <Copy size={14} />
                         <span>Kopiera</span>
                       </>
                     )}

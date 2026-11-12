@@ -64,7 +64,6 @@ export const BankAccountsSection: React.FC<BankAccountsSectionProps> = ({
                 >
                   <ArrowClockwise
                     size={13}
-                    weight="bold"
                     className={isSyncingThis ? 'animate-spin' : ''}
                   />
                   <span>{isSyncingThis ? 'Synkar...' : 'Synka'}</span>

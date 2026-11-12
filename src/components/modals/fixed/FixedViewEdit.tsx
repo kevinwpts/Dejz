@@ -170,7 +170,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
                     aria-label={`Återställ ursprungsnamn (${originalDisplayName})`}
                     className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer shrink-0"
                   >
-                    <ClockCounterClockwise size={15} weight="bold" />
+                    <ClockCounterClockwise size={15} />
                   </button>
                 )}
               </div>

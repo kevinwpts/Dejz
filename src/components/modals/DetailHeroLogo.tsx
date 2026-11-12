@@ -28,7 +28,7 @@ export function DetailHeroLogo({ name, category, logoUrl, isRecurring, refreshKe
           }}
           title={prefersCatIcon ? 'Tryck för att visa företagslogga' : 'Tryck för att visa kategori-ikon'}
           aria-label={prefersCatIcon ? 'Visa företagslogga' : 'Visa kategoriikon'}
-          className="relative group/logo cursor-pointer rounded-2xl focus:outline-none active:scale-95 transition-transform"
+          className="relative group/logo cursor-pointer rounded-full focus:outline-none active:scale-95 transition-transform"
         >
           <ItemLogo
             key={`hero-logo-${refreshKey}`}
