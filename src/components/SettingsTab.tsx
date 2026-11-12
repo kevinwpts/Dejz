@@ -4,22 +4,14 @@ import { PaymentMethodsSettingsView } from './settings/PaymentMethodsSettingsVie
 import { isBankEnabledForEmail } from '../utils/bankFeatureFlag';
 
 
-import { BankConnection, BankAccount } from '../services/bankService';
+import { BankConnection, BankAccount } from '../services/bank/types';
 import { WeekendHandlingMode } from '../utils/periodEngine';
 import { CategorySettings } from './CategorySettings';
 import { RecurringDiscoveryView } from './RecurringDiscoveryView';
-import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from './HomeTab';
-import {
-  getStoredPaymentMethods,
-  compressImageFileToDataUrl,
-  getPrivacyBlurMode,
-  getSavingsGoals,
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-  getTransactionMetaMap,
-  getAccountMetaMap,
-} from '../utils/appCache';
-import { PaymentMethodOption } from '../constants';
+import { TransactionItem, FixedExpenseItem, IncomeItem, AccountItem } from '../app/models';
+import { getStoredPaymentMethods, getStoredExpenseCategories, getStoredIncomeCategories, PaymentMethodItem } from '../utils/cache/categories';
+import { compressImageFileToDataUrl } from '../utils/cache/merchants';
+import { getPrivacyBlurMode, getSavingsGoals, getTransactionMetaMap, getAccountMetaMap } from '../utils/cache/itemMeta';
 import { DayOfMonthPicker } from './ui/DayOfMonthPicker';
 import {
   CookiesPage,
@@ -92,9 +84,6 @@ interface SettingsTabProps {
   onOpenSection?: (section: 'goals' | 'receipts' | 'packages') => void;
   sectionCounts?: { goals?: number; receipts?: number; packages?: number };
 }
-
-export type { SettingsSubView } from './settings/subviews';
-export { SETTINGS_SUBVIEW_TITLES } from './settings/subviews';
 
 // Sparade värden läses utanför komponenten – React Compiler kan inte optimera try/catch med villkor.
 function readStoredPhone(): string {
@@ -205,7 +194,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   );
 
   // Payment methods sheet state
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodOption[]>(() =>
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodItem[]>(() =>
     getStoredPaymentMethods()
   );
 

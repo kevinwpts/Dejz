@@ -1,7 +1,7 @@
 // Bankinställningar: "Ansluten bank" – varje bankkoppling med status (ansluten / går ut / utgången)
 import React, { useState } from 'react';
 import { getConnectionDaysLeft } from '../../../services/bank/connectionExpiry';
-import type { BankConnection } from '../../../services/bankService';
+import type { BankConnection } from '../../../services/bank/types';
 import { ItemLogo } from '../../ItemLogo';
 
 interface BankConnectionsSectionProps {

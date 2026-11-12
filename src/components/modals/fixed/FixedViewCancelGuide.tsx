@@ -2,7 +2,7 @@ import type { CancelGuideData, ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, Trash, CaretLeft, ArrowSquareOut, Sparkle, Info } from '@phosphor-icons/react';
-import { FixedExpenseItem } from '../../HomeTab';
+import { FixedExpenseItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 

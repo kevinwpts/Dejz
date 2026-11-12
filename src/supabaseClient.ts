@@ -4,8 +4,8 @@ import type { Database } from './types/database';
 const metaEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : ({} as Partial<ImportMetaEnv>);
 const procEnv = typeof process !== 'undefined' && process.env ? process.env : ({} as Record<string, string | undefined>);
 
-export const supabaseUrl = metaEnv.VITE_SUPABASE_URL || procEnv.VITE_SUPABASE_URL || procEnv.SUPABASE_URL || undefined;
-export const supabaseAnonKey = metaEnv.VITE_SUPABASE_ANON_KEY || procEnv.VITE_SUPABASE_ANON_KEY || procEnv.SUPABASE_ANON_KEY || undefined;
+const supabaseUrl = metaEnv.VITE_SUPABASE_URL || procEnv.VITE_SUPABASE_URL || procEnv.SUPABASE_URL || undefined;
+const supabaseAnonKey = metaEnv.VITE_SUPABASE_ANON_KEY || procEnv.VITE_SUPABASE_ANON_KEY || procEnv.SUPABASE_ANON_KEY || undefined;
 
 const isValidUrl = (url: string | undefined): boolean => {
   if (!url) return false;
@@ -23,8 +23,8 @@ const isValidKey = (key: string | undefined): boolean => {
   return key.length > 20;
 };
 
-export const isSupabaseUrlValid = isValidUrl(supabaseUrl);
-export const isSupabaseKeyValid = isValidKey(supabaseAnonKey);
+const isSupabaseUrlValid = isValidUrl(supabaseUrl);
+const isSupabaseKeyValid = isValidKey(supabaseAnonKey);
 export const isSupabaseConfigured = isSupabaseUrlValid && isSupabaseKeyValid;
 
 // Lokalt demoläge (npm run dev + ?demo): använd en egen, tom inloggningslagring så att en

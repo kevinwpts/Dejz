@@ -7,22 +7,13 @@ import {
   Package,
   Paperclip,
 } from '@phosphor-icons/react';
-import {
-  TransactionItem,
-  FixedExpenseItem,
-  IncomeItem,
-  getTransactionTime,
-  compareTransactionsChronologically,
-} from '../HomeTab';
+import { TransactionItem, FixedExpenseItem, IncomeItem, getTransactionTime, compareTransactionsChronologically } from '../../app/models';
 import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
-import {
-  checkIsRecurringTransaction,
-  findMatchingFixedExpense,
-  findMatchingIncome,
-} from '../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
+import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurring/matching';
 import {
   PeriodInfo,
   isDateInPeriod,

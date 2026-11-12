@@ -1,19 +1,15 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
 import { AppTab } from '../../components/BottomNav';
-import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
+import { IncomeItem, FixedExpenseItem, TransactionItem } from '../models';
 import type { SettingsSubView } from '../../components/settings/subviews';
-import { BankConnection, BankAccount } from '../../services/bankService';
-import {
-  loadCachedAppState,
-  hasCachedBankData,
-  getExcludeInternalTransfers,
-  setExcludeInternalTransfers as saveExcludeInternalTransfers,
-  getMerchantAliases,
-} from '../../utils/appCache';
+import { BankConnection, BankAccount } from '../../services/bank/types';
+import { loadCachedAppState, hasCachedBankData } from '../../utils/cache/appState';
+import { getExcludeInternalTransfers, setExcludeInternalTransfers as saveExcludeInternalTransfers } from '../../utils/cache/categories';
+import { getMerchantAliases } from '../../utils/cache/merchants';
 import { FeedbackToastState } from '../components/AppToasts';
 import { useAiMerchantCleaning } from './useAiMerchantCleaning';
-import { sanitizeTransactionItem } from '../transactionMapping';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 
 /**
  * Appens tillstånd: inloggad användare, listorna (inkomster, fasta utgifter, köp), bankdata,

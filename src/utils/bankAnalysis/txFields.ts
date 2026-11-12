@@ -1,5 +1,5 @@
 // Små gemensamma hjälpare för att läsa fält ur en banktransaktion. Används i hela bankanalysen.
-import { BankTransactionItem } from '../../services/bankService';
+import { BankTransactionItem } from '../../services/bank/types';
 
 /** Transaktionens datum (bokföring → transaktion → valuta), eller '' om inget datum finns. */
 export function getTxDate(

@@ -5,7 +5,7 @@ import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
 import { BottomSheet } from '../ui/BottomSheet';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
-import { checkIsRecurringTransaction } from '../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
 import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 
 export interface HomeAccountSheetProps {

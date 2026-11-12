@@ -3,7 +3,7 @@ import { useApp } from '../AppContext';
 import React from 'react';
 import { isBankEnabledForEmail } from '../../utils/bankFeatureFlag';
 import { SetNewPasswordSheet } from '../../components/SetNewPasswordSheet';
-import { syncAllUserPreferencesToSupabase } from '../../utils/appCache';
+import { syncAllUserPreferencesToSupabase } from '../../utils/cache/preferencesSync';
 
 export const OnboardingScreen: React.FC = () => {
   const {

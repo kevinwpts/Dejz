@@ -8,11 +8,11 @@ import {
   ClockCounterClockwise,
 } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
-import type { IncomeItem } from '../../HomeTab';
+import type { IncomeItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon } from '../../CategoryIcon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import {
   isMerchantCategoryIconPreferred,
   setMerchantCategoryIconPreferred,

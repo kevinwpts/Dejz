@@ -1,0 +1,30 @@
+// knip hittar död kod: filer som ingen använder, exporter som ingen importerar och oanvända paket.
+// Körs i `npm run lint` (och därmed på GitHub vid varje push) – hittar den något stoppas bygget.
+// Vite, Vitest, Playwright och ESLint känns igen automatiskt (index.html → src/main.tsx, tester, e2e/).
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    // Serverfunktionerna på Vercel: varje fil i api/ är en egen adress. Filer som börjar med _ är hjälpfiler.
+    "api/**/*.ts",
+    "!api/**/_*.ts",
+    // Supabase-funktionerna (Deno). Deras https://-importer ignoreras av knip.
+    "supabase/functions/*/index.ts",
+    // Fristående verktyg som körs för hand med node
+    "scripts/**/*.{js,cjs,mjs,ts}"
+  ],
+  "project": [
+    // .css följer med så att `@import "tailwindcss"` räknas som användning av paketet
+    "src/**/*.{ts,tsx,css}",
+    "api/**/*.ts",
+    "supabase/functions/**/*.ts",
+    "scripts/**/*.{js,cjs,mjs,ts}",
+    "e2e/**/*.ts",
+    "*.{ts,js}"
+  ],
+  // Capacitor-tillägg som iPhone-appen laddar in vid `npx cap sync ios`, utan import i koden
+  "ignoreDependencies": ["@capacitor/ios", "@capacitor/splash-screen", "@capacitor/status-bar"],
+  // Genereras från Supabase och ska inte ändras för hand
+  "ignoreIssues": {
+    "src/types/database.ts": ["exports", "types"]
+  }
+}

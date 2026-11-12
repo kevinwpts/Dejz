@@ -5,7 +5,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { CaretLeft } from '@phosphor-icons/react';
 
-import { AccountItem } from '../HomeTab';
+import { AccountItem } from '../../app/models';
 import { StepName } from './wizard/StepName';
 import { StepArtwork } from './wizard/StepArtwork';
 import { StepAccountLink } from './wizard/StepAccountLink';

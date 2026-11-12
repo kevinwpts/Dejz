@@ -4,7 +4,7 @@ import { X, Check, CaretLeft } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import { CategoryIcon } from '../../CategoryIcon';
 import { DayOfMonthPicker } from '../../ui/DayOfMonthPicker';
-import type { IncomeItem } from '../../HomeTab';
+import type { IncomeItem } from '../../../app/models';
 import type {
   ModalSubView,
   NavigateSubView,

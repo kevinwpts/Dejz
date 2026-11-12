@@ -2,9 +2,9 @@ import { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, CaretLeft, Check } from '@phosphor-icons/react';
-import { TransactionItem } from '../../HomeTab';
+import { TransactionItem } from '../../../app/models';
 import { CategoryIcon } from '../../CategoryIcon';
-import { saveTransactionMeta } from '../../../utils/appCache';
+import { saveTransactionMeta } from '../../../utils/cache/itemMeta';
 
 export interface TxViewCategoryPickerProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";

@@ -1,6 +1,6 @@
 import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../app/models';
-import type { BankTransactionItem } from '../services/bankService';
-import { categorizeBankTransactionForApp } from './bankHistoryAnalyzer';
+import type { BankTransactionItem } from '../services/bank/types';
+import { categorizeBankTransactionForApp } from './bankAnalysis/merchantRules';
 
 /**
  * Kategorilistan i Analys-fliken: utgifter per kategori (rörligt + fasta) och inkomster per kategori.

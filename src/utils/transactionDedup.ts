@@ -1,4 +1,4 @@
-import { TransactionItem } from '../components/HomeTab';
+import { TransactionItem } from '../app/models';
 
 const GENERIC_DEDUP_TITLES = new Set([
   '',
@@ -29,12 +29,12 @@ const GENERIC_DEDUP_TITLES = new Set([
   'ovrigt',
 ]);
 
-export function isGenericDedupTitle(normTitle: string | null | undefined): boolean {
+function isGenericDedupTitle(normTitle: string | null | undefined): boolean {
   const t = (normTitle || '').toLowerCase().trim();
   return !t || GENERIC_DEDUP_TITLES.has(t);
 }
 
-export function normalizeMerchantForDedup(rawName: unknown): string {
+function normalizeMerchantForDedup(rawName: unknown): string {
   if (typeof rawName !== 'string') return '';
   const str = rawName.toLowerCase();
 

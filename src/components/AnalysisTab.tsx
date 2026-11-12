@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../app/models';
-import type { BankAccount } from '../services/bankService';
+import type { BankAccount } from '../services/bank/types';
 import { useAnalysisData } from './analysis/useAnalysisData';
 import { AnalysisPeriodNav, AnalysisPeriodSheet } from './analysis/AnalysisPeriodSelector';
 import { AnalysisDonutChart } from './analysis/AnalysisDonutChart';

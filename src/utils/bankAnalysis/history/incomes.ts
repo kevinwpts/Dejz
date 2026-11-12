@@ -1,11 +1,12 @@
 // Steg 3: lön och andra återkommande inkomster (CSN, Försäkringskassan, a-kassa, pension) och lönedag.
 // Överföringar och återbetalningar får aldrig automatiskt bli lön.
-import { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import { Frequency } from '../../../types';
 import { getLogoUrl } from '../../logo';
 import { DetectedIncomeWithEvidence } from '../types';
 import { isLikelyPersonFullName } from '../accounts';
-import { getNormalizedBankTxAmount, isInternalTransferOrMicroSavings } from '../normalization';
+import { getNormalizedBankTxAmount } from '../normalization/amount';
+import { isInternalTransferOrMicroSavings } from '../normalization/internalTransfer';
 import {
   VARIABLE_SPENDING_EXCLUSIONS,
   buildEvidenceSummary,

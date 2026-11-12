@@ -1,5 +1,5 @@
 import type { FixedExpenseItem, TransactionItem } from '../app/models';
-import type { SavingsGoalItem } from './appCache';
+import type { SavingsGoalItem } from './cache/itemMeta';
 import { getFixedShareRatio } from './budgetEngine';
 
 /**

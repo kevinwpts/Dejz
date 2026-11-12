@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react';
-import type { RefObject } from 'react';
+import { useEffect, useMemo, type RefObject } from 'react';
 import { supabase } from '../../supabaseClient';
-import type { BankConnection, BankAccount } from '../../services/bankService';
+import type { BankConnection, BankAccount } from '../../services/bank/types';
 import { isDemoMode } from '../../utils/demoUtils';
-import { getExcludeInternalTransfers, pullUserPreferences } from '../../utils/appCache';
+import { getExcludeInternalTransfers } from '../../utils/cache/categories';
+import { pullUserPreferences } from '../../utils/cache/preferencesSync';
 
 const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // Bakgrundskontroll var 15:e minut när användaren är aktiv i appen
 

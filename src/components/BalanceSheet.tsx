@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BottomSheet } from './ui/BottomSheet';
-import { ManualBalance } from '../utils/appCache';
+import { ManualBalance } from '../utils/cache/manualBalance';
 
 /**
  * "Vad har du på kontot just nu?" – utan bankkoppling är detta det säkraste sättet att få

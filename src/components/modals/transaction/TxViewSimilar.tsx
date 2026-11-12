@@ -1,8 +1,8 @@
 import { ModalSubView } from './shared';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import React from 'react';
 import { X, CaretRight, CaretLeft } from '@phosphor-icons/react';
-import { TransactionItem, getTransactionTime } from '../../HomeTab';
+import { TransactionItem, getTransactionTime } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
 

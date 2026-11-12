@@ -1,14 +1,11 @@
 import type { ModalSubView } from './shared';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import React from 'react';
 import { X, CaretRight, CaretLeft, ArrowsClockwise } from '@phosphor-icons/react';
-import { FixedExpenseItem, TransactionItem, getTransactionTime } from '../../HomeTab';
+import { FixedExpenseItem, TransactionItem, getTransactionTime } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
-import {
-  findAllMatchingFixedExpensesByMerchant,
-  isFixedExpenseAmountMatch,
-} from '../../../utils/recurring';
+import { findAllMatchingFixedExpensesByMerchant, isFixedExpenseAmountMatch } from '../../../utils/recurring/matching';
 
 export interface FixedViewSimilarProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";

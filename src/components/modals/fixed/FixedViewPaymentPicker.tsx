@@ -2,7 +2,7 @@ import type { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, Check, CaretLeft } from '@phosphor-icons/react';
-import { FixedExpenseItem } from '../../HomeTab';
+import { FixedExpenseItem } from '../../../app/models';
 import { PaymentMethodIcon } from '../../CategoryIcon';
 
 export interface FixedViewPaymentPickerProps {

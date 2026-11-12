@@ -1,5 +1,5 @@
 // Känner igen överföringar mellan användarens egna konton och mikrosparande.
-import { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import { BankRawJson } from '../../../app/models';
 import { isLikelyPersonFullName } from '../accounts';
 import { isLikelySwishTransactionText } from '../merchantRules';

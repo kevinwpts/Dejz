@@ -1,6 +1,6 @@
 // "Sedan sist" på hemfliken: räknar ut vilka nya köp som kommit sedan förra besöket
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import { checkIsRecurringTransaction } from '../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
 import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 
 export const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';

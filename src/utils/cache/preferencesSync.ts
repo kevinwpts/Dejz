@@ -1,5 +1,5 @@
 /** Samlar alla lokala inställningar och synkar dem med ditt konto i Supabase. */
-import { FixedExpenseItem, IncomeItem } from '../../components/HomeTab';
+import { FixedExpenseItem, IncomeItem } from '../../app/models';
 import { Category } from '../../types';
 import { type Database, type Json } from '../../types/database';
 import { isLocalDemoMode, supabase } from '../../supabaseClient';
@@ -12,7 +12,7 @@ import { PrefSyncMeta, emptyMeta, findDirtyKeys, hashValue, planHydrate } from '
 
 // --- Full Supabase Sync & Hydration for All User Choices ---
 // Alla användarval som sparas i profiles.user_preferences.
-export interface UserPreferences {
+interface UserPreferences {
   showAccountsOnHome: boolean;
   excludeInternalTransfers: boolean;
   excludedTransactionIds: string[];
@@ -72,7 +72,7 @@ function readProfilePreferences(profile: ProfileWithPreferences): Partial<UserPr
   ) as Partial<UserPreferences>;
 }
 
-export function collectAllUserPreferences(): Partial<UserPreferences> {
+function collectAllUserPreferences(): Partial<UserPreferences> {
   if (typeof window === 'undefined') return {};
   const safeParse = <T,>(key: string, fallback: T): T => {
     try {

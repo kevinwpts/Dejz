@@ -1,7 +1,7 @@
 // Steg 2: återkommande dragningar hos samma mottagare som inga regler känner till (t.ex. ett lokalt gym).
-import { BankTransactionItem } from '../../../services/bankService';
+import { BankTransactionItem } from '../../../services/bank/types';
 import { getLogoUrl } from '../../logo';
-import { getNormalizedBankTxAmount } from '../normalization';
+import { getNormalizedBankTxAmount } from '../normalization/amount';
 import {
   VARIABLE_SPENDING_EXCLUSIONS,
   buildEvidenceSummary,

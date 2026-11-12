@@ -6,7 +6,7 @@ import { X } from '@phosphor-icons/react';
 /*  Håll innehållet i synk med PRIVACY.md i projektroten.              */
 /* ------------------------------------------------------------------ */
 
-export const PRIVACY_UPDATED = '2026-11-11';
+const PRIVACY_UPDATED = '2026-11-11';
 export const PRIVACY_CONTACT = 'hej@dejz.se';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (

@@ -31,7 +31,7 @@ export function getSwedishDateStr(d: Date = new Date()): string {
 /**
  * Returnerar gårdagens datum i Sverige som 'YYYY-MM-DD'
  */
-export function getYesterdaySwedishDateStr(): string {
+function getYesterdaySwedishDateStr(): string {
   const d = new Date();
   d.setDate(d.getDate() - 1);
   return getSwedishDateStr(d);

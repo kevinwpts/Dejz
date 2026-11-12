@@ -2,9 +2,9 @@ import { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, Trash, CaretLeft, Check } from '@phosphor-icons/react';
-import { TransactionItem } from '../../HomeTab';
+import { TransactionItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
-import { saveTransactionMeta } from '../../../utils/appCache';
+import { saveTransactionMeta } from '../../../utils/cache/itemMeta';
 import { SwishLogo } from '../../SwishLogo';
 
 export interface TxViewSwishProps {

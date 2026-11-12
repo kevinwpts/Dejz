@@ -2,7 +2,7 @@ import type { SetStateAction } from 'react';
 import React from 'react';
 import { setMarketingConsent } from '../../utils/marketingConsent';
 import { Check } from '@phosphor-icons/react';
-import { setManualBalance } from '../../utils/appCache';
+import { setManualBalance } from '../../utils/cache/manualBalance';
 
 export interface OnboardingStepBalanceProps {
   step: 2 | 1 | 3 | 4 | 5 | 6 | 7;

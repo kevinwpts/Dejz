@@ -1,10 +1,11 @@
-// Regler för fasta utgifter, butiker, Swish och kategorier. Del av bankanalysen (tidigare utils/bankHistoryAnalyzer.ts).
-import { BankTransactionItem } from '../../services/bankService';
+// Regler för fasta utgifter, butiker, Swish och kategorier. Del av bankanalysen.
+import { BankTransactionItem } from '../../services/bank/types';
 import type { BankRawJson } from '../../app/models';
 import { SWEDISH_EXPENSE_PRESETS } from '../../data/swedishExpensePresets';
 import { Frequency } from '../../types';
 import { getLogoUrl, getLearnedBrandCategory } from '../logo';
-import { resolveMerchantAlias, resolveSwishPhoneToName } from '../appCache';
+import { resolveMerchantAlias } from '../cache/merchants';
+import { resolveSwishPhoneToName } from '../cache/swishDirectory';
 import { isInternalTransferOrMicroSavings } from './normalization/internalTransfer';
 import { inferCategoryAndMethodFromName } from './existingBudget/manualCategory';
 
@@ -591,7 +592,7 @@ export function formatSwishTitle(
   return 'Swish';
 }
 
-export const KNOWN_MERCHANT_NAMES_MAP: Record<string, string> = {
+const KNOWN_MERCHANT_NAMES_MAP: Record<string, string> = {
   systembolaget: 'Systembolaget',
   systembolage: 'Systembolaget',
   systembolag: 'Systembolaget',
@@ -720,7 +721,7 @@ export const KNOWN_MERCHANT_NAMES_MAP: Record<string, string> = {
   alfakassan: 'Alfa-kassan',
 };
 
-export const CORPORATE_SUFFIXES = new Set([
+const CORPORATE_SUFFIXES = new Set([
   'AB',
   'HB',
   'KB',
@@ -734,7 +735,7 @@ export const CORPORATE_SUFFIXES = new Set([
   'PUBL',
 ]);
 
-export const ACRONYM_BRANDS: Record<string, string> = {
+const ACRONYM_BRANDS: Record<string, string> = {
   ica: 'ICA',
   coop: 'Coop',
   ikea: 'IKEA',
@@ -756,9 +757,9 @@ export const ACRONYM_BRANDS: Record<string, string> = {
   se: 'SE',
 };
 
-export const LOWERCASE_JOINERS = new Set(['och', 'i', 'på', 'av', 'af', 'von', 'de', 'la', 'the', 'of', 'and']);
+const LOWERCASE_JOINERS = new Set(['och', 'i', 'på', 'av', 'af', 'von', 'de', 'la', 'the', 'of', 'and']);
 
-export const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {
+const SWEDISH_ASCII_PLACE_AND_WORD_MAP: Record<string, string> = {
   rydeback: 'Rydebäck',
   malmo: 'Malmö',
   goteborg: 'Göteborg',
@@ -1005,7 +1006,7 @@ export function cleanDisplayMerchantName(rawText: string | null | undefined): st
   return formattedWords.join(' ');
 }
 
-export function extractRawJsonFallbackText(rawJson: BankRawJson | null | undefined): string {
+function extractRawJsonFallbackText(rawJson: BankRawJson | null | undefined): string {
   if (!rawJson || typeof rawJson !== 'object') return '';
   const parts: string[] = [];
   if (typeof rawJson.creditor?.name === 'string') parts.push(rawJson.creditor.name);
@@ -1193,7 +1194,7 @@ export function categorizeBankTransactionForApp(
  * Mappar bankens ISO 18245 MCC-kod (Merchant Category Code) eller bank_transaction_code
  * till rätt svensk kategori när handlaren är en okänd lokal butik, restaurang eller utlandsköp.
  */
-export function resolveCategoryFromMccCode(rawJson: BankRawJson | null | undefined): string[] | null {
+function resolveCategoryFromMccCode(rawJson: BankRawJson | null | undefined): string[] | null {
   if (!rawJson || typeof rawJson !== 'object') return null;
 
   const rawMcc =
@@ -1301,7 +1302,7 @@ export function resolveCategoryFromMccCode(rawJson: BankRawJson | null | undefin
   return null;
 }
 
-export const AI_SKIP_GENERIC_PLACEHOLDERS = new Set([
+const AI_SKIP_GENERIC_PLACEHOLDERS = new Set([
   'banktransaktion',
   'kortköp',
   'kortkop',
@@ -1510,11 +1511,6 @@ export function inferTrueRecurringDayOfMonth(
 
   // Om alla dagar bara förekommit 1 gång men ligger tätt (t.ex. [23, 22]), välj den lägsta/typiska i klustret eller senaste
   return bestDay;
-}
-
-export function getYearMonthKey(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'unknown';
-  return dateStr.slice(0, 7); // YYYY-MM
 }
 
 export function inferFrequencyFromDates(datesIso: string[]): Frequency {

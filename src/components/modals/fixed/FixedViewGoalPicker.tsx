@@ -1,9 +1,9 @@
-import type { SavingsGoalItem } from '../../../utils/appCache';
+import type { SavingsGoalItem } from '../../../utils/cache/itemMeta';
 import type { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, Check, CaretLeft } from '@phosphor-icons/react';
-import { FixedExpenseItem } from '../../HomeTab';
+import { FixedExpenseItem } from '../../../app/models';
 
 export interface FixedViewGoalPickerProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";

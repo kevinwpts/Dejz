@@ -1,17 +1,9 @@
 import React, { useRef } from 'react';
 import { useRetainedValue } from './useRetainedValue';
 import { BottomSheet } from '../ui/BottomSheet';
-import {
-  TransactionItem,
-  getTransactionTime,
-  FixedExpenseItem,
-  IncomeItem,
-  AccountItem,
-} from '../HomeTab';
-import {
-  checkIsRecurringTransaction,
-  findSimilarTransactionsForTransaction,
-} from '../../utils/recurring';
+import { TransactionItem, getTransactionTime, FixedExpenseItem, IncomeItem, AccountItem } from '../../app/models';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
+import { findSimilarTransactionsForTransaction } from '../../utils/recurring/similarTransactions';
 import { TxViewEdit } from './transaction/TxViewEdit';
 import { TxViewDetails } from './transaction/TxViewDetails';
 import { TxViewSwish } from './transaction/TxViewSwish';

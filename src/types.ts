@@ -1,9 +1,7 @@
 export enum PaymentMethod {
   AUTOGIRO = 'Autogiro',
-  FAKTURA = 'Faktura',
   KORTBETALNING = 'Kortbetalning',
   SWISH = 'Swish',
-  OVRIGT = 'Övrigt',
 }
 
 export enum Frequency {
@@ -24,12 +22,6 @@ export enum PaydayType {
   LAST_DAY = 'LAST_DAY',
   TWENTY_FIFTH = 'TWENTY_FIFTH',
   CUSTOM = 'CUSTOM',
-}
-
-export enum SortOrder {
-  ALPHABETICAL = 'ALPHABETICAL',
-  DATE = 'DATE',
-  AMOUNT = 'AMOUNT',
 }
 
 export interface Category {
@@ -76,7 +68,7 @@ export interface Account {
 }
 
 /** Ett betalsätt i listan (namn, ikon, färg) */
-export interface PaymentMethodOption {
+interface PaymentMethodOption {
   name: string;
   icon: string;
   color?: string;
@@ -134,7 +126,7 @@ export interface Config {
   partnerInviteCode?: string;
 }
 
-export interface Debt {
+interface Debt {
   id: string;
   type: 'owe_me' | 'i_owe'; // owe_me = de är skyldiga mig, i_owe = jag är skyldig
   personName: string;
@@ -145,7 +137,7 @@ export interface Debt {
   settledAt?: number;
 }
 
-export type HomeWidgetId =
+type HomeWidgetId =
   | 'quick_expense'
   | 'attention_items'
   | 'monthly_pulse'
@@ -213,13 +205,6 @@ export interface FixedExpense {
   cancellationScenario?: 'already_paid' | 'one_remaining' | 'multiple_remaining';
 }
 
-export interface SavingsPotTransaction {
-  id: string;
-  amount: number;
-  timestamp: number;
-  note?: string;
-}
-
 export interface TransactionSplit {
   id: string;
   amount: number;
@@ -254,13 +239,3 @@ export interface Transaction {
   refundOfTransactionId?: string;
 }
 
-export interface AppNotification {
-  id: string;
-  type: 'variable_expense' | 'variable_income' | 'variable_savings' | 'general';
-  item: FixedExpense | Income | MonthlySaving;
-  title: string;
-  subtitle: string;
-  deductionDay: number;
-  expectedAmount: number;
-  date?: Date;
-}

@@ -2,7 +2,7 @@ import { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, CaretRight, CaretLeft } from '@phosphor-icons/react';
-import { TransactionItem } from '../../HomeTab';
+import { TransactionItem } from '../../../app/models';
 import { formatSwedishFullDate } from '../../../utils/swedishDate';
 
 export interface TxViewDatePickerProps {

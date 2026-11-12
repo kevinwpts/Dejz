@@ -1,8 +1,8 @@
 // Sparade köpdatum från reservationer (localStorage) och bankradens faktiska betaldatum.
-import type { BankTransactionItem } from '../../services/bankService';
+import type { BankTransactionItem } from '../../services/bank/types';
 import { getActualBankPaymentDateAndMeta } from '../../utils/swedishDate';
 
-export const RESERVATION_PURCHASE_DATES_KEY = 'dejz_reservation_purchase_dates_v1';
+const RESERVATION_PURCHASE_DATES_KEY = 'dejz_reservation_purchase_dates_v1';
 
 export function getSavedReservationPurchaseDates(): Record<string, string> {
   if (typeof window === 'undefined') return {};

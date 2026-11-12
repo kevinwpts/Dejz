@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { getSavingsGoals, SAVINGS_GOALS_KEY, type SavingsGoalItem } from '../appCache';
+import { getSavingsGoals, SAVINGS_GOALS_KEY, type SavingsGoalItem } from '../cache/itemMeta';
 
 /**
  * Sparmålen (ligger i localStorage). Läses vid varje rendering och när de sparas

@@ -1,9 +1,9 @@
 // Utbetalningsdagar för inkomster och när en inkomst först syntes.
 // Flyttad från App.tsx.
 import { getActualPayday } from '../utils/periodEngine';
-import { IncomeItem } from '../components/HomeTab';
+import { IncomeItem } from './models';
 import { getSwedishDateStr } from '../utils/swedishDate';
-import { syncAllUserPreferencesToSupabase } from '../utils/appCache';
+import { syncAllUserPreferencesToSupabase } from '../utils/cache/preferencesSync';
 
 export function getPayDatesForIncome(
   inc: IncomeItem,
@@ -41,7 +41,7 @@ export function getPayDatesForIncome(
 }
 
 /** Datum (YYYY-MM-DD) då en inkomst först syntes på den här enheten. Sparas i localStorage. */
-export function getIncomeFirstSeen(incomeId: string, today: string): string {
+function getIncomeFirstSeen(incomeId: string, today: string): string {
   const KEY = 'dejz_income_first_seen';
   try {
     const map: Record<string, string> = JSON.parse(localStorage.getItem(KEY) || '{}');

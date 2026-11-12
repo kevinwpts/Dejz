@@ -1,10 +1,11 @@
 // Kärnan i historikanalysen – används både i introduktionen och vid synk från Inställningar.
-import { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import { PaydayType, WeekendAdjustment } from '../../../types';
 import { getPeriodBoundaries } from '../../date';
 import { formatIsoDateStockholm } from '../../swedishDate';
 import { DetectedFixedExpenseWithEvidence, DetectedIncomeWithEvidence } from '../types';
-import { findRawBankInternalTransferIds, getNormalizedBankTxAmount } from '../normalization';
+import { findRawBankInternalTransferIds } from '../normalization/transferPairs';
+import { getNormalizedBankTxAmount } from '../normalization/amount';
 import { getTxDate, isPendingBookingStatus } from '../txFields';
 import { DetectedFixedWithTxIds } from './shared';
 import { detectRuleBasedFixedExpenses } from './ruleBasedFixed';

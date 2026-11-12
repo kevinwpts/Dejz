@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from '@phosphor-icons/react';
 import { PeriodInfo } from '../../utils/periodEngine';
-import { FixedExpenseItem, IncomeItem, TransactionItem } from '../HomeTab';
+import { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 import { BottomSheet } from '../ui/BottomSheet';
 import { EmptyClusterArtwork } from '../ui/VisualArtwork';
 

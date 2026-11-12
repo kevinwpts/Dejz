@@ -1,14 +1,13 @@
 // Kopplar reservationer (PDNG/HOLD) till sina bokförda rader så att köpdatum, tid och butik ärvs.
-import { bankService, BankTransactionItem } from '../../services/bankService';
-import {
-  categorizeBankTransactionForApp,
-  getNormalizedBankTxAmount,
-} from '../../utils/bankHistoryAnalyzer';
-import { isGenericPlaceholderMerchant } from '../../utils/appCache';
+import { bankService } from '../../services/bankService';
+import { BankTransactionItem } from '../../services/bank/types';
+import { categorizeBankTransactionForApp } from '../../utils/bankAnalysis/merchantRules';
+import { getNormalizedBankTxAmount } from '../../utils/bankAnalysis/normalization/amount';
+import { isGenericPlaceholderMerchant } from '../../utils/cache/merchants';
 import { getActualTransactionDate, saveReservationPurchaseDate } from './reservationDates';
 import { extractBankTxTime } from './bankTxTime';
 
-export interface ReservationMeta {
+interface ReservationMeta {
   purchaseDate: string;
   purchaseTime: string;
   preservedMerchant?: string;

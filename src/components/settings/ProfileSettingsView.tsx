@@ -14,7 +14,7 @@ import {
   EnvelopeSimple,
 } from '@phosphor-icons/react';
 import { supabase } from '../../supabaseClient';
-import { setPrivacyBlurMode } from '../../utils/appCache';
+import { setPrivacyBlurMode } from '../../utils/cache/itemMeta';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { appOrigin } from '../../utils/platform';

@@ -1,7 +1,7 @@
 // Delade småbitar för listflikarna (Sparade, Paket): gruppering per dag, dagsrubrik med summa och ikonerna under köpets namn.
 import React from 'react';
 import { Heart, Package, Paperclip } from '@phosphor-icons/react';
-import type { TransactionItem } from '../../../components/HomeTab';
+import type { TransactionItem } from '../../models';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
 
 /** Gruppera köp per datum, nyaste dagen först. */

@@ -1,8 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { reconcilePeriodRecurringMatches } from '../recurring';
+import { reconcilePeriodRecurringMatches } from '../recurring/periodReconcile';
 import { estimateFromAmounts, estimateVariableBill, getBillHistory } from '../variableBills';
-import type { FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
+import type { FixedExpenseItem, TransactionItem } from '../../app/models';
 
 // Regressionstester: en räkning som varierar (el) får aldrig räknas dubbelt.
 

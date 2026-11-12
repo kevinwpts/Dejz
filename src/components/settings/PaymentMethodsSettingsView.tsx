@@ -1,5 +1,5 @@
 import type { SetStateAction } from 'react';
-import type { PaymentMethodItem } from '../../utils/appCache';
+import { PaymentMethodItem, saveStoredPaymentMethods } from '../../utils/cache/categories';
 import React, { useState } from 'react';
 import {
   ArrowCounterClockwise,
@@ -9,11 +9,8 @@ import {
   Check,
   X,
 } from '@phosphor-icons/react';
-import { TransactionItem, FixedExpenseItem } from '../HomeTab';
-import {
-  saveStoredPaymentMethods,
-} from '../../utils/appCache';
-import { DEFAULT_PAYMENT_METHODS, PaymentMethodOption } from '../../constants';
+import { TransactionItem, FixedExpenseItem } from '../../app/models';
+import { DEFAULT_PAYMENT_METHODS } from '../../constants';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { PaymentMethodIcon, AVAILABLE_PAYMENT_METHOD_ICONS } from '../CategoryIcon';
@@ -34,7 +31,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
   fixedExpenses,
 }) => {
   const [pmSheetMode, setPmSheetMode] = useState<'new' | 'edit' | null>(null);
-  const [selectedPm, setSelectedPm] = useState<PaymentMethodOption | null>(null);
+  const [selectedPm, setSelectedPm] = useState<PaymentMethodItem | null>(null);
   const [pmFormName, setPmFormName] = useState('');
   const [pmFormIcon, setPmFormIcon] = useState('credit-card');
   const [pmDeleteConfirm, setPmDeleteConfirm] = useState(false);
@@ -66,7 +63,7 @@ export const PaymentMethodsSettingsView: React.FC<PaymentMethodsSettingsViewProp
         closePmSheet();
         return;
       }
-      const next: PaymentMethodOption[] = [
+      const next: PaymentMethodItem[] = [
         ...paymentMethods,
         { id: `pm-${Date.now()}`, name: trimmed, icon: pmFormIcon, isCustom: true },
       ];

@@ -3,14 +3,10 @@ import { WelcomeBetaCard } from './WelcomeBetaCard';
 import { PeriodInfo, isDateInPeriod } from '../utils/periodEngine';
 import { deduplicateTransactions } from '../utils/transactionDedup';
 import { getSwedishDateStr } from '../utils/swedishDate';
-import { reconcilePeriodRecurringMatches } from '../utils/recurring';
-import {
-  getShowBudgetBreakdownOnHome,
-  getShowAccountsOnHome,
-  markTransactionsReviewed,
-} from '../utils/appCache';
-import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
-import { compareTransactionsChronologically, doesTransactionMatchAccount } from '../app/models';
+import { reconcilePeriodRecurringMatches } from '../utils/recurring/periodReconcile';
+import { getShowBudgetBreakdownOnHome, getShowAccountsOnHome } from '../utils/cache/categories';
+import { markTransactionsReviewed } from '../utils/cache/itemMeta';
+import { type AccountItem, type FixedExpenseItem, type IncomeItem, type TransactionItem, compareTransactionsChronologically, doesTransactionMatchAccount } from '../app/models';
 import { HomeHeroCard } from './home/HomeHeroCard';
 import { HomeAccountsCard } from './home/HomeAccountsCard';
 import { HomeGoalsCard } from './home/HomeGoalsCard';
@@ -21,10 +17,6 @@ import { HomeSinceLastSheet } from './home/HomeSinceLastSheet';
 import { useSinceLastVisit } from './home/useSinceLastVisit';
 import { useHomeTimeline } from './home/useHomeTimeline';
 import { useSavingsGoals } from '../utils/hooks/useSavingsGoals';
-
-// Typer och hjälpfunktioner finns i app/models.ts – exporteras här vidare så att gamla importer fungerar
-export type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
-export { compareTransactionsChronologically, doesTransactionMatchAccount, formatFixedCancellationBadge, getTransactionTime, isFixedExpenseActiveInPeriod } from '../app/models';
 
 // Samma tomma listor varje gång – en ny [] vid varje render skulle räkna om "Sedan sist" hela tiden
 const NO_INCOMES: IncomeItem[] = [];

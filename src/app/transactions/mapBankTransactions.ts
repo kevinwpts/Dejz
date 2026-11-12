@@ -1,19 +1,15 @@
 // Banktransaktioner → appens transaktioner: reservationer, datum, tid, kategori och dubbletter.
 import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../models';
-import type { BankAccount, BankTransactionItem } from '../../services/bankService';
+import type { BankAccount, BankTransactionItem } from '../../services/bank/types';
 import { getLogoUrl } from '../../utils/logo';
-import {
-  categorizeBankTransactionForApp,
-  findRawBankInternalTransferIds,
-  formatBankAccountNumber,
-  getBankAccountTitle,
-  getNormalizedBankTxAmount,
-  isLikelyCreditCardInvoiceBankTx,
-  resolveBankTxSekAmount,
-} from '../../utils/bankHistoryAnalyzer';
+import { categorizeBankTransactionForApp } from '../../utils/bankAnalysis/merchantRules';
+import { findRawBankInternalTransferIds } from '../../utils/bankAnalysis/normalization/transferPairs';
+import { formatBankAccountNumber, getBankAccountTitle } from '../../utils/bankAnalysis/accounts';
+import { getNormalizedBankTxAmount, isLikelyCreditCardInvoiceBankTx, resolveBankTxSekAmount } from '../../utils/bankAnalysis/normalization/amount';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { getActualBankPaymentDateAndMeta, getSwedishDateStr } from '../../utils/swedishDate';
-import { isTransactionManuallyExcluded, isGenericPlaceholderMerchant } from '../../utils/appCache';
+import { isTransactionManuallyExcluded } from '../../utils/cache/categories';
+import { isGenericPlaceholderMerchant } from '../../utils/cache/merchants';
 import { getActualTransactionDate } from './reservationDates';
 import { extractBankTxTime } from './bankTxTime';
 import { sanitizeTransactionItem } from './sanitizeTransaction';

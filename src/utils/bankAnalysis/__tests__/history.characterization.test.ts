@@ -2,13 +2,10 @@
 // så att omstruktureringar av koden inte ändrar beteendet.
 import './setupTz';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import {
-  analyzeBankTransactionsForOnboarding,
-  extractOnboardingAiCandidates,
-  formatDateWithWeekday,
-  getBankTxCodeDescription,
-  runCoreBankDetection,
-} from '../history';
+import { analyzeBankTransactionsForOnboarding } from '../history/onboarding';
+import { extractOnboardingAiCandidates, formatDateWithWeekday } from '../history/aiCandidates';
+import { getBankTxCodeDescription } from '../txFields';
+import { runCoreBankDetection } from '../history/core';
 import {
   ELIN_ACCOUNTS,
   FIXED_NOW,

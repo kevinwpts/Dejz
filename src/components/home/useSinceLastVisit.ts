@@ -1,9 +1,6 @@
 // Hemflikens "Sedan sist"-blad: vilka köp som visas, när bladet öppnas och att markera dem som sedda
 import { useState, useEffect, useCallback } from 'react';
-import {
-  hasInitializedReviewedTransactions,
-  markTransactionsReviewed,
-} from '../../utils/appCache';
+import { hasInitializedReviewedTransactions, markTransactionsReviewed } from '../../utils/cache/itemMeta';
 import type { TransactionItem } from '../../app/models';
 import {
   planSinceLastVisit,

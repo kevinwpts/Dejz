@@ -1,14 +1,9 @@
 // Rena hjälpfunktioner för transaktionslistan: filtrering, sökning, gruppering per dag och etiketter (ingen React).
-import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
-import { compareTransactionsChronologically, doesTransactionMatchAccount } from '../../app/models';
+import { type AccountItem, type FixedExpenseItem, type IncomeItem, type TransactionItem, compareTransactionsChronologically, doesTransactionMatchAccount } from '../../app/models';
 import { formatSwedishDateHeading, getItemReceipts } from '../../utils/swedishDate';
-import { checkIsRecurringTransaction } from '../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
 import { isDateInPeriod, PeriodInfo } from '../../utils/periodEngine';
-import {
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-  getStoredPaymentMethods,
-} from '../../utils/appCache';
+import { getStoredExpenseCategories, getStoredIncomeCategories, getStoredPaymentMethods } from '../../utils/cache/categories';
 
 export type TxTypeTab = 'all' | 'expense' | 'income';
 export type DateRangeFilter = 'all' | 'period' | 'last30' | 'thisMonth';
@@ -52,7 +47,7 @@ export const formatKr = (amount: number) => {
   return new Intl.NumberFormat('sv-SE').format(Math.round(amount)) + ' kr';
 };
 
-export function inferPaymentMethodForTx(tx: TransactionItem): string {
+function inferPaymentMethodForTx(tx: TransactionItem): string {
   if (tx.paymentMethod) return tx.paymentMethod;
   const combined = `${tx.title || ''} ${tx.category || ''} ${tx.rawDescription || ''}`.toLowerCase();
   if (combined.includes('swish')) return 'Swish';

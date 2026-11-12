@@ -1,5 +1,5 @@
 // Plockar ut bankradens riktiga klockslag (hittar aldrig på ett eget).
-import type { BankTransactionItem } from '../../services/bankService';
+import type { BankTransactionItem } from '../../services/bank/types';
 import { formatIsoTimeStockholm } from '../../utils/swedishDate';
 
 export function extractBankTxTime(

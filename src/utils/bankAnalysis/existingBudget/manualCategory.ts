@@ -1,7 +1,8 @@
 // Gissar kategori, betalsätt och logga när användaren själv skriver ett namn (t.ex. "Netflix", "A-kassa", "ICA").
 import { SWEDISH_EXPENSE_PRESETS } from '../../../data/swedishExpensePresets';
 import { getLogoUrl, getLearnedBrandCategory } from '../../logo';
-import { getStoredPaymentMethods, normalizeCategoryToValid, resolveMerchantAlias } from '../../appCache';
+import { getStoredPaymentMethods, normalizeCategoryToValid } from '../../cache/categories';
+import { resolveMerchantAlias } from '../../cache/merchants';
 import { EVERYDAY_MERCHANT_RULES, EXTENDED_FIXED_EXPENSE_RULES } from '../merchantRules';
 import { MANUAL_KEYWORD_GROUPS } from './manualKeywordGroups';
 

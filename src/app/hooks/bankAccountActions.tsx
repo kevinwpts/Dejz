@@ -2,12 +2,8 @@ import { logError } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 import { bankService } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
-import {
-  saveCachedAppState,
-  clearCachedAppState,
-  cancelPendingPreferenceSync,
-  clearAllLocalAppData,
-} from '../../utils/appCache';
+import { saveCachedAppState, clearCachedAppState } from '../../utils/cache/appState';
+import { cancelPendingPreferenceSync, clearAllLocalAppData } from '../../utils/cache/preferencesSync';
 import { apiUrl } from '../../utils/platform';
 import type { UseAppActionsContext } from './useAppActions';
 

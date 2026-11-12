@@ -1,11 +1,11 @@
 import { logWarn } from '../../utils/logger';
 // Hook för bankdelen av onboardingen: BankID-start, återkomst från banken, kontoval och analys av banktransaktioner till förslag.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SetStateAction } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import type { FixedExpenseItem, IncomeItem } from '../../app/models';
-import { bankService, BankAspsp, BankConnection, BankAccount } from '../../services/bankService';
+import { bankService } from '../../services/bankService';
+import { BankAspsp, BankConnection, BankAccount } from '../../services/bank/types';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
-import { extractOnboardingAiCandidates } from '../../utils/bankHistoryAnalyzer';
+import { extractOnboardingAiCandidates } from '../../utils/bankAnalysis/history/aiCandidates';
 import { estimateFromAmounts } from '../../utils/variableBills';
 import { appOrigin } from '../../utils/platform';
 import {

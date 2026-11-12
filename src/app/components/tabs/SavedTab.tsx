@@ -1,7 +1,7 @@
 // Fliken "Sparade": köp som användaren markerat med ett hjärta, grupperade per dag.
 import React from 'react';
 import { useApp } from '../../AppContext';
-import { getTransactionTime } from '../../../components/HomeTab';
+import { getTransactionTime } from '../../models';
 import { ItemLogo } from '../../../components/ItemLogo';
 import { CategoryIcon } from '../../../components/CategoryIcon';
 import { EmptyClusterArtwork } from '../../../components/ui/VisualArtwork';

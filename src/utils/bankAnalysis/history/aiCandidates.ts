@@ -1,8 +1,9 @@
 // Kandidater för AI-granskning i introduktionen: både det reglerna hittat och okända dragningar/inkomster.
-import { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import { AnalyzedBankOnboardingData, DetectedFixedExpenseWithEvidence, DetectedIncomeWithEvidence } from '../types';
 import { isLikelyPersonFullName } from '../accounts';
-import { getNormalizedBankTxAmount, isInternalTransferOrMicroSavings } from '../normalization';
+import { getNormalizedBankTxAmount } from '../normalization/amount';
+import { isInternalTransferOrMicroSavings } from '../normalization/internalTransfer';
 import {
   VARIABLE_SPENDING_EXCLUSIONS,
   cleanDisplayMerchantName,

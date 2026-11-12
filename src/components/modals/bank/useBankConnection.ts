@@ -1,12 +1,7 @@
 // Flödet för att ansluta en bank: hämta banker, starta inloggning, ta emot konton och spara kontoval.
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  bankService,
-  BankAspsp,
-  BankEnvironment,
-  BankAccount,
-  BankConnection,
-} from '../../../services/bankService';
+import { bankService } from '../../../services/bankService';
+import { BankAspsp, BankEnvironment, BankAccount, BankConnection } from '../../../services/bank/types';
 import { appOrigin } from '../../../utils/platform';
 import { BankStep, buildAccountNameMap } from './shared';
 

@@ -1,10 +1,10 @@
 // Inkomstfönstret: lista med banktransaktioner som matchar inkomsten.
 import React from 'react';
 import { X, CaretRight, CaretLeft } from '@phosphor-icons/react';
-import { TransactionItem, getTransactionTime } from '../../HomeTab';
+import { TransactionItem, getTransactionTime } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { formatSwedishDateHeading } from '../../../utils/swedishDate';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import type { ModalSubView, NavigateSubView, SlideAnimClass } from './shared';
 
 export interface IncomeViewSimilarProps {

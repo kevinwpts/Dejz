@@ -2,7 +2,7 @@
  * Gör om fel från inloggningen (Supabase) till begripliga svenska texter.
  * Används av både startsidan och inloggningsrutan, så att samma fel alltid visas likadant.
  */
-export type AuthErrorKind =
+type AuthErrorKind =
   | 'network'
   | 'invalid_credentials'
   | 'email_not_confirmed'

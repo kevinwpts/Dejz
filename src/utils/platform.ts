@@ -6,7 +6,7 @@
  */
 import { Capacitor } from '@capacitor/core';
 
-export const WEB_ORIGIN = 'https://dejz.se';
+const WEB_ORIGIN = 'https://dejz.se';
 
 export function isNativeApp(): boolean {
   return Capacitor.isNativePlatform();

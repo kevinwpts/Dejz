@@ -2,12 +2,12 @@
 import React from 'react';
 import { Paperclip, FileText, Eye } from '@phosphor-icons/react';
 import { useApp } from '../../AppContext';
-import { getTransactionTime } from '../../../components/HomeTab';
+import { getTransactionTime } from '../../models';
 import { ItemLogo } from '../../../components/ItemLogo';
 import { CategoryIcon } from '../../../components/CategoryIcon';
 import { EmptyClusterArtwork } from '../../../components/ui/VisualArtwork';
 import { getItemReceipts } from '../../../utils/swedishDate';
-import { checkIsRecurringTransaction } from '../../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../../utils/recurring/checkRecurring';
 import { TxFlagIcons, formatKr } from './tabListParts';
 
 export const ReceiptsTab: React.FC = () => {

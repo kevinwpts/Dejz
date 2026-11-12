@@ -4,9 +4,7 @@ import type { OnboardingFlowProps } from '../OnboardingFlow';
 import { SWEDISH_EXPENSE_PRESETS } from '../../data/swedishExpensePresets';
 import { Plus } from '@phosphor-icons/react';
 import { getLogoUrl } from '../../utils/logo';
-import {
-  normalizeCategoryToValid,
-} from '../../utils/appCache';
+import { normalizeCategoryToValid } from '../../utils/cache/categories';
 import {
   SheetEditorState,
 } from './onboardingConfig';

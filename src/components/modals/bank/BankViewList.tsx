@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { getConnectionDaysLeft } from '../../../services/bank/connectionExpiry';
 import { Bank, MagnifyingGlass, SpinnerGap, ArrowClockwise, CaretRight } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
-import type { BankAspsp, BankConnection } from '../../../services/bankService';
+import type { BankAspsp, BankConnection } from '../../../services/bank/types';
 import { ItemLogo } from '../../ItemLogo';
 
 export interface BankViewListProps {

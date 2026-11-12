@@ -10,8 +10,8 @@ import {
   getFixedExpenseAmountInPeriod,
   PeriodMatches,
 } from '../budgetEngine';
-import { reconcilePeriodRecurringMatches } from '../recurring';
-import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../components/HomeTab';
+import { reconcilePeriodRecurringMatches } from '../recurring/periodReconcile';
+import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
 import type { PeriodInfo } from '../periodEngine';
 
 // Löneperiod 25 nov – 24 dec

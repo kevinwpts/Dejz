@@ -1,13 +1,8 @@
 // Härledda värden för köpfönstret (konto, banktext, ursprungligt namn) – rena funktioner utan state.
-import type { BankTransactionItem } from '../../../services/bankService';
-import type { AccountItem, TransactionItem } from '../../HomeTab';
-import { getTransactionMetaMap } from '../../../utils/appCache';
-import {
-  categorizeBankTransactionForApp,
-  cleanDisplayMerchantName,
-  formatSwishTitle,
-  isLikelySwishTransactionText,
-} from '../../../utils/bankHistoryAnalyzer';
+import type { BankTransactionItem } from '../../../services/bank/types';
+import type { AccountItem, TransactionItem } from '../../../app/models';
+import { getTransactionMetaMap } from '../../../utils/cache/itemMeta';
+import { categorizeBankTransactionForApp, cleanDisplayMerchantName, formatSwishTitle, isLikelySwishTransactionText } from '../../../utils/bankAnalysis/merchantRules';
 import { describeAccount, type AccountDisplayInfo } from '../../../utils/accountDisplay';
 
 export type TxAccountInfo = AccountDisplayInfo;

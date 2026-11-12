@@ -2,7 +2,7 @@ import type { SetStateAction } from 'react';
 import React from 'react';
 import { Bank, CaretDown, CaretRight } from '@phosphor-icons/react';
 import { ItemLogo } from '../ItemLogo';
-import { setShowAccountsOnHome } from '../../utils/appCache';
+import { setShowAccountsOnHome } from '../../utils/cache/categories';
 import type { AccountItem } from '../../app/models';
 
 export interface HomeAccountsCardProps {

@@ -1,9 +1,9 @@
 // Fält för en mappad bankrad: inkomstkategori (lön, Swish, återbetalning …) och bantad rawJson.
 import type { TransactionItem } from '../models';
-import type { BankTransactionItem } from '../../services/bankService';
+import type { BankTransactionItem } from '../../services/bank/types';
 import { getLogoUrl } from '../../utils/logo';
-import { cleanDisplayMerchantName, formatSwishTitle } from '../../utils/bankHistoryAnalyzer';
-import { isGenericPlaceholderMerchant } from '../../utils/appCache';
+import { cleanDisplayMerchantName, formatSwishTitle } from '../../utils/bankAnalysis/merchantRules';
+import { isGenericPlaceholderMerchant } from '../../utils/cache/merchants';
 
 export interface BankCatInfo {
   merchant: string;

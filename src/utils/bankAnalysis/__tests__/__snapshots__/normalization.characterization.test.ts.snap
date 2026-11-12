@@ -479,7 +479,7 @@ exports[`egna överföringar > isInternalTransferOrMicroSavings med konton: kort
 ]
 `;
 
-exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmount, kreditkortsfaktura, butiksretur 1`] = `
+exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmount, kreditkortsfaktura 1`] = `
 [
   {
     "amount": 0,
@@ -488,7 +488,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "NOLL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 0,
     "sek": {
       "absSekAmount": 0,
@@ -505,7 +504,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "NAN",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 0,
     "sek": {
       "absSekAmount": 0,
@@ -522,7 +520,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "KORTKÖP ICA",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -539,7 +536,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "ICA",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -556,7 +552,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "ICA",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -573,7 +568,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Reserverat belopp",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -590,7 +584,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Reserverat retur",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": true,
     "normalized": 500,
     "sek": {
       "absSekAmount": 500,
@@ -607,7 +600,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "X",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -624,7 +616,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "X",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -641,7 +632,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "X",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -658,7 +648,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Preliminär",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -500,
     "sek": {
       "absSekAmount": 500,
@@ -675,7 +664,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "LÖN",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 25000,
     "sek": {
       "absSekAmount": 25000,
@@ -692,7 +680,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Lon mars",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 25000,
     "sek": {
       "absSekAmount": 25000,
@@ -709,7 +696,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Lonely planet",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -25000,
     "sek": {
       "absSekAmount": 25000,
@@ -726,7 +712,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Swish från Anna",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -743,7 +728,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Swish till Anna",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -760,7 +744,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Swish 1231234567",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -777,7 +760,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Swish 1231234567",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -794,7 +776,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Insättning",
     "internal": true,
     "internalWithAccounts": true,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -811,7 +792,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "insatt kontant",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -828,7 +808,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Överföring från spar",
     "internal": true,
     "internalWithAccounts": true,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -845,7 +824,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Överföring till spar",
     "internal": true,
     "internalWithAccounts": true,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -862,7 +840,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Utbetalning",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -879,7 +856,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Skadeersättning",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -896,7 +872,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Försäkringskassan",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -913,7 +888,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Skatteverket",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -930,7 +904,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Utdelning",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -947,7 +920,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Ränteintäkt",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -964,7 +936,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Premie",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -981,7 +952,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "CSN återbetalning",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -998,7 +968,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Bankomat uttag",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -1015,7 +984,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -300,
     "sek": {
       "absSekAmount": 300,
@@ -1032,7 +1000,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 300,
     "sek": {
       "absSekAmount": 300,
@@ -1049,7 +1016,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 572.5,
@@ -1066,7 +1032,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 572.5,
@@ -1083,7 +1048,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 50,
@@ -1100,7 +1064,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 475,
@@ -1117,7 +1080,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 532.5,
@@ -1134,7 +1096,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 50,
@@ -1151,7 +1112,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -50,
     "sek": {
       "absSekAmount": 660.12,
@@ -1168,7 +1128,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -540,
     "sek": {
       "absSekAmount": 540,
@@ -1185,7 +1144,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -540,
     "sek": {
       "absSekAmount": 540,
@@ -1202,7 +1160,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "TRAVEL",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -540,
     "sek": {
       "absSekAmount": 540,
@@ -1219,7 +1176,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "ENTERCARD",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -900,
     "sek": {
       "absSekAmount": 900,
@@ -1236,7 +1192,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "ENTERCARD",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -700,
     "sek": {
       "absSekAmount": 700,
@@ -1253,7 +1208,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "KLARNA",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -1500,
     "sek": {
       "absSekAmount": 1500,
@@ -1270,7 +1224,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "KLARNA",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -1500,
     "sek": {
       "absSekAmount": 1500,
@@ -1287,7 +1240,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "KLARNA",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -1499,
     "sek": {
       "absSekAmount": 1499,
@@ -1304,7 +1256,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Walley faktura",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -2000,
     "sek": {
       "absSekAmount": 2000,
@@ -1321,7 +1272,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Walley",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 2000,
     "sek": {
       "absSekAmount": 2000,
@@ -1338,7 +1288,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Retur H&M",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": true,
     "normalized": 199,
     "sek": {
       "absSekAmount": 199,
@@ -1355,7 +1304,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "H&M",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": true,
     "normalized": 199,
     "sek": {
       "absSekAmount": 199,
@@ -1372,7 +1320,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "H&M",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": -199,
     "sek": {
       "absSekAmount": 199,
@@ -1389,7 +1336,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "Swish retur",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 199,
     "sek": {
       "absSekAmount": 199,
@@ -1406,7 +1352,6 @@ exports[`enskilda transaktioner > getNormalizedBankTxAmount, resolveBankTxSekAmo
     "desc": "CSN kreditering",
     "internal": false,
     "internalWithAccounts": false,
-    "merchantRefund": false,
     "normalized": 199,
     "sek": {
       "absSekAmount": 199,

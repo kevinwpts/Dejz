@@ -1,8 +1,8 @@
 // Bankinställningar: bladet "Välj konton att synka" för en bankkoppling
 import React from 'react';
 import { Check } from '@phosphor-icons/react';
-import type { BankConnection, BankAccount } from '../../../services/bankService';
-import type { getAccountMetaMap } from '../../../utils/appCache';
+import type { BankConnection, BankAccount } from '../../../services/bank/types';
+import type { getAccountMetaMap } from '../../../utils/cache/itemMeta';
 import { BottomSheet } from '../../ui/BottomSheet';
 import { stripRawAccountDigits } from '../accountText';
 import { formatKr } from './formatKr';

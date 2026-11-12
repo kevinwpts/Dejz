@@ -1,7 +1,7 @@
 // Logo search and resolution utility with comprehensive Swedish & international brand dictionary
 // Provides context-aware brand recognition (e.g., "Svea Fastigheter(Hyra)" -> sveafastigheter.se, "Maxi" -> ICA Maxi, "Fitness 24-7" -> fitness24seven.com, etc.)
 
-export const checkImage = (url: string, timeoutMs = 2500): Promise<boolean> => {
+const checkImage = (url: string, timeoutMs = 2500): Promise<boolean> => {
     return new Promise((resolve) => {
         let finished = false;
         const img = new Image();
@@ -43,14 +43,14 @@ export const checkImage = (url: string, timeoutMs = 2500): Promise<boolean> => {
 import { SWISH_SVG_DATA_URI } from '../components/SwishLogo';
 import { apiUrl } from './platform';
 
-export const SEB_SVG_DATA_URI =
+const SEB_SVG_DATA_URI =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23121519'/%3E%3Crect y='110' width='120' height='10' fill='%2360CD18'/%3E%3Cpath d='M33.5 47 C32 44.2 29.2 43 25.5 43 C20.8 43 18 45.4 18 48.8 C18 52.5 21.2 53.8 26 55.2 C31.2 56.7 34.5 58.6 34.5 63.2 C34.5 67.5 31 70.5 25.2 70.5 C21 70.5 18 69 16.2 66.2' stroke='%23FFFFFF' stroke-width='6.2' stroke-linecap='butt' fill='none'/%3E%3Cline x1='43' y1='32' x2='43' y2='82' stroke='%23FFFFFF' stroke-width='3.6'/%3E%3Cpath d='M67 43.5 H53 V70 H67 M53 56.75 H65' stroke='%23FFFFFF' stroke-width='6.2' stroke-linecap='butt' stroke-linejoin='miter' fill='none'/%3E%3Cline x1='77' y1='32' x2='77' y2='82' stroke='%23FFFFFF' stroke-width='3.6'/%3E%3Cpath d='M86 43.5 H95.5 C99.5 43.5 102 45.8 102 49.8 C102 53.8 99.5 56.2 95.5 56.2 H86 M86 56.2 H96.5 C100.8 56.2 103.2 58.8 103.2 63.1 C103.2 67.4 100.8 70 96.5 70 H86 M86 40.4 V73.1' stroke='%23FFFFFF' stroke-width='6.2' stroke-linecap='butt' stroke-linejoin='miter' fill='none'/%3E%3C/svg%3E";
 
 /**
  * Domains where img.logo.dev serves a scraped og:image photograph instead of a logo,
  * or where a specific high-resolution favicon/logo endpoint is verified superior.
  */
-export const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
+const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
     'folksam.se': 'https://www.google.com/s2/favicons?domain=https://www.folksam.se&sz=128',
     'getswish.se': SWISH_SVG_DATA_URI,
     'swish.nu': SWISH_SVG_DATA_URI,
@@ -60,7 +60,7 @@ export const DOMAIN_LOGO_OVERRIDES: Record<string, string> = {
  * Curated mapping of Swedish and international brands to official domains.
  * Sorted by length descending during lookup so specific multi-word phrases match first.
  */
-export const KNOWN_BRANDS: Record<string, string> = {
+const KNOWN_BRANDS: Record<string, string> = {
     // --- SWISH & BETALNINGAR ---
     'swish': 'getswish.se',
     'swish betalning': 'getswish.se',
@@ -1568,7 +1568,7 @@ function stripGenericModifiers(segment: string): string {
  *  - "Svea Fastigheter - Hyra" -> ["svea fastigheter"]
  *  - "Månadshyra Svea Fastigheter" -> ["svea fastigheter"]
  */
-export function extractBrandSearchCandidates(rawInput: string): string[] {
+function extractBrandSearchCandidates(rawInput: string): string[] {
     if (!rawInput || !rawInput.trim()) return [];
     const trimmed = rawInput.trim().toLowerCase();
     const candidates: string[] = [];
@@ -1639,7 +1639,7 @@ function normalizeMerchantIconPrefKey(name: string): string {
         .trim();
 }
 
-export function getPreferCategoryIconMerchants(): Set<string> {
+function getPreferCategoryIconMerchants(): Set<string> {
     if (typeof window === 'undefined') return new Set();
     try {
         const raw = localStorage.getItem(PREFER_CATEGORY_ICON_STORAGE_KEY);
@@ -1751,7 +1751,7 @@ export function saveLearnedBrandDomain(name: string, domain: string, category?: 
     }
 }
 
-export function getLearnedBrandDomain(name: string): string | undefined {
+function getLearnedBrandDomain(name: string): string | undefined {
     if (!name || name.trim().length < 2) return undefined;
     const map = loadLearnedBrandsMap();
     const candidates = extractBrandSearchCandidates(name.toLowerCase());
@@ -1775,7 +1775,7 @@ export function getLearnedBrandCategory(name: string): string | undefined {
     return undefined;
 }
 
-export function findKnownBrandDomain(name: string, category?: string): string | undefined {
+function findKnownBrandDomain(name: string, category?: string): string | undefined {
     if (!name || name.trim().length < 2) return undefined;
     const lower = name.toLowerCase().trim();
     const catLower = (category || '').toLowerCase();
@@ -1871,7 +1871,7 @@ export function findKnownBrandDomain(name: string, category?: string): string | 
  * Returns the primary high-resolution logo URL for a given domain.
  * Respects DOMAIN_LOGO_OVERRIDES and appends &fallback=404 to img.logo.dev so missing logos trigger onerror fallback.
  */
-export function getDomainPrimaryLogoUrl(domain: string): string {
+function getDomainPrimaryLogoUrl(domain: string): string {
     const cleanDomain = domain.toLowerCase().trim().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').split('/')[0];
     if (DOMAIN_LOGO_OVERRIDES[cleanDomain]) {
         return DOMAIN_LOGO_OVERRIDES[cleanDomain];
@@ -1888,7 +1888,7 @@ export function getDomainPrimaryLogoUrl(domain: string): string {
 /**
  * Returns the reliable Google 128px favicon URL for a domain (never rate-limits, works on 99.5% of Swedish domains).
  */
-export function getDomainFallbackLogoUrl(domain: string): string {
+function getDomainFallbackLogoUrl(domain: string): string {
     const cleanDomain = domain.toLowerCase().trim().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').split('/')[0];
     if (DOMAIN_LOGO_OVERRIDES[cleanDomain]) {
         return DOMAIN_LOGO_OVERRIDES[cleanDomain];
@@ -1988,7 +1988,7 @@ export function getFallbackLogoUrl(failedUrl?: string, name?: string, category?:
 /**
  * Builds ordered candidate logo URLs for a given domain.
  */
-export function buildDomainLogoUrls(domain: string): string[] {
+function buildDomainLogoUrls(domain: string): string[] {
     const cleanDomain = domain.toLowerCase().trim().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').split('/')[0];
     if (DOMAIN_LOGO_OVERRIDES[cleanDomain]) {
         return [DOMAIN_LOGO_OVERRIDES[cleanDomain]];

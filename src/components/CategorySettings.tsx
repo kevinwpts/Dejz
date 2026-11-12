@@ -10,20 +10,10 @@ import {
 import { Category } from '../types';
 import { BottomSheet } from './ui/BottomSheet';
 import { ConfirmDialog } from './ui/ConfirmDialog';
-import {
-  DEFAULT_EXPENSE_CATEGORIES,
-  DEFAULT_INCOME_CATEGORIES,
-} from '../constants';
-import {
-  getStoredExpenseCategories,
-  saveStoredExpenseCategories,
-  getStoredIncomeCategories,
-  saveStoredIncomeCategories,
-  propagateCategoryChangeInCache,
-  clearCategoryRemap,
-} from '../utils/appCache';
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
+import { getStoredExpenseCategories, saveStoredExpenseCategories, getStoredIncomeCategories, saveStoredIncomeCategories, propagateCategoryChangeInCache, clearCategoryRemap } from '../utils/cache/categories';
 import { CategoryIcon, AVAILABLE_CATEGORY_ICONS } from './CategoryIcon';
-import { TransactionItem, FixedExpenseItem, IncomeItem } from './HomeTab';
+import { TransactionItem, FixedExpenseItem, IncomeItem } from '../app/models';
 
 interface CategorySettingsProps {
   transactions?: TransactionItem[];

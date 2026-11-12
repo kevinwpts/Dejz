@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { analyzeBankTransactionsForOnboarding } from '../bankHistoryAnalyzer';
+import { analyzeBankTransactionsForOnboarding } from '../bankAnalysis/history/onboarding';
 
 // Bankanalysen i introduktionen: sex månaders påhittad historik för "Elin".
 

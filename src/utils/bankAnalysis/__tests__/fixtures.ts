@@ -1,15 +1,9 @@
 // Påhittad bankdata för karaktäriseringstesterna av bankanalysen.
 // Inga riktiga personer eller siffror – bara mönster som liknar svenska bankutdrag.
-import type { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import type { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import type { BankRawJson } from '../../../app/models';
-import {
-  Config,
-  FixedExpense,
-  Frequency,
-  Income,
-  PaydayType,
-  Transaction,
-} from '../../../types';
+
+
 
 /** Fast "nu" för testerna: torsdag 12 november 2026 kl 10:00 (svensk tid). */
 export const FIXED_NOW = new Date('2026-11-12T09:00:00.000Z');
@@ -304,55 +298,3 @@ export function gapFillHistory(): BankTransactionItem[] {
   return rows;
 }
 
-export function baseConfig(overrides: Partial<Config> = {}): Config {
-  return {
-    currency: 'kr',
-    language: 'sv',
-    payday: 25,
-    paydayType: PaydayType.TWENTY_FIFTH,
-    paydayBeforeWeekend: true,
-    categories: [
-      { id: 'mat', name: 'Mat & dryck', icon: 'ShoppingCart', color: '#000000' },
-      { id: 'uteliv', name: 'Uteliv', icon: 'Utensils', color: '#000000' },
-      { id: 'shopping', name: 'Shopping', icon: 'ShoppingBag', color: '#000000' },
-      { id: 'transport', name: 'Transport', icon: 'Car', color: '#000000' },
-      { id: 'abonnemang', name: 'Abonnemang', icon: 'Smartphone', color: '#000000' },
-      { id: 'ovrigt', name: 'Övrigt', icon: 'Package', color: '#000000' },
-    ],
-    incomeCategories: [{ id: 'lon', name: 'Lön', icon: 'Briefcase', color: '#000000' }],
-    paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro'],
-    initialSpent: 0,
-    notifications: {},
-    securityLock: false,
-    darkMode: false,
-    quickChoices: [],
-    savingsPot: 0,
-    savingsGoals: [],
-    totalSavedLifetime: 0,
-    surplusIncome: 0,
-    monthlySavings: 0,
-    includeFixedExpensesInAnalysis: true,
-    showFixedExpensesInTodayView: false,
-    showFixedExpensesInCalendar: false,
-    ...overrides,
-  };
-}
-
-export const EXISTING_FIXED: FixedExpense[] = [
-  { id: 'f1', name: 'Hyra (Heimstaden)', amount: 8950, category: 'Boende', paymentMethod: 'Autogiro', frequency: Frequency.MONTHLY, deductionDay: 27 },
-  { id: 'f2', name: 'Netflix', amount: 129, category: 'Streaming', paymentMethod: 'Kort', frequency: Frequency.MONTHLY, deductionDay: 2 },
-  { id: 'f3', name: 'SATS', amount: 649, category: 'Hälsa', paymentMethod: 'Kort', frequency: Frequency.MONTHLY, isCancelled: true },
-  { id: 'f4', name: 'Telia', amount: 297, category: 'Abonnemang', paymentMethod: 'Autogiro', frequency: Frequency.MONTHLY },
-  { id: 'f5', name: 'Espresso House', amount: 300, category: 'Uteliv', paymentMethod: 'Kort', frequency: Frequency.MONTHLY },
-];
-
-export const EXISTING_INCOMES: Income[] = [{ id: 'i1', name: 'Lön', amount: 26400, category: 'Lön', deductionDay: 25 }];
-
-/** Appens befintliga transaktioner (funktion så att tidszonen hinner sättas först). */
-export function existingAppTxs(): Transaction[] {
-  return [
-  { id: 'a1', amount: 432, category: 'Mat & dryck', tags: [], merchant: 'ICA Nara Haga', timestamp: Date.parse('2026-11-03T12:00:00'), type: 'expense' },
-  { id: 'a2', amount: 189, category: 'Uteliv', tags: ['bank_tx:t_nonexistent'], merchant: 'Max Burgers', timestamp: Date.parse('2026-11-09T12:00:00'), type: 'expense' },
-  { id: 'a3', amount: 64.5, category: 'Uteliv', tags: [], merchant: 'Espresso House', timestamp: Date.parse('2026-11-11T12:00:00'), type: 'expense', bankTransactionId: 'other_bank' },
-  ];
-}

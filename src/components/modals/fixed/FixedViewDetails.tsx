@@ -1,5 +1,5 @@
-import type { SavingsGoalItem } from '../../../utils/appCache';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { SavingsGoalItem } from '../../../utils/cache/itemMeta';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import type { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
@@ -12,7 +12,7 @@ import {
   ClockCounterClockwise,
   Scissors,
 } from '@phosphor-icons/react';
-import { FixedExpenseItem, formatFixedCancellationBadge } from '../../HomeTab';
+import { FixedExpenseItem, formatFixedCancellationBadge } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { ReceiptAttachment } from '../../../utils/swedishDate';

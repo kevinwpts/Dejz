@@ -4,7 +4,7 @@ import { X, Check, CaretRight } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon } from '../../CategoryIcon';
-import { inferCategoryAndMethodFromName } from '../../../utils/bankHistoryAnalyzer';
+import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 import type { ModalSubView, NavigateSubView, SlideAnimClass } from './shared';
 
 export interface IncomeViewEditProps {

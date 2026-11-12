@@ -65,9 +65,6 @@ const SHORT_SWEDISH_MONTHS = [
   'dec',
 ];
 
-// Flyttad till räknemotorn – exporteras här vidare så att gamla importer fungerar
-export { isFixedExpenseActiveInPeriod } from '../utils/budgetEngine';
-
 export function formatFixedCancellationBadge(exp: FixedExpenseItem): string | null {
   if (!exp.isCancelled) return null;
   if (exp.hasNoMorePayments) return 'Uppsagd · Slut';
@@ -136,7 +133,7 @@ export interface TransactionItem {
 }
 
 // Konto-/motpartsdata i Enable Banking-svaret.
-export interface BankRawJsonAccount {
+interface BankRawJsonAccount {
   iban?: string;
   other?: { identification?: string; [key: string]: unknown };
   [key: string]: unknown;

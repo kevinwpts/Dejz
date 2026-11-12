@@ -4,9 +4,8 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { PeriodInfo, isDateInPeriod } from '../../utils/periodEngine';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { formatSwedishDateHeading, getSwedishDateStr } from '../../utils/swedishDate';
-import type { reconcilePeriodRecurringMatches } from '../../utils/recurring';
-import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
-import { compareTransactionsChronologically } from '../../app/models';
+import type { reconcilePeriodRecurringMatches } from '../../utils/recurring/periodReconcile';
+import { type FixedExpenseItem, type IncomeItem, type TransactionItem, compareTransactionsChronologically } from '../../app/models';
 
 interface HomeTimelineInputs {
   transactions: TransactionItem[];

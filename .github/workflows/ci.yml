@@ -30,7 +30,8 @@ jobs:
       - name: TypeScript (0 fel)
         run: npm run typecheck
 
-      - name: Kodgranskning (lint)
+      # Designvakten, ESLint och knip (hittar död kod: oanvända filer, exporter och paket)
+      - name: Kodgranskning (lint + död kod)
         run: npm run lint
 
       - name: Tester för räknemotorn

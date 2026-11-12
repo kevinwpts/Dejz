@@ -5,15 +5,11 @@ import { OnboardingItemSheet } from './onboarding/OnboardingItemSheet';
 import { getMarketingConsent, hasPendingSignupConsent } from '../utils/marketingConsent';
 import { isDemoMode } from '../utils/demoUtils';
 import { CaretLeft } from '@phosphor-icons/react';
-import { IncomeItem, FixedExpenseItem } from './HomeTab';
-import { BankConnection, BankAccount } from '../services/bankService';
+import { IncomeItem, FixedExpenseItem } from '../app/models';
+import { BankConnection, BankAccount } from '../services/bank/types';
 import { WeekendHandlingMode } from '../utils/periodEngine';
-import {
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-  getStoredPaymentMethods,
-  syncAllUserPreferencesToSupabase,
-} from '../utils/appCache';
+import { getStoredExpenseCategories, getStoredIncomeCategories, getStoredPaymentMethods } from '../utils/cache/categories';
+import { syncAllUserPreferencesToSupabase } from '../utils/cache/preferencesSync';
 import {
   OnboardingStep,
   STEP_ORDER_MANUAL,

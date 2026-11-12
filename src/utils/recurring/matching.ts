@@ -1,10 +1,7 @@
 // Matchar en transaktion mot användarens fasta utgifter och fasta inkomster (namn, alias, belopp).
 import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../../app/models';
-import {
-  extractMerchantKeyVariants,
-  isGenericPlaceholderMerchant,
-  normalizeMerchantKey,
-} from '../appCache';
+import { extractMerchantKeyVariants, normalizeMerchantKey } from '../cache/appState';
+import { isGenericPlaceholderMerchant } from '../cache/merchants';
 import {
   extractSpecificBrandTokens,
   foldForMatching,

@@ -1,16 +1,10 @@
 // Karaktäriseringstester: låser exakt hur belopp, tecken och egna överföringar tolkas i dag.
 import './setupTz';
 import { describe, expect, test } from 'vitest';
-import {
-  APPROX_FX_RATES_TO_SEK,
-  findRawBankInternalTransferIds,
-  getNormalizedBankTxAmount,
-  isExplicitInflowTransaction,
-  isInternalTransferOrMicroSavings,
-  isLikelyCreditCardInvoiceBankTx,
-  isLikelyMerchantRefundBankTx,
-  resolveBankTxSekAmount,
-} from '../normalization';
+import { APPROX_FX_RATES_TO_SEK, getNormalizedBankTxAmount, isLikelyCreditCardInvoiceBankTx, resolveBankTxSekAmount } from '../normalization/amount';
+import { findRawBankInternalTransferIds } from '../normalization/transferPairs';
+import { isExplicitInflowTransaction } from '../normalization/inflow';
+import { isInternalTransferOrMicroSavings } from '../normalization/internalTransfer';
 import {
   ELIN_ACCOUNTS,
   TxInput,
@@ -90,7 +84,7 @@ function singleRows() {
 }
 
 describe('enskilda transaktioner', () => {
-  test('getNormalizedBankTxAmount, resolveBankTxSekAmount, kreditkortsfaktura, butiksretur', () => {
+  test('getNormalizedBankTxAmount, resolveBankTxSekAmount, kreditkortsfaktura', () => {
     expect(
       singleRows().map((r) => ({
         desc: r.description,
@@ -99,7 +93,6 @@ describe('enskilda transaktioner', () => {
         normalized: getNormalizedBankTxAmount(r),
         sek: resolveBankTxSekAmount(r),
         creditCardInvoice: isLikelyCreditCardInvoiceBankTx(r),
-        merchantRefund: isLikelyMerchantRefundBankTx(r),
         internal: isInternalTransferOrMicroSavings(r),
         internalWithAccounts: isInternalTransferOrMicroSavings(r, ELIN_ACCOUNTS),
       }))

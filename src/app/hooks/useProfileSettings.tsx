@@ -1,9 +1,8 @@
-import type { SetStateAction } from 'react';
-import { useCallback } from 'react';
+import { type SetStateAction, useCallback } from 'react';
 import { WeekendHandlingMode } from '../../utils/periodEngine';
 import { supabase } from '../../supabaseClient';
 import { dataService } from '../../services/dataService';
-import { saveCachedAppState } from '../../utils/appCache';
+import { saveCachedAppState } from '../../utils/cache/appState';
 
 export interface UseProfileSettingsContext {
   setTargetPayday: (value: SetStateAction<number>) => void;

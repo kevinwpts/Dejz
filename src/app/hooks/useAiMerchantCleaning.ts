@@ -1,26 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  IncomeItem,
-  FixedExpenseItem,
-  TransactionItem,
-  getTransactionTime,
-} from '../../components/HomeTab';
+import { IncomeItem, FixedExpenseItem, TransactionItem, getTransactionTime } from '../models';
 import { getLogoUrl, saveLearnedBrandDomain } from '../../utils/logo';
-import { needsAiMerchantCleaning } from '../../utils/bankHistoryAnalyzer';
+import { needsAiMerchantCleaning } from '../../utils/bankAnalysis/merchantRules';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import {
-  saveCachedAppState,
-  getMerchantAliases,
-  resolveMerchantAlias,
-  isGenericPlaceholderMerchant,
-  normalizeMerchantKey,
-  normalizeCategoryToValid,
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-} from '../../utils/appCache';
-import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurring';
+import { saveCachedAppState, normalizeMerchantKey } from '../../utils/cache/appState';
+import { getMerchantAliases, resolveMerchantAlias, isGenericPlaceholderMerchant } from '../../utils/cache/merchants';
+import { normalizeCategoryToValid, getStoredExpenseCategories, getStoredIncomeCategories } from '../../utils/cache/categories';
+import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurring/matching';
 
-import { sanitizeTransactionItem } from '../../app/transactionMapping';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 import { apiUrl } from '../../utils/platform';
 import { isDemoMode } from '../../utils/demoUtils';
 

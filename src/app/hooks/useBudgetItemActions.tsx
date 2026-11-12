@@ -1,28 +1,14 @@
-import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
+import { IncomeItem, FixedExpenseItem, TransactionItem } from '../models';
 import { dataService } from '../../services/dataService';
 import { Frequency } from '../../types';
 import { getLogoUrl } from '../../utils/logo';
-import {
-  saveCachedAppState,
-  dismissFixedMerchant,
-  unDismissFixedMerchant,
-  dismissIncomeMerchant,
-  unDismissIncomeMerchant,
-  markFixedIdDeleted,
-  unmarkFixedIdDeleted,
-  markIncomeIdDeleted,
-  unmarkIncomeIdDeleted,
-  saveManualFixedOverride,
-  saveManualIncomeOverride,
-  getMerchantAliases,
-  normalizeMerchantKey,
-  ensureValidUuid,
-  saveTransactionMeta,
-  syncAllUserPreferencesToSupabase,
-} from '../../utils/appCache';
-import { findAllMatchingFixedExpensesByMerchant } from '../../utils/recurring';
+import { saveCachedAppState, normalizeMerchantKey, ensureValidUuid } from '../../utils/cache/appState';
+import { dismissFixedMerchant, unDismissFixedMerchant, dismissIncomeMerchant, unDismissIncomeMerchant, markFixedIdDeleted, unmarkFixedIdDeleted, markIncomeIdDeleted, unmarkIncomeIdDeleted, saveManualFixedOverride, saveManualIncomeOverride, getMerchantAliases } from '../../utils/cache/merchants';
+import { saveTransactionMeta } from '../../utils/cache/itemMeta';
+import { syncAllUserPreferencesToSupabase } from '../../utils/cache/preferencesSync';
+import { findAllMatchingFixedExpensesByMerchant } from '../../utils/recurring/matching';
 import { useVariableBillEstimates } from './useVariableBillEstimates';
-import { sanitizeTransactionItem } from '../transactionMapping';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 import type { UseAppActionsContext } from './useAppActions';
 
 /** Inkomster och fasta utgifter: lägga till, ändra, ta bort och koppla köp. */

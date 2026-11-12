@@ -48,7 +48,7 @@ export function saveAccountMeta(accountId: string, patch: AccountMetaPatch): voi
   }
 }
 
-export interface SavingsGoalActivity {
+interface SavingsGoalActivity {
   id: string;
   text: string;
   date: string;
@@ -271,22 +271,6 @@ export function getCategoryBudgets(): Record<string, number> {
     return parsed && typeof parsed === 'object' ? parsed : {};
   } catch {
     return {};
-  }
-}
-
-export function saveCategoryBudget(category: string, amount: number | null): void {
-  if (typeof window === 'undefined' || !category) return;
-  try {
-    const map = getCategoryBudgets();
-    if (amount === null || amount <= 0 || Number.isNaN(amount)) {
-      delete map[category];
-    } else {
-      map[category] = Math.round(amount);
-    }
-    localStorage.setItem(CATEGORY_BUDGETS_KEY, JSON.stringify(map));
-    syncAllUserPreferencesToSupabase();
-  } catch {
-    // ignore
   }
 }
 

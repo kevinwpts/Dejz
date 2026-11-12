@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface DayPreset {
+interface DayPreset {
   day: number;
   label: string;
   badge?: string;

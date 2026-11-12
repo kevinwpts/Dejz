@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, WarningCircle, LockKey, CaretLeft } from '@phosphor-icons/react';
-import { BankAccount, BankConnection } from '../../services/bankService';
+import { BankAccount, BankConnection } from '../../services/bank/types';
 import { BottomSheet } from '../ui/BottomSheet';
 import { useBankConnection } from './bank/useBankConnection';
 import { BankViewList } from './bank/BankViewList';

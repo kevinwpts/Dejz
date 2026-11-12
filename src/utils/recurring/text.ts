@@ -1,6 +1,6 @@
 // Gemensamma ordlistor och texthjälpare för matchning av fasta utgifter/inkomster (lövmodul).
 import type { TransactionItem } from '../../app/models';
-import { extractMerchantKeyVariants } from '../appCache';
+import { extractMerchantKeyVariants } from '../cache/appState';
 
 const EVERYDAY_GROCERY_OR_FOOD_KEYWORDS = [
   'ica maxi',

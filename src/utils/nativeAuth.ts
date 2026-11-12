@@ -10,7 +10,7 @@ import type { Provider } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 import { appOrigin, isNativeApp } from './platform';
 
-export const NATIVE_AUTH_CALLBACK = 'se.dejz.app://auth-callback';
+const NATIVE_AUTH_CALLBACK = 'se.dejz.app://auth-callback';
 
 /** Plockar ut inloggningsuppgifterna ur återkomstlänken (kod eller tokens). */
 export function parseAuthCallback(url: string): { code?: string; accessToken?: string; refreshToken?: string; error?: string } {

@@ -13,7 +13,7 @@ import { isDemoMode } from './demoUtils';
 
 const KEY = 'dejz_first_touch_v1';
 
-export interface FirstTouch {
+interface FirstTouch {
   utm_source: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -44,7 +44,7 @@ export function captureFirstTouch(): void {
   }
 }
 
-export function getFirstTouch(): FirstTouch | null {
+function getFirstTouch(): FirstTouch | null {
   try {
     const raw = localStorage.getItem(KEY);
     return raw ? (JSON.parse(raw) as FirstTouch) : null;

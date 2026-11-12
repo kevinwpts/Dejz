@@ -1,6 +1,6 @@
 /** Snabbstart: senaste appläget sparas lokalt så att appen visar dina siffror direkt. Plus id-hjälpare. */
-import { BankConnection, BankAccount } from '../../services/bankService';
-import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
+import { BankConnection, BankAccount } from '../../services/bank/types';
+import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../app/models';
 import { WeekendHandlingMode } from '../periodEngine';
 import { GENERIC_PLACEHOLDER_MERCHANTS } from './merchants';
 
@@ -91,7 +91,7 @@ export function isValidUuid(id?: string | null): boolean {
   return Boolean(id && UUID_REGEX.test(id));
 }
 
-export function deterministicUuid(seed: string): string {
+function deterministicUuid(seed: string): string {
   const input = String(seed || 'default').toLowerCase().trim();
   let h1 = 0xdeadbeef ^ input.length;
   let h2 = 0x41c6ce57 ^ input.length;

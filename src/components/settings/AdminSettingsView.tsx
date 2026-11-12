@@ -1,7 +1,7 @@
 import type { SettingsSubView } from './subviews';
 import React from 'react';
 import { AdminPanelView } from '../AdminSimulator';
-import { TransactionItem, FixedExpenseItem } from '../HomeTab';
+import { TransactionItem, FixedExpenseItem } from '../../app/models';
 
 export interface AdminSettingsViewProps {
   onStartOnboarding?: () => void;

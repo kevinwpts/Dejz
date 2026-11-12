@@ -2,19 +2,15 @@ import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   Plus,
 } from '@phosphor-icons/react';
-import {
-  getSavingsGoals,
-  saveSavingsGoals,
-  SavingsGoalItem,
-  compressImageFileToDataUrl,
-} from '../utils/appCache';
+import { getSavingsGoals, saveSavingsGoals, SavingsGoalItem } from '../utils/cache/itemMeta';
+import { compressImageFileToDataUrl } from '../utils/cache/merchants';
 import {
   GOAL_ARTWORKS,
   getGoalArtworkTheme,
   GoalArtworkIllustration,
   EmptyClusterArtwork,
 } from './ui/VisualArtwork';
-import { TransactionItem, AccountItem } from './HomeTab';
+import { TransactionItem, AccountItem } from '../app/models';
 import { GoalDetailView } from './goals/GoalDetailView';
 import { GoalCreateWizard } from './goals/GoalCreateWizard';
 import type { CreateWizardStep } from './goals/goalHelpers';

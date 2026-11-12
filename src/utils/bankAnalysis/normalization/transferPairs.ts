@@ -1,5 +1,5 @@
 // Hittar par av överföringar: pengar ut från ett konto och samma belopp in på ett annat.
-import { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import { isLikelySwishTransactionText } from '../merchantRules';
 import {
   getBankTxCodeDescription,

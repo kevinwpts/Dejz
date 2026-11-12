@@ -4,7 +4,7 @@ import { BottomNav } from '../../components/BottomNav';
 import { AddEntrySheet, isVoiceEntrySupported } from '../../components/VoiceEntry';
 import { BalanceSheet } from '../../components/BalanceSheet';
 import { getItemReceipts } from '../../utils/swedishDate';
-import { setManualBalance } from '../../utils/appCache';
+import { setManualBalance } from '../../utils/cache/manualBalance';
 import { useSavingsGoals } from '../../utils/hooks/useSavingsGoals';
 
 export const AppSheetsAndModals: React.FC = () => {

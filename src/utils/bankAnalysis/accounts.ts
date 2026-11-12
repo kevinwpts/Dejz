@@ -1,22 +1,5 @@
-// Kontonamn och visning av bankkonton. Del av bankanalysen (tidigare utils/bankHistoryAnalyzer.ts).
-import { BankAccount } from '../../services/bankService';
-
-// ---------------------------------------------------------------------------
-// 1. ACCOUNT DISPLAY & SELECTION HELPERS
-// ---------------------------------------------------------------------------
-
-export function isLikelySavingsAccount(acc: Pick<BankAccount, 'name' | 'product' | 'custom_name'>): boolean {
-  const combined = `${acc.custom_name || ''} ${acc.product || ''} ${acc.name || ''}`.toLowerCase();
-  return (
-    combined.includes('sparkonto') ||
-    combined.includes('enkla sparkontot') ||
-    combined.includes('framtidskonto') ||
-    combined.includes('placeringskonto') ||
-    combined.includes('kapitalkonto') ||
-    combined.includes('fasträntekonto') ||
-    combined.includes('buffer')
-  );
-}
+// Kontonamn och visning av bankkonton. Del av bankanalysen.
+import { BankAccount } from '../../services/bank/types';
 
 export function formatBankAccountNumber(rawNumber: string | null | undefined): string {
   if (!rawNumber) return '';
@@ -52,7 +35,7 @@ export function isLikelyPersonFullName(rawName: string): boolean {
   return false;
 }
 
-export function isRawAccountNumberOrIban(str: string): boolean {
+function isRawAccountNumberOrIban(str: string): boolean {
   const cleaned = str.replace(/[\s-]/g, '');
   if (/^\d{6,}$/.test(cleaned)) return true;
   if (/^[A-Z]{2}\d{2}[A-Z0-9]{8,}$/i.test(cleaned)) return true;
@@ -85,25 +68,3 @@ export function getBankAccountTitle(
   return `${shortBank} · Privatkonto`;
 }
 
-export function getBankAccountShortLabel(
-  acc: Pick<BankAccount, 'name' | 'product' | 'bban' | 'iban' | 'provider_account_uid' | 'custom_name'> & {
-    aspsp_name?: string | null;
-  },
-  aspspName?: string | null
-): string {
-  const custom = (acc.custom_name || '').trim();
-  if (custom && !isRawAccountNumberOrIban(custom)) {
-    return custom;
-  }
-
-  return getBankAccountTitle(acc, aspspName);
-}
-
-export function formatCleanBalanceLabel(rawLabel: string | null | undefined): string {
-  if (!rawLabel) return 'Tillgängligt saldo';
-  // Remove technical ISO codes like (ITAV), (CLAV), (ITBD), (CLBD), (SEK)
-  const cleaned = rawLabel
-    .replace(/\s*\((ITAV|CLAV|ITBD|CLBD|XPCD|OPAV|OPBD|PRCD|VALU|INFO|SEK|EUR|DKK|NOK)\)/gi, '')
-    .trim();
-  return cleaned || 'Tillgängligt saldo';
-}

@@ -1,28 +1,20 @@
 import { useState, useMemo } from 'react';
 import { calculateCurrentPeriod, PeriodInfo, isDateInPeriod } from '../../utils/periodEngine';
-import {
-  AccountItem,
-  IncomeItem,
-  FixedExpenseItem,
-  TransactionItem,
-  compareTransactionsChronologically,
-} from '../../components/HomeTab';
-import { BankConnection, BankAccount } from '../../services/bankService';
+import { AccountItem, IncomeItem, FixedExpenseItem, TransactionItem, compareTransactionsChronologically } from '../models';
+import { BankConnection, BankAccount } from '../../services/bank/types';
 import { getLogoUrl } from '../../utils/logo';
-import { formatBankAccountNumber, getBankAccountTitle } from '../../utils/bankHistoryAnalyzer';
+import { formatBankAccountNumber, getBankAccountTitle } from '../../utils/bankAnalysis/accounts';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import {
-  isTransactionManuallyExcluded,
-  getMerchantAliases,
-  getAccountMetaMap,
-} from '../../utils/appCache';
+import { isTransactionManuallyExcluded } from '../../utils/cache/categories';
+import { getMerchantAliases } from '../../utils/cache/merchants';
+import { getAccountMetaMap } from '../../utils/cache/itemMeta';
 import {
   findInternalTransferIds,
   isInternalTransferTransaction,
 } from '../../utils/transferDetection';
-import { reconcilePeriodRecurringMatches } from '../../utils/recurring';
+import { reconcilePeriodRecurringMatches } from '../../utils/recurring/periodReconcile';
 import { useSavingsGoalCredit } from './useSavingsGoalCredit';
-import { sanitizeTransactionItem } from '../transactionMapping';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 import { getPayDatesForIncome } from '../incomeSchedule';
 import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
 

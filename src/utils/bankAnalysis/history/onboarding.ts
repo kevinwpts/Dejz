@@ -1,7 +1,7 @@
 // Bankanalysen i introduktionen: vad appen föreslår när användaren kopplar sin bank.
-import { BankAccount, BankTransactionItem } from '../../../services/bankService';
+import { BankAccount, BankTransactionItem } from '../../../services/bank/types';
 import { AnalyzedBankOnboardingData } from '../types';
-import { getNormalizedBankTxAmount } from '../normalization';
+import { getNormalizedBankTxAmount } from '../normalization/amount';
 import { getTxDate } from '../txFields';
 import { CoreBankDetectionResult, runCoreBankDetection } from './core';
 

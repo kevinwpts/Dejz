@@ -1,5 +1,5 @@
 // Gemensamma typer och hjälpfunktioner för fönstret "Anslut bank".
-import type { BankAccount } from '../../../services/bankService';
+import type { BankAccount } from '../../../services/bank/types';
 
 /** Stegen i flödet: banklista → inloggning hos banken → välj konton */
 export type BankStep = 'list' | 'authorizing' | 'select-accounts';

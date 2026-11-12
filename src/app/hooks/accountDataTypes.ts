@@ -1,8 +1,8 @@
 // Gemensamma typer för kontodatan (inloggning, laddning och bankkoppling). Delas av useAccountData och dess delhooks.
 import type React from 'react';
 import type { WeekendHandlingMode } from '../../utils/periodEngine';
-import type { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
-import type { BankConnection, BankAccount } from '../../services/bankService';
+import type { IncomeItem, FixedExpenseItem, TransactionItem } from '../models';
+import type { BankConnection, BankAccount } from '../../services/bank/types';
 
 /** Resultatet av en bankstatus-hämtning (kopplingar + konton). */
 export interface BankStatusResult {
@@ -11,7 +11,7 @@ export interface BankStatusResult {
 }
 
 /** Väntande återkomst från banken (?code=...&state=...). */
-export interface PendingBankCallback {
+interface PendingBankCallback {
   code: string;
   state: string;
   promise: Promise<void> | null;

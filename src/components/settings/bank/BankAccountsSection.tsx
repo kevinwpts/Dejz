@@ -1,7 +1,7 @@
 // Bankinställningar: kontolistan där varje konto öppnar kontoinställningar/detaljer
 import React from 'react';
 import { ArrowClockwise, CaretRight } from '@phosphor-icons/react';
-import type { BankAccount } from '../../../services/bankService';
+import type { BankAccount } from '../../../services/bank/types';
 import type { AccountItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { stripRawAccountDigits } from '../accountText';

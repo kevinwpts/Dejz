@@ -1,8 +1,8 @@
-import type { RecurringMatchResult } from '../../../utils/recurring';
+import type { RecurringMatchResult } from '../../../utils/recurring/checkRecurring';
 import { ModalSubView } from './shared';
 import React from 'react';
 import { X, CaretLeft, Check, Plus } from '@phosphor-icons/react';
-import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../HomeTab';
+import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 
 export interface TxViewLinkFixedPickerProps {

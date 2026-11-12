@@ -25,7 +25,7 @@ const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 …) … Version/27.2 Mobile … Safari" → { device: "iPhone", os: "iOS 27.2", browser: "Safari" } */
-export function describeUserAgent(ua: string) {
+function describeUserAgent(ua: string) {
   const s = ua || '';
   let device = 'Okänd enhet';
   let os = '';

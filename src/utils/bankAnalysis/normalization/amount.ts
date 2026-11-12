@@ -1,5 +1,5 @@
 // Belopp och tecken: vad som är utgift/inkomst och vad det blir i kronor.
-import { BankTransactionItem } from '../../../services/bankService';
+import { BankTransactionItem } from '../../../services/bank/types';
 import { BankRawJson } from '../../../app/models';
 import { getTxText, includesAny } from '../txFields';
 import { EXPLICIT_REFUND_WORDS, RESERVATION_WORDS, isExplicitInflowTransaction } from './inflow';
@@ -159,29 +159,4 @@ export function isLikelyCreditCardInvoiceBankTx(tx: BankTransactionItem): boolea
   const text = getTxText(tx);
   if (includesAny(text, CREDIT_CARD_INVOICE_WORDS)) return true;
   return text.includes('klarna') && absAmt >= 1500 && !tx.raw_json?.card_transaction;
-}
-
-/** Inkomster som aldrig är butiksreturer. */
-const NOT_REFUND_WORDS = [
-  'lön',
-  'salary',
-  'csn',
-  'försäkringskassan',
-  'forsakringskassan',
-  'pension',
-  'barnbidrag',
-  'skatteverket',
-  'swish',
-];
-
-const MERCHANT_REFUND_WORDS = [...EXPLICIT_REFUND_WORDS, 'återbetalning', 'aterbetalning'];
-
-/** Sant om pengarna in är en retur från en butik (inte lön, bidrag eller Swish). */
-export function isLikelyMerchantRefundBankTx(tx: BankTransactionItem): boolean {
-  if (getNormalizedBankTxAmount(tx) <= 0) return false;
-  const text = getTxText(tx);
-  if (includesAny(text, NOT_REFUND_WORDS)) return false;
-  if (includesAny(text, MERCHANT_REFUND_WORDS)) return true;
-  // Positivt kortköp hos en butik är en kortretur
-  return Boolean(tx.raw_json?.card_transaction && tx.credit_debit_indicator === 'CRDT');
 }

@@ -17,11 +17,7 @@ import {
   Tag,
   Wallet,
 } from '@phosphor-icons/react';
-import {
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-  getStoredPaymentMethods,
-} from '../utils/appCache';
+import { getStoredExpenseCategories, getStoredIncomeCategories, getStoredPaymentMethods } from '../utils/cache/categories';
 import {
   FLUENT_EMOJI_FALLBACK_KEY,
   FLUENT_EMOJI_SVGS,
@@ -387,7 +383,7 @@ export function isKnownIconId(val: string | undefined | null): boolean {
   return Boolean(ICON_ID_TO_FLUENT_KEY[clean]);
 }
 
-export function resolveCategoryIconId(category?: string, explicitIconId?: string): string {
+function resolveCategoryIconId(category?: string, explicitIconId?: string): string {
   if (explicitIconId) {
     const cleanExplicit = explicitIconId.trim().toLowerCase();
     if (ICON_ID_TO_FLUENT_KEY[cleanExplicit]) {
@@ -547,7 +543,7 @@ export function resolveCategoryIconId(category?: string, explicitIconId?: string
   return 'tag';
 }
 
-export function resolvePaymentMethodIconId(method?: string, explicitIconId?: string): string {
+function resolvePaymentMethodIconId(method?: string, explicitIconId?: string): string {
   if (explicitIconId) {
     const cleanExplicit = explicitIconId.trim().toLowerCase();
     if (ICON_ID_TO_FLUENT_KEY[cleanExplicit]) {
@@ -658,7 +654,7 @@ export function resolveCategoryColor(category?: string, explicitColor?: string):
   }
 }
 
-export function resolveFluentEmojiKey(iconId?: string): FluentEmojiKey {
+function resolveFluentEmojiKey(iconId?: string): FluentEmojiKey {
   if (!iconId) return FLUENT_EMOJI_FALLBACK_KEY;
   const clean = iconId.trim().toLowerCase();
   return ICON_ID_TO_FLUENT_KEY[clean] || FLUENT_EMOJI_FALLBACK_KEY;
@@ -683,7 +679,7 @@ interface FluentEmojiSvgProps {
   className?: string;
 }
 
-export const FluentEmojiSvg: React.FC<FluentEmojiSvgProps> = ({
+const FluentEmojiSvg: React.FC<FluentEmojiSvgProps> = ({
   fluentKey,
   size,
   className = '',

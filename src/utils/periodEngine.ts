@@ -80,7 +80,7 @@ function getEasterSunday(year: number): Date {
  * Returnerar namnet på svensk röd dag eller bankfri afton (julafton, midsommarafton, nyårsafton),
  * eller null om datumet är en vanlig helgfri vardag.
  */
-export function getSwedishHolidayName(date: Date): string | null {
+function getSwedishHolidayName(date: Date): string | null {
   const y = date.getFullYear();
   const m = date.getMonth(); // 0-11
   const d = date.getDate();
@@ -121,7 +121,7 @@ export function getSwedishHolidayName(date: Date): string | null {
 /**
  * Kontrollerar om ett datum är lördag, söndag eller svensk bankfri helgdag/afton.
  */
-export function isSwedishNonBankingDay(date: Date): boolean {
+function isSwedishNonBankingDay(date: Date): boolean {
   const dow = date.getDay();
   if (dow === 0 || dow === 6) return true;
   return getSwedishHolidayName(date) !== null;

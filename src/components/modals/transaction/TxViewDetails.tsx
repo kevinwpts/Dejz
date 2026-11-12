@@ -1,4 +1,5 @@
-import type { RecurringMatchResult, SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { RecurringMatchResult } from '../../../utils/recurring/checkRecurring';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import { ModalSubView, getDefaultPaymentMethodForTx } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
@@ -16,15 +17,10 @@ import {
   Plus,
 } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
-import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../HomeTab';
+import { TransactionItem, FixedExpenseItem, IncomeItem } from '../../../app/models';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
-import { formatSwedishDateHeading, ReceiptAttachment } from '../../../utils/swedishDate';
-import {
-  getSavingsGoals,
-  saveSavingsGoals,
-  SavingsGoalItem,
-} from '../../../utils/appCache';
-import { formatIsoDateStockholm } from '../../../utils/swedishDate';
+import { formatSwedishDateHeading, ReceiptAttachment, formatIsoDateStockholm } from '../../../utils/swedishDate';
+import { getSavingsGoals, saveSavingsGoals, SavingsGoalItem } from '../../../utils/cache/itemMeta';
 
 
 import type { AccountDisplayInfo } from '../../../utils/accountDisplay';

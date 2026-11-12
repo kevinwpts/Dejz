@@ -1,13 +1,11 @@
 import { useEffect } from 'react';
 import { useLiveSync } from './useLiveSync';
-import { sanitizeTransactionItem } from '../../app/transactionMapping';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 import type { AccountDataContext } from './accountDataTypes';
 import { useBankStatusRefresh } from './useBankStatusRefresh';
 import { useUserDataHydration } from './useUserDataHydration';
 import { useBankSync } from './useBankSync';
 import { useAuthSession } from './useAuthSession';
-
-export type { AccountDataContext } from './accountDataTypes';
 
 /**
  * Inloggning, laddning av användarens data från Supabase och bankkopplingen

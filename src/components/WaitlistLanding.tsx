@@ -6,8 +6,6 @@ import {
 import { PrivacyPolicySheet } from './PrivacyPolicy';
 import { BrandLogo } from './BrandLogo';
 
-export const DEJZ_SLOGAN = 'Se vad du har kvar till nästa lön.';
-
 /* ------------------------------------------------------------------ */
 /*  Väntelista – startsida för besökare som inte är inloggade          */
 /* ------------------------------------------------------------------ */

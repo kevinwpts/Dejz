@@ -2,7 +2,7 @@
 import React from 'react';
 import { ArrowSquareOut } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
-import type { BankAspsp } from '../../../services/bankService';
+import type { BankAspsp } from '../../../services/bank/types';
 import { ItemLogo } from '../../ItemLogo';
 
 export interface BankViewAuthorizingProps {

@@ -2,7 +2,7 @@ import type { ModalSubView } from './shared';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { X, Check, CaretRight, CaretLeft } from '@phosphor-icons/react';
-import { FixedExpenseItem } from '../../HomeTab';
+import { FixedExpenseItem } from '../../../app/models';
 import { getSwedishDateStr } from '../../../utils/swedishDate';
 
 export interface FixedViewCancelPickerProps {

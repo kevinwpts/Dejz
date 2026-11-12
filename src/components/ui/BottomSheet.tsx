@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Check } from '@phosphor-icons/react';
+import { X } from '@phosphor-icons/react';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -20,56 +20,6 @@ interface BottomSheetProps {
   disablePadding?: boolean;
   fullScreen?: boolean;
 }
-
-export interface BottomSheetOptionProps {
-  label: string;
-  subtitle?: string;
-  icon?: React.ReactNode;
-  badge?: string;
-  isSelected?: boolean;
-  onClick: () => void;
-}
-
-export const BottomSheetOption: React.FC<BottomSheetOptionProps> = ({
-  label,
-  subtitle,
-  icon,
-  badge,
-  isSelected,
-  onClick,
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`w-full px-3.5 py-3 rounded-2xl flex items-center justify-between gap-3 text-left transition-all cursor-pointer ${
-      isSelected
-        ? 'bg-[var(--surface-raised)] text-[var(--text-primary)]'
-        : 'hover:bg-[var(--surface-hover)] text-[var(--text-primary)]'
-    }`}
-  >
-    <div className="flex items-center gap-3 min-w-0 flex-1">
-      {icon && <div className="shrink-0 text-[var(--text-secondary)]">{icon}</div>}
-      <div className="min-w-0 flex-1">
-        <span className={`text-callout sm:text-subhead block truncate ${isSelected ? 'font-semibold' : 'font-medium'}`}>
-          {label}
-        </span>
-        {subtitle && (
-          <span className="text-meta text-[var(--text-muted)] block truncate mt-0.5">
-            {subtitle}
-          </span>
-        )}
-      </div>
-    </div>
-    <div className="flex items-center gap-2 shrink-0">
-      {badge && (
-        <span className="text-xs font-display font-semibold text-[var(--text-muted)] tabular-nums">
-          {badge}
-        </span>
-      )}
-      {isSelected && <Check size={14} weight="bold" className="text-[var(--text-primary)]" />}
-    </div>
-  </button>
-);
 
 let openSheetsCount = 0;
 

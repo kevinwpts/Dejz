@@ -1,23 +1,11 @@
 // Slår ihop fasta utgifter och inkomster från databas, telefon och bankanalys till en lista.
 // Flyttad från App.tsx.
-import { IncomeItem, FixedExpenseItem } from '../components/HomeTab';
+import { IncomeItem, FixedExpenseItem } from './models';
 import { getLogoUrl } from '../utils/logo';
-import {
-  DetectedFixedExpenseWithEvidence,
-  DetectedIncomeWithEvidence,
-} from '../utils/bankHistoryAnalyzer';
-import {
-  getDismissedFixedMerchants,
-  getDismissedIncomeMerchants,
-  getDeletedFixedIds,
-  getDeletedIncomeIds,
-  getManualFixedOverrides,
-  getManualIncomeOverrides,
-  normalizeMerchantKey,
-  ensureValidUuid,
-  isValidUuid,
-  normalizeCategoryToValid,
-} from '../utils/appCache';
+import { DetectedFixedExpenseWithEvidence, DetectedIncomeWithEvidence } from '../utils/bankAnalysis/types';
+import { getDismissedFixedMerchants, getDismissedIncomeMerchants, getDeletedFixedIds, getDeletedIncomeIds, getManualFixedOverrides, getManualIncomeOverrides } from '../utils/cache/merchants';
+import { normalizeMerchantKey, ensureValidUuid, isValidUuid } from '../utils/cache/appState';
+import { normalizeCategoryToValid } from '../utils/cache/categories';
 
 // Rad från databasen (eller demolagringen) – fält kan saknas i äldre data.
 type DbFixedExpenseRow = Partial<FixedExpenseItem> & { deductionDay?: number };

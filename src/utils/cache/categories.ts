@@ -143,7 +143,7 @@ export function getCategoryRemap(): Record<string, string> {
   }
 }
 
-export function saveCategoryRemapRule(oldName: string, newName: string): void {
+function saveCategoryRemapRule(oldName: string, newName: string): void {
   if (typeof window === 'undefined' || !oldName || !newName) return;
   try {
     const map = getCategoryRemap();

@@ -9,17 +9,15 @@ import {
 import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../../app/models';
 import { resolveCategoryColor } from '../CategoryIcon';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import { isTransactionManuallyExcluded } from '../../utils/appCache';
-import {
-  checkIsRecurringTransaction,
-  reconcilePeriodRecurringMatches,
-} from '../../utils/recurring';
+import { isTransactionManuallyExcluded } from '../../utils/cache/categories';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
+import { reconcilePeriodRecurringMatches } from '../../utils/recurring/periodReconcile';
 import { getFixedExpenseAmountInPeriod } from '../../utils/budgetEngine';
 import {
   findInternalTransferIds,
   isInternalTransferTransaction,
 } from '../../utils/transferDetection';
-import type { BankAccount } from '../../services/bankService';
+import type { BankAccount } from '../../services/bank/types';
 import { buildCategoryBreakdown } from '../../utils/categoryBreakdown';
 
 export interface AnalysisDataInput {

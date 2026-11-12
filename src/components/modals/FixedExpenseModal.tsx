@@ -4,18 +4,15 @@ import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
 import { useSavingsGoals } from '../../utils/hooks/useSavingsGoals';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, CaretLeft } from '@phosphor-icons/react';
-import { FixedExpenseItem, AccountItem, TransactionItem } from '../HomeTab';
+import { FixedExpenseItem, AccountItem, TransactionItem } from '../../app/models';
 import { BottomSheet } from '../ui/BottomSheet';
 import { DayOfMonthPicker } from '../ui/DayOfMonthPicker';
 import { getItemReceipts, ReceiptAttachment } from '../../utils/swedishDate';
-import { findMatchingFixedExpense, findTransactionsForFixedExpense } from '../../utils/recurring';
-import {
-  getStoredExpenseCategories,
-  getStoredPaymentMethods,
-  normalizeCategoryToValid,
-  compressReceiptFiles,
-} from '../../utils/appCache';
-import { inferCategoryAndMethodFromName } from '../../utils/bankHistoryAnalyzer';
+import { findMatchingFixedExpense } from '../../utils/recurring/matching';
+import { findTransactionsForFixedExpense } from '../../utils/recurring/similarTransactions';
+import { getStoredExpenseCategories, getStoredPaymentMethods, normalizeCategoryToValid } from '../../utils/cache/categories';
+import { compressReceiptFiles } from '../../utils/cache/merchants';
+import { inferCategoryAndMethodFromName } from '../../utils/bankAnalysis/existingBudget/manualCategory';
 import { fetchLogoForName, getLearnedBrandCategory } from '../../utils/logo';
 import { FixedViewDetails } from './fixed/FixedViewDetails';
 import { FixedViewEdit } from './fixed/FixedViewEdit';

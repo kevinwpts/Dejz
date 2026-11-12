@@ -24,7 +24,7 @@ function writeJsonStorage<T>(key: string, value: T): void {
   }
 }
 
-export function getAccountOverlayMap(): Record<string, Partial<BankAccount>> {
+function getAccountOverlayMap(): Record<string, Partial<BankAccount>> {
   return readJsonStorage<Record<string, Partial<BankAccount>>>(LOCAL_ACCOUNT_OVERLAY_KEY, {});
 }
 
@@ -46,7 +46,7 @@ export function mergeAccountWithOverlay(acc: BankAccount): BankAccount {
   return merged;
 }
 
-export function getTxReconciliationOverlayMap(): Record<string, Partial<BankTransactionItem>> {
+function getTxReconciliationOverlayMap(): Record<string, Partial<BankTransactionItem>> {
   return readJsonStorage<Record<string, Partial<BankTransactionItem>>>(
     LOCAL_TX_RECONCILIATION_OVERLAY_KEY,
     {}

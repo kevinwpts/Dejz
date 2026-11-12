@@ -2,7 +2,7 @@
 import React from 'react';
 import { useApp } from '../../AppContext';
 import { HomeTab } from '../../../components/HomeTab';
-import { saveAccountMeta } from '../../../utils/appCache';
+import { saveAccountMeta } from '../../../utils/cache/itemMeta';
 
 export const HomeTabContent: React.FC = () => {
   const {

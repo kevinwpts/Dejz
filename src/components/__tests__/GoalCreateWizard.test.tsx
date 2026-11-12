@@ -5,7 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SavingsGoalsView } from '../SavingsGoalsView';
-import { getSavingsGoals, saveSavingsGoals, type SavingsGoalItem } from '../../utils/appCache';
+import { getSavingsGoals, saveSavingsGoals, type SavingsGoalItem } from '../../utils/cache/itemMeta';
 import { makeAccount, normalizeText } from '../../test/fixtures';
 
 /** Guidens fråga överst (den sista rubriken – listan bakom har egna rubriker) */

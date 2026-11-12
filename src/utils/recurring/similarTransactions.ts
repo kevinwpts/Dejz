@@ -1,11 +1,7 @@
 // Hittar liknande transaktioner (samma butik, kedja, fasta utgift eller inkomst) och summerar dem.
-import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../../app/models';
-import { compareTransactionsChronologically } from '../../app/models';
-import {
-  extractMerchantKeyVariants,
-  isGenericPlaceholderMerchant,
-  normalizeMerchantKey,
-} from '../appCache';
+import { type TransactionItem, type FixedExpenseItem, type IncomeItem, compareTransactionsChronologically } from '../../app/models';
+import { extractMerchantKeyVariants, normalizeMerchantKey } from '../cache/appState';
+import { isGenericPlaceholderMerchant } from '../cache/merchants';
 import { GENERIC_WRAPPER_WORDS } from './text';
 import { findMatchingFixedExpense, findMatchingIncome } from './matching';
 import { detectMerchantChain } from './merchantChains';

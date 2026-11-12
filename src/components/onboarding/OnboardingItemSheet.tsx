@@ -1,9 +1,7 @@
 import type { FormEvent, SetStateAction } from 'react';
 import React from 'react';
 import { CaretLeft, CaretRight, Trash, Check, X } from '@phosphor-icons/react';
-import {
-  inferCategoryAndMethodFromName,
-} from '../../utils/bankHistoryAnalyzer';
+import { inferCategoryAndMethodFromName } from '../../utils/bankAnalysis/existingBudget/manualCategory';
 
 
 import { ItemLogo } from '../ItemLogo';

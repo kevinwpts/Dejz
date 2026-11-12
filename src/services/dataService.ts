@@ -11,9 +11,6 @@ import { accountsData } from './data/accounts';
 import { feedbackData } from './data/feedback';
 import { maintenanceData } from './data/maintenance';
 
-export { hasValidSavedCategoryBudgets } from './data/settings';
-export type { StoredSettings } from './data/settings';
-
 export const dataService = {
   ...settingsData,
   ...transactionsData,

@@ -1,5 +1,4 @@
 import { Config, Income, FixedExpense, Transaction, Account, PaydayType, Frequency, PaymentMethod } from '../types';
-import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 
 export function seedDemoData() {
   if (!localStorage.getItem('cookie_consent')) {
@@ -878,98 +877,6 @@ export function seedDemoData() {
       id: 'demo-user',
       email: 'demo@dejz.se',
       user_metadata: { full_name: 'Elin Lindqvist', avatar_url: '/demo/avatar.jpg' },
-      app_metadata: {},
-      aud: 'authenticated',
-      created_at: new Date().toISOString()
-    }
-  };
-
-  localStorage.setItem('dejz_demo_session', JSON.stringify(mockSession));
-  return mockSession;
-}
-
-export function createFreshTestAccount(preferredLang?: string) {
-  if (!localStorage.getItem('cookie_consent')) {
-    localStorage.setItem('cookie_consent', 'demo_accepted');
-  }
-
-  try {
-    localStorage.removeItem('dejz_onboarding_completed_demo-user');
-    localStorage.removeItem('dejz_onboarding_skipped_demo-user');
-    localStorage.removeItem('dejz_onboarding_completed');
-    localStorage.removeItem('dejz_onboarding_skipped');
-    localStorage.removeItem('dejz_has_saved_initial_budget');
-    localStorage.removeItem('dejz_has_saved_initial_budget_demo-user');
-    localStorage.removeItem('dejz_has_saved_budget');
-    localStorage.removeItem('user_settings_demo-user');
-  } catch (_e) {
-    // ignore
-  }
-
-  const lang = preferredLang || localStorage.getItem('app_language') || 'sv';
-
-  const defaultFreshConfig: Config = {
-    currency: 'kr',
-    language: lang,
-    payday: 25,
-    paydayType: PaydayType.TWENTY_FIFTH,
-    paydayBeforeWeekend: true,
-    categories: DEFAULT_EXPENSE_CATEGORIES.map((c) => ({ ...c, budget: undefined })),
-    incomeCategories: DEFAULT_INCOME_CATEGORIES,
-    paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
-    initialSpent: 0,
-    notifications: {
-      salaryDayReminder: true,
-      weeklySummary: true,
-    },
-    securityLock: false,
-    darkMode: false,
-    themeMode: 'light',
-    quickChoices: [],
-    savingsPot: 0,
-    savingsGoals: [],
-    totalSavedLifetime: 0,
-    surplusIncome: 0,
-    monthlySavings: 0,
-    monthlySavingsItems: [],
-    appIconTheme: 'accent',
-    includeFixedExpensesInAnalysis: true,
-    showFixedExpensesInTodayView: false,
-    showFixedExpensesInCalendar: false,
-    showFixedExpensesInHistory: false,
-    hasSavedInitialBudget: false,
-  };
-
-  const freshProfile = {
-    id: 'demo-user',
-    email: 'test@example.com',
-    full_name: '',
-    currency: 'kr',
-    language: lang,
-    onboarding_completed: false,
-    has_saved_initial_budget: false,
-    categories: defaultFreshConfig.categories,
-    income_categories: defaultFreshConfig.incomeCategories,
-    payment_methods: defaultFreshConfig.paymentMethods,
-  };
-
-  localStorage.setItem('demo_settings', JSON.stringify(defaultFreshConfig));
-  localStorage.setItem('demo_incomes', JSON.stringify([]));
-  localStorage.setItem('demo_fixed', JSON.stringify([]));
-  localStorage.setItem('demo_transactions', JSON.stringify([]));
-  localStorage.setItem('demo_accounts', JSON.stringify([]));
-  localStorage.setItem('demo_profile', JSON.stringify(freshProfile));
-  localStorage.setItem('demo_data_version', 'v_fresh_test_account');
-
-  const mockSession = {
-    access_token: 'demo-token',
-    refresh_token: 'demo-refresh',
-    expires_in: 3600,
-    token_type: 'bearer',
-    user: {
-      id: 'demo-user',
-      email: 'test@example.com',
-      user_metadata: {},
       app_metadata: {},
       aud: 'authenticated',
       created_at: new Date().toISOString()

@@ -1,9 +1,9 @@
 import type { RefObject, SetStateAction } from 'react';
 import { PeriodInfo, WeekendHandlingMode } from '../../utils/periodEngine';
 import { AppTab } from '../../components/BottomNav';
-import { IncomeItem, FixedExpenseItem, TransactionItem } from '../../components/HomeTab';
+import { IncomeItem, FixedExpenseItem, TransactionItem } from '../models';
 import type { SettingsSubView } from '../../components/settings/subviews';
-import { BankConnection, BankAccount } from '../../services/bankService';
+import { BankConnection, BankAccount } from '../../services/bank/types';
 
 
 import { FeedbackToastState } from '../components/AppToasts';

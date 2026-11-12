@@ -2,7 +2,7 @@
 import React from 'react';
 import { SpinnerGap, Check } from '@phosphor-icons/react';
 import type { SetStateAction } from 'react';
-import type { BankAccount, BankConnection } from '../../../services/bankService';
+import type { BankAccount, BankConnection } from '../../../services/bank/types';
 import { formatBankKr, getCleanAccountTypeLabel } from './shared';
 
 export interface BankViewSelectAccountsProps {

@@ -1,12 +1,7 @@
 // Karaktäriseringstester: låser exakt vad sammanslagningen för befintliga användare ger i dag.
 import './setupTz';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import {
-  inferCategoryAndMethodFromName,
-  isSameFixedExpenseName,
-  matchesKeywordSmart,
-  normalizePaymentMethodName,
-} from '../existingBudget';
+import { inferCategoryAndMethodFromName, matchesKeywordSmart, normalizePaymentMethodName } from '../existingBudget/manualCategory';
 import { FIXED_NOW } from './fixtures';
 
 beforeAll(() => {
@@ -56,13 +51,5 @@ describe('små hjälpfunktioner', () => {
       ['a.b', 'a.b'], ['a+b', 'a+'], ['netflix.com', 'netflix'], ['dn.se', 'dn'], ['ica', 'ica '],
     ];
     expect(cases.map(([t, k]) => [t, k, matchesKeywordSmart(t, k)])).toMatchSnapshot();
-  });
-
-  test('isSameFixedExpenseName', () => {
-    const cases: Array<[string | null | undefined, string | null | undefined]> = [
-      ['Netflix', 'netflix'], ['Hyra (Heimstaden)', 'Heimstaden'], ['Hyra', 'Boende'], ['Fastighetsavgift', 'Hyra (X)'],
-      ['Telia', 'Tele2'], [null, 'x'], ['x', undefined], ['', ''], ['  Spotify ', 'Spotify Premium'],
-    ];
-    expect(cases.map(([a, b]) => [a, b, isSameFixedExpenseName(a, b)])).toMatchSnapshot();
   });
 });

@@ -2,11 +2,7 @@ import { LandingPage } from '../lazyScreens';
 import { useApp } from '../AppContext';
 import React from 'react';
 import { supabase } from '../../supabaseClient';
-import {
-  syncAllUserPreferencesToSupabase,
-  cancelPendingPreferenceSync,
-  clearAllLocalAppData,
-} from '../../utils/appCache';
+import { syncAllUserPreferencesToSupabase, cancelPendingPreferenceSync, clearAllLocalAppData } from '../../utils/cache/preferencesSync';
 
 export const LandingScreen: React.FC = () => {
   const {

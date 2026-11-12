@@ -19,7 +19,7 @@ const db = supabase;
 type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
-export function hasValidSavedCategoryBudgets(cats: unknown): boolean {
+function hasValidSavedCategoryBudgets(cats: unknown): boolean {
   if (!Array.isArray(cats) || cats.length === 0) return false;
   const budgetVals = cats.map((c: { budget?: unknown } | null) => Number(c?.budget) || 0);
   const totalSum = budgetVals.reduce((a: number, b: number) => a + b, 0);

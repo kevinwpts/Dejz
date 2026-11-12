@@ -12,9 +12,8 @@ import { ItemLogo } from '../ItemLogo';
 import { CategoryIcon } from '../CategoryIcon';
 import { SwipeableTxRow } from '../ui/SwipeableTxRow';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
-import { checkIsRecurringTransaction } from '../../utils/recurring';
-import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
-import { getTransactionTime } from '../../app/models';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
+import { type FixedExpenseItem, type IncomeItem, type TransactionItem, getTransactionTime } from '../../app/models';
 
 export interface HomeTimelineProps {
   timelineScrollRef: RefObject<HTMLDivElement | null>;

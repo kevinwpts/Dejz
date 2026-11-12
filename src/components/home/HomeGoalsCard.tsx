@@ -1,4 +1,4 @@
-import type { SavingsGoalItem } from '../../utils/appCache';
+import type { SavingsGoalItem } from '../../utils/cache/itemMeta';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { CaretDown, CaretRight } from '@phosphor-icons/react';

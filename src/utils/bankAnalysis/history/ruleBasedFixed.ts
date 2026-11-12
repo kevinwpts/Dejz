@@ -1,5 +1,5 @@
 // Steg 1: fasta utgifter som matchar kända svenska räkningar och abonnemang (Netflix, hyra, el …).
-import { BankTransactionItem } from '../../../services/bankService';
+import { BankTransactionItem } from '../../../services/bank/types';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../../../data/swedishExpensePresets';
 import { FixedExpense, Frequency } from '../../../types';
 import { getLogoUrl } from '../../logo';

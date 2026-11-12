@@ -1,22 +1,15 @@
 import React, { useMemo } from 'react';
 import { Plus } from '@phosphor-icons/react';
-import {
-  FixedExpenseItem,
-  IncomeItem,
-  TransactionItem,
-  AccountItem,
-  formatFixedCancellationBadge,
-  isFixedExpenseActiveInPeriod,
-} from './HomeTab';
+import { FixedExpenseItem, IncomeItem, TransactionItem, AccountItem, formatFixedCancellationBadge } from '../app/models';
+import { isFixedExpenseActiveInPeriod, getFixedExpenseAmountInPeriod, PeriodMatches } from '../utils/budgetEngine';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from './CategoryIcon';
 import {
   PeriodInfo,
   isDateInPeriod,
 } from '../utils/periodEngine';
-import { reconcilePeriodRecurringMatches } from '../utils/recurring';
+import { reconcilePeriodRecurringMatches } from '../utils/recurring/periodReconcile';
 import { estimateVariableBill } from '../utils/variableBills';
-import { getFixedExpenseAmountInPeriod, PeriodMatches } from '../utils/budgetEngine';
 import { formatIsoDateStockholm } from '../utils/swedishDate';
 import { useSavingsGoals } from '../utils/hooks/useSavingsGoals';
 import { EmptyClusterArtwork } from './ui/VisualArtwork';

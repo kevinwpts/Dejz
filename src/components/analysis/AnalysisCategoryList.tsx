@@ -1,11 +1,10 @@
 // Kategorilistan i Analys-fliken: en rad per kategori som fälls ut och visar periodens poster
 import React from 'react';
 import { CaretRight, CaretDown, Heart, Package, Paperclip } from '@phosphor-icons/react';
-import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../../app/models';
-import { getTransactionTime } from '../../app/models';
+import { type TransactionItem, type FixedExpenseItem, type IncomeItem, getTransactionTime } from '../../app/models';
 import { CategoryIcon } from '../CategoryIcon';
 import { ItemLogo } from '../ItemLogo';
-import { checkIsRecurringTransaction } from '../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
 import { formatSwedishDateHeading } from '../../utils/swedishDate';
 import type { CategoryBreakdownEntry } from '../../utils/categoryBreakdown';
 import { formatKr } from './formatKr';

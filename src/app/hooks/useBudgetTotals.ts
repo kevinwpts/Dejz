@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../models';
-import type { BankAccount } from '../../services/bankService';
+import type { BankAccount } from '../../services/bank/types';
 import type { PeriodInfo } from '../../utils/periodEngine';
-import {
-  getManualBalance,
-  isTransactionManuallyExcluded,
-  ManualBalance,
-} from '../../utils/appCache';
+import { getManualBalance, ManualBalance } from '../../utils/cache/manualBalance';
+import { isTransactionManuallyExcluded } from '../../utils/cache/categories';
 import { isInternalTransferTransaction } from '../../utils/transferDetection';
 import {
   computeDagsbudget,

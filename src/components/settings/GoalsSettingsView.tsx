@@ -1,6 +1,6 @@
 import React from 'react';
 import { SavingsGoalsView } from '../SavingsGoalsView';
-import { TransactionItem, AccountItem } from '../HomeTab';
+import { TransactionItem, AccountItem } from '../../app/models';
 
 export interface GoalsSettingsViewProps {
   userName?: string | null;

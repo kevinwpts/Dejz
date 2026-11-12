@@ -1,16 +1,15 @@
 // Hämtar bankstatus + banktransaktioner (Enable Banking) och uppdaterar inkomster, fasta poster och köp i ett steg.
 import { useCallback } from 'react';
-import { compareTransactionsChronologically } from '../../components/HomeTab';
+import { compareTransactionsChronologically } from '../models';
 import { bankService } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
 import { Frequency } from '../../types';
-import { analyzeBankTransactionsForOnboarding } from '../../utils/bankHistoryAnalyzer';
+import { analyzeBankTransactionsForOnboarding } from '../../utils/bankAnalysis/history/onboarding';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import { saveCachedAppState, getMerchantAliases } from '../../utils/appCache';
-import {
-  sanitizeTransactionItem,
-  mapBankTransactionsToAppItems,
-} from '../../app/transactionMapping';
+import { saveCachedAppState } from '../../utils/cache/appState';
+import { getMerchantAliases } from '../../utils/cache/merchants';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
+import { mapBankTransactionsToAppItems } from '../transactions/mapBankTransactions';
 import { reconcileFixedExpensesList, reconcileIncomesList } from '../../app/reconcileLists';
 import type { AccountDataContext, BankStatusResult } from './accountDataTypes';
 import { keepPrevUserFlags } from './accountDataHelpers';

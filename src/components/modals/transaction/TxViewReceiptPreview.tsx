@@ -2,7 +2,7 @@ import { ModalSubView } from './shared';
 import type { RefObject } from 'react';
 import React from 'react';
 import { X, FileText, CaretLeft, Plus } from '@phosphor-icons/react';
-import { TransactionItem } from '../../HomeTab';
+import { TransactionItem } from '../../../app/models';
 import { ReceiptAttachment } from '../../../utils/swedishDate';
 
 export interface TxViewReceiptPreviewProps {

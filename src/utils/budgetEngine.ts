@@ -16,7 +16,7 @@ import type { PeriodInfo } from './periodEngine';
 import { getDueDateInPeriod } from './periodEngine';
 import { formatIsoDateStockholm } from './swedishDate';
 
-/** Resultatet av reconcilePeriodRecurringMatches (recurring.ts) */
+/** Resultatet av reconcilePeriodRecurringMatches (recurring/periodReconcile.ts) */
 export interface PeriodMatches {
   claimedFixedTxIds: Set<string>;
   matchedFixedTxByExpId: Map<string, TransactionItem>;

@@ -1,7 +1,3 @@
-export type { PaymentMethodItem as PaymentMethodOption } from './utils/appCache';
-export const SUPPORT_EMAIL = '';
-export const LOGO_URL = '/favicon.svg';
-
 export const DEFAULT_EXPENSE_CATEGORIES = [
   { id: 'mat-dryck', name: 'Mat & dryck', icon: 'cart', color: '#D66B42' },
   { id: 'boende', name: 'Boende', icon: 'house', color: '#5B69B1' },

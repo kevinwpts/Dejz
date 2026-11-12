@@ -1,29 +1,15 @@
 // Städar en transaktion: datum, Swish-namn, användarens alias/kategorier och koppling till fasta poster.
 import type { FixedExpenseItem, IncomeItem, TransactionItem } from '../models';
-import type { BankTransactionItem } from '../../services/bankService';
+import type { BankTransactionItem } from '../../services/bank/types';
 import { getLogoUrl } from '../../utils/logo';
-import {
-  categorizeBankTransactionForApp,
-  extractSwishPhoneNumber,
-  formatSwishPhone,
-  formatSwishTitle,
-  isLikelySwishTransactionText,
-} from '../../utils/bankHistoryAnalyzer';
+import { categorizeBankTransactionForApp, extractSwishPhoneNumber, formatSwishPhone, formatSwishTitle, isLikelySwishTransactionText } from '../../utils/bankAnalysis/merchantRules';
 import { getSwedishDateStr, parseDateFromSwedishText } from '../../utils/swedishDate';
 import { SWISH_SVG_DATA_URI } from '../../components/SwishLogo';
-import {
-  resolveMerchantAlias,
-  isGenericPlaceholderMerchant,
-  normalizeCategoryToValid,
-  getTransactionMetaMap,
-  migratePendingMetaToBooked,
-  resolveSwishPhoneToName,
-} from '../../utils/appCache';
-import {
-  findMatchingFixedExpense,
-  findMatchingIncome,
-  isFixedExpenseAmountMatch,
-} from '../../utils/recurring';
+import { resolveMerchantAlias, isGenericPlaceholderMerchant } from '../../utils/cache/merchants';
+import { normalizeCategoryToValid } from '../../utils/cache/categories';
+import { getTransactionMetaMap, migratePendingMetaToBooked } from '../../utils/cache/itemMeta';
+import { resolveSwishPhoneToName } from '../../utils/cache/swishDirectory';
+import { findMatchingFixedExpense, findMatchingIncome, isFixedExpenseAmountMatch } from '../../utils/recurring/matching';
 import { getSavedReservationPurchaseDates } from './reservationDates';
 import { extractBankTxTime } from './bankTxTime';
 

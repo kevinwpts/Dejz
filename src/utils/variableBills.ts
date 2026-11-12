@@ -1,10 +1,10 @@
 import type { FixedExpenseItem, TransactionItem } from '../app/models';
-import { findAllMatchingFixedExpensesByMerchant } from './recurring';
+import { findAllMatchingFixedExpensesByMerchant } from './recurring/matching';
 
 /**
  * Räkningar som varierar (el, telefon …): uppskatta nästa belopp från de senaste dragningarna.
  *
- * Hur dubbelräkning undviks (se reconcilePeriodRecurringMatches i recurring.ts):
+ * Hur dubbelräkning undviks (se reconcilePeriodRecurringMatches i recurring/periodReconcile.ts):
  * - Innan dragningen reserveras uppskattningen (fasta utgiftens belopp).
  * - När dragningen kommer kopplas den till den fasta utgiften på NAMNET – oavsett belopp –
  *   och det riktiga beloppet används. Dragningen räknas då inte som ett vanligt köp.

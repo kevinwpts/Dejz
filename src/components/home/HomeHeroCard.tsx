@@ -1,7 +1,7 @@
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { PeriodInfo } from '../../utils/periodEngine';
-import { setShowBudgetBreakdownOnHome } from '../../utils/appCache';
+import { setShowBudgetBreakdownOnHome } from '../../utils/cache/categories';
 import type { AccountItem } from '../../app/models';
 
 export interface HomeHeroCardProps {

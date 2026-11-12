@@ -1,7 +1,6 @@
-import { BankAccount } from '../services/bankService';
-import { TransactionItem } from '../components/HomeTab';
-import type { BankRawJson } from '../app/models';
-import { isLikelySwishTransactionText } from './bankHistoryAnalyzer';
+import { BankAccount } from '../services/bank/types';
+import { TransactionItem, type BankRawJson } from '../app/models';
+import { isLikelySwishTransactionText } from './bankAnalysis/merchantRules';
 
 /**
  * Extraherar kontonummer-varianter (inklusive med och utan clearingnummer), IBAN,

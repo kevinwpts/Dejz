@@ -4,7 +4,7 @@ import { afterEach, describe, expect, test } from 'vitest';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { useExternalSnapshot } from '../useExternalSnapshot';
 import { useSavingsGoals } from '../useSavingsGoals';
-import { saveSavingsGoals, type SavingsGoalItem } from '../../appCache';
+import { saveSavingsGoals, type SavingsGoalItem } from '../../cache/itemMeta';
 import { useRetainedValue } from '../../../components/modals/useRetainedValue';
 
 afterEach(() => {

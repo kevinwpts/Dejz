@@ -8,7 +8,7 @@ import { parseQuickEntry } from '../utils/quickEntry';
  * Rösten öppnar "Nytt köp" med namn, belopp och kategori ifyllt – inget sparas förrän man trycker Spara.
  */
 
-export type VoiceResult = { title: string; amount?: number };
+type VoiceResult = { title: string; amount?: number };
 
 interface AddEntrySheetProps {
   isOpen: boolean;

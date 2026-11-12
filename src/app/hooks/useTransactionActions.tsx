@@ -1,20 +1,14 @@
 import { useCallback } from 'react';
-import { TransactionItem } from '../../components/HomeTab';
+import { TransactionItem } from '../models';
 import { bankService } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
 import { getLogoUrl } from '../../utils/logo';
-import {
-  saveCachedAppState,
-  setTransactionExcludedState,
-  getMerchantAliases,
-  saveMerchantAlias,
-  removeMerchantAliasForSources,
-  propagateCategoryChangeInCache,
-  getTransactionMetaMap,
-  saveTransactionMeta,
-  syncAllUserPreferencesToSupabase,
-} from '../../utils/appCache';
-import { sanitizeTransactionItem } from '../transactionMapping';
+import { saveCachedAppState } from '../../utils/cache/appState';
+import { setTransactionExcludedState, propagateCategoryChangeInCache } from '../../utils/cache/categories';
+import { getMerchantAliases, saveMerchantAlias, removeMerchantAliasForSources } from '../../utils/cache/merchants';
+import { getTransactionMetaMap, saveTransactionMeta } from '../../utils/cache/itemMeta';
+import { syncAllUserPreferencesToSupabase } from '../../utils/cache/preferencesSync';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 import type { UseAppActionsContext } from './useAppActions';
 
 /** Köp: lägga till, ändra, ta bort, undanta, hjärta, paket och kategoribyte. */

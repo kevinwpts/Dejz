@@ -1,6 +1,6 @@
 // Små rena hjälpfunktioner för kontodatan: behåll användarens markeringar på banktransaktioner,
 // översätt sparade transaktioner från Supabase och avgör om introduktionen ska visas.
-import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../../components/HomeTab';
+import type { TransactionItem, FixedExpenseItem, IncomeItem } from '../models';
 import { dataService } from '../../services/dataService';
 import { getLogoUrl } from '../../utils/logo';
 import {
@@ -8,7 +8,7 @@ import {
   formatIsoTimeStockholm,
   getSwedishDateStr,
 } from '../../utils/swedishDate';
-import { sanitizeTransactionItem } from '../../app/transactionMapping';
+import { sanitizeTransactionItem } from '../transactions/sanitizeTransaction';
 
 type DbTransactions = Awaited<ReturnType<typeof dataService.getTransactions>>;
 type DbProfile = Awaited<ReturnType<typeof dataService.getProfile>>;

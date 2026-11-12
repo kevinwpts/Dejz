@@ -1912,56 +1912,6 @@ exports[`inferCategoryAndMethodFromName > alla namn som transaction 1`] = `
 ]
 `;
 
-exports[`små hjälpfunktioner > isSameFixedExpenseName 1`] = `
-[
-  [
-    "Netflix",
-    "netflix",
-    true,
-  ],
-  [
-    "Hyra (Heimstaden)",
-    "Heimstaden",
-    true,
-  ],
-  [
-    "Hyra",
-    "Boende",
-    true,
-  ],
-  [
-    "Fastighetsavgift",
-    "Hyra (X)",
-    true,
-  ],
-  [
-    "Telia",
-    "Tele2",
-    false,
-  ],
-  [
-    null,
-    "x",
-    false,
-  ],
-  [
-    "x",
-    undefined,
-    false,
-  ],
-  [
-    "",
-    "",
-    false,
-  ],
-  [
-    "  Spotify ",
-    "Spotify Premium",
-    true,
-  ],
-]
-`;
-
 exports[`små hjälpfunktioner > matchesKeywordSmart 1`] = `
 [
   [

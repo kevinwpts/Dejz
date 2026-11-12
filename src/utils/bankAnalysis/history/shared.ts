@@ -1,7 +1,7 @@
 // Gemensamt för historikanalysens steg.
-import { BankTransactionItem } from '../../../services/bankService';
+import { BankTransactionItem } from '../../../services/bank/types';
 import { DetectedFixedExpenseWithEvidence } from '../types';
-import { getNormalizedBankTxAmount } from '../normalization';
+import { getNormalizedBankTxAmount } from '../normalization/amount';
 import { getTxDate } from '../txFields';
 
 /** En hittad fast utgift plus id:n på de banktransaktioner som bevisar den. */

@@ -1,6 +1,7 @@
 // Inställningar för introduktionen: banklistor, stegordning och markering vid bankkoppling.
 // Flyttade från OnboardingFlow.tsx.
-import { BankAspsp, SWEDISH_BANKS_CATALOG } from '../../services/bankService';
+import { BankAspsp } from '../../services/bank/types';
+import { SWEDISH_BANKS_CATALOG } from '../../services/bank/catalog';
 
 export const POPULAR_SWEDISH_BANKS: { id: string; name: string; displayName: string }[] = [
   { id: 'swedbank', name: 'Swedbank', displayName: 'Swedbank' },
@@ -14,7 +15,7 @@ export const POPULAR_SWEDISH_BANKS: { id: string; name: string; displayName: str
   { id: 'avanza', name: 'Avanza', displayName: 'Avanza' },
 ];
 
-export const EXCLUDED_B2B_OR_FOREIGN_ASPSP_PATTERNS = [
+const EXCLUDED_B2B_OR_FOREIGN_ASPSP_PATTERNS = [
   /corporate/i,
   /first card/i,
   /airplus/i,
@@ -44,7 +45,6 @@ export const EXCLUDED_B2B_OR_FOREIGN_ASPSP_PATTERNS = [
 export const CONSUMER_SWEDISH_BANKS: BankAspsp[] = SWEDISH_BANKS_CATALOG.filter(
   (b) => !EXCLUDED_B2B_OR_FOREIGN_ASPSP_PATTERNS.some((rx) => rx.test(b.name))
 );
-
 
 export type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 

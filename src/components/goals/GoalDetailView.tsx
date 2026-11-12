@@ -11,9 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import {
-  SavingsGoalItem,
-} from '../../utils/appCache';
+import { SavingsGoalItem } from '../../utils/cache/itemMeta';
 import {
   GOAL_ARTWORKS,
   getGoalArtworkTheme,
@@ -22,7 +20,7 @@ import {
 import { formatSwedishDateHeading, getSwedishDateStr } from '../../utils/swedishDate';
 
 
-import { TransactionItem, AccountItem } from '../HomeTab';
+import { TransactionItem, AccountItem } from '../../app/models';
 
 export interface GoalDetailViewProps {
   selectedGoal: SavingsGoalItem;

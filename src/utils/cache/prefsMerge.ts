@@ -45,7 +45,7 @@ export function hashValue(value: unknown): string {
   return `${(h >>> 0).toString(36)}:${s.length}`;
 }
 
-export function isEmptyValue(value: unknown): boolean {
+function isEmptyValue(value: unknown): boolean {
   if (value === undefined || value === null || value === '') return true;
   if (Array.isArray(value)) return value.length === 0;
   if (typeof value === 'object') return Object.keys(value as object).length === 0;

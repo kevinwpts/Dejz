@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { FixedExpenseItem } from '../models';
 import type { PeriodInfo } from '../../utils/periodEngine';
 import type { PeriodMatches } from '../../utils/budgetEngine';
-import { getSavingsGoals, saveSavingsGoals } from '../../utils/appCache';
+import { getSavingsGoals, saveSavingsGoals } from '../../utils/cache/itemMeta';
 import { creditGoalsFromBankMatches, creditGoalsWithoutBank } from '../../utils/goalCredit';
 
 /**

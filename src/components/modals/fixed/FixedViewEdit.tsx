@@ -1,4 +1,4 @@
-import type { SavingsGoalItem } from '../../../utils/appCache';
+import type { SavingsGoalItem } from '../../../utils/cache/itemMeta';
 import type { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
@@ -10,16 +10,14 @@ import {
   Paperclip,
   ClockCounterClockwise,
 } from '@phosphor-icons/react';
-import { FixedExpenseItem } from '../../HomeTab';
+import { FixedExpenseItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { getItemReceipts, ReceiptAttachment } from '../../../utils/swedishDate';
-import { normalizeCategoryToValid } from '../../../utils/appCache';
-import {
-  inferCategoryAndMethodFromName,
-  cleanDisplayMerchantName,
-} from '../../../utils/bankHistoryAnalyzer';
+import { normalizeCategoryToValid } from '../../../utils/cache/categories';
+import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
+import { cleanDisplayMerchantName } from '../../../utils/bankAnalysis/merchantRules';
 
 export interface FixedViewEditProps {
   subView: "details" | "edit" | "category-picker" | "day-picker" | "payment-picker" | "goal-picker" | "receipt-preview" | "similar" | "cancel-picker" | "cancel-guide";

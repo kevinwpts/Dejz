@@ -1,16 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useRetainedValue } from './useRetainedValue';
 import { useExternalSnapshot } from '../../utils/hooks/useExternalSnapshot';
-import { IncomeItem, AccountItem, TransactionItem } from '../HomeTab';
+import { IncomeItem, AccountItem, TransactionItem } from '../../app/models';
 import { BottomSheet } from '../ui/BottomSheet';
-import {
-  findMatchingIncome,
-  findTransactionsForIncome,
-} from '../../utils/recurring';
-import {
-  getStoredIncomeCategories,
-  normalizeCategoryToValid,
-} from '../../utils/appCache';
+import { findMatchingIncome } from '../../utils/recurring/matching';
+import { findTransactionsForIncome } from '../../utils/recurring/similarTransactions';
+import { getStoredIncomeCategories, normalizeCategoryToValid } from '../../utils/cache/categories';
 import type { IncomeAccountInfo, ModalSubView } from './income/shared';
 import { IncomeViewSimilar } from './income/IncomeViewSimilar';
 import { IncomeViewCategoryPicker, IncomeViewDayPicker } from './income/IncomeViewPickers';

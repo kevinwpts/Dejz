@@ -23,7 +23,7 @@ function isOnboardingInProgress(): boolean {
   }
 }
 
-export const App: React.FC = () => {
+const App: React.FC = () => {
   const app = useAppModel();
   // Ladda ned övriga skärmar i bakgrunden när telefonen är ledig (snabb start, snabba byten)
   useEffect(() => preloadScreens(), []);

@@ -1,4 +1,4 @@
-import type { RecurringMatchResult } from '../../../utils/recurring';
+import type { RecurringMatchResult } from '../../../utils/recurring/checkRecurring';
 import { ModalSubView } from './shared';
 import type { RefObject, SetStateAction } from 'react';
 import React from 'react';
@@ -13,11 +13,11 @@ import {
   Plus,
 } from '@phosphor-icons/react';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
-import { TransactionItem } from '../../HomeTab';
+import { TransactionItem } from '../../../app/models';
 import { ItemLogo } from '../../ItemLogo';
 import { CategoryIcon, PaymentMethodIcon } from '../../CategoryIcon';
 import { formatSwedishFullDate, ReceiptAttachment } from '../../../utils/swedishDate';
-import { inferCategoryAndMethodFromName } from '../../../utils/bankHistoryAnalyzer';
+import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
 
 export interface TxViewEditProps {
   subView: "details" | "edit" | "category-picker" | "payment-picker" | "date-picker" | "link-fixed-picker" | "similar" | "swish" | "receipt-preview";

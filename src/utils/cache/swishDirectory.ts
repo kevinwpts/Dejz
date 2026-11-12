@@ -4,7 +4,7 @@ import { syncAllUserPreferencesToSupabase } from './preferencesSync';
 // --- Swish Phone-to-Name Directory & Lookup Cache ---
 const SWISH_PHONE_LOOKUP_KEY = 'dejz_swish_phone_lookup_v1';
 
-export function normalizeSwishPhoneKey(rawPhone: string | null | undefined): string {
+function normalizeSwishPhoneKey(rawPhone: string | null | undefined): string {
   if (!rawPhone) return '';
   const digits = String(rawPhone).replace(/\D/g, '');
   if (digits.startsWith('467') && digits.length === 11) {
@@ -19,7 +19,7 @@ export function normalizeSwishPhoneKey(rawPhone: string | null | undefined): str
   return digits;
 }
 
-export function getSwishPhoneDirectoryMap(): Record<string, string> {
+function getSwishPhoneDirectoryMap(): Record<string, string> {
   const map: Record<string, string> = {};
   if (typeof window === 'undefined') return map;
   try {

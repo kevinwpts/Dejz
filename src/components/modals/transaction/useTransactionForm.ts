@@ -1,25 +1,17 @@
 // Formulärets state för köpfönstret: återställning vid öppning, AI-kategori och spara/avbryt/radera.
 import React, { useState, useEffect, useRef } from 'react';
-import type { TransactionItem } from '../../HomeTab';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
+import type { TransactionItem } from '../../../app/models';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
 import {
   getItemReceipts,
   formatIsoDateStockholm,
   ReceiptAttachment,
 } from '../../../utils/swedishDate';
-import {
-  getStoredExpenseCategories,
-  getStoredIncomeCategories,
-  getStoredPaymentMethods,
-  normalizeCategoryToValid,
-  compressReceiptFiles,
-  saveSwishPhoneDirectoryEntry,
-  removeSwishPhoneDirectoryEntry,
-} from '../../../utils/appCache';
-import {
-  inferCategoryAndMethodFromName,
-  extractSwishPhoneNumber,
-} from '../../../utils/bankHistoryAnalyzer';
+import { getStoredExpenseCategories, getStoredIncomeCategories, getStoredPaymentMethods, normalizeCategoryToValid } from '../../../utils/cache/categories';
+import { compressReceiptFiles } from '../../../utils/cache/merchants';
+import { saveSwishPhoneDirectoryEntry, removeSwishPhoneDirectoryEntry } from '../../../utils/cache/swishDirectory';
+import { inferCategoryAndMethodFromName } from '../../../utils/bankAnalysis/existingBudget/manualCategory';
+import { extractSwishPhoneNumber } from '../../../utils/bankAnalysis/merchantRules';
 import { fetchLogoForName, getLearnedBrandCategory } from '../../../utils/logo';
 import { getDefaultPaymentMethodForTx, ModalSubView } from './shared';
 import { useExternalSnapshot } from '../../../utils/hooks/useExternalSnapshot';

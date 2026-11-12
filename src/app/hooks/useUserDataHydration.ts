@@ -1,24 +1,17 @@
 // Laddar all användardata vid appstart (Supabase-tabeller + bankdata) och lägger in den i appen i ett enda steg.
 import { useCallback } from 'react';
-import { compareTransactionsChronologically } from '../../components/HomeTab';
+import { compareTransactionsChronologically } from '../models';
 import type { WeekendHandlingMode } from '../../utils/periodEngine';
 import { bankService } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
 import { Frequency } from '../../types';
-import { analyzeBankTransactionsForOnboarding } from '../../utils/bankHistoryAnalyzer';
+import { analyzeBankTransactionsForOnboarding } from '../../utils/bankAnalysis/history/onboarding';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
-import {
-  loadCachedAppState,
-  saveCachedAppState,
-  clearCachedAppState,
-  getExcludeInternalTransfers,
-  getMerchantAliases,
-  hydrateAllUserPreferencesFromProfile,
-  extractSavedFixedFromProfile,
-  extractSavedIncomesFromProfile,
-  clearAllLocalAppData,
-} from '../../utils/appCache';
-import { mapBankTransactionsToAppItems } from '../../app/transactionMapping';
+import { loadCachedAppState, saveCachedAppState, clearCachedAppState } from '../../utils/cache/appState';
+import { getExcludeInternalTransfers } from '../../utils/cache/categories';
+import { getMerchantAliases } from '../../utils/cache/merchants';
+import { hydrateAllUserPreferencesFromProfile, extractSavedFixedFromProfile, extractSavedIncomesFromProfile, clearAllLocalAppData } from '../../utils/cache/preferencesSync';
+import { mapBankTransactionsToAppItems } from '../transactions/mapBankTransactions';
 import { reconcileFixedExpensesList, reconcileIncomesList } from '../../app/reconcileLists';
 import type { AccountDataContext, BankStatusResult } from './accountDataTypes';
 import { keepPrevUserFlags, mapDbTransactions, resolveOnboardingActive } from './accountDataHelpers';

@@ -9,7 +9,7 @@ import {
   SpinnerGap,
   WarningCircle,
 } from '@phosphor-icons/react';
-import { BankAspsp, BankConnection, BankAccount } from '../../services/bankService';
+import { BankAspsp, BankConnection, BankAccount } from '../../services/bank/types';
 import { ItemLogo } from '../ItemLogo';
 import { OnboardingStep, POPULAR_SWEDISH_BANKS } from './onboardingConfig';
 

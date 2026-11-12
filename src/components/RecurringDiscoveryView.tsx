@@ -4,16 +4,14 @@ import {
   Plus,
   ArrowClockwise,
 } from '@phosphor-icons/react';
-import { FixedExpenseItem, IncomeItem, TransactionItem } from './HomeTab';
+import { FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
 import { ItemLogo } from './ItemLogo';
 import { CategoryIcon } from './CategoryIcon';
-import { bankService, BankAccount } from '../services/bankService';
-import { analyzeBankTransactionsForOnboarding } from '../utils/bankHistoryAnalyzer';
-import {
-  findMatchingFixedExpense,
-  findMatchingIncome,
-} from '../utils/recurring';
-import { normalizeMerchantKey } from '../utils/appCache';
+import { bankService } from '../services/bankService';
+import { BankAccount } from '../services/bank/types';
+import { analyzeBankTransactionsForOnboarding } from '../utils/bankAnalysis/history/onboarding';
+import { findMatchingFixedExpense, findMatchingIncome } from '../utils/recurring/matching';
+import { normalizeMerchantKey } from '../utils/cache/appState';
 import { getLogoUrl } from '../utils/logo';
 
 interface RecurringDiscoveryViewProps {

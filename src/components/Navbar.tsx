@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UserCircle, MagnifyingGlass, Bell, CaretLeft, Eye, EyeSlash, ChatTeardropText } from '@phosphor-icons/react';
 import { openFeedback } from '../utils/sendFeedback';
-import { getPrivacyBlurMode, setPrivacyBlurMode } from '../utils/appCache';
+import { getPrivacyBlurMode, setPrivacyBlurMode } from '../utils/cache/itemMeta';
 
 interface NavbarProps {
   userEmail: string | null;

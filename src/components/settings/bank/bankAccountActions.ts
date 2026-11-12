@@ -2,9 +2,10 @@
 import type React from 'react';
 import type { SetStateAction } from 'react';
 import { stripRawAccountDigits } from '../accountText';
-import { bankService, BankConnection, BankAccount } from '../../../services/bankService';
+import { bankService } from '../../../services/bankService';
+import { BankConnection, BankAccount } from '../../../services/bank/types';
 import type { AccountItem } from '../../../app/models';
-import { getAccountMetaMap, saveAccountMeta } from '../../../utils/appCache';
+import { getAccountMetaMap, saveAccountMeta } from '../../../utils/cache/itemMeta';
 import { appOrigin } from '../../../utils/platform';
 
 export interface BankAccountActionDeps {

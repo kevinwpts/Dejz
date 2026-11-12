@@ -4,7 +4,7 @@ import type { Json } from '../../types/database';
 
 export type BankEnvironment = 'production' | 'sandbox';
 
-export type BankReconciliationStatus =
+type BankReconciliationStatus =
   | 'unprocessed'
   | 'imported_as_purchase'
   | 'matched_manual_tx'

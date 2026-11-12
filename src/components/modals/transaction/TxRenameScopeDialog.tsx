@@ -1,9 +1,9 @@
 // Centrerad dialog: ska ett nytt namn/kategori gälla bara det här köpet eller fler liknande köp?
 import React from 'react';
 import { createPortal } from 'react-dom';
-import type { TransactionItem } from '../../HomeTab';
-import type { SimilarTransactionsSummary } from '../../../utils/recurring';
-import { extractSwishPhoneNumber } from '../../../utils/bankHistoryAnalyzer';
+import type { TransactionItem } from '../../../app/models';
+import type { SimilarTransactionsSummary } from '../../../utils/recurring/similarTransactions';
+import { extractSwishPhoneNumber } from '../../../utils/bankAnalysis/merchantRules';
 import type { TxRenameScope } from './useTransactionForm';
 
 export interface TxRenameScopeDialogProps {

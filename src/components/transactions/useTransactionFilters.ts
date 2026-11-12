@@ -1,10 +1,9 @@
 // Hook som håller sök- och filterläget för transaktionslistan och räknar fram filtrerade/grupperade transaktioner.
 import { useMemo, useState } from 'react';
-import type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../../app/models';
-import { compareTransactionsChronologically } from '../../app/models';
+import { type AccountItem, type FixedExpenseItem, type IncomeItem, type TransactionItem, compareTransactionsChronologically } from '../../app/models';
 import { deduplicateTransactions } from '../../utils/transactionDedup';
 import { getSwedishDateStr, getItemReceipts } from '../../utils/swedishDate';
-import { checkIsRecurringTransaction } from '../../utils/recurring';
+import { checkIsRecurringTransaction } from '../../utils/recurring/checkRecurring';
 import { PeriodInfo } from '../../utils/periodEngine';
 import {
   DateRangeFilter,

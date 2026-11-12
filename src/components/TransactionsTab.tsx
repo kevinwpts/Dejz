@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  TransactionItem,
-  AccountItem,
-  FixedExpenseItem,
-  IncomeItem,
-} from './HomeTab';
+import { TransactionItem, AccountItem, FixedExpenseItem, IncomeItem } from '../app/models';
 import { PeriodInfo, WeekendHandlingMode } from '../utils/periodEngine';
 import { useTransactionFilters } from './transactions/useTransactionFilters';
 import { TransactionsSearchBar } from './transactions/TransactionsSearchBar';
