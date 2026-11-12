@@ -161,7 +161,7 @@ function parseLocally(prompt: string, categories: string[], defaultPayday: numbe
 
   // If name is empty, fallback to intelligent default
   let category = 'Lön';
-  let icon = 'Briefcase';
+  let icon: string;
 
   const lowerPrompt = prompt.toLowerCase();
   if (lowerPrompt.includes('csn') || lowerPrompt.includes('studie')) {

@@ -47,15 +47,18 @@ function lazyScreen<C extends React.ComponentType<P>, P extends object = React.C
   loaders.push(load);
 
   const Wrapped: React.FC<P> = (props) => {
-    const [, setReady] = useState(Loaded !== null);
+    // `ready` finns för att rendera om när koden har laddats klart
+    const [ready, setReady] = useState(Loaded !== null);
     useEffect(() => {
-      if (Loaded) return;
+      if (ready || Loaded) return;
       let active = true;
-      void load().then(() => active && setReady(true));
+      void load().then(() => {
+        if (active) setReady(true);
+      });
       return () => {
         active = false;
       };
-    }, []);
+    }, [ready]);
     return Loaded ? <Loaded {...props} /> : <>{fallback}</>;
   };
   Wrapped.displayName = `Lazy(${name})`;

@@ -1,3 +1,4 @@
+import { logError } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 import { bankService } from '../../services/bankService';
 import { dataService } from '../../services/dataService';
@@ -11,7 +12,7 @@ import { apiUrl } from '../../utils/platform';
 import type { UseAppActionsContext } from './useAppActions';
 
 /** Bank, utloggning, radera och nollställ konto. */
-export function useBankAccountActions({
+export function createBankAccountActions({
   setSyncingBank,
   lastSyncTimestampRef,
   refreshBankStatus,
@@ -184,7 +185,7 @@ export function useBankAccountActions({
         );
       }
     } catch (err) {
-      console.error('Error during account deletion:', err);
+      logError('Error during account deletion', err);
     } finally {
       // 5. Logga ut lokalt direkt (utan att vänta på nätverksanrop mot redan raderad auth.users-post) och rensa all lokal lagring
       await withFastTimeout(supabase.auth.signOut({ scope: 'local' }), 800);
@@ -265,7 +266,7 @@ export function useBankAccountActions({
         await withFastTimeout(dataService.deleteAllUserData(activeUid), 2000);
       }
     } catch (err) {
-      console.error('Error during account reset:', err);
+      logError('Error during account reset', err);
     } finally {
       clearAllLocalAppData(true); // Behåll tema och inloggningssession
 

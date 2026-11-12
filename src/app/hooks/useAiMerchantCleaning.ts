@@ -23,6 +23,20 @@ import { findMatchingFixedExpense, findMatchingIncome } from '../../utils/recurr
 import { sanitizeTransactionItem } from '../../app/transactionMapping';
 import { apiUrl } from '../../utils/platform';
 
+/** Skickar en omgång kryptiska bankrader till AI-tvätten. Ger `null` om servern svarar med fel. */
+async function fetchMerchantCleaning(
+  body: { items: unknown[]; expenseCategories: string[]; incomeCategories: string[] },
+  signal: AbortSignal
+) {
+  const res = await fetch(apiUrl('/api/ai/clean-merchants'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  });
+  return res.ok ? res.json() : null;
+}
+
 /**
  * Tyst AI-tvätt i bakgrunden: kryptiska bankrader (t.ex. "ZETTLE*GBG KAF") får ett riktigt
  * butiksnamn, kategori och logga. Flyttad från App.tsx.
@@ -46,6 +60,12 @@ export function useAiMerchantCleaning({
   // Tyst AI-tvätt i bakgrunden för kryptiska/okända bankrader (t.ex. ZETTLE*GBG KAF, NYX*SVENSKA, KLARNA*84920)
   const aiCleanedKeysRef = useRef<Set<string>>(new Set());
   const aiCleanInFlightRef = useRef<boolean>(false);
+  // Avbryter en pågående AI-tvätt om hooken avmonteras. Avbryts medvetet inte när
+  // transaktionerna ändras – då skulle anropet startas om i onödan (kostar AI-anrop).
+  const abortControllerRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    return () => abortControllerRef.current?.abort();
+  }, []);
 
   useEffect(() => {
     if (aiCleanInFlightRef.current || transactions.length === 0) return;
@@ -125,16 +145,12 @@ export function useAiMerchantCleaning({
     const expenseCategories = getStoredExpenseCategories().map((c) => c.name);
     const incomeCategories = getStoredIncomeCategories().map((c) => c.name);
 
-    fetch(apiUrl('/api/ai/clean-merchants'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: batchItems,
-        expenseCategories,
-        incomeCategories,
-      }),
-    })
-      .then((res) => (res.ok ? res.json() : null))
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    fetchMerchantCleaning(
+      { items: batchItems, expenseCategories, incomeCategories },
+      controller.signal
+    )
       .then((data) => {
         if (
           isDeletingAccountRef.current ||
@@ -192,6 +208,7 @@ export function useAiMerchantCleaning({
       })
       .finally(() => {
         aiCleanInFlightRef.current = false;
+        if (abortControllerRef.current === controller) abortControllerRef.current = null;
       });
   }, [transactions, fixedExpensesRef, incomesRef, isDeletingAccountRef, setTransactions, userIdRef]);
 

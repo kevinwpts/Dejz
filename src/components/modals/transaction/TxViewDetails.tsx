@@ -404,7 +404,7 @@ export const TxViewDetails: React.FC<TxViewDetailsProps> = ({
             {draftReceipts.length > 0 && (
               <>
                 {draftReceipts.map((rcpt, idx) => (
-                  <div key={`${rcpt.name}-${idx}`} className="ui-row">
+                  <div key={rcpt.url} className="ui-row">
                     <button
                       type="button"
                       onClick={() => {

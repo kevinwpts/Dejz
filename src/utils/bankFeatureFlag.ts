@@ -1,3 +1,4 @@
+import { logWarn } from './logger';
 import { User } from '@supabase/supabase-js';
 
 const ADMIN_EMAILS = new Set([
@@ -45,7 +46,7 @@ export function saveOnboardingBankDraft(draft: OnboardingBankDraft): void {
   try {
     localStorage.setItem(BANK_ONBOARDING_DRAFT_KEY, JSON.stringify(draft));
   } catch (e) {
-    console.error('Could not save onboarding bank draft:', e);
+    logWarn('Could not save onboarding bank draft', e);
   }
 }
 

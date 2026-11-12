@@ -100,9 +100,11 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
             0
           ).getDate();
 
-          const cells: (number | null)[] = [];
-          for (let i = 0; i < startWeekday; i++) cells.push(null);
-          for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+          // Tomma rutor före den 1:a (så att dagen hamnar under rätt veckodag)
+          const leadingBlankKeys: string[] = [];
+          for (let i = 0; i < startWeekday; i++) leadingBlankKeys.push(`empty-${i}`);
+          const dayNumbers: number[] = [];
+          for (let d = 1; d <= daysInMonth; d++) dayNumbers.push(d);
 
           return (
             <div className="space-y-3">
@@ -185,10 +187,10 @@ export const TxViewDatePicker: React.FC<TxViewDatePickerProps> = ({
                       {w}
                     </span>
                   ))}
-                  {cells.map((dayNum, idx) => {
-                    if (!dayNum) {
-                      return <div key={`empty-${idx}`} className="h-10" />;
-                    }
+                  {leadingBlankKeys.map((blankKey) => (
+                    <div key={blankKey} className="h-10" />
+                  ))}
+                  {dayNumbers.map((dayNum) => {
                     const iso = `${pickerYearMonth.year}-${String(
                       pickerYearMonth.month + 1
                     ).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;

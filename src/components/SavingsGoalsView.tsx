@@ -97,9 +97,9 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     onAutoOpenConsumedRef.current = onAutoOpenConsumed;
   }, [onAutoOpenConsumed]);
 
+  // Säg till föräldern att "öppna direkt" är använt (själva öppnandet sker under render, se nedan)
   React.useEffect(() => {
     if (autoOpenCreate) {
-      openCreateGoal();
       onAutoOpenConsumedRef.current?.();
     }
   }, [autoOpenCreate]);
@@ -183,6 +183,13 @@ export const SavingsGoalsView: React.FC<SavingsGoalsViewProps> = ({
     setWizardStep(1);
     setIsCreateWizardOpen(true);
   };
+
+  // Öppna skapa-guiden när föräldern ber om det (justeras direkt under render när autoOpenCreate blir true)
+  const [prevAutoOpenCreate, setPrevAutoOpenCreate] = useState(false);
+  if (Boolean(autoOpenCreate) !== prevAutoOpenCreate) {
+    setPrevAutoOpenCreate(Boolean(autoOpenCreate));
+    if (autoOpenCreate) openCreateGoal();
+  }
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

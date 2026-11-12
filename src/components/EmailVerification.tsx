@@ -5,17 +5,22 @@ import { confirmVerificationFromUrl, sendVerificationEmail, useEmailVerification
 /** Visas överst när man kommer från länken i verifieringsmejlet (dejz.se/verifiera?token=…) */
 export const EmailVerifiedNotice: React.FC = () => {
   const [result, setResult] = useState<'verified' | 'invalid' | null>(null);
-  const ran = useRef(false);
+  const ranRef = useRef(false);
 
   useEffect(() => {
-    if (ran.current) return;
-    ran.current = true;
+    if (ranRef.current) return;
+    ranRef.current = true;
     void confirmVerificationFromUrl().then((r) => {
-      if (!r) return;
-      setResult(r);
-      setTimeout(() => setResult(null), 6000);
+      if (r) setResult(r);
     });
   }, []);
+
+  // Dölj beskedet efter 6 sekunder
+  useEffect(() => {
+    if (!result) return;
+    const timer = setTimeout(() => setResult(null), 6000);
+    return () => clearTimeout(timer);
+  }, [result]);
 
   if (!result) return null;
   const ok = result === 'verified';

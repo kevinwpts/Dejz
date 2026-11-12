@@ -8,7 +8,7 @@ import {
   loadCachedAppState,
   hasCachedBankData,
   getExcludeInternalTransfers,
-  setExcludeInternalTransfers,
+  setExcludeInternalTransfers as saveExcludeInternalTransfers,
   getMerchantAliases,
 } from '../../utils/appCache';
 import { FeedbackToastState } from '../components/AppToasts';
@@ -125,13 +125,13 @@ export function useAppState() {
   );
 
   // Inställning för att dölja och exkludera interna överföringar från "Kvar att spendera"
-  const [excludeInternalTransfers, setExcludeInternalTransfersState] = useState<boolean>(() =>
+  const [excludeInternalTransfers, setExcludeInternalTransfers] = useState<boolean>(() =>
     getExcludeInternalTransfers()
   );
 
   const handleToggleExcludeInternalTransfers = useCallback((val: boolean) => {
-    setExcludeInternalTransfersState(val);
     setExcludeInternalTransfers(val);
+    saveExcludeInternalTransfers(val);
   }, []);
 
   // Initial loading guard: only true if there is completely no cached banking data
@@ -245,23 +245,28 @@ export function useAppState() {
     const splashEl = document.getElementById('dejz-splash');
     if (!splashEl) return;
 
+    let hideTimer: number | undefined;
     const hideSplash = () => {
       splashEl.classList.add('dejz-splash-hide');
-      window.setTimeout(() => {
-        if (splashEl) {
-          splashEl.style.display = 'none';
-        }
+      hideTimer = window.setTimeout(() => {
+        splashEl.style.display = 'none';
       }, 450);
     };
 
     if (!isInitialLoading || showLanding || isOnboardingActive) {
       const minDisplayTimer = window.setTimeout(hideSplash, 550);
-      return () => window.clearTimeout(minDisplayTimer);
+      return () => {
+        window.clearTimeout(minDisplayTimer);
+        window.clearTimeout(hideTimer);
+      };
     }
 
     // Säkerhetstimer så att splashen aldrig fastnar om nätverket är långsamt
     const fallbackTimer = window.setTimeout(hideSplash, 1200);
-    return () => window.clearTimeout(fallbackTimer);
+    return () => {
+      window.clearTimeout(fallbackTimer);
+      window.clearTimeout(hideTimer);
+    };
   }, [isInitialLoading, showLanding, isOnboardingActive]);
 
   const userIdRef = useRef<string | null>(userId);
@@ -316,7 +321,7 @@ export function useAppState() {
     setBankAccounts,
     setCallbackStatusMsg,
     setConnections,
-    setExcludeInternalTransfersState,
+    setExcludeInternalTransfersState: setExcludeInternalTransfers,
     setFixedExpenses,
     setIncomes,
     setIsBankModalOpen,

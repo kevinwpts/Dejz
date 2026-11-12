@@ -568,7 +568,7 @@ export function runCoreBankDetection(
     let groupKey = 'salary';
     let incomeName = 'Lön';
     let incomeCategory = 'Lön';
-    let isPrimarySalary = isExplicitSalary || isBankCodeIncome;
+    let isPrimarySalary: boolean;
 
     if (isBarnbidrag) {
       groupKey = 'barnbidrag';

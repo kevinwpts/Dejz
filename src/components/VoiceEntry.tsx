@@ -78,8 +78,8 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
   // true när lyssnandet avbryts (t.ex. bladet stängs) – då ska inget köp skapas
   const cancelledRef = useRef(false);
 
-  /** Avbryt utan att skapa något (används när bladet stängs eller man väljer manuellt). */
-  const stopListening = () => {
+  /** Stäng av mikrofonen utan att skapa något köp (rör bara taligenkänningen, inte state). */
+  const abortRecognition = () => {
     cancelledRef.current = true;
     try {
       recRef.current?.abort();
@@ -87,6 +87,11 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
       // redan stoppad
     }
     recRef.current = null;
+  };
+
+  /** Avbryt utan att skapa något (används när bladet stängs eller man väljer manuellt). */
+  const stopListening = () => {
+    abortRecognition();
     setListening(false);
   };
 
@@ -103,15 +108,23 @@ export const AddEntrySheet: React.FC<AddEntrySheetProps> = ({
     setListening(false);
   };
 
-  useEffect(() => {
+  // Bladet stängs: nollställ det som visas (justeras direkt under render) …
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
     if (!isOpen) {
-      stopListening();
+      setListening(false);
       setHeard('');
       setError(null);
     }
+  }
+
+  // … och stäng av mikrofonen (sidoeffekt → i en effekt). Även när komponenten försvinner.
+  useEffect(() => {
+    if (!isOpen) abortRecognition();
   }, [isOpen]);
 
-  useEffect(() => () => stopListening(), []);
+  useEffect(() => () => abortRecognition(), []);
 
   const startListening = () => {
     const Rec = getSpeechRecognition();

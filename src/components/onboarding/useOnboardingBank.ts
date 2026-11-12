@@ -1,3 +1,4 @@
+import { logWarn } from '../../utils/logger';
 // Hook för bankdelen av onboardingen: BankID-start, återkomst från banken, kontoval och analys av banktransaktioner till förslag.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SetStateAction } from 'react';
@@ -29,6 +30,22 @@ interface UseOnboardingBankArgs {
   goNext: (from: OnboardingStep) => void;
 }
 
+/** Konton som hör till den senaste bankkopplingen (eller alla konton om inga matchar). */
+function pickConnectedAccounts(conns: BankConnection[], accs: BankAccount[]): BankAccount[] {
+  if (!conns || conns.length === 0) return [];
+  const newestConn = conns[0];
+  const connAccounts = accs.filter((a) => a.connection_id === newestConn.id);
+  return connAccounts.length > 0 ? connAccounts : accs;
+}
+
+function clearPendingBankAuth() {
+  try {
+    localStorage.removeItem('dejz_onboarding_pending_bank_auth');
+  } catch {
+    // ignore
+  }
+}
+
 export function useOnboardingBank({
   step,
   bankEnabled,
@@ -52,8 +69,13 @@ export function useOnboardingBank({
 
   // Kontoval efter lyckad autentisering
   const [fetchedAccounts, setFetchedAccounts] = useState<BankAccount[]>([]);
-  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
-  const seenAccountIdsRef = useRef<Set<string>>(new Set());
+  // Valda konton + vilka konton vi redan sett (så att konton användaren bockat ur inte bockas i igen).
+  // Ligger i samma state så att uppdateringen blir ren och kan göras direkt när nya konton dyker upp.
+  const [accountPick, setAccountPick] = useState<{ seenIds: string[]; selectedIds: string[] }>({
+    seenIds: [],
+    selectedIds: [],
+  });
+  const selectedAccountIds = accountPick.selectedIds;
   const [activeConnection, setActiveConnection] = useState<BankConnection | null>(null);
   const [savingAccounts, setSavingAccounts] = useState(false);
   const pendingSyncConnectionIdRef = useRef<string | null>(null);
@@ -221,7 +243,7 @@ export function useOnboardingBank({
         }
         // Hoppade användaren över bankkopplingen visas snabbknapparna i stället för påhittade belopp
       } catch (err) {
-        console.warn('Could not analyze bank transactions:', err);
+        logWarn('Could not analyze bank transactions', err);
       } finally {
         bankAnalysisInFlightRef.current = false;
         bankAnalysisDoneRef.current = true;
@@ -236,45 +258,42 @@ export function useOnboardingBank({
     // Avsiktligt bara step/bankEnabled: analysen ska inte startas om av att data uppdateras under tiden.
   }, [step, bankEnabled]);
 
-  // Synka om App.tsx redan hunnit populera fixedExpenses eller incomes via bakgrundssynk (utan att låsa runBankAnalysis)
-  useEffect(() => {
-    if (suggestedFixedExpenses.length === 0 && fixedExpenses.length > 0 && !analyzingBank) {
-      setSuggestedFixedExpenses(
-        fixedExpenses.map((f) => ({
-          id: f.id,
-          name: f.name,
-          amount: Math.round(f.amount),
-          dueDay: f.dueDay || 27,
-          category: f.category || 'Räkningar',
-          paymentMethod: f.paymentMethod || 'Autogiro',
-          checked: true,
-          logo: f.logo,
-          isFromBank: true,
-        }))
-      );
-    }
-  }, [fixedExpenses, suggestedFixedExpenses.length, analyzingBank]);
+  // Synka om App.tsx redan hunnit populera fixedExpenses eller incomes via bakgrundssynk (utan att låsa runBankAnalysis).
+  // Görs direkt under render: listan är tom → fyll den från det App redan har.
+  if (suggestedFixedExpenses.length === 0 && fixedExpenses.length > 0 && !analyzingBank) {
+    setSuggestedFixedExpenses(
+      fixedExpenses.map((f) => ({
+        id: f.id,
+        name: f.name,
+        amount: Math.round(f.amount),
+        dueDay: f.dueDay || 27,
+        category: f.category || 'Räkningar',
+        paymentMethod: f.paymentMethod || 'Autogiro',
+        checked: true,
+        logo: f.logo,
+        isFromBank: true,
+      }))
+    );
+  }
 
-  useEffect(() => {
-    if (suggestedIncomes.length === 0 && incomes.length > 0) {
-      setSuggestedIncomes(
-        incomes.map((inc) => ({
-          id: inc.id,
-          name: inc.name,
-          amount: Math.round(inc.amount),
-          payday: inc.payday || 25,
-          category: inc.category || 'Lön',
-          checked: true,
-          logo: inc.logo,
-          isFromBank: true,
-        }))
-      );
-      const primary = incomes[0];
-      if (primary?.payday && primary.payday >= 1 && primary.payday <= 31) {
-        setPayday(primary.payday);
-      }
+  if (suggestedIncomes.length === 0 && incomes.length > 0) {
+    setSuggestedIncomes(
+      incomes.map((inc) => ({
+        id: inc.id,
+        name: inc.name,
+        amount: Math.round(inc.amount),
+        payday: inc.payday || 25,
+        category: inc.category || 'Lön',
+        checked: true,
+        logo: inc.logo,
+        isFromBank: true,
+      }))
+    );
+    const primary = incomes[0];
+    if (primary?.payday && primary.payday >= 1 && primary.payday <= 31) {
+      setPayday(primary.payday);
     }
-  }, [incomes, suggestedIncomes.length, setPayday]);
+  }
 
   // Starta BankID-autentisering direkt och sömlöst
   const handleSelectBankInline = async (
@@ -338,56 +357,68 @@ export function useOnboardingBank({
     return idx === 0 ? 'Lönekonto' : 'Bankkonto';
   }, []);
 
-  // Hjälpfunktion för att öppna och uppdatera kontoval så att samtliga bankkonton garanterat kommer med från start
-  const applyConnectedBankState = useCallback(
+  // Visa kontovalet för den senaste bankkopplingen. Rör bara state (ingen localStorage/ref),
+  // så den kan även köras direkt under render när App skickar in nya konton.
+  const showConnectedBankAccounts = useCallback(
     (conns: BankConnection[], accs: BankAccount[]) => {
-      if (!conns || conns.length === 0) return false;
-      const newestConn = conns[0];
-      const connAccounts = accs.filter((a) => a.connection_id === newestConn.id);
-      const accountsToUse = connAccounts.length > 0 ? connAccounts : accs;
-      if (accountsToUse.length > 0) {
-        try {
-          localStorage.removeItem('dejz_onboarding_pending_bank_auth');
-        } catch {
-          // ignore
-        }
-        setVerifyingBankReturn(false);
-        setConnectingBankName(null);
-        setActiveConnection(newestConn);
-        setFetchedAccounts(accountsToUse);
+      const accountsToUse = pickConnectedAccounts(conns, accs);
+      if (accountsToUse.length === 0) return false;
+      setVerifyingBankReturn(false);
+      setConnectingBankName(null);
+      setActiveConnection(conns[0]);
+      setFetchedAccounts(accountsToUse);
 
-        // Lägg automatiskt till nytillkomna konton som valda, utan att skriva över konton användaren själv bockat ur
-        const newlyDiscoveredIds: string[] = [];
-        for (const acc of accountsToUse) {
-          if (!seenAccountIdsRef.current.has(acc.id)) {
-            seenAccountIdsRef.current.add(acc.id);
-            if (acc.is_selected !== false) {
-              newlyDiscoveredIds.push(acc.id);
-            }
-          }
-        }
-        if (newlyDiscoveredIds.length > 0) {
-          setSelectedAccountIds((prev) => {
-            const merged = new Set([...prev, ...newlyDiscoveredIds]);
-            return Array.from(merged);
-          });
-        }
+      // Lägg automatiskt till nytillkomna konton som valda, utan att skriva över konton användaren själv bockat ur
+      setAccountPick((prev) => {
+        const newAccounts = accountsToUse.filter((acc) => !prev.seenIds.includes(acc.id));
+        if (newAccounts.length === 0) return prev;
+        const newlySelected = newAccounts.filter((acc) => acc.is_selected !== false).map((acc) => acc.id);
+        return {
+          seenIds: [...prev.seenIds, ...newAccounts.map((acc) => acc.id)],
+          selectedIds: Array.from(new Set([...prev.selectedIds, ...newlySelected])),
+        };
+      });
 
-        setStep2View('select-accounts');
-        return true;
-      }
-      return false;
+      setStep2View('select-accounts');
+      return true;
     },
     []
   );
 
+  // Hjälpfunktion för att öppna och uppdatera kontoval så att samtliga bankkonton garanterat kommer med från start
+  const applyConnectedBankState = useCallback(
+    (conns: BankConnection[], accs: BankAccount[]) => {
+      if (pickConnectedAccounts(conns, accs).length === 0) return false;
+      clearPendingBankAuth();
+      return showConnectedBankAccounts(conns, accs);
+    },
+    [showConnectedBankAccounts]
+  );
+
   // Reagera DIREKT när App.tsx uppdaterar connections/bankAccounts (även om select-accounts redan visas så att ett 3:e konto aldrig missas!)
+  // Mönstret "justera state när props ändras": vi sparar vilka värden vi senast reagerade på.
+  const [prevBankProps, setPrevBankProps] = useState<{
+    step: OnboardingStep;
+    connections: BankConnection[];
+    bankAccounts: BankAccount[];
+  } | null>(null);
+  if (
+    !prevBankProps ||
+    prevBankProps.step !== step ||
+    prevBankProps.connections !== connections ||
+    prevBankProps.bankAccounts !== bankAccounts
+  ) {
+    setPrevBankProps({ step, connections, bankAccounts });
+    if (step === 2 && connections.length > 0 && bankAccounts.length > 0) {
+      showConnectedBankAccounts(connections, bankAccounts);
+    }
+  }
+
+  // Bankinloggningen är klar – ta bort markeringen om pågående inloggning (sidoeffekt → i en effekt)
   useEffect(() => {
     if (step !== 2) return;
-    if (connections.length > 0 && bankAccounts.length > 0) {
-      applyConnectedBankState(connections, bankAccounts);
-    }
-  }, [step, connections, bankAccounts, applyConnectedBankState]);
+    if (pickConnectedAccounts(connections, bankAccounts).length > 0) clearPendingBankAuth();
+  }, [step, connections, bankAccounts]);
 
   // Poll status med automatiska omförsök när användaren återvänder från Mobilt BankID till appen
   useEffect(() => {
@@ -470,7 +501,7 @@ export function useOnboardingBank({
       if (retryTimer) clearTimeout(retryTimer);
       window.removeEventListener('focus', handleVisibilityOrFocus);
       window.removeEventListener('pageshow', handleVisibilityOrFocus);
-      window.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, [step, step2View, bankCallbackStatusMsg, connections.length, onBankStateUpdated, applyConnectedBankState]);
 
@@ -509,9 +540,12 @@ export function useOnboardingBank({
   };
 
   const toggleAccountSelection = (accId: string) => {
-    setSelectedAccountIds((prev) =>
-      prev.includes(accId) ? prev.filter((id) => id !== accId) : [...prev, accId]
-    );
+    setAccountPick((prev) => ({
+      ...prev,
+      selectedIds: prev.selectedIds.includes(accId)
+        ? prev.selectedIds.filter((id) => id !== accId)
+        : [...prev.selectedIds, accId],
+    }));
   };
 
   const filteredBanks = useMemo(() => {

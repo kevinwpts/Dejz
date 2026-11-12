@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOnboardingSheet } from './onboarding/useOnboardingSheet';
+import { createOnboardingSheetActions } from './onboarding/useOnboardingSheet';
 import { useOnboardingBank } from './onboarding/useOnboardingBank';
 import { OnboardingItemSheet } from './onboarding/OnboardingItemSheet';
 import { getMarketingConsent, hasPendingSignupConsent } from '../utils/marketingConsent';
@@ -63,13 +63,16 @@ export interface OnboardingFlowProps {
   bankEnabled?: boolean;
 }
 
+// Samma tomma lista varje gång – en ny [] vid varje render skulle få kontovalet att räknas om hela tiden
+const NO_BANK_ACCOUNTS: BankAccount[] = [];
+
 export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
   initialName,
   targetPayday = 25,
   initialWeekendHandling = 'before',
   onUpdateWeekendHandling,
   connections,
-  bankAccounts: _bankAccounts = [],
+  bankAccounts: _bankAccounts = NO_BANK_ACCOUNTS,
   bankCallbackStatusMsg = null,
   onBankStateUpdated,
   incomes,
@@ -309,11 +312,10 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     return stored;
   }, [sheetEditor?.paymentMethod]);
 
-  useEffect(() => {
-    if (initialName && !name) {
-      setName(initialName);
-    }
-  }, [initialName, name]);
+  // Fyll i namnet från kontot om fältet är tomt (justeras direkt under render)
+  if (initialName && !name) {
+    setName(initialName);
+  }
 
   const hasConnectedBank = connections.length > 0;
 
@@ -368,7 +370,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({
     }
     goNext(5);
   };
-  const { openEditSuggestedFixed, renderQuickChips, openEditSuggestedIncome, handleSaveSheet, handleDeleteFromSheet } = useOnboardingSheet({
+  const { openEditSuggestedFixed, renderQuickChips, openEditSuggestedIncome, handleSaveSheet, handleDeleteFromSheet } = createOnboardingSheetActions({
     setSheetSubView,
     setSheetNavDir,
     setSheetEditor,

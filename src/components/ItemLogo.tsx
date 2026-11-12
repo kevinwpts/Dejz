@@ -29,8 +29,15 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
     Boolean(logoUrl === 'none' || isMerchantCategoryIconPreferred(name))
   );
 
-  useEffect(() => {
+  // Räkna om valet när namnet eller loggan ändras (justeras direkt under render)
+  const [prefInputs, setPrefInputs] = useState({ name, logoUrl });
+  if (prefInputs.name !== name || prefInputs.logoUrl !== logoUrl) {
+    setPrefInputs({ name, logoUrl });
     setPreferCatIcon(Boolean(logoUrl === 'none' || isMerchantCategoryIconPreferred(name)));
+  }
+
+  // …och när användaren ändrar logga/ikon-valet någon annanstans i appen
+  useEffect(() => {
     const handlePrefChange = () => {
       setPreferCatIcon(Boolean(logoUrl === 'none' || isMerchantCategoryIconPreferred(name)));
     };
@@ -44,42 +51,45 @@ export const ItemLogo: React.FC<ItemLogoProps> = ({
       (name || '').toLowerCase().includes('swish') ||
       Boolean(logoUrl && (logoUrl.includes('swish') || logoUrl.includes('getswish'))));
 
-  const initialSrc = preferCatIcon
+  const resolvedSrc = preferCatIcon
     ? undefined
     : sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
-  const [currentSrc, setCurrentSrc] = useState<string | undefined>(initialSrc);
+  const [currentSrc, setCurrentSrc] = useState<string | undefined>(resolvedSrc);
   const [imgFailed, setImgFailed] = useState(false);
 
-  useEffect(() => {
-    if (preferCatIcon) {
-      setCurrentSrc(undefined);
-      setImgFailed(false);
-      return;
-    }
-
-    const resolved = sanitizeLogoUrl(logoUrl, name, category) || getLogoUrl(name, category);
-    setCurrentSrc(resolved);
+  // Börja om med rätt bild när butik, kategori eller logga ändras (justeras direkt under render)
+  const [srcInputs, setSrcInputs] = useState({ name, category, logoUrl, preferCatIcon });
+  if (
+    srcInputs.name !== name ||
+    srcInputs.category !== category ||
+    srcInputs.logoUrl !== logoUrl ||
+    srcInputs.preferCatIcon !== preferCatIcon
+  ) {
+    setSrcInputs({ name, category, logoUrl, preferCatIcon });
+    setCurrentSrc(resolvedSrc);
     setImgFailed(false);
+  }
 
-    if (!resolved && name && name.trim().length >= 3 && !isSwish) {
-      let cancelled = false;
-      const timer = window.setTimeout(() => {
-        fetchLogoForName(name, category)
-          .then((foundUrl) => {
-            if (!cancelled && foundUrl) {
-              setCurrentSrc(foundUrl);
-              setImgFailed(false);
-            }
-          })
-          .catch(() => {});
-      }, 220);
+  // Ingen känd logga: leta upp en via nätet (lite fördröjt så att snabb scrollning inte skickar anrop)
+  useEffect(() => {
+    if (preferCatIcon || resolvedSrc || !name || name.trim().length < 3 || isSwish) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      fetchLogoForName(name, category)
+        .then((foundUrl) => {
+          if (!cancelled && foundUrl) {
+            setCurrentSrc(foundUrl);
+            setImgFailed(false);
+          }
+        })
+        .catch(() => {});
+    }, 220);
 
-      return () => {
-        cancelled = true;
-        window.clearTimeout(timer);
-      };
-    }
-  }, [name, category, logoUrl, isSwish, preferCatIcon]);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [name, category, logoUrl, isSwish, preferCatIcon, resolvedSrc]);
 
   const handleError = () => {
     const fallback = getFallbackLogoUrl(currentSrc, name, category);

@@ -82,6 +82,15 @@ interface TransactionModalProps {
   prefill?: { title: string; amount?: number } | null;
 }
 
+/**
+ * Dagens datum (Stockholm) som ÅÅÅÅ-MM-DD. Läses bara när formuläret
+ * återställs för ett nytt köp – resultatet sparas i state, så renderingen
+ * blir densamma även om komponenten renderas om.
+ */
+function getTodayIsoStockholm(): string {
+  return formatIsoDateStockholm(new Date());
+}
+
 export function normalizeSwedishSwishNumber(raw: string): string {
   const digits = (raw || '').replace(/\D/g, '');
   if (!digits) return '';
@@ -182,61 +191,78 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     return stored;
   }, [isOpen, paymentMethod]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    if (initialTransaction) {
-      const kind = initialTransaction.type === 'income' ? 'income' : 'expense';
-      setTxType(kind);
-      setTitle(initialTransaction.title || '');
-      setAmount(initialTransaction.amount);
-      setDate(initialTransaction.date || '');
-      setPaymentMethod(getDefaultPaymentMethodForTx(initialTransaction));
-      const rawNote = (initialTransaction.note || '').trim();
-      const rawDesc = (initialTransaction.rawDescription || '').trim();
-      const rawCp = (initialTransaction.counterpartyName || '').trim();
-      const isRawDuplicate =
-        (rawDesc && rawNote.toLowerCase() === rawDesc.toLowerCase()) ||
-        (rawCp && rawNote.toLowerCase() === rawCp.toLowerCase());
-      setNote(isRawDuplicate ? '' : rawNote);
-      setCategory(
-        normalizeCategoryToValid(
-          initialTransaction.category || (kind === 'income' ? 'Lön' : 'Övrigt'),
-          kind
-        )
-      );
-      setDraftReceipts(getItemReceipts(initialTransaction));
-      setPreviewReceipt(null);
-      setSubView('details');
-      setPickerReturnView('details');
-      setNavDirection('forward');
-      setShowDeleteConfirm(false);
-      setShowSimilarPopup(false);
-      setShowFullAccount(false);
-    } else {
-      const todayIso = formatIsoDateStockholm(new Date());
-      setTxType('expense');
-      setTitle(prefill?.title || '');
-      setAmount(prefill?.amount ? String(prefill.amount) : '');
-      setDate(todayIso);
-      setPickerYearMonth({
-        year: parseInt(todayIso.slice(0, 4), 10),
-        month: parseInt(todayIso.slice(5, 7), 10) - 1,
-      });
-      const prefillInferred = prefill?.title
-        ? inferCategoryAndMethodFromName(prefill.title, 'transaction')
-        : null;
-      setPaymentMethod(prefillInferred?.paymentMethod || 'Kort');
-      setNote('');
-      setCategory(prefillInferred?.category || 'Mat & dryck');
-      setDraftReceipts([]);
-      setPreviewReceipt(null);
-      setSubView('edit');
-      setPickerReturnView('edit');
-      setNavDirection('forward');
-      setShowDeleteConfirm(false);
-      setShowSimilarPopup(false);
+  // Fyll i/återställ formuläret när rutan öppnas, ett annat köp väljs eller
+  // förifyllningen byts. Görs under render ("adjust state when a prop changes")
+  // i stället för i en effekt. Jämför samma värden som den gamla effekten
+  // (isOpen + objektreferenserna), och null som startvärde gör att
+  // återställningen även sker vid första renderingen.
+  const [prevResetDeps, setPrevResetDeps] = useState<{
+    isOpen: boolean;
+    initialTransaction: TransactionItem | null | undefined;
+    prefill: TransactionModalProps['prefill'];
+  } | null>(null);
+  if (
+    prevResetDeps === null ||
+    prevResetDeps.isOpen !== isOpen ||
+    prevResetDeps.initialTransaction !== initialTransaction ||
+    prevResetDeps.prefill !== prefill
+  ) {
+    setPrevResetDeps({ isOpen, initialTransaction, prefill });
+    if (isOpen) {
+      if (initialTransaction) {
+        const kind = initialTransaction.type === 'income' ? 'income' : 'expense';
+        setTxType(kind);
+        setTitle(initialTransaction.title || '');
+        setAmount(initialTransaction.amount);
+        setDate(initialTransaction.date || '');
+        setPaymentMethod(getDefaultPaymentMethodForTx(initialTransaction));
+        const rawNote = (initialTransaction.note || '').trim();
+        const rawDesc = (initialTransaction.rawDescription || '').trim();
+        const rawCp = (initialTransaction.counterpartyName || '').trim();
+        const isRawDuplicate =
+          (rawDesc && rawNote.toLowerCase() === rawDesc.toLowerCase()) ||
+          (rawCp && rawNote.toLowerCase() === rawCp.toLowerCase());
+        setNote(isRawDuplicate ? '' : rawNote);
+        setCategory(
+          normalizeCategoryToValid(
+            initialTransaction.category || (kind === 'income' ? 'Lön' : 'Övrigt'),
+            kind
+          )
+        );
+        setDraftReceipts(getItemReceipts(initialTransaction));
+        setPreviewReceipt(null);
+        setSubView('details');
+        setPickerReturnView('details');
+        setNavDirection('forward');
+        setShowDeleteConfirm(false);
+        setShowSimilarPopup(false);
+        setShowFullAccount(false);
+      } else {
+        const todayIso = getTodayIsoStockholm();
+        setTxType('expense');
+        setTitle(prefill?.title || '');
+        setAmount(prefill?.amount ? String(prefill.amount) : '');
+        setDate(todayIso);
+        setPickerYearMonth({
+          year: parseInt(todayIso.slice(0, 4), 10),
+          month: parseInt(todayIso.slice(5, 7), 10) - 1,
+        });
+        const prefillInferred = prefill?.title
+          ? inferCategoryAndMethodFromName(prefill.title, 'transaction')
+          : null;
+        setPaymentMethod(prefillInferred?.paymentMethod || 'Kort');
+        setNote('');
+        setCategory(prefillInferred?.category || 'Mat & dryck');
+        setDraftReceipts([]);
+        setPreviewReceipt(null);
+        setSubView('edit');
+        setPickerReturnView('edit');
+        setNavDirection('forward');
+        setShowDeleteConfirm(false);
+        setShowSimilarPopup(false);
+      }
     }
-  }, [initialTransaction, isOpen, prefill]);
+  }
 
   // Senaste kategorin, utan att AI-gissningen startas om när kategorin ändras (då skulle den skriva över användarens val)
   const categoryRef = useRef(category);
@@ -301,8 +327,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const sourceNum = rawAccNum || digitsInRaw;
     const digitsOnly = sourceNum.replace(/\D/g, '');
 
-    let fullNumber = '';
-    let maskedNumber = '';
+    let fullNumber: string;
+    let maskedNumber: string;
     if (digitsOnly.length >= 7) {
       fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
       maskedNumber = `•••• ${digitsOnly.slice(-4)}`;

@@ -1,4 +1,5 @@
 // Underhåll av data: nollställ spargrisen, byt namn på kategori och radera all användardata.
+import { logError } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 import { FixedExpense, Income, SavingsGoal, Transaction } from '../../types';
 import { fromJson } from '../budgetRows';
@@ -104,7 +105,7 @@ export const maintenanceData = {
             localStorage.setItem('demo_transactions', JSON.stringify(updatedList));
           }
         } catch (e) {
-          console.error('Error updating demo_transactions:', e);
+          logError('Error updating demo_transactions', e);
         }
       }
 
@@ -121,7 +122,7 @@ export const maintenanceData = {
             );
             localStorage.setItem('demo_fixed', JSON.stringify(updated));
           } catch (e) {
-            console.error('Error updating demo_fixed:', e);
+            logError('Error updating demo_fixed', e);
           }
         }
       }
@@ -139,7 +140,7 @@ export const maintenanceData = {
             );
             localStorage.setItem('demo_incomes', JSON.stringify(updated));
           } catch (e) {
-            console.error('Error updating demo_incomes:', e);
+            logError('Error updating demo_incomes', e);
           }
         }
       }
@@ -158,7 +159,7 @@ export const maintenanceData = {
             localStorage.setItem('demo_settings', JSON.stringify(cfg));
           }
         } catch (e) {
-          console.error('Error updating demo_settings quickChoices:', e);
+          logError('Error updating demo_settings quickChoices', e);
         }
       }
 
@@ -223,7 +224,7 @@ export const maintenanceData = {
           .ilike('category', trimmedOld);
       }
     } catch (err) {
-      console.error('Error renaming category in Supabase:', err);
+      logError('Error renaming category in Supabase', err);
       throw err;
     }
   },

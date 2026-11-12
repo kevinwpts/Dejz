@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   X,
   PencilSimple,
@@ -92,27 +92,41 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
     return getStoredIncomeCategories().map((c) => c.name);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    if (initialIncome) {
-      setName(initialIncome.name);
-      setAmount(initialIncome.amount);
-      setPayday(initialIncome.payday || 25);
-      setCategory(normalizeCategoryToValid(initialIncome.category || 'Lön', 'income'));
-      setSubView('details');
-      setPickerReturnView('details');
-    } else {
-      setName('');
-      setAmount('');
-      setPayday(25);
-      setCategory('Lön');
-      setSubView('edit');
-      setPickerReturnView('edit');
+  // Fyll i/återställ formuläret när rutan öppnas eller en annan inkomst väljs.
+  // Görs under render ("adjust state when a prop changes") i stället för i en effekt.
+  // Jämför samma värden som den gamla effekten (isOpen + objektreferensen), och
+  // null som startvärde gör att återställningen även sker vid första renderingen.
+  const [prevResetDeps, setPrevResetDeps] = useState<{
+    isOpen: boolean;
+    initialIncome: IncomeItem | null | undefined;
+  } | null>(null);
+  if (
+    prevResetDeps === null ||
+    prevResetDeps.isOpen !== isOpen ||
+    prevResetDeps.initialIncome !== initialIncome
+  ) {
+    setPrevResetDeps({ isOpen, initialIncome });
+    if (isOpen) {
+      if (initialIncome) {
+        setName(initialIncome.name);
+        setAmount(initialIncome.amount);
+        setPayday(initialIncome.payday || 25);
+        setCategory(normalizeCategoryToValid(initialIncome.category || 'Lön', 'income'));
+        setSubView('details');
+        setPickerReturnView('details');
+      } else {
+        setName('');
+        setAmount('');
+        setPayday(25);
+        setCategory('Lön');
+        setSubView('edit');
+        setPickerReturnView('edit');
+      }
+      setNavDirection('forward');
+      setShowDeleteConfirm(false);
+      setShowFullAccount(false);
     }
-    setNavDirection('forward');
-    setShowDeleteConfirm(false);
-    setShowFullAccount(false);
-  }, [initialIncome, isOpen]);
+  }
 
   const resolvedAccountInfo = useMemo(() => {
     const matchedTx = activeIncome
@@ -144,8 +158,8 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
     const sourceNum = rawAccNum || digitsInRaw;
     const digitsOnly = sourceNum.replace(/\D/g, '');
 
-    let fullNumber = '';
-    let maskedNumber = '';
+    let fullNumber: string;
+    let maskedNumber: string;
     if (digitsOnly.length >= 7) {
       fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
       maskedNumber = `•••• ${digitsOnly.slice(-4)}`;

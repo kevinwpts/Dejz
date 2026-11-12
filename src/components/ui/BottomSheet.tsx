@@ -114,30 +114,40 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const closeTimeoutRef = useRef<number | null>(null);
   const dragStartYRef = useRef<number | null>(null);
 
-  useEffect(() => {
+  // Justera state direkt i renderingen när isOpen ändras (i stället för i en effect).
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
-      if (closeTimeoutRef.current) {
-        window.clearTimeout(closeTimeoutRef.current);
-        closeTimeoutRef.current = null;
-      }
       setIsRendered(true);
       setIsClosing(false);
       setDragOffsetY(0);
       setIsDragging(false);
     } else if (isRendered) {
       setIsClosing(true);
-      closeTimeoutRef.current = window.setTimeout(() => {
-        setIsRendered(false);
-        setIsClosing(false);
-        setDragOffsetY(0);
-        setIsDragging(false);
-      }, 200);
     }
+  }
+
+  // Avbryt en väntande animerad stängning när isOpen ändras eller arket avmonteras.
+  useEffect(() => {
     return () => {
-      if (closeTimeoutRef.current) {
+      if (closeTimeoutRef.current !== null) {
         window.clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
       }
     };
+  }, [isOpen]);
+
+  // Ta bort arket från DOM:en när stängningsanimationen är klar.
+  useEffect(() => {
+    if (isOpen || !isRendered) return;
+    const unmountTimer = window.setTimeout(() => {
+      setIsRendered(false);
+      setIsClosing(false);
+      setDragOffsetY(0);
+      setIsDragging(false);
+    }, 200);
+    return () => window.clearTimeout(unmountTimer);
   }, [isOpen, isRendered]);
 
   useEffect(() => {

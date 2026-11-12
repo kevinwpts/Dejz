@@ -664,6 +664,19 @@ export function resolveFluentEmojiKey(iconId?: string): FluentEmojiKey {
   return ICON_ID_TO_FLUENT_KEY[clean] || FLUENT_EMOJI_FALLBACK_KEY;
 }
 
+// Fluent-ikonerna är fast SVG-kod som ligger i appen. De visas som en bild (data-URI) i stället för
+// att klistras in som HTML – då kan ingen kod i SVG:n köras och vi slipper dangerouslySetInnerHTML.
+const fluentEmojiDataUriCache = new Map<FluentEmojiKey, string>();
+function getFluentEmojiDataUri(fluentKey: FluentEmojiKey): string {
+  const cached = fluentEmojiDataUriCache.get(fluentKey);
+  if (cached) return cached;
+  const svgBody = FLUENT_EMOJI_SVGS[fluentKey] || FLUENT_EMOJI_SVGS[FLUENT_EMOJI_FALLBACK_KEY];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1 30 30" fill="none">${svgBody}</svg>`;
+  const uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  fluentEmojiDataUriCache.set(fluentKey, uri);
+  return uri;
+}
+
 interface FluentEmojiSvgProps {
   fluentKey: FluentEmojiKey;
   size: number;
@@ -675,17 +688,15 @@ export const FluentEmojiSvg: React.FC<FluentEmojiSvgProps> = ({
   size,
   className = '',
 }) => {
-  const svgBody = FLUENT_EMOJI_SVGS[fluentKey] || FLUENT_EMOJI_SVGS[FLUENT_EMOJI_FALLBACK_KEY];
   return (
-    <svg
+    <img
+      src={getFluentEmojiDataUri(fluentKey)}
       width={size}
       height={size}
-      viewBox="1 1 30 30"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+      alt=""
       aria-hidden="true"
+      draggable={false}
       className={`inline-block shrink-0 select-none pointer-events-none ${className}`}
-      dangerouslySetInnerHTML={{ __html: svgBody }}
     />
   );
 };

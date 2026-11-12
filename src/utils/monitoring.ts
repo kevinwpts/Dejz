@@ -20,8 +20,8 @@ function stripQuery(url?: string): string | undefined {
 }
 
 export function initMonitoring(): void {
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
-  if (!dsn || import.meta.env.DEV || typeof window === 'undefined') return;
+  const dsn = import.meta.env?.VITE_SENTRY_DSN;
+  if (!dsn || import.meta.env?.DEV || typeof window === 'undefined') return;
   try {
     if (isDemoMode()) return;
   } catch {
@@ -31,7 +31,7 @@ export function initMonitoring(): void {
     .then((mod) => {
       mod.init({
         dsn,
-        environment: import.meta.env.MODE,
+        environment: import.meta.env?.MODE,
         dataCollection: {
           userInfo: false,
           cookies: false,
@@ -70,7 +70,7 @@ export function initMonitoring(): void {
 /** Skicka ett fel till Sentry (om det är påslaget). */
 export function reportError(error: unknown, context?: Record<string, string>): void {
   if (!sentry) {
-    if (import.meta.env.VITE_SENTRY_DSN && pending.length < 10) pending.push({ error, context });
+    if (import.meta.env?.VITE_SENTRY_DSN && pending.length < 10) pending.push({ error, context });
     return;
   }
   sentry.captureException(error, context ? { extra: context } : undefined);

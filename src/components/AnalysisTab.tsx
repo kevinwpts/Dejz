@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   CalendarBlank,
   CaretRight,
@@ -385,15 +385,13 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
     });
   }, [categoryBreakdown]);
 
-  // Reset selected slice if it no longer exists in the selected period
-  useEffect(() => {
-    if (
-      selectedSliceCategory &&
-      !expenseChartSlices.some((s) => s.category === selectedSliceCategory)
-    ) {
-      setSelectedSliceCategory(null);
-    }
-  }, [expenseChartSlices, selectedSliceCategory]);
+  // Nollställ vald tårtbit om den inte finns i den valda perioden (justeras direkt under render)
+  if (
+    selectedSliceCategory &&
+    !expenseChartSlices.some((s) => s.category === selectedSliceCategory)
+  ) {
+    setSelectedSliceCategory(null);
+  }
 
   const activeSlice = useMemo(() => {
     if (!selectedSliceCategory) return null;
@@ -724,7 +722,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     <div className="overflow-hidden">
                       {isExpanded && (
                         <div className="divide-y divide-[var(--border-subtle)]">
-                          {item.items.map((entry, idx) => {
+                          {item.items.map((entry) => {
                             // Raden är ett köp, en fast utgift eller en inkomst
                             const subItem: SubItemView = entry;
                             const subTx = 'date' in entry ? entry : null;
@@ -746,7 +744,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
                             return (
                               <button
-                                key={subItem.id || `${item.category}-${idx}`}
+                                key={entry.id}
                                 type="button"
                                 onClick={() => {
                                   if (subTx?.date && onSelectTransaction) {

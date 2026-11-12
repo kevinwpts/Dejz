@@ -133,15 +133,25 @@ export const BankModal: React.FC<BankModalProps> = ({
     }
   }, [environment]);
 
+  // När rutan är stängd: nollställ flödet. Görs under render i stället för i en
+  // effekt; villkoret gör att det bara sker när något faktiskt behöver nollställas.
+  if (
+    !isOpen &&
+    (step !== 'list' ||
+      selectedBank !== null ||
+      authUrl !== null ||
+      authState !== null ||
+      errorMsg !== null)
+  ) {
+    setStep('list');
+    setSelectedBank(null);
+    setAuthUrl(null);
+    setAuthState(null);
+    setErrorMsg(null);
+  }
+
   useEffect(() => {
-    if (!isOpen) {
-      setStep('list');
-      setSelectedBank(null);
-      setAuthUrl(null);
-      setAuthState(null);
-      setErrorMsg(null);
-      return;
-    }
+    if (!isOpen) return;
 
     if (preselectedBankName && step === 'list' && !startingAuth) {
       const cleanTarget = preselectedBankName.trim().toLowerCase();

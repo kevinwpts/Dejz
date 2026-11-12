@@ -50,14 +50,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setView(allowedInitialView);
+  // Återställ vyn när rutan öppnas (eller startvyn byts medan den är öppen).
+  // Görs under render ("adjust state when a prop changes") i stället för i en effekt.
+  const resetKey: AuthView | null = isOpen ? allowedInitialView : null;
+  const [prevResetKey, setPrevResetKey] = useState<AuthView | null>(resetKey);
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    if (resetKey !== null) {
+      setView(resetKey);
       setErrorMsg(null);
       setHasPasswordError(false);
       setResetEmailSent(false);
     }
-  }, [isOpen, allowedInitialView]);
+  }
 
   // Resend cooldown timer
   useEffect(() => {

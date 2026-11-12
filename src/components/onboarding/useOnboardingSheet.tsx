@@ -11,7 +11,7 @@ import {
   SheetEditorState,
 } from './onboardingConfig';
 
-export interface UseOnboardingSheetContext
+export interface OnboardingSheetContext
   extends Pick<
     OnboardingFlowProps,
     'incomes' | 'fixedExpenses' | 'onAddIncome' | 'onAddFixed' | 'onUpdateIncome' | 'onUpdateFixed' | 'onDeleteIncome' | 'onDeleteFixed'
@@ -28,7 +28,8 @@ export interface UseOnboardingSheetContext
   suggestedFixedExpenses: { id: string; name: string; amount: number; dueDay: number; category: string; paymentMethod?: string; evidenceSummary?: string; checked: boolean; logo?: string; isFromBank?: boolean; isShared?: boolean; fullAmount?: number; }[];
 }
 
-export function useOnboardingSheet({
+/** Funktionerna för lägg-till/ändra-bladet i onboardingen. Ingen hook – anropar inga React-hooks. */
+export function createOnboardingSheetActions({
   setSheetSubView,
   setSheetNavDir,
   setSheetEditor,
@@ -47,7 +48,7 @@ export function useOnboardingSheet({
   onUpdateFixed,
   onDeleteIncome,
   onDeleteFixed,
-}: UseOnboardingSheetContext) {
+}: OnboardingSheetContext) {
   const openAddSheet = (
     type: 'income' | 'fixed',
     preset?: { name: string; category: string; day?: number; amount?: number; paymentMethod?: string }

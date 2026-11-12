@@ -117,37 +117,51 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     return getSavingsGoals();
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    if (initialExpense) {
-      setName(initialExpense.name);
-      setAmount(initialExpense.amount);
-      setDueDay(initialExpense.dueDay || 27);
-      setCategory(normalizeCategoryToValid(initialExpense.category || 'Räkningar', 'expense'));
-      setPaymentMethod(initialExpense.paymentMethod || 'Autogiro');
-      setLinkedGoalId(initialExpense.linkedGoalId || '');
-      setDraftReceipts(getItemReceipts(initialExpense));
-      setSubView('details');
-      setPickerReturnView('details');
-    } else {
-      setName('');
-      setAmount('');
-      setDueDay(27);
-      setCategory('Räkningar');
-      setPaymentMethod('Autogiro');
-      setLinkedGoalId('');
-      setDraftReceipts([]);
-      setSubView('edit');
-      setPickerReturnView('edit');
+  // Fyll i/återställ formuläret när rutan öppnas eller en annan räkning väljs.
+  // Görs under render ("adjust state when a prop changes") i stället för i en effekt.
+  // Jämför samma värden som den gamla effekten (isOpen + objektreferensen), och
+  // null som startvärde gör att återställningen även sker vid första renderingen.
+  const [prevResetDeps, setPrevResetDeps] = useState<{
+    isOpen: boolean;
+    initialExpense: FixedExpenseItem | null | undefined;
+  } | null>(null);
+  if (
+    prevResetDeps === null ||
+    prevResetDeps.isOpen !== isOpen ||
+    prevResetDeps.initialExpense !== initialExpense
+  ) {
+    setPrevResetDeps({ isOpen, initialExpense });
+    if (isOpen) {
+      if (initialExpense) {
+        setName(initialExpense.name);
+        setAmount(initialExpense.amount);
+        setDueDay(initialExpense.dueDay || 27);
+        setCategory(normalizeCategoryToValid(initialExpense.category || 'Räkningar', 'expense'));
+        setPaymentMethod(initialExpense.paymentMethod || 'Autogiro');
+        setLinkedGoalId(initialExpense.linkedGoalId || '');
+        setDraftReceipts(getItemReceipts(initialExpense));
+        setSubView('details');
+        setPickerReturnView('details');
+      } else {
+        setName('');
+        setAmount('');
+        setDueDay(27);
+        setCategory('Räkningar');
+        setPaymentMethod('Autogiro');
+        setLinkedGoalId('');
+        setDraftReceipts([]);
+        setSubView('edit');
+        setPickerReturnView('edit');
+      }
+      setPreviewReceipt(null);
+      setNavDirection('forward');
+      setShowDeleteConfirm(false);
+      setShowFullAccount(false);
+      setShowCustomMonthPicker(false);
+      setCancelGuide(null);
+      setIsLoadingCancelGuide(false);
     }
-    setPreviewReceipt(null);
-    setNavDirection('forward');
-    setShowDeleteConfirm(false);
-    setShowFullAccount(false);
-    setShowCustomMonthPicker(false);
-    setCancelGuide(null);
-    setIsLoadingCancelGuide(false);
-  }, [initialExpense, isOpen]);
+  }
 
   // Senaste kategorin, utan att AI-gissningen startas om när kategorin ändras (då skulle den skriva över användarens val)
   const categoryRef = useRef(category);
@@ -252,8 +266,8 @@ export const FixedExpenseModal: React.FC<FixedExpenseModalProps> = ({
     const sourceNum = rawAccNum || digitsInRaw;
     const digitsOnly = sourceNum.replace(/\D/g, '');
 
-    let fullNumber = '';
-    let maskedNumber = '';
+    let fullNumber: string;
+    let maskedNumber: string;
     if (digitsOnly.length >= 7) {
       fullNumber = sourceNum.replace(/^[•*\s·-]+/, '').trim();
       maskedNumber = `•••• ${digitsOnly.slice(-4)}`;

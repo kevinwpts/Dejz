@@ -39,8 +39,8 @@ export function isFixedExpenseActiveInPeriod(exp: FixedExpenseItem, period: Peri
   if (!exp.isCancelled) return true;
   if (exp.hasNoMorePayments) return false;
   if (exp.lastPaymentDate && /^\d{4}-\d{2}$/.test(exp.lastPaymentDate)) {
-    // endDate är ett Date-objekt (inte text) – gör om till "ÅÅÅÅ-MM" innan jämförelsen
-    const end = period.endDate as unknown as Date | string | undefined;
+    // endDate ska vara ett Date-objekt, men äldre sparad data kan ha text – hantera båda
+    const end: unknown = period.endDate;
     const periodEndYm =
       end instanceof Date && !isNaN(end.getTime())
         ? `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`

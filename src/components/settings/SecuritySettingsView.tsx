@@ -1,3 +1,4 @@
+import { logError } from '../../utils/logger';
 import type { SetStateAction } from 'react';
 import React from 'react';
 import { ArrowCounterClockwise, CaretRight, Trash, DownloadSimple } from '@phosphor-icons/react';
@@ -113,7 +114,7 @@ export const SecuritySettingsView: React.FC<SecuritySettingsViewProps> = ({
               await onResetAccount();
             }
           } catch (err) {
-            console.error('Kunde inte utföra säkerhetsåtgärd:', err);
+            logError('Kunde inte utföra säkerhetsåtgärd', err);
           } finally {
             setSecurityProcessing(false);
             setSecurityConfirmAction(null);

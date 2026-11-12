@@ -1,3 +1,4 @@
+import { logWarn } from '../utils/logger';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { sendFeedback } from '../utils/sendFeedback';
 import { reportError } from '../utils/monitoring';
@@ -36,7 +37,8 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    // Skickas till Sentry av reportError nedan – här bara konsolen under utveckling
+    logWarn('Uncaught error', { error, errorInfo });
     this.componentStack = (errorInfo?.componentStack || '').slice(0, 1500);
     reportError(error, { komponenter: this.componentStack });
     void sendFeedback('crash', `${error?.name || 'Error'}: ${error?.message || String(error)}`, {

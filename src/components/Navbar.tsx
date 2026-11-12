@@ -54,10 +54,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     setPrivacyBlurMode(next);
   };
 
-  useEffect(() => {
-    suppressScrollHideUntilRef.current = Date.now() + 220;
+  // Ny sida: visa menyraden igen direkt (justeras under render när sidan byts)
+  const [prevPage, setPrevPage] = useState({ pageTitle, navigationKey });
+  if (prevPage.pageTitle !== pageTitle || prevPage.navigationKey !== navigationKey) {
+    setPrevPage({ pageTitle, navigationKey });
     setIsHidden(false);
     setIsAtTop(true);
+  }
+
+  // …och scrolla upp till toppen (sidoeffekt mot sidan → i en effekt)
+  useEffect(() => {
+    suppressScrollHideUntilRef.current = Date.now() + 220;
     lastScrollYRef.current = 0;
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });

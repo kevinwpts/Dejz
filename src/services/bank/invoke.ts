@@ -1,4 +1,5 @@
 // Anropar banktjänstens serverfunktion (enable-banking) med inloggning och tidsgräns.
+import { logWarn } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 
 async function ensureActiveSession(): Promise<string | null> {
@@ -17,7 +18,7 @@ async function ensureActiveSession(): Promise<string | null> {
       return refreshed.session.access_token;
     }
   } catch (err) {
-    console.warn('[bankService] Could not ensure session:', err);
+    logWarn('[bankService] Could not ensure session', err);
   }
   return null;
 }

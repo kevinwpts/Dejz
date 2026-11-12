@@ -230,13 +230,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     }
   });
 
-  useEffect(() => {
+  // Uppdatera fälten när namn/e-post ändras utifrån (justeras direkt under render)
+  const [prevUserName, setPrevUserName] = useState(userName);
+  if (prevUserName !== userName) {
+    setPrevUserName(userName);
     setEditName(userName || '');
-  }, [userName]);
-
-  useEffect(() => {
+  }
+  const [prevUserEmail, setPrevUserEmail] = useState(userEmail);
+  if (prevUserEmail !== userEmail) {
+    setPrevUserEmail(userEmail);
     setEditEmail(userEmail || '');
-  }, [userEmail]);
+  }
 
   const applyTheme = (mode: 'light' | 'dark' | 'system') => {
     setThemeMode(mode);

@@ -160,6 +160,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
   existingEmail,
   onContinueExisting,
 }) => {
+  const [currentYear] = useState(() => new Date().getFullYear());
   const [privacyOpen, setPrivacyOpen] = useState(() => {
     try {
       return window.location.pathname.replace(/\/$/, '') === '/integritet';
@@ -312,7 +313,7 @@ export const WaitlistLanding: React.FC<WaitlistLandingProps> = ({
         <footer className="mt-12 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-3">
             <BrandLogo className="h-4 text-[var(--accent-color)]" />
-            <span>© {new Date().getFullYear()} Dejz</span>
+            <span>© {currentYear} Dejz</span>
             <button
               type="button"
               onClick={() => setPrivacyOpen(true)}

@@ -4,15 +4,12 @@
  * I appen laddas sidan inte från dejz.se, så relativa adresser som "/api/..." och
  * window.location.origin pekar fel. Använd apiUrl() och appOrigin() i stället.
  */
+import { Capacitor } from '@capacitor/core';
+
 export const WEB_ORIGIN = 'https://dejz.se';
 
 export function isNativeApp(): boolean {
-  try {
-    const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
-    return Boolean(cap?.isNativePlatform?.());
-  } catch {
-    return false;
-  }
+  return Capacitor.isNativePlatform();
 }
 
 /** Adress till dejz.se:s egna serverfunktioner (/api/...) – fungerar både på webben och i appen */

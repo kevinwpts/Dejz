@@ -152,7 +152,7 @@ export const FixedViewCancelGuide: React.FC<FixedViewCancelGuideProps> = ({
                   <ol className="space-y-2.5">
                     {guide.steps.map((step, idx) => (
                       <li
-                        key={idx}
+                        key={step}
                         className="flex items-start gap-2.5 text-footnote leading-snug text-[var(--text-primary)]"
                       >
                         <span className="w-5 h-5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-caption font-display font-semibold text-[var(--text-primary)] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">

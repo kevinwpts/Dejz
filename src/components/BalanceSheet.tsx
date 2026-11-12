@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { BottomSheet } from './ui/BottomSheet';
 import { ManualBalance } from '../utils/appCache';
 
@@ -22,10 +22,12 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({
   onClear,
 }) => {
   const [value, setValue] = useState('');
-
-  useEffect(() => {
+  // Töm fältet varje gång bladet öppnas (justeras direkt under render när isOpen ändras)
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) setValue('');
-  }, [isOpen]);
+  }
 
   const amount = Math.round(Number(value.replace(/\s/g, '').replace(',', '.')));
   const valid = value.trim() !== '' && Number.isFinite(amount);

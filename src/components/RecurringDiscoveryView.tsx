@@ -59,11 +59,14 @@ const INCOME_CATEGORIES = new Set([
   'inkomst',
 ]);
 
+// Samma tomma lista varje gång – en ny [] vid varje render skulle starta om analysen hela tiden
+const NO_BANK_ACCOUNTS: BankAccount[] = [];
+
 export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
   transactions,
   incomes,
   fixedExpenses,
-  bankAccounts = [],
+  bankAccounts = NO_BANK_ACCOUNTS,
   targetPayday,
   paydayBeforeWeekend,
   onAddIncome,
@@ -91,15 +94,27 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
       occurrences: number;
     }>
   >([]);
-  const [justAddedKeys, setJustAddedKeys] = useState<Set<string>>(new Set());
+  const [justAddedKeys, setJustAddedKeys] = useState<Set<string>>(() => new Set());
 
   const formatKr = (amount: number) =>
     `${new Intl.NumberFormat('sv-SE').format(Math.round(amount))} kr`;
 
-  const runAnalysis = useCallback(async () => {
+  // Visa "skannar" direkt när underlaget ändras (justeras under render; själva analysen körs i effekten nedan)
+  const [analysisInputs, setAnalysisInputs] = useState({ targetPayday, paydayBeforeWeekend, bankAccounts });
+  if (
+    analysisInputs.targetPayday !== targetPayday ||
+    analysisInputs.paydayBeforeWeekend !== paydayBeforeWeekend ||
+    analysisInputs.bankAccounts !== bankAccounts
+  ) {
+    setAnalysisInputs({ targetPayday, paydayBeforeWeekend, bankAccounts });
     setIsScanning(true);
+  }
+
+  // isStale: true när en nyare analys har startat eller vyn stängts – då skrivs inget resultat
+  const runAnalysis = useCallback(async (isStale: () => boolean = () => false) => {
     try {
       const bankTxs = await bankService.listAllTransactionsForReconciliation(5000).catch(() => []);
+      if (isStale()) return;
       if (Array.isArray(bankTxs) && bankTxs.length > 0) {
         const analyzed = analyzeBankTransactionsForOnboarding(
           bankTxs,
@@ -135,13 +150,26 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
         setRawBankDetectedFixed([]);
       }
     } finally {
-      setTimeout(() => setIsScanning(false), 240);
+      // Kort paus så att "skannar" inte bara blinkar förbi
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 240);
+      });
+      if (!isStale()) setIsScanning(false);
     }
   }, [targetPayday, paydayBeforeWeekend, bankAccounts]);
 
   useEffect(() => {
-    runAnalysis();
+    let stale = false;
+    void runAnalysis(() => stale);
+    return () => {
+      stale = true;
+    };
   }, [runAnalysis]);
+
+  const rescan = () => {
+    setIsScanning(true);
+    void runAnalysis();
+  };
 
   const missingCandidates = useMemo(() => {
     const incomeMap = new Map<
@@ -458,7 +486,7 @@ export const RecurringDiscoveryView: React.FC<RecurringDiscoveryViewProps> = ({
           </p>
           <button
             type="button"
-            onClick={runAnalysis}
+            onClick={rescan}
             className="ui-btn-secondary max-w-[180px] mx-auto"
           >
             <ArrowClockwise size={14} />

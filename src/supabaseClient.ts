@@ -34,35 +34,13 @@ export const isLocalDemoMode =
   Boolean(metaEnv.DEV) &&
   new URLSearchParams(window.location.search).has('demo');
 
-export const supabase = isSupabaseConfigured
-  ? createClient<Database>(
-      supabaseUrl!,
-      supabaseAnonKey!,
-      isLocalDemoMode ? { auth: { storageKey: 'dejz-demo-isolated-auth', persistSession: false } } : undefined
-    )
-  : {
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: new Error('Supabase not configured') }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-        getUser: async () => ({ data: { user: null }, error: new Error('Supabase not configured') }),
-        signInWithPassword: async () => ({ data: { user: null, session: null }, error: new Error('Supabase not configured') }),
-        signUp: async () => ({ data: { user: null, session: null }, error: new Error('Supabase not configured') }),
-        signOut: async () => ({ error: new Error('Supabase not configured') }),
-        updateUser: async () => ({ data: { user: null }, error: new Error('Supabase not configured') }),
-      },
-      from: () => ({
-        select: () => ({ eq: () => ({ single: async () => ({ data: null, error: new Error('Supabase not configured') }), order: () => ({ data: [], error: new Error('Supabase not configured') }) }) }),
-        insert: () => ({ select: async () => ({ data: [], error: new Error('Supabase not configured') }) }),
-        update: () => ({ eq: () => ({ select: async () => ({ data: [], error: new Error('Supabase not configured') }) }) }),
-        delete: () => ({ eq: async () => ({ error: new Error('Supabase not configured') }) }),
-      }),
-      storage: {
-        from: () => ({
-          upload: async () => ({ data: null, error: new Error('Supabase not configured') }),
-          getPublicUrl: () => ({ data: { publicUrl: '' } }),
-        }),
-      },
-      functions: {
-        invoke: async () => ({ data: null, error: new Error('Supabase not configured') }),
-      },
-    } as unknown as SupabaseClient<Database>;
+// Saknas nycklarna (t.ex. i tester) används en adress som inte finns: alla anrop misslyckas
+// lugnt med ett nätverksfel i stället för att appen kraschar.
+const NOT_CONFIGURED_URL = 'https://not-configured.invalid';
+const NOT_CONFIGURED_KEY = 'not-configured-public-anon-key';
+
+export const supabase: SupabaseClient<Database> = createClient<Database>(
+  isSupabaseConfigured && supabaseUrl ? supabaseUrl : NOT_CONFIGURED_URL,
+  isSupabaseConfigured && supabaseAnonKey ? supabaseAnonKey : NOT_CONFIGURED_KEY,
+  isLocalDemoMode ? { auth: { storageKey: 'dejz-demo-isolated-auth', persistSession: false } } : undefined
+);

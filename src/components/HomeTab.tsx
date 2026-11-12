@@ -11,7 +11,6 @@ import {
   getShowBudgetBreakdownOnHome,
   getShowAccountsOnHome,
   getSavingsGoals,
-  getReviewedTransactionIds,
   hasInitializedReviewedTransactions,
   markTransactionsReviewed,
 } from '../utils/appCache';
@@ -28,6 +27,101 @@ import { HomeSinceLastSheet } from './home/HomeSinceLastSheet';
 // Typer och hjälpfunktioner finns i app/models.ts – exporteras här vidare så att gamla importer fungerar
 export type { AccountItem, FixedExpenseItem, IncomeItem, TransactionItem } from '../app/models';
 export { compareTransactionsChronologically, doesTransactionMatchAccount, formatFixedCancellationBadge, getTransactionTime, isFixedExpenseActiveInPeriod } from '../app/models';
+
+const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';
+// Samma tomma listor varje gång – en ny [] vid varje render skulle räkna om "Sedan sist" hela tiden
+const NO_INCOMES: IncomeItem[] = [];
+const NO_FIXED_EXPENSES: FixedExpenseItem[] = [];
+
+interface SinceLastVisitInputs {
+  transactions: TransactionItem[];
+  isInitialLoading: boolean;
+  todayStr: string;
+  fixedExpenses: FixedExpenseItem[];
+  incomes: IncomeItem[];
+  hasBankConnection?: boolean;
+}
+
+interface SinceLastVisitPlan {
+  /** Köp som ska visas i "Sedan sist" (tom lista = visa inget nytt) */
+  txs: TransactionItem[];
+  /** Bara första besöket: id:n som ska sparas som redan sedda */
+  initialSeenIds: string[] | null;
+}
+
+/**
+ * "Sedan sist": vilka nya köp har kommit sedan förra besöket? Läser bara från localStorage –
+ * att spara "sedda" köp görs separat i en effekt. Returnerar null när inget ska räknas ut.
+ */
+function planSinceLastVisit({
+  transactions,
+  isInitialLoading,
+  todayStr,
+  fixedExpenses,
+  incomes,
+  hasBankConnection,
+}: SinceLastVisitInputs): SinceLastVisitPlan | null {
+  if (!hasBankConnection) return null;
+  if (isInitialLoading || !transactions || transactions.length === 0) return null;
+  try {
+    const deduped = deduplicateTransactions(transactions);
+    const recentCutoff = (() => {
+      const parts = todayStr.split('-');
+      const d = new Date(
+        Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10) - 3, 12, 0, 0)
+      );
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(
+        d.getUTCDate()
+      ).padStart(2, '0')}`;
+    })();
+
+    const rawSeen = localStorage.getItem(SEEN_STORAGE_KEY);
+    if (!rawSeen) {
+      // Första gången: visa senaste inköpsdagens rörliga köp (om det finns köp senaste 3 dagarna)
+      const recentExpenses = deduped.filter(
+        (tx) =>
+          !tx.isExcluded &&
+          tx.type === 'expense' &&
+          (tx.date || '') >= recentCutoff &&
+          (tx.date || '') <= todayStr &&
+          !checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
+      );
+
+      if (recentExpenses.length > 0) {
+        const latestDate = recentExpenses.reduce(
+          (maxD, tx) => ((tx.date || '') > maxD ? tx.date : maxD),
+          ''
+        );
+        const batch = recentExpenses
+          .filter((tx) => tx.date === latestDate)
+          .slice(0, 6);
+        const batchIdSet = new Set(batch.map((b) => b.id));
+        const initialSeen = deduped
+          .filter((tx) => !batchIdSet.has(tx.id))
+          .map((tx) => tx.id);
+        return { txs: batch, initialSeenIds: initialSeen };
+      }
+      return { txs: [], initialSeenIds: deduped.map((tx) => tx.id) };
+    }
+
+    const seenSet = new Set<string>(JSON.parse(rawSeen) || []);
+    const newlyArrived = deduped
+      .filter(
+        (tx) =>
+          !seenSet.has(tx.id) &&
+          !tx.isExcluded &&
+          tx.type === 'expense' &&
+          (tx.date || '') >= recentCutoff &&
+          (tx.date || '') <= todayStr &&
+          !checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
+      )
+      .slice(0, 8);
+    return { txs: newlyArrived, initialSeenIds: null };
+  } catch {
+    // ignore storage errors
+    return null;
+  }
+}
 
 interface HomeTabProps {
   period: PeriodInfo;
@@ -71,8 +165,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   connectedBank: _connectedBank,
   accounts,
   hasBankConnection = false,
-  incomes = [],
-  fixedExpenses = [],
+  incomes = NO_INCOMES,
+  fixedExpenses = NO_FIXED_EXPENSES,
   transactions,
   totalBalance,
   totalIncome,
@@ -184,7 +278,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const todayStr = useMemo(() => getSwedishDateStr(), []);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(() => getSwedishDateStr());
   const [isTodayScrolledOut, setIsTodayScrolledOut] = useState<boolean>(false);
-  const [_reviewedIds, setReviewedIds] = useState<Set<string>>(() => getReviewedTransactionIds());
 
   const activeModalAccount = useMemo(
     () =>
@@ -215,90 +308,44 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       ).padStart(2, '0')}`;
       const olderIds = transactions.filter((t) => (t.date || '') < cutoffStr).map((t) => t.id);
       markTransactionsReviewed(olderIds);
-      setReviewedIds(getReviewedTransactionIds());
     }
   }, [transactions, todayStr]);
 
   const handleMarkReviewed = (ids: string[]) => {
     markTransactionsReviewed(ids);
-    setReviewedIds(getReviewedTransactionIds());
   };
 
   // "Sedan sist"-överblick för nya köp sedan förra besöket i appen
   const [sinceLastVisitTxs, setSinceLastVisitTxs] = useState<TransactionItem[]>([]);
   const [isSinceLastOpen, setIsSinceLastOpen] = useState(false);
 
+  // Räkna ut "Sedan sist" direkt under render när köpen (eller lönedata) ändras.
+  // Mönstret "justera state när props ändras": vi sparar vilka värden vi senast räknade på.
+  const sinceLastInputs = { transactions, isInitialLoading, todayStr, fixedExpenses, incomes, hasBankConnection };
+  const [prevSinceLastInputs, setPrevSinceLastInputs] = useState<typeof sinceLastInputs | null>(null);
+  if (
+    !prevSinceLastInputs ||
+    prevSinceLastInputs.transactions !== transactions ||
+    prevSinceLastInputs.isInitialLoading !== isInitialLoading ||
+    prevSinceLastInputs.todayStr !== todayStr ||
+    prevSinceLastInputs.fixedExpenses !== fixedExpenses ||
+    prevSinceLastInputs.incomes !== incomes ||
+    prevSinceLastInputs.hasBankConnection !== hasBankConnection
+  ) {
+    setPrevSinceLastInputs(sinceLastInputs);
+    const plan = planSinceLastVisit(sinceLastInputs);
+    if (plan && plan.txs.length > 0) {
+      setSinceLastVisitTxs(plan.txs);
+      setIsSinceLastOpen(true);
+    }
+  }
+
+  // Första besöket: spara vilka köp som redan är "sedda" (sidoeffekt mot localStorage → i en effekt)
   useEffect(() => {
-    if (!hasBankConnection) return;
-    if (isInitialLoading || !transactions || transactions.length === 0) return;
-    const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';
+    const plan = planSinceLastVisit({ transactions, isInitialLoading, todayStr, fixedExpenses, incomes, hasBankConnection });
+    if (!plan?.initialSeenIds) return;
     try {
-      const deduped = deduplicateTransactions(transactions);
-      const recentCutoff = (() => {
-        const parts = todayStr.split('-');
-        const d = new Date(
-          Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10) - 3, 12, 0, 0)
-        );
-        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(
-          d.getUTCDate()
-        ).padStart(2, '0')}`;
-      })();
-
-      const rawSeen = localStorage.getItem(SEEN_STORAGE_KEY);
-      if (!rawSeen) {
-        // Första gången: visa senaste inköpsdagens rörliga köp (om det finns köp senaste 3 dagarna)
-        const recentExpenses = deduped.filter(
-          (tx) =>
-            !tx.isExcluded &&
-            tx.type === 'expense' &&
-            (tx.date || '') >= recentCutoff &&
-            (tx.date || '') <= todayStr &&
-            !checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
-        );
-
-        if (recentExpenses.length > 0) {
-          const latestDate = recentExpenses.reduce(
-            (maxD, tx) => ((tx.date || '') > maxD ? tx.date : maxD),
-            ''
-          );
-          const batch = recentExpenses
-            .filter((tx) => tx.date === latestDate)
-            .slice(0, 6);
-          const batchIdSet = new Set(batch.map((b) => b.id));
-          const initialSeen = deduped
-            .filter((tx) => !batchIdSet.has(tx.id))
-            .map((tx) => tx.id);
-          localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(initialSeen));
-          if (batch.length > 0) {
-            setSinceLastVisitTxs(batch);
-            setIsSinceLastOpen(true);
-          }
-        } else {
-          localStorage.setItem(
-            SEEN_STORAGE_KEY,
-            JSON.stringify(deduped.map((tx) => tx.id))
-          );
-        }
-        return;
-      }
-
-      const seenSet = new Set<string>(JSON.parse(rawSeen) || []);
-      const newlyArrived = deduped
-        .filter(
-          (tx) =>
-            !seenSet.has(tx.id) &&
-            !tx.isExcluded &&
-            tx.type === 'expense' &&
-            (tx.date || '') >= recentCutoff &&
-            (tx.date || '') <= todayStr &&
-            !checkIsRecurringTransaction(tx, fixedExpenses, incomes).isRecurring
-        )
-        .slice(0, 8);
-
-      if (newlyArrived.length > 0) {
-        setSinceLastVisitTxs(newlyArrived);
-        setIsSinceLastOpen(true);
-      }
+      localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(plan.initialSeenIds));
     } catch {
       // ignore storage errors
     }
@@ -307,7 +354,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const dismissSinceLastVisit = useCallback(() => {
     setIsSinceLastOpen(false);
     try {
-      const SEEN_STORAGE_KEY = 'dejz_seen_tx_ids_v2';
       const rawSeen = localStorage.getItem(SEEN_STORAGE_KEY);
       const seenSet = new Set<string>(rawSeen ? JSON.parse(rawSeen) : []);
       for (const tx of transactions || []) {
@@ -329,7 +375,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   }, [transactions, sinceLastVisitTxs]);
 
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
-  const dayButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const dayButtonsRef = useRef<Record<string, HTMLButtonElement | null>>({});
   const dragStateRef = useRef<{
     isDown: boolean;
     startX: number;
@@ -464,7 +510,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   }, [todayStr]);
 
   const centerDateButton = useCallback((dateKey: string, behavior: ScrollBehavior) => {
-    const btn = dayButtonRefs.current[dateKey];
+    const btn = dayButtonsRef.current[dateKey];
     const container = timelineScrollRef.current;
     if (!btn || !container) return;
     const containerRect = container.getBoundingClientRect();
@@ -499,7 +545,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
   const handleTimelineScroll = () => {
     const container = timelineScrollRef.current;
-    const todayBtn = dayButtonRefs.current[todayStr];
+    const todayBtn = dayButtonsRef.current[todayStr];
     if (!container || !todayBtn) return;
     const cRect = container.getBoundingClientRect();
     const bRect = todayBtn.getBoundingClientRect();
@@ -683,7 +729,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         incomes={incomes}
         periodRecurringMatches={periodRecurringMatches}
         fixedExpenses={fixedExpenses}
-        dayButtonRefs={dayButtonRefs}
+        dayButtonRefs={dayButtonsRef}
         dragStateRef={dragStateRef}
         setSelectedDateKey={setSelectedDateKey}
         isInitialLoading={isInitialLoading}

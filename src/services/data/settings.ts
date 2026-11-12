@@ -1,4 +1,5 @@
 // Inställningar och profil: läser och sparar användarens inställningar (profiles-tabellen eller demoläget).
+import { logError, logWarn } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 import {
   Category,
@@ -74,7 +75,7 @@ export const settingsData = {
       .maybeSingle();
     
     if (profileError) {
-      console.error('[Supabase Error] getSettings:', profileError);
+      logError('[Supabase Error] getSettings', profileError);
       throw profileError;
     }
     
@@ -168,7 +169,7 @@ export const settingsData = {
         try {
           settings = JSON.parse(savedSettings);
         } catch (_e) {
-          console.warn('Failed to parse demo_settings:', _e);
+          logWarn('Failed to parse demo_settings', _e);
         }
       }
       return {
@@ -188,7 +189,7 @@ export const settingsData = {
       .maybeSingle();
       
     if (profileError) {
-      console.error("Error fetching profile:", profileError);
+      logError('Error fetching profile', profileError);
       // Don't throw, just return a default so the app doesn't crash
       return { };
     }
@@ -224,7 +225,7 @@ export const settingsData = {
           profile.income_categories = config.incomeCategories;
           localStorage.setItem('demo_profile', JSON.stringify(profile));
         } catch (_e) {
-          console.error("Failed to sync demo_profile:", _e);
+          logError('Failed to sync demo_profile', _e);
         }
       }
       return;
@@ -301,13 +302,13 @@ export const settingsData = {
 
     // Om UPDATE misslyckas (t.ex. profilraden saknas): försök en gång med UPSERT
     if (error) {
-      console.warn("[Supabase saveSettings] UPDATE failed, falling back to UPSERT...", error);
+      logWarn('[Supabase saveSettings] UPDATE failed, falling back to UPSERT...', error);
       const upsertResult = await db.from('profiles').upsert(payload);
       error = upsertResult.error;
     }
 
     if (error) {
-      console.error("Error saving settings to Supabase profiles:", error);
+      logError('Error saving settings to Supabase profiles', error);
       throw error;
     }
   },

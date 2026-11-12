@@ -290,7 +290,7 @@ export const FixedViewEdit: React.FC<FixedViewEditProps> = ({
           <div className="space-y-2">
             {draftReceipts.map((rcpt, idx) => (
               <div
-                key={`${rcpt.name}-${idx}`}
+                key={rcpt.url}
                 className="rounded-2xl bg-[var(--bg-color)] border border-[var(--border-subtle)] px-3.5 py-2.5 flex items-center justify-between gap-2"
               >
                 <button

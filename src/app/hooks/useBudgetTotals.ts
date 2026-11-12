@@ -100,15 +100,20 @@ export function useBudgetTotals({
   );
 
   // "Saldo just nu" (utan bank): användaren skriver in vad som finns på kontot
-  const [manualBalance, setManualBalanceState] = useState<ManualBalance | null>(() =>
+  const [manualBalance, setManualBalance] = useState<ManualBalance | null>(() =>
     getManualBalance()
   );
+  // Läs om när inloggningen/laddningen ändras – profilen kan ha laddat ett saldo från en annan enhet
+  const [prevLoadState, setPrevLoadState] = useState({ isInitialLoading, userId });
+  if (prevLoadState.isInitialLoading !== isInitialLoading || prevLoadState.userId !== userId) {
+    setPrevLoadState({ isInitialLoading, userId });
+    setManualBalance(getManualBalance());
+  }
   useEffect(() => {
-    const reload = () => setManualBalanceState(getManualBalance());
+    const reload = () => setManualBalance(getManualBalance());
     window.addEventListener('dejz-manual-balance', reload);
-    reload(); // profilen kan ha laddat ett saldo från en annan enhet
     return () => window.removeEventListener('dejz-manual-balance', reload);
-  }, [isInitialLoading, userId]);
+  }, []);
 
   // Saldot gäller bara i den löneperiod det skrevs in
   const activeManualBalance = useMemo(() => {

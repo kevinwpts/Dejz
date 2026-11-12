@@ -7,7 +7,7 @@ import { BankConnection, BankAccount } from '../../services/bankService';
 
 
 import { FeedbackToastState } from '../components/AppToasts';
-import { useBankAccountActions } from './useBankAccountActions';
+import { createBankAccountActions } from './bankAccountActions';
 import { useBudgetItemActions } from './useBudgetItemActions';
 import { useTransactionActions } from './useTransactionActions';
 
@@ -57,9 +57,9 @@ export interface UseAppActionsContext {
 }
 
 export function useAppActions(ctx: UseAppActionsContext) {
-  // Uppdelat efter område – se useBankAccountActions, useBudgetItemActions och useTransactionActions
+  // Uppdelat efter område – se createBankAccountActions, useBudgetItemActions och useTransactionActions
   return {
-    ...useBankAccountActions(ctx),
+    ...createBankAccountActions(ctx),
     ...useBudgetItemActions(ctx),
     ...useTransactionActions(ctx),
   };

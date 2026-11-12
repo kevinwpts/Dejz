@@ -1,4 +1,5 @@
 // Feedback från användare och enkel statistik till adminvyn.
+import { logWarn } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 
 const db = supabase;
@@ -28,7 +29,7 @@ export const feedbackData = {
         });
       
       if (error) {
-        console.warn('Supabase feedback insert error, saving to local store:', error);
+        logWarn('Supabase feedback insert error, saving to local store', error);
         const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
         demoFeedbacks.unshift({
           id: 'local-' + Date.now(),
@@ -39,7 +40,7 @@ export const feedbackData = {
         localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
       }
     } catch (e) {
-      console.warn('Feedback fallback to local storage:', e);
+      logWarn('Feedback fallback to local storage', e);
       const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
       demoFeedbacks.unshift({
         id: 'local-' + Date.now(),
@@ -61,7 +62,7 @@ export const feedbackData = {
         .limit(50);
       
       if (error) {
-        console.warn('Could not fetch remote feedback:', error);
+        logWarn('Could not fetch remote feedback', error);
         return demoFeedbacks;
       }
       return [...(data || []), ...demoFeedbacks];

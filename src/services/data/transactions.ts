@@ -1,4 +1,5 @@
 // Transaktioner (utgifter och inkomster): hämta, lägga till, ändra och ta bort.
+import { logError, logWarn } from '../../utils/logger';
 import { supabase } from '../../supabaseClient';
 import { Transaction } from '../../types';
 import { getTransactionReceipts } from '../../utils/format';
@@ -63,7 +64,7 @@ export const transactionsData = {
       .maybeSingle();
 
     if (!profile) {
-      console.warn('[Data] Profile missing during transaction add, attempting repair...');
+      logWarn('Data', 'Profile missing during transaction add, attempting repair');
       await db
         .from('profiles')
         .upsert({ id: userId, dark_mode: false, theme_mode: 'light' });
@@ -90,7 +91,7 @@ export const transactionsData = {
     }
 
     if (error) {
-      console.error('[Supabase Error] addTransaction:', error);
+      logError('[Supabase Error] addTransaction', error);
       throw error;
     }
     if (!data || data.length === 0) throw new Error('Ingen data returnerades från databasen');

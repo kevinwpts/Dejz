@@ -29,6 +29,57 @@ interface LandingPageProps {
 
 type AuthViewMode = 'login' | 'register' | 'forgot_password';
 
+const AUTH_LINK_ERROR_KEY = 'dejz_auth_link_error';
+const AUTH_LINK_ERROR_MSG =
+  'Länken har gått ut eller redan använts. Logga in – är kontot inte bekräftat kan du få en ny länk.';
+
+/**
+ * Om någon utan konto försöker logga in med Google skickar Supabase tillbaka ett fel i adressen
+ * (när "Allow new users to sign up" är avstängt). Ger då en vänlig förklaring, annars null.
+ */
+function readUrlAuthError(): string | null {
+  try {
+    const raw = `${window.location.search}&${window.location.hash.replace(/^#/, '')}`;
+    const params = new URLSearchParams(raw);
+    const desc = (params.get('error_description') || '').toLowerCase();
+    if (!params.get('error') && !desc) return null;
+    return desc.includes('expired') || desc.includes('invalid')
+      ? AUTH_LINK_ERROR_MSG
+      : desc.includes('signup') || desc.includes('sign up') || desc.includes('not allowed')
+      ? 'Det gick inte att skapa kontot med Google. Försök igen eller använd e-post.'
+      : 'Inloggningen avbröts. Försök igen.';
+  } catch {
+    return null;
+  }
+}
+
+/** Har App markerat att bekräftelselänken hade gått ut? (bara läsning) */
+function hasAuthLinkError(): boolean {
+  try {
+    return Boolean(sessionStorage.getItem(AUTH_LINK_ERROR_KEY));
+  } catch {
+    return false;
+  }
+}
+
+/** Läser och tar bort markeringen så att felet bara visas en gång. */
+function consumeAuthLinkError(): boolean {
+  const had = hasAuthLinkError();
+  if (had) {
+    try {
+      sessionStorage.removeItem(AUTH_LINK_ERROR_KEY);
+    } catch {
+      // ignore
+    }
+  }
+  return had;
+}
+
+/** Felet som ska visas direkt när sidan öppnas. Länkfelet vinner över Google-felet (som förut). */
+function readInitialAuthError(): string | null {
+  return hasAuthLinkError() ? AUTH_LINK_ERROR_MSG : readUrlAuthError();
+}
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   existingEmail,
   onAuthenticated,
@@ -36,9 +87,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 }) => {
   // I App Store-appen finns ingen marknadsföringssida – appen öppnar direkt på registrering/inloggning
   const nativeApp = isNativeApp();
-  const [activePage, setActivePage] = useState<'landing' | 'auth'>(nativeApp ? 'auth' : 'landing');
+  // Felmeddelande vi kommer tillbaka med (från Google-inloggning eller en gammal mejllänk) läses en gång
+  const [initialAuthError] = useState<string | null>(readInitialAuthError);
+  const [activePage, setActivePage] = useState<'landing' | 'auth'>(
+    initialAuthError || nativeApp ? 'auth' : 'landing'
+  );
   const [slideDir, setSlideDir] = useState<'forward' | 'back'>('forward');
-  const [view, setView] = useState<AuthViewMode>(nativeApp ? 'register' : 'login');
+  const [view, setView] = useState<AuthViewMode>(
+    initialAuthError ? 'login' : nativeApp ? 'register' : 'login'
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +103,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(initialAuthError);
   const [hasPasswordError, setHasPasswordError] = useState(false);
   const [shakeTrigger, setShakeTrigger] = useState(0);
   const [resetEmailSent, setResetEmailSent] = useState(false);
@@ -58,47 +115,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [resendingConfirm, setResendingConfirm] = useState(false);
 
-  // Om någon utan konto försöker logga in med Google skickar Supabase tillbaka ett fel
-  // (när "Allow new users to sign up" är avstängt). Visa då en vänlig förklaring.
+  // Felet har redan visats (se initialAuthError) – städa bort det ur adressfältet och sessionStorage
   useEffect(() => {
     try {
-      const raw = `${window.location.search}&${window.location.hash.replace(/^#/, '')}`;
-      const params = new URLSearchParams(raw);
-      const desc = (params.get('error_description') || '').toLowerCase();
-      if (params.get('error') || desc) {
-        setView('login');
-        setActivePage('auth');
-        setErrorMsg(
-          desc.includes('expired') || desc.includes('invalid')
-            ? 'Länken har gått ut eller redan använts. Logga in – är kontot inte bekräftat kan du få en ny länk.'
-            : desc.includes('signup') || desc.includes('sign up') || desc.includes('not allowed')
-            ? 'Det gick inte att skapa kontot med Google. Försök igen eller använd e-post.'
-            : 'Inloggningen avbröts. Försök igen.'
-        );
-        window.history.replaceState(null, '', window.location.pathname);
-      }
+      if (readUrlAuthError()) window.history.replaceState(null, '', window.location.pathname);
     } catch {
       // ignore
     }
+    consumeAuthLinkError();
   }, []);
 
   // Bekräftelselänken från mejlet hade gått ut eller redan använts (kontrolleras i App)
   useEffect(() => {
     const show = () => {
-      try {
-        if (sessionStorage.getItem('dejz_auth_link_error')) {
-          sessionStorage.removeItem('dejz_auth_link_error');
-          setView('login');
-          setActivePage('auth');
-          setErrorMsg(
-            'Länken har gått ut eller redan använts. Logga in – är kontot inte bekräftat kan du få en ny länk.'
-          );
-        }
-      } catch {
-        // ignore
+      if (consumeAuthLinkError()) {
+        setView('login');
+        setActivePage('auth');
+        setErrorMsg(AUTH_LINK_ERROR_MSG);
       }
     };
-    show();
     window.addEventListener('dejz-auth-link-error', show);
     return () => window.removeEventListener('dejz-auth-link-error', show);
   }, []);

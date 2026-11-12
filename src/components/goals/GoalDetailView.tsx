@@ -77,6 +77,8 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   galleryInputRef,
   transactions,
 }) => {
+  // Dagens datum läses en gång (används bara om målet saknar skapat-datum)
+  const [todayIso] = React.useState(() => new Date().toISOString().slice(0, 10));
   const theme = getGoalArtworkTheme(selectedGoal.artworkId);
   const effectiveSelectedAmount = resolveGoalAmount(selectedGoal);
   const linkedLabel = resolveGoalLinkedLabel(selectedGoal);
@@ -92,7 +94,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
           {
             id: 'init',
             text: 'Du har skapat ditt mål',
-            date: selectedGoal.createdAt || new Date().toISOString().slice(0, 10),
+            date: selectedGoal.createdAt || todayIso,
           },
         ];
 
